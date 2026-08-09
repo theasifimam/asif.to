@@ -16,6 +16,8 @@ import {
   Sparkles,
   ChevronRight,
   FileCode,
+  Brain,
+  Layers,
 } from "lucide-react";
 
 export default function CourseOverviewPage() {
@@ -113,7 +115,7 @@ export default function CourseOverviewPage() {
             {course.subtitle}
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center gap-3 pt-2">
             <Link
               href={`/courses/${courseId}/${firstChapterSlug}`}
               className="flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold shadow-lg shadow-blue-500/25 active:scale-95 transition-all"
@@ -128,6 +130,22 @@ export default function CourseOverviewPage() {
             >
               <FileCode className="w-4 h-4" />
               <span>View {tech?.name} Cheatsheet</span>
+            </Link>
+            
+            <Link
+              href="/quiz"
+              className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 text-xs font-bold transition-all active:scale-95"
+            >
+              <Brain className="w-4 h-4 text-purple-500" />
+              <span>Practice Quiz</span>
+            </Link>
+            
+            <Link
+              href="/revision"
+              className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 text-xs font-bold transition-all active:scale-95"
+            >
+              <Layers className="w-4 h-4 text-emerald-500" />
+              <span>Flashcards</span>
             </Link>
           </div>
         </section>

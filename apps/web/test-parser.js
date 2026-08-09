@@ -1,0 +1,1 @@
+const text = \### 1. Microtask Queue\nThis queue has the absolute highest priority.\n- **Promises** (\\\	hen\\\, \\\catch\\\)\n- \\\process.nextTick()\\\\n\n> Interview Highlight\n> Q: What is the output?\n> A: Yes.\; console.log(text);

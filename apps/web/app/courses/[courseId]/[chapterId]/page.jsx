@@ -73,51 +73,85 @@ function parseContentBlocks(contentArray, techName) {
       return;
     }
 
-    // Process normal text: split further by double newlines or headings
-    const subParagraphs = trimmed.split(/\n\s*\n/);
+    // Process normal text: line by line state machine
+    const lines = trimmed.split('\n');
+    let currentType = null;
+    let currentBuffer = [];
 
-    subParagraphs.forEach((para) => {
-      const pTrimmed = para.trim();
-      if (!pTrimmed) return;
+    const flush = () => {
+      if (currentBuffer.length === 0) return;
+      const text = currentBuffer.join('\n').trim();
+      
+      if (currentType === 'image') {
+        const imageMatch = text.match(/^!\[(.*?)\]\((.*?)\)$/);
+        if (imageMatch) {
+          blocks.push({ type: "image", alt: imageMatch[1], url: imageMatch[2] });
+        }
+      } else if (currentType === 'h1') {
+        blocks.push({ type: "h1", text: text.replace(/^#\s+/, '') });
+      } else if (currentType === 'h2') {
+        blocks.push({ type: "h2", text: text.replace(/^##\s+/, '') });
+      } else if (currentType === 'h3') {
+        blocks.push({ type: "h3", text: text.replace(/^###\s+/, '') });
+      } else if (currentType === 'table') {
+        blocks.push({ type: "table", text });
+      } else if (currentType === 'blockquote') {
+        blocks.push({ type: "blockquote", text });
+      } else if (currentType === 'list') {
+        blocks.push({ type: "list", text });
+      } else {
+        blocks.push({ type: "text", text });
+      }
+      currentBuffer = [];
+      currentType = null;
+    };
 
-      // Image tag: ![alt](url)
-      const imageMatch = pTrimmed.match(/^!\[(.*?)\]\((.*?)\)$/);
-      if (imageMatch) {
-        blocks.push({
-          type: "image",
-          alt: imageMatch[1],
-          url: imageMatch[2],
-        });
+    lines.forEach(line => {
+      const t = line.trim();
+      
+      if (!t) {
+        flush(); // empty line flushes current block
         return;
       }
 
-      // Heading H1: # Title
-      if (pTrimmed.startsWith("# ")) {
-        blocks.push({ type: "h1", text: pTrimmed.slice(2) });
-        return;
-      }
+      // Determine the line type
+      let lineType = 'text';
+      if (t.match(/^!\[(.*?)\]\((.*?)\)$/)) lineType = 'image';
+      else if (t.startsWith('# ')) lineType = 'h1';
+      else if (t.startsWith('## ')) lineType = 'h2';
+      else if (t.startsWith('### ')) lineType = 'h3';
+      else if (t.startsWith('|') && t.includes('|')) lineType = 'table';
+      else if (t.startsWith('>')) lineType = 'blockquote';
+      else if (t.match(/^[-*]\s/) || t.match(/^\d+\.\s/)) lineType = 'list';
 
-      // Heading H2: ## Subtitle
-      if (pTrimmed.startsWith("## ")) {
-        blocks.push({ type: "h2", text: pTrimmed.slice(3) });
-        return;
+      // Headings and images are single-line entities, flush immediately
+      if (['h1', 'h2', 'h3', 'image'].includes(lineType)) {
+        flush();
+        currentType = lineType;
+        currentBuffer.push(line);
+        flush(); 
+      } else {
+        // If type changed from something else to a list, table, or blockquote
+        if (currentType && currentType !== lineType && lineType !== 'text') {
+           flush();
+           currentType = lineType;
+        } else if (!currentType) {
+           currentType = lineType;
+        }
+        
+        // Handle appending to the current block
+        if (currentType === 'blockquote' && lineType === 'blockquote') {
+           currentBuffer.push(t.replace(/^>\s*/, '')); // Strip the '> '
+        } 
+        else if (currentType === 'blockquote' && lineType === 'text') {
+           currentBuffer.push(t); // Text continuing inside a blockquote
+        }
+        else {
+           currentBuffer.push(line);
+        }
       }
-
-      // Heading H3: ### Section
-      if (pTrimmed.startsWith("### ")) {
-        blocks.push({ type: "h3", text: pTrimmed.slice(4) });
-        return;
-      }
-
-      // Markdown Table
-      if (pTrimmed.startsWith("|") && pTrimmed.includes("\n|")) {
-        blocks.push({ type: "table", text: pTrimmed });
-        return;
-      }
-
-      // Regular paragraph text
-      blocks.push({ type: "text", text: pTrimmed });
     });
+    flush();
   });
 
   return blocks;
@@ -140,6 +174,10 @@ function renderInlineFormatting(text) {
     )
     // Replace **bold**
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    // Replace *italic*
+    .replace(/(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)/g, "<em>$1</em>")
+    // Replace _italic_
+    .replace(/_(.*?)_/g, "<em>$1</em>")
     // Replace `inline code`
     .replace(
       /`(.*?)`/g,
@@ -482,7 +520,7 @@ export default function CourseChapterPage() {
                           key={idx}
                           className="text-xl sm:text-3xl font-black text-foreground tracking-tight mt-8 mb-3 border-b border-zinc-100 dark:border-zinc-800 pb-2"
                         >
-                          {block.text}
+                          {renderInlineFormatting(block.text)}
                         </h2>
                       );
                     }
@@ -492,7 +530,7 @@ export default function CourseChapterPage() {
                           key={idx}
                           className="text-lg sm:text-2xl font-extrabold text-foreground tracking-tight mt-6 mb-3"
                         >
-                          {block.text}
+                          {renderInlineFormatting(block.text)}
                         </h3>
                       );
                     }
@@ -502,7 +540,7 @@ export default function CourseChapterPage() {
                           key={idx}
                           className="text-base sm:text-xl font-bold text-foreground mt-5 mb-2"
                         >
-                          {block.text}
+                          {renderInlineFormatting(block.text)}
                         </h4>
                       );
                     }
@@ -542,6 +580,40 @@ export default function CourseChapterPage() {
                         </p>
                       );
                     }
+                    if (block.type === "blockquote") {
+                      return (
+                        <blockquote key={idx} className="border-l-4 border-blue-500 pl-5 py-3 my-6 bg-blue-500/5 rounded-r-2xl italic text-zinc-700 dark:text-zinc-300 font-medium">
+                          {renderInlineFormatting(block.text)}
+                        </blockquote>
+                      );
+                    }
+                    if (block.type === "list") {
+                      const listItems = block.text.split('\n').filter(l => l.trim());
+                      return (
+                        <ul key={idx} className="space-y-3 my-5 pl-2">
+                          {listItems.map((li, i) => {
+                            const isOrdered = /^\d+\.\s/.test(li.trim());
+                            const content = li.trim().replace(/^([-*]|\d+\.)\s+/, '');
+                            return (
+                              <li key={i} className="flex gap-3.5 text-zinc-700 dark:text-zinc-300">
+                                <span className="text-blue-500 mt-0.5 shrink-0">
+                                  {isOrdered ? (
+                                    <span className="font-bold text-[10px] bg-blue-500/10 px-1.5 py-0.5 rounded text-blue-600 dark:text-blue-400">
+                                      {li.trim().match(/^\d+/)[0]}
+                                    </span>
+                                  ) : (
+                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block align-middle mb-0.5" />
+                                  )}
+                                </span>
+                                <span className="leading-relaxed">
+                                  {renderInlineFormatting(content)}
+                                </span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      );
+                    }
                     if (block.type === "table") {
                       const rows = block.text.split("\n").map(r => r.trim()).filter(r => r && r.startsWith("|"));
                       if (rows.length < 3) return null; // Needs header, separator, and at least one body row
@@ -550,7 +622,7 @@ export default function CourseChapterPage() {
                       const bodyRows = rows.slice(2).map(r => r.split("|").slice(1, -1).map(c => c.trim()));
                       
                       return (
-                        <div key={idx} className="overflow-x-auto my-6 border border-zinc-200 dark:border-zinc-800 rounded-2xl">
+                        <div key={idx} className="overflow-x-auto my-6 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm">
                           <table className="w-full text-left border-collapse min-w-max">
                             <thead>
                               <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
