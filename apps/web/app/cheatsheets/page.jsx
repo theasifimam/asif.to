@@ -172,73 +172,77 @@ export default function CheatsheetsPage() {
 
         {/* Cheatsheets List */}
         {!isLoading && (
-          <div className="space-y-6">
-            {filteredCheatsheets.length === 0 && (
-              <div className="text-center py-20 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-sm">
+          <div>
+            {filteredCheatsheets.length === 0 ? (
+              <div className="text-center py-20 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-sm border border-zinc-200/80 dark:border-zinc-800/80">
                 <FileText className="w-10 h-10 text-zinc-300 dark:text-zinc-700 mx-auto mb-3" />
                 <p className="font-bold text-sm text-muted-foreground">No cheatsheets found.</p>
                 <p className="text-xs text-zinc-400 mt-1">Try a different search or tech filter.</p>
               </div>
-            )}
+            ) : (
+              <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/80">
+                {filteredCheatsheets.map((cs, idx) => {
+                  const tech = TECH_STACKS.find((t) => t.id === cs.techId);
 
-            {filteredCheatsheets.map((cs) => {
-              const tech = TECH_STACKS.find((t) => t.id === cs.techId);
-
-              return (
-                <div
-                  key={cs._id || cs.id}
-                  className="p-6 sm:p-8 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-md space-y-4 border border-zinc-100 dark:border-zinc-800/60"
-                >
-                  {/* Cheatsheet Header Row */}
-                  <div className="flex items-start justify-between gap-3 flex-wrap">
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <span className={`font-bold px-3 py-1 rounded-full text-xs ${tech?.badgeBg || "bg-blue-500/10 text-blue-600"}`}>
-                        {tech?.name || cs.techId} Cheatsheet
-                      </span>
-                      <span className="text-xs text-zinc-400 font-medium">
-                        {cs.snippets?.length ?? 0} snippets
-                      </span>
-                    </div>
-
-                    {/* PDF Download Button */}
-                    <button
-                      onClick={() => downloadCheatsheetPdf(cs, tech?.name)}
-                      className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-foreground text-xs font-bold transition-all active:scale-95 shadow-sm"
-                      title="Download as PDF"
+                  return (
+                    <div
+                      key={cs._id || cs.id}
+                      className={`p-6 sm:p-8 space-y-4 hover:bg-zinc-50/50 dark:hover:bg-zinc-800/40 transition-colors ${
+                        idx === 0 ? "rounded-t-[2.5rem]" : ""
+                      } ${idx === filteredCheatsheets.length - 1 ? "rounded-b-[2.5rem]" : ""}`}
                     >
-                      <Download className="w-3.5 h-3.5 text-blue-500" />
-                      <span>Download PDF</span>
-                    </button>
-                  </div>
+                      {/* Cheatsheet Header Row */}
+                      <div className="flex items-start justify-between gap-3 flex-wrap">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className={`font-bold px-3 py-1 rounded-full text-xs ${tech?.badgeBg || "bg-blue-500/10 text-blue-600"}`}>
+                            {tech?.name || cs.techId} Cheatsheet
+                          </span>
+                          <span className="text-xs text-zinc-400 font-medium">
+                            {cs.snippets?.length ?? 0} snippets
+                          </span>
+                        </div>
 
-                  {/* Title & Description */}
-                  <div>
-                    <h2 className="text-xl sm:text-2xl font-black text-foreground">{cs.title}</h2>
-                    {cs.description && (
-                      <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 font-medium leading-relaxed">
-                        {cs.description}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Code Snippets */}
-                  <div className="space-y-4 pt-2">
-                    {(cs.snippets || []).map((snip, idx) => (
-                      <div key={idx} className="space-y-1.5">
-                        <span className="text-xs font-extrabold text-foreground tracking-wide block">
-                          {snip.name}
-                        </span>
-                        <CodeSnippetViewer
-                          code={snip.code}
-                          language={snip.language || "javascript"}
-                          title={snip.name}
-                        />
+                        {/* PDF Download Button */}
+                        <button
+                          onClick={() => downloadCheatsheetPdf(cs, tech?.name)}
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-foreground text-xs font-bold transition-all active:scale-95 shadow-sm cursor-pointer"
+                          title="Download as PDF"
+                        >
+                          <Download className="w-3.5 h-3.5 text-blue-500" />
+                          <span>Download PDF</span>
+                        </button>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+
+                      {/* Title & Description */}
+                      <div>
+                        <h2 className="text-xl sm:text-2xl font-black text-foreground">{cs.title}</h2>
+                        {cs.description && (
+                          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 font-medium leading-relaxed">
+                            {cs.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Code Snippets */}
+                      <div className="space-y-4 pt-2">
+                        {(cs.snippets || []).map((snip, snipIdx) => (
+                          <div key={snipIdx} className="space-y-1.5">
+                            <span className="text-xs font-extrabold text-foreground tracking-wide block">
+                              {snip.name}
+                            </span>
+                            <CodeSnippetViewer
+                              code={snip.code}
+                              language={snip.language || "javascript"}
+                              title={snip.name}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </main>

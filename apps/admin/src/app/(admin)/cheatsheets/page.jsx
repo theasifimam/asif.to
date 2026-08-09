@@ -125,11 +125,13 @@ export default function CheatsheetsAdminPage() {
           <p className="text-xs text-zinc-400 mt-1">Click "New Cheatsheet" to create your first one.</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {cheatsheets.map((cs) => (
+        <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/80">
+          {cheatsheets.map((cs, idx) => (
             <div
               key={cs._id}
-              className="flex items-center justify-between gap-4 p-5 rounded-3xl bg-white dark:bg-zinc-900 shadow-sm hover:shadow-md transition-all border border-zinc-100 dark:border-zinc-800"
+              className={`flex items-center justify-between gap-4 p-5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors ${
+                idx === 0 ? "rounded-t-[2.5rem]" : ""
+              } ${idx === cheatsheets.length - 1 ? "rounded-b-[2.5rem]" : ""}`}
             >
               <div className="flex items-center gap-4 overflow-hidden">
                 <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">

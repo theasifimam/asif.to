@@ -2,18 +2,8 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
-import {
-  ChevronRight,
-  Command,
-  Fingerprint,
-  Globe,
-  Loader2,
-  Lock } from
-'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { motion } from 'framer-motion';
+import { ChevronRight, Mail, Lock, Sparkles, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function SigninPage() {
@@ -24,155 +14,117 @@ export default function SigninPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!email || !password) {
+      toast.error('Please enter both email and password');
+      return;
+    }
     setIsLoading(true);
     try {
       await login({ email, password });
-      toast.success('Protocol Clearance Verified');
+      toast.success('Signed in successfully');
     } catch (error) {
-      toast.error('Terminal Entry Refused: Identity Mismatch');
+      const msg = error?.response?.data?.message || 'Invalid email or password';
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white flex items-center justify-center md:justify-start relative overflow-hidden font-sans">
-            {/* Full Page Visual Layer */}
-            <div className="absolute inset-0 z-0">
-                <Image
-          src="/signin-visual.png"
-          alt="Background"
-          fill
-          className="object-cover opacity-40 mix-blend-luminosity grayscale scale-110"
-          priority />
-        
-                {/* Tactical Overlays */}
-                <div className="absolute inset-0 bg-gradient-to-r from-[#030303] via-[#030303]/90 to-transparent" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(16,185,129,0.05)_0%,transparent_50%)]" />
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-foreground flex items-center justify-center p-4 sm:p-6 transition-colors duration-300 relative overflow-hidden font-sans">
+      {/* Background Decorative Ambient Glows matching apps/web */}
+      <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
-                {/* Grid System */}
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_100%)]" />
+      {/* Main Card Container styled like apps/web AuthModal & Cards */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-[2.5rem] p-8 sm:p-10 shadow-2xl shadow-blue-500/5 dark:shadow-black/50 relative z-10"
+      >
+        {/* Header with asif.to Logo */}
+        <div className="flex flex-col items-center text-center gap-3 mb-8">
+          <span className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-lg shadow-lg shadow-blue-500/30">
+            &lt;/&gt;
+          </span>
+          <div className="flex items-center gap-2">
+            <h1 className="font-outfit font-black text-2xl tracking-tight text-zinc-900 dark:text-white">
+              asif<span className="text-blue-600 dark:text-blue-400">.to</span>
+            </h1>
+            <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2.5 py-0.5 rounded-full border border-blue-500/20">
+              Admin
+            </span>
+          </div>
+          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-xs">
+            Sign in to manage courses, articles, flashcards & administrative settings
+          </p>
+        </div>
+
+        {/* Signin Form */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Email Field */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 ml-1">
+              Email Address
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+              <input
+                type="email"
+                placeholder="admin@asif.to"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60 rounded-2xl pl-11 pr-5 py-3.5 text-sm font-medium text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+              />
             </div>
+          </div>
 
-            {/* Left-Side Content Portal */}
-            <div className="relative z-20 w-full md:w-[600px] lg:w-[700px] min-h-screen flex flex-col p-8 md:p-16 lg:p-24 justify-center">
-                <div className="max-w-[400px]">
-                    {/* Integrated Header */}
-                    <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="mb-12">
-            
-                        <div className="flex items-center gap-5 mb-3">
-                            <div className="w-12 h-12 rounded-xl bg-white dark:bg-white flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-                                <Command className="text-black" size={24} />
-                            </div>
-                            <div className="flex flex-col">
-                                <h1 className="text-3xl font-black font-outfit uppercase tracking-tighter leading-none">
-                                    MAZLIS<span className="text-emerald-500">.</span>
-                                </h1>
-                                <span className="text-[9px] font-black uppercase tracking-[0.6em] text-emerald-500/60 mt-1">Control Hub</span>
-                            </div>
-                        </div>
-                        <div className="h-px w-full bg-gradient-to-r from-white/20 to-transparent mt-6" />
-                    </motion.div>
-
-                    {/* Secure Entry Form */}
-                    <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="space-y-8">
-            
-                        <div className="space-y-2">
-                            <h2 className="text-lg font-bold font-outfit uppercase tracking-tight">Identity Verification</h2>
-                            <p className="text-[11px] text-zinc-500 uppercase tracking-widest font-medium">End-to-end encrypted terminal session</p>
-                        </div>
-
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="space-y-4">
-                                {/* Email Field */}
-                                <div className="space-y-1.5 group">
-                                    <div className="flex justify-between items-center px-1">
-                                        <label className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 group-focus-within:text-emerald-500 transition-colors">Access Key (Email)</label>
-                                        <div className="flex gap-1">
-                                            <div className="w-1 h-1 rounded-full bg-emerald-500/40" />
-                                            <div className="w-1 h-1 rounded-full bg-emerald-500/20" />
-                                        </div>
-                                    </div>
-                                    <div className="relative">
-                                        <Input
-                      type="email"
-                      placeholder="operator@mazlis.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="bg-white/5 border-white/10 hover:border-white/20 focus:border-emerald-500/50 h-13 rounded-3xl pl-12 text-sm font-medium transition-all outline-none placeholder:text-zinc-700" />
-                    
-                                        <Fingerprint className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-emerald-500 transition-colors" size={18} />
-                                    </div>
-                                </div>
-
-                                {/* Password Field */}
-                                <div className="space-y-1.5 group">
-                                    <div className="flex justify-between items-center px-1">
-                                        <label className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 group-focus-within:text-emerald-500 transition-colors">Secure Cipher</label>
-                                        <button type="button" className="text-[9px] font-bold text-zinc-600 hover:text-white transition-colors uppercase tracking-widest">Forgot?</button>
-                                    </div>
-                                    <div className="relative">
-                                        <Input
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="bg-white/5 border-white/10 hover:border-white/20 focus:border-emerald-500/50 h-13 rounded-3xl pl-12 text-sm font-medium transition-all outline-none placeholder:text-zinc-700" />
-                    
-                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-emerald-500 transition-colors" size={18} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <Button
-                type="submit"
-                variant="tactical"
-                loading={isLoading}
-                className="w-full h-12 rounded-3xl">
-                
-                                <span className="relative z-10 flex items-center justify-center gap-3">
-                                    {!isLoading && <>Initialize Session <ChevronRight size={16} /></>}
-                                </span>
-                            </Button>
-                        </form>
-                    </motion.div>
-
-                    {/* Operational Footer */}
-                    <div className="mt-20 pt-10 border-t border-white/5 flex flex-col gap-6">
-                        <div className="flex items-center gap-6">
-                            <div className="flex flex-col gap-1">
-                                <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">Protocol Node</span>
-                                <span className="text-[10px] font-bold text-zinc-400">editorial.ops.darbhanga</span>
-                            </div>
-                            <div className="w-px h-6 bg-white/10" />
-                            <div className="flex flex-col gap-1">
-                                <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">Environment</span>
-                                <div className="flex items-center gap-2">
-                                    <span className="w-1 h-1 rounded-full bg-emerald-500 animate-ping" />
-                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">Active_Production</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+          {/* Password Field */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 ml-1">
+              Password
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60 rounded-2xl pl-11 pr-5 py-3.5 text-sm font-medium text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+              />
             </div>
+          </div>
 
-            {/* Ambient Technical Details (Right Corner) */}
-            <div className="absolute bottom-12 right-12 hidden lg:flex flex-col items-end gap-3 pointer-events-none opacity-40">
-                <div className="flex gap-1.5">
-                    {[1, 2, 3, 4].map((i) => <div key={i} className="w-8 h-px bg-white/20" />)}
-                </div>
-                <span className="text-[9px] font-black tracking-[0.8em] uppercase text-zinc-500">Authorized Personnel Proxy</span>
-            </div>
-        </div>);
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full h-12 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-extrabold text-xs uppercase tracking-wider rounded-full shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2 mt-6 cursor-pointer disabled:opacity-50"
+          >
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Signing in...
+              </span>
+            ) : (
+              <>
+                Sign In to Admin Panel
+                <ChevronRight className="w-4 h-4" />
+              </>
+            )}
+          </button>
+        </form>
 
+        {/* Bottom Trust Badge */}
+        <div className="mt-8 pt-6 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center justify-center gap-2 text-zinc-400 text-xs font-semibold">
+          <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          <span>Protected Administrative Access &bull; asif.to</span>
+        </div>
+      </motion.div>
+    </div>
+  );
 }

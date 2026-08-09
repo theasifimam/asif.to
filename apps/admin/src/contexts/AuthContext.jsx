@@ -4,27 +4,6 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import api from '@/lib/axios';
 import { useRouter, usePathname } from 'next/navigation';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const AuthContext = createContext(undefined);
 
 export function AuthProvider({ children }) {
@@ -39,14 +18,28 @@ export function AuthProvider({ children }) {
 
   const checkUser = async () => {
     try {
-      const { data } = await api.get('/auth/me');
-      setUser(data.data.user);
-    } catch (error) {
-      console.error('Session check failed:', error);
-      setUser(null);
-      if (pathname !== '/signin') {
-        router.push('/signin');
+      const token =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('asif_admin_token') ||
+            localStorage.getItem('mazlis_admin_token') ||
+            localStorage.getItem('token')
+          : null;
+
+      if (!token) {
+        setUser(null);
+        setLoading(false);
+        return;
       }
+
+      const { data } = await api.get('/auth/me');
+      if (data?.data?.user) {
+        setUser(data.data.user);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.warn('Session check warning:', error?.response?.data?.message || error.message);
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -54,15 +47,19 @@ export function AuthProvider({ children }) {
 
   const login = async (credentials) => {
     const { data } = await api.post('/auth/admin/signin', credentials);
-    const user = data.data.user;
+    const loggedUser = data.data.user;
     const token = data.data.token;
 
-    setUser(user);
+    setUser(loggedUser);
 
-    // Sync with lib/auth.ts storage keys
     if (typeof window !== 'undefined') {
+      localStorage.setItem('asif_admin_token', token);
       localStorage.setItem('mazlis_admin_token', token);
-      localStorage.setItem('mazlis_admin_user', JSON.stringify(user));
+      localStorage.setItem('token', token);
+
+      localStorage.setItem('asif_admin_user', JSON.stringify(loggedUser));
+      localStorage.setItem('mazlis_admin_user', JSON.stringify(loggedUser));
+      localStorage.setItem('user', JSON.stringify(loggedUser));
     }
 
     router.push('/dashboard');
@@ -71,18 +68,27 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     try {
       await api.post('/auth/signout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('asif_admin_token');
+        localStorage.removeItem('mazlis_admin_token');
+        localStorage.removeItem('token');
+        localStorage.removeItem('asif_admin_user');
+        localStorage.removeItem('mazlis_admin_user');
+        localStorage.removeItem('user');
+      }
       setUser(null);
       router.push('/signin');
-    } catch (error) {
-      console.error('Logout failed', error);
     }
   };
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout, checkUser }}>
-            {children}
-        </AuthContext.Provider>);
-
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export const useAuth = () => {

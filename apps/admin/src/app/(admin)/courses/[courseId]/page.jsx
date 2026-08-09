@@ -314,15 +314,17 @@ export default function CourseEditorPage() {
         </div>
 
         {chapters.length === 0 ? (
-          <div className="text-center py-10 text-muted-foreground">
+          <div className="text-center py-10 text-muted-foreground bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80">
             <p className="text-sm">No chapters yet. Add your first chapter!</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/80">
             {chapters.map((ch, idx) => (
               <div
                 key={ch._id}
-                className="flex items-center justify-between gap-3 p-4 rounded-2xl bg-white dark:bg-zinc-900 shadow-sm hover:shadow-md transition-all"
+                className={`flex items-center justify-between gap-3 p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors ${
+                  idx === 0 ? "rounded-t-[2.5rem]" : ""
+                } ${idx === chapters.length - 1 ? "rounded-b-[2.5rem]" : ""}`}
               >
                 <div className="flex items-center gap-3">
                   <span className="shrink-0 w-7 h-7 rounded-xl bg-blue-600 text-white text-xs font-black flex items-center justify-center">

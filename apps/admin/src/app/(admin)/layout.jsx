@@ -116,10 +116,10 @@ export default function AdminLayout({ children }) {
 
   if (loading || !mounted || !user) {
     return (
-      <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-6">
-          <div className="w-16 h-16 border-4 border-zinc-900 border-t-[#E2FF54] rounded-full animate-spin"></div>
-          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-600 italic">
+      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-foreground flex items-center justify-center font-sans">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-zinc-200 dark:border-zinc-800 border-t-blue-600 rounded-full animate-spin"></div>
+          <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">
             Loading Admin Panel...
           </span>
         </div>
@@ -134,7 +134,7 @@ export default function AdminLayout({ children }) {
     : user?.profilePicture?.url;
 
   return (
-    <div className="flex h-screen bg-zinc-50 dark:bg-[#09090b] text-zinc-800 dark:text-zinc-400 overflow-hidden font-sans transition-colors duration-300">
+    <div className="flex h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-200 overflow-hidden font-sans transition-colors duration-300">
       {/* Toggle Overlay for Mobile */}
       <AnimatePresence>
         {isMobileMenuOpen && (
@@ -180,26 +180,26 @@ export default function AdminLayout({ children }) {
         </div>
 
         <div
-          className={`p-8 pb-12 flex flex-col gap-1 ${isCollapsed ? "items-center px-0" : ""}`}
+          className={`p-6 pb-8 flex flex-col gap-2 ${isCollapsed ? "items-center px-0" : ""}`}
         >
           <Link
-            href="/"
-            className="font-outfit font-black text-2xl tracking-tighter text-black dark:text-white leading-none"
+            href="/dashboard"
+            className="flex items-center gap-2.5 group"
           >
-            {isCollapsed ? "M." : "MAZLIS."}
-          </Link>
-          <AnimatePresence mode="wait">
+            <span className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xs shadow-md shadow-blue-500/30 shrink-0">
+              &lt;/&gt;
+            </span>
             {!isCollapsed && (
-              <motion.span
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                className="text-[10px] uppercase font-bold tracking-[0.3em] text-zinc-500 dark:text-zinc-600 truncate"
-              >
-                Admin Panel
-              </motion.span>
+              <div className="flex items-center gap-2">
+                <span className="font-outfit font-black text-xl tracking-tight text-zinc-900 dark:text-white">
+                  asif<span className="text-blue-600 dark:text-blue-400">.to</span>
+                </span>
+                <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/20">
+                  Admin
+                </span>
+              </div>
             )}
-          </AnimatePresence>
+          </Link>
         </div>
 
         <nav className="flex-1 px-4 flex flex-col gap-10 overflow-y-auto no-scrollbar">
@@ -225,10 +225,10 @@ export default function AdminLayout({ children }) {
                       key={item.href}
                       href={item.href}
                       title={isCollapsed ? item.name : ""}
-                      className={`group flex items-center px-4 py-3 rounded-xl transition-all duration-300 ${
+                      className={`group flex items-center px-4 py-3 rounded-2xl transition-all duration-300 ${
                         isActive
-                          ? "bg-zinc-100 dark:bg-zinc-900 text-black dark:text-white shadow-sm shadow-black/5 dark:shadow-zinc-950/50 border border-zinc-200 dark:border-zinc-800"
-                          : "hover:bg-zinc-50 dark:hover:bg-zinc-900/40 hover:text-zinc-900 dark:hover:text-zinc-200 cursor-pointer"
+                          ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 border border-blue-600"
+                          : "hover:bg-zinc-100 dark:hover:bg-zinc-900/60 hover:text-zinc-900 dark:hover:text-zinc-200 cursor-pointer"
                       } ${isCollapsed ? "justify-center" : "justify-between"}`}
                     >
                       <div className="flex items-center gap-3">
@@ -237,13 +237,13 @@ export default function AdminLayout({ children }) {
                           strokeWidth={isActive ? 2.5 : 2}
                           className={
                             isActive
-                              ? "text-black dark:text-white"
-                              : "text-zinc-500 dark:text-zinc-600 group-hover:text-zinc-800 dark:group-hover:text-zinc-400"
+                              ? "text-white"
+                              : "text-zinc-500 dark:text-zinc-500 group-hover:text-zinc-800 dark:group-hover:text-zinc-200"
                           }
                         />
                         {!isCollapsed && (
                           <span
-                            className={`text-[13px] font-bold tracking-tight uppercase ${isActive ? "tracking-wider" : ""} truncate`}
+                            className={`text-[13px] font-bold tracking-tight ${isActive ? "font-extrabold" : ""} truncate`}
                           >
                             {item.name}
                           </span>
@@ -252,7 +252,7 @@ export default function AdminLayout({ children }) {
                       {!isCollapsed && isActive && (
                         <motion.div
                           layoutId="active"
-                          className="w-1.5 h-1.5 rounded-full bg-black dark:bg-white shadow-[0_0_10px_rgba(0,0,0,0.5)] dark:shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                          className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"
                         />
                       )}
                     </Link>
@@ -264,11 +264,105 @@ export default function AdminLayout({ children }) {
         </nav>
 
         <div
-          className={`p-4 mt-auto border-t border-zinc-200 dark:border-zinc-900 transition-colors duration-300 ${isCollapsed ? "flex justify-center" : ""}`}
+          className={`p-4 mt-auto border-t border-zinc-200 dark:border-zinc-900 transition-colors duration-300 relative ${isCollapsed ? "flex justify-center" : ""}`}
         >
+          {/* User Account Popover Menu at sidebar position */}
+          <AnimatePresence>
+            {isUserMenuDialogOpen && (
+              <>
+                {/* Backdrop to dismiss when clicking outside */}
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsUserMenuDialogOpen(false)}
+                />
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                  className={`absolute bottom-full mb-3 z-50 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-4 shadow-2xl shadow-black/10 dark:shadow-black/60 flex flex-col gap-3 ${
+                    isCollapsed ? "left-2 w-64" : "left-4 right-4"
+                  }`}
+                >
+                  {/* User Info Header */}
+                  <div className="flex items-center gap-3 pb-3 border-b border-zinc-100 dark:border-zinc-800">
+                    <Avatar className="w-10 h-10 border border-zinc-200 dark:border-zinc-700 shadow-sm shrink-0">
+                      <AvatarImage src={avatarUrl || ""} className="object-cover" />
+                      <AvatarFallback className="bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-black uppercase text-xs">
+                        {user?.fullName
+                          ?.split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .slice(0, 2) || "AD"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-black font-outfit text-zinc-900 dark:text-white uppercase truncate">
+                        {user?.fullName || "Admin User"}
+                      </span>
+                      <span className="text-[10px] font-bold text-zinc-400 truncate">
+                        {user?.email || "admin@asif.to"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex flex-col gap-1">
+                    <button
+                      onClick={() => {
+                        setIsUserMenuDialogOpen(false);
+                        router.push("/profile");
+                      }}
+                      className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-all text-zinc-800 dark:text-zinc-200 font-bold text-xs"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <User size={16} className="text-blue-600 dark:text-blue-400" />
+                        <span>My Profile</span>
+                      </div>
+                      <ChevronRight size={14} className="text-zinc-400" />
+                    </button>
+
+                    <button
+                      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                      className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-all text-zinc-800 dark:text-zinc-200 font-bold text-xs"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        {theme === "dark" ? (
+                          <Sun size={16} className="text-amber-500" />
+                        ) : (
+                          <Moon size={16} className="text-blue-600" />
+                        )}
+                        <span>Theme</span>
+                      </div>
+                      <span className="text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
+                        {theme === "dark" ? "Dark" : "Light"}
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setIsUserMenuDialogOpen(false);
+                        setIsLogoutDialogOpen(true);
+                      }}
+                      className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-all text-red-600 dark:text-red-400 font-bold text-xs mt-1"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <LogOut size={16} />
+                        <span>Log Out</span>
+                      </div>
+                    </button>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+
           <button
-            onClick={() => setIsUserMenuDialogOpen(true)}
-            className={`w-full flex items-center justify-between p-3 rounded-2xl bg-zinc-100/80 dark:bg-zinc-900/60 hover:bg-zinc-200/80 dark:hover:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800/80 transition-all group/user shadow-sm ${isCollapsed ? "p-2 justify-center w-auto" : ""}`}
+            onClick={() => setIsUserMenuDialogOpen(!isUserMenuDialogOpen)}
+            className={`w-full flex items-center justify-between p-3 rounded-2xl bg-zinc-100/80 dark:bg-zinc-900/60 hover:bg-zinc-200/80 dark:hover:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800/80 transition-all group/user shadow-sm ${
+              isCollapsed ? "p-2 justify-center w-auto" : ""
+            }`}
             title={isCollapsed ? user?.fullName || "Account Options" : ""}
           >
             <div className="flex items-center gap-3 min-w-0">
@@ -296,7 +390,9 @@ export default function AdminLayout({ children }) {
             {!isCollapsed && (
               <ChevronRight
                 size={16}
-                className="text-zinc-400 group-hover/user:text-zinc-900 dark:group-hover/user:text-white transition-all transform group-hover/user:translate-x-0.5 shrink-0"
+                className={`text-zinc-400 group-hover/user:text-zinc-900 dark:group-hover/user:text-white transition-transform shrink-0 ${
+                  isUserMenuDialogOpen ? "-rotate-90 text-blue-600" : ""
+                }`}
               />
             )}
           </button>
@@ -366,92 +462,6 @@ export default function AdminLayout({ children }) {
         </main>
       </div>
 
-      {/* User Account & Settings Dialog */}
-      <Dialog
-        open={isUserMenuDialogOpen}
-        onOpenChange={setIsUserMenuDialogOpen}
-      >
-        <DialogContent className="max-w-100 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6 md:p-8 rounded-4xl gap-6">
-          <DialogHeader className="gap-4 text-center items-center">
-            <Avatar className="w-20 h-20 border-2 border-zinc-200 dark:border-zinc-800 shadow-md">
-              <AvatarImage src={avatarUrl || ""} className="object-cover" />
-              <AvatarFallback className="bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white font-black uppercase text-base">
-                {user?.fullName
-                  ?.split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .slice(0, 2) || "AD"}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col gap-1 items-center">
-              <DialogTitle className="text-xl font-black font-outfit uppercase tracking-tight text-zinc-900 dark:text-white">
-                {user?.fullName || "Admin User"}
-              </DialogTitle>
-              <DialogDescription className="text-zinc-500 dark:text-zinc-400 text-xs font-semibold">
-                {user?.email || "admin@mazlis.com"} &bull;{" "}
-                <span className="uppercase text-amber-500 dark:text-amber-400 font-bold">
-                  {user?.role || "Admin"}
-                </span>
-              </DialogDescription>
-            </div>
-          </DialogHeader>
-
-          <div className="flex flex-col gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-900">
-            {/* View Profile */}
-            <button
-              onClick={() => {
-                setIsUserMenuDialogOpen(false);
-                router.push("/profile");
-              }}
-              className="flex items-center justify-between p-4 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-900/80 transition-all text-zinc-800 dark:text-zinc-200 group font-bold text-xs uppercase tracking-wider"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors">
-                  <User size={18} />
-                </div>
-                <span>My Profile</span>
-              </div>
-              <ChevronRight
-                size={16}
-                className="text-zinc-400 group-hover:translate-x-1 transition-transform"
-              />
-            </button>
-
-            {/* Toggle Theme */}
-            <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="flex items-center justify-between p-4 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-900/80 transition-all text-zinc-800 dark:text-zinc-200 group font-bold text-xs uppercase tracking-wider"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors">
-                  {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-                </div>
-                <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
-              </div>
-              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900">
-                {theme === "dark" ? "Dark" : "Light"}
-              </span>
-            </button>
-
-            {/* Logout */}
-            <button
-              onClick={() => {
-                setIsUserMenuDialogOpen(false);
-                setIsLogoutDialogOpen(true);
-              }}
-              className="flex items-center justify-between p-4 rounded-2xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-all text-red-600 dark:text-red-400 group font-bold text-xs uppercase tracking-wider mt-2"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-red-100/50 dark:bg-red-500/20 text-red-600 dark:text-red-400">
-                  <LogOut size={18} />
-                </div>
-                <span>Log Out</span>
-              </div>
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       {/* Logout Confirmation Dialog */}
       <Dialog open={isLogoutDialogOpen} onOpenChange={setIsLogoutDialogOpen}>
         <DialogContent className="max-w-100 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-8 rounded-4xl gap-8">
@@ -463,7 +473,7 @@ export default function AdminLayout({ children }) {
               Log Out?
             </DialogTitle>
             <DialogDescription className="text-zinc-500 dark:text-zinc-400 text-[13px] font-medium leading-relaxed">
-              Are you sure you want to log out of Mazlis Admin Panel?
+              Are you sure you want to log out of asif.to Admin Panel?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-900">

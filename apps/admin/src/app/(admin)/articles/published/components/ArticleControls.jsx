@@ -34,8 +34,8 @@ export default function ArticleControls({
           </button>
           <button
             onClick={() => setStatusFilter('published')}
-            className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 ${statusFilter === 'published' ? 'bg-emerald-500 text-white shadow-sm' : 'text-zinc-500 hover:text-emerald-600'}`}>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse"></span>
+            className={`px-4 py-2 rounded-xl transition-all flex items-center gap-1.5 ${statusFilter === 'published' ? 'bg-blue-600 text-white shadow-sm' : 'text-zinc-500 hover:text-blue-600'}`}>
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-300 animate-pulse"></span>
             Visible
           </button>
           <button

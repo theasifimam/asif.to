@@ -5,41 +5,102 @@
 @theme {
   --font-sans: var(--font-inter);
   --font-outfit: var(--font-outfit);
+  --color-background: var(--site-bg);
+  --color-foreground: var(--site-fg);
 }
 
 :root {
-  --background: #ffffff;
+  --site-bg: #f9faf7;
+  --site-fg: #1a1c18;
+  --accent: #2563eb;
+  --card-bg: #ffffff;
+  --radius-xl: 2rem;
+  --radius-lg: 1.25rem;
+  --font-outfit: "Outfit", sans-serif;
+  --font-inter: "Inter", sans-serif;
+
+  /* Material 3 Blue Palette for asif.to */
+  --m3-primary: #2563eb;
+  --m3-on-primary: #ffffff;
+  --m3-primary-container: #dbeafe;
+  --m3-on-primary-container: #1e3a8a;
+  --m3-surface: #f9faf7;
+  --m3-surface-card: #ffffff;
+  --m3-surface-low: #f1f5f9;
+  --m3-surface-high: #e2e8f0;
+  --m3-border: #e2e8f0;
+
+  --background: #f9faf7;
   --foreground: #09090b;
   --card: #ffffff;
   --card-foreground: #09090b;
-  --border: #e4e4e7;
-  --input: #e4e4e7;
-  --ring: #18181b;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #2563eb;
 }
 
 .dark {
+  --site-bg: #09090b;
+  --site-fg: #e2e8f0;
+  --accent: #3b82f6;
+  --card-bg: #18181b;
+
+  /* Material 3 Dark Blue Palette */
+  --m3-primary: #3b82f6;
+  --m3-on-primary: #1e3a8a;
+  --m3-primary-container: #1e3a8a;
+  --m3-on-primary-container: #dbeafe;
+  --m3-surface: #09090b;
+  --m3-surface-card: #18181b;
+  --m3-surface-low: #121215;
+  --m3-surface-high: #27272a;
+  --m3-border: #27272a;
+
   --background: #09090b;
   --foreground: #fafafa;
-  --card: #09090b;
+  --card: #18181b;
   --card-foreground: #fafafa;
   --border: #27272a;
   --input: #27272a;
-  --ring: #d4d4d8;
+  --ring: #3b82f6;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: var(--site-bg);
+  color: var(--site-fg);
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
 .font-outfit {
   font-family: var(--font-outfit);
 }
 
-/* Custom Scrollbar for that premium feel */
+/* Material 3 Tactile Spring Press */
+.android-haptic {
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s ease, border-color 0.2s ease;
+}
+.android-haptic:active {
+  transform: scale(0.97);
+}
+
+/* Material 3 Clean Squircle Tile */
+.android-tile {
+  border-radius: 2rem;
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.android-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px -8px rgba(37, 99, 235, 0.12);
+}
+.dark .android-tile:hover {
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.5);
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -47,43 +108,51 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: #cbd5e1;
   border-radius: 10px;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: #27272a;
+}
+
 ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
   background: #3f3f46;
 }
 
-/* Typography Overrides */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-outfit);
-  letter-spacing: -0.02em;
-}
-
-/* Hide scrollbar for Chrome, Safari and Opera */
-.no-scrollbar::-webkit-scrollbar {
+/* Hide scrollbars for mobile / clean UI */
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
   display: none;
 }
 
-/* Hide scrollbar for IE, Edge and Firefox */
-.no-scrollbar {
+.no-scrollbar,
+.scrollbar-none {
   -ms-overflow-style: none;
-  /* IE and Edge */
   scrollbar-width: none;
-  /* Firefox */
 }
 
-/* Animation utilities */
+/* Glass panel utility */
 .glass-panel {
-  background: rgba(9, 9, 11, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.dark .glass-panel {
+  background: rgba(9, 9, 11, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Typography Overrides */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-outfit);
+  letter-spacing: -0.02em;
 }
 
 /* ─── Quill Content Rendering ─── */
@@ -95,35 +164,27 @@ h6 {
   color: var(--foreground) !important;
 }
 
-/* Force visibility by overriding fixed inline styles from pastes, but EXCLUDE PRE tags */
 .ql-editor :not(a, pre, code, span) {
   background-color: transparent !important;
   color: var(--foreground) !important;
 }
 
-/* Maintain distinct link colors */
 .ql-editor a {
-  color: #3b82f6 !important;
+  color: #2563eb !important;
   text-decoration: underline;
 }
 
-
+.dark .ql-editor a {
+  color: #60a5fa !important;
+}
 
 .ql-editor p {
   margin-bottom: 1.5rem !important;
 }
 
-.ql-align-center {
-  text-align: center;
-}
-
-.ql-align-right {
-  text-align: right;
-}
-
-.ql-align-justify {
-  text-align: justify;
-}
+.ql-align-center { text-align: center; }
+.ql-align-right { text-align: right; }
+.ql-align-justify { text-align: justify; }
 
 .ql-video {
   width: 100%;
@@ -137,15 +198,16 @@ h6 {
 .ql-editor h3 { font-size: 1.875rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; }
 
 .ql-editor blockquote {
-  border-left: 4px solid #18181b;
+  border-left: 4px solid #2563eb;
   padding-left: 2rem;
   margin: 2rem 0;
   font-style: italic;
-  color: #71717a;
+  color: #64748b;
 }
 
 .dark .ql-editor blockquote {
-  border-left-color: #fafafa;
+  border-left-color: #3b82f6;
+  color: #94a3b8;
 }
 
 .ql-editor ul, .ql-editor ol {
@@ -154,13 +216,8 @@ h6 {
   list-style-position: outside !important;
 }
 
-.ql-editor ul {
-  list-style-type: disc !important;
-}
-
-.ql-editor ol {
-  list-style-type: decimal !important;
-}
+.ql-editor ul { list-style-type: disc !important; }
+.ql-editor ol { list-style-type: decimal !important; }
 
 .ql-editor li {
   margin-bottom: 0.75rem !important;
@@ -168,29 +225,9 @@ h6 {
   padding-left: 0.5em !important;
 }
 
-/* Nested Lists */
-.ql-editor li > ul, .ql-editor li > ol {
-  margin-top: 0.75rem !important;
-  margin-bottom: 0.75rem !important;
-}
-
-.ql-editor ul ul { list-style-type: circle !important; }
-.ql-editor ul ul ul { list-style-type: square !important; }
-
-/* Indent support */
-.ql-indent-1 { padding-left: 3em !important; }
-.ql-indent-2 { padding-left: 4.5em !important; }
-.ql-indent-3 { padding-left: 6em !important; }
-.ql-indent-4 { padding-left: 7.5em !important; }
-.ql-indent-5 { padding-left: 9em !important; }
-.ql-indent-6 { padding-left: 10.5em !important; }
-.ql-indent-7 { padding-left: 12em !important; }
-.ql-indent-8 { padding-left: 13.5em !important; }
-
-
 .ql-editor img {
   max-width: 100%;
   height: auto;
   border-radius: 1.5rem;
   margin: 2rem 0;
-}
+}

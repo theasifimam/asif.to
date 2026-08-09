@@ -43,7 +43,7 @@ const buttonVariants = cva(
         link: ["text-primary underline-offset-4", "hover:underline"],
         tactical: [
         "bg-white text-black font-black uppercase tracking-[0.3em] text-[11px]",
-        "hover:bg-emerald-50 active:scale-[0.98]",
+        "hover:bg-blue-50 active:scale-[0.98]",
         "rounded-lg shadow-lg shadow-black/5"]
 
       },

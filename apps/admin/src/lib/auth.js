@@ -7,8 +7,8 @@
  */
 
 // Token storage key
-const AUTH_TOKEN_KEY = "mazlis_admin_token";
-const AUTH_USER_KEY = "mazlis_admin_user";
+const AUTH_TOKEN_KEY = "asif_admin_token";
+const AUTH_USER_KEY = "asif_admin_user";
 
 // Types
 
@@ -54,7 +54,7 @@ export function isAuthenticated() {
  */
 export function getAuthToken() {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(AUTH_TOKEN_KEY);
+  return localStorage.getItem(AUTH_TOKEN_KEY) || localStorage.getItem("mazlis_admin_token");
 }
 
 /**

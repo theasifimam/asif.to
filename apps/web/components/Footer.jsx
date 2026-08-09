@@ -1,10 +1,10 @@
 import React from "react";
 import Link from "next/link";
 
-export default function Footer() {
+export default function Footer({ containerWidth = "max-w-5xl" }) {
   return (
     <footer className="w-full mt-auto pt-8">
-      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 pb-28 md:pb-12">
+      <div className={`w-full ${containerWidth} mx-auto px-4 sm:px-6 pb-28 md:pb-12 transition-all duration-300`}>
         <div className="p-8 sm:p-10 rounded-[3rem] bg-white dark:bg-zinc-900/90 shadow-lg shadow-black/5 dark:shadow-black/20 flex flex-col gap-8">
           
           <div className="flex flex-col md:flex-row justify-between items-start gap-8">

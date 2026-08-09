@@ -169,16 +169,21 @@ export default function CoursesAdminPage() {
           <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground">
+        <div className="text-center py-16 text-muted-foreground bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80">
           <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-30" />
           <p className="text-sm font-medium">No courses found.</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {filtered.map((course) => (
-            <div key={course._id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-3xl bg-white dark:bg-zinc-900 shadow-sm hover:shadow-md transition-all">
+        <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/80">
+          {filtered.map((course, index) => (
+            <div
+              key={course._id}
+              className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors ${
+                index === 0 ? "rounded-t-[2.5rem]" : ""
+              } ${index === filtered.length - 1 ? "rounded-b-[2.5rem]" : ""}`}
+            >
               <div className="flex items-start gap-4">
-                <div className={`px-2.5 py-1 rounded-xl text-[11px] font-extrabold uppercase tracking-wider ${TECH_COLORS[course.techId] || "bg-zinc-100 text-zinc-600"}`}>
+                <div className={`px-2.5 py-1 rounded-xl text-[11px] font-extrabold uppercase tracking-wider shrink-0 ${TECH_COLORS[course.techId] || "bg-zinc-100 text-zinc-600"}`}>
                   {course.techId}
                 </div>
                 <div className="flex flex-col gap-1">
@@ -197,7 +202,7 @@ export default function CoursesAdminPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 self-end sm:self-auto">
+              <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
                 <Link
                   href={`/courses/${course._id}`}
                   className="flex items-center gap-1 px-4 py-2 rounded-full bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20"

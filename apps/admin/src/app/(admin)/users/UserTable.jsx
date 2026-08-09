@@ -17,26 +17,26 @@ export function UserTable({ users, loading }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-32 gap-4">
-                <Loader2 className="animate-spin text-zinc-500" size={24} />
-                <span className="text-[11px] font-black uppercase tracking-widest text-zinc-400">Loading Users...</span>
-            </div>);
-
+      <div className="flex items-center justify-center py-32 gap-4 bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80">
+        <Loader2 className="animate-spin text-zinc-500" size={24} />
+        <span className="text-[11px] font-black uppercase tracking-widest text-zinc-400">Loading Users...</span>
+      </div>
+    );
   }
 
   if (users.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 gap-4">
-                <UsersIcon className="text-zinc-300 dark:text-zinc-800" size={48} />
-                <span className="text-zinc-400 dark:text-zinc-600 text-sm font-bold">No users found</span>
-            </div>);
-
+      <div className="flex flex-col items-center justify-center py-32 gap-4 bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80">
+        <UsersIcon className="text-zinc-300 dark:text-zinc-800" size={48} />
+        <span className="text-zinc-400 dark:text-zinc-600 text-sm font-bold">No users found</span>
+      </div>
+    );
   }
 
   return (
-    <div className="w-full">
-            {/* Mobile View: Cards */}
-            <div className="lg:hidden flex flex-col divide-y divide-zinc-100 dark:divide-zinc-800/40">
+    <div className="w-full bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm overflow-hidden">
+      {/* Mobile View: Cards */}
+      <div className="lg:hidden flex flex-col divide-y divide-zinc-100 dark:divide-zinc-800/80">
                 {users.map((user, i) => {
           const roleConf = ROLE_CONFIG[user.role] || ROLE_CONFIG.reader;
           const RoleIcon = roleConf.icon;

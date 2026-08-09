@@ -170,12 +170,14 @@ export default function CourseOverviewPage() {
             </p>
           </div>
 
-          <div className="space-y-3">
+          <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/80">
             {course.chapters.map((ch, idx) => (
               <Link
                 key={ch._id || ch.slug}
                 href={`/courses/${courseId}/${ch.slug}`}
-                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-4xl bg-white dark:bg-zinc-900/90 shadow-sm hover:shadow-md transition-all duration-300"
+                className={`group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors duration-200 ${
+                  idx === 0 ? "rounded-t-[2.5rem]" : ""
+                } ${idx === course.chapters.length - 1 ? "rounded-b-[2.5rem]" : ""}`}
               >
                 <div className="flex items-start gap-4">
                   <div className="shrink-0 w-8 h-8 rounded-2xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/25">
@@ -191,7 +193,7 @@ export default function CourseOverviewPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 self-end sm:self-auto">
+                <div className="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 self-end sm:self-auto shrink-0">
                   <span>Start Lesson</span>
                   <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </div>

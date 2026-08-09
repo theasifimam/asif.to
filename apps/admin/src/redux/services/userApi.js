@@ -7,7 +7,7 @@ export const userApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: API_URL,
     prepareHeaders: (headers) => {
-      const token = localStorage.getItem('mazlis_admin_token');
+      const token = localStorage.getItem('asif_admin_token') || localStorage.getItem('mazlis_admin_token');
       if (token) {
         headers.set('authorization', `Bearer ${token}`);
       }

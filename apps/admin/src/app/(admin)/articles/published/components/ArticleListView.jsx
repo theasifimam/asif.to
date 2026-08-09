@@ -14,7 +14,7 @@ export default function ArticleListView({
   setIsDeleteOpen
 }) {
   return (
-    <section className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-900 border-y border-zinc-200 dark:border-zinc-900">
+    <section className="flex flex-col bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/80">
       <AnimatePresence>
         {articles.map((item, i) => {
           const isVisibleOnWeb = item.status === 'published';
@@ -26,7 +26,10 @@ export default function ArticleListView({
               exit={{ opacity: 0, scale: 0.98 }}
               transition={{ delay: i * 0.03 }}
               key={item._id}
-              className="group py-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:px-6 transition-all rounded-3xl cursor-pointer relative overflow-hidden">
+              className={`group p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer relative overflow-hidden ${
+                i === 0 ? 'rounded-t-[2.5rem]' : ''
+              } ${i === articles.length - 1 ? 'rounded-b-[2.5rem]' : ''}`}
+            >
               
               <div className={`absolute inset-0 transition-opacity ${isVisibleOnWeb ? 'bg-gradient-to-r from-emerald-500/0 via-emerald-500/0 to-emerald-500/5 opacity-0 group-hover:opacity-100' : 'bg-gradient-to-r from-amber-500/0 via-amber-500/0 to-amber-500/5 opacity-0 group-hover:opacity-100'}`} />
 

@@ -34,12 +34,12 @@ export function Header() {
   // Get page config or fallback
   const currentConfig = PAGE_CONFIG[pathname] || {
     title: pathname.split("/").pop()?.replace(/-/g, " ") || "Dashboard",
-    description: "Mazlis Admin Console"
+    description: "asif.to Admin Panel"
   };
 
   // Sync document title
   useEffect(() => {
-    document.title = `${currentConfig.title} | Mazlis Admin`;
+    document.title = `${currentConfig.title} | asif.to Admin`;
   }, [currentConfig.title]);
 
   return (

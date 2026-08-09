@@ -149,16 +149,18 @@ export default function QuizAdminPage() {
           <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/80">
           {questions.length === 0 && (
             <p className="text-sm text-center text-muted-foreground py-10">
               No questions yet.
             </p>
           )}
-          {questions.map((q) => (
+          {questions.map((q, idx) => (
             <div
               key={q._id}
-              className="p-5 rounded-3xl bg-white dark:bg-zinc-900 shadow-sm hover:shadow-md transition-all space-y-3"
+              className={`p-5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors space-y-3 ${
+                idx === 0 ? "rounded-t-[2.5rem]" : ""
+              } ${idx === questions.length - 1 ? "rounded-b-[2.5rem]" : ""}`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">

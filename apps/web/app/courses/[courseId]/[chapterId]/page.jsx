@@ -20,6 +20,10 @@ import {
   Loader2,
   AlertCircle,
   Code,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Search,
+  BookOpen,
 } from "lucide-react";
 
 /** Parse markdown text into structured content blocks (Headings, Paragraphs, Images, Code Blocks) */
@@ -105,6 +109,12 @@ function parseContentBlocks(contentArray, techName) {
         return;
       }
 
+      // Markdown Table
+      if (pTrimmed.startsWith("|") && pTrimmed.includes("\n|")) {
+        blocks.push({ type: "table", text: pTrimmed });
+        return;
+      }
+
       // Regular paragraph text
       blocks.push({ type: "text", text: pTrimmed });
     });
@@ -150,6 +160,8 @@ export default function CourseChapterPage() {
   const chapterId = params?.chapterId;
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [sidebarSearch, setSidebarSearch] = useState("");
 
   const { data, isLoading, isError } = useGetChapterBySlugQuery(
     { courseSlug: courseId, chapterSlug: chapterId },
@@ -169,6 +181,17 @@ export default function CourseChapterPage() {
   const progressPercentage = allChapters.length
     ? Math.round(((currentChapterIndex + 1) / allChapters.length) * 100)
     : 0;
+
+  const activeItemRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (activeItemRef.current) {
+      activeItemRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  }, [chapterId, allChapters]);
 
   if (isLoading) {
     return (
@@ -236,13 +259,14 @@ export default function CourseChapterPage() {
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground transition-colors duration-300 pb-24 sm:pb-12">
       <Header />
 
-      <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 pt-20 sm:pt-24 flex flex-col gap-6">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 pt-20 sm:pt-24 flex flex-col gap-6">
         {/* Top Course Header Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-sm border border-zinc-200/60 dark:border-zinc-800/60">
           <div className="flex items-center gap-3">
             <Link
               href={`/courses/${courseId}`}
-              className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 transition-colors"
+              className="p-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+              title="Back to course overview"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
@@ -263,16 +287,37 @@ export default function CourseChapterPage() {
             </div>
           </div>
 
-          {/* Chapter Drawer Toggle for Mobile */}
-          <button
-            onClick={() => setIsDrawerOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 text-white text-xs font-bold shadow-md shadow-blue-500/25 active:scale-95 transition-all self-start sm:self-auto"
-          >
-            <List className="w-4 h-4" />
-            <span>
-              Course Chapters ({currentChapterIndex + 1}/{allChapters.length})
-            </span>
-          </button>
+          <div className="flex items-center gap-3 self-start sm:self-auto">
+            {/* Desktop Sidebar Toggle */}
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-bold transition-all"
+              title={isSidebarOpen ? "Hide sidebar" : "Show sidebar"}
+            >
+              {isSidebarOpen ? (
+                <>
+                  <PanelLeftClose className="w-4 h-4" />
+                  <span>Collapse Sidebar</span>
+                </>
+              ) : (
+                <>
+                  <PanelLeftOpen className="w-4 h-4 text-blue-500" />
+                  <span>Show Sidebar</span>
+                </>
+              )}
+            </button>
+
+            {/* Mobile Chapter Drawer Toggle */}
+            <button
+              onClick={() => setIsDrawerOpen(true)}
+              className="lg:hidden flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 text-white text-xs font-bold shadow-md shadow-blue-500/25 active:scale-95 transition-all"
+            >
+              <List className="w-4 h-4" />
+              <span>
+                Chapters ({currentChapterIndex + 1}/{allChapters.length})
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Progress Bar */}
@@ -283,48 +328,87 @@ export default function CourseChapterPage() {
           />
         </div>
 
-        {/* Layout: Sidebar + Lesson */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Desktop Chapter Sidebar */}
-          <aside className="hidden lg:block lg:col-span-4 space-y-2 p-5 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-sm h-fit">
-            <h2 className="text-xs font-extrabold uppercase tracking-widest text-zinc-400 mb-3 px-2">
-              Course Chapters
-            </h2>
-            <div className="space-y-1.5">
-              {allChapters.map((ch) => {
-                const isActive = ch.slug === chapter?.slug;
-                return (
-                  <Link
-                    key={ch.slug}
-                    href={`/courses/${courseId}/${ch.slug}`}
-                    className={`flex items-center justify-between p-3 rounded-2xl text-xs font-bold transition-all ${
-                      isActive
-                        ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
-                        : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                    }`}
-                  >
-                    <span className="line-clamp-1">{ch.title}</span>
-                    {isActive && (
-                      <CheckCircle className="w-4 h-4 text-white shrink-0 ml-2" />
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
-          </aside>
+        {/* Layout: Sticky Collapsible Sidebar + Lesson Reader */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
+          {/* Desktop Sticky & Collapsible Chapter Sidebar */}
+          {isSidebarOpen && (
+            <aside className="hidden lg:block lg:col-span-4 xl:col-span-3 z-30">
+              <div style={{ position: "sticky", top: "90px" }}>
+                <div className="h-[calc(100vh-7.5rem)] flex flex-col gap-3 p-4 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-sm border border-zinc-200/60 dark:border-zinc-800/60">
+                  <div className="flex items-center justify-between px-2 pt-1 shrink-0">
+                    <h2 className="text-xs font-extrabold uppercase tracking-widest text-zinc-400 flex items-center gap-1.5">
+                      <BookOpen className="w-4 h-4 text-blue-500" />
+                      Chapters ({allChapters.length})
+                    </h2>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600">
+                      {currentChapterIndex + 1}/{allChapters.length}
+                    </span>
+                  </div>
 
-          {/* Lesson Content */}
-          <section className="lg:col-span-8 flex flex-col gap-6">
-            {/* Top Prev / Next Navigation */}
-            <div className="flex items-center justify-between p-4 rounded-3xl bg-white dark:bg-zinc-900/90 shadow-sm text-xs font-bold">
+                  {/* Sidebar Search Filter */}
+                  <div className="relative shrink-0">
+                    <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+                    <input
+                      type="text"
+                      placeholder="Filter chapters..."
+                      value={sidebarSearch}
+                      onChange={(e) => setSidebarSearch(e.target.value)}
+                      className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-xs text-foreground placeholder:text-zinc-400 border-0 outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* Chapter Navigation List */}
+                  <div className="flex-1 overflow-y-auto pr-1 space-y-1 custom-scrollbar">
+                    {allChapters
+                      .filter((ch) =>
+                        ch.title.toLowerCase().includes(sidebarSearch.toLowerCase()),
+                      )
+                      .map((ch) => {
+                        const isActive = ch.slug === chapter?.slug;
+                        return (
+                          <Link
+                            key={ch.slug}
+                            ref={isActive ? activeItemRef : null}
+                            href={`/courses/${courseId}/${ch.slug}`}
+                            className={`group flex items-center justify-between p-3 rounded-2xl text-xs font-bold transition-colors ${
+                              isActive
+                                ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
+                                : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/80"
+                            }`}
+                          >
+                            <span className="line-clamp-2 leading-snug">
+                              {ch.title}
+                            </span>
+                            {isActive && (
+                              <CheckCircle className="w-4 h-4 text-white shrink-0 ml-2" />
+                            )}
+                          </Link>
+                        );
+                      })}
+                  </div>
+                </div>
+              </div>
+            </aside>
+          )}
+
+          {/* Lesson Content Area - Expands when sidebar is collapsed */}
+          <section
+            className={`flex flex-col gap-6 transition-all duration-300 ${
+              isSidebarOpen
+                ? "lg:col-span-8 xl:col-span-9"
+                : "lg:col-span-12 max-w-4xl mx-auto w-full"
+            }`}
+          >
+            {/* Top Prev / Next Quick Navigation */}
+            <div className="flex items-center justify-between p-4 rounded-3xl bg-white dark:bg-zinc-900/90 shadow-sm border border-zinc-200/60 dark:border-zinc-800/60 text-xs font-bold">
               {prevChapter ? (
                 <Link
                   href={`/courses/${courseId}/${prevChapter.slug}`}
-                  className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline"
+                  className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:underline"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   <span className="line-clamp-1">
-                    Prev: {prevChapter.title?.split(". ")[1] || "Previous"}
+                    Prev: {prevChapter.title?.split(". ")[1] || prevChapter.title}
                   </span>
                 </Link>
               ) : (
@@ -336,31 +420,33 @@ export default function CourseChapterPage() {
               {nextChapter ? (
                 <Link
                   href={`/courses/${courseId}/${nextChapter.slug}`}
-                  className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline"
+                  className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 hover:underline"
                 >
                   <span className="line-clamp-1">
-                    Next: {nextChapter.title?.split(". ")[1] || "Next"}
+                    Next: {nextChapter.title?.split(". ")[1] || nextChapter.title}
                   </span>
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               ) : (
                 <span className="text-emerald-500 font-bold">
-                  Course Completed!
+                  Course Completed! 🎉
                 </span>
               )}
             </div>
 
-            {/* Chapter Details & Content Document */}
-            <div className="p-6 sm:p-8 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-md flex flex-col gap-5">
-              <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                Lesson {currentChapterIndex + 1}
-              </span>
-              <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
-                {chapter?.title}
-              </h1>
-              <p className="text-xs sm:text-base text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium pb-2 border-b border-zinc-100 dark:border-zinc-800">
-                {chapter?.summary}
-              </p>
+            {/* Chapter Details & Main Tutorial Reader Document */}
+            <div className="p-6 sm:p-10 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-md border border-zinc-200/60 dark:border-zinc-800/60 flex flex-col gap-6">
+              <div>
+                <span className="text-xs font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-widest">
+                  Lesson {currentChapterIndex + 1} of {allChapters.length}
+                </span>
+                <h1 className="text-2xl sm:text-4xl font-black text-foreground tracking-tight mt-1 mb-3">
+                  {chapter?.title}
+                </h1>
+                <p className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium pb-4 border-b border-zinc-100 dark:border-zinc-800">
+                  {chapter?.summary}
+                </p>
+              </div>
 
               {/* Render Structured Content Blocks */}
               {isSimplePoints ? (
@@ -388,13 +474,13 @@ export default function CourseChapterPage() {
                 </div>
               ) : (
                 /* Modern Full Tutorial Document Format */
-                <div className="space-y-4 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 font-medium leading-relaxed">
+                <div className="space-y-5 text-sm sm:text-base text-zinc-700 dark:text-zinc-300 font-medium leading-relaxed">
                   {parsedBlocks.map((block, idx) => {
                     if (block.type === "h1") {
                       return (
                         <h2
                           key={idx}
-                          className="text-xl sm:text-2xl font-black text-foreground tracking-tight mt-6 mb-2 border-b border-zinc-100 dark:border-zinc-800 pb-2"
+                          className="text-xl sm:text-3xl font-black text-foreground tracking-tight mt-8 mb-3 border-b border-zinc-100 dark:border-zinc-800 pb-2"
                         >
                           {block.text}
                         </h2>
@@ -404,7 +490,7 @@ export default function CourseChapterPage() {
                       return (
                         <h3
                           key={idx}
-                          className="text-lg sm:text-xl font-extrabold text-foreground tracking-tight mt-5 mb-2"
+                          className="text-lg sm:text-2xl font-extrabold text-foreground tracking-tight mt-6 mb-3"
                         >
                           {block.text}
                         </h3>
@@ -414,7 +500,7 @@ export default function CourseChapterPage() {
                       return (
                         <h4
                           key={idx}
-                          className="text-base sm:text-lg font-bold text-foreground mt-4 mb-1"
+                          className="text-base sm:text-xl font-bold text-foreground mt-5 mb-2"
                         >
                           {block.text}
                         </h4>
@@ -422,7 +508,7 @@ export default function CourseChapterPage() {
                     }
                     if (block.type === "code") {
                       return (
-                        <div key={idx} className="my-4">
+                        <div key={idx} className="my-5">
                           <CodeSnippetViewer
                             code={block.code}
                             title={block.title}
@@ -434,7 +520,7 @@ export default function CourseChapterPage() {
                       return (
                         <div
                           key={idx}
-                          className="my-5 rounded-3xl overflow-hidden shadow-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
+                          className="my-6 rounded-3xl overflow-hidden shadow-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
                         >
                           <img
                             src={block.url}
@@ -446,6 +532,43 @@ export default function CourseChapterPage() {
                               {block.alt}
                             </p>
                           )}
+                        </div>
+                      );
+                    }
+                    if (block.type === "text") {
+                      return (
+                        <p key={idx} className="mb-4 text-zinc-600 dark:text-zinc-400">
+                          {renderInlineFormatting(block.text)}
+                        </p>
+                      );
+                    }
+                    if (block.type === "table") {
+                      const rows = block.text.split("\n").map(r => r.trim()).filter(r => r && r.startsWith("|"));
+                      if (rows.length < 3) return null; // Needs header, separator, and at least one body row
+                      const headers = rows[0].split("|").slice(1, -1).map(h => h.trim());
+                      // Ignore the separator row (rows[1])
+                      const bodyRows = rows.slice(2).map(r => r.split("|").slice(1, -1).map(c => c.trim()));
+                      
+                      return (
+                        <div key={idx} className="overflow-x-auto my-6 border border-zinc-200 dark:border-zinc-800 rounded-2xl">
+                          <table className="w-full text-left border-collapse min-w-max">
+                            <thead>
+                              <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50">
+                                {headers.map((h, i) => (
+                                  <th key={i} className="px-5 py-4 text-sm font-bold text-foreground">{renderInlineFormatting(h)}</th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 bg-white dark:bg-zinc-950/50">
+                              {bodyRows.map((row, i) => (
+                                <tr key={i} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
+                                  {row.map((cell, j) => (
+                                    <td key={j} className="px-5 py-3.5 text-sm text-zinc-600 dark:text-zinc-300">{renderInlineFormatting(cell)}</td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
                         </div>
                       );
                     }
@@ -483,8 +606,8 @@ export default function CourseChapterPage() {
 
             {/* Try It Challenge */}
             {chapter?.tryItChallenge && (
-              <div className="p-6 rounded-[2.5rem] bg-linear-to-br from-indigo-500/10 via-purple-500/10 to-blue-500/10 shadow-sm space-y-3">
-                <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-black text-sm">
+              <div className="p-6 sm:p-8 rounded-[2.5rem] bg-linear-to-br from-indigo-500/10 via-purple-500/10 to-blue-500/10 shadow-sm border border-indigo-500/20 space-y-3">
+                <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-black text-sm sm:text-base">
                   <Play className="w-4 h-4 fill-current" />
                   <span>Try It Yourself Challenge</span>
                 </div>
@@ -495,11 +618,11 @@ export default function CourseChapterPage() {
             )}
 
             {/* Bottom Prev / Next Navigation */}
-            <div className="flex items-center justify-between p-5 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-sm text-xs font-bold">
+            <div className="flex items-center justify-between p-5 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-sm border border-zinc-200/60 dark:border-zinc-800/60 text-xs font-bold">
               {prevChapter ? (
                 <Link
                   href={`/courses/${courseId}/${prevChapter.slug}`}
-                  className="flex items-center gap-2 px-5 py-3 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 transition-all active:scale-95"
+                  className="flex items-center gap-2 px-5 py-3 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all active:scale-95"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   <span>Previous Lesson</span>
@@ -569,7 +692,7 @@ export default function CourseChapterPage() {
         </div>
       )}
 
-      <Footer />
+      <Footer containerWidth="max-w-7xl" />
     </div>
   );
 }

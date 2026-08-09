@@ -50,11 +50,13 @@ export default function BookmarksPage() {
           </div>
 
           {savedCards.length > 0 ? (
-            <div className="grid grid-cols-1 gap-3.5">
-              {savedCards.map((card) => (
+            <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/80">
+              {savedCards.map((card, idx) => (
                 <div
                   key={card.id}
-                  className="p-5 rounded-4xl bg-white dark:bg-zinc-900/90 shadow-sm space-y-2.5"
+                  className={`p-5 space-y-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors ${
+                    idx === 0 ? "rounded-t-[2.5rem]" : ""
+                  } ${idx === savedCards.length - 1 ? "rounded-b-[2.5rem]" : ""}`}
                 >
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-extrabold text-blue-600 dark:text-blue-400">
@@ -62,7 +64,7 @@ export default function BookmarksPage() {
                     </span>
                     <button
                       onClick={() => removeCard(card.id)}
-                      className="p-1.5 rounded-full text-zinc-400 hover:text-red-500 transition-colors"
+                      className="p-1.5 rounded-full text-zinc-400 hover:text-red-500 transition-colors cursor-pointer"
                       title="Remove from saved"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -83,7 +85,7 @@ export default function BookmarksPage() {
               ))}
             </div>
           ) : (
-            <div className="p-8 text-center rounded-4xl bg-white dark:bg-zinc-900/90 text-xs text-zinc-400 font-medium shadow-sm">
+            <div className="p-8 text-center rounded-[2.5rem] bg-white dark:bg-zinc-900/90 text-xs text-zinc-400 font-medium shadow-sm border border-zinc-200/80 dark:border-zinc-800/80">
               No saved flashcards yet. Tap the bookmark icon while revising
               cards to save them here!
             </div>
@@ -100,11 +102,13 @@ export default function BookmarksPage() {
           </div>
 
           {savedTutorials.length > 0 ? (
-            <div className="grid grid-cols-1 gap-3.5">
-              {savedTutorials.map((t) => (
+            <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/80">
+              {savedTutorials.map((t, idx) => (
                 <div
                   key={t.id}
-                  className="p-5 rounded-4xl bg-white dark:bg-zinc-900/90 shadow-sm flex flex-col gap-2"
+                  className={`p-5 flex flex-col gap-2 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors ${
+                    idx === 0 ? "rounded-t-[2.5rem]" : ""
+                  } ${idx === savedTutorials.length - 1 ? "rounded-b-[2.5rem]" : ""}`}
                 >
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-bold px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
@@ -112,7 +116,7 @@ export default function BookmarksPage() {
                     </span>
                     <button
                       onClick={() => removeTutorial(t.id)}
-                      className="p-1.5 rounded-full text-zinc-400 hover:text-red-500 transition-colors"
+                      className="p-1.5 rounded-full text-zinc-400 hover:text-red-500 transition-colors cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -129,7 +133,7 @@ export default function BookmarksPage() {
               ))}
             </div>
           ) : (
-            <div className="p-8 text-center rounded-4xl bg-white dark:bg-zinc-900/90 text-xs text-zinc-400 font-medium shadow-sm">
+            <div className="p-8 text-center rounded-[2.5rem] bg-white dark:bg-zinc-900/90 text-xs text-zinc-400 font-medium shadow-sm border border-zinc-200/80 dark:border-zinc-800/80">
               No saved tutorials yet.
             </div>
           )}
