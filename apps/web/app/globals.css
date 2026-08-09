@@ -1,0 +1,298 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-background: var(--site-bg);
+  --color-foreground: var(--site-fg);
+}
+
+:root {
+  --site-bg: #f9faf7;
+  --site-fg: #1a1c18;
+  --accent: #5d6b33;
+  --card-bg: #ffffff;
+  --radius-xl: 2rem;
+  --radius-lg: 1.25rem;
+  --font-outfit: "Outfit", sans-serif;
+  --font-inter: "Inter", sans-serif;
+
+  /* Material 3 Sage Dynamic Palette */
+  --m3-primary: #5d6b33;
+  --m3-on-primary: #ffffff;
+  --m3-primary-container: #dfeba8;
+  --m3-on-primary-container: #191e00;
+  --m3-surface: #f9faf7;
+  --m3-surface-card: #ffffff;
+  --m3-surface-low: #f1f2ee;
+  --m3-surface-high: #e5e6e2;
+  --m3-border: #e2e3dd;
+}
+
+.dark {
+  --site-bg: #121411;
+  --site-fg: #e2e3dd;
+  --accent: #c2d08a;
+  --card-bg: #1a1c18;
+
+  /* Material 3 Dark Sage Palette */
+  --m3-primary: #c2d08a;
+  --m3-on-primary: #2d340e;
+  --m3-primary-container: #434c1f;
+  --m3-on-primary-container: #dfeba8;
+  --m3-surface: #121411;
+  --m3-surface-card: #1a1c18;
+  --m3-surface-low: #1d1e1b;
+  --m3-surface-high: #272825;
+  --m3-border: #2f312c;
+}
+
+body {
+  background-color: var(--site-bg);
+  color: var(--site-fg);
+  font-family: var(--font-inter);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Material 3 Tactile Spring Press */
+.android-haptic {
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s ease, border-color 0.2s ease;
+}
+.android-haptic:active {
+  transform: scale(0.97);
+}
+
+/* Material 3 Clean Squircle Tile */
+.android-tile {
+  border-radius: 2rem;
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.android-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px -8px rgba(37, 99, 235, 0.08);
+}
+.dark .android-tile:hover {
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.5);
+}
+
+/* Hide scrollbar on mobile devices for a cleaner app-like feel */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (max-width: 768px) {
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  *::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.font-outfit {
+  font-family: var(--font-outfit);
+}
+
+::selection {
+  background: #18181b;
+  color: #ffffff;
+}
+
+/* Safely override fixed inline styles from pastes without breaking special components */
+.ql-editor [style*="background-color"], 
+.prose [style*="background-color"] {
+  background-color: transparent !important;
+}
+
+.ql-editor [style*="color"], 
+.prose [style*="color"] {
+  color: inherit !important;
+}
+
+/* Maintain distinct link colors */
+.ql-editor a, .prose a {
+  color: #3b82f6 !important;
+  text-decoration: underline;
+}
+
+
+.ql-align-center {
+  text-align: center;
+}
+
+.ql-align-right {
+  text-align: right;
+}
+
+.ql-align-justify {
+  text-align: justify;
+}
+
+.ql-video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 1.5rem;
+  margin: 2rem 0;
+}
+
+/* Prose refinements for Quill output */
+.prose .ql-video {
+  margin: 3rem 0;
+}
+
+.prose blockquote {
+  font-style: italic;
+  border-left-width: 4px;
+  padding-left: 2rem;
+}
+
+/* ─── List Styles for Quill ─── */
+.ql-editor ul, .ql-editor ol {
+  padding-left: 1.5em !important;
+  margin-bottom: 1.5rem !important;
+  list-style-position: outside !important;
+}
+
+.ql-editor ul {
+  list-style-type: disc !important;
+}
+
+.ql-editor ol {
+  list-style-type: decimal !important;
+}
+
+.ql-editor li {
+  margin-bottom: 0.75rem !important;
+  display: list-item !important;
+  padding-left: 0.5em !important;
+}
+
+/* Nested Lists */
+.ql-editor li > ul, .ql-editor li > ol {
+  margin-top: 0.75rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.ql-editor ul ul { list-style-type: circle !important; }
+.ql-editor ul ul ul { list-style-type: square !important; }
+
+/* Indent support */
+.ql-indent-1 { padding-left: 3em !important; }
+.ql-indent-2 { padding-left: 4.5em !important; }
+.ql-indent-3 { padding-left: 6em !important; }
+.ql-indent-4 { padding-left: 7.5em !important; }
+.ql-indent-5 { padding-left: 9em !important; }
+.ql-indent-6 { padding-left: 10.5em !important; }
+.ql-indent-7 { padding-left: 12em !important; }
+.ql-indent-8 { padding-left: 13.5em !important; }/* ─── Code Snippets for Quill (Syntax Highlighted) ─── */
+pre.ql-syntax {
+  background-color: #1a1b26 !important; /* Premium deep blue-black */
+  color: #a9b1d6; /* Removed !important to allow hljs classes to work */
+  border-radius: 1.5rem !important;
+  padding: 2.5rem 2rem 2rem !important;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Roboto Mono', monospace !important;
+  font-size: 0.95rem !important;
+  line-height: 1.7 !important;
+  margin: 3rem 0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  position: relative;
+  tab-size: 2;
+}
+
+/* Stylish "Code" indicator label */
+pre.ql-syntax::before {
+  content: 'SIGNAL CODE';
+  position: absolute;
+  top: 0.75rem;
+  left: 2rem;
+  font-family: var(--font-outfit);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.2);
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* Scrollbar styling for code blocks */
+pre.ql-syntax::-webkit-scrollbar {
+  height: 8px;
+}
+
+pre.ql-syntax::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+pre.ql-syntax::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+pre.ql-syntax::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark pre.ql-syntax {
+  background-color: #0b0e14 !important; /* Extremely dark for dark mode depth */
+  border-color: rgba(255,255,255,0.03) !important;
+}
+
+/* Fallback for standard pre tags within articles */
+.prose pre, .ql-editor pre, pre.hljs, .wmde-markdown pre {
+  background-color: #1a1b26 !important;
+  color: #a9b1d6 !important;
+  padding: 2rem !important;
+  border-radius: 1.5rem !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  padding: 2rem !important;
+  border-radius: 1.5rem !important;
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  margin: 2.5rem 0 !important;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+  font-size: 0.9rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Maximized state for code blocks */
+pre.code-block-maximized {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  z-index: 9999 !important;
+  border-radius: 0 !important;
+  padding: 5rem 2rem 2rem !important;
+  overflow-y: auto !important;
+  white-space: pre-wrap !important;
+}
+
+body.has-maximized-code {
+  overflow: hidden !important;
+}
+
+/* Ensure code tags inside don't have their own background */
+.prose pre code, .ql-editor pre code, .wmde-markdown pre code {
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+.dark .prose pre, .dark .ql-editor pre, .dark pre.hljs, .dark .wmde-markdown pre {
+  background-color: #0b0e14 !important;
+}
+
