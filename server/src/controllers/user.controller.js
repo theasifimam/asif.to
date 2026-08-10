@@ -58,7 +58,7 @@ export const getPublicProfile = async (req, res) => {
   try {
     const { username } = req.params;
     const user = await User.findOne({ username }).
-    select("-password -email -role -status -isVerified -lastLogin -updatedAt -__v");
+    select("-password -role -status -isVerified -lastLogin -updatedAt -__v");
     if (!user) {
       res.status(404).json({ success: false, message: "User not found." });
       return;

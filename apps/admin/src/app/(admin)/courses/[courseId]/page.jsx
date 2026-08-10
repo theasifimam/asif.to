@@ -6,19 +6,22 @@ import Link from "next/link";
 import { coursesApi, chaptersApi } from "@/lib/api";
 import Editor from "@/components/Editor";
 import {
-  ArrowLeft, Plus, Pencil, Trash2, Loader2,
-  CheckCircle, XCircle, BookOpen, Clock, Save, X, Sparkles
+  ArrowLeft,
+  Plus,
+  Pencil,
+  Trash2,
+  Loader2,
+  CheckCircle,
+  XCircle,
+  BookOpen,
+  Clock,
+  Save,
+  X,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
-const DEFAULT_CHAPTER_FORM = {
-  title: "",
-  summary: "",
-  contentBody: "",
-  tryItChallenge: "",
-  order: 0,
-  status: "published",
-};
+
 
 export default function CourseEditorPage() {
   const { courseId } = useParams();
@@ -29,9 +32,7 @@ export default function CourseEditorPage() {
   const [loading, setLoading] = useState(true);
   const [editCourse, setEditCourse] = useState(false);
   const [courseForm, setCourseForm] = useState({});
-  const [showChapterModal, setShowChapterModal] = useState(false);
-  const [editingChapterId, setEditingChapterId] = useState(null);
-  const [chapterForm, setChapterForm] = useState(DEFAULT_CHAPTER_FORM);
+
   const [saving, setSaving] = useState(false);
   const [deletingChapter, setDeletingChapter] = useState(null);
 
@@ -81,66 +82,7 @@ export default function CourseEditorPage() {
     setSaving(false);
   };
 
-  const openAddChapter = () => {
-    setEditingChapterId(null);
-    setChapterForm(DEFAULT_CHAPTER_FORM);
-    setShowChapterModal(true);
-  };
 
-  const openEditChapter = (ch) => {
-    setEditingChapterId(ch._id);
-    
-    // Combine array content or codeSnippets into one unified markdown string for the Editor
-    let combinedContent = Array.isArray(ch.content) ? ch.content.join("\n\n") : (ch.content || "");
-    if (Array.isArray(ch.codeSnippets) && ch.codeSnippets.length > 0) {
-      const snippetsMd = ch.codeSnippets.map((s) => `\`\`\`${s.language || "javascript"}\n// ${s.title || "Code Snippet"}\n${s.code}\n\`\`\``).join("\n\n");
-      if (snippetsMd && !combinedContent.includes(ch.codeSnippets[0]?.code)) {
-        combinedContent += "\n\n" + snippetsMd;
-      }
-    } else if (ch.codeSnippet && !combinedContent.includes(ch.codeSnippet)) {
-      combinedContent += `\n\n\`\`\`${ch.language || "javascript"}\n${ch.codeSnippet}\n\`\`\``;
-    }
-
-    setChapterForm({
-      title: ch.title || "",
-      summary: ch.summary || "",
-      contentBody: combinedContent,
-      tryItChallenge: ch.tryItChallenge || "",
-      order: ch.order ?? 0,
-      status: ch.status || "published",
-    });
-    setShowChapterModal(true);
-  };
-
-  const handleSaveChapter = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    
-    // Store content body directly as single content string/array
-    const data = {
-      title: chapterForm.title,
-      summary: chapterForm.summary,
-      content: [chapterForm.contentBody],
-      tryItChallenge: chapterForm.tryItChallenge,
-      order: chapterForm.order,
-      status: chapterForm.status,
-    };
-
-    const res = editingChapterId
-      ? await chaptersApi.update(editingChapterId, data)
-      : await chaptersApi.create(courseId, data);
-
-    if (res.success) {
-      toast.success(editingChapterId ? "Chapter updated!" : "Chapter created!");
-      setShowChapterModal(false);
-      setEditingChapterId(null);
-      setChapterForm(DEFAULT_CHAPTER_FORM);
-      load();
-    } else {
-      toast.error(res.error || "Failed to save chapter");
-    }
-    setSaving(false);
-  };
 
   const handleDeleteChapter = async (id) => {
     if (!confirm("Delete this chapter? This cannot be undone.")) return;
@@ -160,7 +102,7 @@ export default function CourseEditorPage() {
     const res = await chaptersApi.update(ch._id, { status: newStatus });
     if (res.success) {
       setChapters((prev) =>
-        prev.map((c) => (c._id === ch._id ? { ...c, status: newStatus } : c))
+        prev.map((c) => (c._id === ch._id ? { ...c, status: newStatus } : c)),
       );
       toast.success(`Chapter ${newStatus}`);
     }
@@ -185,7 +127,9 @@ export default function CourseEditorPage() {
           <ArrowLeft className="w-4 h-4" />
         </Link>
         <div>
-          <h1 className="text-xl font-black text-foreground">{course?.title}</h1>
+          <h1 className="text-xl font-black text-foreground">
+            {course?.title}
+          </h1>
           <p className="text-xs text-muted-foreground">
             {course?.techId} · {course?.level} · {course?.duration}
           </p>
@@ -202,45 +146,65 @@ export default function CourseEditorPage() {
             onClick={() => setEditCourse(!editCourse)}
             className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
           >
-            {editCourse ? <X className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
+            {editCourse ? (
+              <X className="w-4 h-4" />
+            ) : (
+              <Pencil className="w-4 h-4" />
+            )}
           </button>
         </div>
 
         {editCourse ? (
           <form onSubmit={handleSaveCourse} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground">Title</label>
+              <label className="text-xs font-bold text-muted-foreground">
+                Title
+              </label>
               <input
                 required
                 className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none focus:ring-2 focus:ring-blue-500"
                 value={courseForm.title || ""}
-                onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
+                onChange={(e) =>
+                  setCourseForm({ ...courseForm, title: e.target.value })
+                }
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground">Subtitle</label>
+              <label className="text-xs font-bold text-muted-foreground">
+                Subtitle
+              </label>
               <textarea
                 rows={2}
                 className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none resize-none"
                 value={courseForm.subtitle || ""}
-                onChange={(e) => setCourseForm({ ...courseForm, subtitle: e.target.value })}
+                onChange={(e) =>
+                  setCourseForm({ ...courseForm, subtitle: e.target.value })
+                }
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-muted-foreground">Duration</label>
+                <label className="text-xs font-bold text-muted-foreground">
+                  Duration
+                </label>
                 <input
                   className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none"
                   value={courseForm.duration || ""}
-                  onChange={(e) => setCourseForm({ ...courseForm, duration: e.target.value })}
+                  onChange={(e) =>
+                    setCourseForm({ ...courseForm, duration: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold text-muted-foreground">Status</label>
+                <label className="text-xs font-bold text-muted-foreground">
+                  Status
+                </label>
                 <select
                   className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none"
                   value={courseForm.status}
-                  onChange={(e) => setCourseForm({ ...courseForm, status: e.target.value })}
+                  onChange={(e) =>
+                    setCourseForm({ ...courseForm, status: e.target.value })
+                  }
                 >
                   <option value="published">Published</option>
                   <option value="draft">Draft</option>
@@ -255,7 +219,12 @@ export default function CourseEditorPage() {
                 rows={4}
                 className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none resize-none"
                 value={courseForm.learningOutcomes || ""}
-                onChange={(e) => setCourseForm({ ...courseForm, learningOutcomes: e.target.value })}
+                onChange={(e) =>
+                  setCourseForm({
+                    ...courseForm,
+                    learningOutcomes: e.target.value,
+                  })
+                }
                 placeholder="Write JSX and build reusable components&#10;Manage state with useState..."
               />
             </div>
@@ -265,7 +234,11 @@ export default function CourseEditorPage() {
                 disabled={saving}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition-all"
               >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                {saving ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
                 Save Changes
               </button>
               <button
@@ -287,7 +260,9 @@ export default function CourseEditorPage() {
               </span>
               <span
                 className={`font-bold ${
-                  course?.status === "published" ? "text-emerald-600" : "text-amber-500"
+                  course?.status === "published"
+                    ? "text-emerald-600"
+                    : "text-amber-500"
                 }`}
               >
                 {course?.status}
@@ -304,13 +279,13 @@ export default function CourseEditorPage() {
             <BookOpen className="w-5 h-5 text-blue-500" />
             Chapters ({chapters.length})
           </h2>
-          <button
-            onClick={openAddChapter}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20"
+          <Link
+            href={`/courses/${courseId}/chapters/new`}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-all shadow-sm shadow-blue-500/25"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-4 h-4" />
             Add Chapter
-          </button>
+          </Link>
         </div>
 
         {chapters.length === 0 ? (
@@ -331,15 +306,21 @@ export default function CourseEditorPage() {
                     {idx + 1}
                   </span>
                   <div>
-                    <p className="text-sm font-bold text-foreground line-clamp-1">{ch.title}</p>
-                    <p className="text-xs text-muted-foreground line-clamp-1">{ch.summary}</p>
+                    <p className="text-sm font-bold text-foreground line-clamp-1">
+                      {ch.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground line-clamp-1">
+                      {ch.summary}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => handleToggleChapterStatus(ch)}
                     className={`text-xs font-bold ${
-                      ch.status === "published" ? "text-emerald-600" : "text-amber-500"
+                      ch.status === "published"
+                        ? "text-emerald-600"
+                        : "text-amber-500"
                     }`}
                   >
                     {ch.status === "published" ? (
@@ -348,12 +329,12 @@ export default function CourseEditorPage() {
                       <XCircle className="w-4 h-4" />
                     )}
                   </button>
-                  <button
-                    onClick={() => openEditChapter(ch)}
-                    className="p-2 rounded-full hover:bg-blue-50 dark:hover:bg-blue-950/30 text-blue-500 transition-colors"
+                  <Link
+                    href={`/courses/${courseId}/chapters/${ch._id}`}
+                    className="p-2 rounded-full hover:bg-blue-50 dark:hover:bg-blue-950/30 text-blue-500 transition-colors inline-flex items-center justify-center"
                   >
                     <Pencil className="w-4 h-4" />
-                  </button>
+                  </Link>
                   <button
                     onClick={() => handleDeleteChapter(ch._id)}
                     disabled={deletingChapter === ch._id}
@@ -372,140 +353,7 @@ export default function CourseEditorPage() {
         )}
       </div>
 
-      {/* Add / Edit Chapter Modal with FULL RICH TEXT EDITOR */}
-      {showChapterModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto">
-          <div className="w-full max-w-4xl bg-white dark:bg-zinc-900 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 my-8">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-black text-foreground">
-                {editingChapterId ? "Edit Chapter" : "Add New Chapter"}
-              </h2>
-              <button
-                onClick={() => setShowChapterModal(false)}
-                className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-800"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
 
-            <form onSubmit={handleSaveChapter} className="space-y-6">
-              {/* Title */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  Chapter Title *
-                </label>
-                <input
-                  required
-                  className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none focus:ring-2 focus:ring-blue-500"
-                  value={chapterForm.title}
-                  onChange={(e) => setChapterForm({ ...chapterForm, title: e.target.value })}
-                  placeholder="e.g. 1. Introduction to React Hooks"
-                />
-              </div>
-
-              {/* Summary */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  Summary *
-                </label>
-                <textarea
-                  required
-                  rows={2}
-                  className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none resize-none"
-                  value={chapterForm.summary}
-                  onChange={(e) => setChapterForm({ ...chapterForm, summary: e.target.value })}
-                  placeholder="One-sentence overview of this chapter..."
-                />
-              </div>
-
-              {/* Unified Full Rich Text & Markdown Editor */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-between">
-                  <span>Chapter Content & Code Editor *</span>
-                  <span className="text-[11px] text-blue-500 font-normal">Live Visual & Markdown Editor with Toolbar Buttons</span>
-                </label>
-                
-                <Editor
-                  value={chapterForm.contentBody}
-                  onChange={(val) => setChapterForm({ ...chapterForm, contentBody: val })}
-                  placeholder="Write your full chapter tutorial here. Use toolbar for H1, H2, Bold, Images, Code blocks..."
-                />
-              </div>
-
-              {/* Try It Challenge */}
-              <div className="space-y-2 pt-2">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  Try It Yourself Challenge
-                </label>
-                <textarea
-                  rows={2}
-                  className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none resize-none"
-                  value={chapterForm.tryItChallenge}
-                  onChange={(e) =>
-                    setChapterForm({ ...chapterForm, tryItChallenge: e.target.value })
-                  }
-                  placeholder="e.g. Build a component that toggles between light and dark mode..."
-                />
-              </div>
-
-              {/* Status & Order */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                    Status
-                  </label>
-                  <select
-                    className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none"
-                    value={chapterForm.status}
-                    onChange={(e) =>
-                      setChapterForm({ ...chapterForm, status: e.target.value })
-                    }
-                  >
-                    <option value="published">Published</option>
-                    <option value="draft">Draft</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                    Display Order
-                  </label>
-                  <input
-                    type="number"
-                    className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none"
-                    value={chapterForm.order}
-                    onChange={(e) =>
-                      setChapterForm({ ...chapterForm, order: Number(e.target.value) })
-                    }
-                  />
-                </div>
-              </div>
-
-              {/* Buttons */}
-              <div className="flex gap-3 pt-3">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex items-center gap-2 flex-1 justify-center py-3 rounded-full bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-500/25"
-                >
-                  {saving ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4" />
-                  )}
-                  {editingChapterId ? "Save Chapter Changes" : "Create Chapter"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowChapterModal(false)}
-                  className="flex-1 py-3 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground text-sm font-bold hover:bg-zinc-200 transition-all"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

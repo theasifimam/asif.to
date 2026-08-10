@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -14,6 +13,9 @@ import {
   Newspaper,
   Loader2,
   UserCheck,
+  Mail,
+  Github,
+  Instagram,
 } from "lucide-react";
 import Link from "next/link";
 import { getImageUrl } from "@/lib/config";
@@ -108,14 +110,25 @@ export default function AuthorClient({ username }) {
               </h1>
 
               <div className="flex flex-wrap items-center gap-4 text-zinc-400 text-xs font-bold uppercase tracking-wider mt-1">
+                {user.email && (
+                  <span className="flex items-center gap-1.5 lowercase text-zinc-600 dark:text-zinc-300 font-semibold">
+                    <Mail size={14} className="text-blue-500 shrink-0" />
+                    <a
+                      href={`mailto:${user.email}`}
+                      className="hover:underline"
+                    >
+                      {user.email}
+                    </a>
+                  </span>
+                )}
                 {user.location && (
                   <span className="flex items-center gap-1.5">
-                    <MapPin size={14} className="text-emerald-500" />{" "}
+                    <MapPin size={14} className="text-emerald-500 shrink-0" />{" "}
                     {user.location}
                   </span>
                 )}
                 <span className="flex items-center gap-1.5">
-                  <Calendar size={14} /> Joined{" "}
+                  <Calendar size={14} className="shrink-0" /> Joined{" "}
                   {user.createdAt
                     ? new Date(user.createdAt).toLocaleDateString("en-US", {
                         month: "short",
@@ -133,7 +146,7 @@ export default function AuthorClient({ username }) {
 
               {user.socials &&
                 Object.values(user.socials).some((link) => link) && (
-                  <div className="flex items-center gap-3 mt-4">
+                  <div className="flex flex-wrap items-center gap-3 mt-4">
                     {user.socials.twitter && (
                       <a
                         href={
@@ -144,6 +157,7 @@ export default function AuthorClient({ username }) {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-2.5 rounded-full border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-400 transition-all"
+                        title="Twitter / X"
                       >
                         <Twitter size={15} />
                       </a>
@@ -158,6 +172,7 @@ export default function AuthorClient({ username }) {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-2.5 rounded-full border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-400 transition-all"
+                        title="LinkedIn"
                       >
                         <Linkedin size={15} />
                       </a>
@@ -172,8 +187,39 @@ export default function AuthorClient({ username }) {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-2.5 rounded-full border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-400 transition-all"
+                        title="Website"
                       >
                         <Globe size={15} />
+                      </a>
+                    )}
+                    {user.socials.github && (
+                      <a
+                        href={
+                          user.socials.github.startsWith("http")
+                            ? user.socials.github
+                            : `https://github.com/${user.socials.github}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2.5 rounded-full border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-400 transition-all"
+                        title="GitHub"
+                      >
+                        <Github size={15} />
+                      </a>
+                    )}
+                    {user.socials.instagram && (
+                      <a
+                        href={
+                          user.socials.instagram.startsWith("http")
+                            ? user.socials.instagram
+                            : `https://instagram.com/${user.socials.instagram}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2.5 rounded-full border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-400 transition-all"
+                        title="Instagram"
+                      >
+                        <Instagram size={15} />
                       </a>
                     )}
                   </div>

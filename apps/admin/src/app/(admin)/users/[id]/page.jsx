@@ -20,6 +20,12 @@ import {
   ArrowRight,
   Settings,
   Edit3,
+  Phone,
+  Twitter,
+  Linkedin,
+  Github,
+  Instagram,
+  Lock,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -111,6 +117,8 @@ export default function UserProfilePage() {
   const router = useRouter();
   const { user: currentUser, checkUser } = useAuth();
 
+  const isOwnProfile = currentUser?._id === id;
+
   // RTK Query hooks
   const {
     data: userResponse,
@@ -125,7 +133,6 @@ export default function UserProfilePage() {
   const [resetPassword, { isLoading: resetLoading }] =
     useResetUserPasswordMutation();
 
-  // Still using axios for articles for now, or could create articleApi
   const [recentArticles, setRecentArticles] = useState([]);
   const [stats, setStats] = useState({
     articles: 0,
@@ -136,13 +143,13 @@ export default function UserProfilePage() {
 
   const user = userResponse?.data?.user;
 
-  // Modal visible states
+  // Modal states
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isPwOpen, setIsPwOpen] = useState(false);
-
   const [confirmAction, setConfirmAction] = useState(null);
 
   const fetchArticles = useCallback(async () => {
+    if (!id) return;
     setArticlesLoading(true);
     try {
       const [articlesRes, draftsRes] = await Promise.all([
@@ -180,20 +187,35 @@ export default function UserProfilePage() {
     try {
       const { type, data } = confirmAction;
       if (type === "suspend") {
+        if (isOwnProfile) {
+          toast.error("You cannot suspend your own account.");
+          setConfirmAction(null);
+          return;
+        }
         const newStatus = user.status === "active" ? "suspended" : "active";
         await updateStatus({ id, status: newStatus }).unwrap();
         toast.success(`User state updated to ${newStatus}`);
       } else if (type === "delete") {
+        if (isOwnProfile) {
+          toast.error("You cannot delete your own account.");
+          setConfirmAction(null);
+          return;
+        }
         await deleteUser(id).unwrap();
         toast.success("User record purged");
         router.push("/users");
         return;
       } else if (type === "role") {
+        if (isOwnProfile) {
+          toast.error("You cannot modify your own role clearance.");
+          setConfirmAction(null);
+          return;
+        }
         await updateRole({ id, role: data.role }).unwrap();
         toast.success(`Access level updated to ${data.role}`);
       }
 
-      if (currentUser?._id === id) await checkUser();
+      if (isOwnProfile) await checkUser();
       setConfirmAction(null);
     } catch (err) {
       toast.error(err.data?.message || "Action failed");
@@ -205,7 +227,7 @@ export default function UserProfilePage() {
       await updateUser({ id, formData }).unwrap();
       toast.success("Profile records synchronized");
       setIsEditOpen(false);
-      if (currentUser?._id === id) await checkUser();
+      if (isOwnProfile) await checkUser();
     } catch (err) {
       toast.error(err.data?.message || "Sync failed");
     }
@@ -239,6 +261,7 @@ export default function UserProfilePage() {
   };
 
   if (loading) return <LoadingSkeleton />;
+  if (!user) return <UserNotFound router={router} />;
 
   const roleConf = ROLE_CONFIG[user.role] || ROLE_CONFIG.reader;
   const statusConf = STATUS_CONFIG[user.status] || STATUS_CONFIG.active;
@@ -254,7 +277,7 @@ export default function UserProfilePage() {
       animate={{ opacity: 1 }}
       className="min-h-screen bg-[#fafafa] dark:bg-black text-zinc-900 dark:text-zinc-400 font-sans selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black"
     >
-      {/* Minimal Top Nav */}
+      {/* Top Nav */}
       <div className="sticky top-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-zinc-100 dark:border-zinc-900 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Button
@@ -266,10 +289,16 @@ export default function UserProfilePage() {
               size={18}
               className="transition-transform group-hover:-translate-x-1"
             />
-            <span>Users</span>
+            <span>All Personnel</span>
           </Button>
 
           <div className="flex items-center gap-4">
+            {isOwnProfile && (
+              <span className="bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-emerald-500/20">
+                Your Profile
+              </span>
+            )}
+
             <div
               className={`flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-100 dark:border-zinc-800 ${statusConf.bg}`}
             >
@@ -285,7 +314,7 @@ export default function UserProfilePage() {
               className="h-9 px-6 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all shadow-xl shadow-zinc-900/10 dark:shadow-none"
             >
               <Edit3 size={14} />
-              Edit Profile
+              {isOwnProfile ? "Edit My Profile" : "Edit Profile"}
             </Button>
           </div>
         </div>
@@ -319,6 +348,11 @@ export default function UserProfilePage() {
               <div className="flex items-center gap-2 font-bold">
                 <Mail size={16} /> {user.email}
               </div>
+              {user.mNumber && (
+                <div className="flex items-center gap-2 font-bold text-zinc-600 dark:text-zinc-400">
+                  <Phone size={16} /> {user.mNumber}
+                </div>
+              )}
               <div className="flex items-center gap-2 uppercase text-[10px] tracking-widest">
                 <MapPin size={16} /> {user.location || "Remote Node"}
               </div>
@@ -327,6 +361,67 @@ export default function UserProfilePage() {
                 <span className="opacity-60">@{user.username}</span>
               </div>
             </div>
+
+            {/* Social Links Row */}
+            {user.socials && Object.values(user.socials).some((link) => link) && (
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
+                {user.socials.twitter && (
+                  <a
+                    href={user.socials.twitter.startsWith("http") ? user.socials.twitter : `https://twitter.com/${user.socials.twitter}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 transition-colors"
+                  >
+                    <Twitter size={14} className="text-sky-400" />
+                    <span>Twitter</span>
+                  </a>
+                )}
+                {user.socials.linkedin && (
+                  <a
+                    href={user.socials.linkedin.startsWith("http") ? user.socials.linkedin : `https://linkedin.com/in/${user.socials.linkedin}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 transition-colors"
+                  >
+                    <Linkedin size={14} className="text-blue-500" />
+                    <span>LinkedIn</span>
+                  </a>
+                )}
+                {user.socials.website && (
+                  <a
+                    href={user.socials.website.startsWith("http") ? user.socials.website : `https://${user.socials.website}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 transition-colors"
+                  >
+                    <Globe size={14} className="text-emerald-500" />
+                    <span>Website</span>
+                  </a>
+                )}
+                {user.socials.github && (
+                  <a
+                    href={user.socials.github.startsWith("http") ? user.socials.github : `https://github.com/${user.socials.github}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 transition-colors"
+                  >
+                    <Github size={14} />
+                    <span>GitHub</span>
+                  </a>
+                )}
+                {user.socials.instagram && (
+                  <a
+                    href={user.socials.instagram.startsWith("http") ? user.socials.instagram : `https://instagram.com/${user.socials.instagram}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 transition-colors"
+                  >
+                    <Instagram size={14} className="text-pink-500" />
+                    <span>Instagram</span>
+                  </a>
+                )}
+              </div>
+            )}
           </div>
         </header>
 
@@ -336,7 +431,6 @@ export default function UserProfilePage() {
             label="Total Articles"
             value={stats.articles}
             icon={FileText}
-            trend="+2.4%"
           />
           <StatBox label="Active Drafts" value={stats.drafts} icon={FileEdit} />
           <StatBox
@@ -348,17 +442,17 @@ export default function UserProfilePage() {
 
         {/* Content Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          {/* Left: Bio & Expertise */}
+          {/* Left: Bio & Articles */}
           <div className="lg:col-span-8 space-y-10">
             <section className="space-y-6">
-              <SectionHeader title="Biography" />
+              <SectionHeader title="Biography & Narrative" />
               <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-4xl p-10 shadow-sm relative overflow-hidden group min-h-50">
                 <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                   <UserIcon size={120} />
                 </div>
                 <p className="text-lg md:text-xl text-zinc-700 dark:text-zinc-300 leading-relaxed font-medium relative z-10">
                   {user.bio ||
-                    "No biography provided for this user. Their professional narrative remains a draft."}
+                    "No biography provided for this personnel. Professional narrative remains empty."}
                 </p>
                 {user.expertise && user.expertise.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-10 relative z-10">
@@ -377,13 +471,7 @@ export default function UserProfilePage() {
 
             <section className="space-y-6">
               <div className="flex items-center justify-between">
-                <SectionHeader title="Recent Articles" />
-                <Button
-                  variant="link"
-                  className="text-zinc-400 hover:text-zinc-900 font-bold transition-all h-auto p-0 text-[10px] uppercase tracking-widest"
-                >
-                  Browse All
-                </Button>
+                <SectionHeader title="Published Dispatches" />
               </div>
               <div className="grid grid-cols-1 gap-4">
                 {recentArticles.length > 0 ? (
@@ -413,7 +501,7 @@ export default function UserProfilePage() {
                           <span className="w-1.5 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800" />
                           <span className="flex items-center gap-1.5">
                             <Eye size={14} />{" "}
-                            {article.readCount.toLocaleString()}
+                            {(article.readCount || 0).toLocaleString()}
                           </span>
                         </div>
                       </div>
@@ -423,24 +511,25 @@ export default function UserProfilePage() {
                     </motion.div>
                   ))
                 ) : (
-                  <div className="bg-white dark:bg-zinc-900 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl py-20 text-center text-zinc-400 font-bold uppercase tracking-[0.2em] text-[11px]">
-                    User has no published articles
+                  <div className="bg-white dark:bg-zinc-900 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl py-16 text-center text-zinc-400 font-bold uppercase tracking-[0.2em] text-[11px]">
+                    No published articles found
                   </div>
                 )}
               </div>
             </section>
           </div>
 
-          {/* Right: Security & Identity Overrides */}
+          {/* Right Column: Clearance & Actions */}
           <aside className="lg:col-span-4 space-y-10">
             <section className="space-y-6">
-              <SectionHeader title="System Identity" />
+              <SectionHeader title="System Clearance" />
               <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[2rem] p-8 space-y-8 shadow-sm">
                 <div className="space-y-4">
                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                    Clearance Role
+                    Clearance Level
                   </label>
                   <Select
+                    disabled={isOwnProfile}
                     value={user.role}
                     onValueChange={(val) =>
                       setConfirmAction({
@@ -458,13 +547,16 @@ export default function UserProfilePage() {
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl border-zinc-200 dark:border-zinc-800">
                       <SelectItem value="reader">Reader Only</SelectItem>
-                      <SelectItem value="author">
-                        Contributing Author
-                      </SelectItem>
+                      <SelectItem value="author">Contributing Author</SelectItem>
                       <SelectItem value="editor">Editor-in-Chief</SelectItem>
                       <SelectItem value="admin">System Admin</SelectItem>
                     </SelectContent>
                   </Select>
+                  {isOwnProfile && (
+                    <p className="text-[10px] font-bold text-zinc-400 flex items-center gap-1 mt-1">
+                      <Lock size={12} /> You cannot change your own clearance level.
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-4">
@@ -477,23 +569,25 @@ export default function UserProfilePage() {
                     className="w-full h-14 rounded-2xl border-zinc-100 dark:border-zinc-800 gap-3 font-black uppercase tracking-widest text-[10px] hover:bg-zinc-50 dark:hover:bg-zinc-950 bg-white dark:bg-transparent shadow-sm transition-all"
                   >
                     <Key size={16} />
-                    Rotate Password Cipher
+                    {isOwnProfile ? "Change My Password" : "Rotate Password Cipher"}
                   </Button>
                 </div>
 
                 <div className="space-y-4">
                   <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                    Joined Lifecycle
+                    Account Lifecycle
                   </label>
                   <div className="p-4 rounded-2xl bg-zinc-50/50 dark:bg-zinc-950/50 border border-zinc-100 dark:border-zinc-800 space-y-3">
                     <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
-                      <span className="text-zinc-400">Registration</span>
+                      <span className="text-zinc-400">Joined</span>
                       <span className="text-zinc-600 dark:text-zinc-300">
-                        {format(new Date(user.createdAt), "MMM d, yyyy")}
+                        {user.createdAt
+                          ? format(new Date(user.createdAt), "MMM d, yyyy")
+                          : "—"}
                       </span>
                     </div>
                     <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
-                      <span className="text-zinc-400">Engagement</span>
+                      <span className="text-zinc-400">Last Login</span>
                       <span className="text-zinc-600 dark:text-zinc-300">
                         {user.lastLogin
                           ? format(new Date(user.lastLogin), "MMM d, yyyy")
@@ -505,57 +599,66 @@ export default function UserProfilePage() {
               </div>
             </section>
 
+            {/* Danger Zone */}
             <section className="space-y-6">
-              <SectionHeader title="Danger Zone" />
+              <SectionHeader title="Account Security Controls" />
               <div className="bg-rose-50/30 dark:bg-rose-950/10 border border-rose-100/50 dark:border-rose-900/20 rounded-[2rem] p-8 space-y-4">
-                <Button
-                  variant={user.status === "active" ? "destructive" : "default"}
-                  onClick={() =>
-                    setConfirmAction({
-                      type: "suspend",
-                      isOpen: true,
-                      title:
-                        user.status === "active"
-                          ? "Suspend System Access?"
-                          : "Restore System Access?",
-                      description:
-                        user.status === "active"
-                          ? "User will be blocked from all nodes."
-                          : "Re-authorizing user access.",
-                      variant:
-                        user.status === "active" ? "destructive" : "default",
-                    })
-                  }
-                  className={`w-full h-14 rounded-2xl gap-3 font-black uppercase tracking-widest text-[10px] ${user.status === "active" ? "bg-rose-500 hover:bg-rose-600 shadow-xl shadow-rose-500/20 border-none" : ""}`}
-                >
-                  {user.status === "active" ? (
-                    <>
-                      <Ban size={16} /> Suspend Operations
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 size={16} /> Activate Protocol
-                    </>
-                  )}
-                </Button>
+                {isOwnProfile ? (
+                  <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900 text-center text-xs font-bold text-zinc-500">
+                    Self-Account Protection Active. Account suspension & deletion are restricted.
+                  </div>
+                ) : (
+                  <>
+                    <Button
+                      variant={user.status === "active" ? "destructive" : "default"}
+                      onClick={() =>
+                        setConfirmAction({
+                          type: "suspend",
+                          isOpen: true,
+                          title:
+                            user.status === "active"
+                              ? "Suspend System Access?"
+                              : "Restore System Access?",
+                          description:
+                            user.status === "active"
+                              ? "User will be blocked from all nodes."
+                              : "Re-authorizing user access.",
+                          variant:
+                            user.status === "active" ? "destructive" : "default",
+                        })
+                      }
+                      className={`w-full h-14 rounded-2xl gap-3 font-black uppercase tracking-widest text-[10px] ${user.status === "active" ? "bg-rose-500 hover:bg-rose-600 shadow-xl shadow-rose-500/20 border-none" : ""}`}
+                    >
+                      {user.status === "active" ? (
+                        <>
+                          <Ban size={16} /> Suspend Operations
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 size={16} /> Activate Protocol
+                        </>
+                      )}
+                    </Button>
 
-                <Button
-                  variant="ghost"
-                  onClick={() =>
-                    setConfirmAction({
-                      type: "delete",
-                      isOpen: true,
-                      title: "Delete User Permanently?",
-                      description:
-                        "This will purge all user metadata. There is no recovery sequence.",
-                      variant: "destructive",
-                    })
-                  }
-                  className="w-full h-14 rounded-2xl gap-3 font-black uppercase tracking-widest text-[10px] text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20"
-                >
-                  <Trash2 size={16} />
-                  Purge Data Record
-                </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() =>
+                        setConfirmAction({
+                          type: "delete",
+                          isOpen: true,
+                          title: "Delete User Permanently?",
+                          description:
+                            "This will purge all user metadata. There is no recovery sequence.",
+                          variant: "destructive",
+                        })
+                      }
+                      className="w-full h-14 rounded-2xl gap-3 font-black uppercase tracking-widest text-[10px] text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20"
+                    >
+                      <Trash2 size={16} />
+                      Purge Data Record
+                    </Button>
+                  </>
+                )}
               </div>
             </section>
           </aside>
@@ -608,7 +711,7 @@ function SectionHeader({ title }) {
   );
 }
 
-function StatBox({ label, value, icon: Icon, trend }) {
+function StatBox({ label, value, icon: Icon }) {
   return (
     <div className="relative bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[2rem] p-8 shadow-sm group hover:border-zinc-300 dark:hover:border-zinc-700 transition-all flex items-center justify-between overflow-hidden">
       <div className="space-y-4 flex-1">
@@ -623,11 +726,6 @@ function StatBox({ label, value, icon: Icon, trend }) {
             <span className="text-3xl font-black font-outfit dark:text-white">
               {value.toLocaleString()}
             </span>
-            {trend && (
-              <span className="text-emerald-500 text-[10px] font-black">
-                {trend}
-              </span>
-            )}
           </div>
         </div>
       </div>
@@ -657,6 +755,50 @@ function LoadingSkeleton() {
           <Skeleton className="h-32 rounded-[2rem]" />
           <Skeleton className="h-32 rounded-[2rem]" />
           <Skeleton className="h-32 rounded-[2rem]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function UserNotFound({ router }) {
+  return (
+    <div className="min-h-screen bg-[#fafafa] dark:bg-black flex flex-col items-center justify-center gap-6 p-6">
+      <div className="text-center space-y-2">
+        <h2 className="text-2xl font-black font-outfit uppercase">User Not Found</h2>
+        <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider">The requested personnel profile could not be located in the database.</p>
+      </div>
+      <Button
+        onClick={() => router.push("/users")}
+        className="px-8 h-12 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 rounded-full font-black uppercase text-xs tracking-widest"
+      >
+        Return to User Directory
+      </Button>
+    </div>
+  );
+}
+
+function ConfirmDialog({ isOpen, onClose, onConfirm, title, description, variant, loading, confirmText }) {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-[2rem] p-8 max-w-md w-full space-y-6 shadow-2xl">
+        <div className="space-y-2">
+          <h3 className="text-xl font-black font-outfit uppercase tracking-tight">{title}</h3>
+          <p className="text-xs text-zinc-500 font-medium leading-relaxed">{description}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" onClick={onClose} disabled={loading} className="flex-1 h-12 rounded-full font-black text-xs uppercase tracking-widest text-zinc-400">
+            Cancel
+          </Button>
+          <Button
+            onClick={onConfirm}
+            disabled={loading}
+            variant={variant === "destructive" ? "destructive" : "default"}
+            className="flex-1 h-12 rounded-full font-black text-xs uppercase tracking-widest"
+          >
+            {confirmText || "Confirm"}
+          </Button>
         </div>
       </div>
     </div>

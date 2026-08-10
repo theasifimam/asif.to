@@ -21,7 +21,7 @@ async function backup() {
     const collections = await db.listCollections().toArray();
     console.log('Collections found:', collections.map(c => c.name));
 
-    const backupDir = path.join(process.cwd(), 'db_backup_news_mazlis');
+    const backupDir = path.join(process.cwd(), `db_backup_${dbName}`);
     if (!fs.existsSync(backupDir)) {
       fs.mkdirSync(backupDir, { recursive: true });
     }

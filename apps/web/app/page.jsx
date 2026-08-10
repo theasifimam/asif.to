@@ -159,26 +159,32 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredCourses.map((course) => {
+              {filteredCourses.map((course, idx) => {
                 const tech = TECH_STACKS.find((t) => t.id === course.techId);
                 const firstChapterSlug =
                   course.chapters?.[0]?.slug ||
                   course.chapters?.[0]?.id ||
                   "ch-1";
-                const courseSlug = course.slug || course.id;
+                const courseSlug = course.slug || course.techId || course.id;
+                const rankNum = course.rank || idx + 1;
 
                 return (
                   <div
                     key={course._id || course.id}
-                    className="group flex flex-col justify-between p-6 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-sm hover:shadow-md transition-all duration-300"
+                    className="group relative flex flex-col justify-between p-6 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-sm hover:shadow-md transition-all duration-300"
                   >
                     <div>
                       <div className="flex items-center justify-between gap-2 text-xs mb-3">
-                        <span
-                          className={`font-bold px-3 py-1 rounded-full ${tech?.badgeBg || "bg-blue-500/10 text-blue-600"}`}
-                        >
-                          {tech?.name || course.techId}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                            #{rankNum} Most Read
+                          </span>
+                          <span
+                            className={`font-bold px-3 py-1 rounded-full ${tech?.badgeBg || "bg-blue-500/10 text-blue-600"}`}
+                          >
+                            {tech?.name || course.techId}
+                          </span>
+                        </div>
                         <span className="text-zinc-400 font-medium">
                           {course.duration}
                         </span>
@@ -209,7 +215,7 @@ export default function HomePage() {
                           href={`/courses/${courseSlug}`}
                           className="text-blue-600 dark:text-blue-400 hover:underline text-[11px]"
                         >
-                          View Syllabus & Index
+                          View Syllabus
                         </Link>
                       </div>
                     </div>

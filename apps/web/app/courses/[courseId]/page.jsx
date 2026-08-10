@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
@@ -131,7 +130,7 @@ export default function CourseOverviewPage() {
               <FileCode className="w-4 h-4" />
               <span>View {tech?.name} Cheatsheet</span>
             </Link>
-            
+
             <Link
               href="/quiz"
               className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 text-xs font-bold transition-all active:scale-95"
@@ -139,7 +138,7 @@ export default function CourseOverviewPage() {
               <Brain className="w-4 h-4 text-purple-500" />
               <span>Practice Quiz</span>
             </Link>
-            
+
             <Link
               href="/revision"
               className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 text-xs font-bold transition-all active:scale-95"

@@ -1,0 +1,203 @@
+[
+  {
+    "_id": "6a783870d486bbb7931ec217",
+    "slug": "react-hooks",
+    "__v": 0,
+    "createdAt": "2026-08-09T08:21:04.448Z",
+    "order": 1,
+    "snippets": [
+      {
+        "name": "useState Hook",
+        "code": "const [state, setState] = useState(initialValue);\nsetState(prev => prev + 1);",
+        "language": "javascript"
+      },
+      {
+        "name": "useEffect Hook",
+        "code": "useEffect(() => {\n  // Side effect logic\n  return () => { /* Cleanup */ };\n}, [dependencyArray]);",
+        "language": "javascript"
+      },
+      {
+        "name": "useMemo Hook",
+        "code": "const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);",
+        "language": "javascript"
+      },
+      {
+        "name": "useCallback Hook",
+        "code": "const memoizedCallback = useCallback(() => { doSomething(a, b); }, [a, b]);",
+        "language": "javascript"
+      }
+    ],
+    "status": "published",
+    "techId": "reactjs",
+    "title": "React Hooks Instant Cheatsheet",
+    "updatedAt": "2026-08-09T08:21:04.448Z"
+  },
+  {
+    "_id": "6a783870d486bbb7931ec219",
+    "slug": "express-rest-api",
+    "__v": 0,
+    "createdAt": "2026-08-09T08:21:04.506Z",
+    "order": 3,
+    "snippets": [
+      {
+        "name": "Route Handlers",
+        "code": "app.get('/users', (req, res) => res.json(users));\napp.post('/users', (req, res) => res.status(201).json(newUser));",
+        "language": "javascript"
+      },
+      {
+        "name": "Global Error Handler",
+        "code": "app.use((err, req, res, next) => {\n  res.status(err.status || 500).json({ error: err.message });\n});",
+        "language": "javascript"
+      }
+    ],
+    "status": "published",
+    "techId": "expressjs",
+    "title": "Express.js REST API Cheatsheet",
+    "updatedAt": "2026-08-09T08:21:04.506Z"
+  },
+  {
+    "_id": "6a783870d486bbb7931ec21a",
+    "slug": "mongodb-mongoose",
+    "__v": 0,
+    "createdAt": "2026-08-09T08:21:04.517Z",
+    "order": 4,
+    "snippets": [
+      {
+        "name": "Connect to MongoDB",
+        "code": "const mongoose = require('mongoose');nmongoose.connect('mongodb://localhost:27017/dbName');",
+        "_id": "6a78dc2045dc04342ee1101b"
+      },
+      {
+        "name": "Define a Schema",
+        "code": "const userSchema = new mongoose.Schema({n  email: { type: String, required: true, unique: true },n  age: { type: Number, default: 18 }n}, { timestamps: true });",
+        "_id": "6a78dc2045dc04342ee1101c"
+      },
+      {
+        "name": "Insert Documents",
+        "code": "// Insert Onenawait User.create({ email: 'test@test.com' });nn// Insert Manynawait User.insertMany([{ email: 'a@a.com' }, { email: 'b@b.com' }]);",
+        "_id": "6a78dc2045dc04342ee1101d"
+      },
+      {
+        "name": "Querying (Find)",
+        "code": "// Find all matchingnawait User.find({ age: { $gte: 18 } });nn// Find onenawait User.findOne({ email: 'test@test.com' });nn// Find by IDnawait User.findById('60c...123');",
+        "_id": "6a78dc2045dc04342ee1101e"
+      },
+      {
+        "name": "Updating",
+        "code": "// Update one documentnawait User.updateOne(n  { _id: '60c...' }, n  { $set: { status: 'active' }, $inc: { logins: 1 } }n);nn// Find and return updatednawait User.findByIdAndUpdate(id, { name: 'Bob' }, { new: true });",
+        "_id": "6a78dc2045dc04342ee1101f"
+      },
+      {
+        "name": "Deleting",
+        "code": "await User.deleteOne({ email: 'test@test.com' });nawait User.findByIdAndDelete('60c...');",
+        "_id": "6a78dc2045dc04342ee11020"
+      },
+      {
+        "name": "Population (JOIN)",
+        "code": "await Post.find().populate('author', 'name email -_id');",
+        "_id": "6a78dc2045dc04342ee11021"
+      },
+      {
+        "name": "Aggregation Pipeline",
+        "code": "await Order.aggregate([n  { $match: { status: 'COMPLETED' } },n  { $group: { _id: '$userId', totalSpent: { $sum: '$amount' } } },n  { $sort: { totalSpent: -1 } }n]);",
+        "_id": "6a78dc2045dc04342ee11022"
+      }
+    ],
+    "status": "published",
+    "techId": "mongodb",
+    "title": "MongoDB & Mongoose Ultimate Reference",
+    "updatedAt": "2026-08-09T08:21:04.517Z",
+    "description": "Queries, updates, schemas, middleware, and aggregation pipelines."
+  },
+  {
+    "_id": "6a783870d486bbb7931ec21b",
+    "slug": "tailwind-utilities",
+    "__v": 0,
+    "createdAt": "2026-08-09T08:21:04.530Z",
+    "order": 5,
+    "snippets": [
+      {
+        "name": "Flexbox Centering",
+        "code": "flex items-center justify-between gap-4",
+        "language": "text"
+      },
+      {
+        "name": "Responsive Grid",
+        "code": "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6",
+        "language": "text"
+      },
+      {
+        "name": "Dark Mode & Transition",
+        "code": "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white transition-colors duration-300",
+        "language": "text"
+      }
+    ],
+    "status": "published",
+    "techId": "tailwindcss",
+    "title": "Tailwind CSS Utility Cheatsheet",
+    "updatedAt": "2026-08-09T08:21:04.530Z"
+  },
+  {
+    "_id": "6a78d4236552eee9602f2ff3",
+    "techId": "nextjs",
+    "slug": "nextjs-app-router",
+    "title": "Next.js App Router Cheat Sheet",
+    "snippets": [
+      {
+        "name": "Special Route Files",
+        "code": "// Special page-related file names in Next.js App Router\npage.jsx       // Target UI route (e.g. /dashboard)\nlayout.jsx     // Wraps sibling and nested pages; preserves state\ntemplate.jsx   // Same as layout but creates a new instance on nav\nloading.jsx    // Suspense loading UI; rendered automatically\nerror.jsx      // Error boundary wrapper (must be 'use client')\nnot-found.jsx  // 404 Page fallback UI\nroute.js       // Backend API endpoint handler",
+        "language": "javascript"
+      },
+      {
+        "name": "Data Fetching Caching Options",
+        "code": "// 1. Static fetch (cached forever by default)\nconst res = await fetch('https://api.example.com/data')\n\n// 2. Dynamic fetch (skip cache, render on demand)\nconst res = await fetch('https://api.example.com/data', { cache: 'no-store' })\n\n// 3. Revalidated fetch (ISR: caches for specified seconds)\nconst res = await fetch('https://api.example.com/data', {\n  next: { revalidate: 3600 } // revalidate hourly\n})",
+        "language": "javascript"
+      },
+      {
+        "name": "Server Action Definition",
+        "code": "// app/actions.js\n'use server' // Marks all exports in this file as Server Actions\n\nimport { revalidatePath } from 'next/cache'\n\nexport async function createTodo(formData) {\n  const text = formData.get('text')\n  \n  // Directly insert into database\n  await db.todo.create({ data: { text } })\n  \n  // Purge the cache on the page to reflect new item\n  revalidatePath('/todos')\n}",
+        "language": "javascript"
+      },
+      {
+        "name": "API Route Handlers",
+        "code": "// app/api/items/route.js\nimport { NextResponse } from 'next/server'\n\n// Handles GET /api/items\nexport async function GET(request) {\n  const data = await db.items.findMany()\n  return NextResponse.json({ success: true, data })\n}\n\n// Handles POST /api/items\nexport async function POST(request) {\n  const body = await request.json()\n  const item = await db.items.create({ data: body })\n  return NextResponse.json({ success: true, item }, { status: 201 })\n}",
+        "language": "javascript"
+      },
+      {
+        "name": "Metadata & SEO",
+        "code": "// App Router Metadata (page.jsx or layout.jsx)\nexport const metadata = {\n  title: 'My Custom Page Title',\n  description: 'SEO optimized description',\n  openGraph: {\n    title: 'Open Graph Title',\n    description: 'Social preview description',\n    images: [{ url: '/og-image.jpg' }],\n  },\n}\n\n// For Dynamic Routes (e.g. /blog/[id]/page.jsx)\nexport async function generateMetadata({ params }) {\n  const post = await getPost(params.id)\n  return {\n    title: `${post.title} | Blog`,\n    description: post.summary\n  }\n}",
+        "language": "javascript"
+      }
+    ],
+    "order": 0,
+    "status": "published",
+    "createdAt": "2026-08-09T19:25:23.388Z",
+    "updatedAt": "2026-08-09T19:25:23.388Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a78d6ced486bbb7931ec224",
+    "slug": "nodejs-express",
+    "__v": 0,
+    "content": "A quick reference guide for core Node.js modules, Express routing, and MongoDB.",
+    "sections": [
+      {
+        "title": "Core Modules",
+        "content": "### File System (Promises)\n```javascript\nconst fs = require('fs/promises');\nconst data = await fs.readFile('file.txt', 'utf8');\nawait fs.writeFile('file.txt', 'Hello World');\n```\n\n### Path Module\n```javascript\nconst path = require('path');\nconst fullPath = path.join(__dirname, 'public', 'index.html');\n```",
+        "_id": "6a78d8e9accf2b06607c16bf"
+      },
+      {
+        "title": "Express Fundamentals",
+        "content": "### Initialization & Middleware\n```javascript\nconst express = require('express');\nconst app = express();\n\napp.use(express.json()); // Parse JSON bodies\napp.use(require('cors')()); // Enable CORS\n\napp.listen(3000, () => console.log('Ready'));\n```\n\n### Routing & Controllers\n```javascript\napp.get('/users/:id', (req, res) => {\n  const id = req.params.id;\n  const { sort } = req.query;\n  res.status(200).json({ id, sort });\n});\n```",
+        "_id": "6a78d8e9accf2b06607c16c0"
+      },
+      {
+        "title": "Mongoose & MongoDB",
+        "content": "### Connection & Schema\n```javascript\nconst mongoose = require('mongoose');\nmongoose.connect('mongodb://localhost/db');\n\nconst userSchema = new mongoose.Schema({\n  email: { type: String, required: true, unique: true },\n  age: Number\n}, { timestamps: true });\n\nconst User = mongoose.model('User', userSchema);\n```\n\n### Queries\n```javascript\n// Find all users over 18, select only email\nconst adults = await User.find({ age: { $gte: 18 } }).select('email');\n\n// Create user\nconst newUser = await User.create({ email: 'test@test.com', age: 20 });\n```",
+        "_id": "6a78d8e9accf2b06607c16c1"
+      }
+    ],
+    "techId": "nodejs",
+    "title": "Node.js & Express Ultimate Cheatsheet"
+  }
+]

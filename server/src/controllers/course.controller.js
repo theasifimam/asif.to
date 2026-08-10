@@ -14,11 +14,11 @@ function slugify(str) {
 
 /**
  * GET /api/v1/courses
- * List all published courses (with chapter counts)
+ * List all published courses (with chapter counts and view rankings)
  */
 export const getCourses = async (req, res) => {
   try {
-    const { status, techId } = req.query;
+    const { status, techId, sortBy } = req.query;
 
     const filter = {};
     if (status && status !== "all") {
@@ -28,25 +28,46 @@ export const getCourses = async (req, res) => {
     }
     if (techId) filter.techId = techId;
 
-    const courses = await Course.find(filter)
-      .sort({ order: 1, createdAt: -1 })
-      .lean();
-
-    // Attach chapter count for each course
+    const courses = await Course.find(filter).lean();
     const courseIds = courses.map((c) => c._id);
-    const chapterCounts = await Chapter.aggregate([
+
+    // Aggregate chapter count & total views for each course
+    const chapterStats = await Chapter.aggregate([
       { $match: { course: { $in: courseIds }, status: "published" } },
-      { $group: { _id: "$course", count: { $sum: 1 } } },
+      {
+        $group: {
+          _id: "$course",
+          count: { $sum: 1 },
+          totalViews: { $sum: "$viewCount" },
+        },
+      },
     ]);
 
     const countMap = {};
-    chapterCounts.forEach((c) => {
-      countMap[c._id.toString()] = c.count;
+    const viewsMap = {};
+    chapterStats.forEach((s) => {
+      countMap[s._id.toString()] = s.count;
+      viewsMap[s._id.toString()] = s.totalViews || 0;
     });
 
-    const result = courses.map((c) => ({
+    let result = courses.map((c) => ({
       ...c,
       chapterCount: countMap[c._id.toString()] || 0,
+      totalViews: viewsMap[c._id.toString()] || 0,
+    }));
+
+    // Rank courses by most read (totalViews descending)
+    result.sort((a, b) => {
+      if (b.totalViews !== a.totalViews) {
+        return b.totalViews - a.totalViews;
+      }
+      return (a.order ?? 0) - (b.order ?? 0);
+    });
+
+    // Attach ranking index
+    result = result.map((c, index) => ({
+      ...c,
+      rank: index + 1,
     }));
 
     res.status(200).json({ success: true, data: result });
@@ -64,7 +85,14 @@ export const getCourseBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
 
-    const course = await Course.findOne({ slug }).lean();
+    let course = await Course.findOne({ slug }).lean();
+    if (!course) {
+      // Fallback: search by techId if slug didn't match directly
+      course = await Course.findOne({ techId: slug, status: "published" })
+        .sort({ createdAt: -1 })
+        .lean();
+    }
+
     if (!course) {
       return res.status(404).json({ success: false, message: "Course not found." });
     }
@@ -74,7 +102,7 @@ export const getCourseBySlug = async (req, res) => {
       status: "published",
     })
       .sort({ order: 1 })
-      .select("slug title summary order")
+      .select("slug title summary order viewCount")
       .lean();
 
     res.status(200).json({ success: true, data: { ...course, chapters } });
@@ -105,6 +133,9 @@ export const getChapterBySlug = async (req, res) => {
     if (!chapter) {
       return res.status(404).json({ success: false, message: "Chapter not found." });
     }
+
+    // Capture real readership: increment viewCount on each read
+    Chapter.findByIdAndUpdate(chapter._id, { $inc: { viewCount: 1 } }).exec().catch(() => {});
 
     // Get adjacent chapters for prev/next navigation
     const allChapters = await Chapter.find({
@@ -209,10 +240,16 @@ export const createCourse = async (req, res) => {
       });
     }
 
-    let slug = slugify(techId);
-    const existing = await Course.findOne({ slug });
-    if (existing) {
-      slug = `${slug}-${Date.now()}`;
+    let baseSlug = req.body.slug ? slugify(req.body.slug) : slugify(techId || title);
+    if (!baseSlug) baseSlug = slugify(title);
+
+    let slug = baseSlug;
+    let existing = await Course.findOne({ slug });
+    let counter = 2;
+    while (existing) {
+      slug = `${baseSlug}-${counter}`;
+      existing = await Course.findOne({ slug });
+      counter++;
     }
 
     const course = await Course.create({
@@ -540,7 +577,6 @@ export const getCourseAnalytics = async (req, res) => {
         },
         topChapters,
         courseStats,
-        zeroViewChapters,
       },
     });
   } catch (error) {
@@ -548,3 +584,4 @@ export const getCourseAnalytics = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+

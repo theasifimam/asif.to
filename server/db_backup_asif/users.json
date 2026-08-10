@@ -1,0 +1,58 @@
+[
+  {
+    "_id": "6a016911a3bb3c5ed2909e42",
+    "fullName": "System Administrator",
+    "username": "admin_1778477329496",
+    "email": "admin_1778477329496@mazlis.com",
+    "password": "$2b$10$TcGxQO0z7upr3.F4syUla.yo.FVyFe7AS7unCEUYtKfCVzYsCviSm",
+    "avatar": "https://ui-avatars.com/api/?name=User&background=random",
+    "role": "admin",
+    "status": "active",
+    "isVerified": true,
+    "expertise": [],
+    "bookmarks": [],
+    "followedTopics": [],
+    "settings": {
+      "newsletter": true,
+      "notifications": true,
+      "theme": "system"
+    },
+    "createdAt": "2026-05-11T05:28:49.527Z",
+    "updatedAt": "2026-05-11T06:30:45.409Z",
+    "__v": 0,
+    "lastLogin": "2026-05-11T06:30:45.396Z"
+  },
+  {
+    "_id": "6a7607f5e3290313db944c43",
+    "fullName": "Asif Imam",
+    "username": "admin",
+    "email": "admin@mazlis.com",
+    "password": "$2b$10$7/LTbAaPE4OKRRUmccPsMeXOS91GrgnnMOegzqm0jvY5vJVRSDjD.",
+    "avatar": "/uploads/avatars/avatar-1786120459975-247407848.jpg",
+    "role": "admin",
+    "status": "active",
+    "isVerified": true,
+    "expertise": [],
+    "bookmarks": [],
+    "followedTopics": [],
+    "settings": {
+      "newsletter": true,
+      "notifications": true,
+      "theme": "system"
+    },
+    "createdAt": "2026-08-07T16:29:41.914Z",
+    "updatedAt": "2026-08-10T04:48:38.574Z",
+    "__v": 0,
+    "lastLogin": "2026-08-10T04:48:38.574Z",
+    "bio": "",
+    "location": "Darbhanga, Bihar",
+    "mNumber": "",
+    "socials": {
+      "twitter": "theasifimam",
+      "linkedin": "theasifimam",
+      "website": "asif.mazlis.com",
+      "github": "theasifimam",
+      "instagram": "asif.imam9"
+    }
+  }
+]

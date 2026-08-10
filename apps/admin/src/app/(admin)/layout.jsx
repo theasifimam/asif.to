@@ -69,15 +69,17 @@ const NAV_ITEMS = [
   },
   {
     group: "Management",
-    items: [
-      { name: "Users", href: "/users", icon: Users },
-    ],
+    items: [{ name: "Users", href: "/users", icon: Users }],
   },
   {
     group: "System Pages",
     items: [
       { name: "About", href: "/legal/about", icon: Info },
-      { name: "Terms of Service", href: "/legal/terms-conditions", icon: ShieldAlert },
+      {
+        name: "Terms of Service",
+        href: "/legal/terms-conditions",
+        icon: ShieldAlert,
+      },
       { name: "Privacy Policy", href: "/legal/privacy-policy", icon: FileText },
       { name: "Cookie Policy", href: "/legal/cookie-usage", icon: Cookie },
       { name: "Help & FAQ", href: "/legal/faq", icon: HelpCircle },
@@ -160,11 +162,11 @@ export default function AdminLayout({ children }) {
               : 0,
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className={`border-r border-zinc-200 dark:border-zinc-800 flex flex-col bg-white dark:bg-zinc-950/95 backdrop-blur-xl shrink-0 fixed lg:relative h-full transition-colors duration-300 ${isMobileMenuOpen ? "z-50 shadow-2xl shadow-black/50" : "z-30"}`}
+        className={`border-r border-zinc-200 dark:border-zinc-800 flex flex-col bg-white dark:bg-zinc-950/95 backdrop-blur-xl shrink-0 fixed lg:relative h-full transition-colors duration-300 ${isMobileMenuOpen ? "z-10 shadow-2xl shadow-black/50" : "z-30"}`}
       >
         {/* Toggle Button (Desktop) */}
         <div
-          className={`absolute top-8 z-40 hidden lg:flex transition-all duration-300 ${isCollapsed ? "right-0 translate-x-1/2 top-12" : "right-4"}`}
+          className={`absolute top-8 z-10 hidden lg:flex transition-all duration-300 ${isCollapsed ? "right-0 translate-x-1/2 top-12" : "right-4"}`}
         >
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
@@ -182,17 +184,15 @@ export default function AdminLayout({ children }) {
         <div
           className={`p-6 pb-8 flex flex-col gap-2 ${isCollapsed ? "items-center px-0" : ""}`}
         >
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2.5 group"
-          >
+          <Link href="/dashboard" className="flex items-center gap-2.5 group">
             <span className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xs shadow-md shadow-blue-500/30 shrink-0">
               &lt;/&gt;
             </span>
             {!isCollapsed && (
               <div className="flex items-center gap-2">
                 <span className="font-outfit font-black text-xl tracking-tight text-zinc-900 dark:text-white">
-                  asif<span className="text-blue-600 dark:text-blue-400">.to</span>
+                  asif
+                  <span className="text-blue-600 dark:text-blue-400">.to</span>
                 </span>
                 <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/20">
                   Admin
@@ -219,11 +219,16 @@ export default function AdminLayout({ children }) {
               </AnimatePresence>
               <div className="flex flex-col gap-1">
                 {group.items.map((item) => {
-                  const isActive = pathname === item.href;
+                  const targetHref =
+                    item.name === "My Profile" && user?._id
+                      ? `/users/${user._id}`
+                      : item.href;
+                  const isActive =
+                    pathname === targetHref || pathname === item.href;
                   return (
                     <Link
                       key={item.href}
-                      href={item.href}
+                      href={targetHref}
                       title={isCollapsed ? item.name : ""}
                       className={`group flex items-center px-4 py-3 rounded-2xl transition-all duration-300 ${
                         isActive
@@ -288,7 +293,10 @@ export default function AdminLayout({ children }) {
                   {/* User Info Header */}
                   <div className="flex items-center gap-3 pb-3 border-b border-zinc-100 dark:border-zinc-800">
                     <Avatar className="w-10 h-10 border border-zinc-200 dark:border-zinc-700 shadow-sm shrink-0">
-                      <AvatarImage src={avatarUrl || ""} className="object-cover" />
+                      <AvatarImage
+                        src={avatarUrl || ""}
+                        className="object-cover"
+                      />
                       <AvatarFallback className="bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-black uppercase text-xs">
                         {user?.fullName
                           ?.split(" ")
@@ -312,19 +320,26 @@ export default function AdminLayout({ children }) {
                     <button
                       onClick={() => {
                         setIsUserMenuDialogOpen(false);
-                        router.push("/profile");
+                        router.push(
+                          user?._id ? `/users/${user._id}` : "/profile",
+                        );
                       }}
                       className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-all text-zinc-800 dark:text-zinc-200 font-bold text-xs"
                     >
                       <div className="flex items-center gap-2.5">
-                        <User size={16} className="text-blue-600 dark:text-blue-400" />
+                        <User
+                          size={16}
+                          className="text-blue-600 dark:text-blue-400"
+                        />
                         <span>My Profile</span>
                       </div>
                       <ChevronRight size={14} className="text-zinc-400" />
                     </button>
 
                     <button
-                      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                      onClick={() =>
+                        setTheme(theme === "dark" ? "light" : "dark")
+                      }
                       className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-all text-zinc-800 dark:text-zinc-200 font-bold text-xs"
                     >
                       <div className="flex items-center gap-2.5">
@@ -400,7 +415,7 @@ export default function AdminLayout({ children }) {
       </motion.aside>
 
       {/* Main Panel */}
-      <div className="flex-1 flex flex-col relative overflow-hidden transition-colors duration-300">
+      <div className="flex-1 z-10 flex flex-col relative overflow-hidden transition-colors duration-300">
         {/* Global Masthead */}
         <header className="h-16 border-b border-zinc-200 dark:border-zinc-900 px-4 md:px-12 flex items-center justify-between bg-white/50 dark:bg-zinc-950/20 backdrop-blur-md z-40 transition-colors duration-300">
           <div className="flex items-center gap-4 md:gap-8">
@@ -431,7 +446,7 @@ export default function AdminLayout({ children }) {
             </button>
 
             <Link
-              href="/profile"
+              href={user?._id ? `/users/${user._id}` : "/profile"}
               className="flex items-center gap-3 pl-3 md:pl-4 border-l border-zinc-200 dark:border-zinc-800 ml-1 md:ml-2 group/header-user cursor-pointer transition-opacity hover:opacity-80"
             >
               <div className="flex-col items-end leading-none hidden xs:flex">

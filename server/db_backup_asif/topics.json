@@ -1,0 +1,65 @@
+[
+  {
+    "_id": "6a016911a3bb3c5ed2909e43",
+    "name": "Politics",
+    "description": "Politics news and analysis",
+    "isParent": false,
+    "createdAt": "2026-05-11T05:28:49.568Z",
+    "updatedAt": "2026-05-11T05:28:49.568Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a016911a3bb3c5ed2909e44",
+    "name": "Technology",
+    "description": "Technology news and analysis",
+    "isParent": false,
+    "createdAt": "2026-05-11T05:28:49.568Z",
+    "updatedAt": "2026-05-11T05:28:49.568Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a016911a3bb3c5ed2909e45",
+    "name": "Science",
+    "description": "Science news and analysis",
+    "isParent": false,
+    "createdAt": "2026-05-11T05:28:49.568Z",
+    "updatedAt": "2026-05-11T05:28:49.568Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a016911a3bb3c5ed2909e46",
+    "name": "Health",
+    "description": "Health news and analysis",
+    "isParent": false,
+    "createdAt": "2026-05-11T05:28:49.569Z",
+    "updatedAt": "2026-05-11T05:28:49.569Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a016911a3bb3c5ed2909e47",
+    "name": "Business",
+    "description": "Business news and analysis",
+    "isParent": false,
+    "createdAt": "2026-05-11T05:28:49.569Z",
+    "updatedAt": "2026-05-11T05:28:49.569Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a016911a3bb3c5ed2909e48",
+    "name": "Entertainment",
+    "description": "Entertainment news and analysis",
+    "isParent": false,
+    "createdAt": "2026-05-11T05:28:49.569Z",
+    "updatedAt": "2026-05-11T05:28:49.569Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a016911a3bb3c5ed2909e49",
+    "name": "Sports",
+    "description": "Sports news and analysis",
+    "isParent": false,
+    "createdAt": "2026-05-11T05:28:49.570Z",
+    "updatedAt": "2026-05-11T05:28:49.570Z",
+    "__v": 0
+  }
+]

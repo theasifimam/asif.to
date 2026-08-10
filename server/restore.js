@@ -48,7 +48,7 @@ async function restore() {
     console.log(`Target database to restore into: ${dbName}`);
 
     const db = client.db(dbName);
-    const backupDir = path.join(process.cwd(), 'db_backup_news_mazlis');
+    const backupDir = path.join(process.cwd(), 'db_backup_asif');
 
     if (!fs.existsSync(backupDir)) {
       throw new Error(`Backup directory not found at ${backupDir}`);

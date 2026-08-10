@@ -5,7 +5,16 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useGetQuizQuestionsQuery } from "@/lib/api/courseApi";
 import { TECH_STACKS } from "@/lib/tutorialData";
-import { HelpCircle, CheckCircle2, XCircle, RotateCcw, Award, ChevronRight, Sparkles, Loader2 } from "lucide-react";
+import {
+  HelpCircle,
+  CheckCircle2,
+  XCircle,
+  RotateCcw,
+  Award,
+  ChevronRight,
+  Sparkles,
+  Loader2,
+} from "lucide-react";
 
 export default function QuizPage() {
   const [selectedTech, setSelectedTech] = useState(null);
@@ -16,7 +25,7 @@ export default function QuizPage() {
   const [isFinished, setIsFinished] = useState(false);
 
   const { data, isLoading } = useGetQuizQuestionsQuery(
-    selectedTech ? { techId: selectedTech } : undefined
+    selectedTech ? { techId: selectedTech } : undefined,
   );
   const QUIZ_QUESTIONS = data?.data || [];
 
@@ -72,7 +81,6 @@ export default function QuizPage() {
       <Header />
 
       <main className="flex-1 w-full max-w-2xl mx-auto px-4 sm:px-6 pt-20 sm:pt-24 flex flex-col gap-6">
-        
         {/* Header Title */}
         <div className="flex flex-col gap-2">
           <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold w-fit shadow-md shadow-emerald-500/20">
@@ -84,7 +92,8 @@ export default function QuizPage() {
             Mobile Practice Quiz
           </h1>
           <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 font-medium">
-            Test your understanding of Next.js, React, Node.js, Express & MongoDB concepts.
+            Test your understanding of Next.js, React, Node.js, Express &
+            MongoDB concepts.
           </p>
         </div>
 
@@ -92,8 +101,10 @@ export default function QuizPage() {
           <div className="p-6 sm:p-8 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-md flex flex-col gap-5">
             {/* Progress bar & stats */}
             <div className="flex items-center justify-between text-xs">
-              <span className={`font-bold px-3 py-1 rounded-full ${tech?.badgeBg || "bg-blue-500/10 text-blue-600"}`}>
-                {tech?.name || question.techId}
+              <span
+                className={`font-bold px-3 py-1 rounded-full ${tech?.badgeBg || "bg-blue-500/10 text-blue-600"}`}
+              >
+                {tech?.name || question?.techId}
               </span>
               <span className="text-zinc-400 font-bold">
                 Question {currentIndex + 1} of {QUIZ_QUESTIONS.length}
@@ -103,7 +114,9 @@ export default function QuizPage() {
             <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-2.5 rounded-full overflow-hidden">
               <div
                 className="bg-blue-600 h-full transition-all duration-300 rounded-full"
-                style={{ width: `${((currentIndex + 1) / QUIZ_QUESTIONS.length) * 100}%` }}
+                style={{
+                  width: `${((currentIndex + 1) / QUIZ_QUESTIONS.length) * 100}%`,
+                }}
               />
             </div>
 
@@ -118,17 +131,21 @@ export default function QuizPage() {
                 const isSelected = selectedOption === idx;
                 const isCorrect = idx === question.correctIndex;
 
-                let optionStyle = "bg-zinc-50 dark:bg-zinc-950 text-foreground shadow-sm hover:bg-zinc-100 dark:hover:bg-zinc-800";
+                let optionStyle =
+                  "bg-zinc-50 dark:bg-zinc-950 text-foreground shadow-sm hover:bg-zinc-100 dark:hover:bg-zinc-800";
                 if (isAnswered) {
                   if (isCorrect) {
-                    optionStyle = "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold shadow-md";
+                    optionStyle =
+                      "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold shadow-md";
                   } else if (isSelected && !isCorrect) {
-                    optionStyle = "bg-red-500/20 text-red-700 dark:text-red-300 font-bold";
+                    optionStyle =
+                      "bg-red-500/20 text-red-700 dark:text-red-300 font-bold";
                   } else {
                     optionStyle = "bg-zinc-50 dark:bg-zinc-950 opacity-50";
                   }
                 } else if (isSelected) {
-                  optionStyle = "bg-blue-600 text-white font-bold shadow-md shadow-blue-500/25 scale-[1.01]";
+                  optionStyle =
+                    "bg-blue-600 text-white font-bold shadow-md shadow-blue-500/25 scale-[1.01]";
                 }
 
                 return (
@@ -141,8 +158,12 @@ export default function QuizPage() {
                     <span>{option}</span>
                     {isAnswered && (
                       <div>
-                        {isCorrect && <CheckCircle2 className="w-5 h-5 text-emerald-500" />}
-                        {isSelected && !isCorrect && <XCircle className="w-5 h-5 text-red-500" />}
+                        {isCorrect && (
+                          <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                        )}
+                        {isSelected && !isCorrect && (
+                          <XCircle className="w-5 h-5 text-red-500" />
+                        )}
                       </div>
                     )}
                   </button>
@@ -157,14 +178,17 @@ export default function QuizPage() {
                   <Sparkles className="w-4 h-4" />
                   <span>Explanation</span>
                 </div>
-                <p className="text-zinc-300 leading-relaxed font-medium">{question.explanation}</p>
+                <p className="text-zinc-300 leading-relaxed font-medium">
+                  {question.explanation}
+                </p>
               </div>
             )}
 
             {/* Action Buttons */}
             <div className="flex items-center justify-between pt-3">
               <span className="text-xs text-zinc-400 font-bold">
-                Current Score: <strong className="text-foreground text-sm">{score}</strong>
+                Current Score:{" "}
+                <strong className="text-foreground text-sm">{score}</strong>
               </span>
 
               {!isAnswered ? (
@@ -180,7 +204,11 @@ export default function QuizPage() {
                   onClick={handleNextQuestion}
                   className="flex items-center gap-1 px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all active:scale-95 shadow-md shadow-emerald-500/25"
                 >
-                  <span>{currentIndex + 1 === QUIZ_QUESTIONS.length ? "Finish Quiz" : "Next Question"}</span>
+                  <span>
+                    {currentIndex + 1 === QUIZ_QUESTIONS.length
+                      ? "Finish Quiz"
+                      : "Next Question"}
+                  </span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               )}
@@ -193,19 +221,32 @@ export default function QuizPage() {
               <Award className="w-12 h-12" />
             </div>
 
-            <h2 className="text-2xl font-black text-foreground">Quiz Completed!</h2>
+            <h2 className="text-2xl font-black text-foreground">
+              Quiz Completed!
+            </h2>
             <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 font-medium">
-              You scored <strong className="text-blue-600 dark:text-blue-400 text-lg font-black">{score}</strong> out of{" "}
-              <strong className="font-black">{QUIZ_QUESTIONS.length}</strong> questions correctly.
+              You scored{" "}
+              <strong className="text-blue-600 dark:text-blue-400 text-lg font-black">
+                {score}
+              </strong>{" "}
+              out of{" "}
+              <strong className="font-black">{QUIZ_QUESTIONS.length}</strong>{" "}
+              questions correctly.
             </p>
 
             <div className="w-full p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-950 text-xs font-bold text-zinc-500">
               {score === QUIZ_QUESTIONS.length ? (
-                <span className="text-emerald-500">🎉 Outstanding! You mastered these concepts!</span>
+                <span className="text-emerald-500">
+                  🎉 Outstanding! You mastered these concepts!
+                </span>
               ) : score >= QUIZ_QUESTIONS.length / 2 ? (
-                <span className="text-blue-500">👍 Good effort! Review the flashcards to lock in 100%.</span>
+                <span className="text-blue-500">
+                  👍 Good effort! Review the flashcards to lock in 100%.
+                </span>
               ) : (
-                <span className="text-amber-500">💪 Keep practicing! Check out the revision deck and tutorials.</span>
+                <span className="text-amber-500">
+                  💪 Keep practicing! Check out the revision deck and tutorials.
+                </span>
               )}
             </div>
 
@@ -218,7 +259,6 @@ export default function QuizPage() {
             </button>
           </div>
         )}
-
       </main>
 
       <Footer />
