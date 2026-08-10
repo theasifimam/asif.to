@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { coursesApi } from "@/lib/api";
 import {
@@ -17,6 +18,14 @@ import {
   Layers,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const TECH_COLORS = {
   reactjs: "bg-cyan-500/10 text-cyan-600",
@@ -34,6 +43,7 @@ export default function CoursesAdminPage() {
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [deleting, setDeleting] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(null);
 
   const [form, setForm] = useState({
     title: "",
@@ -78,17 +88,12 @@ export default function CoursesAdminPage() {
   };
 
   const handleDelete = async (id) => {
-    if (
-      !confirm(
-        "Delete this course and ALL its chapters? This cannot be undone.",
-      )
-    )
-      return;
     setDeleting(id);
     const res = await coursesApi.delete(id);
     if (res.success) {
       toast.success("Course deleted.");
       setCourses((prev) => prev.filter((c) => c._id !== id));
+      setShowDeleteModal(null);
     } else {
       toast.error(res.error || "Failed to delete course");
     }
@@ -339,7 +344,7 @@ export default function CoursesAdminPage() {
                   <ChevronRight className="w-3.5 h-3.5" />
                 </Link>
                 <button
-                  onClick={() => handleDelete(course._id)}
+                  onClick={() => setShowDeleteModal(course)}
                   disabled={deleting === course._id}
                   className="p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-950/30 text-zinc-400 hover:text-red-500 transition-colors"
                 >
@@ -354,6 +359,64 @@ export default function CoursesAdminPage() {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      {typeof document !== "undefined" &&
+        createPortal(
+          <Dialog
+            open={!!showDeleteModal}
+            onOpenChange={(open) =>
+              !open && !deleting && setShowDeleteModal(null)
+            }
+          >
+            <DialogContent className="max-w-md border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6 rounded-4xl gap-6 z-[9999]">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold text-zinc-900 dark:text-white">
+                  Delete Course?
+                </DialogTitle>
+                <DialogDescription className="text-zinc-500 dark:text-zinc-400 mt-2 text-sm leading-relaxed text-left">
+                  Are you sure you want to delete{" "}
+                  <strong className="text-zinc-900 dark:text-white">
+                    {showDeleteModal?.title}
+                  </strong>
+                  ? This will permanently delete the course and{" "}
+                  <strong className="text-zinc-900 dark:text-white">
+                    ALL of its associated chapters
+                  </strong>
+                  . This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+
+              <DialogFooter className="flex gap-3 justify-end pt-2">
+                <button
+                  onClick={() => setShowDeleteModal(null)}
+                  className="px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 transition-colors"
+                  disabled={deleting === showDeleteModal?._id}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleDelete(showDeleteModal?._id)}
+                  className="px-4 py-2 rounded-full text-sm font-medium bg-red-600 hover:bg-red-700 text-white transition-colors flex items-center gap-2 shadow-md shadow-red-500/20"
+                  disabled={deleting === showDeleteModal?._id}
+                >
+                  {deleting === showDeleteModal?._id ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      Delete Course
+                    </>
+                  )}
+                </button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>,
+          document.body,
+        )}
     </div>
   );
 }

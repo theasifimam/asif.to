@@ -41,6 +41,10 @@ export default function HomePage() {
     });
   }, [allCourses, selectedTech, searchQuery]);
 
+  const activeTechIds = useMemo(() => {
+    return Array.from(new Set(allCourses.map((c) => c.techId)));
+  }, [allCourses]);
+
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground transition-colors duration-300 pb-24 sm:pb-12">
       <Header />
@@ -124,6 +128,8 @@ export default function HomePage() {
         <TechStackGrid
           selectedTech={selectedTech}
           onSelectTech={setSelectedTech}
+          activeTechIds={activeTechIds}
+          isLoading={coursesLoading}
         />
 
         {/* Structured Courses Section (W3Schools Style Modernized) */}

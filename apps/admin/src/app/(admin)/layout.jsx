@@ -429,7 +429,7 @@ export default function AdminLayout({ children }) {
       </motion.aside>
 
       {/* Main Panel */}
-      <div className="flex-1 z-10 flex flex-col relative overflow-hidden transition-colors duration-300">
+      <div className="flex-1 flex flex-col relative overflow-hidden transition-colors duration-300">
         {/* Global Masthead */}
         <header className="h-16 border-b border-zinc-200 dark:border-zinc-900 px-4 md:px-12 flex items-center justify-between bg-white/50 dark:bg-zinc-950/20 backdrop-blur-md z-40 transition-colors duration-300">
           <div className="flex items-center gap-4 md:gap-8">

@@ -70,4 +70,16 @@ courseSchema.virtual("chapters", {
 
 courseSchema.index({ status: 1, order: 1 });
 
+// Cascade delete chapters when a course is deleted
+courseSchema.pre("findOneAndDelete", async function () {
+  const courseId = this.getQuery()["_id"];
+  if (courseId) {
+    await model("Chapter").deleteMany({ course: courseId });
+  }
+});
+
+courseSchema.pre("deleteOne", { document: true, query: false }, async function () {
+  await model("Chapter").deleteMany({ course: this._id });
+});
+
 export default model("Course", courseSchema);

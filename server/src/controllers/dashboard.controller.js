@@ -58,8 +58,7 @@ export const getDashboardStats = async (req, res) => {
 
         const chapterCount = cStats.chapterCount || (await Chapter.countDocuments({ course: course._id }));
         const realReads = cStats.totalViews || 0;
-        const completionRate =
-          realReads > 0 ? Math.min(98, Math.max(70, 75 + (realReads % 20))) : 0;
+        const completionRate = realReads > 0 ? 100 : 0; // No progress model exists yet
 
         return {
           id: course._id,
@@ -88,32 +87,30 @@ export const getDashboardStats = async (req, res) => {
     const totalCheatsheets = await Cheatsheet.countDocuments();
     const totalArticles = await Article.countDocuments({ status: "published" });
 
-    // 3. Real Readership Growth Analytics (Daily, Monthly, Yearly)
-    const dailyReads = Math.round(realTotalCourseReads * 0.12);
-    const monthlyReads = Math.round(realTotalCourseReads * 0.65);
-    const yearlyReads = realTotalCourseReads;
+    // 3. Real Readership Analytics (We only have all-time viewCount in DB)
+    const allTimeReads = realTotalCourseReads;
 
     const growthAnalytics = {
       daily: {
-        reads: formatCount(dailyReads),
-        growth: realTotalCourseReads > 0 ? "+12.4%" : "0%",
-        label: "Today's Real Readership",
-        subtext: `Live captured views from web app (${formatCount(dailyReads)} reads today)`,
-        chartData: generateChartTrajectory(dailyReads),
+        reads: formatCount(allTimeReads),
+        growth: "All-time",
+        label: "Total Readership",
+        subtext: `Total captured views from web app (${formatCount(allTimeReads)} reads)`,
+        chartData: generateChartTrajectory(allTimeReads),
       },
       monthly: {
-        reads: formatCount(monthlyReads),
-        growth: realTotalCourseReads > 0 ? "+38.6%" : "0%",
-        label: "Monthly Real Course Reads",
-        subtext: `Live captured views from web app (${formatCount(monthlyReads)} reads this month)`,
-        chartData: generateChartTrajectory(monthlyReads),
+        reads: formatCount(allTimeReads),
+        growth: "All-time",
+        label: "Total Course Reads",
+        subtext: `Total captured views from web app (${formatCount(allTimeReads)} reads)`,
+        chartData: generateChartTrajectory(allTimeReads),
       },
       yearly: {
-        reads: formatCount(yearlyReads),
-        growth: realTotalCourseReads > 0 ? "+142%" : "0%",
-        label: "Annual Real Readership",
-        subtext: `Live total recorded chapter visits (${formatCount(yearlyReads)} total reads)`,
-        chartData: generateChartTrajectory(yearlyReads),
+        reads: formatCount(allTimeReads),
+        growth: "All-time",
+        label: "Total Readership",
+        subtext: `Live total recorded chapter visits (${formatCount(allTimeReads)} total reads)`,
+        chartData: generateChartTrajectory(allTimeReads),
       },
     };
 
@@ -127,18 +124,18 @@ export const getDashboardStats = async (req, res) => {
 
     chapters.forEach((ch) => {
       const tech = courseTechMap[ch.course?.toString()] || "javascript";
-      techDistributionRaw[tech] = (techDistributionRaw[tech] || 0) + (ch.viewCount || 1);
+      techDistributionRaw[tech] = (techDistributionRaw[tech] || 0) + 1; // Count actual chapters
     });
 
-    const totalTechReads = Math.max(1, Object.values(techDistributionRaw).reduce((a, b) => a + b, 0));
+    const totalTechChapters = Math.max(1, Object.values(techDistributionRaw).reduce((a, b) => a + b, 0));
     const techDistribution = Object.keys(techDistributionRaw).map((tech) => {
-      const reads = techDistributionRaw[tech];
-      const percentage = Math.round((reads / totalTechReads) * 100);
+      const chapterCount = techDistributionRaw[tech];
+      const percentage = Math.round((chapterCount / totalTechChapters) * 100);
       return {
         techId: tech,
         label: formatTechLabel(tech),
-        chapters: reads,
-        percentage: percentage || 10,
+        chapters: chapterCount,
+        percentage: percentage,
         color: getTechColor(tech),
       };
     });
@@ -161,10 +158,10 @@ export const getDashboardStats = async (req, res) => {
       },
       {
         label: "Avg. Completion Rate",
-        value: realTotalCourseReads > 0 ? "88.6%" : "0%",
-        trend: "+4.1% vs avg",
+        value: "N/A", // No progress model exists yet
+        trend: "Not Tracked",
         icon: "TrendingUp",
-        description: "High student retention",
+        description: "Coming soon",
       },
       {
         label: "Enrolled Learners",
