@@ -29,13 +29,17 @@ const app = express();
 // ─── Middleware ────────────────────────────────────────────────────────────
 app.use(cors({
   origin: [
-  "http://localhost:3000",
-  "http://localhost:3001",
-  "http://192.168.1.11:3000",
-  "http://192.168.1.11:3001",
-  process.env.ADMIN_URL || "http://localhost:3001",
-  process.env.WEB_URL || "http://localhost:3000"],
-
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://192.168.1.11:3000",
+    "http://192.168.1.11:3001",
+    "https://asif.to",
+    "https://www.asif.to",
+    "https://admin.asif.to",
+    "https://api.asif.to",
+    process.env.ADMIN_URL || "http://localhost:3001",
+    process.env.WEB_URL || "http://localhost:3000",
+  ],
   credentials: true
 }));
 app.use(express.json({ limit: "10mb" }));

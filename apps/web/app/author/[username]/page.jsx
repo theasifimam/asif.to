@@ -5,7 +5,7 @@ import { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
 async function getAuthor(username) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://192.168.1.11:5000/api/v1";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   const res = await fetch(`${baseUrl}/users/public/${username}`, { next: { revalidate: 60 } });
   if (!res.ok) return null;
   const body = await res.json();
@@ -30,14 +30,15 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title: `${user.fullName} | Mazlis News`,
       description: description,
-      images: [user.avatar ? user.avatar.startsWith('http') ? user.avatar : `http://localhost:5000${user.avatar}` : '/logo.jpeg'],
-      type: 'profile'
+      images: [user.avatar ? user.avatar.startsWith('http') ? user.avatar : `${process.env.NEXT_PUBLIC_STORAGE_URL}${user.avatar}` : '/logo.jpeg'],
+      type: 'profile',
+      username: user.username,
     },
     twitter: {
-      card: 'summary',
-      title: user.fullName,
-      description: description,
-      images: [user.avatar ? user.avatar.startsWith('http') ? user.avatar : `http://localhost:5000${user.avatar}` : '/logo.jpeg']
+      card: 'summary_large_image',
+      title: `${user.fullName} (@${user.username}) | Mazlis News`,
+      description: user.bio || `Read articles by ${user.fullName} on Mazlis News.`,
+      images: [user.avatar ? user.avatar.startsWith('http') ? user.avatar : `${process.env.NEXT_PUBLIC_STORAGE_URL}${user.avatar}` : '/logo.jpeg']
     }
   };
 }

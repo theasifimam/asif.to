@@ -110,7 +110,7 @@ const STATUS_CONFIG = {
 };
 
 const STORAGE_URL =
-  process.env.NEXT_PUBLIC_STORAGE_URL || "http://localhost:5000";
+  process.env.NEXT_PUBLIC_STORAGE_URL;
 
 export default function UserProfilePage() {
   const { id } = useParams();

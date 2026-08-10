@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 async function getArticle(slugWithId) {
   const id = slugWithId.substring(slugWithId.lastIndexOf('-') + 1);
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   const res = await fetch(`${baseUrl}/articles/${id}`, { next: { revalidate: 60 } });
   if (!res.ok) return null;
   const body = await res.json();
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title: article.title,
       description: description,
-      images: [article.image ? article.image.startsWith('http') ? article.image : `http://localhost:5000${article.image}` : '/logo.jpeg'],
+      images: [article.image ? article.image.startsWith('http') ? article.image : `${process.env.NEXT_PUBLIC_STORAGE_URL}${article.image}` : '/logo.jpeg'],
       type: 'article',
       authors: [article.author?.fullName],
       publishedTime: article.createdAt
@@ -42,7 +42,7 @@ export async function generateMetadata({ params }) {
       card: 'summary_large_image',
       title: article.title,
       description: description,
-      images: [article.image ? article.image.startsWith('http') ? article.image : `http://localhost:5000${article.image}` : '/logo.jpeg']
+      images: [article.image ? article.image.startsWith('http') ? article.image : `${process.env.NEXT_PUBLIC_STORAGE_URL}${article.image}` : '/logo.jpeg']
     }
   };
 }

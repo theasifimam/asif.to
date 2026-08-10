@@ -12,7 +12,7 @@ import {
 import { Loader2, Camera, Twitter, Linkedin, Globe, Github, Instagram, Phone } from 'lucide-react';
 import { Input, Button, Avatar, AvatarFallback, AvatarImage } from '@/components/ui';
 
-const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || 'http://localhost:5000';
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL;
 
 export function EditUserModal({ isOpen, onClose, user, onUpdate, submitting }) {
   const [fullName, setFullName] = useState('');

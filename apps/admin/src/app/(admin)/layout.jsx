@@ -88,7 +88,7 @@ const NAV_ITEMS = [
 ];
 
 const STORAGE_URL =
-  process.env.NEXT_PUBLIC_STORAGE_URL || "http://localhost:5000";
+  process.env.NEXT_PUBLIC_STORAGE_URL;
 
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
