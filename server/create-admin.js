@@ -7,11 +7,11 @@ dotenv.config();
 
 const createAdmin = async () => {
   try {
-    const uri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/news-mazlis";
+    const uri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/news-asif";
     await mongoose.connect(uri);
     console.log("Connected to MongoDB.");
 
-    const email = "admin@mazlis.com";
+    const email = "admin@asif.to";
     const existingAdmin = await User.findOne({ email });
 
     if (existingAdmin) {
@@ -28,11 +28,13 @@ const createAdmin = async () => {
       password: hashedPassword,
       role: "admin",
       status: "active",
-      isVerified: true
+      isVerified: true,
     });
 
     await newAdmin.save();
-    console.log("Admin user created successfully! Email: admin@mazlis.com, Password: admin123");
+    console.log(
+      "Admin user created successfully! Email: admin@asif.to, Password: admin123",
+    );
     process.exit(0);
   } catch (error) {
     console.error("Error creating admin user:", error);

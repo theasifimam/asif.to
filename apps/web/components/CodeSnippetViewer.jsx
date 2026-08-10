@@ -34,10 +34,10 @@ export default function CodeSnippetViewer({
   }, [code, language]);
 
   return (
-    <div className="my-4 rounded-3xl bg-zinc-950 text-zinc-100 overflow-hidden shadow-xl border border-zinc-800/80">
+    <div className="my-3 sm:my-4 rounded-xl sm:rounded-3xl bg-zinc-950 text-zinc-100 overflow-hidden shadow-xl border border-zinc-800/80">
       {/* Header bar */}
-      <div className="flex items-center justify-between px-5 py-3 bg-zinc-900/90 text-xs font-mono text-zinc-400 border-b border-zinc-800/60">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between px-3.5 sm:px-5 py-2.5 sm:py-3 bg-zinc-900/90 text-xs font-mono text-zinc-400 border-b border-zinc-800/60">
+        <div className="flex items-center gap-2 min-w-0">
           <Code className="w-4 h-4 text-blue-400 shrink-0" />
           <span className="font-bold text-zinc-300 truncate">
             {title || language}
@@ -63,7 +63,7 @@ export default function CodeSnippetViewer({
       </div>
 
       {/* Code Area with highlight.js & word wrapping */}
-      <div className="p-5 text-xs sm:text-sm font-mono leading-relaxed bg-[#282c34] text-zinc-200 selection:bg-blue-500/30 selection:text-white">
+      <div className="p-3.5 sm:p-5 text-xs sm:text-sm font-mono leading-relaxed bg-[#282c34] text-zinc-200 selection:bg-blue-500/30 selection:text-white">
         <pre className="whitespace-pre-wrap wrap-break-word m-0 font-mono">
           <code
             className={`hljs language-${language}`}

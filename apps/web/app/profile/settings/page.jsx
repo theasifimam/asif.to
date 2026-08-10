@@ -22,7 +22,10 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
-import { useGetProfileQuery, useUpdateProfileMutation } from "@/lib/api/authApi";
+import {
+  useGetProfileQuery,
+  useUpdateProfileMutation,
+} from "@/lib/api/authApi";
 import { toast } from "sonner";
 import { getImageUrl } from "@/lib/config";
 import { setCredentials } from "@/lib/store/authSlice";
@@ -30,10 +33,15 @@ import { setCredentials } from "@/lib/store/authSlice";
 export default function ProfileSettingsPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { isAuthenticated, user: storeUser } = useAppSelector((state) => state.auth);
-  const { data: profileRes, isLoading: profileLoading } = useGetProfileQuery(undefined, {
-    skip: !isAuthenticated,
-  });
+  const { isAuthenticated, user: storeUser } = useAppSelector(
+    (state) => state.auth,
+  );
+  const { data: profileRes, isLoading: profileLoading } = useGetProfileQuery(
+    undefined,
+    {
+      skip: !isAuthenticated,
+    },
+  );
   const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
 
   const [formData, setFormData] = useState({
@@ -120,7 +128,7 @@ export default function ProfileSettingsPage() {
 
       const res = await updateProfile(data).unwrap();
       if (res.success) {
-        const token = localStorage.getItem("mazlis_token") || "";
+        const token = localStorage.getItem("asif_token") || "";
         dispatch(setCredentials({ user: res.data.user, token }));
         toast.success("Profile updated successfully!");
         router.push("/profile");
@@ -152,7 +160,10 @@ export default function ProfileSettingsPage() {
             onClick={() => router.back()}
             className="flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-foreground transition-colors w-fit group"
           >
-            <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+            <ChevronLeft
+              size={16}
+              className="group-hover:-translate-x-1 transition-transform"
+            />
             <span>Back to Profile</span>
           </button>
 
@@ -218,9 +229,12 @@ export default function ProfileSettingsPage() {
             </div>
 
             <div className="flex flex-col items-center sm:items-start text-center sm:text-left gap-1.5 flex-1">
-              <h3 className="font-extrabold text-base text-foreground">Profile Photo</h3>
+              <h3 className="font-extrabold text-base text-foreground">
+                Profile Photo
+              </h3>
               <p className="text-xs text-zinc-500 font-medium leading-relaxed max-w-md">
-                Upload a professional avatar image. Recommended size 400x400px (JPG, PNG, or GIF).
+                Upload a professional avatar image. Recommended size 400x400px
+                (JPG, PNG, or GIF).
               </p>
               <label className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-foreground text-xs font-bold cursor-pointer transition-all active:scale-95 shadow-xs">
                 <Edit3 className="w-3.5 h-3.5 text-blue-500" />
@@ -242,8 +256,12 @@ export default function ProfileSettingsPage() {
                 <User size={18} />
               </div>
               <div>
-                <h2 className="text-sm font-extrabold text-foreground">Personal Information</h2>
-                <p className="text-[11px] text-zinc-400 font-medium">Your public name and contact details</p>
+                <h2 className="text-sm font-extrabold text-foreground">
+                  Personal Information
+                </h2>
+                <p className="text-[11px] text-zinc-400 font-medium">
+                  Your public name and contact details
+                </p>
               </div>
             </div>
 
@@ -276,7 +294,10 @@ export default function ProfileSettingsPage() {
                     placeholder="+91 98765 43210"
                     className={`${inputClasses} pl-10`}
                   />
-                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" size={15} />
+                  <Phone
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"
+                    size={15}
+                  />
                 </div>
               </div>
 
@@ -293,7 +314,10 @@ export default function ProfileSettingsPage() {
                     placeholder="e.g. San Francisco, CA or Remote"
                     className={`${inputClasses} pl-10`}
                   />
-                  <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" size={15} />
+                  <MapPin
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"
+                    size={15}
+                  />
                 </div>
               </div>
 
@@ -320,8 +344,12 @@ export default function ProfileSettingsPage() {
                 <Globe size={18} />
               </div>
               <div>
-                <h2 className="text-sm font-extrabold text-foreground">Social & Portfolio Connections</h2>
-                <p className="text-[11px] text-zinc-400 font-medium">Link your public developer channels</p>
+                <h2 className="text-sm font-extrabold text-foreground">
+                  Social & Portfolio Connections
+                </h2>
+                <p className="text-[11px] text-zinc-400 font-medium">
+                  Link your public developer channels
+                </p>
               </div>
             </div>
 
@@ -339,7 +367,10 @@ export default function ProfileSettingsPage() {
                     placeholder="twitter.com/username"
                     className={`${inputClasses} pl-10`}
                   />
-                  <Twitter className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" size={15} />
+                  <Twitter
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"
+                    size={15}
+                  />
                 </div>
               </div>
 
@@ -356,7 +387,10 @@ export default function ProfileSettingsPage() {
                     placeholder="linkedin.com/in/username"
                     className={`${inputClasses} pl-10`}
                   />
-                  <Linkedin className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" size={15} />
+                  <Linkedin
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"
+                    size={15}
+                  />
                 </div>
               </div>
 
@@ -373,7 +407,10 @@ export default function ProfileSettingsPage() {
                     placeholder="https://yourportfolio.dev"
                     className={`${inputClasses} pl-10`}
                   />
-                  <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" size={15} />
+                  <Globe
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"
+                    size={15}
+                  />
                 </div>
               </div>
             </div>
@@ -418,7 +455,9 @@ export default function ProfileSettingsPage() {
               Encrypted & Privacy Protected
             </h3>
             <p className="text-xs text-zinc-500 font-medium leading-relaxed">
-              Your profile information is securely synced. Only public details (name, avatar, location, bio, and social links) are shown on your public author page.
+              Your profile information is securely synced. Only public details
+              (name, avatar, location, bio, and social links) are shown on your
+              public author page.
             </p>
           </div>
         </div>

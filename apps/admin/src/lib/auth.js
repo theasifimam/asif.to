@@ -1,7 +1,7 @@
 /**
- * Mazlis Admin Panel - Auth Utilities
+ * asif Admin Panel - Auth Utilities
  * Frontend-only authentication scaffolding
- * 
+ *
  * NOTE: This is a placeholder implementation.
  * Replace with actual auth integration when connecting to backend.
  */
@@ -11,32 +11,6 @@ const AUTH_TOKEN_KEY = "asif_admin_token";
 const AUTH_USER_KEY = "asif_admin_user";
 
 // Types
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  * Check if user is authenticated
@@ -54,7 +28,10 @@ export function isAuthenticated() {
  */
 export function getAuthToken() {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(AUTH_TOKEN_KEY) || localStorage.getItem("mazlis_admin_token");
+  return (
+    localStorage.getItem(AUTH_TOKEN_KEY) ||
+    localStorage.getItem("asif_admin_token")
+  );
 }
 
 /**
@@ -80,7 +57,7 @@ export function getAuthState() {
   return {
     isAuthenticated: isAuthenticated(),
     user: getCurrentUser(),
-    token: getAuthToken()
+    token: getAuthToken(),
   };
 }
 
@@ -95,12 +72,12 @@ export async function login(credentials) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "true"
+        "ngrok-skip-browser-warning": "true",
       },
       body: JSON.stringify({
         emailOrUsername: credentials.email,
-        password: credentials.password
-      })
+        password: credentials.password,
+      }),
     });
 
     const data = await response.json();
@@ -108,7 +85,7 @@ export async function login(credentials) {
     if (!response.ok) {
       return {
         success: false,
-        error: data.message || "Login failed"
+        error: data.message || "Login failed",
       };
     }
 
@@ -119,7 +96,7 @@ export async function login(credentials) {
       name: data.data.user.fullName,
       role: data.data.user.role, // Ensure backend returns role
       avatar: data.data.user.profilePicture?.url,
-      createdAt: data.data.user.createdAt
+      createdAt: data.data.user.createdAt,
     };
 
     localStorage.setItem(AUTH_TOKEN_KEY, data.data.token);
@@ -128,13 +105,13 @@ export async function login(credentials) {
     return {
       success: true,
       user: user,
-      token: data.data.token
+      token: data.data.token,
     };
   } catch (error) {
     console.error("Login error:", error);
     return {
       success: false,
-      error: "Network error during login"
+      error: "Network error during login",
     };
   }
 }
@@ -173,7 +150,7 @@ export function hasRole(requiredRole) {
   const roleHierarchy = {
     super_admin: 3,
     admin: 2,
-    moderator: 1
+    moderator: 1,
   };
 
   return roleHierarchy[user.role] >= roleHierarchy[requiredRole];
@@ -187,6 +164,6 @@ export function getAuthHeaders() {
 
   return {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {})
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 }

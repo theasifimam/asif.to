@@ -16,14 +16,13 @@ export default function NewsletterBanner() {
       return;
     }
     setSubscribed(true);
-    toast.success("Subscribed to Mazlis Dispatch!");
+    toast.success("Subscribed to asif Dispatch!");
     setEmail("");
   };
 
   return (
     <section className="w-full my-8">
       <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#b6c173] via-[#c7d584] to-[#788544] dark:from-[#212a15] dark:via-[#13190d] dark:to-black text-[#1b2111] dark:text-[#dfeba8] p-8 md:p-12 border border-[#b6c173]/30 dark:border-[#2d3624] shadow-xl shadow-[#b6c173]/10 dark:shadow-black/50">
-        
         {/* Floating background decorative blobs/orbs */}
         <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-white/10 dark:bg-[#c2d08a]/5 blur-2xl pointer-events-none" />
         <div className="absolute -bottom-20 -right-20 w-64 h-64 rounded-full bg-black/5 dark:bg-[#b6c173]/5 blur-3xl pointer-events-none" />
@@ -50,10 +49,13 @@ export default function NewsletterBanner() {
               </span>
             </div>
             <h2 className="text-2xl md:text-3.5xl font-black font-outfit tracking-tight leading-tight text-[#1b2111] dark:text-white uppercase">
-              Independent Intel. <br className="hidden sm:inline" /> Straight to your inbox.
+              Independent Intel. <br className="hidden sm:inline" /> Straight to
+              your inbox.
             </h2>
             <p className="text-[#3b4724] dark:text-slate-400 text-xs md:text-sm font-semibold leading-relaxed max-w-lg">
-              Unlock weekly security logs, architectural frameworks, and philosophical updates directly on your interface. No tracking. Pure signal.
+              Unlock weekly security logs, architectural frameworks, and
+              philosophical updates directly on your interface. No tracking.
+              Pure signal.
             </p>
           </div>
 
@@ -65,13 +67,19 @@ export default function NewsletterBanner() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex items-center gap-3 p-4 rounded-full bg-black/10 dark:bg-[#c2d08a]/10 border border-black/15 dark:border-[#c2d08a]/20 text-[#1b2111] dark:text-[#c2d08a] backdrop-blur-md"
               >
-                <CheckCircle2 size={20} className="text-[#1b2111] dark:text-[#c2d08a] shrink-0" />
+                <CheckCircle2
+                  size={20}
+                  className="text-[#1b2111] dark:text-[#c2d08a] shrink-0"
+                />
                 <span className="text-xs font-black tracking-wider uppercase font-outfit">
                   Verified. You are on the dispatch list.
                 </span>
               </motion.div>
             ) : (
-              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+              <form
+                onSubmit={handleSubmit}
+                className="flex flex-col sm:flex-row gap-3"
+              >
                 <input
                   type="email"
                   value={email}

@@ -1,18 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-
-
-
-
-
-
-
-
 const initialState = {
   user: null,
   token: null,
   isAuthenticated: false,
-  isInitialized: false
+  isInitialized: false,
 };
 
 const authSlice = createSlice({
@@ -25,8 +17,8 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.isInitialized = true;
       if (typeof window !== "undefined") {
-        localStorage.setItem("mazlis_token", action.payload.token);
-        localStorage.setItem("mazlis_user", JSON.stringify(action.payload.user));
+        localStorage.setItem("asif_token", action.payload.token);
+        localStorage.setItem("asif_user", JSON.stringify(action.payload.user));
       }
     },
     clearCredentials(state) {
@@ -35,24 +27,24 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.isInitialized = true;
       if (typeof window !== "undefined") {
-        localStorage.removeItem("mazlis_token");
-        localStorage.removeItem("mazlis_user");
+        localStorage.removeItem("asif_token");
+        localStorage.removeItem("asif_user");
       }
     },
     // Hydrate from localStorage on app load
     hydrateAuth(state) {
       if (typeof window !== "undefined") {
-        const token = localStorage.getItem("mazlis_token");
-        const userStr = localStorage.getItem("mazlis_user");
+        const token = localStorage.getItem("asif_token");
+        const userStr = localStorage.getItem("asif_user");
         if (token && userStr) {
           try {
             state.user = JSON.parse(userStr);
             state.token = token;
             state.isAuthenticated = true;
           } catch {
-
             // corrupted data
-          }}
+          }
+        }
         state.isInitialized = true;
       }
     },
@@ -61,29 +53,29 @@ const authSlice = createSlice({
         const articleId = action.payload;
         if (!state.user.bookmarks) state.user.bookmarks = [];
 
-        const isBookmarked = state.user.bookmarks.some((b) =>
-        (typeof b === 'string' ? b : b._id) === articleId
+        const isBookmarked = state.user.bookmarks.some(
+          (b) => (typeof b === "string" ? b : b._id) === articleId,
         );
 
         if (isBookmarked) {
-          state.user.bookmarks = state.user.bookmarks.filter((b) =>
-          (typeof b === 'string' ? b : b._id) !== articleId
+          state.user.bookmarks = state.user.bookmarks.filter(
+            (b) => (typeof b === "string" ? b : b._id) !== articleId,
           );
         } else {
           state.user.bookmarks.push(articleId);
         }
 
         if (typeof window !== "undefined") {
-          localStorage.setItem("mazlis_user", JSON.stringify(state.user));
+          localStorage.setItem("asif_user", JSON.stringify(state.user));
         }
       }
-    }
+    },
   },
   extraReducers: (builder) => {
-
-
     // We can't import authApi here because of circular dependency
     // But we can listen for fulfilled actions if we want, or just update credentials manually in components
-  } });
-export const { setCredentials, clearCredentials, hydrateAuth, toggleBookmark } = authSlice.actions;
+  },
+});
+export const { setCredentials, clearCredentials, hydrateAuth, toggleBookmark } =
+  authSlice.actions;
 export default authSlice.reducer;

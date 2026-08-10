@@ -24,15 +24,15 @@ export async function generateMetadata({ params }) {
 
   if (!course) {
     return {
-      title: "Course Not Found | Mazlis News",
+      title: "Course Not Found | asif.to",
     };
   }
 
-  const description = course.subtitle || `Learn ${course.title} on Mazlis News.`;
+  const description = course.subtitle || `Learn ${course.title} on asif.to.`;
   const defaultImage = "/logo.jpeg";
 
   return {
-    title: `${course.title} | Mazlis News`,
+    title: `${course.title} | asif.to`,
     description: description,
     openGraph: {
       title: course.title,

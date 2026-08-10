@@ -34,6 +34,8 @@ import {
   CheckCircle2,
   Loader2,
   X,
+  Trash2,
+  ChevronRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -46,6 +48,29 @@ export default function ProfilePage() {
   const [authTab, setAuthTab] = useState("signin");
   const [activeTab, setActiveTab] = useState("saved");
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [savedLectures, setSavedLectures] = useState([]);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("asif_saved_lectures");
+        if (saved) setSavedLectures(JSON.parse(saved));
+      } catch {}
+    }
+  }, []);
+
+  const removeSavedLecture = (chapterId) => {
+    setSavedLectures((prev) => {
+      const updated = prev.filter((item) => item.chapterId !== chapterId);
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("asif_saved_lectures", JSON.stringify(updated));
+        } catch {}
+      }
+      return updated;
+    });
+    toast.success("Saved lecture removed");
+  };
 
   const [signout, { isLoading: isSigningOut }] = useSignoutMutation();
 
@@ -282,37 +307,95 @@ export default function ProfilePage() {
               )}
 
               {activeTab === "saved" && (
-                <div>
-                  {user?.bookmarks && user.bookmarks.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {user.bookmarks.map((item) => (
-                        <ArticleCard
-                          key={item._id}
-                          article={{
-                            id: item._id,
-                            slug: item.slug,
-                            title: item.title,
-                            author: item.author?.fullName || "asif.to Team",
-                            date: new Date(item.createdAt).toLocaleDateString(),
-                            imageUrl: item.image,
-                            views: item.readCount || 120,
-                          }}
-                          variant="vertical"
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-12 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-sm text-center flex flex-col items-center gap-3">
-                      <Bookmark className="w-10 h-10 text-zinc-300 dark:text-zinc-700" />
-                      <h3 className="font-extrabold text-base text-foreground">Your Saved Collection is Empty</h3>
-                      <p className="text-xs text-zinc-500 max-w-sm">
-                        Bookmark your favorite coding courses, cheatsheets, and tutorial lessons to access them instantly anytime.
-                      </p>
-                      <Link href="/" className="mt-2 px-6 py-2.5 rounded-full bg-blue-600 text-white text-xs font-bold shadow-md">
-                        Explore Courses
-                      </Link>
-                    </div>
-                  )}
+                <div className="space-y-8">
+                  {/* Saved Course Lectures */}
+                  <div>
+                    <h3 className="font-extrabold text-sm uppercase tracking-wider text-zinc-400 mb-4 flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-blue-500" />
+                      Saved Lectures & Lessons ({savedLectures.length})
+                    </h3>
+
+                    {savedLectures.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {savedLectures.map((item) => (
+                          <div
+                            key={item.chapterId}
+                            className="p-5 rounded-3xl bg-white dark:bg-zinc-900 shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col justify-between gap-3 hover:border-blue-500/30 transition-all"
+                          >
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="font-bold px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 uppercase tracking-wider text-[10px]">
+                                  {item.courseTitle || "Course"}
+                                </span>
+                                <button
+                                  onClick={() => removeSavedLecture(item.chapterId)}
+                                  className="text-zinc-400 hover:text-red-500 p-1 transition-colors"
+                                  title="Remove from saved"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                              <h4 className="font-extrabold text-sm text-foreground leading-snug line-clamp-2">
+                                {item.chapterTitle}
+                              </h4>
+                              {item.summary && (
+                                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium line-clamp-2">
+                                  {item.summary}
+                                </p>
+                              )}
+                            </div>
+                            <Link
+                              href={`/courses/${item.courseId}/${item.chapterId}`}
+                              className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline pt-2 border-t border-zinc-100 dark:border-zinc-800/80 mt-1"
+                            >
+                              <span>Read Lecture</span>
+                              <ChevronRight className="w-3.5 h-3.5" />
+                            </Link>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-8 rounded-3xl bg-white dark:bg-zinc-900/90 shadow-sm text-center flex flex-col items-center gap-2 border border-zinc-100 dark:border-zinc-800">
+                        <p className="text-xs text-zinc-500 font-medium">
+                          No saved lectures yet. Click "Save Lecture" while reading any course chapter to add it here.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Saved Articles */}
+                  <div>
+                    <h3 className="font-extrabold text-sm uppercase tracking-wider text-zinc-400 mb-4 flex items-center gap-2">
+                      <Bookmark className="w-4 h-4 text-purple-500" />
+                      Saved Articles ({user?.bookmarks?.length || 0})
+                    </h3>
+
+                    {user?.bookmarks && user.bookmarks.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {user.bookmarks.map((item) => (
+                          <ArticleCard
+                            key={item._id}
+                            article={{
+                              id: item._id,
+                              slug: item.slug,
+                              title: item.title,
+                              author: item.author?.fullName || "asif.to Team",
+                              date: new Date(item.createdAt).toLocaleDateString(),
+                              imageUrl: item.image,
+                              views: item.readCount || 120,
+                            }}
+                            variant="vertical"
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-8 rounded-3xl bg-white dark:bg-zinc-900/90 shadow-sm text-center flex flex-col items-center gap-2 border border-zinc-100 dark:border-zinc-800">
+                        <p className="text-xs text-zinc-500 font-medium">
+                          No saved articles found in your bookmarks collection.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 

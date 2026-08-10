@@ -8,7 +8,7 @@ async function getChapterData(courseId, chapterId) {
   try {
     const res = await fetch(
       `${baseUrl}/courses/slug/${courseId}/chapters/${chapterId}`,
-      { next: { revalidate: 60 } }
+      { next: { revalidate: 60 } },
     );
     if (!res.ok) return null;
     const body = await res.json();
@@ -25,16 +25,18 @@ export async function generateMetadata({ params }) {
 
   if (!data || !data.chapter) {
     return {
-      title: "Lesson Not Found | Mazlis News",
+      title: "Lesson Not Found | asif.to",
     };
   }
 
   const { course, chapter } = data;
-  const description = chapter.summary || `Read ${chapter.title} in the ${course.title} course on Mazlis News.`;
+  const description =
+    chapter.summary ||
+    `Read ${chapter.title} in the ${course.title} course on asif.to.`;
   const defaultImage = "/logo.jpeg";
 
   return {
-    title: `${chapter.title} - ${course.title} | Mazlis News`,
+    title: `${chapter.title} - ${course.title} | asif.to`,
     description: description,
     openGraph: {
       title: `${chapter.title} - ${course.title}`,

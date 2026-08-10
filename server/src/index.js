@@ -27,21 +27,23 @@ connectDB();
 const app = express();
 
 // ─── Middleware ────────────────────────────────────────────────────────────
-app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "http://192.168.1.11:3000",
-    "http://192.168.1.11:3001",
-    "https://asif.to",
-    "https://www.asif.to",
-    "https://admin.asif.to",
-    "https://api.asif.to",
-    process.env.ADMIN_URL || "http://localhost:3001",
-    process.env.WEB_URL || "http://localhost:3000",
-  ],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://192.168.1.11:3000",
+      "http://192.168.1.11:3001",
+      "https://asif.to",
+      "https://www.asif.to",
+      "https://admin.asif.to",
+      "https://api.asif.to",
+      process.env.ADMIN_URL || "http://localhost:3001",
+      process.env.WEB_URL || "http://localhost:3000",
+    ],
+    credentials: true,
+  }),
+);
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -53,8 +55,8 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.get("/health", (req, res) => {
   res.json({
     status: "ok",
-    message: "Mazlis News API is running",
-    timestamp: new Date().toISOString()
+    message: "asif.to API is running",
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -75,7 +77,9 @@ app.use("/api/v1/flashcards", flashcardRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {
-  res.status(404).json({ success: false, message: `Route '${req.originalUrl}' not found.` });
+  res
+    .status(404)
+    .json({ success: false, message: `Route '${req.originalUrl}' not found.` });
 });
 
 // ─── Start Server ──────────────────────────────────────────────────────────

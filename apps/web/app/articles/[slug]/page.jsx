@@ -1,13 +1,15 @@
-import React from 'react';
-import ArticleClient from '@/components/ArticleClient';
-import { Metadata } from 'next';
+import React from "react";
+import ArticleClient from "@/components/ArticleClient";
+import { Metadata } from "next";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 async function getArticle(slugWithId) {
-  const id = slugWithId.substring(slugWithId.lastIndexOf('-') + 1);
+  const id = slugWithId.substring(slugWithId.lastIndexOf("-") + 1);
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-  const res = await fetch(`${baseUrl}/articles/${id}`, { next: { revalidate: 60 } });
+  const res = await fetch(`${baseUrl}/articles/${id}`, {
+    next: { revalidate: 60 },
+  });
   if (!res.ok) return null;
   const body = await res.json();
   return body.data;
@@ -19,31 +21,43 @@ export async function generateMetadata({ params }) {
 
   if (!article) {
     return {
-      title: 'Article Not Found | Mazlis News'
+      title: "Article Not Found | asif.to",
     };
   }
 
-  const description = article.content ?
-  article.content.replace(/<[^>]*>/g, '').substring(0, 160) + '...' :
-  'Read the latest investigations on Mazlis News.';
+  const description = article.content
+    ? article.content.replace(/<[^>]*>/g, "").substring(0, 160) + "..."
+    : "Read the latest investigations on asif.to.";
 
   return {
-    title: `${article.title} | Mazlis News`,
+    title: `${article.title} | asif.to`,
     description: description,
     openGraph: {
       title: article.title,
       description: description,
-      images: [article.image ? article.image.startsWith('http') ? article.image : `${process.env.NEXT_PUBLIC_STORAGE_URL}${article.image}` : '/logo.jpeg'],
-      type: 'article',
+      images: [
+        article.image
+          ? article.image.startsWith("http")
+            ? article.image
+            : `${process.env.NEXT_PUBLIC_STORAGE_URL}${article.image}`
+          : "/logo.jpeg",
+      ],
+      type: "article",
       authors: [article.author?.fullName],
-      publishedTime: article.createdAt
+      publishedTime: article.createdAt,
     },
     twitter: {
-      card: 'summary_large_image',
+      card: "summary_large_image",
       title: article.title,
       description: description,
-      images: [article.image ? article.image.startsWith('http') ? article.image : `${process.env.NEXT_PUBLIC_STORAGE_URL}${article.image}` : '/logo.jpeg']
-    }
+      images: [
+        article.image
+          ? article.image.startsWith("http")
+            ? article.image
+            : `${process.env.NEXT_PUBLIC_STORAGE_URL}${article.image}`
+          : "/logo.jpeg",
+      ],
+    },
   };
 }
 

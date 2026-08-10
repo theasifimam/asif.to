@@ -4,14 +4,14 @@ const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
   headers: {
-    "Content-Type": "application/json"
-  }
+    "Content-Type": "application/json",
+  },
 });
 
 // Attach JWT from localStorage on every request
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-    const token = localStorage.getItem("mazlis_token");
+    const token = localStorage.getItem("asif_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

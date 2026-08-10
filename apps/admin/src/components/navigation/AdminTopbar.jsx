@@ -5,11 +5,6 @@ import { getCurrentUser } from "@/lib/auth";
 import { Bell, Search, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 
-
-
-
-
-
 /**
  * AdminTopbar - Top navigation bar for admin panel
  *
@@ -21,9 +16,7 @@ import { useEffect, useState } from "react";
  * - User profile
  */
 export function AdminTopbar({ className, title }) {
-  const [user, setUser] = useState(
-    null
-  );
+  const [user, setUser] = useState(null);
   const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
@@ -45,16 +38,16 @@ export function AdminTopbar({ className, title }) {
       className={cn(
         "flex h-16 items-center justify-between px-6",
         "bg-background/80 backdrop-blur-sm",
-        className
-      )}>
-      
+        className,
+      )}
+    >
       {/* Left: Title */}
       <div>
-        {title &&
-        <h1 className="text-xl font-black uppercase tracking-wider">
+        {title && (
+          <h1 className="text-xl font-black uppercase tracking-wider">
             {title}
           </h1>
-        }
+        )}
       </div>
 
       {/* Right: Actions */}
@@ -64,9 +57,9 @@ export function AdminTopbar({ className, title }) {
           className={cn(
             "flex h-10 w-10 items-center justify-center rounded-[12px]",
             "bg-muted text-muted-foreground",
-            "transition-smooth hover:bg-muted/80 hover:text-foreground"
-          )}>
-          
+            "transition-smooth hover:bg-muted/80 hover:text-foreground",
+          )}
+        >
           <Search className="h-5 w-5" />
         </button>
 
@@ -75,9 +68,9 @@ export function AdminTopbar({ className, title }) {
           className={cn(
             "relative flex h-10 w-10 items-center justify-center rounded-[12px]",
             "bg-muted text-muted-foreground",
-            "transition-smooth hover:bg-muted/80 hover:text-foreground"
-          )}>
-          
+            "transition-smooth hover:bg-muted/80 hover:text-foreground",
+          )}
+        >
           <Bell className="h-5 w-5" />
           {/* Notification badge */}
           <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
@@ -91,9 +84,9 @@ export function AdminTopbar({ className, title }) {
           className={cn(
             "flex h-10 w-10 items-center justify-center rounded-[12px]",
             "bg-muted text-muted-foreground",
-            "transition-smooth hover:bg-muted/80 hover:text-foreground"
-          )}>
-          
+            "transition-smooth hover:bg-muted/80 hover:text-foreground",
+          )}
+        >
           {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </button>
 
@@ -112,13 +105,13 @@ export function AdminTopbar({ className, title }) {
               {user?.name || "Admin User"}
             </p>
             <p className="text-xs text-muted-foreground">
-              {user?.email || "admin@mazlis.app"}
+              {user?.email || "admin@asif.app"}
             </p>
           </div>
         </div>
       </div>
-    </header>);
-
+    </header>
+  );
 }
 
 export default AdminTopbar;

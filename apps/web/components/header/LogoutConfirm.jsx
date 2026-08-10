@@ -29,7 +29,7 @@ export default function LogoutConfirm({ isOpen, onClose, onConfirm }) {
               Sign Out Now?
             </h2>
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-10 leading-relaxed font-medium">
-              You are about to sign out of Mazlis News. You'll need to
+              You are about to sign out of asif.to. You'll need to
               re-authenticate to access your Intel library.
             </p>
             <div className="flex flex-col w-full gap-3">

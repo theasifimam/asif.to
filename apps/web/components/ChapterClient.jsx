@@ -226,12 +226,18 @@ export default function ChapterClient() {
 
   // Local state for completed chapters
   const [completedChapters, setCompletedChapters] = useState([]);
+  // Local state for saved lectures
+  const [savedLectures, setSavedLectures] = useState([]);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && courseId) {
+    if (typeof window !== "undefined") {
       try {
-        const saved = localStorage.getItem(`course_completed_${courseId}`);
-        if (saved) setCompletedChapters(JSON.parse(saved));
+        if (courseId) {
+          const savedComp = localStorage.getItem(`course_completed_${courseId}`);
+          if (savedComp) setCompletedChapters(JSON.parse(savedComp));
+        }
+        const savedLec = localStorage.getItem("asif_saved_lectures");
+        if (savedLec) setSavedLectures(JSON.parse(savedLec));
       } catch {
         /* ignore */
       }
@@ -275,6 +281,45 @@ export default function ChapterClient() {
   const progressPercentage = allChapters.length
     ? Math.round(((currentChapterIndex + 1) / allChapters.length) * 100)
     : 0;
+
+  const isCurrentSaved = useMemo(() => {
+    return savedLectures.some(
+      (item) => item.courseId === courseId && item.chapterId === chapter?.slug,
+    );
+  }, [savedLectures, courseId, chapter?.slug]);
+
+  const toggleSaveLecture = () => {
+    if (!courseId || !chapter?.slug) return;
+    setSavedLectures((prev) => {
+      const exists = prev.some(
+        (item) => item.courseId === courseId && item.chapterId === chapter.slug,
+      );
+      let updated;
+      if (exists) {
+        updated = prev.filter(
+          (item) =>
+            !(item.courseId === courseId && item.chapterId === chapter.slug),
+        );
+      } else {
+        const newItem = {
+          courseId,
+          courseTitle: course?.title || "Course",
+          chapterId: chapter.slug,
+          chapterTitle: chapter.title,
+          summary: chapter.summary || "",
+          techId: course?.techId,
+          savedAt: new Date().toISOString(),
+        };
+        updated = [newItem, ...prev];
+      }
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("asif_saved_lectures", JSON.stringify(updated));
+        } catch {}
+      }
+      return updated;
+    });
+  };
 
   const activeItemRef = useRef(null);
 
@@ -402,10 +447,10 @@ export default function ChapterClient() {
   // Font size multiplier classes
   const fontBodyClass =
     fontSize === "sm"
-      ? "text-sm leading-relaxed"
+      ? "text-[13px] sm:text-sm leading-relaxed"
       : fontSize === "lg"
-        ? "text-lg sm:text-xl leading-loose"
-        : "text-base sm:text-lg leading-relaxed";
+        ? "text-sm sm:text-xl leading-loose"
+        : "text-sm sm:text-lg leading-relaxed";
 
   let sectionHeadingCount = 0;
 
@@ -528,16 +573,16 @@ export default function ChapterClient() {
       )}
 
       <main
-        className={`flex-1 w-full mx-auto px-4 sm:px-6 transition-all duration-300 ${
+        className={`flex-1 w-full mx-auto px-0 sm:px-6 transition-all duration-300 ${
           isFocusMode
             ? "max-w-4xl py-6 sm:py-10"
-            : "max-w-7xl pt-20 sm:pt-24 flex flex-col gap-6 pb-24 sm:pb-12"
+            : "max-w-7xl pt-16 sm:pt-24 flex flex-col gap-0 sm:gap-6 pb-28 sm:pb-16"
         }`}
       >
         {/* Standard Mode Top Header Bar */}
         {!isFocusMode && (
           <>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 sm:p-6 rounded-none sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-none sm:shadow-xs border-b sm:border border-zinc-200/60 dark:border-zinc-800/60">
               <div className="flex items-center gap-3">
                 <Link
                   href={`/courses/${courseId}`}
@@ -720,7 +765,7 @@ export default function ChapterClient() {
           >
             {/* Top Quick Navigation (Standard Mode) */}
             {!isFocusMode && (
-              <div className="flex items-center justify-between p-4 rounded-3xl bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 text-xs font-bold">
+              <div className="flex items-center justify-between p-3.5 sm:p-4 rounded-none sm:rounded-3xl bg-white dark:bg-zinc-900/90 shadow-none sm:shadow-xs border-b sm:border border-zinc-200/60 dark:border-zinc-800/60 text-xs font-bold">
                 {prevChapter ? (
                   <Link
                     href={`/courses/${courseId}/${prevChapter.slug}`}
@@ -759,8 +804,8 @@ export default function ChapterClient() {
 
             {/* Main Lesson Reader Document Card */}
             <div
-              className={`rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 flex flex-col gap-6 ${
-                isFocusMode ? "p-6 sm:p-12 shadow-xl" : "p-6 sm:p-10"
+              className={`rounded-none sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-none sm:shadow-xs border-0 sm:border border-zinc-200/60 dark:border-zinc-800/60 flex flex-col gap-5 sm:gap-6 ${
+                isFocusMode ? "px-4 py-6 sm:p-12 shadow-xl" : "px-4 py-6 sm:p-10"
               }`}
             >
               {/* Document Header */}
@@ -777,20 +822,36 @@ export default function ChapterClient() {
                     </span>
                   </div>
 
-                  {/* Mark as Done Toggle Button */}
-                  <button
-                    onClick={() => toggleChapterComplete(chapter?.slug)}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all ${
-                      isCurrentCompleted
-                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                        : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200"
-                    }`}
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    <span>
-                      {isCurrentCompleted ? "Completed" : "Mark as Completed"}
-                    </span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {/* Mark as Done Toggle Button */}
+                    <button
+                      onClick={() => toggleChapterComplete(chapter?.slug)}
+                      className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                        isCurrentCompleted
+                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                          : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200"
+                      }`}
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      <span>
+                        {isCurrentCompleted ? "Completed" : "Mark Done"}
+                      </span>
+                    </button>
+
+                    {/* Save Lecture Toggle Button */}
+                    <button
+                      onClick={toggleSaveLecture}
+                      className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                        isCurrentSaved
+                          ? "bg-amber-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20"
+                          : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200"
+                      }`}
+                      title={isCurrentSaved ? "Remove from saved lectures" : "Save lecture for later"}
+                    >
+                      <Bookmark className={`w-3.5 h-3.5 ${isCurrentSaved ? "fill-current" : ""}`} />
+                      <span>{isCurrentSaved ? "Saved" : "Save"}</span>
+                    </button>
+                  </div>
                 </div>
 
                 <h1
@@ -818,7 +879,7 @@ export default function ChapterClient() {
                     <Sparkles className="w-4 h-4 text-blue-500" />
                     Key Chapter Explanations
                   </h3>
-                  <div className="space-y-3 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 font-medium">
+                  <div className="space-y-3 text-sm text-zinc-600 dark:text-zinc-300 font-medium">
                     {chapter.content.map((point, idx) => (
                       <div
                         key={idx}
@@ -891,7 +952,7 @@ export default function ChapterClient() {
                     }
                     if (block.type === "code") {
                       return (
-                        <div key={idx} className="my-6">
+                        <div key={idx} className="my-3 sm:my-6">
                           <CodeSnippetViewer
                             code={block.code}
                             title={block.title}
@@ -903,7 +964,7 @@ export default function ChapterClient() {
                       return (
                         <div
                           key={idx}
-                          className="my-6 rounded-3xl overflow-hidden shadow-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
+                          className="my-4 sm:my-6 rounded-2xl sm:rounded-3xl overflow-hidden shadow-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
                         >
                           <img
                             src={block.url}
@@ -932,7 +993,7 @@ export default function ChapterClient() {
                       return (
                         <blockquote
                           key={idx}
-                          className="border-l-4 border-blue-500 pl-5 py-4 my-6 bg-blue-500/5 dark:bg-blue-500/10 rounded-r-2xl text-zinc-800 dark:text-zinc-200 font-medium shadow-xs flex items-start gap-3"
+                          className="border-l-4 border-blue-500 pl-4 py-3 my-4 sm:my-6 bg-blue-500/5 dark:bg-blue-500/10 rounded-r-2xl text-zinc-800 dark:text-zinc-200 font-medium shadow-xs flex items-start gap-3"
                         >
                           <Lightbulb className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
                           <div className="flex-1 italic leading-relaxed">
@@ -995,7 +1056,7 @@ export default function ChapterClient() {
                       return (
                         <div
                           key={idx}
-                          className="overflow-x-auto my-6 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs"
+                          className="overflow-x-auto my-4 sm:my-6 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs"
                         >
                           <table className="w-full text-left border-collapse min-w-max">
                             <thead>
@@ -1065,7 +1126,7 @@ export default function ChapterClient() {
 
             {/* Try It Challenge */}
             {chapter?.tryItChallenge && (
-              <div className="p-6 sm:p-8 rounded-[2.5rem] bg-linear-to-br from-indigo-500/10 via-purple-500/10 to-blue-500/10 shadow-xs border border-indigo-500/20 space-y-3">
+              <div className="p-4 sm:p-8 rounded-none sm:rounded-[2.5rem] bg-linear-to-br from-indigo-500/10 via-purple-500/10 to-blue-500/10 shadow-none sm:shadow-xs border-y sm:border border-indigo-500/20 space-y-3">
                 <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-black text-sm sm:text-base">
                   <Play className="w-4 h-4 fill-current" />
                   <span>Try It Yourself Challenge</span>
@@ -1077,7 +1138,7 @@ export default function ChapterClient() {
             )}
 
             {/* Share Section */}
-            <div className="p-6 sm:p-8 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 space-y-4">
+            <div className="p-4 sm:p-8 rounded-none sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-none sm:shadow-xs border-t sm:border border-zinc-200/60 dark:border-zinc-800/60 space-y-4">
               <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2">
                 <Share2 className="w-4 h-4 text-blue-500" />
                 Share this Chapter
@@ -1085,59 +1146,78 @@ export default function ChapterClient() {
               <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                 Help others learn by sharing this lesson with your friends and network.
               </p>
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-3">
                 <button
                   onClick={() => {
                     const url = encodeURIComponent(window.location.href);
-                    const text = encodeURIComponent(`Check out this lesson: ${chapter?.title} on Mazlis News`);
-                    window.open(`https://wa.me/?text=${text}%20${url}`, '_blank');
+                    const text = encodeURIComponent(
+                      `Check out this lesson: ${chapter?.title} on asif.to`,
+                    );
+                    window.open(
+                      `https://wa.me/?text=${text}%20${url}`,
+                      "_blank",
+                    );
                   }}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 text-xs font-bold transition-all active:scale-95"
+                  className="w-10 h-10 rounded-full bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 flex items-center justify-center transition-all active:scale-90"
+                  title="Share on WhatsApp"
                 >
-                  WhatsApp
+                  <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.105 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                  </svg>
                 </button>
                 <button
                   onClick={() => {
                     const url = encodeURIComponent(window.location.href);
-                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+                    window.open(
+                      `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+                      "_blank",
+                    );
                   }}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#1877F2]/10 text-[#1877F2] hover:bg-[#1877F2]/20 text-xs font-bold transition-all active:scale-95"
+                  className="w-10 h-10 rounded-full bg-[#1877F2]/10 text-[#1877F2] hover:bg-[#1877F2]/20 flex items-center justify-center transition-all active:scale-90"
+                  title="Share on Facebook"
                 >
-                  <Facebook className="w-3.5 h-3.5" />
-                  Facebook
+                  <Facebook className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => {
                     const url = encodeURIComponent(window.location.href);
-                    const text = encodeURIComponent(`Check out this lesson: ${chapter?.title} on Mazlis News`);
-                    window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
+                    const text = encodeURIComponent(
+                      `Check out this lesson: ${chapter?.title} on asif.to`,
+                    );
+                    window.open(
+                      `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
+                      "_blank",
+                    );
                   }}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-black/10 dark:bg-white/10 text-black dark:text-white hover:bg-black/20 dark:hover:bg-white/20 text-xs font-bold transition-all active:scale-95"
+                  className="w-10 h-10 rounded-full bg-black/10 dark:bg-white/10 text-black dark:text-white hover:bg-black/20 dark:hover:bg-white/20 flex items-center justify-center transition-all active:scale-90"
+                  title="Share on X"
                 >
-                  <Twitter className="w-3.5 h-3.5" />
-                  X (Twitter)
+                  <Twitter className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => {
                     const url = encodeURIComponent(window.location.href);
-                    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+                    window.open(
+                      `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
+                      "_blank",
+                    );
                   }}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#0A66C2]/10 text-[#0A66C2] hover:bg-[#0A66C2]/20 text-xs font-bold transition-all active:scale-95"
+                  className="w-10 h-10 rounded-full bg-[#0A66C2]/10 text-[#0A66C2] hover:bg-[#0A66C2]/20 flex items-center justify-center transition-all active:scale-90"
+                  title="Share on LinkedIn"
                 >
-                  <Linkedin className="w-3.5 h-3.5" />
-                  LinkedIn
+                  <Linkedin className="w-4 h-4" />
                 </button>
                 <button
                   onClick={async () => {
                     try {
                       await navigator.clipboard.writeText(window.location.href);
-                      alert("Link copied to clipboard!");
+                      toast.success("Link copied to clipboard!");
                     } catch (err) {}
                   }}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-bold transition-all active:scale-95"
+                  className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 flex items-center justify-center transition-all active:scale-90"
+                  title="Copy link to clipboard"
                 >
-                  <Link2 className="w-3.5 h-3.5" />
-                  Copy Link
+                  <Link2 className="w-4 h-4" />
                 </button>
                 {typeof navigator !== "undefined" && navigator.share && (
                   <button
@@ -1145,22 +1225,22 @@ export default function ChapterClient() {
                       try {
                         await navigator.share({
                           title: chapter?.title,
-                          text: `Check out this lesson on Mazlis News`,
+                          text: `Check out this lesson on asif.to`,
                           url: window.location.href,
                         });
                       } catch (err) {}
                     }}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 text-xs font-bold transition-all active:scale-95 shadow-md shadow-blue-500/20"
+                    className="w-10 h-10 rounded-full bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center transition-all active:scale-90 shadow-md shadow-blue-500/20"
+                    title="More share options..."
                   >
-                    <Share2 className="w-3.5 h-3.5" />
-                    Share Via...
+                    <Share2 className="w-4 h-4" />
                   </button>
                 )}
               </div>
             </div>
 
             {/* Bottom Prev / Next Navigation */}
-            <div className="flex items-center justify-between p-5 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 text-xs font-bold">
+            <div className="flex items-center justify-between p-4 sm:p-5 rounded-none sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-none sm:shadow-xs border-t sm:border border-zinc-200/60 dark:border-zinc-800/60 text-xs font-bold">
               {prevChapter ? (
                 <Link
                   href={`/courses/${courseId}/${prevChapter.slug}`}
