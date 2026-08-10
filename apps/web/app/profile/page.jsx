@@ -193,7 +193,7 @@ export default function ProfilePage() {
                   <span className="text-xs font-extrabold uppercase tracking-wider text-zinc-400">Streak</span>
                   <Flame className="w-5 h-5" />
                 </div>
-                <span className="text-2xl font-black text-foreground mt-1">7 Days</span>
+                <span className="text-2xl font-black text-foreground mt-1">{user?.streak || 0} Days</span>
                 <span className="text-[11px] text-zinc-400 font-medium">Daily Learning</span>
               </div>
 
@@ -202,7 +202,7 @@ export default function ProfilePage() {
                   <span className="text-xs font-extrabold uppercase tracking-wider text-zinc-400">Courses</span>
                   <BookOpen className="w-5 h-5" />
                 </div>
-                <span className="text-2xl font-black text-foreground mt-1">6 Active</span>
+                <span className="text-2xl font-black text-foreground mt-1">{user?.activeCourses || 0} Active</span>
                 <span className="text-[11px] text-zinc-400 font-medium">Tech Tracks</span>
               </div>
 
@@ -220,7 +220,7 @@ export default function ProfilePage() {
                   <span className="text-xs font-extrabold uppercase tracking-wider text-zinc-400">Mastery</span>
                   <Award className="w-5 h-5" />
                 </div>
-                <span className="text-2xl font-black text-foreground mt-1">Level 4</span>
+                <span className="text-2xl font-black text-foreground mt-1">Level {user?.masteryLevel || 1}</span>
                 <span className="text-[11px] text-zinc-400 font-medium">Pro Developer</span>
               </div>
             </section>

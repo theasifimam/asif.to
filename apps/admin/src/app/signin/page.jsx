@@ -45,9 +45,7 @@ export default function SigninPage() {
       >
         {/* Header with asif.to Logo */}
         <div className="flex flex-col items-center text-center gap-3 mb-8">
-          <span className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-lg shadow-lg shadow-blue-500/30">
-            &lt;/&gt;
-          </span>
+          <img src="/logo.png" alt="asif.to" className="w-12 h-12 rounded-xl object-contain shadow-sm" />
           <div className="flex items-center gap-2">
             <h1 className="font-outfit font-black text-2xl tracking-tight text-zinc-900 dark:text-white">
               asif<span className="text-blue-600 dark:text-blue-400">.to</span>

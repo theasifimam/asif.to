@@ -46,7 +46,6 @@ const cheatsheetSchema = new Schema(
   }
 );
 
-cheatsheetSchema.index({ slug: 1 });
 cheatsheetSchema.index({ techId: 1, status: 1 });
 
 export default model("Cheatsheet", cheatsheetSchema);

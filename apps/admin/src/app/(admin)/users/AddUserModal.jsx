@@ -49,7 +49,7 @@ export function AddUserModal({ isOpen, onClose, onAdd, submitting }) {
         }
       }}
     >
-      <DialogContent className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-[2rem] p-10 sm:max-w-[500px] shadow-2xl">
+      <DialogContent className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-4xl p-10 sm:max-w-125 shadow-2xl">
         <DialogHeader className="mb-4">
           <DialogTitle className="text-3xl font-black font-outfit uppercase tracking-tighter">
             Provision Access.
@@ -110,7 +110,7 @@ export function AddUserModal({ isOpen, onClose, onAdd, submitting }) {
               <SelectTrigger className="bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 rounded-xl h-12 text-sm font-bold">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="z-[999]">
+              <SelectContent className="z-999">
                 <SelectItem value="reader">Reader</SelectItem>
                 <SelectItem value="author">Author</SelectItem>
                 <SelectItem value="editor">Editor</SelectItem>

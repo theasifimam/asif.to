@@ -19,7 +19,7 @@ export const metadata = {
   title: "asif.to | Admin Control Panel",
   description: "Advanced Admin & Content Management Interface for asif.to",
   icons: {
-    icon: "/logo.jpeg"
+    icon: "/logo.png"
   }
 };
 

@@ -109,9 +109,8 @@ export default function Header() {
   const isArticlePage =
     pathname.includes("/articles/") || pathname.includes("/tutorials/");
   
-  // Align Header with wider 7xl layout on course chapter pages
-  const isCourseChapterPage = pathname.startsWith("/courses/") && pathname.split("/").length > 3;
-  const containerMaxWidth = isCourseChapterPage ? "max-w-7xl" : "max-w-5xl";
+  // Align Header with 7xl layout across all pages
+  const containerMaxWidth = "max-w-7xl";
 
   const navLinksForSidebar = [
     { label: "Home / Courses", href: "/" },
@@ -123,8 +122,8 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed top-3 left-0 w-full z-50 px-3 md:px-8 transition-all duration-300">
-        <div className={`${containerMaxWidth} mx-auto bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl rounded-full px-4 md:px-6 h-14 md:h-16 flex items-center justify-between shadow-lg shadow-black/5 dark:shadow-black/30 transition-all duration-300`}>
+      <header className="fixed top-3 left-0 w-full z-50 px-1.5 sm:px-3 md:px-8 transition-all duration-300">
+        <div className={`${containerMaxWidth} mx-auto bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl rounded-full px-3 sm:px-4 md:px-6 h-14 md:h-16 flex items-center justify-between shadow-lg shadow-black/5 dark:shadow-black/30 transition-all duration-300`}>
           {/* Brand Logo */}
           <div className="flex items-center gap-3">
             {isArticlePage ? (
@@ -137,9 +136,7 @@ export default function Header() {
             ) : (
               <div className="flex items-center gap-2.5">
                 <Link href="/" className="flex items-center gap-2 group">
-                  <span className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-blue-500/30">
-                    &lt;/&gt;
-                  </span>
+                  <img src="/logo.png" alt="asif.to" className="w-8 h-8 rounded-xl object-contain shadow-sm" />
                   <span className="font-outfit font-black text-lg sm:text-xl tracking-tight text-foreground">
                     asif<span className="text-blue-600 dark:text-blue-400">.to</span>
                   </span>

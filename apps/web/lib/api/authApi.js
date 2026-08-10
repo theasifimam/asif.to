@@ -91,6 +91,14 @@ export const authApi = createApi({
       providesTags: ["Auth"]
     }),
 
+    // Check username availability
+    checkUsername: builder.query({
+      query: (username) => ({
+        url: `/auth/check-username?username=${username}`,
+        method: "GET"
+      })
+    }),
+
     // Sign out
     signout: builder.mutation({
       query: () => ({
@@ -165,6 +173,7 @@ export const {
   useSendOtpMutation,
   useVerifyOtpMutation,
   useGetMeQuery,
+  useCheckUsernameQuery,
   useSignoutMutation,
   useUpdatePasswordMutation,
   useGetProfileQuery,

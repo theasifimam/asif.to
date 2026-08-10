@@ -235,3 +235,19 @@ export const updatePassword = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+// GET /api/v1/auth/check-username
+export const checkUsername = async (req, res) => {
+  try {
+    const { username } = req.query;
+    if (!username) {
+      res.status(400).json({ success: false, message: "Username is required." });
+      return;
+    }
+    const user = await User.findOne({ username: username.toLowerCase().trim() });
+    res.status(200).json({ success: true, available: !user });
+  } catch (error) {
+    console.error("[AUTH] CheckUsername error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};

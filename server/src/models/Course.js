@@ -68,7 +68,6 @@ courseSchema.virtual("chapters", {
   options: { sort: { order: 1 } },
 });
 
-courseSchema.index({ slug: 1 });
 courseSchema.index({ status: 1, order: 1 });
 
 export default model("Course", courseSchema);

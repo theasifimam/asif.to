@@ -94,9 +94,7 @@ export default function Sidebar({
             {/* Header inside Sidebar */}
             <div className="p-6 flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/60">
               <div className="flex items-center gap-3">
-                <span className="w-9 h-9 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black text-xs shadow-md shadow-blue-500/30">
-                  &lt;/&gt;
-                </span>
+                <img src="/logo.png" alt="asif.to" className="w-9 h-9 rounded-xl object-contain shadow-sm" />
                 <div className="flex flex-col">
                   <Link
                     href="/"

@@ -55,7 +55,7 @@ function downloadCheatsheetPdf(cs, techName) {
   </button>
 
   <header>
-    <div class="logo">asif<span>.to</span></div>
+    <div class="logo"><img src="/logo.png" alt="asif.to" style="width:24px;height:24px;border-radius:6px;vertical-align:middle;margin-right:8px;" />asif<span>.to</span></div>
     <div class="badge">${techName || cs.techId} Cheatsheet</div>
   </header>
 

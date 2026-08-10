@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   Eye,
   EyeOff,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -24,12 +25,13 @@ import {
   useSignupMutation,
   useSendOtpMutation,
   useVerifyOtpMutation,
+  useCheckUsernameQuery,
 } from "@/lib/api/authApi";
 import { setCredentials } from "@/lib/store/authSlice";
 import { useAppDispatch } from "@/lib/store/hooks";
 
 const inputClass =
-  "w-full bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-5 py-3.5 text-sm font-medium placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 dark:focus:ring-white/10 focus:border-zinc-400 dark:focus:border-zinc-600 dark:text-white transition-all";
+  "w-full bg-zinc-50 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-5 py-3.5 text-sm font-medium placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 dark:focus:border-blue-500 dark:text-white transition-all";
 
 export default function AuthModal({
   isOpen,
@@ -50,6 +52,20 @@ export default function AuthModal({
   const [suPassword, setSuPassword] = useState("");
   const [suShowPw, setSuShowPw] = useState(false);
   const [suStep, setSuStep] = useState("form");
+
+  // Username debouncing
+  const [debouncedUsername, setDebouncedUsername] = useState("");
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedUsername(suUsername);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [suUsername]);
+
+  const { data: usernameData, isFetching: isCheckingUsername } = useCheckUsernameQuery(debouncedUsername, {
+    skip: debouncedUsername.length < 3,
+  });
+  const isUsernameAvailable = usernameData?.success ? usernameData.available : null;
 
   // ─── OTP state (shared for signup & signin-otp modes) ─────────────────
   const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
@@ -92,7 +108,9 @@ export default function AuthModal({
   // ─── Commit auth response ─────────────────────────────────────────────
   const commitAuth = (data) => {
     dispatch(setCredentials({ user: data.data.user, token: data.data.token }));
-    toast.success(`Welcome, ${data.data.user.fullName.split(" ")[0]}!`);
+    toast.success(
+      `Welcome to asif.to, ${data.data.user.fullName.split(" ")[0]}! 🎉`,
+    );
     handleOpenChange(false);
   };
 
@@ -119,6 +137,10 @@ export default function AuthModal({
   // ─── Sign-up step 1: send OTP ──────────────────────────────────────────
   const handleSendOtp = async (e) => {
     e.preventDefault();
+    if (isUsernameAvailable === false) {
+      toast.error("Please choose an available username.");
+      return;
+    }
     if (!suFullName || !suUsername || !suEmail || !suPassword) {
       toast.error("All fields are required.");
       return;
@@ -127,7 +149,9 @@ export default function AuthModal({
       toast.error("Password must be at least 8 characters.");
       return;
     }
-    const toastId = toast.loading("Sending verification code...");
+    const toastId = toast.loading(
+      "Sending verification code from noreply@asif.to...",
+    );
     try {
       await sendOtp({
         email: suEmail,
@@ -135,7 +159,7 @@ export default function AuthModal({
         purpose: "signup",
       }).unwrap();
       toast.dismiss(toastId);
-      toast.success(`Code sent to ${suEmail}`);
+      toast.success(`Verification code sent to ${suEmail}`);
       setSuStep("otp");
       setResendCountdown(60);
       setTimeout(() => otpRefs.current[0]?.focus(), 100);
@@ -152,7 +176,7 @@ export default function AuthModal({
       toast.error("Enter the 6-digit code.");
       return;
     }
-    const toastId = toast.loading("Verifying code...");
+    const toastId = toast.loading("Verifying OTP code...");
     try {
       // Step 1: verify OTP
       await verifyOtp({ email: suEmail, otp }).unwrap();
@@ -177,7 +201,7 @@ export default function AuthModal({
   // ─── Resend OTP ────────────────────────────────────────────────────────
   const handleResendOtp = async () => {
     if (resendCountdown > 0) return;
-    const toastId = toast.loading("Resending code...");
+    const toastId = toast.loading("Resending code from noreply@asif.to...");
     try {
       await sendOtp({
         email: suEmail,
@@ -185,7 +209,7 @@ export default function AuthModal({
         purpose: "signup",
       }).unwrap();
       toast.dismiss(toastId);
-      toast.success("New code sent.");
+      toast.success("New verification code sent.");
       setResendCountdown(60);
       setOtpDigits(["", "", "", "", "", ""]);
       setTimeout(() => otpRefs.current[0]?.focus(), 100);
@@ -251,28 +275,34 @@ export default function AuthModal({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 24 }}
                 transition={{ type: "spring", damping: 28, stiffness: 320 }}
-                className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[440px] bg-white dark:bg-[#0a0a0a] border border-zinc-100 dark:border-zinc-900 rounded-[2.5rem] shadow-2xl shadow-black/10 z-[201] overflow-hidden"
+                className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[440px] bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl sm:rounded-[2.5rem] shadow-2xl z-[201] overflow-hidden"
               >
                 {/* ── Header ── */}
-                <div className="flex items-center justify-between px-8 pt-8 pb-0">
-                  <span className="font-outfit font-black text-xl tracking-tighter text-zinc-900 dark:text-white uppercase italic">
-                    asif.
-                  </span>
+                <div className="flex items-center justify-between px-6 sm:px-8 pt-6 sm:pt-8 pb-0">
+                  <div className="flex items-center gap-2">
+                    <img src="/logo.png" alt="asif.to" className="w-8 h-8 rounded-xl object-contain shadow-sm shrink-0" />
+                    <span className="font-outfit font-black text-xl tracking-tight text-foreground">
+                      asif
+                      <span className="text-blue-600 dark:text-blue-400">
+                        .to
+                      </span>
+                    </span>
+                  </div>
                   <Dialog.Close asChild>
-                    <button className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-full transition-colors text-zinc-500 dark:text-zinc-400">
+                    <button className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-500 dark:text-zinc-400">
                       <X size={18} />
                     </button>
                   </Dialog.Close>
                 </div>
 
                 {/* ── Content ── */}
-                <div className="p-8 pt-6">
+                <div className="p-6 sm:p-8 pt-6">
                   <Tabs.Root
                     defaultValue={defaultTab}
                     className="flex flex-col gap-6"
                   >
                     {/* Tab switcher */}
-                    <Tabs.List className="flex gap-1 p-1 bg-zinc-100 dark:bg-zinc-900 rounded-2xl">
+                    <Tabs.List className="flex gap-1 p-1 bg-zinc-100 dark:bg-zinc-800/80 rounded-full">
                       {["signin", "signup"].map((tab) => (
                         <Tabs.Trigger
                           key={tab}
@@ -280,9 +310,9 @@ export default function AuthModal({
                           onClick={() => {
                             if (tab === "signup") setSuStep("form");
                           }}
-                          className="flex-1 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-500 data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-white data-[state=active]:rounded-xl data-[state=active]:shadow-sm transition-all"
+                          className="flex-1 py-2.5 text-xs font-bold text-zinc-500 dark:text-zinc-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:rounded-full data-[state=active]:shadow-md data-[state=active]:shadow-blue-500/25 transition-all"
                         >
-                          {tab === "signin" ? "Sign In" : "Sign Up"}
+                          {tab === "signin" ? "Sign In" : "Create Account"}
                         </Tabs.Trigger>
                       ))}
                     </Tabs.List>
@@ -293,11 +323,12 @@ export default function AuthModal({
                       className="flex flex-col gap-6 outline-none"
                     >
                       <div>
-                        <h2 className="text-2xl font-black font-outfit tracking-tighter text-zinc-900 dark:text-white">
-                          Welcome back.
+                        <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+                          Welcome Back
                         </h2>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mt-1">
-                          Access your editorial dossier
+                        <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mt-1">
+                          Access your web development courses, cheatsheets &
+                          notes
                         </p>
                       </div>
 
@@ -306,13 +337,13 @@ export default function AuthModal({
                         className="flex flex-col gap-4"
                       >
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400 ml-1">
+                          <label className="text-xs font-extrabold text-foreground uppercase tracking-wider ml-1">
                             Email Address
                           </label>
                           <div className="relative">
                             <input
                               type="email"
-                              placeholder="you@asif.to"
+                              placeholder="support@asif.to"
                               value={siEmail}
                               onChange={(e) => setSiEmail(e.target.value)}
                               required
@@ -320,14 +351,14 @@ export default function AuthModal({
                             />
 
                             <Mail
-                              size={15}
-                              className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-600"
+                              size={16}
+                              className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500 shrink-0"
                             />
                           </div>
                         </div>
 
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400 ml-1">
+                          <label className="text-xs font-extrabold text-foreground uppercase tracking-wider ml-1">
                             Password
                           </label>
                           <div className="relative">
@@ -341,18 +372,18 @@ export default function AuthModal({
                             />
 
                             <Lock
-                              size={15}
-                              className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-600"
+                              size={16}
+                              className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500 shrink-0"
                             />
                             <button
                               type="button"
                               onClick={() => setSiShowPw(!siShowPw)}
-                              className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-600 hover:text-zinc-700 dark:hover:text-zinc-400 transition-colors"
+                              className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-foreground transition-colors"
                             >
                               {siShowPw ? (
-                                <EyeOff size={15} />
+                                <EyeOff size={16} />
                               ) : (
-                                <Eye size={15} />
+                                <Eye size={16} />
                               )}
                             </button>
                           </div>
@@ -361,21 +392,17 @@ export default function AuthModal({
                         <button
                           type="submit"
                           disabled={isBusy}
-                          className="mt-2 w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.98]"
+                          className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed active:scale-98"
                         >
                           {siLoading ? (
                             <Loader2 size={16} className="animate-spin" />
                           ) : (
                             <>
-                              Authenticate <ArrowRight size={14} />
+                              Sign In to Account <ArrowRight size={14} />
                             </>
                           )}
                         </button>
                       </form>
-
-                      <p className="text-center text-[9px] font-bold text-zinc-400 dark:text-zinc-600 uppercase tracking-widest">
-                        Secure end-to-end encryption
-                      </p>
                     </Tabs.Content>
 
                     {/* ══════════ SIGN UP TAB ══════════ */}
@@ -394,11 +421,11 @@ export default function AuthModal({
                             className="flex flex-col gap-6"
                           >
                             <div>
-                              <h2 className="text-2xl font-black font-outfit tracking-tighter text-zinc-900 dark:text-white">
-                                Join the protocol.
+                              <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+                                Join asif.to
                               </h2>
-                              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mt-1">
-                                Independent journalism needs you
+                              <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mt-1">
+                                Create your account & verify email via OTP
                               </p>
                             </div>
 
@@ -408,7 +435,7 @@ export default function AuthModal({
                             >
                               <div className="grid grid-cols-2 gap-3">
                                 <div className="flex flex-col gap-1.5">
-                                  <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400 ml-1">
+                                  <label className="text-xs font-extrabold text-foreground uppercase tracking-wider ml-1">
                                     Full Name
                                   </label>
                                   <div className="relative">
@@ -424,13 +451,13 @@ export default function AuthModal({
                                     />
 
                                     <User
-                                      size={13}
-                                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-600"
+                                      size={14}
+                                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-500 shrink-0"
                                     />
                                   </div>
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                  <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400 ml-1">
+                                  <label className="text-xs font-extrabold text-foreground uppercase tracking-wider ml-1">
                                     Username
                                   </label>
                                   <div className="relative">
@@ -446,25 +473,34 @@ export default function AuthModal({
                                         )
                                       }
                                       required
-                                      className={`${inputClass} pl-10 text-xs`}
+                                      className={`${inputClass} pl-10 text-xs ${suUsername.length >= 3 && isUsernameAvailable === false ? 'border-red-500 focus:border-red-500 ring-red-500/20' : ''}`}
                                     />
 
                                     <AtSign
-                                      size={13}
-                                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-600"
+                                      size={14}
+                                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-500 shrink-0"
                                     />
+                                    {isCheckingUsername && suUsername.length >= 3 && (
+                                      <Loader2 size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-blue-500 animate-spin" />
+                                    )}
                                   </div>
+                                  {suUsername.length >= 3 && isUsernameAvailable === false && !isCheckingUsername && (
+                                    <span className="text-[10px] font-bold text-red-500 ml-1 mt-0.5 tracking-wide">This username is taken</span>
+                                  )}
+                                  {suUsername.length >= 3 && isUsernameAvailable === true && !isCheckingUsername && (
+                                    <span className="text-[10px] font-bold text-emerald-500 ml-1 mt-0.5 tracking-wide">Username available</span>
+                                  )}
                                 </div>
                               </div>
 
                               <div className="flex flex-col gap-1.5">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400 ml-1">
+                                <label className="text-xs font-extrabold text-foreground uppercase tracking-wider ml-1">
                                   Email Address
                                 </label>
                                 <div className="relative">
                                   <input
                                     type="email"
-                                    placeholder="you@example.com"
+                                    placeholder="support@asif.to"
                                     value={suEmail}
                                     onChange={(e) => setSuEmail(e.target.value)}
                                     required
@@ -472,14 +508,14 @@ export default function AuthModal({
                                   />
 
                                   <Mail
-                                    size={15}
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-600"
+                                    size={16}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500 shrink-0"
                                   />
                                 </div>
                               </div>
 
                               <div className="flex flex-col gap-1.5">
-                                <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400 ml-1">
+                                <label className="text-xs font-extrabold text-foreground uppercase tracking-wider ml-1">
                                   Password
                                 </label>
                                 <div className="relative">
@@ -495,28 +531,28 @@ export default function AuthModal({
                                   />
 
                                   <Lock
-                                    size={15}
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-600"
+                                    size={16}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500 shrink-0"
                                   />
                                   <button
                                     type="button"
                                     onClick={() => setSuShowPw(!suShowPw)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-600 hover:text-zinc-700 dark:hover:text-zinc-400 transition-colors"
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-foreground transition-colors"
                                   >
                                     {suShowPw ? (
-                                      <EyeOff size={15} />
+                                      <EyeOff size={16} />
                                     ) : (
-                                      <Eye size={15} />
+                                      <Eye size={16} />
                                     )}
                                   </button>
                                 </div>
-                                {/* Password strength indicator */}
+                                {/* Password strength bar */}
                                 {suPassword.length > 0 && (
                                   <div className="flex gap-1 mt-1 ml-1">
                                     {[1, 2, 3, 4].map((level) => (
                                       <div
                                         key={level}
-                                        className={`h-0.5 flex-1 rounded-full transition-colors ${
+                                        className={`h-1 flex-1 rounded-full transition-colors ${
                                           suPassword.length >= level * 2
                                             ? level <= 2
                                               ? "bg-red-400"
@@ -534,28 +570,24 @@ export default function AuthModal({
                               <button
                                 type="submit"
                                 disabled={isBusy}
-                                className="mt-2 w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.98]"
+                                className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 active:scale-98"
                               >
                                 {otpSending ? (
                                   <Loader2 size={16} className="animate-spin" />
                                 ) : (
                                   <>
-                                    Verify Email <Mail size={14} />
+                                    Send Verification OTP <Mail size={14} />
                                   </>
                                 )}
                               </button>
                             </form>
 
-                            <p className="text-[9px] text-zinc-400 dark:text-zinc-600 text-center uppercase tracking-widest leading-relaxed">
-                              By registering, you agree to our{" "}
-                              <span className="text-zinc-900 dark:text-white font-black cursor-pointer">
-                                Protocol Terms
-                              </span>{" "}
-                              and{" "}
-                              <span className="text-zinc-900 dark:text-white font-black cursor-pointer">
-                                Privacy Policy
-                              </span>
-                              .
+                            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 text-center font-medium leading-relaxed">
+                              An OTP email will be sent from{" "}
+                              <strong className="text-foreground">
+                                noreply@asif.to
+                              </strong>{" "}
+                              to verify your email.
                             </p>
                           </motion.div>
                         )}
@@ -575,17 +607,21 @@ export default function AuthModal({
                                   setSuStep("form");
                                   setOtpDigits(["", "", "", "", "", ""]);
                                 }}
-                                className="mt-1 p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-xl text-zinc-500 dark:text-zinc-400 transition-colors"
+                                className="mt-1 p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl text-zinc-500 dark:text-zinc-400 transition-colors shrink-0"
                               >
-                                <ChevronLeft size={18} />
+                                <ChevronLeft size={20} />
                               </button>
                               <div>
-                                <h2 className="text-2xl font-black font-outfit tracking-tighter text-zinc-900 dark:text-white">
-                                  Verify identity.
+                                <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+                                  Enter OTP Code
                                 </h2>
-                                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mt-1">
-                                  Code sent to{" "}
-                                  <span className="text-zinc-900 dark:text-white">
+                                <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mt-1">
+                                  We sent a 6-digit code from{" "}
+                                  <strong className="text-blue-600 dark:text-blue-400">
+                                    noreply@asif.to
+                                  </strong>{" "}
+                                  to{" "}
+                                  <span className="text-foreground font-bold">
                                     {suEmail}
                                   </span>
                                 </p>
@@ -611,13 +647,11 @@ export default function AuthModal({
                                     handleOtpChange(i, e.target.value)
                                   }
                                   onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                                  className={`w-12 h-14 text-center text-xl font-black rounded-2xl border transition-all outline-none
-                                                                        ${
-                                                                          digit
-                                                                            ? "border-zinc-900 dark:border-white bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-sm"
-                                                                            : "border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 text-zinc-900 dark:text-white"
-                                                                        }
-                                                                        focus:border-zinc-600 dark:focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/5 dark:focus:ring-white/5`}
+                                  className={`w-11 h-13 sm:w-12 sm:h-14 text-center text-xl font-black rounded-xl border transition-all outline-none ${
+                                    digit
+                                      ? "border-blue-600 dark:border-blue-500 bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-sm"
+                                      : "border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/80 text-foreground"
+                                  } focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20`}
                                 />
                               ))}
                             </div>
@@ -625,29 +659,29 @@ export default function AuthModal({
                             <button
                               onClick={handleVerifyAndSignup}
                               disabled={isBusy || otpDigits.some((d) => !d)}
-                              className="w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.98]"
+                              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 active:scale-98"
                             >
                               {otpVerifying || suLoading ? (
                                 <Loader2 size={16} className="animate-spin" />
                               ) : (
                                 <>
-                                  <ShieldCheck size={14} /> Confirm & Create
+                                  <ShieldCheck size={16} /> Verify OTP & Create
                                   Account
                                 </>
                               )}
                             </button>
 
-                            <div className="flex items-center justify-center gap-3">
-                              <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-600">
-                                Didn&apos;t receive it?
+                            <div className="flex items-center justify-center gap-3 pt-1">
+                              <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                                Didn&apos;t receive code?
                               </span>
                               <button
                                 onClick={handleResendOtp}
                                 disabled={resendCountdown > 0 || otpSending}
-                                className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-zinc-900 dark:text-white disabled:text-zinc-400 dark:disabled:text-zinc-600 disabled:cursor-not-allowed transition-colors hover:opacity-70"
+                                className="flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline disabled:text-zinc-400 dark:disabled:text-zinc-600 disabled:no-underline disabled:cursor-not-allowed transition-colors"
                               >
                                 <RefreshCw
-                                  size={11}
+                                  size={12}
                                   className={otpSending ? "animate-spin" : ""}
                                 />
                                 {resendCountdown > 0

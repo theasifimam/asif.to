@@ -60,6 +60,18 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    streak: {
+      type: Number,
+      default: 0,
+    },
+    activeCourses: {
+      type: Number,
+      default: 0,
+    },
+    masteryLevel: {
+      type: Number,
+      default: 1,
+    },
     expertise: [
       {
         type: String,
@@ -112,7 +124,6 @@ const userSchema = new Schema(
 );
 
 // Indexes for better search performance
-userSchema.index({ username: 1 });
-userSchema.index({ email: 1 });
+// username and email indexes are automatically created by unique: true
 
 export default model("User", userSchema);

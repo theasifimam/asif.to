@@ -74,7 +74,7 @@ export default function CourseClient() {
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground transition-colors duration-300 pb-24 sm:pb-12">
       <Header />
 
-      <main className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 pt-20 sm:pt-24 flex flex-col gap-6">
+      <main className="flex-1 w-full max-w-4xl mx-auto px-2 sm:px-6 pt-20 sm:pt-24 flex flex-col gap-6">
         {/* Back Button */}
         <div>
           <Link
@@ -87,7 +87,7 @@ export default function CourseClient() {
         </div>
 
         {/* Course Hero Banner */}
-        <section className="p-6 sm:p-9 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-md flex flex-col gap-5">
+        <section className="p-4 sm:p-9 rounded-2xl sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-md flex flex-col gap-5">
           <div className="flex items-center justify-between gap-2 text-xs">
             <span
               className={`font-bold px-3 py-1 rounded-full ${tech?.badgeBg || "bg-blue-500/10 text-blue-600"}`}

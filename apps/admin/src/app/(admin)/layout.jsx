@@ -26,6 +26,8 @@ import {
   FileCode,
   Layers,
   Clipboard,
+  X,
+  MessageSquare,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
@@ -69,7 +71,10 @@ const NAV_ITEMS = [
   },
   {
     group: "Management",
-    items: [{ name: "Users", href: "/users", icon: Users }],
+    items: [
+      { name: "Users", href: "/users", icon: Users },
+      { name: "Messages", href: "/messages", icon: MessageSquare },
+    ],
   },
   {
     group: "System Pages",
@@ -154,15 +159,17 @@ export default function AdminLayout({ children }) {
       <motion.aside
         initial={false}
         animate={{
-          width: isCollapsed ? 80 : 288,
+          width: isCollapsed && !isMobileMenuOpen ? 80 : 288,
           x: isMobileMenuOpen
             ? 0
-            : mounted && window.innerWidth < 1024
-              ? -288
+            : mounted && typeof window !== "undefined" && window.innerWidth < 1024
+              ? -320
               : 0,
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className={`border-r border-zinc-200 dark:border-zinc-800 flex flex-col bg-white dark:bg-zinc-950/95 backdrop-blur-xl shrink-0 fixed lg:relative h-full transition-colors duration-300 ${isMobileMenuOpen ? "z-10 shadow-2xl shadow-black/50" : "z-30"}`}
+        className={`border-r border-zinc-200 dark:border-zinc-800 flex flex-col bg-white dark:bg-zinc-950 backdrop-blur-xl shrink-0 fixed inset-y-0 left-0 lg:relative h-full transition-colors duration-300 ${
+          isMobileMenuOpen ? "z-50 shadow-2xl shadow-black/50" : "z-30"
+        }`}
       >
         {/* Toggle Button (Desktop) */}
         <div
@@ -182,13 +189,11 @@ export default function AdminLayout({ children }) {
         </div>
 
         <div
-          className={`p-6 pb-8 flex flex-col gap-2 ${isCollapsed ? "items-center px-0" : ""}`}
+          className={`p-6 pb-8 flex items-center justify-between gap-2 ${isCollapsed && !isMobileMenuOpen ? "items-center px-0 justify-center" : ""}`}
         >
           <Link href="/dashboard" className="flex items-center gap-2.5 group">
-            <span className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-xs shadow-md shadow-blue-500/30 shrink-0">
-              &lt;/&gt;
-            </span>
-            {!isCollapsed && (
+            <img src="/logo.png" alt="asif.to" className="w-8 h-8 rounded-xl object-contain shadow-sm shrink-0" />
+            {(!isCollapsed || isMobileMenuOpen) && (
               <div className="flex items-center gap-2">
                 <span className="font-outfit font-black text-xl tracking-tight text-zinc-900 dark:text-white">
                   asif
@@ -200,13 +205,22 @@ export default function AdminLayout({ children }) {
               </div>
             )}
           </Link>
+
+          {/* Close Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="lg:hidden p-1.5 rounded-xl text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all"
+            title="Close Menu"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <nav className="flex-1 px-4 flex flex-col gap-10 overflow-y-auto no-scrollbar">
           {NAV_ITEMS.map((group) => (
             <div key={group.group} className="flex flex-col gap-4">
               <AnimatePresence mode="wait">
-                {!isCollapsed && (
+                {(!isCollapsed || isMobileMenuOpen) && (
                   <motion.h3
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -229,12 +243,12 @@ export default function AdminLayout({ children }) {
                     <Link
                       key={item.href}
                       href={targetHref}
-                      title={isCollapsed ? item.name : ""}
+                      title={isCollapsed && !isMobileMenuOpen ? item.name : ""}
                       className={`group flex items-center px-4 py-3 rounded-2xl transition-all duration-300 ${
                         isActive
                           ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 border border-blue-600"
                           : "hover:bg-zinc-100 dark:hover:bg-zinc-900/60 hover:text-zinc-900 dark:hover:text-zinc-200 cursor-pointer"
-                      } ${isCollapsed ? "justify-center" : "justify-between"}`}
+                      } ${isCollapsed && !isMobileMenuOpen ? "justify-center" : "justify-between"}`}
                     >
                       <div className="flex items-center gap-3">
                         <item.icon
@@ -246,7 +260,7 @@ export default function AdminLayout({ children }) {
                               : "text-zinc-500 dark:text-zinc-500 group-hover:text-zinc-800 dark:group-hover:text-zinc-200"
                           }
                         />
-                        {!isCollapsed && (
+                        {(!isCollapsed || isMobileMenuOpen) && (
                           <span
                             className={`text-[13px] font-bold tracking-tight ${isActive ? "font-extrabold" : ""} truncate`}
                           >
@@ -254,7 +268,7 @@ export default function AdminLayout({ children }) {
                           </span>
                         )}
                       </div>
-                      {!isCollapsed && isActive && (
+                      {(!isCollapsed || isMobileMenuOpen) && isActive && (
                         <motion.div
                           layoutId="active"
                           className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"

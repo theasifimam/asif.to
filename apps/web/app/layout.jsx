@@ -20,6 +20,9 @@ export const metadata = {
     "Learn and revise Next.js, React.js, Express.js, Node.js, MongoDB, Mongoose, JavaScript & TypeScript concepts on the go. Mobile-first bite-sized coding tutorials, flashcards, code snippets, and quizzes.",
   keywords: ["Next.js", "React.js", "Express.js", "Node.js", "MongoDB", "Mongoose", "JavaScript", "TypeScript", "Coding Tutorials", "Revision Flashcards"],
   authors: [{ name: "asif.to Team" }],
+  icons: {
+    icon: "/logo.png",
+  },
   openGraph: {
     title: "asif.to | Mobile-First Coding Tutorials & Revision",
     description: "Learn and revise coding concepts on the go with flashcards, code snippets, and quizzes.",
