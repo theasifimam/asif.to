@@ -11,8 +11,6 @@ export default function ChapterDocumentCard({
   estimatedReadingTime,
   isCurrentCompleted,
   toggleChapterComplete,
-  isCurrentSaved,
-  toggleSaveLecture,
   isFocusMode,
   isSimplePoints,
   parsedBlocks,
@@ -33,8 +31,6 @@ export default function ChapterDocumentCard({
         estimatedReadingTime={estimatedReadingTime}
         isCurrentCompleted={isCurrentCompleted}
         toggleChapterComplete={toggleChapterComplete}
-        isCurrentSaved={isCurrentSaved}
-        toggleSaveLecture={toggleSaveLecture}
         isFocusMode={isFocusMode}
       />
 

@@ -94,7 +94,9 @@ export const getCourseBySlug = async (req, res) => {
     }
 
     if (!course) {
-      return res.status(404).json({ success: false, message: "Course not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found." });
     }
 
     const chapters = await Chapter.find({
@@ -120,9 +122,18 @@ export const getChapterBySlug = async (req, res) => {
   try {
     const { slug: courseSlug, chapterSlug } = req.params;
 
-    const course = await Course.findOne({ slug: courseSlug }).lean();
+    let course = await Course.findOne({ slug: courseSlug }).lean();
     if (!course) {
-      return res.status(404).json({ success: false, message: "Course not found." });
+      // Fallback: search by techId if slug didn't match directly
+      course = await Course.findOne({ techId: courseSlug, status: "published" })
+        .sort({ createdAt: -1 })
+        .lean();
+    }
+
+    if (!course) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found." });
     }
 
     const chapter = await Chapter.findOne({
@@ -131,11 +142,15 @@ export const getChapterBySlug = async (req, res) => {
     }).lean();
 
     if (!chapter) {
-      return res.status(404).json({ success: false, message: "Chapter not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Chapter not found." });
     }
 
     // Capture real readership: increment viewCount on each read
-    Chapter.findByIdAndUpdate(chapter._id, { $inc: { viewCount: 1 } }).exec().catch(() => {});
+    Chapter.findByIdAndUpdate(chapter._id, { $inc: { viewCount: 1 } })
+      .exec()
+      .catch(() => {});
 
     // Get adjacent chapters for prev/next navigation
     const allChapters = await Chapter.find({
@@ -146,9 +161,7 @@ export const getChapterBySlug = async (req, res) => {
       .select("slug title order")
       .lean();
 
-    const currentIndex = allChapters.findIndex(
-      (c) => c.slug === chapter.slug
-    );
+    const currentIndex = allChapters.findIndex((c) => c.slug === chapter.slug);
     const prevChapter = currentIndex > 0 ? allChapters[currentIndex - 1] : null;
     const nextChapter =
       currentIndex < allChapters.length - 1
@@ -158,7 +171,14 @@ export const getChapterBySlug = async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
-        course: { _id: course._id, slug: course.slug, title: course.title, techId: course.techId },
+        course: {
+          _id: course._id,
+          slug: course.slug,
+          title: course.title,
+          techId: course.techId,
+          examEnabled: course.examEnabled,
+          examSettings: course.examSettings,
+        },
         chapter,
         allChapters,
         prevChapter,
@@ -179,7 +199,9 @@ export const getChapterBySlug = async (req, res) => {
  */
 export const getCoursesAdmin = async (req, res) => {
   try {
-    const courses = await Course.find({}).sort({ order: 1, createdAt: -1 }).lean();
+    const courses = await Course.find({})
+      .sort({ order: 1, createdAt: -1 })
+      .lean();
 
     const courseIds = courses.map((c) => c._id);
     const chapterCounts = await Chapter.aggregate([
@@ -213,7 +235,9 @@ export const getCourseByIdAdmin = async (req, res) => {
     const { id } = req.params;
     const course = await Course.findById(id).lean();
     if (!course) {
-      return res.status(404).json({ success: false, message: "Course not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found." });
     }
     const chapters = await Chapter.find({ course: id })
       .sort({ order: 1 })
@@ -231,7 +255,19 @@ export const getCourseByIdAdmin = async (req, res) => {
  */
 export const createCourse = async (req, res) => {
   try {
-    const { title, subtitle, techId, level, duration, thumbnail, learningOutcomes, order, status } = req.body;
+    const {
+      title,
+      subtitle,
+      techId,
+      level,
+      duration,
+      thumbnail,
+      learningOutcomes,
+      order,
+      status,
+      examEnabled,
+      examSettings,
+    } = req.body;
 
     if (!title || !subtitle || !techId) {
       return res.status(400).json({
@@ -240,7 +276,9 @@ export const createCourse = async (req, res) => {
       });
     }
 
-    let baseSlug = req.body.slug ? slugify(req.body.slug) : slugify(techId || title);
+    let baseSlug = req.body.slug
+      ? slugify(req.body.slug)
+      : slugify(techId || title);
     if (!baseSlug) baseSlug = slugify(title);
 
     let slug = baseSlug;
@@ -263,6 +301,8 @@ export const createCourse = async (req, res) => {
       learningOutcomes: learningOutcomes || [],
       order: order ?? 0,
       status: status || "published",
+      examEnabled: Boolean(examEnabled),
+      examSettings: examSettings || undefined,
     });
 
     res.status(201).json({ success: true, data: course });
@@ -279,11 +319,47 @@ export const createCourse = async (req, res) => {
 export const updateCourse = async (req, res) => {
   try {
     const { id } = req.params;
-    const allowed = ["title", "subtitle", "techId", "level", "duration", "thumbnail", "learningOutcomes", "order", "status", "slug"];
+    const allowed = [
+      "title",
+      "subtitle",
+      "techId",
+      "level",
+      "duration",
+      "thumbnail",
+      "learningOutcomes",
+      "order",
+      "status",
+      "slug",
+      "examEnabled",
+      "examSettings",
+    ];
     const updates = {};
     allowed.forEach((key) => {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
     });
+
+    if (req.body.slug !== undefined) {
+      const formattedSlug = slugify(req.body.slug);
+      if (!formattedSlug) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid URL slug." });
+      }
+      const existing = await Course.findOne({
+        slug: formattedSlug,
+        _id: { $ne: id },
+      });
+      if (existing) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message: "Slug is already in use by another course.",
+          });
+      }
+      updates.slug = formattedSlug;
+    }
+
     updates.updatedAt = new Date();
 
     const course = await Course.findByIdAndUpdate(id, updates, {
@@ -292,7 +368,9 @@ export const updateCourse = async (req, res) => {
     });
 
     if (!course) {
-      return res.status(404).json({ success: false, message: "Course not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found." });
     }
 
     res.status(200).json({ success: true, data: course });
@@ -312,14 +390,18 @@ export const deleteCourse = async (req, res) => {
 
     const course = await Course.findById(id);
     if (!course) {
-      return res.status(404).json({ success: false, message: "Course not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found." });
     }
 
     // Delete all associated chapters
     await Chapter.deleteMany({ course: id });
     await Course.findByIdAndDelete(id);
 
-    res.status(200).json({ success: true, message: "Course and all chapters deleted." });
+    res
+      .status(200)
+      .json({ success: true, message: "Course and all chapters deleted." });
   } catch (error) {
     console.error("[COURSES] deleteCourse error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -352,7 +434,17 @@ export const getChapters = async (req, res) => {
 export const createChapter = async (req, res) => {
   try {
     const { courseId } = req.params;
-    const { title, summary, content, codeSnippet, codeSnippets, language, tryItChallenge, order, status } = req.body;
+    const {
+      title,
+      summary,
+      content,
+      codeSnippet,
+      codeSnippets,
+      language,
+      tryItChallenge,
+      order,
+      status,
+    } = req.body;
 
     if (!title || !summary) {
       return res.status(400).json({
@@ -363,7 +455,9 @@ export const createChapter = async (req, res) => {
 
     const course = await Course.findById(courseId);
     if (!course) {
-      return res.status(404).json({ success: false, message: "Course not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found." });
     }
 
     // Auto-generate slug from title, ensure unique within course
@@ -410,7 +504,18 @@ export const createChapter = async (req, res) => {
 export const updateChapter = async (req, res) => {
   try {
     const { id } = req.params;
-    const allowed = ["title", "slug", "summary", "content", "codeSnippet", "codeSnippets", "language", "tryItChallenge", "order", "status"];
+    const allowed = [
+      "title",
+      "slug",
+      "summary",
+      "content",
+      "codeSnippet",
+      "codeSnippets",
+      "language",
+      "tryItChallenge",
+      "order",
+      "status",
+    ];
     const updates = {};
     allowed.forEach((key) => {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
@@ -423,7 +528,9 @@ export const updateChapter = async (req, res) => {
     });
 
     if (!chapter) {
-      return res.status(404).json({ success: false, message: "Chapter not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Chapter not found." });
     }
 
     res.status(200).json({ success: true, data: chapter });
@@ -442,7 +549,9 @@ export const deleteChapter = async (req, res) => {
     const { id } = req.params;
     const chapter = await Chapter.findByIdAndDelete(id);
     if (!chapter) {
-      return res.status(404).json({ success: false, message: "Chapter not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Chapter not found." });
     }
     res.status(200).json({ success: true, message: "Chapter deleted." });
   } catch (error) {
@@ -461,11 +570,13 @@ export const reorderChapters = async (req, res) => {
     const { orders } = req.body;
 
     if (!Array.isArray(orders)) {
-      return res.status(400).json({ success: false, message: "orders array is required." });
+      return res
+        .status(400)
+        .json({ success: false, message: "orders array is required." });
     }
 
     const ops = orders.map(({ id, order }) =>
-      Chapter.findByIdAndUpdate(id, { order }, { new: true })
+      Chapter.findByIdAndUpdate(id, { order }, { new: true }),
     );
     await Promise.all(ops);
 
@@ -512,7 +623,9 @@ export const getCourseAnalytics = async (req, res) => {
 
     // Build a courseId → course map
     const courseMap = {};
-    courses.forEach((c) => { courseMap[c._id.toString()] = c; });
+    courses.forEach((c) => {
+      courseMap[c._id.toString()] = c;
+    });
 
     // 3. Enrich chapters with course info
     const enrichedChapters = chapters.map((ch) => ({
@@ -549,7 +662,7 @@ export const getCourseAnalytics = async (req, res) => {
     });
 
     const courseStats = Object.values(courseTotals).sort(
-      (a, b) => b.totalViews - a.totalViews
+      (a, b) => b.totalViews - a.totalViews,
     );
 
     // 6. Chapters with zero views (content that hasn't been read yet)
@@ -558,12 +671,16 @@ export const getCourseAnalytics = async (req, res) => {
       .slice(0, 20);
 
     // 7. Summary totals
-    const totalViews = enrichedChapters.reduce((sum, ch) => sum + (ch.viewCount || 0), 0);
+    const totalViews = enrichedChapters.reduce(
+      (sum, ch) => sum + (ch.viewCount || 0),
+      0,
+    );
     const totalChapters = enrichedChapters.length;
-    const publishedChapters = enrichedChapters.filter((ch) => ch.status === "published").length;
-    const avgViewsPerChapter = totalChapters > 0
-      ? Math.round(totalViews / totalChapters)
-      : 0;
+    const publishedChapters = enrichedChapters.filter(
+      (ch) => ch.status === "published",
+    ).length;
+    const avgViewsPerChapter =
+      totalChapters > 0 ? Math.round(totalViews / totalChapters) : 0;
 
     res.status(200).json({
       success: true,
@@ -584,4 +701,3 @@ export const getCourseAnalytics = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-

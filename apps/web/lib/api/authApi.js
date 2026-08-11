@@ -4,7 +4,7 @@ import { axiosBaseQuery } from "./axiosBaseQuery";
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: axiosBaseQuery(),
-  tagTypes: ["Auth", "Bookmarks"],
+  tagTypes: ["Auth", "Bookmarks", "Saves"],
   endpoints: (builder) => ({
     // Sign in with email + password
     signin: builder.mutation({
@@ -127,6 +127,26 @@ export const authApi = createApi({
       }),
       providesTags: ["Bookmarks"],
     }),
+
+    // ─── Unified Save System ───────────────────────────────────────────
+    // Toggle save for course/chapter/cheatsheet/quiz_question
+    toggleSavedItem: builder.mutation({
+      query: (body) => ({
+        url: "/users/me/saves/toggle",
+        method: "POST",
+        data: body,
+      }),
+      invalidatesTags: ["Saves"],
+    }),
+
+    // Get all saved items, populated
+    getMySavedItems: builder.query({
+      query: () => ({
+        url: "/users/me/saves",
+        method: "GET",
+      }),
+      providesTags: ["Saves"],
+    }),
   }),
 });
 
@@ -145,4 +165,6 @@ export const {
   useUpdateProfileMutation,
   useToggleBookmarkMutation,
   useGetBookmarksQuery,
+  useToggleSavedItemMutation,
+  useGetMySavedItemsQuery,
 } = authApi;

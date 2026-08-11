@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   getQuizQuestions,
+  getCourseExam,
   getQuizQuestionsAdmin,
   createQuizQuestion,
   updateQuizQuestion,
@@ -12,9 +13,15 @@ const router = Router();
 
 // Public
 router.get("/", getQuizQuestions);
+router.get("/exam/:courseSlug", getCourseExam);
 
 // Admin
-router.get("/admin/all", protect, authorize("admin", "editor"), getQuizQuestionsAdmin);
+router.get(
+  "/admin/all",
+  protect,
+  authorize("admin", "editor"),
+  getQuizQuestionsAdmin,
+);
 router.post("/", protect, authorize("admin", "editor"), createQuizQuestion);
 router.patch("/:id", protect, authorize("admin", "editor"), updateQuizQuestion);
 router.delete("/:id", protect, authorize("admin"), deleteQuizQuestion);

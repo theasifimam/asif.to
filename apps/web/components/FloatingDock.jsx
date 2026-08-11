@@ -3,16 +3,18 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAppSelector } from "@/lib/store/hooks";
 import { Home, Compass, Search, User } from "lucide-react";
 
 export default function FloatingDock() {
   const pathname = usePathname();
+  const { user } = useAppSelector((s) => s.auth);
 
   const navItems = [
     { label: "Home", href: "/", icon: Home },
     { label: "Articles", href: "/articles", icon: Compass },
     { label: "Search", href: "/search", icon: Search },
-    { label: "Profile", href: "/profile", icon: User },
+    { label: "Profile", href: user?.username ? `/${user.username}` : "/", icon: User },
   ];
 
   return (

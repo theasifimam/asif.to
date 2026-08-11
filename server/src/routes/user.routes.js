@@ -12,8 +12,10 @@ import {
   updateMyProfile,
   getPublicProfile,
   getMyBookmarks,
-  toggleBookmark } from
-"../controllers/user.controller.js";
+  toggleBookmark,
+  toggleSavedItem,
+  getMySavedItems,
+} from "../controllers/user.controller.js";
 import { protect, authorize } from "../middlewares/auth.middleware.js";
 
 import { uploadAvatar } from "../middlewares/upload.middleware.js";
@@ -25,6 +27,8 @@ router.get("/me/profile", protect, getMyProfile);
 router.patch("/me/update", protect, uploadAvatar.single("avatar"), updateMyProfile);
 router.get("/me/bookmarks", protect, getMyBookmarks);
 router.post("/me/bookmarks/toggle/:articleId", protect, toggleBookmark);
+router.post("/me/saves/toggle", protect, toggleSavedItem);
+router.get("/me/saves", protect, getMySavedItems);
 
 // ─── Public routes ──────────────────────────────────────────────────────────
 router.get("/public/:username", getPublicProfile);

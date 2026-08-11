@@ -1,4 +1,3 @@
-
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -9,23 +8,21 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const signToken = (id) => {
-  const secret = process.env.JWT_SECRET || process.env.JWT_ACCESS_SECRET || "fallback_secret_key_12345";
+  const secret =
+    process.env.JWT_SECRET ||
+    process.env.JWT_ACCESS_SECRET ||
+    "fallback_secret_key_12345";
   return jwt.sign({ id }, secret, {
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d"
+    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
   });
 };
 
-const sendTokenResponse = (
-res,
-statusCode,
-user,
-token) =>
-{
+const sendTokenResponse = (res, statusCode, user, token) => {
   const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   };
 
   res.cookie("token", token, cookieOptions);
@@ -35,28 +32,48 @@ token) =>
 
   res.status(statusCode).json({
     success: true,
-    message: statusCode === 201 ? "Account created successfully" : "Login successful",
+    message:
+      statusCode === 201 ? "Account created successfully" : "Login successful",
     data: {
       user: userData,
-      token
-    }
+      token,
+    },
   });
 };
 
 // POST /api/v1/auth/signup
 export const signup = async (req, res) => {
   try {
-    const { fullName, username, email, password, role } = req.body;
+    const { fullName, username, email, password, role, otp } = req.body;
+    const normalizedEmail = email?.toLowerCase().trim();
 
-    if (!fullName || !username || !email || !password) {
-      res.status(400).json({ success: false, message: "fullName, username, email and password are required." });
+    if (!fullName || !username || !normalizedEmail || !password || !otp) {
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: "fullName, username, email, password and OTP are required.",
+        });
       return;
     }
 
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    const existingUser = await User.findOne({
+      $or: [
+        { email: normalizedEmail },
+        { username: username.toLowerCase().trim() },
+      ],
+    });
     if (existingUser) {
       const field = existingUser.email === email ? "email" : "username";
-      res.status(409).json({ success: false, message: `This ${field} is already in use.` });
+      res
+        .status(409)
+        .json({ success: false, message: `This ${field} is already in use.` });
+      return;
+    }
+
+    const otpResult = verifyAndConsumeOtp(normalizedEmail, otp);
+    if (!otpResult.success) {
+      res.status(400).json({ success: false, message: otpResult.message });
       return;
     }
 
@@ -64,16 +81,16 @@ export const signup = async (req, res) => {
     const newUser = await User.create({
       fullName,
       username: username.toLowerCase().trim(),
-      email: email.toLowerCase().trim(),
+      email: normalizedEmail,
       password: hashedPassword,
-      role: role || "reader"
+      role: role || "reader",
     });
 
     const token = signToken(String(newUser._id));
 
     // Send welcome email (non-blocking)
-    sendWelcomeEmail(email, fullName).catch((err) =>
-    console.error("[AUTH] Welcome email failed:", err)
+    sendWelcomeEmail(normalizedEmail, fullName).catch((err) =>
+      console.error("[AUTH] Welcome email failed:", err),
     );
 
     sendTokenResponse(res, 201, newUser, token);
@@ -81,7 +98,14 @@ export const signup = async (req, res) => {
     console.error("[AUTH] Signup error:", error);
     if (error.code === 11000) {
       const field = Object.keys(error.keyValue)[0];
-      res.status(409).json({ success: false, message: `This ${field} is already taken.` });
+      res
+        .status(409)
+        .json({ success: false, message: `This ${field} is already taken.` });
+      return;
+    }
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((err) => err.message);
+      res.status(400).json({ success: false, message: messages.join(", ") });
       return;
     }
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -94,11 +118,16 @@ export const signin = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      res.status(400).json({ success: false, message: "Email and password are required." });
+      res
+        .status(400)
+        .json({ success: false, message: "Email/Username and password are required." });
       return;
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
+    const login = email.toLowerCase();
+    const user = await User.findOne({
+      $or: [{ email: login }, { username: login }]
+    }).select("+password");
     if (!user) {
       res.status(401).json({ success: false, message: "Invalid credentials." });
       return;
@@ -111,7 +140,9 @@ export const signin = async (req, res) => {
     }
 
     if (user.status === "suspended") {
-      res.status(403).json({ success: false, message: "Your account has been suspended." });
+      res
+        .status(403)
+        .json({ success: false, message: "Your account has been suspended." });
       return;
     }
 
@@ -133,11 +164,15 @@ export const adminSignin = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      res.status(400).json({ success: false, message: "Email and password are required." });
+      res
+        .status(400)
+        .json({ success: false, message: "Email and password are required." });
       return;
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
+    const user = await User.findOne({ email: email.toLowerCase() }).select(
+      "+password",
+    );
     if (!user) {
       res.status(401).json({ success: false, message: "Invalid credentials." });
       return;
@@ -146,7 +181,12 @@ export const adminSignin = async (req, res) => {
     // Only allow admin, editor, author roles
     const allowedRoles = ["admin", "editor", "author"];
     if (!allowedRoles.includes(user.role)) {
-      res.status(403).json({ success: false, message: "Access denied. Admin privileges required." });
+      res
+        .status(403)
+        .json({
+          success: false,
+          message: "Access denied. Admin privileges required.",
+        });
       return;
     }
 
@@ -157,7 +197,9 @@ export const adminSignin = async (req, res) => {
     }
 
     if (user.status === "suspended") {
-      res.status(403).json({ success: false, message: "Your account has been suspended." });
+      res
+        .status(403)
+        .json({ success: false, message: "Your account has been suspended." });
       return;
     }
 
@@ -182,7 +224,7 @@ export const getMe = async (req, res) => {
     }
     res.status(200).json({
       success: true,
-      data: { user }
+      data: { user },
     });
   } catch (error) {
     console.error("[AUTH] GetMe error:", error);
@@ -194,7 +236,7 @@ export const getMe = async (req, res) => {
 export const signout = async (req, res) => {
   res.cookie("token", "", {
     httpOnly: true,
-    expires: new Date(0)
+    expires: new Date(0),
   });
   res.status(200).json({ success: true, message: "Signed out successfully." });
 };
@@ -205,7 +247,12 @@ export const updatePassword = async (req, res) => {
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
-      res.status(400).json({ success: false, message: "Current and new passwords are required." });
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: "Current and new passwords are required.",
+        });
       return;
     }
 
@@ -217,12 +264,19 @@ export const updatePassword = async (req, res) => {
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
-      res.status(401).json({ success: false, message: "Current password is incorrect." });
+      res
+        .status(401)
+        .json({ success: false, message: "Current password is incorrect." });
       return;
     }
 
     if (newPassword.length < 8) {
-      res.status(400).json({ success: false, message: "New password must be at least 8 characters." });
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: "New password must be at least 8 characters.",
+        });
       return;
     }
 
@@ -242,10 +296,14 @@ export const checkUsername = async (req, res) => {
   try {
     const { username } = req.query;
     if (!username) {
-      res.status(400).json({ success: false, message: "Username is required." });
+      res
+        .status(400)
+        .json({ success: false, message: "Username is required." });
       return;
     }
-    const user = await User.findOne({ username: username.toLowerCase().trim() });
+    const user = await User.findOne({
+      username: username.toLowerCase().trim(),
+    });
     res.status(200).json({ success: true, available: !user });
   } catch (error) {
     console.error("[AUTH] CheckUsername error:", error);
@@ -259,12 +317,22 @@ export const resetPassword = async (req, res) => {
     const { email, otp, newPassword } = req.body;
 
     if (!email || !otp || !newPassword) {
-      res.status(400).json({ success: false, message: "Email, OTP, and new password are required." });
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: "Email, OTP, and new password are required.",
+        });
       return;
     }
 
     if (newPassword.length < 8) {
-      res.status(400).json({ success: false, message: "New password must be at least 8 characters." });
+      res
+        .status(400)
+        .json({
+          success: false,
+          message: "New password must be at least 8 characters.",
+        });
       return;
     }
 

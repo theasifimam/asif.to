@@ -1,10 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { Award, Download, RotateCcw, CheckCircle2, XCircle, Sparkles, Clock, AlertTriangle } from "lucide-react";
+import {
+  Award,
+  Download,
+  RotateCcw,
+  CheckCircle2,
+  XCircle,
+  Sparkles,
+  Clock,
+  AlertTriangle,
+} from "lucide-react";
 import { generateCertificate } from "./generateCertificate";
-
-const PASSING_SCORE = 14; // 14/20 = 70%
 
 /**
  * ExamResultCard
@@ -21,9 +28,14 @@ export default function ExamResultCard({
   autoSubmitReason,
   onRetry,
   cooldownHours,
+  passingScore,
+  passingPercentage,
+  durationMinutes,
 }) {
   const [downloading, setDownloading] = useState(false);
-  const passed = score >= PASSING_SCORE;
+  const requiredScore =
+    passingScore ?? Math.ceil((total * (passingPercentage ?? 70)) / 100);
+  const passed = score >= requiredScore;
   const percentage = Math.round((score / total) * 100);
   const today = new Date().toLocaleDateString("en-US", {
     year: "numeric",
@@ -54,14 +66,19 @@ export default function ExamResultCard({
         <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-bold">
           <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
           <p>
-            Your exam was automatically submitted due to multiple anti-cheat violations (tab switching / fullscreen exit). The result below reflects your answers at the time of submission.
+            Your exam was automatically submitted due to multiple anti-cheat
+            violations (tab switching / fullscreen exit). The result below
+            reflects your answers at the time of submission.
           </p>
         </div>
       )}
       {autoSubmitReason === "timeout" && (
         <div className="flex items-start gap-3 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold">
           <Clock className="w-5 h-5 shrink-0 mt-0.5" />
-          <p>Time&apos;s up! Your exam was automatically submitted when the 30-minute timer expired.</p>
+          <p>
+            Time&apos;s up! Your exam was automatically submitted when the
+            {durationMinutes}-minute timer expired.
+          </p>
         </div>
       )}
 
@@ -93,15 +110,23 @@ export default function ExamResultCard({
           </h2>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium max-w-sm">
             {passed
-              ? `You passed the React.js Final Exam and have earned your certificate.`
-              : `You scored ${score}/${total} — you need at least ${PASSING_SCORE}/20 to pass. Review the course material and try again.`}
+              ? `You passed the ${courseName} Final Exam and have earned your certificate.`
+              : `You scored ${score}/${total} — you need at least ${requiredScore}/${total} (${passingPercentage}%) to pass. Review the course material and try again.`}
           </p>
         </div>
 
         {/* Score ring */}
         <div className="relative w-28 h-28">
           <svg className="w-28 h-28 -rotate-90" viewBox="0 0 112 112">
-            <circle cx="56" cy="56" r="48" fill="none" stroke="currentColor" strokeWidth="8" className="text-zinc-200 dark:text-zinc-700" />
+            <circle
+              cx="56"
+              cy="56"
+              r="48"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="8"
+              className="text-zinc-200 dark:text-zinc-700"
+            />
             <circle
               cx="56"
               cy="56"
@@ -116,10 +141,14 @@ export default function ExamResultCard({
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className={`text-2xl font-black ${passed ? "text-emerald-500" : "text-red-500"}`}>
+            <span
+              className={`text-2xl font-black ${passed ? "text-emerald-500" : "text-red-500"}`}
+            >
               {percentage}%
             </span>
-            <span className="text-[10px] text-zinc-400 font-bold">{score}/{total}</span>
+            <span className="text-[10px] text-zinc-400 font-bold">
+              {score}/{total}
+            </span>
           </div>
         </div>
 
@@ -139,7 +168,7 @@ export default function ExamResultCard({
             className="flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-70 text-white font-bold text-sm shadow-lg shadow-emerald-500/30 transition-all active:scale-95"
           >
             <Download className="w-4 h-4" />
-            {downloading ? "Generating..." : "Download Certificate (PNG)"}
+            {downloading ? "Generating..." : "Download Certificate (PDF)"}
           </button>
         ) : (
           <div className="flex flex-col items-center gap-2">
@@ -197,7 +226,9 @@ export default function ExamResultCard({
                       Q{idx + 1}. {q.question}
                     </p>
                     {wasAnswered ? (
-                      <p className={`${isCorrect ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
+                      <p
+                        className={`${isCorrect ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}
+                      >
                         Your answer: {q.options[userAnswer]}
                       </p>
                     ) : (

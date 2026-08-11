@@ -16,7 +16,7 @@ export default function ChapterSidebar({
 }) {
   return (
     <aside className="hidden lg:block lg:col-span-4 xl:col-span-3 z-30">
-      <div style={{ position: "sticky", top: "90px" }}>
+      <div style={{ position: "sticky", top: "20px" }}>
         <div className="h-[calc(100vh-7.5rem)] flex flex-col gap-3 p-4 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60">
           <div className="flex items-center justify-between px-2 pt-1 shrink-0">
             <h2 className="text-xs font-extrabold uppercase tracking-widest text-zinc-400 flex items-center gap-1.5">
@@ -44,9 +44,7 @@ export default function ChapterSidebar({
           <div className="flex-1 overflow-y-auto pr-1 space-y-1.5 custom-scrollbar">
             {allChapters
               .filter((ch) =>
-                ch.title
-                  .toLowerCase()
-                  .includes(sidebarSearch.toLowerCase()),
+                ch.title.toLowerCase().includes(sidebarSearch.toLowerCase()),
               )
               .map((ch, idx) => {
                 const isActive = ch.slug === chapter?.slug;

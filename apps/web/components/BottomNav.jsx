@@ -17,7 +17,8 @@ export default function BottomNav() {
   );
 
   const isHomeActive = pathname === "/";
-  const isProfileActive = pathname.startsWith("/profile");
+  const profilePath = user?.username ? `/${user.username}` : null;
+  const isProfileActive = profilePath ? pathname.startsWith(profilePath) : false;
 
   return (
     <nav
@@ -45,7 +46,7 @@ export default function BottomNav() {
 
       {/* Profile Tab Button */}
       <Link
-        href="/profile"
+        href={profilePath || "/"}
         className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 ${
           isProfileActive
             ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 scale-105"

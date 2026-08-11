@@ -21,8 +21,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-
-
 export default function CourseEditorPage() {
   const { courseId } = useParams();
   const router = useRouter();
@@ -45,12 +43,20 @@ export default function CourseEditorPage() {
       setCourseForm({
         title: data.title,
         subtitle: data.subtitle,
+        slug: data.slug || "",
         techId: data.techId,
         level: data.level,
         duration: data.duration,
         order: data.order,
         status: data.status,
         learningOutcomes: (data.learningOutcomes || []).join("\n"),
+        examEnabled: Boolean(data.examEnabled),
+        examSettings: {
+          questionCount: data.examSettings?.questionCount ?? 20,
+          durationMinutes: data.examSettings?.durationMinutes ?? 30,
+          passingPercentage: data.examSettings?.passingPercentage ?? 70,
+          cooldownHours: data.examSettings?.cooldownHours ?? 24,
+        },
       });
       setChapters(data.chapters || []);
     }
@@ -81,8 +87,6 @@ export default function CourseEditorPage() {
     }
     setSaving(false);
   };
-
-
 
   const handleDeleteChapter = async (id) => {
     if (!confirm("Delete this chapter? This cannot be undone.")) return;
@@ -131,7 +135,7 @@ export default function CourseEditorPage() {
             {course?.title}
           </h1>
           <p className="text-xs text-muted-foreground">
-            {course?.techId} · {course?.level} · {course?.duration}
+            {course?.techId} · {course?.level} · {course?.duration} · <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">/courses/{course?.slug}</span>
           </p>
         </div>
       </div>
@@ -167,6 +171,20 @@ export default function CourseEditorPage() {
                 onChange={(e) =>
                   setCourseForm({ ...courseForm, title: e.target.value })
                 }
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground">
+                URL Slug (SEO)
+              </label>
+              <input
+                required
+                className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-mono text-blue-600 dark:text-blue-400 font-bold border-0 outline-none focus:ring-2 focus:ring-blue-500"
+                value={courseForm.slug || ""}
+                onChange={(e) =>
+                  setCourseForm({ ...courseForm, slug: e.target.value })
+                }
+                placeholder="e.g. javascript-complete-guide"
               />
             </div>
             <div className="space-y-2">
@@ -227,6 +245,54 @@ export default function CourseEditorPage() {
                 }
                 placeholder="Write JSX and build reusable components&#10;Manage state with useState..."
               />
+            </div>
+            <div className="space-y-4 rounded-2xl bg-blue-500/5 p-4 border border-blue-500/10">
+              <label className="flex items-center gap-2 text-sm font-bold text-foreground">
+                <input
+                  type="checkbox"
+                  checked={Boolean(courseForm.examEnabled)}
+                  onChange={(e) =>
+                    setCourseForm({
+                      ...courseForm,
+                      examEnabled: e.target.checked,
+                    })
+                  }
+                  className="h-4 w-4 accent-blue-600"
+                />
+                Enable final exam for this course
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[
+                  ["questionCount", "Questions", 1, 100],
+                  ["durationMinutes", "Minutes", 1, 300],
+                  ["passingPercentage", "Pass %", 1, 100],
+                  ["cooldownHours", "Cooldown h", 0, 720],
+                ].map(([key, label, min, max]) => (
+                  <label
+                    key={key}
+                    className="space-y-1 text-xs font-bold text-muted-foreground"
+                  >
+                    {label}
+                    <input
+                      type="number"
+                      min={min}
+                      max={max}
+                      required={Boolean(courseForm.examEnabled)}
+                      className="w-full px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-sm text-foreground border-0 outline-none"
+                      value={courseForm.examSettings?.[key] ?? ""}
+                      onChange={(e) =>
+                        setCourseForm({
+                          ...courseForm,
+                          examSettings: {
+                            ...courseForm.examSettings,
+                            [key]: Number(e.target.value),
+                          },
+                        })
+                      }
+                    />
+                  </label>
+                ))}
+              </div>
             </div>
             <div className="flex gap-3 pt-2">
               <button
@@ -352,8 +418,6 @@ export default function CourseEditorPage() {
           </div>
         )}
       </div>
-
-
     </div>
   );
 }

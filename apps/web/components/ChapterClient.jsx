@@ -33,8 +33,6 @@ export default function ChapterClient() {
 
   // Local state for completed chapters
   const [completedChapters, setCompletedChapters] = useState([]);
-  // Local state for saved lectures
-  const [savedLectures, setSavedLectures] = useState([]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -45,8 +43,6 @@ export default function ChapterClient() {
           );
           if (savedComp) setCompletedChapters(JSON.parse(savedComp));
         }
-        const savedLec = localStorage.getItem("asif_saved_lectures");
-        if (savedLec) setSavedLectures(JSON.parse(savedLec));
       } catch {
         /* ignore */
       }
@@ -78,6 +74,7 @@ export default function ChapterClient() {
   );
 
   const course = data?.data?.course;
+  const activeCourseSlug = course?.slug || courseId;
   const chapter = data?.data?.chapter;
   const allChapters = data?.data?.allChapters || [];
   const prevChapter = data?.data?.prevChapter;
@@ -90,45 +87,6 @@ export default function ChapterClient() {
   const progressPercentage = allChapters.length
     ? Math.round(((currentChapterIndex + 1) / allChapters.length) * 100)
     : 0;
-
-  const isCurrentSaved = useMemo(() => {
-    return savedLectures.some(
-      (item) => item.courseId === courseId && item.chapterId === chapter?.slug,
-    );
-  }, [savedLectures, courseId, chapter?.slug]);
-
-  const toggleSaveLecture = () => {
-    if (!courseId || !chapter?.slug) return;
-    setSavedLectures((prev) => {
-      const exists = prev.some(
-        (item) => item.courseId === courseId && item.chapterId === chapter.slug,
-      );
-      let updated;
-      if (exists) {
-        updated = prev.filter(
-          (item) =>
-            !(item.courseId === courseId && item.chapterId === chapter.slug),
-        );
-      } else {
-        const newItem = {
-          courseId,
-          courseTitle: course?.title || "Course",
-          chapterId: chapter.slug,
-          chapterTitle: chapter.title,
-          summary: chapter.summary || "",
-          techId: course?.techId,
-          savedAt: new Date().toISOString(),
-        };
-        updated = [newItem, ...prev];
-      }
-      if (typeof window !== "undefined") {
-        try {
-          localStorage.setItem("asif_saved_lectures", JSON.stringify(updated));
-        } catch {}
-      }
-      return updated;
-    });
-  };
 
   const activeItemRef = useRef(null);
 
@@ -218,7 +176,7 @@ export default function ChapterClient() {
               Lesson not found
             </h1>
             <Link
-              href={`/courses/${courseId}`}
+              href={`/courses/${activeCourseSlug}`}
               className="px-6 py-2.5 rounded-full bg-blue-600 text-white text-xs font-bold"
             >
               Back to Course Index
@@ -295,7 +253,7 @@ export default function ChapterClient() {
         {/* Standard Mode Top Header Bar */}
         {!isFocusMode && (
           <ChapterHeader
-            courseId={courseId}
+            courseId={activeCourseSlug}
             course={course}
             tech={tech}
             progressPercentage={progressPercentage}
@@ -319,7 +277,7 @@ export default function ChapterClient() {
           {/* Desktop Sticky & Collapsible Chapter Sidebar */}
           {!isFocusMode && isSidebarOpen && (
             <ChapterSidebar
-              courseId={courseId}
+              courseId={activeCourseSlug}
               chapter={chapter}
               allChapters={allChapters}
               currentChapterIndex={currentChapterIndex}
@@ -343,12 +301,14 @@ export default function ChapterClient() {
             {/* Top Quick Navigation (Standard Mode) */}
             {!isFocusMode && (
               <ChapterQuickNav
-                courseId={courseId}
+                courseId={activeCourseSlug}
                 prevChapter={prevChapter}
                 nextChapter={nextChapter}
+                examEnabled={course?.examEnabled}
                 variant="top"
               />
-            )}            {/* Main Lesson Reader Document Card */}
+            )}{" "}
+            {/* Main Lesson Reader Document Card */}
             <ChapterDocumentCard
               chapter={chapter}
               currentChapterIndex={currentChapterIndex}
@@ -356,31 +316,26 @@ export default function ChapterClient() {
               estimatedReadingTime={estimatedReadingTime}
               isCurrentCompleted={isCurrentCompleted}
               toggleChapterComplete={toggleChapterComplete}
-              isCurrentSaved={isCurrentSaved}
-              toggleSaveLecture={toggleSaveLecture}
               isFocusMode={isFocusMode}
               isSimplePoints={isSimplePoints}
               parsedBlocks={parsedBlocks}
               fontBodyClass={fontBodyClass}
             />
-
             {/* Standalone Code Examples */}
             <StandaloneCodeSnippets
               standaloneSnippets={standaloneSnippets}
               techName={tech?.name}
             />
-
             {/* Try It Challenge */}
             <TryItChallenge challenge={chapter?.tryItChallenge} />
-
             {/* Share Section */}
             <ChapterShareSection chapter={chapter} />
-
             {/* Bottom Prev / Next Navigation */}
             <ChapterQuickNav
-              courseId={courseId}
+              courseId={activeCourseSlug}
               prevChapter={prevChapter}
               nextChapter={nextChapter}
+              examEnabled={course?.examEnabled}
               variant="bottom"
             />
           </section>
@@ -391,7 +346,7 @@ export default function ChapterClient() {
       <ChapterDrawer
         isDrawerOpen={isDrawerOpen}
         setIsDrawerOpen={setIsDrawerOpen}
-        courseId={courseId}
+        courseId={activeCourseSlug}
         chapter={chapter}
         allChapters={allChapters}
         completedChapters={completedChapters}

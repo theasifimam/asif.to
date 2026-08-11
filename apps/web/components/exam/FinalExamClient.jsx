@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useCallback, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useSelector } from "react-redux";
-import { useRouter } from "next/navigation";
 import {
   ShieldCheck,
   LogIn,
@@ -14,27 +13,15 @@ import {
   CheckSquare,
   Maximize,
 } from "lucide-react";
-import { REACTJS_EXAM_QUESTIONS } from "@/lib/reactjsExamData";
+import { useGetCourseExamQuery } from "@/lib/api/courseApi";
 import ExamTimer from "./ExamTimer";
 import ExamQuestion from "./ExamQuestion";
 import ExamResultCard from "./ExamResultCard";
 import { useProctoredExam } from "./useProctoredExam";
 
-const TOTAL_QUESTIONS = 20;
-const PASSING_SCORE = 14;
-const COOLDOWN_HOURS = 24;
-const COURSE_ID = "reactjs";
-const COURSE_NAME = "React.js — Complete Course";
-
-// Randomly pick N questions from the pool (seeded once per session)
-function pickRandomQuestions(pool, n) {
-  const shuffled = [...pool].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, n);
-}
-
-function getExamCooldown() {
+function getExamCooldown(courseId) {
   try {
-    const raw = localStorage.getItem("exam_last_attempt_reactjs");
+    const raw = localStorage.getItem(`exam_last_attempt_${courseId}`);
     if (!raw) return null;
     return new Date(raw);
   } catch {
@@ -42,72 +29,79 @@ function getExamCooldown() {
   }
 }
 
-function setExamCooldown() {
+function setExamCooldown(courseId) {
   try {
-    localStorage.setItem("exam_last_attempt_reactjs", new Date().toISOString());
+    localStorage.setItem(
+      `exam_last_attempt_${courseId}`,
+      new Date().toISOString(),
+    );
   } catch {}
 }
 
-function clearExamSession() {
+function clearExamSession(courseId) {
   try {
-    sessionStorage.removeItem("exam_timer_start");
-    sessionStorage.removeItem("exam_questions_reactjs");
+    sessionStorage.removeItem(`exam_timer_start_${courseId}`);
   } catch {}
-}
-
-function getOrCreateQuestions() {
-  try {
-    const saved = sessionStorage.getItem("exam_questions_reactjs");
-    if (saved) return JSON.parse(saved);
-  } catch {}
-  const questions = pickRandomQuestions(REACTJS_EXAM_QUESTIONS, TOTAL_QUESTIONS);
-  try {
-    sessionStorage.setItem("exam_questions_reactjs", JSON.stringify(questions));
-  } catch {}
-  return questions;
 }
 
 // ── Phases ────────────────────────────────────────────────────────────────────
-const PHASE_AUTH = "auth";       // not logged in
-const PHASE_INTRO = "intro";     // rules screen
-const PHASE_EXAM = "exam";       // active exam
-const PHASE_RESULT = "result";   // result screen
+const PHASE_AUTH = "auth"; // not logged in
+const PHASE_INTRO = "intro"; // rules screen
+const PHASE_EXAM = "exam"; // active exam
+const PHASE_RESULT = "result"; // result screen
 
-export default function FinalExamClient() {
+export default function FinalExamClient({ courseId, course }) {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
-  const router = useRouter();
+  const {
+    data: examResponse,
+    isLoading,
+    isError,
+    error,
+  } = useGetCourseExamQuery(courseId);
+  const exam = examResponse?.data;
+  const questions = exam?.questions || [];
+  const settings = exam?.settings || {};
+  const totalQuestions = questions.length;
+  const durationMinutes = settings.durationMinutes || 30;
+  const passingPercentage = settings.passingPercentage || 70;
+  const passingScore = Math.ceil((totalQuestions * passingPercentage) / 100);
+  const cooldownHours = settings.cooldownHours ?? 24;
+  const courseName = exam?.course?.title || course?.title || courseId;
 
   // ── Cooldown check ──────────────────────────────────────────────────────────
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
   useEffect(() => {
-    const lastAttempt = getExamCooldown();
+    const lastAttempt = getExamCooldown(courseId);
     if (lastAttempt) {
       const hoursSince = (Date.now() - lastAttempt.getTime()) / 3600000;
-      if (hoursSince < COOLDOWN_HOURS) {
-        setCooldownRemaining(Math.ceil(COOLDOWN_HOURS - hoursSince));
+      if (hoursSince < cooldownHours) {
+        setCooldownRemaining(Math.ceil(cooldownHours - hoursSince));
       }
     }
-  }, []);
+  }, [courseId, cooldownHours]);
 
   // ── Phase state ────────────────────────────────────────────────────────────
   const initialPhase = !isAuthenticated ? PHASE_AUTH : PHASE_INTRO;
   const [phase, setPhase] = useState(initialPhase);
 
-  // ── Questions (seeded per session) ─────────────────────────────────────────
-  const [questions] = useState(() => getOrCreateQuestions());
-
   // ── Answers array (index = question index, value = selected option index or null) ──
-  const [answers, setAnswers] = useState(() => new Array(TOTAL_QUESTIONS).fill(null));
+  const [answers, setAnswers] = useState([]);
+  useEffect(() => {
+    setAnswers(new Array(totalQuestions).fill(null));
+  }, [totalQuestions]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [autoSubmitReason, setAutoSubmitReason] = useState(null);
   const [score, setScore] = useState(null);
 
   // ── Anti-cheat ─────────────────────────────────────────────────────────────
-  const handleAutoSubmit = useCallback((reason) => {
-    setAutoSubmitReason(reason);
-    submitExam(answers);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answers]);
+  const handleAutoSubmit = useCallback(
+    (reason) => {
+      setAutoSubmitReason(reason);
+      submitExam(answers);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [answers],
+  );
 
   const {
     violations,
@@ -119,8 +113,8 @@ export default function FinalExamClient() {
 
   // ── Exam actions ───────────────────────────────────────────────────────────
   const startExam = () => {
-    clearExamSession(); // fresh timer
-    setAnswers(new Array(TOTAL_QUESTIONS).fill(null));
+    clearExamSession(courseId); // fresh timer
+    setAnswers(new Array(totalQuestions).fill(null));
     setCurrentIndex(0);
     setAutoSubmitReason(null);
     setScore(null);
@@ -128,15 +122,18 @@ export default function FinalExamClient() {
     enterFullscreen();
   };
 
-  const submitExam = useCallback((finalAnswers) => {
-    const computed = questions.reduce((acc, q, idx) => {
-      return acc + (finalAnswers[idx] === q.correctIndex ? 1 : 0);
-    }, 0);
-    setScore(computed);
-    setExamCooldown();
-    clearExamSession();
-    setPhase(PHASE_RESULT);
-  }, [questions]);
+  const submitExam = useCallback(
+    (finalAnswers) => {
+      const computed = questions.reduce((acc, q, idx) => {
+        return acc + (finalAnswers[idx] === q.correctIndex ? 1 : 0);
+      }, 0);
+      setScore(computed);
+      setExamCooldown(courseId);
+      clearExamSession(courseId);
+      setPhase(PHASE_RESULT);
+    },
+    [questions, courseId],
+  );
 
   const handleTimerExpire = useCallback(() => {
     setAutoSubmitReason("timeout");
@@ -144,17 +141,17 @@ export default function FinalExamClient() {
   }, [answers, submitExam]);
 
   const handleRetry = () => {
-    const lastAttempt = getExamCooldown();
+    const lastAttempt = getExamCooldown(courseId);
     if (lastAttempt) {
       const hoursSince = (Date.now() - lastAttempt.getTime()) / 3600000;
-      const remaining = Math.ceil(COOLDOWN_HOURS - hoursSince);
+      const remaining = Math.ceil(cooldownHours - hoursSince);
       if (remaining > 0) {
         setCooldownRemaining(remaining);
         return;
       }
     }
     setCooldownRemaining(0);
-    clearExamSession();
+    clearExamSession(courseId);
     setPhase(PHASE_INTRO);
   };
 
@@ -169,7 +166,29 @@ export default function FinalExamClient() {
   const answeredCount = answers.filter((a) => a !== null).length;
 
   // ── Progress bar for answered questions ───────────────────────────────────
-  const progressPct = (answeredCount / TOTAL_QUESTIONS) * 100;
+  const progressPct = totalQuestions
+    ? (answeredCount / totalQuestions) * 100
+    : 0;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-[40vh] flex items-center justify-center text-sm font-bold text-zinc-500">
+        Loading exam...
+      </div>
+    );
+  }
+
+  if (isError || !exam || !totalQuestions) {
+    const message =
+      error?.data?.message || "This course exam is not currently available.";
+    return (
+      <div className="min-h-[40vh] flex flex-col items-center justify-center gap-3 px-4 text-center">
+        <AlertTriangle className="w-10 h-10 text-amber-500" />
+        <h2 className="text-xl font-black text-foreground">Exam unavailable</h2>
+        <p className="text-sm text-zinc-500">{message}</p>
+      </div>
+    );
+  }
 
   // ── Render: Auth Guard ─────────────────────────────────────────────────────
   if (phase === PHASE_AUTH || !isAuthenticated) {
@@ -183,7 +202,8 @@ export default function FinalExamClient() {
             Sign In Required
           </h2>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium max-w-sm">
-            You must be logged into your asif.to account to take the final exam and receive your certificate.
+            You must be logged into your asif.to account to take the final exam
+            and receive your certificate.
           </p>
         </div>
         <div className="flex gap-3 flex-wrap justify-center">
@@ -216,10 +236,11 @@ export default function FinalExamClient() {
             </div>
             <div>
               <h1 className="text-xl font-black text-foreground">
-                React.js Final Exam
+                {courseName} Final Exam
               </h1>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-                Proctored · 20 Questions · 30 Minutes
+                Proctored · {totalQuestions} Questions · {durationMinutes}{" "}
+                Minutes
               </p>
             </div>
           </div>
@@ -230,7 +251,9 @@ export default function FinalExamClient() {
               {(user?.name || user?.username || "U").charAt(0).toUpperCase()}
             </div>
             <div>
-              <p className="text-sm font-extrabold text-foreground">{user?.name || user?.username}</p>
+              <p className="text-sm font-extrabold text-foreground">
+                {user?.name || user?.username}
+              </p>
               <p className="text-xs text-zinc-400 font-medium">{user?.email}</p>
             </div>
           </div>
@@ -241,7 +264,10 @@ export default function FinalExamClient() {
               <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
               <p>
                 You recently took this exam. You can retake it in{" "}
-                <strong>{cooldownRemaining} hour{cooldownRemaining > 1 ? "s" : ""}</strong>.
+                <strong>
+                  {cooldownRemaining} hour{cooldownRemaining > 1 ? "s" : ""}
+                </strong>
+                .
               </p>
             </div>
           )}
@@ -254,15 +280,15 @@ export default function FinalExamClient() {
             </h2>
             <ul className="space-y-2 text-xs font-medium text-zinc-600 dark:text-zinc-300">
               {[
-                "20 questions randomly selected from a pool of 60+",
-                "You have exactly 30 minutes — timer cannot be paused",
+                `${totalQuestions} questions selected from the course question bank`,
+                `You have exactly ${durationMinutes} minutes — timer cannot be paused`,
                 "Exam will auto-submit when time expires",
                 "You MUST stay in fullscreen mode throughout the exam",
                 "Switching tabs or minimizing is recorded as a violation",
                 "Two violations = automatic exam submission",
                 "Right-click, copy/paste, and DevTools shortcuts are disabled",
-                "You must score 14/20 (70%) or above to receive your certificate",
-                "Failed attempts have a 24-hour cooldown before retaking",
+                `You must score ${passingScore}/${totalQuestions} (${passingPercentage}%) or above to receive your certificate`,
+                `Failed attempts have a ${cooldownHours}-hour cooldown before retaking`,
                 "Passing earns a downloadable certificate with your name and score",
               ].map((rule, i) => (
                 <li key={i} className="flex items-start gap-2">
@@ -300,7 +326,7 @@ export default function FinalExamClient() {
   if (phase === PHASE_EXAM) {
     const question = questions[currentIndex];
     const isFirst = currentIndex === 0;
-    const isLast = currentIndex === TOTAL_QUESTIONS - 1;
+    const isLast = currentIndex === totalQuestions - 1;
 
     return (
       <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto">
@@ -314,7 +340,10 @@ export default function FinalExamClient() {
             <div>
               <p>{warningMessage}</p>
               <p className="font-medium opacity-80 mt-0.5">
-                Violation {violations}/2 — {violations >= 2 ? "Submitting now..." : "Next violation will auto-submit your exam."}
+                Violation {violations}/2 —{" "}
+                {violations >= 2
+                  ? "Submitting now..."
+                  : "Next violation will auto-submit your exam."}
               </p>
             </div>
           </div>
@@ -326,17 +355,21 @@ export default function FinalExamClient() {
             <ShieldCheck className="w-4 h-4 text-blue-500" />
             <span className="hidden sm:inline">Proctored Exam</span>
             <span className="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-extrabold">
-              React.js
+              {exam.course.techId || courseName}
             </span>
           </div>
-          <ExamTimer onExpire={handleTimerExpire} />
+          <ExamTimer
+            onExpire={handleTimerExpire}
+            durationMinutes={durationMinutes}
+            storageKey={`exam_timer_start_${courseId}`}
+          />
         </div>
 
         {/* Answered progress */}
         <div className="flex items-center gap-2.5 px-1">
           <CheckSquare className="w-3.5 h-3.5 text-emerald-500" />
           <span className="text-xs font-bold text-zinc-500">
-            {answeredCount}/{TOTAL_QUESTIONS} answered
+            {answeredCount}/{totalQuestions} answered
           </span>
           <div className="flex-1 h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
             <div
@@ -351,7 +384,7 @@ export default function FinalExamClient() {
           <ExamQuestion
             question={question}
             questionNumber={currentIndex + 1}
-            totalQuestions={TOTAL_QUESTIONS}
+            totalQuestions={totalQuestions}
             selectedOption={answers[currentIndex]}
             onSelect={selectAnswer}
           />
@@ -378,8 +411,8 @@ export default function FinalExamClient() {
                   idx === currentIndex
                     ? "bg-blue-600 text-white shadow-md"
                     : answers[idx] !== null
-                    ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 hover:bg-zinc-200"
+                      ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 hover:bg-zinc-200"
                 }`}
               >
                 {idx + 1}
@@ -415,15 +448,18 @@ export default function FinalExamClient() {
     return (
       <ExamResultCard
         score={score}
-        total={TOTAL_QUESTIONS}
+        total={totalQuestions}
         questions={questions}
         answers={answers}
         studentName={user?.name || user?.username || "Student"}
         studentEmail={user?.email || ""}
-        courseName={COURSE_NAME}
+        courseName={courseName}
         autoSubmitReason={autoSubmitReason}
         onRetry={handleRetry}
         cooldownHours={cooldownRemaining}
+        passingScore={passingScore}
+        passingPercentage={passingPercentage}
+        durationMinutes={durationMinutes}
       />
     );
   }

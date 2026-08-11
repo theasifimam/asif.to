@@ -45,19 +45,10 @@ const SIDEBAR_ITEMS = [
     icon: HelpCircle,
     color: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
   },
-  {
-    label: "Saved Notes",
-    href: "/bookmarks",
-    icon: Bookmark,
-    color: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
-  },
-  {
-    label: "My Profile",
-    href: "/profile",
-    icon: User,
-    color: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
-  },
 ];
+
+// Profile is shown separately below, nav items don't include it
+
 
 export default function Sidebar({
   isOpen,
@@ -199,7 +190,7 @@ export default function Sidebar({
               ) : (
                 <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700/60 shadow-sm">
                   <Link
-                    href="/profile"
+                    href={user?.username ? `/${user.username}` : "/"}
                     onClick={onClose}
                     className="flex items-center gap-3 overflow-hidden"
                   >

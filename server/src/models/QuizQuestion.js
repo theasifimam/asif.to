@@ -2,16 +2,12 @@ import { Schema, model } from "mongoose";
 
 const quizQuestionSchema = new Schema(
   {
-    techId: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    course: {
-      type: Schema.Types.ObjectId,
-      ref: "Course",
-      default: null,
-    },
+    courses: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Course",
+      },
+    ],
     question: {
       type: String,
       required: true,
@@ -48,9 +44,9 @@ const quizQuestionSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-quizQuestionSchema.index({ techId: 1, status: 1 });
+quizQuestionSchema.index({ courses: 1, status: 1 });
 
 export default model("QuizQuestion", quizQuestionSchema);

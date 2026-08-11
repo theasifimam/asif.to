@@ -6,7 +6,7 @@
  * Replace base URL and implement actual endpoints when connecting to backend.
  */
 
-import { getAuthHeaders, logout } from "./auth";
+import { getAuthHeaders } from "./auth";
 
 // API Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -352,8 +352,8 @@ export const cheatsheetsApi = {
 export const quizApi = {
   list: (params) =>
     apiGet(`/quiz?${params ? new URLSearchParams(params) : ""}`),
-  listAll: (techId) =>
-    apiGet(`/quiz/admin/all${techId ? `?techId=${techId}` : ""}`),
+  listAll: (params) =>
+    apiGet(`/quiz/admin/all${params ? `?${new URLSearchParams(params)}` : ""}`),
   create: (data) => apiPost("/quiz", data),
   update: (id, data) => apiPatch(`/quiz/${id}`, data),
   delete: (id) => apiDelete(`/quiz/${id}`),

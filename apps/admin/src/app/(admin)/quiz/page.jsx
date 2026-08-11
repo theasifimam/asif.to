@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { quizApi } from "@/lib/api";
+import { quizApi, coursesApi } from "@/lib/api";
 import {
   HelpCircle,
   Plus,
@@ -14,17 +14,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const TECH_IDS = [
-  "reactjs",
-  "nextjs",
-  "nodejs",
-  "expressjs",
-  "mongodb",
-  "tailwindcss",
-  "javascript",
-];
 const DEFAULT_FORM = {
-  techId: "",
+  courseIds: [],
   question: "",
   options: ["", "", "", ""],
   correctIndex: 0,
@@ -35,31 +26,41 @@ const DEFAULT_FORM = {
 
 export default function QuizAdminPage() {
   const [questions, setQuestions] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterTech, setFilterTech] = useState("");
+  const [filterCourseId, setFilterCourseId] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [form, setForm] = useState(DEFAULT_FORM);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(null);
 
+  useEffect(() => {
+    coursesApi.listAll().then((res) => {
+      if (res.success) setCourses(res.data?.data || []);
+    });
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
-    const res = await quizApi.listAll(filterTech);
+    const res = await quizApi.listAll(
+      filterCourseId ? { courseId: filterCourseId } : undefined,
+    );
     if (res.success) setQuestions(res.data?.data || []);
     setLoading(false);
-  }, [filterTech]);
+  }, [filterCourseId]);
 
   useEffect(() => {
-    load();
+    const timeoutId = window.setTimeout(load, 0);
+    return () => window.clearTimeout(timeoutId);
   }, [load]);
 
   const openEdit = (q) => {
     setEditTarget(q);
     setForm({
-      techId: q.techId,
       question: q.question,
       options: [...q.options],
+      courseIds: (q.courses || []).map((course) => course._id || course),
       correctIndex: q.correctIndex,
       explanation: q.explanation || "",
       difficulty: q.difficulty,
@@ -109,7 +110,7 @@ export default function QuizAdminPage() {
             Quiz Builder
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Add multiple-choice quiz questions per technology track.
+            Add multiple-choice quiz questions to one or more courses.
           </p>
         </div>
         <button
@@ -128,18 +129,18 @@ export default function QuizAdminPage() {
       {/* Filter */}
       <div className="flex items-center gap-2 flex-wrap">
         <button
-          onClick={() => setFilterTech("")}
-          className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${!filterTech ? "bg-blue-600 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-foreground"}`}
+          onClick={() => setFilterCourseId("")}
+          className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${!filterCourseId ? "bg-blue-600 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-foreground"}`}
         >
           All
         </button>
-        {TECH_IDS.map((t) => (
+        {courses.map((course) => (
           <button
-            key={t}
-            onClick={() => setFilterTech(t)}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filterTech === t ? "bg-blue-600 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-foreground"}`}
+            key={course._id}
+            onClick={() => setFilterCourseId(course._id)}
+            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${filterCourseId === course._id ? "bg-blue-600 text-white" : "bg-zinc-100 dark:bg-zinc-800 text-foreground"}`}
           >
-            {t}
+            {course.title}
           </button>
         ))}
       </div>
@@ -166,7 +167,10 @@ export default function QuizAdminPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1.5">
                     <span className="text-[11px] font-extrabold uppercase tracking-wider text-blue-600 bg-blue-500/10 px-2 py-0.5 rounded-full">
-                      {q.techId}
+                      {(q.courses || [])
+                        .map((course) => course.title)
+                        .filter(Boolean)
+                        .join(", ") || "Unassigned"}
                     </span>
                     <span
                       className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${q.difficulty === "easy" ? "bg-emerald-500/10 text-emerald-600" : q.difficulty === "hard" ? "bg-red-500/10 text-red-600" : "bg-amber-500/10 text-amber-600"}`}
@@ -243,23 +247,30 @@ export default function QuizAdminPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                    Tech ID *
+                    Courses *
                   </label>
                   <select
                     required
-                    className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none"
-                    value={form.techId}
-                    onChange={(e) =>
-                      setForm({ ...form, techId: e.target.value })
-                    }
+                    multiple
+                    className="w-full min-h-28 px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none"
+                    value={form.courseIds}
+                    onChange={(e) => {
+                      const courseIds = Array.from(
+                        e.target.selectedOptions,
+                        (option) => option.value,
+                      );
+                      setForm({ ...form, courseIds });
+                    }}
                   >
-                    <option value="">Select...</option>
-                    {TECH_IDS.map((t) => (
-                      <option key={t} value={t}>
-                        {t}
+                    {courses.map((course) => (
+                      <option key={course._id} value={course._id}>
+                        {course.title}
                       </option>
                     ))}
                   </select>
+                  <p className="text-[11px] text-muted-foreground">
+                    Use Ctrl/Cmd to select multiple courses.
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">

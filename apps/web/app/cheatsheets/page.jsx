@@ -1,12 +1,20 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CodeSnippetViewer from "@/components/CodeSnippetViewer";
+import SaveButton from "@/components/SaveButton";
 import { useGetCheatsheetsQuery } from "@/lib/api/courseApi";
 import { TECH_STACKS } from "@/lib/tutorialData";
-import { Sparkles, Search, Loader2, Download, FileText, Printer } from "lucide-react";
+import {
+  Sparkles,
+  Search,
+  Loader2,
+  Download,
+  FileText,
+  Printer,
+} from "lucide-react";
 
 /** Generate and trigger a print-to-PDF for a single cheatsheet */
 function downloadCheatsheetPdf(cs, techName) {
@@ -21,7 +29,7 @@ function downloadCheatsheetPdf(cs, techName) {
           ${i + 1}. ${snip.name || "Snippet"}
         </p>
         <pre style="background:#1e1e2e;color:#cdd6f4;padding:16px 20px;border-radius:12px;font-size:12px;font-family:'Fira Code',Courier,monospace;white-space:pre-wrap;word-break:break-word;line-height:1.6;margin:0;">${escapeHtml(snip.code || "")}</pre>
-      </div>`
+      </div>`,
     )
     .join("");
 
@@ -86,7 +94,7 @@ export default function CheatsheetsPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data, isLoading } = useGetCheatsheetsQuery(
-    selectedTech ? { techId: selectedTech } : undefined
+    selectedTech ? { techId: selectedTech } : undefined,
   );
 
   const CHEATSHEETS = data?.data || [];
@@ -98,7 +106,7 @@ export default function CheatsheetsPage() {
       cs.snippets?.some(
         (s) =>
           s.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          s.code?.toLowerCase().includes(searchQuery.toLowerCase())
+          s.code?.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     return matchesSearch;
   });
@@ -108,7 +116,6 @@ export default function CheatsheetsPage() {
       <Header />
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 pt-20 sm:pt-24 flex flex-col gap-6">
-
         {/* Header Title */}
         <div className="flex flex-col gap-2">
           <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-blue-600 text-white text-xs font-bold w-fit shadow-md shadow-blue-500/20">
@@ -120,7 +127,8 @@ export default function CheatsheetsPage() {
             Coding Cheatsheets & Syntax Reference
           </h1>
           <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 font-medium">
-            Quickly lookup React hooks, Next.js routes, Express middleware, MongoDB aggregation pipelines, and Tailwind CSS utilities.
+            Quickly lookup React hooks, Next.js routes, Express middleware,
+            MongoDB aggregation pipelines, and Tailwind CSS utilities.
           </p>
         </div>
 
@@ -176,8 +184,12 @@ export default function CheatsheetsPage() {
             {filteredCheatsheets.length === 0 ? (
               <div className="text-center py-20 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-sm border border-zinc-200/80 dark:border-zinc-800/80">
                 <FileText className="w-10 h-10 text-zinc-300 dark:text-zinc-700 mx-auto mb-3" />
-                <p className="font-bold text-sm text-muted-foreground">No cheatsheets found.</p>
-                <p className="text-xs text-zinc-400 mt-1">Try a different search or tech filter.</p>
+                <p className="font-bold text-sm text-muted-foreground">
+                  No cheatsheets found.
+                </p>
+                <p className="text-xs text-zinc-400 mt-1">
+                  Try a different search or tech filter.
+                </p>
               </div>
             ) : (
               <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/80">
@@ -194,7 +206,9 @@ export default function CheatsheetsPage() {
                       {/* Cheatsheet Header Row */}
                       <div className="flex items-start justify-between gap-3 flex-wrap">
                         <div className="flex items-center gap-3 flex-wrap">
-                          <span className={`font-bold px-3 py-1 rounded-full text-xs ${tech?.badgeBg || "bg-blue-500/10 text-blue-600"}`}>
+                          <span
+                            className={`font-bold px-3 py-1 rounded-full text-xs ${tech?.badgeBg || "bg-blue-500/10 text-blue-600"}`}
+                          >
                             {tech?.name || cs.techId} Cheatsheet
                           </span>
                           <span className="text-xs text-zinc-400 font-medium">
@@ -202,20 +216,31 @@ export default function CheatsheetsPage() {
                           </span>
                         </div>
 
-                        {/* PDF Download Button */}
-                        <button
-                          onClick={() => downloadCheatsheetPdf(cs, tech?.name)}
-                          className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-foreground text-xs font-bold transition-all active:scale-95 shadow-sm cursor-pointer"
-                          title="Download as PDF"
-                        >
-                          <Download className="w-3.5 h-3.5 text-blue-500" />
-                          <span>Download PDF</span>
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <SaveButton
+                            itemId={cs._id}
+                            itemType="cheatsheet"
+                            label="Save"
+                            size="sm"
+                          />
+                          <button
+                            onClick={() =>
+                              downloadCheatsheetPdf(cs, tech?.name)
+                            }
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-foreground text-xs font-bold transition-all active:scale-95 shadow-sm cursor-pointer"
+                            title="Download as PDF"
+                          >
+                            <Download className="w-3.5 h-3.5 text-blue-500" />
+                            <span>Download PDF</span>
+                          </button>
+                        </div>
                       </div>
 
                       {/* Title & Description */}
                       <div>
-                        <h2 className="text-xl sm:text-2xl font-black text-foreground">{cs.title}</h2>
+                        <h2 className="text-xl sm:text-2xl font-black text-foreground">
+                          {cs.title}
+                        </h2>
                         {cs.description && (
                           <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 font-medium leading-relaxed">
                             {cs.description}

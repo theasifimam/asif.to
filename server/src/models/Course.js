@@ -51,13 +51,23 @@ const courseSchema = new Schema(
       enum: ["draft", "published"],
       default: "published",
     },
+    examEnabled: {
+      type: Boolean,
+      default: false,
+    },
+    examSettings: {
+      questionCount: { type: Number, default: 20, min: 1, max: 100 },
+      durationMinutes: { type: Number, default: 30, min: 1, max: 300 },
+      passingPercentage: { type: Number, default: 70, min: 1, max: 100 },
+      cooldownHours: { type: Number, default: 24, min: 0, max: 720 },
+    },
     // Populated chapters are fetched via Chapter.find({ course: id })
   },
   {
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 // Virtual: chapter count
@@ -69,6 +79,7 @@ courseSchema.virtual("chapters", {
 });
 
 courseSchema.index({ status: 1, order: 1 });
+courseSchema.index({ examEnabled: 1, status: 1 });
 
 // Cascade delete chapters when a course is deleted
 courseSchema.pre("findOneAndDelete", async function () {
@@ -78,8 +89,12 @@ courseSchema.pre("findOneAndDelete", async function () {
   }
 });
 
-courseSchema.pre("deleteOne", { document: true, query: false }, async function () {
-  await model("Chapter").deleteMany({ course: this._id });
-});
+courseSchema.pre(
+  "deleteOne",
+  { document: true, query: false },
+  async function () {
+    await model("Chapter").deleteMany({ course: this._id });
+  },
+);
 
 export default model("Course", courseSchema);

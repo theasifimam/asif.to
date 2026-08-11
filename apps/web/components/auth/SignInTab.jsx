@@ -30,12 +30,12 @@ export default function SignInTab({
       <form onSubmit={handleSignin} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-extrabold text-foreground uppercase tracking-wider ml-1">
-            Email Address
+            Email or Username
           </label>
           <div className="relative">
             <input
-              type="email"
-              placeholder="support@asif.to"
+              type="text"
+              placeholder="username or email@asif.to"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required

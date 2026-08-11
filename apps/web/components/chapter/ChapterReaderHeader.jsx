@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Clock, Check, Bookmark } from "lucide-react";
+import { Clock, Check } from "lucide-react";
+import SaveButton from "@/components/SaveButton";
 
 export default function ChapterReaderHeader({
   chapter,
@@ -10,8 +11,6 @@ export default function ChapterReaderHeader({
   estimatedReadingTime,
   isCurrentCompleted,
   toggleChapterComplete,
-  isCurrentSaved,
-  toggleSaveLecture,
   isFocusMode,
 }) {
   return (
@@ -46,25 +45,12 @@ export default function ChapterReaderHeader({
             <span>{isCurrentCompleted ? "Completed" : "Mark Done"}</span>
           </button>
 
-          {/* Save Lecture Toggle Button */}
-          <button
-            onClick={toggleSaveLecture}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all ${
-              isCurrentSaved
-                ? "bg-amber-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20"
-                : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200"
-            }`}
-            title={
-              isCurrentSaved
-                ? "Remove from saved lectures"
-                : "Save lecture for later"
-            }
-          >
-            <Bookmark
-              className={`w-3.5 h-3.5 ${isCurrentSaved ? "fill-current" : ""}`}
-            />
-            <span>{isCurrentSaved ? "Saved" : "Save"}</span>
-          </button>
+          <SaveButton
+            itemId={chapter?._id}
+            itemType="chapter"
+            label="Save"
+            size="sm"
+          />
         </div>
       </div>
 

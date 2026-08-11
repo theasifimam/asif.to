@@ -22,16 +22,33 @@ export const metadata = {
   },
   description:
     "Learn and revise React.js, Next.js, Express.js, Node.js, MongoDB & TypeScript on asif.to. Mobile-first step-by-step coding tutorials, instant syntax cheatsheets, flashcards, and practice quizzes.",
-  keywords: ["asif.to", "asif.to tutorials", "Next.js", "React.js", "Express.js", "Node.js", "MongoDB", "Mongoose", "JavaScript", "TypeScript", "Coding Tutorials", "Revision Flashcards"],
+  keywords: [
+    "asif.to",
+    "asif.to tutorials",
+    "Next.js",
+    "React.js",
+    "Express.js",
+    "Node.js",
+    "MongoDB",
+    "Mongoose",
+    "JavaScript",
+    "TypeScript",
+    "Coding Tutorials",
+    "Revision Flashcards",
+  ],
   authors: [{ name: "asif.to Team" }],
   icons: {
     icon: "/logo.png",
   },
   openGraph: {
     title: "asif.to — Mobile-First Coding Tutorials & Revision",
-    description: "Learn and revise coding concepts step-by-step on asif.to with flashcards, code snippets, and quizzes.",
+    description:
+      "Learn and revise coding concepts step-by-step on asif.to with flashcards, code snippets, and quizzes.",
     siteName: "asif.to Tutorials",
     type: "website",
+  },
+  alternates: {
+    canonical: "/",
   },
 };
 
@@ -45,7 +62,9 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${outfit.variable} antialiased selection:bg-blue-500 selection:text-white bg-zinc-50 dark:bg-zinc-950 text-foreground`}>
+      <body
+        className={`${inter.variable} ${outfit.variable} antialiased selection:bg-blue-500 selection:text-white bg-zinc-50 dark:bg-zinc-950 text-foreground`}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

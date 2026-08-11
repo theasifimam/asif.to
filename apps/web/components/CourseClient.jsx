@@ -19,9 +19,7 @@ import {
   Layers,
   GraduationCap,
 } from "lucide-react";
-
-// Courses with a final exam
-const EXAM_COURSES = ["reactjs"];
+import SaveButton from "@/components/SaveButton";
 
 export default function CourseClient() {
   const params = useParams();
@@ -31,8 +29,11 @@ export default function CourseClient() {
     skip: !courseId,
   });
   const course = data?.data;
+  const activeCourseSlug = course?.slug || courseId;
   const tech = course ? TECH_STACKS.find((t) => t.id === course.techId) : null;
   const firstChapterSlug = course?.chapters?.[0]?.slug || "ch-1";
+  const examEnabled = Boolean(course?.examEnabled);
+  const examSettings = course?.examSettings || {};
 
   if (isLoading) {
     return (
@@ -120,7 +121,7 @@ export default function CourseClient() {
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Link
-              href={`/courses/${courseId}/${firstChapterSlug}`}
+              href={`/courses/${activeCourseSlug}/${firstChapterSlug}`}
               className="flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold shadow-lg shadow-blue-500/25 active:scale-95 transition-all"
             >
               <Play className="w-4 h-4 fill-current" />
@@ -151,15 +152,30 @@ export default function CourseClient() {
               <span>Flashcards</span>
             </Link>
 
-            {/* Final Exam CTA — only for courses that have an exam */}
-            {EXAM_COURSES.includes(courseId) && (
+            {/* Save Course Button */}
+            <SaveButton
+              itemId={course._id}
+              itemType="course"
+              label="Save Course"
+              className="w-full sm:w-auto justify-center"
+            />
+
+            {examEnabled ? (
               <Link
-                href={`/courses/${courseId}/final-exam`}
+                href={`/courses/${activeCourseSlug}/final-exam`}
                 className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs font-bold shadow-lg shadow-purple-500/20 transition-all active:scale-95"
               >
                 <GraduationCap className="w-4 h-4" />
                 <span>Take Final Exam</span>
               </Link>
+            ) : (
+              <div
+                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 text-xs font-bold cursor-not-allowed"
+                aria-disabled="true"
+              >
+                <GraduationCap className="w-4 h-4" />
+                <span>Final Exam Coming Soon</span>
+              </div>
             )}
           </div>
         </section>
@@ -204,38 +220,48 @@ export default function CourseClient() {
 
           <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/80">
             {course.chapters.map((ch, idx) => (
-              <Link
+              <div
                 key={ch._id || ch.slug}
-                href={`/courses/${courseId}/${ch.slug}`}
-                className={`group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors duration-200 ${
+                className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors duration-200 ${
                   idx === 0 ? "rounded-t-[2.5rem]" : ""
                 }`}
               >
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-8 h-8 rounded-2xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/25">
-                    {idx + 1}
+                <Link
+                  href={`/courses/${activeCourseSlug}/${ch.slug}`}
+                  className="group flex flex-1 items-start justify-between gap-4 min-w-0"
+                >
+                  <div className="flex items-start gap-4 min-w-0">
+                    <div className="shrink-0 w-8 h-8 rounded-2xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/25">
+                      {idx + 1}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-extrabold text-base text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {ch.title}
+                      </h3>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 mt-1 font-medium">
+                        {ch.summary}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-extrabold text-base text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                      {ch.title}
-                    </h3>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 mt-1 font-medium">
-                      {ch.summary}
-                    </p>
-                  </div>
-                </div>
 
-                <div className="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 self-end sm:self-auto shrink-0">
-                  <span>Start Lesson</span>
-                  <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </Link>
+                  <div className="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 shrink-0">
+                    <span>Start Lesson</span>
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </Link>
+                <SaveButton
+                  itemId={ch._id}
+                  itemType="chapter"
+                  label="Save"
+                  size="sm"
+                  className="self-end sm:self-auto shrink-0"
+                />
+              </div>
             ))}
 
-            {/* Final Exam row — pinned at bottom of chapter list for exam courses */}
-            {EXAM_COURSES.includes(courseId) && (
+            {examEnabled ? (
               <Link
-                href={`/courses/${courseId}/final-exam`}
+                href={`/courses/${activeCourseSlug}/final-exam`}
                 className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-b-[2.5rem] bg-linear-to-r from-blue-500/5 via-purple-500/5 to-blue-500/5 hover:from-blue-500/10 hover:to-purple-500/10 transition-colors duration-200 border-t-2 border-dashed border-blue-500/30"
               >
                 <div className="flex items-start gap-4">
@@ -244,10 +270,12 @@ export default function CourseClient() {
                   </div>
                   <div>
                     <h3 className="font-extrabold text-base text-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                      Final Exam — Certification Test
+                      Final Exam - Certification Test
                     </h3>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
-                      20 questions · 30 minutes · Proctored · Earn your certificate
+                      {examSettings.questionCount || 20} questions ·{" "}
+                      {examSettings.durationMinutes || 30} minutes · Proctored ·
+                      Earn your certificate
                     </p>
                   </div>
                 </div>
@@ -256,6 +284,28 @@ export default function CourseClient() {
                   <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
+            ) : (
+              <div
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-b-[2.5rem] bg-zinc-50 dark:bg-zinc-900/60 border-t-2 border-dashed border-zinc-200 dark:border-zinc-800"
+                aria-disabled="true"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="shrink-0 w-8 h-8 rounded-2xl bg-zinc-200 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center">
+                    <GraduationCap className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-base text-zinc-500 dark:text-zinc-400">
+                      Final Exam - Coming Soon
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-1 font-medium">
+                      The certification exam for this course is being prepared.
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs font-bold text-zinc-400 self-end sm:self-auto shrink-0">
+                  Coming Soon
+                </span>
+              </div>
             )}
           </div>
         </section>

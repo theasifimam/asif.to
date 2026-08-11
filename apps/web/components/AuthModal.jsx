@@ -9,7 +9,6 @@ import {
   useSigninMutation,
   useSignupMutation,
   useSendOtpMutation,
-  useVerifyOtpMutation,
   useCheckUsernameQuery,
 } from "@/lib/api/authApi";
 import { setCredentials } from "@/lib/store/authSlice";
@@ -33,10 +32,14 @@ export default function AuthModal({
   const [isForgotPassword, setIsForgotPassword] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) return undefined;
+
+    const resetTimer = setTimeout(() => {
       setActiveTab(defaultTab);
       setIsForgotPassword(false);
-    }
+    }, 0);
+
+    return () => clearTimeout(resetTimer);
   }, [isOpen, defaultTab]);
 
   // ─── Sign-in state ────────────────────────────────────────────────────
@@ -78,7 +81,6 @@ export default function AuthModal({
   const [signin, { isLoading: siLoading }] = useSigninMutation();
   const [signup, { isLoading: suLoading }] = useSignupMutation();
   const [sendOtp, { isLoading: otpSending }] = useSendOtpMutation();
-  const [verifyOtp, { isLoading: otpVerifying }] = useVerifyOtpMutation();
 
   // ─── Countdown timer for OTP resend ─────────────────────────────────
   useEffect(() => {
@@ -157,8 +159,8 @@ export default function AuthModal({
     );
     try {
       await sendOtp({
-        email: suEmail,
-        fullName: suFullName,
+        email: suEmail.trim().toLowerCase(),
+        fullName: suFullName.trim(),
         purpose: "signup",
       }).unwrap();
       toast.dismiss(toastId);
@@ -179,21 +181,18 @@ export default function AuthModal({
       toast.error("Enter the 6-digit code.");
       return;
     }
-    const toastId = toast.loading("Verifying OTP code...");
+    const toastId = toast.loading(
+      "Verifying code and creating your account...",
+    );
     try {
-      // Step 1: verify OTP
-      await verifyOtp({ email: suEmail, otp }).unwrap();
-      toast.dismiss(toastId);
-
-      // Step 2: create account
-      const toastId2 = toast.loading("Creating your account...");
       const res = await signup({
-        fullName: suFullName,
-        username: suUsername,
-        email: suEmail,
+        fullName: suFullName.trim(),
+        username: suUsername.trim(),
+        email: suEmail.trim().toLowerCase(),
         password: suPassword,
+        otp,
       }).unwrap();
-      toast.dismiss(toastId2);
+      toast.dismiss(toastId);
       commitAuth(res);
     } catch (err) {
       toast.dismiss(toastId);
@@ -207,8 +206,8 @@ export default function AuthModal({
     const toastId = toast.loading("Resending code from noreply@asif.to...");
     try {
       await sendOtp({
-        email: suEmail,
-        fullName: suFullName,
+        email: suEmail.trim().toLowerCase(),
+        fullName: suFullName.trim(),
         purpose: "signup",
       }).unwrap();
       toast.dismiss(toastId);
@@ -256,7 +255,7 @@ export default function AuthModal({
     }
   };
 
-  const isBusy = siLoading || suLoading || otpSending || otpVerifying;
+  const isBusy = siLoading || suLoading || otpSending;
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
@@ -278,13 +277,13 @@ export default function AuthModal({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 24 }}
                 transition={{ type: "spring", damping: 28, stiffness: 320 }}
-                className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-110 bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl sm:rounded-[2.5rem] shadow-2xl z-201 overflow-hidden"
+                className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[92vw] sm:w-full max-w-[440px] max-h-[85vh] sm:max-h-[90vh] bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl sm:rounded-[2.5rem] shadow-2xl z-201 flex flex-col overflow-hidden"
               >
                 {/* Header */}
                 <AuthHeader />
 
                 {/* Content */}
-                <div className="p-6 sm:p-8 pt-6">
+                <div className="flex-1 overflow-y-auto p-5 sm:p-8 pt-4">
                   <AnimatePresence mode="wait">
                     {isForgotPassword ? (
                       <motion.div
@@ -407,7 +406,7 @@ export default function AuthModal({
                                     }
                                     handleResendOtp={handleResendOtp}
                                     resendCountdown={resendCountdown}
-                                    otpVerifying={otpVerifying}
+                                    otpVerifying={suLoading}
                                     suLoading={suLoading}
                                     otpSending={otpSending}
                                     isBusy={isBusy}

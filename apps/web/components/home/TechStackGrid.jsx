@@ -28,7 +28,7 @@ const ICON_MAP = {
   Sparkles,
 };
 
-export default function TechStackGrid({ selectedTech, onSelectTech, activeTechIds = [], isLoading = false }) {
+export default function TechStackGrid({ selectedTech, onSelectTech, activeTechIds = [], courses = [], isLoading = false }) {
   const visibleTechStacks = TECH_STACKS.filter(tech => activeTechIds.includes(tech.id));
 
   if (!isLoading && visibleTechStacks.length === 0) return null;
@@ -54,11 +54,13 @@ export default function TechStackGrid({ selectedTech, onSelectTech, activeTechId
         ) : (
           visibleTechStacks.map((tech) => {
             const IconComponent = ICON_MAP[tech.icon] || Code2;
+            const matchingCourse = courses.find((c) => c.techId === tech.id);
+            const courseSlug = matchingCourse?.slug || tech.id;
 
             return (
               <Link
                 key={tech.id}
-                href={`/courses/${tech.id}`}
+                href={`/courses/${courseSlug}`}
                 className="group relative flex flex-col justify-between text-left p-4 sm:p-5 rounded-3xl bg-white dark:bg-zinc-900/90 shadow-sm hover:shadow-md hover:bg-zinc-100/80 dark:hover:bg-zinc-800/90 transition-all duration-300 active:scale-[0.97]"
               >
                 <div>

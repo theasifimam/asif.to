@@ -14,6 +14,18 @@ const userSchema = new Schema(
       trim: true,
       lowercase: true,
       minlength: 3,
+      validate: {
+        validator: function (v) {
+          const reserved = [
+            "about", "contact", "contactus", "admin", "api", "profile",
+            "settings", "courses", "quiz", "auth", "login", "signup",
+            "bookmarks", "dashboard", "support", "terms", "privacy",
+            "revision", "exams", "home"
+          ];
+          return !reserved.includes(v.toLowerCase());
+        },
+        message: "This username is reserved and cannot be used.",
+      },
     },
     email: {
       type: String,
@@ -72,6 +84,25 @@ const userSchema = new Schema(
       type: Number,
       default: 1,
     },
+    completedCourses: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Course",
+      },
+    ],
+    certificates: [
+      {
+        courseId: {
+          type: Schema.Types.ObjectId,
+          ref: "Course",
+        },
+        issueDate: {
+          type: Date,
+          default: Date.now,
+        },
+        certificateUrl: String,
+      },
+    ],
     expertise: [
       {
         type: String,
@@ -89,6 +120,26 @@ const userSchema = new Schema(
       {
         type: Schema.Types.ObjectId,
         ref: "Article",
+      },
+    ],
+
+    // ─── Unified save system ──────────────────────────────────────────────────
+    // Polymorphic saves for courses, chapters, cheatsheets, quiz questions
+    savedItems: [
+      {
+        itemId: {
+          type: Schema.Types.ObjectId,
+          required: true,
+        },
+        itemType: {
+          type: String,
+          enum: ["course", "chapter", "cheatsheet", "quiz_question"],
+          required: true,
+        },
+        savedAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
 

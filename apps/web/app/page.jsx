@@ -3,10 +3,10 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
+import SaveButton from "@/components/SaveButton";
 import Footer from "@/components/Footer";
 import TechStackGrid from "@/components/home/TechStackGrid";
 import RevisionFlashcards from "@/components/home/RevisionFlashcards";
-import CodeSnippetViewer from "@/components/CodeSnippetViewer";
 import { TECH_STACKS } from "@/lib/tutorialData";
 import { useGetCoursesQuery } from "@/lib/api/courseApi";
 import {
@@ -62,12 +62,16 @@ export default function HomePage() {
             </div>
 
             <h1 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
-              Master React, Next.js, Node & MongoDB on <span className="underline decoration-yellow-300 decoration-wavy decoration-2">asif.to</span>
+              Master React, Next.js, Node & MongoDB on{" "}
+              <span className="underline decoration-yellow-300 decoration-wavy decoration-2">
+                asif.to
+              </span>
             </h1>
 
             <p className="text-xs sm:text-sm text-blue-100 mt-2 max-w-xl leading-relaxed font-medium">
-              Your go-to hub for structured web development tutorials, instant syntax cheatsheets,
-              interactive revision flashcards, and practice quizzes designed for phone & desktop.
+              Your go-to hub for structured web development tutorials, instant
+              syntax cheatsheets, interactive revision flashcards, and practice
+              quizzes designed for phone & desktop.
             </p>
 
             {/* Instant Search Bar */}
@@ -128,6 +132,7 @@ export default function HomePage() {
           selectedTech={selectedTech}
           onSelectTech={setSelectedTech}
           activeTechIds={activeTechIds}
+          courses={allCourses}
           isLoading={coursesLoading}
         />
 
@@ -166,11 +171,6 @@ export default function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredCourses.map((course, idx) => {
                 const tech = TECH_STACKS.find((t) => t.id === course.techId);
-                const firstChapterSlug =
-                  course.chapters?.[0]?.slug ||
-                  course.chapters?.[0]?.id ||
-                  "ch-1";
-                const courseSlug = course.slug || course.techId || course.id;
                 const rankNum = course.rank || idx + 1;
 
                 return (
@@ -195,7 +195,7 @@ export default function HomePage() {
                         </span>
                       </div>
 
-                      <Link href={`/courses/${courseSlug}`}>
+                      <Link href={`/courses/${course.slug}`}>
                         <h3 className="font-extrabold text-lg sm:text-xl text-foreground leading-snug mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                           {course.title}
                         </h3>
@@ -217,7 +217,7 @@ export default function HomePage() {
                           </span>
                         </div>
                         <Link
-                          href={`/courses/${courseSlug}`}
+                          href={`/courses/${course.slug}`}
                           className="text-blue-600 dark:text-blue-400 hover:underline text-[11px]"
                         >
                           View Syllabus
@@ -225,13 +225,22 @@ export default function HomePage() {
                       </div>
                     </div>
 
-                    <Link
-                      href={`/courses/${courseSlug}/${firstChapterSlug}`}
-                      className="flex items-center justify-center gap-2 w-full py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-500/25 active:scale-95 transition-all"
-                    >
-                      <Play className="w-3.5 h-3.5 fill-current" />
-                      <span>Start Course (Lesson 1)</span>
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/courses/${course.slug}`}
+                        className="flex flex-1 items-center justify-center gap-2 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-500/25 active:scale-95 transition-all"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span>Start Course</span>
+                      </Link>
+                      <SaveButton
+                        itemId={course._id}
+                        itemType="course"
+                        label="Save Course"
+                        size="sm"
+                        className="shrink-0"
+                      />
+                    </div>
                   </div>
                 );
               })}

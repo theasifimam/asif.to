@@ -48,6 +48,7 @@ export default function CoursesAdminPage() {
   const [form, setForm] = useState({
     title: "",
     subtitle: "",
+    slug: "",
     techId: "",
     level: "Beginner - Advanced",
     duration: "Self-paced",
@@ -75,6 +76,7 @@ export default function CoursesAdminPage() {
       setForm({
         title: "",
         subtitle: "",
+        slug: "",
         techId: "",
         level: "Beginner - Advanced",
         duration: "Self-paced",
@@ -176,6 +178,17 @@ export default function CoursesAdminPage() {
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   placeholder="e.g. React.js Complete Course: Zero to Mastery"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  URL Slug (SEO)
+                </label>
+                <input
+                  className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none focus:ring-2 focus:ring-blue-500"
+                  value={form.slug || ""}
+                  onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                  placeholder="e.g. javascript-complete-guide (optional)"
                 />
               </div>
               <div className="space-y-2">
@@ -311,7 +324,10 @@ export default function CoursesAdminPage() {
                   <h3 className="font-extrabold text-base text-foreground line-clamp-1">
                     {course.title}
                   </h3>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium">
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium flex-wrap">
+                    <span className="px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-[10px] font-mono font-bold text-blue-600 dark:text-blue-400">
+                      /{course.slug || course.techId}
+                    </span>
                     <span className="flex items-center gap-1">
                       <Layers className="w-3 h-3" /> {course.chapterCount || 0}{" "}
                       Chapters
@@ -369,7 +385,7 @@ export default function CoursesAdminPage() {
               !open && !deleting && setShowDeleteModal(null)
             }
           >
-            <DialogContent className="max-w-md border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6 rounded-4xl gap-6 z-[9999]">
+            <DialogContent className="max-w-md border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6 rounded-4xl gap-6 z-9999">
               <DialogHeader>
                 <DialogTitle className="text-xl font-bold text-zinc-900 dark:text-white">
                   Delete Course?

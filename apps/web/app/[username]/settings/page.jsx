@@ -36,6 +36,7 @@ export default function ProfileSettingsPage() {
   const { isAuthenticated, user: storeUser } = useAppSelector(
     (state) => state.auth,
   );
+  const username = storeUser?.username;
   const { data: profileRes, isLoading: profileLoading } = useGetProfileQuery(
     undefined,
     {
@@ -61,7 +62,7 @@ export default function ProfileSettingsPage() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push("/profile");
+      router.push("/");
     }
   }, [isAuthenticated, router]);
 
@@ -131,7 +132,7 @@ export default function ProfileSettingsPage() {
         const token = localStorage.getItem("asif_token") || "";
         dispatch(setCredentials({ user: res.data.user, token }));
         toast.success("Profile updated successfully!");
-        router.push("/profile");
+        router.push(`/${username}`);
       }
     } catch (err) {
       toast.error(err?.data?.message || "Failed to update profile");

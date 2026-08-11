@@ -7,7 +7,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "seed:react-exam": "node src/scripts/seed-react-exam.js",
+    "seed:nextjs-exam": "node src/scripts/seed-nextjs-exam.js",
+    "seed:javascript-exam": "node src/scripts/seed-course-exams.js javascript",
+    "seed:nodejs-exam": "node src/scripts/seed-course-exams.js nodejs",
+    "seed:html-exam": "node src/scripts/seed-course-exams.js html",
+    "seed:course-exams": "node src/scripts/seed-course-exams.js"
   },
   "keywords": [],
   "author": "",

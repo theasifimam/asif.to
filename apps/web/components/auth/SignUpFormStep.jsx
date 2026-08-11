@@ -32,7 +32,7 @@ export default function SignUpFormStep({
       </div>
 
       <form onSubmit={handleSendOtp} className="flex flex-col gap-4">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-extrabold text-foreground uppercase tracking-wider ml-1">
               Full Name

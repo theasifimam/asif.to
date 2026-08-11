@@ -6,7 +6,6 @@ export const courseApi = createApi({
   baseQuery: axiosBaseQuery(),
   tagTypes: ["Courses", "Chapters", "Cheatsheets", "Quiz", "Flashcards"],
   endpoints: (builder) => ({
-
     // ── Courses ─────────────────────────────────────────────────────────────
     getCourses: builder.query({
       query: (params) => ({ url: "/courses", method: "GET", params }),
@@ -37,13 +36,25 @@ export const courseApi = createApi({
 
     getCheatsheetBySlug: builder.query({
       query: (slug) => ({ url: `/cheatsheets/${slug}`, method: "GET" }),
-      providesTags: (result, error, slug) => [{ type: "Cheatsheets", id: slug }],
+      providesTags: (result, error, slug) => [
+        { type: "Cheatsheets", id: slug },
+      ],
     }),
 
     // ── Quiz ─────────────────────────────────────────────────────────────────
     getQuizQuestions: builder.query({
       query: (params) => ({ url: "/quiz", method: "GET", params }),
       providesTags: ["Quiz"],
+    }),
+
+    getCourseExam: builder.query({
+      query: (courseSlug) => ({
+        url: `/quiz/exam/${courseSlug}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, slug) => [
+        { type: "Quiz", id: `exam-${slug}` },
+      ],
     }),
 
     // ── Flashcards ───────────────────────────────────────────────────────────
@@ -61,5 +72,6 @@ export const {
   useGetCheatsheetsQuery,
   useGetCheatsheetBySlugQuery,
   useGetQuizQuestionsQuery,
+  useGetCourseExamQuery,
   useGetFlashcardsQuery,
 } = courseApi;
