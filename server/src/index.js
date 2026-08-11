@@ -22,8 +22,6 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Connect to MongoDB
-connectDB();
 
 const app = express();
 
@@ -85,7 +83,17 @@ app.use((req, res) => {
 });
 
 // ─── Start Server ──────────────────────────────────────────────────────────
-const PORT = parseInt(process.env.PORT || "5000", 10);
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+const startServer = async () => {
+  try {
+    await connectDB();
+    const PORT = parseInt(process.env.PORT || "5000", 10);
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("❌ Fatal error during server startup:", error);
+    process.exit(1);
+  }
+};
+
+startServer();

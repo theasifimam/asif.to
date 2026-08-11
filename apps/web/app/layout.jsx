@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ReduxProvider } from "@/components/ReduxProvider";
 import BottomNav from "@/components/BottomNav";
+import { ScrollNavProvider } from "@/components/ScrollNavProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -15,17 +16,21 @@ const outfit = Outfit({
 });
 
 export const metadata = {
-  title: "asif.to | Mobile-First Coding Tutorials & Revision",
+  title: {
+    default: "asif.to — Step-by-Step Web & Full-Stack Coding Tutorials",
+    template: "%s | asif.to Tutorials",
+  },
   description:
-    "Learn and revise Next.js, React.js, Express.js, Node.js, MongoDB, Mongoose, JavaScript & TypeScript concepts on the go. Mobile-first bite-sized coding tutorials, flashcards, code snippets, and quizzes.",
-  keywords: ["Next.js", "React.js", "Express.js", "Node.js", "MongoDB", "Mongoose", "JavaScript", "TypeScript", "Coding Tutorials", "Revision Flashcards"],
+    "Learn and revise React.js, Next.js, Express.js, Node.js, MongoDB & TypeScript on asif.to. Mobile-first step-by-step coding tutorials, instant syntax cheatsheets, flashcards, and practice quizzes.",
+  keywords: ["asif.to", "asif.to tutorials", "Next.js", "React.js", "Express.js", "Node.js", "MongoDB", "Mongoose", "JavaScript", "TypeScript", "Coding Tutorials", "Revision Flashcards"],
   authors: [{ name: "asif.to Team" }],
   icons: {
     icon: "/logo.png",
   },
   openGraph: {
-    title: "asif.to | Mobile-First Coding Tutorials & Revision",
-    description: "Learn and revise coding concepts on the go with flashcards, code snippets, and quizzes.",
+    title: "asif.to — Mobile-First Coding Tutorials & Revision",
+    description: "Learn and revise coding concepts step-by-step on asif.to with flashcards, code snippets, and quizzes.",
+    siteName: "asif.to Tutorials",
     type: "website",
   },
 };
@@ -48,8 +53,10 @@ export default function RootLayout({ children }) {
           disableTransitionOnChange
         >
           <ReduxProvider>
-            {children}
-            <BottomNav />
+            <ScrollNavProvider>
+              {children}
+              <BottomNav />
+            </ScrollNavProvider>
           </ReduxProvider>
         </ThemeProvider>
       </body>

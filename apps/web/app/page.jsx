@@ -56,19 +56,18 @@ export default function HomePage() {
           <div className="absolute top-2 right-12 w-28 h-28 rounded-full bg-blue-400/20 blur-xl pointer-events-none" />
 
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-extrabold tracking-wider uppercase mb-3">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-extrabold tracking-wider uppercase mb-3">
               <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
-              <span>Modern W3Schools Alternative for Developers</span>
+              <span>asif.to • Step-by-Step Coding Tutorials & Cheatsheets</span>
             </div>
 
             <h1 className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
-              Learn React, Next.js, Node, Express & MongoDB Step-by-Step
+              Master React, Next.js, Node & MongoDB on <span className="underline decoration-yellow-300 decoration-wavy decoration-2">asif.to</span>
             </h1>
 
             <p className="text-xs sm:text-sm text-blue-100 mt-2 max-w-xl leading-relaxed font-medium">
-              Structured step-by-step courses, instant syntax cheatsheets,
-              interactive revision flashcards, and practice quizzes designed for
-              phone & desktop.
+              Your go-to hub for structured web development tutorials, instant syntax cheatsheets,
+              interactive revision flashcards, and practice quizzes designed for phone & desktop.
             </p>
 
             {/* Instant Search Bar */}

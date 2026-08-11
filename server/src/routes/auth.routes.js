@@ -6,8 +6,9 @@ import {
   getMe,
   signout,
   updatePassword,
-  checkUsername } from
-"../controllers/auth.controller.js";
+  checkUsername,
+  resetPassword
+} from "../controllers/auth.controller.js";
 import { sendOtp, verifyOtp } from "../controllers/otp.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
 
@@ -19,6 +20,7 @@ router.post("/signin", signin);
 router.post("/admin/signin", adminSignin);
 router.post("/signout", signout);
 router.get("/check-username", checkUsername);
+router.post("/reset-password", resetPassword);
 
 // OTP routes
 router.post("/otp/send", sendOtp);

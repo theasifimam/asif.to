@@ -2,7 +2,10 @@
 
 import React from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, GraduationCap } from "lucide-react";
+
+// Courses that have a final exam
+const EXAM_COURSES = ["reactjs"];
 
 export default function ChapterQuickNav({
   courseId,
@@ -39,6 +42,14 @@ export default function ChapterQuickNav({
             </span>
             <ChevronRight className="w-4 h-4 shrink-0" />
           </Link>
+        ) : EXAM_COURSES.includes(courseId) ? (
+          <Link
+            href={`/courses/${courseId}/final-exam`}
+            className="flex items-center gap-1 text-purple-600 dark:text-purple-400 hover:underline max-w-[48%] justify-end text-right ml-auto font-bold text-[11px] sm:text-xs"
+          >
+            <GraduationCap className="w-4 h-4 shrink-0" />
+            <span>Take Final Exam</span>
+          </Link>
         ) : (
           <span className="text-emerald-500 font-bold text-[11px] sm:text-xs">
             Course Completed! 🎉
@@ -70,6 +81,15 @@ export default function ChapterQuickNav({
         >
           <span>Next Lesson</span>
           <ChevronRight className="w-4 h-4" />
+        </Link>
+      ) : EXAM_COURSES.includes(courseId) ? (
+        /* Last chapter of a course with exam — show Final Exam CTA */
+        <Link
+          href={`/courses/${courseId}/final-exam`}
+          className="flex items-center gap-1.5 px-4 py-2.5 sm:px-6 sm:py-3 rounded-full bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold transition-all shadow-md shadow-blue-500/25 active:scale-95 text-[11px] sm:text-xs"
+        >
+          <GraduationCap className="w-4 h-4" />
+          <span>Take Final Exam</span>
         </Link>
       ) : (
         <Link

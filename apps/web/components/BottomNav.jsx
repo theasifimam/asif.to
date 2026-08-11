@@ -7,9 +7,11 @@ import { usePathname } from "next/navigation";
 import { Home, User } from "lucide-react";
 import { useAppSelector } from "@/lib/store/hooks";
 import { getImageUrl } from "@/lib/config";
+import { useScrollNavVisible } from "@/components/ScrollNavProvider";
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const isNavVisible = useScrollNavVisible();
   const { user, isAuthenticated, isInitialized } = useAppSelector(
     (s) => s.auth,
   );
@@ -18,7 +20,13 @@ export default function BottomNav() {
   const isProfileActive = pathname.startsWith("/profile");
 
   return (
-    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 md:hidden bg-white/90 dark:bg-zinc-900/90 backdrop-blur-2xl px-4 py-2 rounded-full shadow-2xl border border-zinc-200/80 dark:border-zinc-800/80 flex items-center gap-3">
+    <nav
+      className={`fixed left-1/2 -translate-x-1/2 z-50 md:hidden bg-white/90 dark:bg-zinc-900/90 backdrop-blur-2xl px-4 py-2 rounded-full shadow-2xl border border-zinc-200/80 dark:border-zinc-800/80 flex items-center gap-3 transition-[bottom,opacity] duration-300 ease-in-out ${
+        isNavVisible
+          ? "bottom-4 opacity-100"
+          : "bottom-[-5rem] opacity-0 pointer-events-none"
+      }`}
+    >
       {/* Home Tab Button */}
       <Link
         href="/"

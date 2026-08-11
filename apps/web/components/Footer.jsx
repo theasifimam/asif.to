@@ -1,8 +1,26 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
-import { Mail } from "lucide-react";
+import { Mail, Bookmark, Share2, Check, Sparkles } from "lucide-react";
 
 export default function Footer({ containerWidth = "max-w-7xl" }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = () => {
+    if (typeof window !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText("https://asif.to");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleBookmark = () => {
+    if (typeof window !== "undefined") {
+      alert("Press Ctrl+D (or Cmd+D) to bookmark asif.to in your browser!");
+    }
+  };
+
   return (
     <footer className="w-full mt-auto pt-8">
       <div
@@ -11,22 +29,65 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
         <div className="p-6 sm:p-10 rounded-2xl sm:rounded-[3rem] bg-white dark:bg-zinc-900/90 shadow-lg shadow-black/5 dark:shadow-black/20 flex flex-col gap-8">
           <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
             {/* Brand */}
-            <div className="flex flex-col gap-3 max-w-sm">
-              <Link href="/" className="flex items-center gap-2">
-                <img src="/logo.png" alt="asif.to" className="w-8 h-8 rounded-xl object-contain shadow-sm" />
-                <span className="font-outfit font-black text-xl tracking-tight text-foreground">
-                  asif
-                  <span className="text-blue-600 dark:text-blue-400">.to</span>
-                </span>
+            <div className="flex flex-col gap-3.5 max-w-sm">
+              <Link href="/" className="flex items-center gap-2.5 group">
+                <div className="relative">
+                  <img
+                    src="/logo.png"
+                    alt="asif.to"
+                    className="w-9 h-9 rounded-xl object-contain shadow-sm group-hover:scale-105 transition-transform"
+                  />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-blue-600 rounded-full border-2 border-white dark:border-zinc-900" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-outfit font-black text-2xl tracking-tight text-foreground leading-none">
+                    asif
+                    <span className="text-blue-600 dark:text-blue-400">
+                      .to
+                    </span>
+                  </span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
+                    Coding Tutorials & Cheatsheets
+                  </span>
+                </div>
               </Link>
               <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed">
                 Modern step-by-step coding courses, instant syntax cheatsheets,
-                interactive flashcards, and quizzes for React, Next.js, Express,
+                interactive flashcards, and practice quizzes for React, Next.js, Express,
                 Node & MongoDB.
               </p>
+
+              {/* Bookmark & Share CTA Buttons */}
+              <div className="flex items-center gap-2 pt-1 flex-wrap">
+                <button
+                  onClick={handleBookmark}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600/10 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white text-xs font-bold transition-all border border-blue-500/20 active:scale-95"
+                  title="Bookmark asif.to in your browser"
+                >
+                  <Bookmark className="w-3.5 h-3.5" />
+                  <span>Bookmark asif.to</span>
+                </button>
+                <button
+                  onClick={handleCopyLink}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 text-xs font-bold transition-all active:scale-95"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-500" />
+                      <span className="text-emerald-500">Link Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="w-3.5 h-3.5" />
+                      <span>Share asif.to</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
               <a
                 href="mailto:support@asif.to"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline w-fit pt-1"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors w-fit pt-0.5"
               >
                 <Mail className="w-3.5 h-3.5" />
                 <span>support@asif.to</span>

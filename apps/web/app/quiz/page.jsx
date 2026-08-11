@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useGetQuizQuestionsQuery } from "@/lib/api/courseApi";
@@ -14,6 +15,9 @@ import {
   ChevronRight,
   Sparkles,
   Loader2,
+  GraduationCap,
+  ShieldCheck,
+  Clock,
 } from "lucide-react";
 
 export default function QuizPage() {
@@ -95,6 +99,59 @@ export default function QuizPage() {
             Test your understanding of Next.js, React, Node.js, Express &
             MongoDB concepts.
           </p>
+        </div>
+
+        {/* ── Course Final Exams Section ─────────────────────────────────── */}
+        <section className="space-y-3">
+          <div className="flex items-center gap-2">
+            <GraduationCap className="w-4 h-4 text-purple-500" />
+            <h2 className="text-sm font-black text-foreground uppercase tracking-widest">
+              Course Final Exams
+            </h2>
+          </div>
+
+          <Link
+            href="/courses/reactjs/final-exam"
+            className="group flex items-center justify-between gap-4 p-5 rounded-[2rem] bg-white dark:bg-zinc-900/90 shadow-md border border-zinc-200/60 dark:border-zinc-800/60 hover:border-purple-500/40 hover:shadow-lg transition-all duration-200"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center shrink-0">
+                <span className="text-2xl">⚛️</span>
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-extrabold text-sm text-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                  React.js Final Exam
+                </h3>
+                <div className="flex flex-wrap gap-2 text-[11px] font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                    20 questions
+                  </span>
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                    <Clock className="w-3 h-3" />
+                    30 min
+                  </span>
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                    <ShieldCheck className="w-3 h-3" />
+                    Proctored
+                  </span>
+                </div>
+                <p className="text-[11px] text-zinc-400 font-medium">
+                  Score 70%+ to earn your React.js certificate
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 text-xs font-bold text-purple-600 dark:text-purple-400 shrink-0">
+              <span className="hidden sm:inline">Take Exam</span>
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+        </section>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800" />
+          <span className="text-[11px] font-black text-zinc-400 uppercase tracking-widest">Practice Quiz</span>
+          <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800" />
         </div>
 
         {!isFinished ? (

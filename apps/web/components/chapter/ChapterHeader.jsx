@@ -36,6 +36,9 @@ export default function ChapterHeader({
             <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           </Link>
           <div className="flex items-center gap-2 min-w-0 flex-wrap">
+            <span className="font-black text-[10px] sm:text-[11px] px-2.5 py-0.5 rounded-full bg-blue-600/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 uppercase tracking-widest border border-blue-500/20 shrink-0">
+              asif.to
+            </span>
             <span
               className={`font-bold text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full shrink-0 ${
                 tech?.badgeBg || "bg-blue-500/10 text-blue-600 dark:text-blue-400"

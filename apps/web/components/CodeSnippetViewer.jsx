@@ -39,6 +39,9 @@ export default function CodeSnippetViewer({
       <div className="flex items-center justify-between px-2.5 sm:px-5 py-2.5 sm:py-3 bg-zinc-900/90 text-xs font-mono text-zinc-400 border-b border-zinc-800/60">
         <div className="flex items-center gap-2 min-w-0">
           <Code className="w-4 h-4 text-blue-400 shrink-0" />
+          <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 text-[10px] font-sans font-black tracking-wider uppercase border border-blue-500/20 shrink-0">
+            asif.to
+          </span>
           <span className="font-bold text-zinc-300 truncate">
             {title || language}
           </span>
@@ -51,7 +54,7 @@ export default function CodeSnippetViewer({
           {copied ? (
             <>
               <Check className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-emerald-400 font-bold">Copied!</span>
+              <span className="text-emerald-400 font-bold">Copied from asif.to!</span>
             </>
           ) : (
             <>

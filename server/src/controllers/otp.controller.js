@@ -42,8 +42,8 @@ export const sendOtp = async (req, res) => {
       }
     }
 
-    // For signin: ensure account exists
-    if (purpose === "signin") {
+    // For signin or forgot-password: ensure account exists
+    if (purpose === "signin" || purpose === "forgot-password") {
       const existing = await User.findOne({ email: email.toLowerCase() });
       if (!existing) {
         res.status(404).json({ success: false, message: "No account found with this email." });
@@ -117,4 +117,29 @@ export const verifyOtp = async (req, res) => {
     console.error("[OTP] verifyOtp error:", error);
     res.status(500).json({ success: false, message: "Internal server error." });
   }
+};
+
+export const verifyAndConsumeOtp = (email, otp) => {
+  if (!email || !otp) return { success: false, message: "Email and OTP are required." };
+  
+  const entry = otpStore.get(email.toLowerCase());
+  if (!entry) return { success: false, message: "No verification code found. Please request a new one." };
+  if (Date.now() > entry.expiresAt) {
+    otpStore.delete(email.toLowerCase());
+    return { success: false, message: "Verification code has expired. Please request a new one." };
+  }
+  
+  entry.attempts++;
+  if (entry.attempts > MAX_ATTEMPTS) {
+    otpStore.delete(email.toLowerCase());
+    return { success: false, message: "Too many failed attempts. Please request a new code." };
+  }
+  
+  if (entry.otp !== otp.trim()) {
+    return { success: false, message: `Invalid code. ${MAX_ATTEMPTS - entry.attempts} attempts remaining.` };
+  }
+  
+  // Valid — remove from store
+  otpStore.delete(email.toLowerCase());
+  return { success: true };
 };

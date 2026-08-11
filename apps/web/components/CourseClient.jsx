@@ -17,7 +17,11 @@ import {
   FileCode,
   Brain,
   Layers,
+  GraduationCap,
 } from "lucide-react";
+
+// Courses with a final exam
+const EXAM_COURSES = ["reactjs"];
 
 export default function CourseClient() {
   const params = useParams();
@@ -146,6 +150,17 @@ export default function CourseClient() {
               <Layers className="w-4 h-4 text-emerald-500" />
               <span>Flashcards</span>
             </Link>
+
+            {/* Final Exam CTA — only for courses that have an exam */}
+            {EXAM_COURSES.includes(courseId) && (
+              <Link
+                href={`/courses/${courseId}/final-exam`}
+                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs font-bold shadow-lg shadow-purple-500/20 transition-all active:scale-95"
+              >
+                <GraduationCap className="w-4 h-4" />
+                <span>Take Final Exam</span>
+              </Link>
+            )}
           </div>
         </section>
 
@@ -194,7 +209,7 @@ export default function CourseClient() {
                 href={`/courses/${courseId}/${ch.slug}`}
                 className={`group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors duration-200 ${
                   idx === 0 ? "rounded-t-[2.5rem]" : ""
-                } ${idx === course.chapters.length - 1 ? "rounded-b-[2.5rem]" : ""}`}
+                }`}
               >
                 <div className="flex items-start gap-4">
                   <div className="shrink-0 w-8 h-8 rounded-2xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/25">
@@ -216,6 +231,32 @@ export default function CourseClient() {
                 </div>
               </Link>
             ))}
+
+            {/* Final Exam row — pinned at bottom of chapter list for exam courses */}
+            {EXAM_COURSES.includes(courseId) && (
+              <Link
+                href={`/courses/${courseId}/final-exam`}
+                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-b-[2.5rem] bg-linear-to-r from-blue-500/5 via-purple-500/5 to-blue-500/5 hover:from-blue-500/10 hover:to-purple-500/10 transition-colors duration-200 border-t-2 border-dashed border-blue-500/30"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="shrink-0 w-8 h-8 rounded-2xl bg-linear-to-br from-blue-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/25">
+                    <GraduationCap className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-base text-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                      Final Exam — Certification Test
+                    </h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
+                      20 questions · 30 minutes · Proctored · Earn your certificate
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-purple-600 dark:text-purple-400 self-end sm:self-auto shrink-0">
+                  <span>Take Exam</span>
+                  <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+            )}
           </div>
         </section>
       </main>

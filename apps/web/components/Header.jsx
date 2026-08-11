@@ -30,6 +30,7 @@ import {
 } from "@/lib/api/courseApi";
 import { toast } from "sonner";
 import { usePathname } from "next/navigation";
+import { useScrollNavVisible } from "@/components/ScrollNavProvider";
 
 const Sidebar = dynamic(() => import("./header/Sidebar"), { ssr: false });
 const LogoutConfirm = dynamic(() => import("./header/LogoutConfirm"), {
@@ -106,9 +107,10 @@ export default function Header() {
   }, []);
 
   const pathname = usePathname();
+  const isNavVisible = useScrollNavVisible();
   const isArticlePage =
     pathname.includes("/articles/") || pathname.includes("/tutorials/");
-  
+
   // Align Header with 7xl layout across all pages
   const containerMaxWidth = "max-w-7xl";
 
@@ -122,27 +124,50 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed top-3 left-0 w-full z-50 px-1.5 sm:px-3 md:px-8 transition-all duration-300">
-        <div className={`${containerMaxWidth} mx-auto bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl rounded-full px-3 sm:px-4 md:px-6 h-14 md:h-16 flex items-center justify-between shadow-lg shadow-black/5 dark:shadow-black/30 transition-all duration-300`}>
+      <header
+        className={`fixed left-0 w-full z-50 px-1.5 sm:px-3 md:px-8 transition-[top,opacity] duration-300 ease-in-out ${
+          isNavVisible
+            ? "top-3 opacity-100"
+            : "-top-22 opacity-0 pointer-events-none"
+        }`}
+      >
+        <div
+          className={`${containerMaxWidth} mx-auto bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl rounded-full px-3 sm:px-4 md:px-6 h-14 md:h-16 flex items-center justify-between shadow-lg shadow-black/5 dark:shadow-black/30 transition-all duration-300`}
+        >
           {/* Brand Logo */}
           <div className="flex items-center gap-3">
-            {isArticlePage ? (
-              <Link
-                href="/"
-                className="p-2 -ml-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-foreground"
-              >
-                <ArrowLeft size={20} strokeWidth={2.5} />
-              </Link>
-            ) : (
-              <div className="flex items-center gap-2.5">
-                <Link href="/" className="flex items-center gap-2 group">
-                  <img src="/logo.png" alt="asif.to" className="w-8 h-8 rounded-xl object-contain shadow-sm" />
-                  <span className="font-outfit font-black text-lg sm:text-xl tracking-tight text-foreground">
-                    asif<span className="text-blue-600 dark:text-blue-400">.to</span>
-                  </span>
+            <div className="flex items-center gap-2">
+              {isArticlePage && (
+                <Link
+                  href="/"
+                  className="p-1.5 -ml-1 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-foreground transition-colors"
+                  title="Back to Home"
+                >
+                  <ArrowLeft size={20} strokeWidth={2.5} />
                 </Link>
-              </div>
-            )}
+              )}
+              <Link href="/" className="flex items-center gap-2.5 group">
+                <div className="relative">
+                  <img
+                    src="/logo.png"
+                    alt="asif.to logo"
+                    className="w-8 h-8 rounded-xl object-contain shadow-sm group-hover:scale-105 transition-transform"
+                  />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-blue-600 rounded-full border-2 border-white dark:border-zinc-900" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-outfit font-black text-lg sm:text-xl tracking-tight text-foreground leading-none">
+                    asif
+                    <span className="text-blue-600 dark:text-blue-400">
+                      .to
+                    </span>
+                  </span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 hidden xs:block -mt-0.5">
+                    Tutorials
+                  </span>
+                </div>
+              </Link>
+            </div>
           </div>
 
           {/* Desktop Navigation with Dropdowns */}

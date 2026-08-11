@@ -2,6 +2,7 @@
 
 import React from "react";
 import { ArrowLeft, List, Minimize2 } from "lucide-react";
+import { useScrollNavVisible } from "@/components/ScrollNavProvider";
 
 export default function FocusHeader({
   course,
@@ -16,8 +17,16 @@ export default function FocusHeader({
   setFontSize,
   setIsFocusMode,
 }) {
+  const isNavVisible = useScrollNavVisible();
+
   return (
-    <header className="sticky top-0 z-50 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 shadow-xs transition-all">
+    <header
+      className={`sticky top-0 z-50 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 shadow-xs transition-transform duration-300 ease-in-out ${
+        isNavVisible
+          ? "translate-y-0"
+          : "-translate-y-full pointer-events-none"
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 flex items-center justify-between gap-2 sm:gap-4 overflow-hidden">
         {/* Left: Back button & Lesson title info */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">

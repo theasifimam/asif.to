@@ -1,43 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "./axiosBaseQuery";
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: axiosBaseQuery(),
@@ -48,29 +11,26 @@ export const authApi = createApi({
       query: (credentials) => ({
         url: "/auth/signin",
         method: "POST",
-        data: credentials
-      })
+        data: credentials,
+      }),
     }),
 
     // Sign up (full registration)
-    signup: builder.mutation(
-
-
-      {
-        query: (body) => ({
-          url: "/auth/signup",
-          method: "POST",
-          data: body
-        })
+    signup: builder.mutation({
+      query: (body) => ({
+        url: "/auth/signup",
+        method: "POST",
+        data: body,
       }),
+    }),
 
     // Send OTP to email
     sendOtp: builder.mutation({
       query: (body) => ({
         url: "/auth/otp/send",
         method: "POST",
-        data: body
-      })
+        data: body,
+      }),
     }),
 
     // Verify OTP
@@ -78,93 +38,96 @@ export const authApi = createApi({
       query: (body) => ({
         url: "/auth/otp/verify",
         method: "POST",
-        data: body
-      })
+        data: body,
+      }),
+    }),
+
+    // Reset password with OTP
+    resetPassword: builder.mutation({
+      query: (body) => ({
+        url: "/auth/reset-password",
+        method: "POST",
+        data: body,
+      }),
     }),
 
     // Get current user
     getMe: builder.query({
       query: () => ({
         url: "/auth/me",
-        method: "GET"
+        method: "GET",
       }),
-      providesTags: ["Auth"]
+      providesTags: ["Auth"],
     }),
 
     // Check username availability
     checkUsername: builder.query({
       query: (username) => ({
         url: `/auth/check-username?username=${username}`,
-        method: "GET"
-      })
+        method: "GET",
+      }),
     }),
 
     // Sign out
     signout: builder.mutation({
       query: () => ({
         url: "/auth/signout",
-        method: "POST"
+        method: "POST",
       }),
-      invalidatesTags: ["Auth"]
+      invalidatesTags: ["Auth"],
     }),
 
     // Update own password
-    updatePassword: builder.mutation(
-
-
-      {
-        query: (body) => ({
-          url: "/auth/update-password",
-          method: "PATCH",
-          data: body
-        })
+    updatePassword: builder.mutation({
+      query: (body) => ({
+        url: "/auth/update-password",
+        method: "PATCH",
+        data: body,
       }),
+    }),
 
     // ─── USER PROFILE ENDPOINTS ───
     getProfile: builder.query({
       query: () => ({
         url: "/users/me/profile",
-        method: "GET"
+        method: "GET",
       }),
-      providesTags: ["Auth"]
+      providesTags: ["Auth"],
     }),
 
     getPublicProfile: builder.query({
       query: (username) => ({
         url: `/users/public/${username}`,
-        method: "GET"
-      })
+        method: "GET",
+      }),
     }),
 
-    updateProfile: builder.mutation(
-
-
-      {
-        query: (body) => ({
-          url: "/users/me/update",
-          method: "PATCH",
-          data: body
-        }),
-        invalidatesTags: ["Auth"]
+    updateProfile: builder.mutation({
+      query: (body) => ({
+        url: "/users/me/update",
+        method: "PATCH",
+        data: body,
       }),
+      invalidatesTags: ["Auth"],
+    }),
 
     // Bookmark Endpoints
     toggleBookmark: builder.mutation({
       query: (articleId) => ({
         url: `/users/me/bookmarks/toggle/${articleId}`,
-        method: "POST"
+        method: "POST",
       }),
-      invalidatesTags: ["Bookmarks"]
+      invalidatesTags: ["Bookmarks"],
     }),
 
     getBookmarks: builder.query({
       query: () => ({
         url: "/users/me/bookmarks",
-        method: "GET"
+        method: "GET",
       }),
-      providesTags: ["Bookmarks"]
-    })
-  })
+      providesTags: ["Bookmarks"],
+    }),
+  }),
 });
 
 export const {
@@ -172,6 +135,7 @@ export const {
   useSignupMutation,
   useSendOtpMutation,
   useVerifyOtpMutation,
+  useResetPasswordMutation,
   useGetMeQuery,
   useCheckUsernameQuery,
   useSignoutMutation,
@@ -180,5 +144,5 @@ export const {
   useGetPublicProfileQuery,
   useUpdateProfileMutation,
   useToggleBookmarkMutation,
-  useGetBookmarksQuery
+  useGetBookmarksQuery,
 } = authApi;

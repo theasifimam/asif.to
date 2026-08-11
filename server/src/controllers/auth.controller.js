@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 import { sendWelcomeEmail } from "../services/email.service.js";
+import { verifyAndConsumeOtp } from "./otp.controller.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -248,6 +249,47 @@ export const checkUsername = async (req, res) => {
     res.status(200).json({ success: true, available: !user });
   } catch (error) {
     console.error("[AUTH] CheckUsername error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// POST /api/v1/auth/reset-password
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+      res.status(400).json({ success: false, message: "Email, OTP, and new password are required." });
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      res.status(400).json({ success: false, message: "New password must be at least 8 characters." });
+      return;
+    }
+
+    // Verify OTP using the helper function
+    const otpResult = verifyAndConsumeOtp(email, otp);
+    if (!otpResult.success) {
+      res.status(400).json({ success: false, message: otpResult.message });
+      return;
+    }
+
+    // Find the user and update the password
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      res.status(404).json({ success: false, message: "User not found." });
+      return;
+    }
+
+    user.password = await bcrypt.hash(newPassword, 12);
+    await user.save({ validateBeforeSave: false });
+
+    // Optionally sign them in
+    const token = signToken(String(user._id));
+    sendTokenResponse(res, 200, user, token);
+  } catch (error) {
+    console.error("[AUTH] ResetPassword error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
