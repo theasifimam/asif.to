@@ -1,31 +1,11 @@
-import { cache } from "react";
 import ChapterClient from "@/components/ChapterClient";
 import CourseTopicPage, {
   buildTopicMetadata,
-  getPublicTopic,
 } from "@/components/CourseTopicPage";
+import { getChapterData, getPublicTopic } from "@/lib/publicContent";
 import { absoluteUrl, assetUrl, getSiteUrl, jsonLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
-
-const getChapterData = cache(async (courseSlug, chapterSlug) => {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (!baseUrl) return null;
-
-  try {
-    const response = await fetch(
-      `${baseUrl}/courses/slug/${encodeURIComponent(courseSlug)}/chapters/${encodeURIComponent(chapterSlug)}`,
-      { next: { revalidate: 60 } },
-    );
-    if (!response.ok) return null;
-
-    const body = await response.json();
-    return body.data || null;
-  } catch (error) {
-    console.error("Error fetching chapter:", error);
-    return null;
-  }
-});
 
 function chapterPath(data, courseSlug, chapterSlug) {
   return `/${encodeURIComponent(data.course.slug || courseSlug)}/${encodeURIComponent(data.chapter.slug || chapterSlug)}`;
@@ -42,7 +22,10 @@ function buildChapterMetadata(data, courseSlug, chapterSlug) {
     chapter.canonicalUrl,
     chapterPath(data, courseSlug, chapterSlug),
   );
-  const image = assetUrl(course.thumbnail);
+  const image = absoluteUrl(
+    "",
+    `${chapterPath(data, courseSlug, chapterSlug)}/opengraph-image`,
+  );
 
   return {
     title,
@@ -58,7 +41,14 @@ function buildChapterMetadata(data, courseSlug, chapterSlug) {
       type: "article",
       publishedTime: chapter.createdAt || undefined,
       modifiedTime: chapter.updatedAt || undefined,
-      images: [{ url: image, alt: `${chapter.title} - ${course.title}` }],
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: `${chapter.title} - ${course.title}`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",

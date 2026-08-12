@@ -14,11 +14,10 @@ import {
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import TopicMarkdown from "@/components/TopicMarkdown";
+import { getPublicTopic } from "@/lib/publicContent";
+import { absoluteUrl, getSiteUrl } from "@/lib/seo";
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://asif.to").replace(
-  /\/$/,
-  "",
-);
+const siteUrl = getSiteUrl();
 
 function pathForTopic(courseSlug, topic) {
   const segments = [courseSlug];
@@ -104,25 +103,6 @@ function structuredData(courseSlug, topic, questions) {
   return { "@context": "https://schema.org", "@graph": graph };
 }
 
-export async function getPublicTopic(courseSlug, topicPath) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (!baseUrl || !topicPath.length) return null;
-
-  try {
-    const path = [courseSlug, ...topicPath].map(encodeURIComponent).join("/");
-    const response = await fetch(`${baseUrl}/topics/public/${path}`, {
-      next: { revalidate: 60 },
-    });
-    if (!response.ok) return null;
-
-    const body = await response.json();
-    return body.data || null;
-  } catch (error) {
-    console.error("Error fetching public topic:", error);
-    return null;
-  }
-}
-
 export async function buildTopicMetadata(courseSlug, topicPath) {
   const topic = await getPublicTopic(courseSlug, topicPath);
 
@@ -137,7 +117,14 @@ export async function buildTopicMetadata(courseSlug, topicPath) {
   const description = topic.seoDescription || topic.excerpt;
   const canonical =
     topic.canonicalUrl || `${siteUrl}${pathForTopic(courseSlug, topic)}`;
-  const image = `${siteUrl}/logo.png`;
+  const nestedImageParams = new URLSearchParams({ course: courseSlug });
+  topicPath.forEach((segment) => nestedImageParams.append("path", segment));
+  const image = absoluteUrl(
+    "",
+    topicPath.length > 1
+      ? `/topic-opengraph-image?${nestedImageParams.toString()}`
+      : `${pathForTopic(courseSlug, topic)}/opengraph-image`,
+  );
 
   return {
     title,
@@ -152,7 +139,14 @@ export async function buildTopicMetadata(courseSlug, topicPath) {
       type: "article",
       publishedTime: topic.publishedAt || undefined,
       modifiedTime: topic.updatedAt || undefined,
-      images: [{ url: image, alt: "asif.to" }],
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: `${topic.title} | ${topic.course?.title || "asif.to"}`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
