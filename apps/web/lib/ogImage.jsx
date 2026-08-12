@@ -1,20 +1,17 @@
 import { ImageResponse } from "next/og";
 
-export const OG_IMAGE_SIZE = {
-  width: 1200,
-  height: 630,
-};
-
+export const OG_IMAGE_SIZE = { width: 1200, height: 630 };
 export const OG_IMAGE_CONTENT_TYPE = "image/png";
 
-function cleanText(value, fallback = "") {
-  return String(value || fallback)
+// --- Utilities ---
+
+const cleanText = (value, fallback = "") =>
+  String(value || fallback)
     .replace(/<[^>]*>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-}
 
-function shorten(value, maximumLength) {
+const shorten = (value, maximumLength) => {
   const text = cleanText(value);
   if (text.length <= maximumLength) return text;
 
@@ -22,32 +19,27 @@ function shorten(value, maximumLength) {
   const lastSpace = shortened.lastIndexOf(" ");
   const cutAt = lastSpace > maximumLength * 0.7 ? lastSpace : shortened.length;
   return `${shortened.slice(0, cutAt)}…`;
-}
+};
 
-export function getOgTitleFontSize(value) {
-  const length = cleanText(value).length;
-  if (length <= 34) return 72;
-  if (length <= 64) return 64;
-  if (length <= 100) return 56;
+const getOgTitleFontSize = (titleLength) => {
+  if (titleLength <= 34) return 72;
+  if (titleLength <= 64) return 64;
+  if (titleLength <= 100) return 56;
   return 48;
-}
+};
 
-export function normalizeOgData(data = {}) {
-  const type =
-    data.type === "interview"
-      ? "interview"
-      : data.type === "course"
-        ? "course"
-        : "topic";
-  const title = shorten(data.title, 160) || "asif.to";
+const normalizeOgData = (data = {}) => {
+  // Cleaner type assignment using array includes
+  const type = ["interview", "course"].includes(data.type)
+    ? data.type
+    : "topic";
   const course = shorten(data.course || data.category, 52);
-  const description = shorten(data.description, 180);
 
   return {
     type,
-    title,
+    title: shorten(data.title, 160) || "asif.to",
     course,
-    description,
+    description: shorten(data.description, 180),
     label:
       type === "interview"
         ? "INTERVIEW PREP"
@@ -55,11 +47,29 @@ export function normalizeOgData(data = {}) {
           ? "COURSE"
           : cleanText(data.label, course || "LEARNING GUIDE").toUpperCase(),
   };
-}
+};
+
+// --- Component ---
 
 export function renderOgImage(data) {
   const content = normalizeOgData(data);
-  const titleFontSize = getOgTitleFontSize(content.title);
+  const titleFontSize = getOgTitleFontSize(content.title.length);
+  const isInterview = content.type === "interview";
+
+  // Centralized theme object keeps the JSX clean and modular
+  const theme = {
+    brandBlue: "#2563eb",
+    brandDark: "#09090b",
+    emeraldText: "#059669",
+    emeraldGlow: "#10b981",
+    textMuted: "#52525b",
+    textLight: "#71717a",
+    bgCanvas: "#f4f4f5",
+    bgCard: "#ffffff",
+    borderCard: "#e4e4e7",
+    tagBg: isInterview ? "#fffbeb" : "#eff6ff",
+    tagText: isInterview ? "#d97706" : "#2563eb",
+  };
 
   return new ImageResponse(
     <div
@@ -67,14 +77,12 @@ export function renderOgImage(data) {
         width: "100%",
         height: "100%",
         display: "flex",
-        padding: "40px",
-        backgroundColor: "#09090b", // Deep, sleek background
-        backgroundImage:
-          "radial-gradient(circle at 25% 25%, #18181b 0%, #09090b 100%)",
+        padding: "48px",
+        backgroundColor: theme.bgCanvas,
         fontFamily: "Inter, sans-serif",
       }}
     >
-      {/* Bento-style inner card */}
+      {/* Bento Card Container */}
       <div
         style={{
           width: "100%",
@@ -82,14 +90,14 @@ export function renderOgImage(data) {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          backgroundColor: "#18181b",
-          borderRadius: "32px",
-          border: "1px solid #27272a",
-          padding: "56px",
-          boxShadow: "0 24px 48px rgba(0,0,0,0.4)",
+          backgroundColor: theme.bgCard,
+          borderRadius: "40px",
+          border: `1px solid ${theme.borderCard}`,
+          padding: "56px 64px",
+          boxShadow: "0 20px 40px rgba(0,0,0,0.04)",
         }}
       >
-        {/* Top Bar: Brand & Label */}
+        {/* Header */}
         <div
           style={{
             display: "flex",
@@ -101,67 +109,52 @@ export function renderOgImage(data) {
             style={{
               display: "flex",
               alignItems: "center",
-              fontSize: 36,
+              fontSize: 40,
               fontWeight: 800,
-              color: "#ffffff",
               letterSpacing: "-1px",
             }}
           >
-            <span style={{ color: "#3b82f6" }}>asif</span>
-            <span style={{ color: "#a1a1aa" }}>.to</span>
+            <span style={{ color: theme.brandBlue }}>asif</span>
+            <span style={{ color: theme.brandDark }}>.to</span>
           </div>
+
           <div
             style={{
               display: "flex",
               alignItems: "center",
               padding: "8px 20px",
               borderRadius: "999px",
-              backgroundColor:
-                content.type === "interview"
-                  ? "rgba(245, 158, 11, 0.1)"
-                  : "rgba(59, 130, 246, 0.1)",
-              border:
-                content.type === "interview"
-                  ? "1px solid rgba(245, 158, 11, 0.3)"
-                  : "1px solid rgba(59, 130, 246, 0.3)",
-              color: content.type === "interview" ? "#fcd34d" : "#93c5fd",
+              backgroundColor: theme.tagBg,
+              color: theme.tagText,
               fontSize: 14,
               fontWeight: 700,
-              letterSpacing: "1px",
+              letterSpacing: "0.5px",
             }}
           >
             {content.label}
           </div>
         </div>
 
-        {/* Main Content Area */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "24px",
-          }}
-        >
+        {/* Body */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           {content.course && (
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                color: "#10b981",
-                fontSize: 24,
-                fontWeight: 600,
+                color: theme.emeraldText,
+                fontSize: 22,
+                fontWeight: 700,
                 letterSpacing: "-0.5px",
               }}
             >
-              {/* Glowing status indicator */}
               <span
                 style={{
-                  width: 12,
-                  height: 12,
+                  width: 10,
+                  height: 10,
                   borderRadius: "50%",
-                  backgroundColor: "#10b981",
+                  backgroundColor: theme.emeraldGlow,
                   marginRight: 12,
-                  boxShadow: "0 0 12px #10b981",
                 }}
               />
               {content.course}
@@ -172,8 +165,8 @@ export function renderOgImage(data) {
             style={{
               fontSize: titleFontSize,
               fontWeight: 800,
-              color: "#ffffff",
-              lineHeight: 1.1,
+              color: theme.brandDark,
+              lineHeight: 1.15,
               letterSpacing: "-1.5px",
               maxWidth: "900px",
             }}
@@ -185,10 +178,11 @@ export function renderOgImage(data) {
             <div
               style={{
                 fontSize: 24,
-                color: "#a1a1aa",
+                color: theme.textMuted,
                 lineHeight: 1.5,
                 maxWidth: "850px",
-                marginTop: "8px",
+                marginTop: "12px",
+                fontWeight: 400,
               }}
             >
               {content.description}
@@ -196,28 +190,24 @@ export function renderOgImage(data) {
           )}
         </div>
 
-        {/* Bottom Footer Bar */}
+        {/* Footer */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            borderTop: "1px solid #27272a",
-            paddingTop: "24px",
+            borderTop: `2px solid ${theme.bgCanvas}`,
+            paddingTop: "28px",
             marginTop: "20px",
           }}
         >
-          <div style={{ color: "#71717a", fontSize: 18, fontWeight: 500 }}>
+          <div
+            style={{ color: theme.textLight, fontSize: 18, fontWeight: 500 }}
+          >
             Practical web development, step by step
           </div>
 
-          {/* Decorative minimalist dots replacing the old chunky bars */}
-          <div
-            style={{
-              display: "flex",
-              gap: "8px",
-            }}
-          >
+          <div style={{ display: "flex", gap: "8px" }}>
             <div
               style={{
                 width: 8,

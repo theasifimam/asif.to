@@ -15,9 +15,13 @@ export const getDashboardStats = async (req, res) => {
     // 1. Fetch Course & Chapter database records
     const courses = await Course.find().sort({ order: 1, createdAt: -1 });
     const totalCourses = courses.length;
-    const publishedCourses = courses.filter((c) => c.status === "published").length;
+    const publishedCourses = courses.filter(
+      (c) => c.status === "published",
+    ).length;
     const totalChapters = await Chapter.countDocuments();
-    const publishedChapters = await Chapter.countDocuments({ status: "published" });
+    const publishedChapters = await Chapter.countDocuments({
+      status: "published",
+    });
 
     // Aggregate real total views across all chapters in DB
     const realTotalViewsAggregation = await Chapter.aggregate([
@@ -56,7 +60,9 @@ export const getDashboardStats = async (req, res) => {
           publishedChapters: 0,
         };
 
-        const chapterCount = cStats.chapterCount || (await Chapter.countDocuments({ course: course._id }));
+        const chapterCount =
+          cStats.chapterCount ||
+          (await Chapter.countDocuments({ course: course._id }));
         const realReads = cStats.totalViews || 0;
         const completionRate = realReads > 0 ? 100 : 0; // No progress model exists yet
 
@@ -75,9 +81,11 @@ export const getDashboardStats = async (req, res) => {
           formattedReads: formatCount(realReads),
           completionRate: realReads > 0 ? `${completionRate}%` : "0%",
           rating: 4.9,
-          updatedAt: formatTimeAgo(course.updatedAt || course.createdAt || new Date()),
+          updatedAt: formatTimeAgo(
+            course.updatedAt || course.createdAt || new Date(),
+          ),
         };
-      })
+      }),
     );
 
     // 2. Secondary Platform Metrics
@@ -114,31 +122,48 @@ export const getDashboardStats = async (req, res) => {
       },
     };
 
-    // 4. Technology Stack Distribution based on REAL chapter reads & counts
+    // 4. Published curriculum distribution by course technology
     const techDistributionRaw = {};
-    const chapters = await Chapter.find().select("course viewCount").lean();
-    
-    // Group course techId
-    const courseTechMap = {};
-    courses.forEach((c) => { courseTechMap[c._id.toString()] = (c.techId || "javascript").toLowerCase(); });
+    const publishedCourseTechMap = {};
 
-    chapters.forEach((ch) => {
-      const tech = courseTechMap[ch.course?.toString()] || "javascript";
-      techDistributionRaw[tech] = (techDistributionRaw[tech] || 0) + 1; // Count actual chapters
+    courses.forEach((course) => {
+      if (course.status !== "published") return;
+
+      const tech = course.techId?.trim().toLowerCase();
+      if (tech) publishedCourseTechMap[course._id.toString()] = tech;
     });
 
-    const totalTechChapters = Math.max(1, Object.values(techDistributionRaw).reduce((a, b) => a + b, 0));
-    const techDistribution = Object.keys(techDistributionRaw).map((tech) => {
-      const chapterCount = techDistributionRaw[tech];
-      const percentage = Math.round((chapterCount / totalTechChapters) * 100);
-      return {
+    const publishedCurriculumChapters = await Chapter.find({
+      status: "published",
+    })
+      .select("course")
+      .lean();
+
+    publishedCurriculumChapters.forEach((chapter) => {
+      const tech = publishedCourseTechMap[chapter.course?.toString()];
+      if (!tech) return;
+
+      techDistributionRaw[tech] = (techDistributionRaw[tech] || 0) + 1;
+    });
+
+    const totalTechChapters = Object.values(techDistributionRaw).reduce(
+      (total, count) => total + count,
+      0,
+    );
+    const techDistribution = Object.entries(techDistributionRaw)
+      .map(([tech, chapterCount]) => ({
         techId: tech,
         label: formatTechLabel(tech),
         chapters: chapterCount,
-        percentage: percentage,
+        percentage:
+          totalTechChapters > 0
+            ? Math.round((chapterCount / totalTechChapters) * 100)
+            : 0,
         color: getTechColor(tech),
-      };
-    });
+      }))
+      .sort(
+        (a, b) => b.chapters - a.chapters || a.label.localeCompare(b.label),
+      );
 
     // 5. Stat Cards for Header Grid
     const stats = [

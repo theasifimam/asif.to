@@ -4,22 +4,11 @@ import React, { useState } from "react";
 import {
   TrendingUp,
   Users,
-  Eye,
   FileText,
-  ArrowUpRight,
   Clock,
-  Globe,
-  Plus,
-  Sparkles,
   BookOpen,
-  Layers,
   GraduationCap,
-  Award,
   BarChart3,
-  Calendar,
-  CheckCircle2,
-  HelpCircle,
-  Zap,
   ChevronRight,
   BrainCircuit,
 } from "lucide-react";
@@ -37,7 +26,12 @@ const ICON_MAP = {
 };
 
 export default function DashboardPage() {
-  const { data: response, isLoading, isError, refetch } = useGetDashboardStatsQuery();
+  const {
+    data: response,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetDashboardStatsQuery();
   const dashboardData = response?.data;
 
   // Active time-frame tab for Course Readership Growth: 'daily' | 'monthly' | 'yearly'
@@ -78,13 +72,20 @@ export default function DashboardPage() {
     growth: "+0%",
     label: "Course Readership",
     subtext: "No data",
-    chartData: [10, 20, 30, 40, 50, 60, 70],
+    chartData: [],
   };
+  const chartValues = (
+    Array.isArray(activeGrowth.chartData) ? activeGrowth.chartData : []
+  ).map((value) => {
+    const numericValue = Number(value);
+    return Number.isFinite(numericValue) ? Math.max(0, numericValue) : 0;
+  });
+  const chartMax = Math.max(0, ...chartValues);
 
   return (
     <div className="p-4 sm:p-6 md:p-8 flex flex-col gap-8 max-w-7xl mx-auto text-zinc-800 dark:text-zinc-300 font-sans">
       {/* High-Impact Hero Banner - Course First */}
-      <section className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white p-8 sm:p-10 shadow-xl shadow-blue-500/15 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <section className="relative overflow-hidden rounded-[2.5rem] bg-linear-to-br from-blue-600 via-indigo-600 to-purple-700 text-white p-8 sm:p-10 shadow-xl shadow-blue-500/15 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="absolute -right-8 -bottom-8 w-56 h-56 rounded-full bg-white/10 blur-2xl pointer-events-none" />
         <div className="absolute top-2 right-12 w-28 h-28 rounded-full bg-blue-400/20 blur-xl pointer-events-none" />
 
@@ -97,7 +98,9 @@ export default function DashboardPage() {
             Course Learning & Engagements
           </h1>
           <p className="text-xs sm:text-sm text-blue-100 mt-2 leading-relaxed font-medium">
-            Monitor real-time course readership growth across days, months, and years. Manage chapters, student completion rates, and curriculum analytics.
+            Monitor real-time course readership growth across days, months, and
+            years. Manage chapters, student completion rates, and curriculum
+            analytics.
           </p>
         </div>
 
@@ -130,7 +133,7 @@ export default function DashboardPage() {
               transition={{ delay: i * 0.08 }}
               key={stat.label}
             >
-              <div className="p-6 rounded-[2rem] border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 shadow-sm hover:shadow-md transition-all flex flex-col gap-4">
+              <div className="p-6 rounded-4xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 shadow-sm hover:shadow-md transition-all flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                   <div className="w-11 h-11 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
                     <StatIcon className="w-5.5 h-5.5" />
@@ -220,12 +223,20 @@ export default function DashboardPage() {
 
               <div className="grid grid-cols-2 gap-3 mt-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase">Avg. Read Time</span>
-                  <span className="text-lg font-black text-zinc-900 dark:text-white">18.4 min</span>
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase">
+                    Avg. Read Time
+                  </span>
+                  <span className="text-lg font-black text-zinc-900 dark:text-white">
+                    18.4 min
+                  </span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase">Completion Rate</span>
-                  <span className="text-lg font-black text-zinc-900 dark:text-white">88.6%</span>
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase">
+                    Completion Rate
+                  </span>
+                  <span className="text-lg font-black text-zinc-900 dark:text-white">
+                    88.6%
+                  </span>
                 </div>
               </div>
             </div>
@@ -240,21 +251,33 @@ export default function DashboardPage() {
               </div>
 
               <div className="h-36 flex items-end justify-between gap-2 pt-4">
-                {(activeGrowth.chartData || [20, 40, 60, 80, 50, 90, 100]).map((val, idx) => {
-                  const maxVal = Math.max(...(activeGrowth.chartData || [100]));
-                  const heightPercent = Math.max(15, Math.round((val / maxVal) * 100));
-                  return (
-                    <div key={idx} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
+                {chartValues.length > 0 ? (
+                  chartValues.map((value, idx) => {
+                    const heightPercent =
+                      chartMax > 0 ? (value / chartMax) * 100 : 0;
+                    return (
                       <div
-                        className="w-full bg-blue-600/80 hover:bg-blue-600 rounded-xl transition-all duration-300 group-hover:scale-105 shadow-xs"
-                        style={{ height: `${heightPercent}%` }}
-                      />
-                      <span className="text-[10px] font-extrabold text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors">
-                        P{idx + 1}
-                      </span>
-                    </div>
-                  );
-                })}
+                        key={idx}
+                        className="flex-1 flex flex-col items-center gap-2 group h-full min-w-0"
+                      >
+                        <div className="w-full flex-1 flex items-end">
+                          <div
+                            title={`${value.toLocaleString()} reads`}
+                            className="w-full bg-blue-600/80 hover:bg-blue-600 rounded-t-lg transition-[height,background-color] duration-300 shadow-xs"
+                            style={{ height: `${heightPercent}%` }}
+                          />
+                        </div>
+                        <span className="text-[10px] font-extrabold text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors shrink-0">
+                          P{idx + 1}
+                        </span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-xs font-bold text-zinc-400">
+                    No readership data available
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
@@ -285,7 +308,7 @@ export default function DashboardPage() {
             {(dashboardData?.topCourses || []).map((course, i) => (
               <div
                 key={course.id}
-                className="p-5 sm:p-6 rounded-[2rem] border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 hover:border-blue-500/50 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs group"
+                className="p-5 sm:p-6 rounded-4xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 hover:border-blue-500/50 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs group"
               >
                 <div className="flex items-start gap-4 min-w-0">
                   <span className="w-9 h-9 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
@@ -351,42 +374,57 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              {(dashboardData?.techDistribution || []).map((item) => (
-                <div key={item.techId} className="flex flex-col gap-1.5">
-                  <div className="flex justify-between text-xs font-bold">
-                    <span className="text-zinc-700 dark:text-zinc-200">{item.label}</span>
-                    <span className="text-zinc-900 dark:text-white font-extrabold">
-                      {item.chapters} Chapters ({item.percentage}%)
-                    </span>
+              {(dashboardData?.techDistribution || []).map((item) => {
+                const percentage = Math.min(
+                  100,
+                  Math.max(0, Number(item.percentage) || 0),
+                );
+
+                return (
+                  <div key={item.techId} className="flex flex-col gap-1.5">
+                    <div className="flex justify-between gap-3 text-xs font-bold">
+                      <span className="text-zinc-700 dark:text-zinc-200">
+                        {item.label}
+                      </span>
+                      <span className="text-zinc-900 dark:text-white font-extrabold text-right">
+                        {item.chapters} Chapters ({percentage}%)
+                      </span>
+                    </div>
+                    <div className="h-2.5 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-[width] duration-500 ${
+                          item.color?.split(" ")[0] || "bg-blue-600"
+                        }`}
+                        style={{ width: `${percentage}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="h-2.5 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        item.color?.split(" ")[0] || "bg-blue-600"
-                      }`}
-                      style={{ width: `${Math.max(12, item.percentage)}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Platform Ecosystem Secondary Counts */}
             <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800/80 grid grid-cols-3 gap-3 text-center">
               <div className="flex flex-col p-2 bg-zinc-50 dark:bg-zinc-950/50 rounded-2xl">
-                <span className="text-[10px] font-extrabold text-zinc-400 uppercase">Quizzes</span>
+                <span className="text-[10px] font-extrabold text-zinc-400 uppercase">
+                  Quizzes
+                </span>
                 <span className="text-xl font-black font-outfit text-zinc-900 dark:text-white">
                   {dashboardData?.counts?.quizzes || 0}
                 </span>
               </div>
               <div className="flex flex-col p-2 bg-zinc-50 dark:bg-zinc-950/50 rounded-2xl">
-                <span className="text-[10px] font-extrabold text-zinc-400 uppercase">Flashcards</span>
+                <span className="text-[10px] font-extrabold text-zinc-400 uppercase">
+                  Flashcards
+                </span>
                 <span className="text-xl font-black font-outfit text-zinc-900 dark:text-white">
                   {dashboardData?.counts?.flashcards || 0}
                 </span>
               </div>
               <div className="flex flex-col p-2 bg-zinc-50 dark:bg-zinc-950/50 rounded-2xl">
-                <span className="text-[10px] font-extrabold text-zinc-400 uppercase">Cheatsheets</span>
+                <span className="text-[10px] font-extrabold text-zinc-400 uppercase">
+                  Cheatsheets
+                </span>
                 <span className="text-xl font-black font-outfit text-zinc-900 dark:text-white">
                   {dashboardData?.counts?.cheatsheets || 0}
                 </span>
