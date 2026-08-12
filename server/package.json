@@ -14,7 +14,8 @@
     "seed:nodejs-exam": "node src/scripts/seed-course-exams.js nodejs",
     "seed:html-exam": "node src/scripts/seed-course-exams.js html",
     "seed:course-exams": "node src/scripts/seed-course-exams.js",
-    "migrate:interview-question-indexes": "node src/scripts/migrate-interview-question-indexes.js"
+    "migrate:interview-question-indexes": "node src/scripts/migrate-interview-question-indexes.js",
+    "seed:css-course": "node src/scripts/seed-css-course.js"
   },
   "keywords": [],
   "author": "",

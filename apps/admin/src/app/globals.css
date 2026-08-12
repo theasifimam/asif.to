@@ -7,62 +7,75 @@
   --font-outfit: var(--font-outfit);
   --color-background: var(--site-bg);
   --color-foreground: var(--site-fg);
+  --color-primary: var(--m3-primary);
+  --color-primary-foreground: var(--m3-on-primary);
+  --color-accent: var(--accent);
+
+  /* Map blue classes to the dynamic Sage Green variables */
+  --color-blue-50: var(--m3-surface-low);
+  --color-blue-100: var(--m3-primary-container);
+  --color-blue-400: var(--accent);
+  --color-blue-500: var(--m3-primary);
+  --color-blue-600: var(--m3-primary);
+  --color-blue-700: var(--accent);
+  --color-blue-900: var(--m3-on-primary-container);
+  --color-blue-950: var(--m3-on-primary-container);
 }
 
 :root {
-  --site-bg: #f9faf7;
-  --site-fg: #1a1c18;
-  --accent: #2563eb;
-  --card-bg: #ffffff;
+  --site-bg: #eff6ff; /* blue-50 */
+  --site-fg: #172554; /* blue-950 */
+  --accent: #2563eb; /* blue-600 */
+  --card-bg: #ffffff; /* white */
   --radius-xl: 2rem;
   --radius-lg: 1.25rem;
   --font-outfit: "Outfit", sans-serif;
   --font-inter: "Inter", sans-serif;
 
-  /* Material 3 Blue Palette for asif.to */
-  --m3-primary: #2563eb;
-  --m3-on-primary: #ffffff;
-  --m3-primary-container: #dbeafe;
-  --m3-on-primary-container: #1e3a8a;
-  --m3-surface: #f9faf7;
-  --m3-surface-card: #ffffff;
-  --m3-surface-low: #f1f5f9;
-  --m3-surface-high: #e2e8f0;
-  --m3-border: #e2e8f0;
+  /* Material 3 Blue Dynamic Palette (Primary set to blue-600) */
+  --m3-primary: #2563eb; /* blue-600 */
+  --m3-on-primary: #ffffff; /* white */
+  --m3-primary-container: #dbeafe; /* blue-100 */
+  --m3-on-primary-container: #1e3a8a; /* blue-900 */
+  --m3-surface: #eff6ff; /* blue-50 */
+  --m3-surface-card: #ffffff; /* white */
+  --m3-surface-low: #f8fafc; /* slate-50 */
+  --m3-surface-high: #dbeafe; /* blue-100 */
+  --m3-border: #bfdbfe; /* blue-200 */
 
-  --background: #f9faf7;
-  --foreground: #09090b;
-  --card: #ffffff;
-  --card-foreground: #09090b;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #2563eb;
+  --background: #eff6ff; /* blue-50 */
+  --foreground: #172554; /* blue-950 */
+  --card: #ffffff; /* white */
+  --card-foreground: #172554; /* blue-950 */
+  --border: #bfdbfe; /* blue-200 */
+  --input: #bfdbfe; /* blue-200 */
+  --ring: #2563eb; /* blue-600 */
 }
 
 .dark {
-  --site-bg: #09090b;
-  --site-fg: #e2e8f0;
-  --accent: #3b82f6;
-  --card-bg: #18181b;
+  --site-bg: #090d16; /* deep navy surface */
+  --site-fg: #eff6ff; /* blue-50 */
+  --accent: #2563eb; /* blue-800 */
+  --card-bg: #0f172a; /* slate-900 */
 
-  /* Material 3 Dark Blue Palette */
-  --m3-primary: #3b82f6;
-  --m3-on-primary: #1e3a8a;
-  --m3-primary-container: #1e3a8a;
-  --m3-on-primary-container: #dbeafe;
-  --m3-surface: #09090b;
-  --m3-surface-card: #18181b;
-  --m3-surface-low: #121215;
-  --m3-surface-high: #27272a;
-  --m3-border: #27272a;
+  /* Material 3 Dark Blue Palette (Primary preserved as blue-600 for contrast) */
+  --m3-primary: #2563eb; /* blue-600 */
+  --m3-on-primary: #ffffff; /* white */
+  --m3-primary-container: #1e3a8a; /* blue-900 */
+  --m3-on-primary-container: #dbeafe; /* blue-100 */
+  --m3-surface: #090d16;
+  --m3-surface-card: #0f172a;
+  --m3-surface-low: #172554; /* blue-950 */
+  --m3-surface-high: #1e3a8a; /* blue-900 */
+  --m3-border: #1e3a8a; /* blue-900 */
 
-  --background: #09090b;
-  --foreground: #fafafa;
-  --card: #18181b;
-  --card-foreground: #fafafa;
-  --border: #27272a;
-  --input: #27272a;
-  --ring: #3b82f6;
+  --background: #090d16;
+  --foreground: #eff6ff; /* blue-50 */
+  --card: #0f172a;
+  --card-foreground: #eff6ff; /* blue-50 */
+  --border: #1e3a8a; /* blue-900 */
+  --input: #1e3a8a; /* blue-900 */
+  --ring: #3b82f6; /* blue-600 */
 }
 
 body {
@@ -78,7 +91,10 @@ body {
 
 /* Material 3 Tactile Spring Press */
 .android-haptic {
-  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), background-color 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.2s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 .android-haptic:active {
   transform: scale(0.97);
@@ -87,7 +103,10 @@ body {
 /* Material 3 Clean Squircle Tile */
 .android-tile {
   border-radius: 2rem;
-  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+  transition:
+    transform 0.25s cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
 }
 .android-tile:hover {
   transform: translateY(-2px);
@@ -150,7 +169,12 @@ body {
 }
 
 /* Typography Overrides */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-outfit);
   letter-spacing: -0.02em;
 }
@@ -182,9 +206,15 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 1.5rem !important;
 }
 
-.ql-align-center { text-align: center; }
-.ql-align-right { text-align: right; }
-.ql-align-justify { text-align: justify; }
+.ql-align-center {
+  text-align: center;
+}
+.ql-align-right {
+  text-align: right;
+}
+.ql-align-justify {
+  text-align: justify;
+}
 
 .ql-video {
   width: 100%;
@@ -193,9 +223,28 @@ h1, h2, h3, h4, h5, h6 {
   margin: 2rem 0;
 }
 
-.ql-editor h1 { font-size: 3rem; font-weight: 900; margin-top: 3rem; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: -0.05em; }
-.ql-editor h2 { font-size: 2.25rem; font-weight: 800; margin-top: 2.5rem; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: -0.03em; }
-.ql-editor h3 { font-size: 1.875rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; }
+.ql-editor h1 {
+  font-size: 3rem;
+  font-weight: 900;
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: -0.05em;
+}
+.ql-editor h2 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  margin-top: 2.5rem;
+  margin-bottom: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+}
+.ql-editor h3 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
 
 .ql-editor blockquote {
   border-left: 4px solid #2563eb;
@@ -210,14 +259,19 @@ h1, h2, h3, h4, h5, h6 {
   color: #94a3b8;
 }
 
-.ql-editor ul, .ql-editor ol {
+.ql-editor ul,
+.ql-editor ol {
   padding-left: 1.5em !important;
   margin-bottom: 1.5rem !important;
   list-style-position: outside !important;
 }
 
-.ql-editor ul { list-style-type: disc !important; }
-.ql-editor ol { list-style-type: decimal !important; }
+.ql-editor ul {
+  list-style-type: disc !important;
+}
+.ql-editor ol {
+  list-style-type: decimal !important;
+}
 
 .ql-editor li {
   margin-bottom: 0.75rem !important;

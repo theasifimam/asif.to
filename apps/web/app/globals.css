@@ -5,46 +5,75 @@
 @theme {
   --color-background: var(--site-bg);
   --color-foreground: var(--site-fg);
+  --color-primary: var(--m3-primary);
+  --color-primary-foreground: var(--m3-on-primary);
+  --color-accent: var(--accent);
+
+  /* Map blue classes to the dynamic Sage Green variables */
+  --color-blue-50: var(--m3-surface-low);
+  --color-blue-100: var(--m3-primary-container);
+  --color-blue-400: var(--accent);
+  --color-blue-500: var(--m3-primary);
+  --color-blue-600: var(--m3-primary);
+  --color-blue-700: var(--accent);
+  --color-blue-900: var(--m3-on-primary-container);
+  --color-blue-950: var(--m3-on-primary-container);
 }
 
 :root {
-  --site-bg: #f9faf7;
-  --site-fg: #1a1c18;
-  --accent: #5d6b33;
-  --card-bg: #ffffff;
+  --site-bg: #eff6ff; /* blue-50 */
+  --site-fg: #172554; /* blue-950 */
+  --accent: #2563eb; /* blue-600 */
+  --card-bg: #ffffff; /* white */
   --radius-xl: 2rem;
   --radius-lg: 1.25rem;
   --font-outfit: "Outfit", sans-serif;
   --font-inter: "Inter", sans-serif;
 
-  /* Material 3 Sage Dynamic Palette */
-  --m3-primary: #5d6b33;
-  --m3-on-primary: #ffffff;
-  --m3-primary-container: #dfeba8;
-  --m3-on-primary-container: #191e00;
-  --m3-surface: #f9faf7;
-  --m3-surface-card: #ffffff;
-  --m3-surface-low: #f1f2ee;
-  --m3-surface-high: #e5e6e2;
-  --m3-border: #e2e3dd;
+  /* Material 3 Blue Dynamic Palette (Primary set to blue-600) */
+  --m3-primary: #2563eb; /* blue-600 */
+  --m3-on-primary: #ffffff; /* white */
+  --m3-primary-container: #dbeafe; /* blue-100 */
+  --m3-on-primary-container: #1e3a8a; /* blue-900 */
+  --m3-surface: #eff6ff; /* blue-50 */
+  --m3-surface-card: #ffffff; /* white */
+  --m3-surface-low: #f8fafc; /* slate-50 */
+  --m3-surface-high: #dbeafe; /* blue-100 */
+  --m3-border: #bfdbfe; /* blue-200 */
+
+  --background: #eff6ff; /* blue-50 */
+  --foreground: #172554; /* blue-950 */
+  --card: #ffffff; /* white */
+  --card-foreground: #172554; /* blue-950 */
+  --border: #bfdbfe; /* blue-200 */
+  --input: #bfdbfe; /* blue-200 */
+  --ring: #2563eb; /* blue-600 */
 }
 
 .dark {
-  --site-bg: #121411;
-  --site-fg: #e2e3dd;
-  --accent: #c2d08a;
-  --card-bg: #1a1c18;
+  --site-bg: #090d16; /* deep navy surface */
+  --site-fg: #eff6ff; /* blue-50 */
+  --accent: #3b82f6; /* blue-500 */
+  --card-bg: #0f172a; /* slate-900 */
 
-  /* Material 3 Dark Sage Palette */
-  --m3-primary: #c2d08a;
-  --m3-on-primary: #2d340e;
-  --m3-primary-container: #434c1f;
-  --m3-on-primary-container: #dfeba8;
-  --m3-surface: #121411;
-  --m3-surface-card: #1a1c18;
-  --m3-surface-low: #1d1e1b;
-  --m3-surface-high: #272825;
-  --m3-border: #2f312c;
+  /* Material 3 Dark Blue Palette (Primary preserved as blue-600 for contrast) */
+  --m3-primary: #2563eb; /* blue-600 */
+  --m3-on-primary: #ffffff; /* white */
+  --m3-primary-container: #1e3a8a; /* blue-900 */
+  --m3-on-primary-container: #dbeafe; /* blue-100 */
+  --m3-surface: #090d16;
+  --m3-surface-card: #0f172a;
+  --m3-surface-low: #172554; /* blue-950 */
+  --m3-surface-high: #1e3a8a; /* blue-900 */
+  --m3-border: #1e3a8a; /* blue-900 */
+
+  --background: #090d16;
+  --foreground: #eff6ff; /* blue-50 */
+  --card: #0f172a;
+  --card-foreground: #eff6ff; /* blue-50 */
+  --border: #1e3a8a; /* blue-900 */
+  --input: #1e3a8a; /* blue-900 */
+  --ring: #2563eb; /* blue-600 */
 }
 
 body {

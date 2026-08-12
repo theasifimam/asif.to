@@ -176,7 +176,7 @@ export default function CourseForm({ courseId = null }) {
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
+        <Loader2 className="h-7 w-7 animate-spin text-primary" />
       </div>
     );
   }
@@ -234,7 +234,7 @@ export default function CourseForm({ courseId = null }) {
         <main className="space-y-6">
           <section className="space-y-5 border-b border-zinc-200 pb-6 dark:border-zinc-800">
             <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-blue-600" />
+              <BookOpen className="h-5 w-5 text-primary" />
               <h2 className="text-base font-semibold">Course content</h2>
             </div>
             <div className="space-y-2">
