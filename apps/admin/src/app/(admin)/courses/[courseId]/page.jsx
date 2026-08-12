@@ -92,7 +92,8 @@ export default function CourseChaptersPage() {
   ]);
 
   useEffect(() => {
-    load();
+    const timer = setTimeout(load, 0);
+    return () => clearTimeout(timer);
   }, [load]);
 
   const setFilter = (key, value) =>

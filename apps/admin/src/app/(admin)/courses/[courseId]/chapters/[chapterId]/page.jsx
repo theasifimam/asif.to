@@ -120,7 +120,8 @@ export default function ChapterFormPage() {
   }, [chapterId, courseId, isNew]);
 
   useEffect(() => {
-    load();
+    const timer = setTimeout(load, 0);
+    return () => clearTimeout(timer);
   }, [load]);
 
   const update = (key, value) =>
