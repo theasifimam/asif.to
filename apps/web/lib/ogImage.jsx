@@ -26,8 +26,8 @@ function shorten(value, maximumLength) {
 
 export function getOgTitleFontSize(value) {
   const length = cleanText(value).length;
-  if (length <= 34) return 76;
-  if (length <= 64) return 66;
+  if (length <= 34) return 72;
+  if (length <= 64) return 64;
   if (length <= 100) return 56;
   return 48;
 }
@@ -50,7 +50,7 @@ export function normalizeOgData(data = {}) {
     description,
     label:
       type === "interview"
-        ? "INTERVIEW QUESTIONS"
+        ? "INTERVIEW PREP"
         : type === "course"
           ? "COURSE"
           : cleanText(data.label, course || "LEARNING GUIDE").toUpperCase(),
@@ -67,161 +67,183 @@ export function renderOgImage(data) {
         width: "100%",
         height: "100%",
         display: "flex",
-        flexDirection: "column",
-        position: "relative",
-        overflow: "hidden",
-        background: "#fafafa",
-        color: "#18181b",
-        padding: "62px 72px 58px",
-        fontFamily: "Arial, Helvetica, sans-serif",
+        padding: "40px",
+        backgroundColor: "#09090b", // Deep, sleek background
+        backgroundImage:
+          "radial-gradient(circle at 25% 25%, #18181b 0%, #09090b 100%)",
+        fontFamily: "Inter, sans-serif",
       }}
     >
+      {/* Bento-style inner card */}
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 12,
-          display: "flex",
-        }}
-      >
-        <div style={{ width: "45%", background: "#2563eb" }} />
-        <div style={{ width: "27%", background: "#06b6d4" }} />
-        <div style={{ flex: 1, background: "#10b981" }} />
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            fontSize: 34,
-            fontWeight: 800,
-            letterSpacing: 0,
-          }}
-        >
-          <span style={{ color: "#2563eb" }}>asif</span>
-          <span style={{ color: "#18181b" }}>.to</span>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            border: "2px solid #d4d4d8",
-            color: content.type === "interview" ? "#b45309" : "#52525b",
-            background: content.type === "interview" ? "#fffbeb" : "#ffffff",
-            padding: "10px 16px",
-            fontSize: 17,
-            fontWeight: 700,
-            letterSpacing: 0,
-          }}
-        >
-          {content.label}
-        </div>
-      </div>
-
-      <div
-        style={{
-          flex: 1,
+          width: "100%",
+          height: "100%",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
-          paddingTop: 28,
-          paddingBottom: 24,
+          justifyContent: "space-between",
+          backgroundColor: "#18181b",
+          borderRadius: "32px",
+          border: "1px solid #27272a",
+          padding: "56px",
+          boxShadow: "0 24px 48px rgba(0,0,0,0.4)",
         }}
       >
+        {/* Top Bar: Brand & Label */}
         <div
           style={{
             display: "flex",
-            maxWidth: 1050,
-            maxHeight: 210,
-            fontSize: titleFontSize,
-            lineHeight: 1.08,
-            fontWeight: 800,
-            letterSpacing: 0,
-            overflow: "hidden",
-            overflowWrap: "anywhere",
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          {content.title}
-        </div>
-
-        {(content.course || content.description) && (
           <div
             style={{
               display: "flex",
-              flexDirection: "column",
-              marginTop: titleFontSize >= 66 ? 28 : 22,
+              alignItems: "center",
+              fontSize: 36,
+              fontWeight: 800,
+              color: "#ffffff",
+              letterSpacing: "-1px",
             }}
           >
-            {content.course && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  color: "#2563eb",
-                  fontSize: 27,
-                  lineHeight: 1.2,
-                  fontWeight: 700,
-                  letterSpacing: 0,
-                }}
-              >
-                <span
-                  style={{
-                    width: 28,
-                    height: 5,
-                    marginRight: 13,
-                    background: "#10b981",
-                  }}
-                />
-                {content.course}
-              </div>
-            )}
-            {content.description && (
-              <div
-                style={{
-                  display: "flex",
-                  maxWidth: 970,
-                  maxHeight: 66,
-                  marginTop: 14,
-                  color: "#52525b",
-                  fontSize: 24,
-                  lineHeight: 1.35,
-                  fontWeight: 400,
-                  letterSpacing: 0,
-                  overflow: "hidden",
-                  overflowWrap: "anywhere",
-                }}
-              >
-                {content.description}
-              </div>
-            )}
+            <span style={{ color: "#3b82f6" }}>asif</span>
+            <span style={{ color: "#a1a1aa" }}>.to</span>
           </div>
-        )}
-      </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              padding: "8px 20px",
+              borderRadius: "999px",
+              backgroundColor:
+                content.type === "interview"
+                  ? "rgba(245, 158, 11, 0.1)"
+                  : "rgba(59, 130, 246, 0.1)",
+              border:
+                content.type === "interview"
+                  ? "1px solid rgba(245, 158, 11, 0.3)"
+                  : "1px solid rgba(59, 130, 246, 0.3)",
+              color: content.type === "interview" ? "#fcd34d" : "#93c5fd",
+              fontSize: 14,
+              fontWeight: 700,
+              letterSpacing: "1px",
+            }}
+          >
+            {content.label}
+          </div>
+        </div>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          borderTop: "2px solid #e4e4e7",
-          paddingTop: 19,
-          color: "#71717a",
-          fontSize: 18,
-          fontWeight: 600,
-          letterSpacing: 0,
-        }}
-      >
-        <span>Practical web development, step by step</span>
-        <span>asif.to</span>
+        {/* Main Content Area */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "24px",
+          }}
+        >
+          {content.course && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                color: "#10b981",
+                fontSize: 24,
+                fontWeight: 600,
+                letterSpacing: "-0.5px",
+              }}
+            >
+              {/* Glowing status indicator */}
+              <span
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: "50%",
+                  backgroundColor: "#10b981",
+                  marginRight: 12,
+                  boxShadow: "0 0 12px #10b981",
+                }}
+              />
+              {content.course}
+            </div>
+          )}
+
+          <div
+            style={{
+              fontSize: titleFontSize,
+              fontWeight: 800,
+              color: "#ffffff",
+              lineHeight: 1.1,
+              letterSpacing: "-1.5px",
+              maxWidth: "900px",
+            }}
+          >
+            {content.title}
+          </div>
+
+          {content.description && (
+            <div
+              style={{
+                fontSize: 24,
+                color: "#a1a1aa",
+                lineHeight: 1.5,
+                maxWidth: "850px",
+                marginTop: "8px",
+              }}
+            >
+              {content.description}
+            </div>
+          )}
+        </div>
+
+        {/* Bottom Footer Bar */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            borderTop: "1px solid #27272a",
+            paddingTop: "24px",
+            marginTop: "20px",
+          }}
+        >
+          <div style={{ color: "#71717a", fontSize: 18, fontWeight: 500 }}>
+            Practical web development, step by step
+          </div>
+
+          {/* Decorative minimalist dots replacing the old chunky bars */}
+          <div
+            style={{
+              display: "flex",
+              gap: "8px",
+            }}
+          >
+            <div
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: "#3b82f6",
+              }}
+            />
+            <div
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: "#06b6d4",
+              }}
+            />
+            <div
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: "#10b981",
+              }}
+            />
+          </div>
+        </div>
       </div>
     </div>,
     OG_IMAGE_SIZE,
