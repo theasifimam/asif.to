@@ -7,6 +7,9 @@ import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import articleRoutes from "./routes/article.routes.js";
 import topicRoutes from "./routes/topic.routes.js";
+import articleTopicRoutes from "./routes/articleTopic.routes.js";
+import topicCategoryRoutes from "./routes/topicCategory.routes.js";
+import interviewQuestionRoutes from "./routes/interviewQuestion.routes.js";
 import pageRoutes from "./routes/page.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import courseRoutes from "./routes/course.routes.js";
@@ -17,11 +20,11 @@ import contactRoutes from "./routes/contact.routes.js";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
-dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+dotenv.config({ path: path.resolve(__dirname, "../.env"), override: false });
 
 const app = express();
 
@@ -62,7 +65,10 @@ app.get("/health", (req, res) => {
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/articles", articleRoutes);
+app.use("/api/v1/article-topics", articleTopicRoutes);
 app.use("/api/v1/topics", topicRoutes);
+app.use("/api/v1/topic-categories", topicCategoryRoutes);
+app.use("/api/v1/interview-questions", interviewQuestionRoutes);
 app.use("/api/v1/pages", pageRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/courses", courseRoutes);

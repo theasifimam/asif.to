@@ -1,275 +1,424 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { coursesApi, chaptersApi } from "@/lib/api";
-import Editor from "@/components/Editor";
-import { ArrowLeft, Loader2, Save } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import {
+  ArrowLeft,
+  ExternalLink,
+  FileText,
+  Loader2,
+  Save,
+  Send,
+} from "lucide-react";
 import { toast } from "sonner";
+import Editor from "@/components/Editor";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { chaptersApi, coursesApi } from "@/lib/api";
 
-const DEFAULT_CHAPTER_FORM = {
+const initialForm = {
   title: "",
+  slug: "",
   summary: "",
   contentBody: "",
   tryItChallenge: "",
+  seoTitle: "",
+  seoDescription: "",
+  keywords: "",
+  canonicalUrl: "",
   order: 0,
-  status: "published",
+  status: "draft",
 };
 
-export default function EditChapterPage() {
-  const { courseId, chapterId } = useParams();
-  const router = useRouter();
+function slugify(value = "") {
+  return String(value)
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
 
+function chapterContent(chapter) {
+  let content = Array.isArray(chapter.content)
+    ? chapter.content.join("\n\n")
+    : chapter.content || "";
+
+  if (Array.isArray(chapter.codeSnippets) && chapter.codeSnippets.length > 0) {
+    const snippets = chapter.codeSnippets
+      .filter((snippet) => snippet.code)
+      .map(
+        (snippet) =>
+          `\`\`\`${snippet.language || "javascript"}\n// ${snippet.title || "Code Snippet"}\n${snippet.code}\n\`\`\``,
+      )
+      .join("\n\n");
+    if (snippets && !content.includes(chapter.codeSnippets[0]?.code || "")) {
+      content = `${content}\n\n${snippets}`.trim();
+    }
+  } else if (chapter.codeSnippet && !content.includes(chapter.codeSnippet)) {
+    content =
+      `${content}\n\n\`\`\`${chapter.language || "javascript"}\n${chapter.codeSnippet}\n\`\`\``.trim();
+  }
+
+  return content;
+}
+
+export default function ChapterFormPage() {
+  const { courseId, chapterId } = useParams();
+  const isNew = chapterId === "new";
+  const [course, setCourse] = useState(null);
+  const [form, setForm] = useState(initialForm);
+  const [slugEdited, setSlugEdited] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [chapterForm, setChapterForm] = useState(DEFAULT_CHAPTER_FORM);
-  const [course, setCourse] = useState(null);
-
-  const isNew = chapterId === "new";
+  const [publishOpen, setPublishOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const res = await coursesApi.getById(courseId);
-    if (res.success) {
-      const data = res.data?.data;
-      setCourse(data);
+    const response = await coursesApi.getById(courseId);
+    if (!response.success) {
+      toast.error(response.error || "Unable to load course");
+      setLoading(false);
+      return;
+    }
 
-      if (!isNew) {
-        const ch = (data.chapters || []).find((c) => c._id === chapterId);
-        if (ch) {
-          // Combine array content or codeSnippets into one unified markdown string for the Editor
-          let combinedContent = Array.isArray(ch.content)
-            ? ch.content.join("\n\n")
-            : ch.content || "";
-          if (Array.isArray(ch.codeSnippets) && ch.codeSnippets.length > 0) {
-            const snippetsMd = ch.codeSnippets
-              .map(
-                (s) =>
-                  `\`\`\`${s.language || "javascript"}\n// ${s.title || "Code Snippet"}\n${s.code}\n\`\`\``,
-              )
-              .join("\n\n");
-            if (snippetsMd && !combinedContent.includes(ch.codeSnippets[0]?.code)) {
-              combinedContent += "\n\n" + snippetsMd;
-            }
-          } else if (ch.codeSnippet && !combinedContent.includes(ch.codeSnippet)) {
-            combinedContent += `\n\n\`\`\`${ch.language || "javascript"}\n${ch.codeSnippet}\n\`\`\``;
-          }
-
-          setChapterForm({
-            title: ch.title || "",
-            summary: ch.summary || "",
-            contentBody: combinedContent,
-            tryItChallenge: ch.tryItChallenge || "",
-            order: ch.order ?? 0,
-            status: ch.status || "published",
-          });
-        } else {
-          toast.error("Chapter not found");
-          router.push(`/courses/${courseId}`);
-        }
-      } else {
-        // Default order for new chapter
-        setChapterForm((prev) => ({
-          ...prev,
-          order: data.chapters?.length || 0,
-        }));
-      }
+    const courseData = response.data?.data;
+    setCourse(courseData);
+    if (isNew) {
+      setForm((current) => ({
+        ...current,
+        order: courseData.chapters?.length || 0,
+      }));
     } else {
-      toast.error("Course not found");
-      router.push("/courses");
+      const chapter = (courseData.chapters || []).find(
+        (item) => item._id === chapterId,
+      );
+      if (!chapter) {
+        toast.error("Chapter not found");
+        setLoading(false);
+        return;
+      }
+      setForm({
+        ...initialForm,
+        ...chapter,
+        contentBody: chapterContent(chapter),
+        keywords: (chapter.keywords || []).join(", "),
+      });
+      setSlugEdited(true);
     }
     setLoading(false);
-  }, [courseId, chapterId, isNew, router]);
+  }, [chapterId, courseId, isNew]);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  const handleSaveChapter = async (e) => {
-    e.preventDefault();
-    setSaving(true);
+  const update = (key, value) =>
+    setForm((current) => ({ ...current, [key]: value }));
 
-    const data = {
-      title: chapterForm.title,
-      summary: chapterForm.summary,
-      content: [chapterForm.contentBody],
-      tryItChallenge: chapterForm.tryItChallenge,
-      order: chapterForm.order,
-      status: chapterForm.status,
-    };
+  const updateTitle = (title) =>
+    setForm((current) => ({
+      ...current,
+      title,
+      slug: slugEdited ? current.slug : slugify(title),
+      seoTitle: current.seoTitle || title,
+    }));
 
-    const res = !isNew
-      ? await chaptersApi.update(chapterId, data)
-      : await chaptersApi.create(courseId, data);
+  const payload = (status = form.status) => ({
+    title: form.title,
+    slug: form.slug,
+    summary: form.summary,
+    content: [form.contentBody],
+    tryItChallenge: form.tryItChallenge,
+    seoTitle: form.seoTitle,
+    seoDescription: form.seoDescription,
+    keywords: form.keywords
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean),
+    canonicalUrl: form.canonicalUrl,
+    order: Number(form.order) || 0,
+    status,
+  });
 
-    if (res.success) {
-      toast.success(!isNew ? "Chapter updated!" : "Chapter created!");
-      router.push(`/courses/${courseId}`);
-    } else {
-      toast.error(res.error || "Failed to save chapter");
+  const persist = async (status) => {
+    if (!form.title.trim() || !form.summary.trim()) {
+      toast.error("Title and summary are required");
+      return null;
     }
+    if (!form.slug.trim()) {
+      toast.error("A URL slug is required");
+      return null;
+    }
+
+    setSaving(true);
+    const response = isNew
+      ? await chaptersApi.create(courseId, payload(status))
+      : await chaptersApi.update(chapterId, payload(status));
+
+    if (!response.success) {
+      toast.error(response.error || "Unable to save chapter");
+      setSaving(false);
+      return null;
+    }
+
+    const chapter = response.data?.data;
+    toast.success(
+      status === "published" ? "Chapter published" : "Chapter saved",
+    );
+    setForm((current) => ({ ...current, status }));
     setSaving(false);
+    if (isNew && chapter?._id) {
+      window.location.assign(`/courses/${courseId}/chapters/${chapter._id}`);
+    }
+    return chapter;
+  };
+
+  const publish = async () => {
+    await persist("published");
+    setPublishOpen(false);
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-32">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
       </div>
     );
   }
 
+  const publicUrl =
+    course?.slug && form.slug
+      ? `https://asif.to/${course.slug}/${form.slug}`
+      : "";
+
   return (
-    <div className="space-y-6 p-4 sm:p-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link
-          href={`/courses/${courseId}`}
-          className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </Link>
-        <div>
-          <h1 className="text-xl font-black text-foreground">
-            {isNew ? "Add New Chapter" : "Edit Chapter"}
-          </h1>
-          <p className="text-xs text-muted-foreground">
-            {course?.title}
-          </p>
+    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
+      <header className="flex flex-col gap-4 border-b border-zinc-200 pb-5 dark:border-zinc-800 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3">
+          <Button
+            variant="outline"
+            size="icon"
+            asChild
+            title="Back to chapters"
+          >
+            <Link href={`/courses/${courseId}`}>
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">
+              {isNew ? "Create chapter" : "Edit chapter"}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {course?.title}
+            </p>
+          </div>
         </div>
-      </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {!isNew && form.status === "published" && publicUrl && (
+            <Button variant="outline" asChild>
+              <a href={publicUrl} target="_blank" rel="noreferrer">
+                <ExternalLink className="h-4 w-4" />
+                View
+              </a>
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            disabled={saving}
+            onClick={() => persist("draft")}
+          >
+            {saving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            Save draft
+          </Button>
+          <Button disabled={saving} onClick={() => setPublishOpen(true)}>
+            <Send className="h-4 w-4" />
+            Publish
+          </Button>
+        </div>
+      </header>
 
-      <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
-        <form onSubmit={handleSaveChapter} className="space-y-6">
-          {/* Title */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Chapter Title *
-            </label>
-            <input
-              required
-              className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none focus:ring-2 focus:ring-blue-500"
-              value={chapterForm.title}
-              onChange={(e) =>
-                setChapterForm({ ...chapterForm, title: e.target.value })
-              }
-              placeholder="e.g. 1. Introduction to React Hooks"
-            />
-          </div>
-
-          {/* Summary */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Summary *
-            </label>
-            <textarea
-              required
-              rows={2}
-              className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none resize-none"
-              value={chapterForm.summary}
-              onChange={(e) =>
-                setChapterForm({ ...chapterForm, summary: e.target.value })
-              }
-              placeholder="One-sentence overview of this chapter..."
-            />
-          </div>
-
-          {/* Unified Full Rich Text & Markdown Editor */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-between">
-              <span>Chapter Content & Code Editor *</span>
-              <span className="text-[11px] text-blue-500 font-normal">
-                Live Visual & Markdown Editor with Toolbar Buttons
-              </span>
-            </label>
-
-            <Editor
-              value={chapterForm.contentBody}
-              onChange={(val) =>
-                setChapterForm({ ...chapterForm, contentBody: val })
-              }
-              placeholder="Write your full chapter tutorial here. Use toolbar for H1, H2, Bold, Images, Code blocks..."
-            />
-          </div>
-
-          {/* Try It Challenge */}
-          <div className="space-y-2 pt-2">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Try It Yourself Challenge
-            </label>
-            <textarea
-              rows={2}
-              className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none resize-none"
-              value={chapterForm.tryItChallenge}
-              onChange={(e) =>
-                setChapterForm({
-                  ...chapterForm,
-                  tryItChallenge: e.target.value,
-                })
-              }
-              placeholder="e.g. Build a component that toggles between light and dark mode..."
-            />
-          </div>
-
-          {/* Status & Order */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Status
-              </label>
-              <select
-                className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none"
-                value={chapterForm.status}
-                onChange={(e) =>
-                  setChapterForm({ ...chapterForm, status: e.target.value })
-                }
-              >
-                <option value="published">Published</option>
-                <option value="draft">Draft</option>
-              </select>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <main className="space-y-6">
+          <section className="space-y-5 border-b border-zinc-200 pb-6 dark:border-zinc-800">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-blue-600" />
+              <h2 className="text-base font-semibold">Chapter content</h2>
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Display Order
-              </label>
-              <input
-                type="number"
-                className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none"
-                value={chapterForm.order}
-                onChange={(e) =>
-                  setChapterForm({
-                    ...chapterForm,
-                    order: Number(e.target.value),
-                  })
+              <Label htmlFor="chapter-title">Title</Label>
+              <Input
+                id="chapter-title"
+                value={form.title}
+                maxLength={180}
+                onChange={(event) => updateTitle(event.target.value)}
+                placeholder="Introduction to React Hooks"
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="chapter-slug">URL slug</Label>
+                <span className="truncate text-xs text-muted-foreground">
+                  /{course?.slug}/{form.slug || "chapter-slug"}
+                </span>
+              </div>
+              <Input
+                id="chapter-slug"
+                value={form.slug}
+                maxLength={200}
+                onChange={(event) => {
+                  setSlugEdited(true);
+                  update("slug", slugify(event.target.value));
+                }}
+                placeholder="introduction-to-react-hooks"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="chapter-summary">Summary</Label>
+              <Textarea
+                id="chapter-summary"
+                value={form.summary}
+                maxLength={320}
+                rows={3}
+                onChange={(event) => update("summary", event.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Content</Label>
+              <Editor
+                value={form.contentBody}
+                onChange={(value) => update("contentBody", value)}
+                placeholder="Write the chapter tutorial and code examples."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="chapter-challenge">Try it challenge</Label>
+              <Textarea
+                id="chapter-challenge"
+                value={form.tryItChallenge}
+                rows={4}
+                onChange={(event) =>
+                  update("tryItChallenge", event.target.value)
                 }
               />
             </div>
-          </div>
+          </section>
 
-          {/* Buttons */}
-          <div className="flex gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
-            <button
-              type="submit"
-              disabled={saving}
-              className="flex items-center gap-2 flex-1 sm:flex-none sm:w-48 justify-center py-3 rounded-full bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-500/25"
+          <section className="space-y-5">
+            <div>
+              <h2 className="text-base font-semibold">Search metadata</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Empty fields fall back to the chapter title and summary.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="chapter-seo-title">SEO title</Label>
+                <span className="text-xs text-muted-foreground">
+                  {form.seoTitle.length}/70
+                </span>
+              </div>
+              <Input
+                id="chapter-seo-title"
+                value={form.seoTitle}
+                maxLength={70}
+                onChange={(event) => update("seoTitle", event.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="chapter-seo-description">SEO description</Label>
+                <span className="text-xs text-muted-foreground">
+                  {form.seoDescription.length}/170
+                </span>
+              </div>
+              <Textarea
+                id="chapter-seo-description"
+                value={form.seoDescription}
+                maxLength={170}
+                rows={4}
+                onChange={(event) =>
+                  update("seoDescription", event.target.value)
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="chapter-keywords">Keywords</Label>
+              <Input
+                id="chapter-keywords"
+                value={form.keywords}
+                onChange={(event) => update("keywords", event.target.value)}
+                placeholder="react hooks, useState, frontend"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="chapter-canonical">Canonical URL</Label>
+              <Input
+                id="chapter-canonical"
+                type="url"
+                value={form.canonicalUrl}
+                maxLength={500}
+                onChange={(event) => update("canonicalUrl", event.target.value)}
+                placeholder={publicUrl || "https://asif.to/course/chapter"}
+              />
+            </div>
+          </section>
+        </main>
+
+        <aside className="space-y-5 lg:border-l lg:border-zinc-200 lg:pl-6 dark:lg:border-zinc-800">
+          <h2 className="text-sm font-semibold">Placement</h2>
+          <div className="space-y-2">
+            <Label>Status</Label>
+            <Select
+              value={form.status}
+              onValueChange={(value) => update("status", value)}
             >
-              {saving ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4" />
-              )}
-              {isNew ? "Create Chapter" : "Save Changes"}
-            </button>
-            <Link
-              href={`/courses/${courseId}`}
-              className="flex-1 sm:flex-none sm:w-48 py-3 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground text-sm font-bold hover:bg-zinc-200 transition-all text-center flex items-center justify-center"
-            >
-              Cancel
-            </Link>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </form>
+          <div className="space-y-2">
+            <Label htmlFor="chapter-order">Display order</Label>
+            <Input
+              id="chapter-order"
+              type="number"
+              value={form.order}
+              onChange={(event) => update("order", event.target.value)}
+            />
+          </div>
+        </aside>
       </div>
+
+      <ConfirmDialog
+        isOpen={publishOpen}
+        onClose={() => setPublishOpen(false)}
+        onConfirm={publish}
+        title="Publish chapter"
+        description="Save these changes and make this chapter available on the public site."
+        confirmText="Publish"
+        variant="default"
+        loading={saving}
+      />
     </div>
   );
 }

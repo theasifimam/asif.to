@@ -1,14 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "./axiosBaseQuery";
 
-
-
-
-
-
-
-
-
 export const topicsApi = createApi({
   reducerPath: "topicsApi",
   baseQuery: axiosBaseQuery(),
@@ -16,12 +8,12 @@ export const topicsApi = createApi({
   endpoints: (builder) => ({
     getTopics: builder.query({
       query: () => ({
-        url: "/topics",
-        method: "GET"
+        url: "/article-topics",
+        method: "GET",
       }),
-      providesTags: ["Topics"]
-    })
-  })
+      providesTags: ["Topics"],
+    }),
+  }),
 });
 
 export const { useGetTopicsQuery } = topicsApi;

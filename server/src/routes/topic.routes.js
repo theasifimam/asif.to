@@ -1,20 +1,29 @@
 import { Router } from "express";
 import {
-  getTopics,
-  createTopic,
-  updateTopic,
-  deleteTopic } from
-"../controllers/topic.controller.js";
+  listCourseTopics,
+  getCourseTopicAdmin,
+  createCourseTopic,
+  updateCourseTopic,
+  publishCourseTopic,
+  deleteCourseTopic,
+  reorderCourseTopics,
+  getPublicTopics,
+  getPublicTopic,
+} from "../controllers/courseTopic.controller.js";
 import { protect, authorize } from "../middlewares/auth.middleware.js";
 
 const router = Router();
+const canManage = [protect, authorize("admin", "editor")];
 
-// Public list topics
-router.get("/", getTopics);
-
-// Admin / Editor only routes
-router.post("/", protect, authorize("admin", "editor"), createTopic);
-router.patch("/:id", protect, authorize("admin", "editor"), updateTopic);
-router.delete("/:id", protect, authorize("admin", "editor"), deleteTopic);
+router.get("/public/:courseSlug", getPublicTopics);
+router.get("/public/:courseSlug/:topicSlug", getPublicTopic);
+router.get("/public/:courseSlug/*topicPath", getPublicTopic);
+router.get("/", ...canManage, listCourseTopics);
+router.get("/:id", ...canManage, getCourseTopicAdmin);
+router.post("/", ...canManage, createCourseTopic);
+router.patch("/reorder", ...canManage, reorderCourseTopics);
+router.patch("/:id/publish", ...canManage, publishCourseTopic);
+router.patch("/:id", ...canManage, updateCourseTopic);
+router.delete("/:id", ...canManage, deleteCourseTopic);
 
 export default router;

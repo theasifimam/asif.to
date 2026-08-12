@@ -3,11 +3,41 @@ import Chapter from "../models/Chapter.js";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function slugify(str) {
-  return str
+function slugify(str = "") {
+  return String(str)
     .toLowerCase()
+    .trim()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+}
+
+function escapeRegex(value = "") {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function normalizeKeywords(value) {
+  if (Array.isArray(value)) {
+    return value.map((keyword) => String(keyword).trim()).filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split(",")
+      .map((keyword) => keyword.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+function getPagination(query, defaultLimit = 20) {
+  const page = Math.max(Number.parseInt(query.page, 10) || 1, 1);
+  const limit = Math.min(
+    Math.max(Number.parseInt(query.limit, 10) || defaultLimit, 1),
+    100,
+  );
+
+  return { page, limit, skip: (page - 1) * limit };
 }
 
 // ── Public Endpoints ──────────────────────────────────────────────────────────
@@ -85,7 +115,7 @@ export const getCourseBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
 
-    let course = await Course.findOne({ slug }).lean();
+    let course = await Course.findOne({ slug, status: "published" }).lean();
     if (!course) {
       // Fallback: search by techId if slug didn't match directly
       course = await Course.findOne({ techId: slug, status: "published" })
@@ -122,7 +152,10 @@ export const getChapterBySlug = async (req, res) => {
   try {
     const { slug: courseSlug, chapterSlug } = req.params;
 
-    let course = await Course.findOne({ slug: courseSlug }).lean();
+    let course = await Course.findOne({
+      slug: courseSlug,
+      status: "published",
+    }).lean();
     if (!course) {
       // Fallback: search by techId if slug didn't match directly
       course = await Course.findOne({ techId: courseSlug, status: "published" })
@@ -139,6 +172,7 @@ export const getChapterBySlug = async (req, res) => {
     const chapter = await Chapter.findOne({
       course: course._id,
       slug: chapterSlug,
+      status: "published",
     }).lean();
 
     if (!chapter) {
@@ -175,6 +209,10 @@ export const getChapterBySlug = async (req, res) => {
           _id: course._id,
           slug: course.slug,
           title: course.title,
+          subtitle: course.subtitle,
+          thumbnail: course.thumbnail,
+          level: course.level,
+          duration: course.duration,
           techId: course.techId,
           examEnabled: course.examEnabled,
           examSettings: course.examSettings,
@@ -199,9 +237,29 @@ export const getChapterBySlug = async (req, res) => {
  */
 export const getCoursesAdmin = async (req, res) => {
   try {
-    const courses = await Course.find({})
-      .sort({ order: 1, createdAt: -1 })
-      .lean();
+    const { search = "", status = "all", level = "all" } = req.query;
+    const hasPagination =
+      req.query.page !== undefined || req.query.limit !== undefined;
+    const { page, limit, skip } = getPagination(req.query);
+    const filter = {};
+
+    if (status !== "all") filter.status = status;
+    if (level !== "all") filter.level = level;
+    if (search.trim()) {
+      const expression = new RegExp(escapeRegex(search.trim()), "i");
+      filter.$or = [
+        { title: expression },
+        { subtitle: expression },
+        { slug: expression },
+        { techId: expression },
+        { keywords: expression },
+      ];
+    }
+
+    const total = await Course.countDocuments(filter);
+    let query = Course.find(filter).sort({ order: 1, createdAt: -1 });
+    if (hasPagination) query = query.skip(skip).limit(limit);
+    const courses = await query.lean();
 
     const courseIds = courses.map((c) => c._id);
     const chapterCounts = await Chapter.aggregate([
@@ -219,7 +277,16 @@ export const getCoursesAdmin = async (req, res) => {
       chapterCount: countMap[c._id.toString()] || 0,
     }));
 
-    res.status(200).json({ success: true, data: result });
+    res.status(200).json({
+      success: true,
+      data: result,
+      pagination: {
+        page: hasPagination ? page : 1,
+        limit: hasPagination ? limit : Math.max(total, 1),
+        total,
+        pages: hasPagination ? Math.max(Math.ceil(total / limit), 1) : 1,
+      },
+    });
   } catch (error) {
     console.error("[COURSES] getCoursesAdmin error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -267,6 +334,10 @@ export const createCourse = async (req, res) => {
       status,
       examEnabled,
       examSettings,
+      seoTitle,
+      seoDescription,
+      keywords,
+      canonicalUrl,
     } = req.body;
 
     if (!title || !subtitle || !techId) {
@@ -299,6 +370,10 @@ export const createCourse = async (req, res) => {
       duration: duration || "Self-paced",
       thumbnail: thumbnail || "",
       learningOutcomes: learningOutcomes || [],
+      seoTitle: seoTitle || "",
+      seoDescription: seoDescription || "",
+      keywords: normalizeKeywords(keywords),
+      canonicalUrl: canonicalUrl || "",
       order: order ?? 0,
       status: status || "published",
       examEnabled: Boolean(examEnabled),
@@ -308,6 +383,12 @@ export const createCourse = async (req, res) => {
     res.status(201).json({ success: true, data: course });
   } catch (error) {
     console.error("[COURSES] createCourse error:", error);
+    if (error?.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "Slug is already in use by another course.",
+      });
+    }
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -327,6 +408,10 @@ export const updateCourse = async (req, res) => {
       "duration",
       "thumbnail",
       "learningOutcomes",
+      "seoTitle",
+      "seoDescription",
+      "keywords",
+      "canonicalUrl",
       "order",
       "status",
       "slug",
@@ -337,6 +422,10 @@ export const updateCourse = async (req, res) => {
     allowed.forEach((key) => {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
     });
+
+    if (req.body.keywords !== undefined) {
+      updates.keywords = normalizeKeywords(req.body.keywords);
+    }
 
     if (req.body.slug !== undefined) {
       const formattedSlug = slugify(req.body.slug);
@@ -350,12 +439,10 @@ export const updateCourse = async (req, res) => {
         _id: { $ne: id },
       });
       if (existing) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "Slug is already in use by another course.",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "Slug is already in use by another course.",
+        });
       }
       updates.slug = formattedSlug;
     }
@@ -376,6 +463,12 @@ export const updateCourse = async (req, res) => {
     res.status(200).json({ success: true, data: course });
   } catch (error) {
     console.error("[COURSES] updateCourse error:", error);
+    if (error?.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "Slug is already in use by another course.",
+      });
+    }
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -417,10 +510,38 @@ export const deleteCourse = async (req, res) => {
 export const getChapters = async (req, res) => {
   try {
     const { courseId } = req.params;
-    const chapters = await Chapter.find({ course: courseId })
-      .sort({ order: 1 })
-      .lean();
-    res.status(200).json({ success: true, data: chapters });
+    const { search = "", status = "all" } = req.query;
+    const hasPagination =
+      req.query.page !== undefined || req.query.limit !== undefined;
+    const { page, limit, skip } = getPagination(req.query);
+    const filter = { course: courseId };
+
+    if (status !== "all") filter.status = status;
+    if (search.trim()) {
+      const expression = new RegExp(escapeRegex(search.trim()), "i");
+      filter.$or = [
+        { title: expression },
+        { summary: expression },
+        { slug: expression },
+        { keywords: expression },
+      ];
+    }
+
+    const total = await Chapter.countDocuments(filter);
+    let query = Chapter.find(filter).sort({ order: 1, createdAt: -1 });
+    if (hasPagination) query = query.skip(skip).limit(limit);
+    const chapters = await query.lean();
+
+    res.status(200).json({
+      success: true,
+      data: chapters,
+      pagination: {
+        page: hasPagination ? page : 1,
+        limit: hasPagination ? limit : Math.max(total, 1),
+        total,
+        pages: hasPagination ? Math.max(Math.ceil(total / limit), 1) : 1,
+      },
+    });
   } catch (error) {
     console.error("[CHAPTERS] getChapters error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -444,6 +565,10 @@ export const createChapter = async (req, res) => {
       tryItChallenge,
       order,
       status,
+      seoTitle,
+      seoDescription,
+      keywords,
+      canonicalUrl,
     } = req.body;
 
     if (!title || !summary) {
@@ -460,11 +585,18 @@ export const createChapter = async (req, res) => {
         .json({ success: false, message: "Course not found." });
     }
 
-    // Auto-generate slug from title, ensure unique within course
-    let slug = slugify(title);
-    const existing = await Chapter.findOne({ course: courseId, slug });
-    if (existing) {
-      slug = `${slug}-${Date.now()}`;
+    const baseSlug = slugify(req.body.slug || title);
+    if (!baseSlug) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid URL slug." });
+    }
+
+    let slug = baseSlug;
+    let counter = 2;
+    while (await Chapter.exists({ course: courseId, slug })) {
+      slug = `${baseSlug}-${counter}`;
+      counter += 1;
     }
 
     // Auto-assign order if not provided
@@ -486,6 +618,10 @@ export const createChapter = async (req, res) => {
       codeSnippets: codeSnippets || [],
       language: language || "javascript",
       tryItChallenge: tryItChallenge || "",
+      seoTitle: seoTitle || "",
+      seoDescription: seoDescription || "",
+      keywords: normalizeKeywords(keywords),
+      canonicalUrl: canonicalUrl || "",
       order: chapterOrder,
       status: status || "published",
     });
@@ -493,6 +629,12 @@ export const createChapter = async (req, res) => {
     res.status(201).json({ success: true, data: chapter });
   } catch (error) {
     console.error("[CHAPTERS] createChapter error:", error);
+    if (error?.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "Slug is already in use by another chapter in this course.",
+      });
+    }
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -513,6 +655,10 @@ export const updateChapter = async (req, res) => {
       "codeSnippets",
       "language",
       "tryItChallenge",
+      "seoTitle",
+      "seoDescription",
+      "keywords",
+      "canonicalUrl",
       "order",
       "status",
     ];
@@ -520,7 +666,39 @@ export const updateChapter = async (req, res) => {
     allowed.forEach((key) => {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
     });
-    updates.updatedAt = new Date();
+
+    const currentChapter = await Chapter.findById(id).select("course").lean();
+    if (!currentChapter) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Chapter not found." });
+    }
+
+    if (req.body.keywords !== undefined) {
+      updates.keywords = normalizeKeywords(req.body.keywords);
+    }
+
+    if (req.body.slug !== undefined) {
+      const formattedSlug = slugify(req.body.slug);
+      if (!formattedSlug) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid URL slug." });
+      }
+
+      const existing = await Chapter.exists({
+        course: currentChapter.course,
+        slug: formattedSlug,
+        _id: { $ne: id },
+      });
+      if (existing) {
+        return res.status(400).json({
+          success: false,
+          message: "Slug is already in use by another chapter in this course.",
+        });
+      }
+      updates.slug = formattedSlug;
+    }
 
     const chapter = await Chapter.findByIdAndUpdate(id, updates, {
       new: true,
@@ -536,6 +714,12 @@ export const updateChapter = async (req, res) => {
     res.status(200).json({ success: true, data: chapter });
   } catch (error) {
     console.error("[CHAPTERS] updateChapter error:", error);
+    if (error?.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "Slug is already in use by another chapter in this course.",
+      });
+    }
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };

@@ -26,6 +26,7 @@ import {
   FileCode,
   Layers,
   Clipboard,
+  FolderTree,
   X,
   MessageSquare,
 } from "lucide-react";
@@ -54,7 +55,6 @@ const NAV_ITEMS = [
   {
     group: "Courses & Learning",
     items: [
-      { name: "All Courses", href: "/courses", icon: GraduationCap },
       { name: "Cheatsheets", href: "/cheatsheets", icon: FileCode },
       { name: "Quiz Builder", href: "/quiz", icon: Clipboard },
       { name: "Flashcards", href: "/flashcards", icon: Layers },
@@ -63,10 +63,17 @@ const NAV_ITEMS = [
   {
     group: "Content",
     items: [
+      { name: "Courses", href: "/courses", icon: GraduationCap },
+      { name: "Topics", href: "/topics", icon: Hash },
+      {
+        name: "Interview Questions",
+        href: "/interview-questions",
+        icon: MessageSquare,
+      },
+      { name: "Categories", href: "/categories", icon: FolderTree },
       { name: "Article Editor", href: "/articles/new", icon: FileEdit },
       { name: "Drafts", href: "/articles/drafts", icon: BookOpen },
       { name: "All Articles", href: "/articles/published", icon: BookOpen },
-      { name: "Topics", href: "/topics", icon: Hash },
     ],
   },
   {
@@ -92,8 +99,7 @@ const NAV_ITEMS = [
   },
 ];
 
-const STORAGE_URL =
-  process.env.NEXT_PUBLIC_STORAGE_URL;
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL;
 
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
@@ -162,18 +168,20 @@ export default function AdminLayout({ children }) {
           width: isCollapsed && !isMobileMenuOpen ? 80 : 288,
           x: isMobileMenuOpen
             ? 0
-            : mounted && typeof window !== "undefined" && window.innerWidth < 1024
+            : mounted &&
+                typeof window !== "undefined" &&
+                window.innerWidth < 1024
               ? -320
               : 0,
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className={`border-r border-zinc-200 dark:border-zinc-800 flex flex-col bg-white dark:bg-zinc-950 backdrop-blur-xl shrink-0 fixed inset-y-0 left-0 lg:relative h-full transition-colors duration-300 ${
-          isMobileMenuOpen ? "z-50 shadow-2xl shadow-black/50" : "z-30"
+          isMobileMenuOpen ? "z-99 shadow-2xl shadow-black/50" : "z-99"
         }`}
       >
         {/* Toggle Button (Desktop) */}
         <div
-          className={`absolute top-8 z-10 hidden lg:flex transition-all duration-300 ${isCollapsed ? "right-0 translate-x-1/2 top-12" : "right-4"}`}
+          className={`absolute top-8 z-99 hidden lg:flex transition-all duration-300 ${isCollapsed ? "right-0 translate-x-1/2 top-12" : "right-4"}`}
         >
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
@@ -192,7 +200,11 @@ export default function AdminLayout({ children }) {
           className={`p-6 pb-8 flex items-center justify-between gap-2 ${isCollapsed && !isMobileMenuOpen ? "items-center px-0 justify-center" : ""}`}
         >
           <Link href="/dashboard" className="flex items-center gap-2.5 group">
-            <img src="/logo.png" alt="asif.to" className="w-8 h-8 rounded-xl object-contain shadow-sm shrink-0" />
+            <img
+              src="/logo.png"
+              alt="asif.to"
+              className="w-8 h-8 rounded-xl object-contain shadow-sm shrink-0"
+            />
             {(!isCollapsed || isMobileMenuOpen) && (
               <div className="flex items-center gap-2">
                 <span className="font-outfit font-black text-xl tracking-tight text-zinc-900 dark:text-white">
@@ -390,11 +402,17 @@ export default function AdminLayout({ children }) {
           <button
             onClick={() => setIsUserMenuDialogOpen(!isUserMenuDialogOpen)}
             className={`w-full flex items-center justify-between p-3 rounded-2xl bg-zinc-100/80 dark:bg-zinc-900/60 hover:bg-zinc-200/80 dark:hover:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800/80 transition-all group/user shadow-sm ${
-              isCollapsed ? "p-2 justify-center w-auto" : ""
+              isCollapsed ? "justify-center w-full align-center" : ""
             }`}
             title={isCollapsed ? user?.fullName || "Account Options" : ""}
           >
-            <div className="flex items-center gap-3 min-w-0">
+            <div
+              className={
+                isCollapsed
+                  ? "flex items-center"
+                  : "flex items-center gap-3 min-w-0"
+              }
+            >
               <Avatar className="w-10 h-10 border border-zinc-200 dark:border-zinc-700 shadow-sm shrink-0 transition-transform group-hover/user:scale-105">
                 <AvatarImage src={avatarUrl || ""} className="object-cover" />
                 <AvatarFallback className="bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-white font-black uppercase text-xs">

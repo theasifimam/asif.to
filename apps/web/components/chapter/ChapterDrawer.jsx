@@ -36,7 +36,7 @@ export default function ChapterDrawer({
             return (
               <Link
                 key={ch.slug}
-                href={`/courses/${courseId}/${ch.slug}`}
+                href={`/${courseId}/${ch.slug}`}
                 onClick={() => setIsDrawerOpen(false)}
                 className={`flex items-center justify-between p-4 rounded-2xl text-xs font-bold transition-all ${
                   isActive

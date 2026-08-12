@@ -13,10 +13,35 @@ const courseSchema = new Schema(
       type: String,
       required: true,
       trim: true,
+      maxlength: 180,
     },
     subtitle: {
       type: String,
       required: true,
+      trim: true,
+      maxlength: 320,
+    },
+    seoTitle: {
+      type: String,
+      default: "",
+      trim: true,
+      maxlength: 70,
+    },
+    seoDescription: {
+      type: String,
+      default: "",
+      trim: true,
+      maxlength: 170,
+    },
+    keywords: {
+      type: [String],
+      default: [],
+    },
+    canonicalUrl: {
+      type: String,
+      default: "",
+      trim: true,
+      maxlength: 500,
     },
     techId: {
       type: String,
@@ -80,12 +105,18 @@ courseSchema.virtual("chapters", {
 
 courseSchema.index({ status: 1, order: 1 });
 courseSchema.index({ examEnabled: 1, status: 1 });
+courseSchema.index({ title: "text", subtitle: "text", keywords: "text" });
 
 // Cascade delete chapters when a course is deleted
 courseSchema.pre("findOneAndDelete", async function () {
   const courseId = this.getQuery()["_id"];
   if (courseId) {
-    await model("Chapter").deleteMany({ course: courseId });
+    await Promise.all([
+      model("Chapter").deleteMany({ course: courseId }),
+      model("CourseTopic").deleteMany({ course: courseId }),
+      model("TopicCategory").deleteMany({ course: courseId }),
+      model("InterviewQuestion").deleteMany({ course: courseId }),
+    ]);
   }
 });
 
@@ -93,7 +124,12 @@ courseSchema.pre(
   "deleteOne",
   { document: true, query: false },
   async function () {
-    await model("Chapter").deleteMany({ course: this._id });
+    await Promise.all([
+      model("Chapter").deleteMany({ course: this._id }),
+      model("CourseTopic").deleteMany({ course: this._id }),
+      model("TopicCategory").deleteMany({ course: this._id }),
+      model("InterviewQuestion").deleteMany({ course: this._id }),
+    ]);
   },
 );
 

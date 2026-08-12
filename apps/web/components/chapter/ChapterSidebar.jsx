@@ -53,7 +53,7 @@ export default function ChapterSidebar({
                   <Link
                     key={ch.slug}
                     ref={isActive ? activeItemRef : null}
-                    href={`/courses/${courseId}/${ch.slug}`}
+                    href={`/${courseId}/${ch.slug}`}
                     className={`group flex items-center justify-between p-3 rounded-2xl text-xs font-bold transition-all ${
                       isActive
                         ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"

@@ -266,14 +266,42 @@ export const articlesApi = {
   delete: (id) => apiDelete(`/articles/${id}`),
 };
 
-/**
- * Topics Management
- */
+/** Article taxonomy used by article editors and public search. */
+export const articleTopicsApi = {
+  list: () => apiGet("/article-topics"),
+  create: (data) => apiPost("/article-topics", data),
+  update: (id, data) => apiPatch(`/article-topics/${id}`, data),
+  delete: (id) => apiDelete(`/article-topics/${id}`),
+};
+
+/** SEO course topics. */
 export const topicsApi = {
-  list: () => apiGet("/topics"),
+  list: (params = {}) => apiGet(`/topics?${new URLSearchParams(params)}`),
+  get: (id) => apiGet(`/topics/${id}`),
   create: (data) => apiPost("/topics", data),
   update: (id, data) => apiPatch(`/topics/${id}`, data),
+  setStatus: (id, status) => apiPatch(`/topics/${id}/publish`, { status }),
+  reorder: (course, orders) => apiPatch("/topics/reorder", { course, orders }),
   delete: (id) => apiDelete(`/topics/${id}`),
+};
+
+/** Reusable canonical interview questions. */
+export const interviewQuestionsApi = {
+  list: (params = {}) =>
+    apiGet(`/interview-questions?${new URLSearchParams(params)}`),
+  get: (id) => apiGet(`/interview-questions/${id}`),
+  create: (data) => apiPost("/interview-questions", data),
+  update: (id, data) => apiPatch(`/interview-questions/${id}`, data),
+  delete: (id) => apiDelete(`/interview-questions/${id}`),
+};
+
+/** Course-scoped topic categories. */
+export const topicCategoriesApi = {
+  list: (course) =>
+    apiGet(`/topic-categories?${new URLSearchParams({ course })}`),
+  create: (data) => apiPost("/topic-categories", data),
+  update: (id, data) => apiPatch(`/topic-categories/${id}`, data),
+  delete: (id) => apiDelete(`/topic-categories/${id}`),
 };
 
 /**
@@ -317,7 +345,10 @@ export const bugReportApi = {
 
 /** Courses */
 export const coursesApi = {
-  listAll: () => apiGet("/courses/admin/all"),
+  listAll: (params) =>
+    apiGet(
+      `/courses/admin/all${params ? `?${new URLSearchParams(params)}` : ""}`,
+    ),
   getById: (id) => apiGet(`/courses/admin/${id}`),
   list: (params) =>
     apiGet(`/courses?${params ? new URLSearchParams(params) : ""}`),
@@ -329,7 +360,10 @@ export const coursesApi = {
 
 /** Chapters */
 export const chaptersApi = {
-  list: (courseId) => apiGet(`/courses/${courseId}/chapters`),
+  list: (courseId, params) =>
+    apiGet(
+      `/courses/${courseId}/chapters${params ? `?${new URLSearchParams(params)}` : ""}`,
+    ),
   create: (courseId, data) => apiPost(`/courses/${courseId}/chapters`, data),
   update: (id, data) => apiPatch(`/courses/chapters/${id}`, data),
   delete: (id) => apiDelete(`/courses/chapters/${id}`),

@@ -19,10 +19,10 @@ import { useGetChapterBySlugQuery } from "@/lib/api/courseApi";
 import { TECH_STACKS } from "@/lib/tutorialData";
 import { Loader2, AlertCircle } from "lucide-react";
 
-export default function ChapterClient() {
+export default function ChapterClient({ courseSlug, chapterSlug }) {
   const params = useParams();
-  const courseId = params?.courseId;
-  const chapterId = params?.chapterId;
+  const courseId = courseSlug || params?.courseId || params?.username;
+  const chapterId = chapterSlug || params?.chapterId || params?.topicSlug;
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);

@@ -18,15 +18,42 @@ const chapterSchema = new Schema(
       type: String,
       required: true,
       trim: true,
+      lowercase: true,
+      maxlength: 200,
     },
     title: {
       type: String,
       required: true,
       trim: true,
+      maxlength: 180,
     },
     summary: {
       type: String,
       required: true,
+      trim: true,
+      maxlength: 320,
+    },
+    seoTitle: {
+      type: String,
+      default: "",
+      trim: true,
+      maxlength: 70,
+    },
+    seoDescription: {
+      type: String,
+      default: "",
+      trim: true,
+      maxlength: 170,
+    },
+    keywords: {
+      type: [String],
+      default: [],
+    },
+    canonicalUrl: {
+      type: String,
+      default: "",
+      trim: true,
+      maxlength: 500,
     },
     // Array of Markdown paragraphs or rich blocks
     content: {
@@ -69,9 +96,11 @@ const chapterSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 chapterSchema.index({ course: 1, slug: 1 }, { unique: true });
+chapterSchema.index({ course: 1, status: 1, order: 1 });
+chapterSchema.index({ title: "text", summary: "text", keywords: "text" });
 
 export default model("Chapter", chapterSchema);

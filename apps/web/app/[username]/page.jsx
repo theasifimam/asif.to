@@ -367,7 +367,7 @@ export default function UserProfilePage() {
                               label: item.course?.title || "Chapter",
                               title: item.title,
                               description: item.summary,
-                              href: `/courses/${item.course?.slug}/${item.slug}`,
+                              href: `/${item.course?.slug}/${item.slug}`,
                             },
                             cheatsheet: {
                               label: "Cheatsheet",

@@ -1,0 +1,318 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Eye, Loader2, Save } from "lucide-react";
+import { toast } from "sonner";
+import Editor from "@/components/Editor";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { coursesApi, interviewQuestionsApi } from "@/lib/api";
+
+const initialForm = {
+  course: "",
+  question: "",
+  slug: "",
+  answer: "",
+  difficulty: "medium",
+  questionType: "conceptual",
+  tags: "",
+  codeExample: "",
+  expectedOutput: "",
+  followUps: "",
+};
+
+function slugify(value) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+export default function InterviewQuestionForm({
+  questionId = null,
+  initialCourse = "",
+}) {
+  const [form, setForm] = useState({ ...initialForm, course: initialCourse });
+  const [courses, setCourses] = useState([]);
+  const [slugEdited, setSlugEdited] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [preview, setPreview] = useState(false);
+
+  useEffect(() => {
+    Promise.all([
+      coursesApi.listAll(),
+      questionId
+        ? interviewQuestionsApi.get(questionId)
+        : Promise.resolve(null),
+    ]).then(([courseResponse, questionResponse]) => {
+      if (courseResponse.success) setCourses(courseResponse.data?.data || []);
+      else toast.error(courseResponse.error || "Unable to load courses");
+
+      if (questionResponse?.success) {
+        const item = questionResponse.data?.data;
+        setForm({
+          ...initialForm,
+          ...item,
+          course: item.course?._id || item.course || "",
+          tags: (item.tags || []).join(", "),
+          followUps: (item.followUps || []).join("\n"),
+        });
+        setSlugEdited(true);
+      } else if (questionId) {
+        toast.error(questionResponse?.error || "Unable to load question");
+      }
+      setLoading(false);
+    });
+  }, [questionId]);
+
+  const update = (key, value) =>
+    setForm((current) => ({ ...current, [key]: value }));
+
+  const updateQuestion = (question) =>
+    setForm((current) => ({
+      ...current,
+      question,
+      slug: slugEdited ? current.slug : slugify(question),
+    }));
+
+  const save = async () => {
+    if (!form.course || !form.question.trim() || !form.answer.trim())
+      return toast.error("Course, question, and answer are required");
+    setSaving(true);
+    const payload = {
+      ...form,
+      tags: form.tags
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+      followUps: form.followUps
+        .split("\n")
+        .map((item) => item.trim())
+        .filter(Boolean),
+    };
+    const response = questionId
+      ? await interviewQuestionsApi.update(questionId, payload)
+      : await interviewQuestionsApi.create(payload);
+    if (response.success) {
+      toast.success(questionId ? "Question saved" : "Question created");
+      if (!questionId)
+        window.location.assign(
+          `/interview-questions/${response.data?.data?._id}/edit`,
+        );
+    } else toast.error(response.error || "Unable to save question");
+    setSaving(false);
+  };
+
+  if (loading)
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+      </div>
+    );
+
+  return (
+    <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+      <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <Link
+            href="/interview-questions"
+            className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back to questions
+          </Link>
+          <h1 className="mt-4 text-3xl font-bold text-zinc-950 dark:text-white">
+            {questionId
+              ? "Edit interview question"
+              : "Create interview question"}
+          </h1>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setPreview((value) => !value)}
+          >
+            <Eye className="h-4 w-4" /> {preview ? "Edit" : "Preview"}
+          </Button>
+          <Button onClick={save} disabled={saving}>
+            {saving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            Save
+          </Button>
+        </div>
+      </header>
+
+      {preview ? (
+        <article className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-6 dark:border-zinc-800/60 dark:bg-zinc-950">
+          <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase text-zinc-500">
+            <span>{form.difficulty}</span>
+            <span>{form.questionType}</span>
+          </div>
+          <h2 className="text-2xl font-bold text-zinc-950 dark:text-white">
+            {form.question || "Untitled question"}
+          </h2>
+          <div className="whitespace-pre-wrap leading-7 text-zinc-700 dark:text-zinc-300">
+            {form.answer}
+          </div>
+          {form.codeExample && (
+            <pre className="overflow-x-auto rounded-2xl bg-zinc-950 p-4 text-sm text-zinc-100">
+              <code>{form.codeExample}</code>
+            </pre>
+          )}
+          {form.expectedOutput && (
+            <pre className="overflow-x-auto rounded-2xl bg-zinc-100 p-4 text-sm dark:bg-zinc-900">
+              <code>{form.expectedOutput}</code>
+            </pre>
+          )}
+        </article>
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <section className="space-y-6">
+            <div className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+              <div className="space-y-2">
+                <Label>Question</Label>
+                <Textarea
+                  value={form.question}
+                  onChange={(event) => updateQuestion(event.target.value)}
+                  rows={3}
+                  maxLength={500}
+                  className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 shadow-none dark:bg-zinc-900"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Stable anchor slug</Label>
+                <Input
+                  value={form.slug}
+                  onChange={(event) => {
+                    setSlugEdited(true);
+                    update("slug", slugify(event.target.value));
+                  }}
+                  placeholder="what-is-usememo"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Answer</Label>
+                <Editor
+                  value={form.answer}
+                  onChange={(value) => update("answer", value)}
+                  placeholder="Write the canonical answer in Markdown..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Code example</Label>
+                <Textarea
+                  value={form.codeExample}
+                  onChange={(event) =>
+                    update("codeExample", event.target.value)
+                  }
+                  rows={8}
+                  className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 font-mono shadow-none dark:bg-zinc-900"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Expected output</Label>
+                <Textarea
+                  value={form.expectedOutput}
+                  onChange={(event) =>
+                    update("expectedOutput", event.target.value)
+                  }
+                  rows={4}
+                  className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 font-mono shadow-none dark:bg-zinc-900"
+                />
+              </div>
+            </div>
+          </section>
+          <aside className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+            <div className="space-y-2">
+              <Label>Course</Label>
+              <Select
+                value={form.course}
+                onValueChange={(value) => update("course", value)}
+              >
+                <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900">
+                  <SelectValue placeholder="Select course" />
+                </SelectTrigger>
+                <SelectContent>
+                  {courses.map((course) => (
+                    <SelectItem key={course._id} value={course._id}>
+                      {course.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-zinc-500">
+                This question can be reused only by topics in this course.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Difficulty</Label>
+              <Select
+                value={form.difficulty}
+                onValueChange={(value) => update("difficulty", value)}
+              >
+                <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="easy">Easy</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="hard">Hard</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Question type</Label>
+              <Select
+                value={form.questionType}
+                onValueChange={(value) => update("questionType", value)}
+              >
+                <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="conceptual">Conceptual</SelectItem>
+                  <SelectItem value="coding">Coding</SelectItem>
+                  <SelectItem value="behavioral">Behavioral</SelectItem>
+                  <SelectItem value="scenario">Scenario</SelectItem>
+                  <SelectItem value="debugging">Debugging</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Tags</Label>
+              <Input
+                value={form.tags}
+                onChange={(event) => update("tags", event.target.value)}
+                placeholder="react, hooks, performance"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Follow-up questions</Label>
+              <Textarea
+                value={form.followUps}
+                onChange={(event) => update("followUps", event.target.value)}
+                rows={7}
+                placeholder="One question per line"
+                className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 shadow-none dark:bg-zinc-900"
+              />
+            </div>
+          </aside>
+        </div>
+      )}
+    </main>
+  );
+}

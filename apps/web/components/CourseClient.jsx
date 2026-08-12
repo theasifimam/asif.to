@@ -121,7 +121,7 @@ export default function CourseClient() {
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Link
-              href={`/courses/${activeCourseSlug}/${firstChapterSlug}`}
+              href={`/${activeCourseSlug}/${firstChapterSlug}`}
               className="flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold shadow-lg shadow-blue-500/25 active:scale-95 transition-all"
             >
               <Play className="w-4 h-4 fill-current" />
@@ -227,7 +227,7 @@ export default function CourseClient() {
                 }`}
               >
                 <Link
-                  href={`/courses/${activeCourseSlug}/${ch.slug}`}
+                  href={`/${activeCourseSlug}/${ch.slug}`}
                   className="group flex flex-1 items-start justify-between gap-4 min-w-0"
                 >
                   <div className="flex items-start gap-4 min-w-0">

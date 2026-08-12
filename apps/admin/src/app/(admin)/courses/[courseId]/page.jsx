@@ -1,423 +1,410 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { coursesApi, chaptersApi } from "@/lib/api";
-import Editor from "@/components/Editor";
+import { useCallback, useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import {
+  ArrowDown,
   ArrowLeft,
-  Plus,
-  Pencil,
-  Trash2,
-  Loader2,
-  CheckCircle,
-  XCircle,
+  ArrowUp,
   BookOpen,
-  Clock,
-  Save,
-  X,
-  Sparkles,
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+  Loader2,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { chaptersApi, coursesApi } from "@/lib/api";
 
-export default function CourseEditorPage() {
+const initialPagination = { page: 1, pages: 1, total: 0, limit: 20 };
+
+export default function CourseChaptersPage() {
   const { courseId } = useParams();
-  const router = useRouter();
-
   const [course, setCourse] = useState(null);
   const [chapters, setChapters] = useState([]);
+  const [filters, setFilters] = useState({
+    search: "",
+    status: "all",
+    page: 1,
+    limit: 20,
+  });
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [pagination, setPagination] = useState(initialPagination);
   const [loading, setLoading] = useState(true);
-  const [editCourse, setEditCourse] = useState(false);
-  const [courseForm, setCourseForm] = useState({});
+  const [updating, setUpdating] = useState(null);
+  const [deleteChapter, setDeleteChapter] = useState(null);
 
-  const [saving, setSaving] = useState(false);
-  const [deletingChapter, setDeletingChapter] = useState(null);
+  useEffect(() => {
+    const timer = setTimeout(
+      () => setDebouncedSearch(filters.search.trim()),
+      250,
+    );
+    return () => clearTimeout(timer);
+  }, [filters.search]);
+
+  const orderingView = !debouncedSearch && filters.status === "all";
 
   const load = useCallback(async () => {
     setLoading(true);
-    const res = await coursesApi.getById(courseId);
-    if (res.success) {
-      const data = res.data?.data;
-      setCourse(data);
-      setCourseForm({
-        title: data.title,
-        subtitle: data.subtitle,
-        slug: data.slug || "",
-        techId: data.techId,
-        level: data.level,
-        duration: data.duration,
-        order: data.order,
-        status: data.status,
-        learningOutcomes: (data.learningOutcomes || []).join("\n"),
-        examEnabled: Boolean(data.examEnabled),
-        examSettings: {
-          questionCount: data.examSettings?.questionCount ?? 20,
-          durationMinutes: data.examSettings?.durationMinutes ?? 30,
-          passingPercentage: data.examSettings?.passingPercentage ?? 70,
-          cooldownHours: data.examSettings?.cooldownHours ?? 24,
-        },
-      });
-      setChapters(data.chapters || []);
-    }
+    const chapterParams = orderingView
+      ? undefined
+      : {
+          search: debouncedSearch,
+          status: filters.status,
+          page: filters.page,
+          limit: filters.limit,
+        };
+    const [courseResponse, chapterResponse] = await Promise.all([
+      coursesApi.getById(courseId),
+      chaptersApi.list(courseId, chapterParams),
+    ]);
+
+    if (courseResponse.success) setCourse(courseResponse.data?.data || null);
+    else toast.error(courseResponse.error || "Unable to load course");
+
+    if (chapterResponse.success) {
+      setChapters(chapterResponse.data?.data || []);
+      setPagination(chapterResponse.data?.pagination || initialPagination);
+    } else toast.error(chapterResponse.error || "Unable to load chapters");
+
     setLoading(false);
-  }, [courseId]);
+  }, [
+    courseId,
+    debouncedSearch,
+    filters.limit,
+    filters.page,
+    filters.status,
+    orderingView,
+  ]);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  const handleSaveCourse = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    const updateData = {
-      ...courseForm,
-      learningOutcomes: courseForm.learningOutcomes
-        .split("\n")
-        .map((s) => s.trim())
-        .filter(Boolean),
-    };
-    const res = await coursesApi.update(courseId, updateData);
-    if (res.success) {
-      toast.success("Course updated!");
-      setCourse(res.data?.data);
-      setEditCourse(false);
-    } else {
-      toast.error(res.error || "Failed to update course");
-    }
-    setSaving(false);
-  };
+  const setFilter = (key, value) =>
+    setFilters((current) => ({
+      ...current,
+      [key]: value,
+      page: key === "page" ? value : 1,
+    }));
 
-  const handleDeleteChapter = async (id) => {
-    if (!confirm("Delete this chapter? This cannot be undone.")) return;
-    setDeletingChapter(id);
-    const res = await chaptersApi.delete(id);
-    if (res.success) {
-      toast.success("Chapter deleted.");
-      setChapters((prev) => prev.filter((c) => c._id !== id));
-    } else {
-      toast.error(res.error || "Failed to delete chapter");
-    }
-    setDeletingChapter(null);
-  };
-
-  const handleToggleChapterStatus = async (ch) => {
-    const newStatus = ch.status === "published" ? "draft" : "published";
-    const res = await chaptersApi.update(ch._id, { status: newStatus });
-    if (res.success) {
-      setChapters((prev) =>
-        prev.map((c) => (c._id === ch._id ? { ...c, status: newStatus } : c)),
+  const toggleStatus = async (chapter) => {
+    const status = chapter.status === "published" ? "draft" : "published";
+    setUpdating(chapter._id);
+    const response = await chaptersApi.update(chapter._id, { status });
+    if (response.success) {
+      toast.success(
+        status === "published" ? "Chapter published" : "Chapter moved to draft",
       );
-      toast.success(`Chapter ${newStatus}`);
-    }
+      load();
+    } else toast.error(response.error || "Unable to update chapter status");
+    setUpdating(null);
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-32">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-      </div>
-    );
-  }
+  const moveChapter = async (index, direction) => {
+    if (!orderingView || filters.search.trim()) return;
+
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= chapters.length) return;
+
+    const current = chapters[index];
+    const target = chapters[targetIndex];
+    setUpdating(current._id);
+    const response = await chaptersApi.reorder([
+      { id: current._id, order: target.order },
+      { id: target._id, order: current.order },
+    ]);
+    if (response.success) {
+      toast.success("Chapter order updated");
+      load();
+    } else toast.error(response.error || "Unable to reorder chapters");
+    setUpdating(null);
+  };
+
+  const remove = async () => {
+    if (!deleteChapter) return;
+    setUpdating(deleteChapter._id);
+    const response = await chaptersApi.delete(deleteChapter._id);
+    if (response.success) {
+      toast.success("Chapter deleted");
+      setDeleteChapter(null);
+      load();
+    } else toast.error(response.error || "Unable to delete chapter");
+    setUpdating(null);
+  };
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link
-          href="/courses"
-          className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 transition-colors"
+    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3">
+          <Button variant="outline" size="icon" asChild title="Back to courses">
+            <Link href="/courses">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+          <div className="min-w-0">
+            <h1 className="truncate text-2xl font-bold text-foreground">
+              {course?.title || "Course chapters"}
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {course
+                ? `/courses/${course.slug} · ${pagination.total} chapters`
+                : "Loading course"}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {course?.status === "published" && (
+            <Button variant="outline" asChild>
+              <a
+                href={`https://asif.to/courses/${course.slug}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <ExternalLink className="h-4 w-4" />
+                View course
+              </a>
+            </Button>
+          )}
+          <Button variant="outline" asChild>
+            <Link href={`/courses/${courseId}/edit`}>
+              <Pencil className="h-4 w-4" />
+              Edit course
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href={`/courses/${courseId}/chapters/new`}>
+              <Plus className="h-4 w-4" />
+              New chapter
+            </Link>
+          </Button>
+        </div>
+      </header>
+
+      <section className="grid gap-3 border-y border-zinc-200 py-4 dark:border-zinc-800 md:grid-cols-[minmax(260px,1fr)_200px]">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={filters.search}
+            onChange={(event) => setFilter("search", event.target.value)}
+            className="pl-9"
+            placeholder="Search title, summary, slug, or keyword"
+          />
+        </div>
+        <Select
+          value={filters.status}
+          onValueChange={(value) => setFilter("status", value)}
         >
-          <ArrowLeft className="w-4 h-4" />
-        </Link>
-        <div>
-          <h1 className="text-xl font-black text-foreground">
-            {course?.title}
-          </h1>
-          <p className="text-xs text-muted-foreground">
-            {course?.techId} · {course?.level} · {course?.duration} · <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">/courses/{course?.slug}</span>
-          </p>
-        </div>
-      </div>
-
-      {/* Course Metadata Card */}
-      <div className="p-6 rounded-3xl bg-white dark:bg-zinc-900 shadow-sm space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-extrabold uppercase tracking-widest text-muted-foreground">
-            Course Details
-          </h2>
-          <button
-            onClick={() => setEditCourse(!editCourse)}
-            className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          <SelectTrigger
+            className="w-full"
+            aria-label="Filter chapters by status"
           >
-            {editCourse ? (
-              <X className="w-4 h-4" />
-            ) : (
-              <Pencil className="w-4 h-4" />
-            )}
-          </button>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All statuses</SelectItem>
+            <SelectItem value="published">Published</SelectItem>
+            <SelectItem value="draft">Draft</SelectItem>
+          </SelectContent>
+        </Select>
+      </section>
+
+      <section className="overflow-hidden border border-zinc-200 dark:border-zinc-800">
+        <div className="hidden grid-cols-[70px_minmax(280px,1fr)_110px_110px_210px] gap-4 bg-zinc-50 px-4 py-3 text-xs font-semibold uppercase text-muted-foreground dark:bg-zinc-900 md:grid">
+          <span>Order</span>
+          <span>Chapter</span>
+          <span>Views</span>
+          <span>Status</span>
+          <span className="text-right">Actions</span>
         </div>
 
-        {editCourse ? (
-          <form onSubmit={handleSaveCourse} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground">
-                Title
-              </label>
-              <input
-                required
-                className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none focus:ring-2 focus:ring-blue-500"
-                value={courseForm.title || ""}
-                onChange={(e) =>
-                  setCourseForm({ ...courseForm, title: e.target.value })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground">
-                URL Slug (SEO)
-              </label>
-              <input
-                required
-                className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-mono text-blue-600 dark:text-blue-400 font-bold border-0 outline-none focus:ring-2 focus:ring-blue-500"
-                value={courseForm.slug || ""}
-                onChange={(e) =>
-                  setCourseForm({ ...courseForm, slug: e.target.value })
-                }
-                placeholder="e.g. javascript-complete-guide"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground">
-                Subtitle
-              </label>
-              <textarea
-                rows={2}
-                className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none resize-none"
-                value={courseForm.subtitle || ""}
-                onChange={(e) =>
-                  setCourseForm({ ...courseForm, subtitle: e.target.value })
-                }
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-muted-foreground">
-                  Duration
-                </label>
-                <input
-                  className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none"
-                  value={courseForm.duration || ""}
-                  onChange={(e) =>
-                    setCourseForm({ ...courseForm, duration: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-muted-foreground">
-                  Status
-                </label>
-                <select
-                  className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none"
-                  value={courseForm.status}
-                  onChange={(e) =>
-                    setCourseForm({ ...courseForm, status: e.target.value })
-                  }
-                >
-                  <option value="published">Published</option>
-                  <option value="draft">Draft</option>
-                </select>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-muted-foreground">
-                Learning Outcomes (one per line)
-              </label>
-              <textarea
-                rows={4}
-                className="w-full px-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-sm font-medium border-0 outline-none resize-none"
-                value={courseForm.learningOutcomes || ""}
-                onChange={(e) =>
-                  setCourseForm({
-                    ...courseForm,
-                    learningOutcomes: e.target.value,
-                  })
-                }
-                placeholder="Write JSX and build reusable components&#10;Manage state with useState..."
-              />
-            </div>
-            <div className="space-y-4 rounded-2xl bg-blue-500/5 p-4 border border-blue-500/10">
-              <label className="flex items-center gap-2 text-sm font-bold text-foreground">
-                <input
-                  type="checkbox"
-                  checked={Boolean(courseForm.examEnabled)}
-                  onChange={(e) =>
-                    setCourseForm({
-                      ...courseForm,
-                      examEnabled: e.target.checked,
-                    })
-                  }
-                  className="h-4 w-4 accent-blue-600"
-                />
-                Enable final exam for this course
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {[
-                  ["questionCount", "Questions", 1, 100],
-                  ["durationMinutes", "Minutes", 1, 300],
-                  ["passingPercentage", "Pass %", 1, 100],
-                  ["cooldownHours", "Cooldown h", 0, 720],
-                ].map(([key, label, min, max]) => (
-                  <label
-                    key={key}
-                    className="space-y-1 text-xs font-bold text-muted-foreground"
-                  >
-                    {label}
-                    <input
-                      type="number"
-                      min={min}
-                      max={max}
-                      required={Boolean(courseForm.examEnabled)}
-                      className="w-full px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-sm text-foreground border-0 outline-none"
-                      value={courseForm.examSettings?.[key] ?? ""}
-                      onChange={(e) =>
-                        setCourseForm({
-                          ...courseForm,
-                          examSettings: {
-                            ...courseForm.examSettings,
-                            [key]: Number(e.target.value),
-                          },
-                        })
-                      }
-                    />
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div className="flex gap-3 pt-2">
-              <button
-                type="submit"
-                disabled={saving}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition-all"
-              >
-                {saving ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4" />
-                )}
-                Save Changes
-              </button>
-              <button
-                type="button"
-                onClick={() => setEditCourse(false)}
-                className="px-5 py-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground text-sm font-bold hover:bg-zinc-200 transition-all"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        ) : (
-          <div className="space-y-1 text-sm text-foreground">
-            <p className="text-muted-foreground">{course?.subtitle}</p>
-            <div className="flex gap-3 text-xs text-muted-foreground font-medium pt-2">
-              <span className="flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                {course?.duration}
-              </span>
-              <span
-                className={`font-bold ${
-                  course?.status === "published"
-                    ? "text-emerald-600"
-                    : "text-amber-500"
-                }`}
-              >
-                {course?.status}
-              </span>
-            </div>
+        {loading ? (
+          <div className="flex min-h-64 items-center justify-center">
+            <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
           </div>
-        )}
-      </div>
-
-      {/* Chapters Section */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-black text-foreground flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-blue-500" />
-            Chapters ({chapters.length})
-          </h2>
-          <Link
-            href={`/courses/${courseId}/chapters/new`}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-all shadow-sm shadow-blue-500/25"
-          >
-            <Plus className="w-4 h-4" />
-            Add Chapter
-          </Link>
-        </div>
-
-        {chapters.length === 0 ? (
-          <div className="text-center py-10 text-muted-foreground bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80">
-            <p className="text-sm">No chapters yet. Add your first chapter!</p>
+        ) : chapters.length === 0 ? (
+          <div className="flex min-h-64 flex-col items-center justify-center gap-2 text-center text-muted-foreground">
+            <BookOpen className="h-9 w-9 opacity-40" />
+            <p className="text-sm font-medium">
+              No chapters match these filters.
+            </p>
           </div>
         ) : (
-          <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/80">
-            {chapters.map((ch, idx) => (
+          <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
+            {chapters.map((chapter, index) => (
               <div
-                key={ch._id}
-                className={`flex items-center justify-between gap-3 p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors ${
-                  idx === 0 ? "rounded-t-[2.5rem]" : ""
-                } ${idx === chapters.length - 1 ? "rounded-b-[2.5rem]" : ""}`}
+                key={chapter._id}
+                className="grid gap-4 px-4 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/60 md:grid-cols-[70px_minmax(280px,1fr)_110px_110px_210px] md:items-center"
               >
-                <div className="flex items-center gap-3">
-                  <span className="shrink-0 w-7 h-7 rounded-xl bg-blue-600 text-white text-xs font-black flex items-center justify-center">
-                    {idx + 1}
-                  </span>
-                  <div>
-                    <p className="text-sm font-bold text-foreground line-clamp-1">
-                      {ch.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground line-clamp-1">
-                      {ch.summary}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={() => handleToggleChapterStatus(ch)}
-                    className={`text-xs font-bold ${
-                      ch.status === "published"
-                        ? "text-emerald-600"
-                        : "text-amber-500"
-                    }`}
-                  >
-                    {ch.status === "published" ? (
-                      <CheckCircle className="w-4 h-4" />
-                    ) : (
-                      <XCircle className="w-4 h-4" />
-                    )}
-                  </button>
+                <span className="text-sm font-semibold text-muted-foreground">
+                  {chapter.order}
+                </span>
+                <div className="min-w-0">
                   <Link
-                    href={`/courses/${courseId}/chapters/${ch._id}`}
-                    className="p-2 rounded-full hover:bg-blue-50 dark:hover:bg-blue-950/30 text-blue-500 transition-colors inline-flex items-center justify-center"
+                    href={`/courses/${courseId}/chapters/${chapter._id}`}
+                    className="block truncate text-sm font-semibold text-foreground hover:text-blue-600"
                   >
-                    <Pencil className="w-4 h-4" />
+                    {chapter.title}
                   </Link>
-                  <button
-                    onClick={() => handleDeleteChapter(ch._id)}
-                    disabled={deletingChapter === ch._id}
-                    className="p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-950/30 text-zinc-400 hover:text-red-500 transition-colors"
+                  <p className="mt-1 truncate text-xs text-muted-foreground">
+                    /{chapter.slug}
+                  </p>
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  {chapter.viewCount || 0}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => toggleStatus(chapter)}
+                  disabled={updating === chapter._id}
+                  className={`w-fit text-xs font-semibold capitalize ${
+                    chapter.status === "published"
+                      ? "text-emerald-600"
+                      : "text-amber-600"
+                  }`}
+                  title="Toggle publishing status"
+                >
+                  {updating === chapter._id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    chapter.status
+                  )}
+                </button>
+                <div className="flex items-center justify-end gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    title={
+                      orderingView && !filters.search.trim()
+                        ? "Move chapter up"
+                        : "Clear filters to reorder chapters"
+                    }
+                    disabled={
+                      !orderingView ||
+                      Boolean(filters.search.trim()) ||
+                      index === 0 ||
+                      updating === chapter._id
+                    }
+                    onClick={() => moveChapter(index, -1)}
                   >
-                    {deletingChapter === ch._id ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="w-4 h-4" />
+                    <ArrowUp className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    title={
+                      orderingView && !filters.search.trim()
+                        ? "Move chapter down"
+                        : "Clear filters to reorder chapters"
+                    }
+                    disabled={
+                      !orderingView ||
+                      Boolean(filters.search.trim()) ||
+                      index === chapters.length - 1 ||
+                      updating === chapter._id
+                    }
+                    onClick={() => moveChapter(index, 1)}
+                  >
+                    <ArrowDown className="h-4 w-4" />
+                  </Button>
+                  {course?.status === "published" &&
+                    chapter.status === "published" && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        asChild
+                        title="View public chapter"
+                      >
+                        <a
+                          href={`https://asif.to/${course.slug}/${chapter.slug}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </Button>
                     )}
-                  </button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    asChild
+                    title="Edit chapter"
+                  >
+                    <Link href={`/courses/${courseId}/chapters/${chapter._id}`}>
+                      <Pencil className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    title="Delete chapter"
+                    className="text-red-600 hover:text-red-700"
+                    onClick={() => setDeleteChapter(chapter)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </section>
+
+      <footer className="flex flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <span>
+          {pagination.total} chapter{pagination.total === 1 ? "" : "s"}
+        </span>
+        {!orderingView && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              title="Previous page"
+              disabled={loading || pagination.page <= 1}
+              onClick={() => setFilter("page", pagination.page - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="min-w-24 text-center text-xs font-medium">
+              Page {pagination.page} of {pagination.pages}
+            </span>
+            <Button
+              variant="outline"
+              size="icon"
+              title="Next page"
+              disabled={loading || pagination.page >= pagination.pages}
+              onClick={() => setFilter("page", pagination.page + 1)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </footer>
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteChapter)}
+        onClose={() => setDeleteChapter(null)}
+        onConfirm={remove}
+        title="Delete chapter"
+        description={`Delete ${deleteChapter?.title || "this chapter"}? This cannot be undone.`}
+        confirmText="Delete"
+        variant="destructive"
+        loading={updating === deleteChapter?._id}
+      />
     </div>
   );
 }
