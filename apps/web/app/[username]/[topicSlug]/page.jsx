@@ -5,6 +5,7 @@ import CourseTopicPage, {
 import { getChapterData, getPublicTopic } from "@/lib/publicContent";
 import { absoluteUrl, assetUrl, getSiteUrl, jsonLd } from "@/lib/seo";
 import InterviewQuestionsGuide, { buildInterviewGuideMetadata } from "@/components/interview/InterviewQuestionsGuide";
+import { authorIdentity, buildPersonSchema } from "@/lib/authorIdentity";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +80,7 @@ function chapterStructuredData(data, courseSlug, chapterSlug) {
   return {
     "@context": "https://schema.org",
     "@graph": [
+      buildPersonSchema(),
       {
         "@type": "LearningResource",
         "@id": `${canonical}#lesson`,
@@ -89,6 +91,7 @@ function chapterStructuredData(data, courseSlug, chapterSlug) {
         image: assetUrl(course.thumbnail),
         datePublished: chapter.createdAt || undefined,
         dateModified: chapter.updatedAt || undefined,
+        author: { "@id": `${authorIdentity.url}#person` },
         educationalLevel: course.level || undefined,
         learningResourceType: "Lesson",
         isPartOf: {

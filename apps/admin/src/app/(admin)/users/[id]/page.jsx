@@ -2,34 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import {
-  ChevronLeft,
-  Mail,
-  Calendar,
-  FileText,
-  FileEdit,
-  Eye,
-  Shield,
-  User as UserIcon,
-  Ban,
-  CheckCircle2,
-  Key,
-  Trash2,
-  MapPin,
-  Globe,
-  ArrowRight,
-  Settings,
-  Edit3,
-  Phone,
-  Twitter,
-  Linkedin,
-  Github,
-  Instagram,
-  Lock,
-} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { format } from "date-fns";
 
 import {
   useGetUserByIdQuery,
@@ -44,73 +18,21 @@ import { PasswordResetModal } from "../PasswordResetModal";
 import { articlesApi } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  Badge,
-  Button,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Skeleton,
-} from "@/components/ui";
+  ProfileTopNav,
+  ProfileHeroHeader,
+  ProfileStatsGrid,
+  ProfileBioSection,
+  ProfileArticlesSection,
+  ProfileClearanceSidebar,
+  ProfileSkeleton,
+  ProfileNotFound,
+  ProfileConfirmDialog,
+  ROLE_CONFIG,
+  STATUS_CONFIG,
+  getInitials,
+} from "./components";
 
-const ROLE_CONFIG = {
-  admin: {
-    label: "Administrator",
-    color: "text-rose-500",
-    bg: "bg-rose-500/5",
-    ring: "ring-rose-500/20",
-    icon: Shield,
-  },
-  editor: {
-    label: "Editor",
-    color: "text-blue-500",
-    bg: "bg-blue-500/5",
-    ring: "ring-blue-500/20",
-    icon: FileEdit,
-  },
-  author: {
-    label: "Author",
-    color: "text-emerald-500",
-    bg: "bg-emerald-500/5",
-    ring: "ring-emerald-500/20",
-    icon: FileText,
-  },
-  reader: {
-    label: "Reader",
-    color: "text-zinc-500",
-    bg: "bg-zinc-500/5",
-    ring: "ring-zinc-500/20",
-    icon: UserIcon,
-  },
-};
-
-const STATUS_CONFIG = {
-  active: {
-    label: "Active",
-    dot: "bg-emerald-500",
-    text: "text-emerald-500",
-    bg: "bg-emerald-500/5",
-  },
-  suspended: {
-    label: "Suspended",
-    dot: "bg-rose-500",
-    text: "text-rose-500",
-    bg: "bg-rose-500/5",
-  },
-  pending: {
-    label: "Pending",
-    dot: "bg-amber-500",
-    text: "text-amber-500",
-    bg: "bg-amber-500/5",
-  },
-};
-
-const STORAGE_URL =
-  process.env.NEXT_PUBLIC_STORAGE_URL;
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL;
 
 export default function UserProfilePage() {
   const { id } = useParams();
@@ -251,17 +173,8 @@ export default function UserProfilePage() {
     resetLoading;
   const loading = userLoading || articlesLoading;
 
-  const getInitials = (name) => {
-    if (!name) return "?";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
-  };
-
-  if (loading) return <LoadingSkeleton />;
-  if (!user) return <UserNotFound router={router} />;
+  if (loading) return <ProfileSkeleton />;
+  if (!user) return <ProfileNotFound router={router} />;
 
   const roleConf = ROLE_CONFIG[user.role] || ROLE_CONFIG.reader;
   const statusConf = STATUS_CONFIG[user.status] || STATUS_CONFIG.active;
@@ -275,399 +188,51 @@ export default function UserProfilePage() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-[#fafafa] dark:bg-black text-zinc-900 dark:text-zinc-400 font-sans selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black"
+      className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-300 font-sans selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black transition-colors duration-300"
     >
-      {/* Top Nav */}
-      <div className="sticky top-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-zinc-100 dark:border-zinc-900 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={() => router.push("/users")}
-            className="group flex items-center gap-2 -ml-3 hover:bg-transparent text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all font-medium"
-          >
-            <ChevronLeft
-              size={18}
-              className="transition-transform group-hover:-translate-x-1"
-            />
-            <span>All Personnel</span>
-          </Button>
+      {/* Top Navigation */}
+      <ProfileTopNav
+        isOwnProfile={isOwnProfile}
+        statusConf={statusConf}
+        setIsEditOpen={setIsEditOpen}
+        router={router}
+      />
 
-          <div className="flex items-center gap-4">
-            {isOwnProfile && (
-              <span className="bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-emerald-500/20">
-                Your Profile
-              </span>
-            )}
-
-            <div
-              className={`flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-100 dark:border-zinc-800 ${statusConf.bg}`}
-            >
-              <div className={`w-1.5 h-1.5 rounded-full ${statusConf.dot}`} />
-              <span
-                className={`text-[11px] font-bold uppercase tracking-wider ${statusConf.text}`}
-              >
-                {statusConf.label}
-              </span>
-            </div>
-            <Button
-              onClick={() => setIsEditOpen(true)}
-              className="h-9 px-6 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all shadow-xl shadow-zinc-900/10 dark:shadow-none"
-            >
-              <Edit3 size={14} />
-              {isOwnProfile ? "Edit My Profile" : "Edit Profile"}
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <main className="max-w-7xl mx-auto p-6 md:p-10 space-y-12">
-        {/* Hero Section */}
-        <header className="flex flex-col md:flex-row items-center md:items-end gap-8 pb-4">
-          <div className="relative group">
-            <div className="absolute inset-0 bg-linear-to-tr from-zinc-200 to-transparent dark:from-zinc-800 rounded-[2.5rem] -rotate-3 group-hover:rotate-0 transition-transform duration-500" />
-            <Avatar className="w-44 h-44 rounded-[2.5rem] border-8 border-white dark:border-zinc-900 shadow-2xl relative z-10 transition-transform duration-500 group-hover:scale-[1.02] overflow-hidden">
-              <AvatarImage src={avatarUrl || ""} className="object-cover" />
-              <AvatarFallback className="text-4xl font-bold bg-zinc-50 dark:bg-zinc-800 text-zinc-400">
-                {getInitials(user.fullName)}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-
-          <div className="flex-1 text-center md:text-left space-y-3 pb-2">
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-              <h1 className="text-4xl md:text-5xl font-black tracking-tight dark:text-white leading-none whitespace-nowrap">
-                {user.fullName}
-              </h1>
-              <Badge
-                className={`${roleConf.bg} ${roleConf.color} ${roleConf.ring} ring-1 border-none rounded-full px-4 py-1.5 text-xs font-black uppercase tracking-widest`}
-              >
-                {roleConf.label}
-              </Badge>
-            </div>
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-6 gap-y-2 text-zinc-500 font-medium">
-              <div className="flex items-center gap-2 font-bold">
-                <Mail size={16} /> {user.email}
-              </div>
-              {user.mNumber && (
-                <div className="flex items-center gap-2 font-bold text-zinc-600 dark:text-zinc-400">
-                  <Phone size={16} /> {user.mNumber}
-                </div>
-              )}
-              <div className="flex items-center gap-2 uppercase text-[10px] tracking-widest">
-                <MapPin size={16} /> {user.location || "Remote Node"}
-              </div>
-              <div className="flex items-center gap-2">
-                <Globe size={16} className="text-zinc-300" />{" "}
-                <span className="opacity-60">@{user.username}</span>
-              </div>
-            </div>
-
-            {/* Social Links Row */}
-            {user.socials && Object.values(user.socials).some((link) => link) && (
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2">
-                {user.socials.twitter && (
-                  <a
-                    href={user.socials.twitter.startsWith("http") ? user.socials.twitter : `https://twitter.com/${user.socials.twitter}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 transition-colors"
-                  >
-                    <Twitter size={14} className="text-sky-400" />
-                    <span>Twitter</span>
-                  </a>
-                )}
-                {user.socials.linkedin && (
-                  <a
-                    href={user.socials.linkedin.startsWith("http") ? user.socials.linkedin : `https://linkedin.com/in/${user.socials.linkedin}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 transition-colors"
-                  >
-                    <Linkedin size={14} className="text-blue-500" />
-                    <span>LinkedIn</span>
-                  </a>
-                )}
-                {user.socials.website && (
-                  <a
-                    href={user.socials.website.startsWith("http") ? user.socials.website : `https://${user.socials.website}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 transition-colors"
-                  >
-                    <Globe size={14} className="text-emerald-500" />
-                    <span>Website</span>
-                  </a>
-                )}
-                {user.socials.github && (
-                  <a
-                    href={user.socials.github.startsWith("http") ? user.socials.github : `https://github.com/${user.socials.github}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 transition-colors"
-                  >
-                    <Github size={14} />
-                    <span>GitHub</span>
-                  </a>
-                )}
-                {user.socials.instagram && (
-                  <a
-                    href={user.socials.instagram.startsWith("http") ? user.socials.instagram : `https://instagram.com/${user.socials.instagram}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 transition-colors"
-                  >
-                    <Instagram size={14} className="text-pink-500" />
-                    <span>Instagram</span>
-                  </a>
-                )}
-              </div>
-            )}
-          </div>
-        </header>
+      <main className="max-w-7xl mx-auto p-4 sm:p-6 md:p-10 space-y-10">
+        {/* Profile Hero Header Card */}
+        <ProfileHeroHeader
+          user={user}
+          avatarUrl={avatarUrl}
+          roleConf={roleConf}
+          statusConf={statusConf}
+          getInitials={getInitials}
+        />
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <StatBox
-            label="Total Articles"
-            value={stats.articles}
-            icon={FileText}
-          />
-          <StatBox label="Active Drafts" value={stats.drafts} icon={FileEdit} />
-          <StatBox
-            label="Cumulative Views"
-            value={stats.totalViews}
-            icon={Eye}
-          />
-        </div>
+        <ProfileStatsGrid stats={stats} />
 
         {/* Content Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          {/* Left: Bio & Articles */}
-          <div className="lg:col-span-8 space-y-10">
-            <section className="space-y-6">
-              <SectionHeader title="Biography & Narrative" />
-              <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-4xl p-10 shadow-sm relative overflow-hidden group min-h-50">
-                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                  <UserIcon size={120} />
-                </div>
-                <p className="text-lg md:text-xl text-zinc-700 dark:text-zinc-300 leading-relaxed font-medium relative z-10">
-                  {user.bio ||
-                    "No biography provided for this personnel. Professional narrative remains empty."}
-                </p>
-                {user.expertise && user.expertise.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-10 relative z-10">
-                    {user.expertise.map((exp) => (
-                      <span
-                        key={exp}
-                        className="px-4 py-2 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-[11px] font-black uppercase tracking-wider text-zinc-500 border border-zinc-100 dark:border-zinc-800"
-                      >
-                        {exp}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </section>
-
-            <section className="space-y-6">
-              <div className="flex items-center justify-between">
-                <SectionHeader title="Published Dispatches" />
-              </div>
-              <div className="grid grid-cols-1 gap-4">
-                {recentArticles.length > 0 ? (
-                  recentArticles.map((article, i) => (
-                    <motion.div
-                      key={article._id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      className="group bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-3xl p-5 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all cursor-pointer flex items-center gap-6 shadow-sm hover:translate-x-1"
-                    >
-                      <div className="w-20 h-20 rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 shrink-0 shadow-inner">
-                        <img
-                          src={article.image}
-                          alt=""
-                          className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0 space-y-1">
-                        <h4 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 tracking-tight group-hover:text-black dark:group-hover:text-white transition-colors truncate">
-                          {article.title}
-                        </h4>
-                        <div className="flex items-center gap-4 text-xs font-bold text-zinc-400 uppercase tracking-widest">
-                          <span>
-                            {format(new Date(article.createdAt), "MMM d, yyyy")}
-                          </span>
-                          <span className="w-1.5 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800" />
-                          <span className="flex items-center gap-1.5">
-                            <Eye size={14} />{" "}
-                            {(article.readCount || 0).toLocaleString()}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center bg-zinc-50 dark:bg-zinc-800 group-hover:bg-zinc-900 group-hover:text-white transition-all">
-                        <ArrowRight size={18} />
-                      </div>
-                    </motion.div>
-                  ))
-                ) : (
-                  <div className="bg-white dark:bg-zinc-900 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl py-16 text-center text-zinc-400 font-bold uppercase tracking-[0.2em] text-[11px]">
-                    No published articles found
-                  </div>
-                )}
-              </div>
-            </section>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column: Bio & Articles */}
+          <div className="lg:col-span-8 space-y-8">
+            <ProfileBioSection user={user} />
+            <ProfileArticlesSection recentArticles={recentArticles} />
           </div>
 
           {/* Right Column: Clearance & Actions */}
-          <aside className="lg:col-span-4 space-y-10">
-            <section className="space-y-6">
-              <SectionHeader title="System Clearance" />
-              <div className="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[2rem] p-8 space-y-8 shadow-sm">
-                <div className="space-y-4">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                    Clearance Level
-                  </label>
-                  <Select
-                    disabled={isOwnProfile}
-                    value={user.role}
-                    onValueChange={(val) =>
-                      setConfirmAction({
-                        type: "role",
-                        isOpen: true,
-                        title: "Authorize Level Shift?",
-                        description: `Elevate or reduce user clearance to '${val}'?`,
-                        variant: "warning",
-                        data: { role: val },
-                      })
-                    }
-                  >
-                    <SelectTrigger className="h-14 rounded-2xl bg-zinc-50/50 dark:bg-zinc-950 border-zinc-100 dark:border-zinc-800 font-bold text-sm focus:ring-0">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-2xl border-zinc-200 dark:border-zinc-800">
-                      <SelectItem value="reader">Reader Only</SelectItem>
-                      <SelectItem value="author">Contributing Author</SelectItem>
-                      <SelectItem value="editor">Editor-in-Chief</SelectItem>
-                      <SelectItem value="admin">System Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {isOwnProfile && (
-                    <p className="text-[10px] font-bold text-zinc-400 flex items-center gap-1 mt-1">
-                      <Lock size={12} /> You cannot change your own clearance level.
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                    Security Credentials
-                  </label>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsPwOpen(true)}
-                    className="w-full h-14 rounded-2xl border-zinc-100 dark:border-zinc-800 gap-3 font-black uppercase tracking-widest text-[10px] hover:bg-zinc-50 dark:hover:bg-zinc-950 bg-white dark:bg-transparent shadow-sm transition-all"
-                  >
-                    <Key size={16} />
-                    {isOwnProfile ? "Change My Password" : "Rotate Password Cipher"}
-                  </Button>
-                </div>
-
-                <div className="space-y-4">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                    Account Lifecycle
-                  </label>
-                  <div className="p-4 rounded-2xl bg-zinc-50/50 dark:bg-zinc-950/50 border border-zinc-100 dark:border-zinc-800 space-y-3">
-                    <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
-                      <span className="text-zinc-400">Joined</span>
-                      <span className="text-zinc-600 dark:text-zinc-300">
-                        {user.createdAt
-                          ? format(new Date(user.createdAt), "MMM d, yyyy")
-                          : "—"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
-                      <span className="text-zinc-400">Last Login</span>
-                      <span className="text-zinc-600 dark:text-zinc-300">
-                        {user.lastLogin
-                          ? format(new Date(user.lastLogin), "MMM d, yyyy")
-                          : "Null"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* Danger Zone */}
-            <section className="space-y-6">
-              <SectionHeader title="Account Security Controls" />
-              <div className="bg-rose-50/30 dark:bg-rose-950/10 border border-rose-100/50 dark:border-rose-900/20 rounded-[2rem] p-8 space-y-4">
-                {isOwnProfile ? (
-                  <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900 text-center text-xs font-bold text-zinc-500">
-                    Self-Account Protection Active. Account suspension & deletion are restricted.
-                  </div>
-                ) : (
-                  <>
-                    <Button
-                      variant={user.status === "active" ? "destructive" : "default"}
-                      onClick={() =>
-                        setConfirmAction({
-                          type: "suspend",
-                          isOpen: true,
-                          title:
-                            user.status === "active"
-                              ? "Suspend System Access?"
-                              : "Restore System Access?",
-                          description:
-                            user.status === "active"
-                              ? "User will be blocked from all nodes."
-                              : "Re-authorizing user access.",
-                          variant:
-                            user.status === "active" ? "destructive" : "default",
-                        })
-                      }
-                      className={`w-full h-14 rounded-2xl gap-3 font-black uppercase tracking-widest text-[10px] ${user.status === "active" ? "bg-rose-500 hover:bg-rose-600 shadow-xl shadow-rose-500/20 border-none" : ""}`}
-                    >
-                      {user.status === "active" ? (
-                        <>
-                          <Ban size={16} /> Suspend Operations
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle2 size={16} /> Activate Protocol
-                        </>
-                      )}
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      onClick={() =>
-                        setConfirmAction({
-                          type: "delete",
-                          isOpen: true,
-                          title: "Delete User Permanently?",
-                          description:
-                            "This will purge all user metadata. There is no recovery sequence.",
-                          variant: "destructive",
-                        })
-                      }
-                      className="w-full h-14 rounded-2xl gap-3 font-black uppercase tracking-widest text-[10px] text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20"
-                    >
-                      <Trash2 size={16} />
-                      Purge Data Record
-                    </Button>
-                  </>
-                )}
-              </div>
-            </section>
-          </aside>
+          <ProfileClearanceSidebar
+            user={user}
+            isOwnProfile={isOwnProfile}
+            setConfirmAction={setConfirmAction}
+            setIsPwOpen={setIsPwOpen}
+          />
         </div>
       </main>
 
+      {/* Confirmation Dialog */}
       <AnimatePresence>
         {confirmAction && (
-          <ConfirmDialog
+          <ProfileConfirmDialog
             isOpen={confirmAction.isOpen}
             onClose={() => setConfirmAction(null)}
             onConfirm={handleAction}
@@ -697,110 +262,5 @@ export default function UserProfilePage() {
         submitting={isActionLoading}
       />
     </motion.div>
-  );
-}
-
-function SectionHeader({ title }) {
-  return (
-    <div className="flex items-center gap-4">
-      <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 whitespace-nowrap">
-        {title}
-      </h2>
-      <div className="h-[1px] w-full bg-zinc-100 dark:bg-zinc-900" />
-    </div>
-  );
-}
-
-function StatBox({ label, value, icon: Icon }) {
-  return (
-    <div className="relative bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-[2rem] p-8 shadow-sm group hover:border-zinc-300 dark:hover:border-zinc-700 transition-all flex items-center justify-between overflow-hidden">
-      <div className="space-y-4 flex-1">
-        <div className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:bg-zinc-900 group-hover:text-white transition-all">
-          <Icon size={20} />
-        </div>
-        <div>
-          <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-            {label}
-          </h3>
-          <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-3xl font-black font-outfit dark:text-white">
-              {value.toLocaleString()}
-            </span>
-          </div>
-        </div>
-      </div>
-      <div className="absolute -bottom-2 -right-2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
-        <Icon size={120} />
-      </div>
-    </div>
-  );
-}
-
-function LoadingSkeleton() {
-  return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-black p-10 animate-pulse">
-      <div className="max-w-7xl mx-auto space-y-12">
-        <div className="flex justify-between items-center">
-          <Skeleton className="h-6 w-32 rounded-full" />
-          <Skeleton className="h-8 w-24 rounded-full" />
-        </div>
-        <div className="flex items-end gap-8">
-          <Skeleton className="w-44 h-44 rounded-[2.5rem]" />
-          <div className="space-y-4 flex-1">
-            <Skeleton className="h-12 w-1/3 rounded-xl" />
-            <Skeleton className="h-4 w-1/4 rounded-lg" />
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-6">
-          <Skeleton className="h-32 rounded-[2rem]" />
-          <Skeleton className="h-32 rounded-[2rem]" />
-          <Skeleton className="h-32 rounded-[2rem]" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function UserNotFound({ router }) {
-  return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-black flex flex-col items-center justify-center gap-6 p-6">
-      <div className="text-center space-y-2">
-        <h2 className="text-2xl font-black font-outfit uppercase">User Not Found</h2>
-        <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider">The requested personnel profile could not be located in the database.</p>
-      </div>
-      <Button
-        onClick={() => router.push("/users")}
-        className="px-8 h-12 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 rounded-full font-black uppercase text-xs tracking-widest"
-      >
-        Return to User Directory
-      </Button>
-    </div>
-  );
-}
-
-function ConfirmDialog({ isOpen, onClose, onConfirm, title, description, variant, loading, confirmText }) {
-  if (!isOpen) return null;
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-[2rem] p-8 max-w-md w-full space-y-6 shadow-2xl">
-        <div className="space-y-2">
-          <h3 className="text-xl font-black font-outfit uppercase tracking-tight">{title}</h3>
-          <p className="text-xs text-zinc-500 font-medium leading-relaxed">{description}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" onClick={onClose} disabled={loading} className="flex-1 h-12 rounded-full font-black text-xs uppercase tracking-widest text-zinc-400">
-            Cancel
-          </Button>
-          <Button
-            onClick={onConfirm}
-            disabled={loading}
-            variant={variant === "destructive" ? "destructive" : "default"}
-            className="flex-1 h-12 rounded-full font-black text-xs uppercase tracking-widest"
-          >
-            {confirmText || "Confirm"}
-          </Button>
-        </div>
-      </div>
-    </div>
   );
 }

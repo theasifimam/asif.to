@@ -16,6 +16,8 @@ import courseRoutes from "./routes/course.routes.js";
 import cheatsheetRoutes from "./routes/cheatsheet.routes.js";
 import quizRoutes from "./routes/quiz.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
+import kanbanRoutes from "./routes/kanban.routes.js";
+import analyticsRoutes from "./routes/analytics.routes.js";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -78,6 +80,8 @@ app.use("/api/v1/chapters", (req, res, next) => {
 app.use("/api/v1/cheatsheets", cheatsheetRoutes);
 app.use("/api/v1/quiz", quizRoutes);
 app.use("/api/v1/contact", contactRoutes);
+app.use("/api/v1/kanban", kanbanRoutes);
+app.use("/api/v1/analytics", analyticsRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {

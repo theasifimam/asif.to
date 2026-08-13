@@ -38,7 +38,7 @@ export function AdminPageHeader({
             {eyebrow}
           </p>
         )}
-        <h1 className="mt-2 break-words text-2xl font-black tracking-tight text-zinc-950 dark:text-white sm:text-3xl">
+        <h1 className="mt-2 wrap-break-word text-2xl font-black tracking-tight text-zinc-950 dark:text-white sm:text-3xl">
           {title}
         </h1>
         {description && (
@@ -88,14 +88,17 @@ export function AdminSearch({
   );
 }
 
-export function AdminContent({ children, className }) {
+export function AdminContent({
+  children,
+  className,
+  plain = false,
+  variant = "default",
+}) {
+  if (plain || variant === "plain") {
+    return <div className={cn("min-w-0", className)}>{children}</div>;
+  }
   return (
-    <section
-      className={cn(
-        "min-w-0 overflow-hidden rounded-4xl border border-zinc-200/60 bg-white px-3 py-4 dark:border-zinc-800/60 dark:bg-zinc-950 sm:p-5",
-        className,
-      )}
-    >
+    <section className={cn("min-w-0 overflow-hidden rounded-4xl", className)}>
       {children}
     </section>
   );

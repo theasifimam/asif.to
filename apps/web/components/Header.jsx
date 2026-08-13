@@ -152,7 +152,6 @@ export default function Header() {
                     alt="asif.to logo"
                     className="w-8 h-8 rounded-xl object-contain shadow-sm group-hover:scale-105 transition-transform"
                   />
-                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-blue-600 rounded-full border-2 border-white dark:border-zinc-900" />
                 </div>
                 <div className="flex flex-col">
                   <span className="font-outfit font-black text-lg sm:text-xl tracking-tight text-foreground leading-none">
@@ -303,44 +302,38 @@ export default function Header() {
             >
               Quiz
             </Link>
-            </nav>
+          </nav>
 
-
-          {/* User Profile & Actions */}
-          <div className="hidden md:flex items-center gap-2">
-            {!isInitialized ? (
-              <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
-            ) : isAuthenticated && user ? (
-              <Link
-                href={`/@${user.username}`}
-                className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-bold text-foreground transition-all active:scale-95 shadow-sm"
-              >
-                <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[11px] flex items-center justify-center font-black shadow-sm">
-                  {user.fullName?.[0]?.toUpperCase() || "U"}
-                </span>
-                <span>{user.fullName.split(" ")[0]}</span>
-              </Link>
-            ) : (
-              <button
-                onClick={() => {
-                  setAuthTab("signin");
-                  setIsAuthOpen(true);
-                }}
-                className="px-4 py-1.5 rounded-full bg-blue-600 text-white text-xs font-bold shadow-md shadow-blue-500/20 active:scale-95 transition-all"
-              >
-                Sign In
-              </button>
-            )}
+          {/* User Profile & Actions (Theme toggle visible on mobile, profile on desktop) */}
+          <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
+              {!isInitialized ? (
+                <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
+              ) : isAuthenticated && user ? (
+                <Link
+                  href={`/@${user.username}`}
+                  className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-bold text-foreground transition-all active:scale-95 shadow-sm"
+                >
+                  <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[11px] flex items-center justify-center font-black shadow-sm">
+                    {user.fullName?.[0]?.toUpperCase() || "U"}
+                  </span>
+                  <span>{user.fullName.split(" ")[0]}</span>
+                </Link>
+              ) : (
+                <button
+                  onClick={() => {
+                    setAuthTab("signin");
+                    setIsAuthOpen(true);
+                  }}
+                  className="px-4 py-1.5 rounded-full bg-blue-600 text-white text-xs font-bold shadow-md shadow-blue-500/20 active:scale-95 transition-all"
+                >
+                  Sign In
+                </button>
+              )}
+            </div>
 
             <ThemeToggle />
           </div>
-
-          <button
-            onClick={() => setIsMenuOpen(true)}
-            className="md:hidden flex p-2 -ml-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-foreground"
-          >
-            <Menu size={20} strokeWidth={2.5} />
-          </button>
         </div>
       </header>
 

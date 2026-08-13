@@ -1,4 +1,5 @@
 import { absoluteUrl, getSiteUrl } from "@/lib/seo";
+import { authorIdentity, buildPersonSchema } from "@/lib/authorIdentity";
 
 function coursePath(course, fallbackSlug = "") {
   const slug = course?.slug || fallbackSlug;
@@ -15,17 +16,24 @@ export function buildCourseSchema(course, fallbackSlug) {
 
   return {
     "@context": "https://schema.org",
+    "@graph": [{
+    ...buildPersonSchema(),
+    }, {
     "@type": "Course",
     name: course.title,
     description:
       course.subtitle ||
       `Learn ${course.title} with step-by-step lessons on asif.to.`,
     url,
+    datePublished: course.createdAt || undefined,
+    dateModified: course.updatedAt || undefined,
+    author: { "@id": `${authorIdentity.url}#person` },
     provider: {
       "@type": "Organization",
       name: "asif.to",
       url: getSiteUrl(),
     },
+    }],
   };
 }
 

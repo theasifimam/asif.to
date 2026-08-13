@@ -4,6 +4,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { ReduxProvider } from "@/components/ReduxProvider";
 import BottomNav from "@/components/BottomNav";
 import { ScrollNavProvider } from "@/components/ScrollNavProvider";
+import AnalyticsTracker from "@/components/AnalyticsTracker";
+import { Suspense } from "react";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -16,6 +18,7 @@ const outfit = Outfit({
 });
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://asif.to"),
   title: {
     default: "asif.to — Step-by-Step Web & Full-Stack Coding Tutorials",
     template: "%s | asif.to Tutorials",
@@ -36,7 +39,7 @@ export const metadata = {
     "Coding Tutorials",
     "Revision Flashcards",
   ],
-  authors: [{ name: "asif.to Team" }],
+  authors: [{ name: "Asif", url: "/author/asif" }],
   icons: {
     icon: "/logo.png",
   },
@@ -73,6 +76,7 @@ export default function RootLayout({ children }) {
         >
           <ReduxProvider>
             <ScrollNavProvider>
+              <Suspense fallback={null}><AnalyticsTracker /></Suspense>
               {children}
               <BottomNav />
             </ScrollNavProvider>

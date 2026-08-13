@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import MobileChapterIndex from "@/components/MobileChapterIndex";
 import { TECH_STACKS } from "@/lib/tutorialData";
 import { useGetCourseBySlugQuery } from "@/lib/api/courseApi";
 import {
@@ -21,6 +22,7 @@ import {
   MessagesSquare,
 } from "lucide-react";
 import SaveButton from "@/components/SaveButton";
+import AuthorIdentityCard from "@/components/AuthorIdentityCard";
 
 export default function CourseClient() {
   const params = useParams();
@@ -79,6 +81,10 @@ export default function CourseClient() {
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground transition-colors duration-300 pb-24 sm:pb-12">
       <Header />
+      <MobileChapterIndex
+        chapters={course.chapters}
+        activeCourseSlug={activeCourseSlug}
+      />
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-2 sm:px-6 pt-20 sm:pt-24 flex flex-col gap-6">
         {/* Back Button */}
@@ -215,6 +221,8 @@ export default function CourseClient() {
             ))}
           </div>
         </section>
+
+        <AuthorIdentityCard publishedAt={course.createdAt} updatedAt={course.updatedAt} compact />
 
         {/* Course Index / Syllabus / Table of Contents */}
         <section className="space-y-4 mt-2">

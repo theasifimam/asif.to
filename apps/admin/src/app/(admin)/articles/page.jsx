@@ -2,18 +2,20 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Edit3, FileText, Loader2, Plus, Search, Trash2 } from "lucide-react";
+import { Edit3, Eye, FileText, Loader2, Plus, Search, Trash2, User } from "lucide-react";
 import { toast } from "sonner";
 import { articlesApi } from "@/lib/api";
 import AdminFormShell from "@/components/AdminFormShell";
 import { Button, Input } from "@/components/ui";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { ViewToggle } from "@/components/ViewToggle";
 
 export default function ArticlesPage() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
+  const [viewMode, setViewMode] = useState("table");
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -24,13 +26,246 @@ export default function ArticlesPage() {
     else toast.error(response.error || "Unable to load articles");
     setLoading(false);
   }, [status]);
-  useEffect(() => { const timer = setTimeout(load, 0); return () => clearTimeout(timer); }, [load]);
-  const filtered = useMemo(() => articles.filter((article) => article.title?.toLowerCase().includes(search.toLowerCase()) || article.author?.fullName?.toLowerCase().includes(search.toLowerCase())), [articles, search]);
-  const remove = async () => { if (!deleteTarget) return; setDeleting(true); const response = await articlesApi.delete(deleteTarget._id); if (response.success) { toast.success("Article deleted"); setDeleteTarget(null); load(); } else toast.error(response.error || "Unable to delete article"); setDeleting(false); };
 
-  return <AdminFormShell eyebrow="Content / Articles" title="Article library" description="Manage published articles and drafts with the same structured workflow as course topics." actions={<Link href="/articles/new"><Button><Plus className="mr-2 h-4 w-4" /> New article</Button></Link>}>
-    <section className="flex flex-col gap-3 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950 md:flex-row"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" /><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search title or author" className="rounded-2xl bg-zinc-100 pl-9 dark:bg-zinc-900" /></div><select value={status} onChange={(event) => setStatus(event.target.value)} className="h-12 rounded-2xl border-0 bg-zinc-100 px-4 text-sm outline-none dark:bg-zinc-900 md:w-48"><option value="all">All status</option><option value="published">Published</option><option value="draft">Drafts</option></select></section>
-    <section className="overflow-hidden rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950"><div className="overflow-x-auto"><table className="w-full min-w-190 text-left text-sm"><thead className="border-b border-zinc-200/60 bg-zinc-50/80 text-xs uppercase text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-900/60"><tr><th className="px-5 py-3">Article</th><th className="px-5 py-3">Author</th><th className="px-5 py-3">Status</th><th className="px-5 py-3">Views</th><th className="px-5 py-3 text-right">Actions</th></tr></thead><tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">{loading ? <tr><td colSpan="5" className="px-5 py-16 text-center"><Loader2 className="mx-auto h-5 w-5 animate-spin text-blue-600" /></td></tr> : filtered.length === 0 ? <tr><td colSpan="5" className="px-5 py-16 text-center text-zinc-500"><FileText className="mx-auto mb-3 h-8 w-8 text-zinc-300" />No articles match these filters.</td></tr> : filtered.map((article) => <tr key={article._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/40"><td className="px-5 py-4"><p className="font-semibold text-zinc-900 dark:text-white">{article.title}</p><p className="mt-1 text-xs text-zinc-400">/{article.slug}</p></td><td className="px-5 py-4 text-zinc-600 dark:text-zinc-300">{article.author?.fullName || "Anonymous"}</td><td className="px-5 py-4"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${article.status === "published" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>{article.status}</span></td><td className="px-5 py-4 text-zinc-600 dark:text-zinc-300">{article.readCount || 0}</td><td className="px-5 py-4"><div className="flex justify-end gap-1"><Link href={`/articles/edit/${article._id}`}><Button variant="ghost" size="icon"><Edit3 className="h-4 w-4" /></Button></Link><Button variant="ghost" size="icon" onClick={() => setDeleteTarget(article)} className="hover:text-red-600"><Trash2 className="h-4 w-4" /></Button></div></td></tr>)}</tbody></table></div></section>
-    <ConfirmDialog isOpen={Boolean(deleteTarget)} onClose={() => setDeleteTarget(null)} onConfirm={remove} loading={deleting} variant="destructive" title="Delete article?" description={`This permanently removes “${deleteTarget?.title || "this article"}”.`} confirmText="Delete article" />
-  </AdminFormShell>;
+  useEffect(() => {
+    const timer = setTimeout(load, 0);
+    return () => clearTimeout(timer);
+  }, [load]);
+
+  const filtered = useMemo(
+    () =>
+      articles.filter(
+        (article) =>
+          article.title?.toLowerCase().includes(search.toLowerCase()) ||
+          article.author?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
+          article.slug?.toLowerCase().includes(search.toLowerCase())
+      ),
+    [articles, search]
+  );
+
+  const remove = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const response = await articlesApi.delete(deleteTarget._id);
+    if (response.success) {
+      toast.success("Article deleted");
+      setArticles((current) => current.filter((item) => item._id !== deleteTarget._id));
+      setDeleteTarget(null);
+    } else {
+      toast.error(response.error || "Unable to delete article");
+    }
+    setDeleting(false);
+  };
+
+  return (
+    <AdminFormShell
+      eyebrow="Content / Articles"
+      title="Article library"
+      description="Manage published articles and drafts with the same structured workflow as course topics."
+      actions={
+        <div className="flex items-center gap-2">
+          <ViewToggle view={viewMode} onViewChange={setViewMode} />
+          <Link href="/articles/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" /> New article
+            </Button>
+          </Link>
+        </div>
+      }
+    >
+      <section className="flex flex-col gap-3 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-3.5 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950 md:flex-row">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+          <Input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search title, slug, or author"
+            className="rounded-2xl bg-zinc-100 pl-9 dark:bg-zinc-900"
+          />
+        </div>
+        <select
+          value={status}
+          onChange={(event) => setStatus(event.target.value)}
+          className="h-12 rounded-2xl border-0 bg-zinc-100 px-4 text-sm outline-none dark:bg-zinc-900 md:w-48"
+        >
+          <option value="all">All status</option>
+          <option value="published">Published</option>
+          <option value="draft">Drafts</option>
+        </select>
+      </section>
+
+      {loading ? (
+        <div className="flex h-64 items-center justify-center rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
+          <FileText className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
+          <p className="text-sm font-medium">No articles match these filters.</p>
+        </div>
+      ) : viewMode === "card" ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((article) => (
+            <div
+              key={article._id}
+              className="group flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs transition-all hover:border-blue-500/50 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                      article.status === "published"
+                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
+                        : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
+                    }`}
+                  >
+                    {article.status}
+                  </span>
+                  <span className="text-[11px] font-bold text-zinc-400">
+                    {article.readCount || 0} reads
+                  </span>
+                </div>
+
+                <div>
+                  <Link
+                    href={`/articles/edit/${article._id}`}
+                    className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-2"
+                  >
+                    {article.title}
+                  </Link>
+                  <p className="mt-1 text-xs text-zinc-400 truncate">
+                    /{article.slug}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-3.5 dark:border-zinc-800/80">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 text-[10px] font-black">
+                    {article.author?.fullName?.charAt(0) || "A"}
+                  </div>
+                  <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 truncate">
+                    {article.author?.fullName || "Anonymous"}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1 shrink-0">
+                  <Link href={`/articles/edit/${article._id}`}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" title="Edit article">
+                      <Edit3 className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setDeleteTarget(article)}
+                    className="h-8 w-8 rounded-lg text-zinc-400 hover:text-red-600"
+                    title="Delete article"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <section className="w-full bg-white dark:bg-zinc-900 rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-190 text-left text-sm">
+              <thead className="border-b border-zinc-200/70 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-950/40 text-[11px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                <tr>
+                  <th className="px-6 py-4">Article</th>
+                  <th className="px-6 py-4">Author</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4">Views</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
+                {filtered.map((article) => (
+                  <tr
+                    key={article._id}
+                    className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
+                  >
+                    <td className="px-6 py-4">
+                      <Link
+                        href={`/articles/edit/${article._id}`}
+                        className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-1"
+                      >
+                        {article.title}
+                      </Link>
+                      <p className="mt-0.5 text-xs text-zinc-400 truncate">
+                        /{article.slug}
+                      </p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 text-[10px] font-black">
+                          {article.author?.fullName?.charAt(0) || "A"}
+                        </div>
+                        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 truncate">
+                          {article.author?.fullName || "Anonymous"}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                          article.status === "published"
+                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-500/20"
+                            : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-500/20"
+                        }`}
+                      >
+                        {article.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                        {article.readCount || 0} reads
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-end gap-1">
+                        <Link href={`/articles/edit/${article._id}`}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            title="Edit article"
+                          >
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setDeleteTarget(article)}
+                          className="h-8 w-8 rounded-xl text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                          title="Delete article"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={remove}
+        loading={deleting}
+        variant="destructive"
+        title="Delete article?"
+        description={`This permanently removes “${deleteTarget?.title || "this article"}”.`}
+        confirmText="Delete article"
+      />
+    </AdminFormShell>
+  );
 }

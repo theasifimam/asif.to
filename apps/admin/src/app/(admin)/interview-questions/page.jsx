@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { coursesApi, interviewQuestionsApi } from "@/lib/api";
+import { ViewToggle } from "@/components/ViewToggle";
 
 export default function InterviewQuestionsPage() {
   const [questions, setQuestions] = useState([]);
@@ -38,6 +39,7 @@ export default function InterviewQuestionsPage() {
     tag: "",
     page: 1,
   });
+  const [viewMode, setViewMode] = useState("table");
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
   const [loading, setLoading] = useState(true);
   const [preview, setPreview] = useState(null);
@@ -82,12 +84,19 @@ export default function InterviewQuestionsPage() {
   ]);
 
   const remove = async () => {
+    if (!deleteTarget) return;
     setDeleting(true);
     const response = await interviewQuestionsApi.delete(deleteTarget._id);
     if (response.success) {
       toast.success("Question deleted");
+      setQuestions((current) =>
+        current.filter((item) => item._id !== deleteTarget._id),
+      );
+      setPagination((prev) => ({
+        ...prev,
+        total: Math.max(0, prev.total - 1),
+      }));
       setDeleteTarget(null);
-      load();
     } else toast.error(response.error || "Unable to delete question");
     setDeleting(false);
   };
@@ -96,28 +105,34 @@ export default function InterviewQuestionsPage() {
     setFilters((current) => ({ ...current, [key]: value, page: 1 }));
 
   return (
-    <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-      <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+    <main className="mx-auto max-w-7xl space-y-4 px-3 py-4 sm:space-y-6 sm:px-6 sm:py-8 lg:px-8">
+      <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
             Content / Interview Questions
           </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">
+          <h1 className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-black tracking-tight text-zinc-950 dark:text-white">
             Question library
           </h1>
-          <p className="mt-2 text-sm text-zinc-500">
+          <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-500">
             Maintain canonical questions that can be reused across interview
             topics.
           </p>
         </div>
-        <Link href="/interview-questions/new">
-          <Button>
-            <Plus className="h-4 w-4" /> New question
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2 md:w-80 sm:w-full">
+          <ViewToggle view={viewMode} onViewChange={setViewMode} />
+          <Link
+            href="/interview-questions/new"
+            className="md:flex-1 sm:flex-2 sm:w-full"
+          >
+            <Button className="w-full">
+              <Plus className="h-4 w-4" /> Question
+            </Button>
+          </Link>
+        </div>
       </header>
 
-      <section className="grid gap-3 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950 md:grid-cols-2 xl:grid-cols-[200px_minmax(220px,1fr)_170px_190px_minmax(180px,0.6fr)]">
+      <section className="grid gap-3 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-3.5 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950 md:grid-cols-2 xl:grid-cols-[200px_minmax(220px,1fr)_170px_190px_minmax(180px,0.6fr)]">
         <Select
           value={filters.course}
           onValueChange={(value) => setFilter("course", value)}
@@ -181,68 +196,207 @@ export default function InterviewQuestionsPage() {
         />
       </section>
 
-      <section className="overflow-hidden rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-205 text-left text-sm">
-            <thead className="border-b border-zinc-200/60 bg-zinc-50/80 text-xs uppercase text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-900/60">
-              <tr>
-                <th className="px-5 py-3">Question</th>
-                <th className="px-5 py-3">Course</th>
-                <th className="px-5 py-3">Difficulty</th>
-                <th className="px-5 py-3">Type</th>
-                <th className="px-5 py-3">Tags</th>
-                <th className="px-5 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-              {loading ? (
-                <tr>
-                  <td colSpan="6" className="px-5 py-16 text-center">
-                    <Loader2 className="mx-auto h-5 w-5 animate-spin text-blue-600" />
-                  </td>
-                </tr>
-              ) : questions.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan="6"
-                    className="px-5 py-16 text-center text-zinc-500"
+      {loading ? (
+        <div className="flex h-64 items-center justify-center rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+        </div>
+      ) : questions.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
+          <p className="text-sm font-medium">
+            No questions match these filters.
+          </p>
+        </div>
+      ) : viewMode === "card" ? (
+        <div className="space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {questions.map((item) => (
+              <div
+                key={item._id}
+                className="group flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs transition-all hover:border-blue-500/50 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                        {item.course?.title || "Unassigned"}
+                      </span>
+                      <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
+                        {item.difficulty}
+                      </span>
+                      <span className="text-[10px] font-bold capitalize text-zinc-400">
+                        {item.questionType}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3
+                      className="font-bold text-zinc-900 dark:text-white line-clamp-3 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      onClick={() => setPreview(item)}
+                    >
+                      {item.question}
+                    </h3>
+                    <p className="mt-1 text-xs text-zinc-400 truncate">
+                      #{item.slug}
+                    </p>
+                  </div>
+
+                  {item.tags && item.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {item.tags.slice(0, 3).map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded-lg bg-zinc-100 px-2 py-0.5 text-[10px] font-semibold text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                      {item.tags.length > 3 && (
+                        <span className="text-[10px] font-bold text-zinc-400 self-center">
+                          +{item.tags.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-3.5 dark:border-zinc-800/80">
+                  <button
+                    onClick={() => setPreview(item)}
+                    className="text-xs font-bold text-blue-600 hover:underline dark:text-blue-400 cursor-pointer"
                   >
-                    No questions match these filters.
-                  </td>
+                    Quick view
+                  </button>
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-lg"
+                      title="Preview question"
+                      onClick={() => setPreview(item)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Link href={`/interview-questions/${item._id}/edit`}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-lg"
+                        title="Edit question"
+                      >
+                        <Edit3 className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title="Delete question"
+                      onClick={() => setDeleteTarget(item)}
+                      className="h-8 w-8 rounded-lg text-zinc-400 hover:text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <footer className="flex items-center justify-between rounded-3xl border border-zinc-200/60 bg-white px-5 py-4 text-sm text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
+            <span>{pagination.total || 0} questions</span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={pagination.page <= 1}
+                onClick={() =>
+                  setFilters((current) => ({
+                    ...current,
+                    page: current.page - 1,
+                  }))
+                }
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="min-w-20 text-center text-xs font-medium">
+                {pagination.page || 1} / {pagination.pages || 1}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={pagination.page >= pagination.pages}
+                onClick={() =>
+                  setFilters((current) => ({
+                    ...current,
+                    page: current.page + 1,
+                  }))
+                }
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </footer>
+        </div>
+      ) : (
+        <section className="w-full bg-white dark:bg-zinc-900 rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-205 text-left text-sm">
+              <thead className="border-b border-zinc-200/70 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-950/40 text-[11px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                <tr>
+                  <th className="px-6 py-4">Question</th>
+                  <th className="px-6 py-4">Course</th>
+                  <th className="px-6 py-4">Difficulty</th>
+                  <th className="px-6 py-4">Type</th>
+                  <th className="px-6 py-4">Tags</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
-              ) : (
-                questions.map((item) => (
+              </thead>
+              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
+                {questions.map((item) => (
                   <tr
                     key={item._id}
-                    className="hover:bg-zinc-50 dark:hover:bg-zinc-900/40"
+                    className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
                   >
-                    <td className="max-w-xl px-5 py-4">
-                      <p className="font-semibold text-zinc-900 dark:text-white">
+                    <td className="max-w-xl px-6 py-4">
+                      <p
+                        className="font-bold text-zinc-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer line-clamp-2"
+                        onClick={() => setPreview(item)}
+                      >
                         {item.question}
                       </p>
-                      <p className="mt-1 text-xs text-zinc-400">#{item.slug}</p>
+                      <p className="mt-0.5 text-xs text-zinc-400 truncate">
+                        #{item.slug}
+                      </p>
                     </td>
-                    <td className="px-5 py-4 text-zinc-600 dark:text-zinc-300">
-                      {item.course?.title || "Unassigned"}
+                    <td className="px-6 py-4">
+                      <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-500/20">
+                        {item.course?.title || "Unassigned"}
+                      </span>
                     </td>
-                    <td className="px-5 py-4">
-                      <Badge variant="outline" className="capitalize">
+                    <td className="px-6 py-4">
+                      <span className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-2.5 py-0.5 text-[10px] font-black uppercase text-zinc-600 dark:text-zinc-300">
                         {item.difficulty}
-                      </Badge>
+                      </span>
                     </td>
-                    <td className="px-5 py-4 capitalize text-zinc-600 dark:text-zinc-300">
-                      {item.questionType}
+                    <td className="px-6 py-4">
+                      <span className="text-xs font-semibold capitalize text-zinc-600 dark:text-zinc-400">
+                        {item.questionType}
+                      </span>
                     </td>
-                    <td className="px-5 py-4">
+                    <td className="px-6 py-4">
                       <div className="flex max-w-56 flex-wrap gap-1">
-                        {(item.tags || []).slice(0, 4).map((tag) => (
-                          <Badge key={tag} variant="secondary">
+                        {(item.tags || []).slice(0, 3).map((tag) => (
+                          <span
+                            key={tag}
+                            className="rounded-lg bg-zinc-100 px-2 py-0.5 text-[10px] font-bold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+                          >
                             {tag}
-                          </Badge>
+                          </span>
                         ))}
                       </div>
                     </td>
-                    <td className="px-5 py-4">
+                    <td className="px-6 py-4">
                       <div className="flex justify-end gap-1">
                         {item.course?.slug && item.slug && (
                           <Link
@@ -252,6 +406,7 @@ export default function InterviewQuestionsPage() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                               title="View on asif.to"
                             >
                               <Eye className="h-4 w-4" />
@@ -261,6 +416,7 @@ export default function InterviewQuestionsPage() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                           title="Preview in admin"
                           onClick={() => setPreview(item)}
                         >
@@ -270,6 +426,7 @@ export default function InterviewQuestionsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                             title="Edit question"
                           >
                             <Edit3 className="h-4 w-4" />
@@ -279,6 +436,7 @@ export default function InterviewQuestionsPage() {
                           variant="ghost"
                           size="icon"
                           title="Delete question"
+                          className="h-8 w-8 rounded-xl text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
                           onClick={() => setDeleteTarget(item)}
                         >
                           <Trash2 className="h-4 w-4 text-red-500" />
@@ -286,46 +444,48 @@ export default function InterviewQuestionsPage() {
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-        <footer className="flex items-center justify-between border-t border-zinc-200/60 px-5 py-4 text-sm text-zinc-500 dark:border-zinc-800/60">
-          <span>{pagination.total || 0} questions</span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              disabled={pagination.page <= 1}
-              onClick={() =>
-                setFilters((current) => ({
-                  ...current,
-                  page: current.page - 1,
-                }))
-              }
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span>
-              {pagination.page || 1} / {pagination.pages || 1}
-            </span>
-            <Button
-              variant="outline"
-              size="icon"
-              disabled={pagination.page >= pagination.pages}
-              onClick={() =>
-                setFilters((current) => ({
-                  ...current,
-                  page: current.page + 1,
-                }))
-              }
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </footer>
-      </section>
+          <footer className="flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/70 px-6 py-3.5 text-xs text-zinc-400 font-medium">
+            <span>{pagination.total || 0} questions</span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 rounded-xl"
+                disabled={pagination.page <= 1}
+                onClick={() =>
+                  setFilters((current) => ({
+                    ...current,
+                    page: current.page - 1,
+                  }))
+                }
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="min-w-20 text-center text-xs font-bold text-zinc-600 dark:text-zinc-300">
+                {pagination.page || 1} / {pagination.pages || 1}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 rounded-xl"
+                disabled={pagination.page >= pagination.pages}
+                onClick={() =>
+                  setFilters((current) => ({
+                    ...current,
+                    page: current.page + 1,
+                  }))
+                }
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </footer>
+        </section>
+      )}
 
       {preview && (
         <div
@@ -333,14 +493,16 @@ export default function InterviewQuestionsPage() {
           role="dialog"
           aria-modal="true"
         >
-          <article className="max-h-[85vh] w-full max-w-3xl overflow-y-auto rounded-4xl bg-white p-6 shadow-xl dark:bg-zinc-950">
+          <article className="max-h-[85vh] w-full max-w-3xl overflow-y-auto rounded-3xl sm:rounded-4xl bg-white p-5 sm:p-6 shadow-xl dark:bg-zinc-950">
             <header className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase text-zinc-500">
                   {preview.course?.title || "Unassigned"} / {preview.difficulty}{" "}
                   / {preview.questionType}
                 </p>
-                <h2 className="mt-2 text-2xl font-bold">{preview.question}</h2>
+                <h2 className="mt-2 text-xl sm:text-2xl font-bold">
+                  {preview.question}
+                </h2>
               </div>
               <Button
                 variant="ghost"
@@ -351,11 +513,11 @@ export default function InterviewQuestionsPage() {
                 <X className="h-5 w-5" />
               </Button>
             </header>
-            <div className="mt-6 whitespace-pre-wrap leading-7 text-zinc-700 dark:text-zinc-300">
+            <div className="mt-6 whitespace-pre-wrap leading-7 text-zinc-700 dark:text-zinc-300 text-sm sm:text-base">
               {preview.answer}
             </div>
             {preview.codeExample && (
-              <pre className="mt-6 overflow-x-auto rounded-2xl bg-zinc-950 p-4 text-sm text-white">
+              <pre className="mt-6 overflow-x-auto rounded-2xl bg-zinc-950 p-4 text-xs sm:text-sm text-white">
                 <code>{preview.codeExample}</code>
               </pre>
             )}

@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CodeSnippetViewer from "@/components/CodeSnippetViewer";
 import { TUTORIALS, TECH_STACKS } from "@/lib/tutorialData";
+import AuthorIdentityCard from "@/components/AuthorIdentityCard";
 import {
   ArrowLeft,
   Clock,
@@ -124,6 +125,8 @@ export default function TutorialDetailPage() {
             </div>
           </div>
         </div>
+
+        <AuthorIdentityCard updatedAt={tutorial.updatedAt} compact />
 
         {/* Code Snippet Section */}
         {tutorial.codeSnippet && (

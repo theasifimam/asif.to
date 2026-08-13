@@ -63,7 +63,9 @@ export const getDashboardStats = async (req, res) => {
           cStats.chapterCount ||
           (await Chapter.countDocuments({ course: course._id }));
         const realReads = cStats.totalViews || 0;
-        const completionRate = realReads > 0 ? 100 : 0; // No progress model exists yet
+        const publicationRate = chapterCount > 0
+          ? Math.round(((cStats.publishedChapters || 0) / chapterCount) * 100)
+          : 0;
 
         return {
           id: course._id,
@@ -78,7 +80,7 @@ export const getDashboardStats = async (req, res) => {
           publishedChapterCount: cStats.publishedChapters || 0,
           totalReads: realReads,
           formattedReads: formatCount(realReads),
-          completionRate: realReads > 0 ? `${completionRate}%` : "0%",
+          publicationRate: `${publicationRate}%`,
           rating: 4.9,
           updatedAt: formatTimeAgo(
             course.updatedAt || course.createdAt || new Date(),
@@ -94,30 +96,29 @@ export const getDashboardStats = async (req, res) => {
     const totalCheatsheets = await Cheatsheet.countDocuments();
     const totalArticles = await Article.countDocuments({ status: "published" });
 
-    // 3. Real Readership Analytics (We only have all-time viewCount in DB)
+    // 3. Real readership analytics. Chapter counters are all-time only, so the
+    // dashboard intentionally compares courses instead of inventing a timeline.
     const allTimeReads = realTotalCourseReads;
+    const readershipByCourse = courseStatsList
+      .filter((course) => course.totalReads > 0)
+      .sort((a, b) => b.totalReads - a.totalReads)
+      .slice(0, 7)
+      .map((course) => ({
+        id: course.id,
+        label: course.title,
+        shortLabel:
+          course.title.length > 12
+            ? `${course.title.slice(0, 11)}…`
+            : course.title,
+        value: course.totalReads,
+      }));
 
     const growthAnalytics = {
-      daily: {
+      allTime: {
         reads: formatCount(allTimeReads),
-        growth: "All-time",
-        label: "Total Readership",
-        subtext: `Total captured views from web app (${formatCount(allTimeReads)} reads)`,
-        chartData: generateChartTrajectory(allTimeReads),
-      },
-      monthly: {
-        reads: formatCount(allTimeReads),
-        growth: "All-time",
         label: "Total Course Reads",
-        subtext: `Total captured views from web app (${formatCount(allTimeReads)} reads)`,
-        chartData: generateChartTrajectory(allTimeReads),
-      },
-      yearly: {
-        reads: formatCount(allTimeReads),
-        growth: "All-time",
-        label: "Total Readership",
-        subtext: `Live total recorded chapter visits (${formatCount(allTimeReads)} total reads)`,
-        chartData: generateChartTrajectory(allTimeReads),
+        subtext: "All-time chapter visits captured by the public web app.",
+        chartData: readershipByCourse,
       },
     };
 
@@ -222,20 +223,6 @@ export const getDashboardStats = async (req, res) => {
   }
 };
 
-function generateChartTrajectory(total) {
-  if (!total || total === 0) return [5, 10, 15, 20, 25, 30, 35];
-  const step = total / 7;
-  return [
-    Math.round(step * 0.4),
-    Math.round(step * 0.8),
-    Math.round(step * 1.5),
-    Math.round(step * 2.8),
-    Math.round(step * 4.2),
-    Math.round(step * 5.6),
-    total,
-  ];
-}
-
 function formatTechLabel(tech) {
   switch (tech) {
     case "javascript":
@@ -261,20 +248,20 @@ function getTechColor(tech) {
   switch (tech) {
     case "javascript":
     case "js":
-      return "bg-yellow-500 text-yellow-600";
+      return "#eab308";
     case "nodejs":
     case "node":
-      return "bg-emerald-500 text-emerald-600";
+      return "#10b981";
     case "html":
     case "html5":
-      return "bg-orange-500 text-orange-600";
+      return "#f97316";
     case "react":
-      return "bg-cyan-500 text-cyan-600";
+      return "#06b6d4";
     case "css":
     case "css3":
-      return "bg-blue-500 text-blue-600";
+      return "#3b82f6";
     default:
-      return "bg-indigo-500 text-indigo-600";
+      return "#6366f1";
   }
 }
 

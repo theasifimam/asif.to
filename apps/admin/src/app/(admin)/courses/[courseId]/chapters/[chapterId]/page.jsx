@@ -201,7 +201,48 @@ export default function ChapterFormPage() {
       : "";
 
   return (
-    <AdminFormShell eyebrow={`Learning / ${course?.title || "Course"}`} title={isNew ? "Create chapter" : "Edit chapter"} description="Build a focused lesson with readable content, code examples, and publishing metadata." back={<Link href={`/courses/${courseId}`} className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"><ArrowLeft className="h-4 w-4" /> Back to chapters</Link>} actions={<><Button variant="outline" disabled={saving} onClick={() => persist("draft")}><Save className="h-4 w-4" />Save draft</Button><Button disabled={saving} onClick={() => setPublishOpen(true)}><Send className="h-4 w-4" />Publish</Button></>}>
+    <AdminFormShell
+      eyebrow={`Learning / ${course?.title || "Course"}`}
+      title={isNew ? "Create chapter" : "Edit chapter"}
+      description="Build a focused lesson with readable content, code examples, and publishing metadata."
+      back={
+        <Link
+          href={`/courses/${courseId}`}
+          className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back to chapters
+        </Link>
+      }
+      actions={
+        <div className="flex flex-wrap items-center gap-2 w-full xs:w-auto">
+          {!isNew && form.status === "published" && publicUrl && (
+            <Button variant="outline" asChild className="flex-1 xs:flex-initial">
+              <a href={publicUrl} target="_blank" rel="noreferrer">
+                <ExternalLink className="h-4 w-4" />
+                View
+              </a>
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            disabled={saving}
+            onClick={() => persist("draft")}
+            className="flex-1 xs:flex-initial"
+          >
+            <Save className="h-4 w-4" />
+            Save draft
+          </Button>
+          <Button
+            disabled={saving}
+            onClick={() => setPublishOpen(true)}
+            className="flex-1 xs:flex-initial"
+          >
+            <Send className="h-4 w-4" />
+            Publish
+          </Button>
+        </div>
+      }
+    >
       <div className="hidden">
         <div className="flex items-start gap-3">
           <Button

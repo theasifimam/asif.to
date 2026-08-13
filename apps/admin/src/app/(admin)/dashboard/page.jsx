@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import {
   TrendingUp,
   Users,
@@ -11,8 +11,9 @@ import {
   BarChart3,
   ChevronRight,
   BrainCircuit,
+  Info,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useGetDashboardStatsQuery } from "@/redux/services/dashboardApi";
 
@@ -33,9 +34,6 @@ export default function DashboardPage() {
     refetch,
   } = useGetDashboardStatsQuery();
   const dashboardData = response?.data;
-
-  // Active time-frame tab for Course Readership Growth: 'daily' | 'monthly' | 'yearly'
-  const [timeframe, setTimeframe] = useState("monthly");
 
   if (isLoading) {
     return (
@@ -67,20 +65,20 @@ export default function DashboardPage() {
     );
   }
 
-  const activeGrowth = dashboardData?.growthAnalytics?.[timeframe] || {
+  const activeGrowth = dashboardData?.growthAnalytics?.allTime || {
     reads: "0",
     growth: "+0%",
     label: "Course Readership",
     subtext: "No data",
     chartData: [],
   };
-  const chartValues = (
+  const chartItems = (
     Array.isArray(activeGrowth.chartData) ? activeGrowth.chartData : []
-  ).map((value) => {
-    const numericValue = Number(value);
-    return Number.isFinite(numericValue) ? Math.max(0, numericValue) : 0;
-  });
-  const chartMax = Math.max(0, ...chartValues);
+  ).map((item) => ({
+    ...item,
+    value: Math.max(0, Number(item?.value) || 0),
+  }));
+  const chartMax = Math.max(0, ...chartItems.map((item) => item.value));
 
   return (
     <div className="p-4 sm:p-6 md:p-8 flex flex-col gap-8 max-w-7xl mx-auto text-zinc-800 dark:text-zinc-300 font-sans">
@@ -159,7 +157,7 @@ export default function DashboardPage() {
         })}
       </section>
 
-      {/* Readership Growth & Engagement Center (Day / Month / Year Tabs) */}
+      {/* Real all-time readership by course */}
       <section className="p-6 sm:p-8 rounded-[2.5rem] bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm flex flex-col gap-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-zinc-800 pb-5">
           <div>
@@ -167,40 +165,20 @@ export default function DashboardPage() {
               <BarChart3 className="w-4 h-4" />
               <span>Readership Analytics</span>
             </div>
-            <h2 className="text-2xl font-black font-outfit text-zinc-900 dark:text-white tracking-tight">
-              Course Readership Growth
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-2xl font-black font-outfit text-zinc-900 dark:text-white tracking-tight">Course Readership</h2>
+              <span className="group/tooltip relative inline-flex" tabIndex={0}>
+                <Info className="h-4 w-4 text-zinc-400" />
+                <span role="tooltip" className="pointer-events-none absolute left-1/2 top-6 z-30 hidden w-64 -translate-x-1/2 rounded-xl bg-zinc-950 p-3 text-[11px] font-medium normal-case leading-relaxed text-white shadow-xl group-hover/tooltip:block group-focus/tooltip:block">The bars compare real all-time chapter visits between courses. This is not a date trend because historical chapter-view dates were not recorded.</span>
+              </span>
+            </div>
           </div>
-
-          {/* Timeframe Selector Pills */}
-          <div className="inline-flex p-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/50 self-start sm:self-auto">
-            {[
-              { id: "daily", label: "Daily (Today)" },
-              { id: "monthly", label: "Monthly (30 Days)" },
-              { id: "yearly", label: "Yearly (Annual)" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setTimeframe(tab.id)}
-                className={`px-4 py-2 rounded-full text-xs font-extrabold uppercase tracking-wider transition-all ${
-                  timeframe === tab.id
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-                    : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          <span className="rounded-full bg-blue-500/10 px-4 py-2 text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400">All-time captured data</span>
         </div>
 
-        {/* Readership Growth Content View */}
-        <AnimatePresence mode="wait">
           <motion.div
-            key={timeframe}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
             className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
           >
@@ -213,62 +191,62 @@ export default function DashboardPage() {
                 <span className="text-5xl font-black font-outfit text-zinc-900 dark:text-white tracking-tight">
                   {activeGrowth.reads}
                 </span>
-                <span className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full">
-                  {activeGrowth.growth}
-                </span>
               </div>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                 {activeGrowth.subtext}
               </p>
 
-              <div className="grid grid-cols-2 gap-3 mt-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase">
-                    Avg. Read Time
-                  </span>
-                  <span className="text-lg font-black text-zinc-900 dark:text-white">
-                    18.4 min
-                  </span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase">
-                    Completion Rate
-                  </span>
-                  <span className="text-lg font-black text-zinc-900 dark:text-white">
-                    88.6%
-                  </span>
-                </div>
-              </div>
+              <p className="mt-3 border-t border-zinc-100 pt-4 text-[11px] leading-relaxed text-zinc-400 dark:border-zinc-800">A read is recorded whenever a public chapter page increments its view counter. Repeat visits are included.</p>
             </div>
 
             {/* Right Visual Bar Chart Visualization */}
-            <div className="lg:col-span-7 flex flex-col gap-3 bg-zinc-50 dark:bg-zinc-950/60 p-6 rounded-3xl border border-zinc-200/50 dark:border-zinc-800/50">
-              <div className="flex items-center justify-between text-xs font-bold text-zinc-500 mb-2">
-                <span>Readership Trend Trajectory</span>
-                <span className="text-blue-600 dark:text-blue-400 font-extrabold uppercase text-[10px]">
-                  Real-time Data Sync
+            <div className="lg:col-span-7 flex flex-col gap-3 bg-zinc-50 dark:bg-zinc-950/60 p-5 sm:p-6 rounded-3xl border border-zinc-200/50 dark:border-zinc-800/50">
+              <div className="flex items-center justify-between text-xs font-bold text-zinc-500 mb-1">
+                <span>Reads by course</span>
+                <span className="text-blue-600 dark:text-blue-400 font-extrabold uppercase text-[10px] tracking-wider px-2.5 py-0.5 rounded-full bg-blue-500/10">
+                  Actual view counters
                 </span>
               </div>
 
-              <div className="h-36 flex items-end justify-between gap-2 pt-4">
-                {chartValues.length > 0 ? (
-                  chartValues.map((value, idx) => {
+              <div className="h-44 flex items-end justify-between gap-3 sm:gap-5 pt-3">
+                {chartItems.length > 0 ? (
+                  chartItems.map((item) => {
                     const heightPercent =
-                      chartMax > 0 ? (value / chartMax) * 100 : 0;
+                      chartMax > 0
+                        ? Math.max(12, Math.round((item.value / chartMax) * 100))
+                        : 12;
                     return (
                       <div
-                        key={idx}
-                        className="flex-1 flex flex-col items-center gap-2 group h-full min-w-0"
+                        key={item.id || item.label}
+                        className="group/bar relative flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2"
+                        tabIndex={0}
                       >
-                        <div className="w-full flex-1 flex items-end">
+                        {/* Bar area without full-height background track */}
+                        <div className="w-full flex-1 flex items-end justify-center">
+                          {/* Thick Plain Primary Color Rounded Pill Bar */}
                           <div
-                            title={`${value.toLocaleString()} reads`}
-                            className="w-full bg-blue-600/80 hover:bg-blue-600 rounded-t-lg transition-[height,background-color] duration-300 shadow-xs"
+                            aria-label={`${item.label}: ${item.value.toLocaleString()} reads`}
+                            className="w-full max-w-[36px] sm:max-w-[52px] rounded-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-400 transition-all duration-500 ease-out shadow-sm shadow-blue-600/20 hover:shadow-md hover:shadow-blue-500/30 active:scale-[0.98] cursor-pointer min-h-[22px]"
                             style={{ height: `${heightPercent}%` }}
                           />
                         </div>
-                        <span className="text-[10px] font-extrabold text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors shrink-0">
-                          P{idx + 1}
+
+                        <span className="max-w-full truncate text-[10px] sm:text-[11px] font-extrabold text-zinc-400 transition-colors group-hover/bar:text-blue-600 dark:group-hover/bar:text-blue-400 text-center">
+                          {item.shortLabel || item.label}
+                        </span>
+
+                        {/* Modern Tooltip */}
+                        <span
+                          role="tooltip"
+                          className="pointer-events-none absolute bottom-11 left-1/2 z-30 hidden w-max max-w-56 -translate-x-1/2 rounded-2xl bg-zinc-950/95 backdrop-blur-md px-3.5 py-2.5 text-center text-[11px] font-semibold text-white shadow-2xl border border-zinc-800 group-hover/bar:block group-focus/bar:block"
+                        >
+                          <strong className="block text-xs font-black text-blue-400 mb-0.5">
+                            {item.label}
+                          </strong>
+                          <span className="text-zinc-300 font-bold">
+                            {item.value.toLocaleString()}
+                          </span>{" "}
+                          all-time chapter reads
                         </span>
                       </div>
                     );
@@ -281,7 +259,6 @@ export default function DashboardPage() {
               </div>
             </div>
           </motion.div>
-        </AnimatePresence>
       </section>
 
       {/* Main Grid: Top Courses & Technology Stack */}
@@ -308,13 +285,13 @@ export default function DashboardPage() {
             {(dashboardData?.topCourses || []).map((course, i) => (
               <div
                 key={course.id}
-                className="p-5 sm:p-6 rounded-4xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 hover:border-blue-500/50 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs group"
+                className="p-4 sm:p-6 rounded-3xl sm:rounded-4xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 hover:border-blue-500/50 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs group min-w-0"
               >
-                <div className="flex items-start gap-4 min-w-0">
-                  <span className="w-9 h-9 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
+                <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
+                  <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl sm:rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
                     0{i + 1}
                   </span>
-                  <div className="flex flex-col min-w-0">
+                  <div className="flex flex-col min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
                         {course.techId}
@@ -329,28 +306,28 @@ export default function DashboardPage() {
                         {course.status}
                       </span>
                     </div>
-                    <h3 className="text-base font-black font-outfit text-zinc-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
+                    <h3 className="text-sm sm:text-base font-black font-outfit text-zinc-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
                       {course.title}
                     </h3>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-1 mt-0.5">
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-1 sm:line-clamp-2 mt-0.5">
                       {course.subtitle}
                     </p>
 
-                    <div className="flex items-center gap-4 text-xs font-bold text-zinc-400 mt-2">
+                    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] sm:text-xs font-bold text-zinc-400 mt-2">
                       <span>{course.chapterCount} Chapters</span>
                       <span>&bull;</span>
-                      <span>{course.completionRate} Completion Rate</span>
+                      <span>{course.publicationRate || "0%"} Chapters Published</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-zinc-100 dark:border-zinc-800">
-                  <span className="text-lg font-black font-outfit text-zinc-900 dark:text-white">
+                  <span className="text-sm sm:text-lg font-black font-outfit text-zinc-900 dark:text-white">
                     {course.formattedReads} reads
                   </span>
                   <Link
                     href={`/courses/${course.id}`}
-                    className="mt-1 px-4 py-2 rounded-full bg-blue-500/10 hover:bg-blue-600 text-blue-600 hover:text-white dark:text-blue-400 dark:hover:text-white text-xs font-extrabold transition-all"
+                    className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-blue-500/10 hover:bg-blue-600 text-blue-600 hover:text-white dark:text-blue-400 dark:hover:text-white text-xs font-extrabold transition-all"
                   >
                     Manage Course
                   </Link>
@@ -368,9 +345,13 @@ export default function DashboardPage() {
               <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block mb-1">
                 Curriculum Focus
               </span>
-              <h3 className="text-xl font-black font-outfit text-zinc-900 dark:text-white">
-                Technology Distribution
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xl font-black font-outfit text-zinc-900 dark:text-white">Technology Distribution</h3>
+                <span className="group/tooltip relative inline-flex" tabIndex={0}>
+                  <Info className="h-4 w-4 text-zinc-400" />
+                  <span role="tooltip" className="pointer-events-none absolute right-0 top-6 z-30 hidden w-64 rounded-xl bg-zinc-950 p-3 text-[11px] font-medium leading-relaxed text-white shadow-xl group-hover/tooltip:block group-focus/tooltip:block">Each bar is the technology’s share of all published course chapters. For example, 25% means one quarter of the published curriculum belongs to that technology.</span>
+                </span>
+              </div>
             </div>
 
             <div className="flex flex-col gap-4">
@@ -381,7 +362,7 @@ export default function DashboardPage() {
                 );
 
                 return (
-                  <div key={item.techId} className="flex flex-col gap-1.5">
+                  <div key={item.techId} className="group/progress relative flex flex-col gap-1.5" tabIndex={0}>
                     <div className="flex justify-between gap-3 text-xs font-bold">
                       <span className="text-zinc-700 dark:text-zinc-200">
                         {item.label}
@@ -392,12 +373,11 @@ export default function DashboardPage() {
                     </div>
                     <div className="h-2.5 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                       <div
-                        className={`h-full rounded-full transition-[width] duration-500 ${
-                          item.color?.split(" ")[0] || "bg-blue-600"
-                        }`}
-                        style={{ width: `${percentage}%` }}
+                        className="h-full min-w-1 rounded-full transition-[width] duration-500"
+                        style={{ width: `${percentage}%`, backgroundColor: item.color || "#2563eb" }}
                       />
                     </div>
+                    <span role="tooltip" className="pointer-events-none absolute bottom-full right-0 z-30 mb-2 hidden w-60 rounded-xl bg-zinc-950 px-3 py-2 text-[11px] font-medium leading-relaxed text-white shadow-xl group-hover/progress:block group-focus/progress:block">{item.label} has {item.chapters} published {item.chapters === 1 ? "chapter" : "chapters"}, representing {percentage}% of {dashboardData?.counts?.publishedChapters || 0} published chapters.</span>
                   </div>
                 );
               })}

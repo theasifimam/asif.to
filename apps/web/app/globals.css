@@ -501,3 +501,100 @@ body.has-maximized-code {
 .dark .topic-markdown .wmde-markdown hr {
   background: #3f3f46;
 }
+
+/* ─── Premium Sonner Toast Redesign ─── */
+[data-sonner-toast] {
+  font-family: var(--font-inter), sans-serif !important;
+  border-radius: var(--radius-lg, 1.25rem) !important;
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border, #bfdbfe) !important;
+  color: var(--foreground, #172554) !important;
+  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.05), 0 8px 10px -6px rgba(37, 99, 235, 0.05) !important;
+  backdrop-filter: blur(16px) !important;
+  padding: 14px 18px !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Light / Dark Mode Overrides */
+.dark [data-sonner-toast] {
+  background: rgba(15, 23, 42, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #eff6ff !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Success Toast */
+[data-sonner-toast][data-type="success"] {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+  background: rgba(240, 253, 250, 0.95) !important;
+}
+[data-sonner-toast][data-type="success"] [data-icon] {
+  color: #10b981 !important;
+}
+.dark [data-sonner-toast][data-type="success"] {
+  background: rgba(20, 184, 166, 0.1) !important;
+  border-color: rgba(20, 184, 166, 0.2) !important;
+}
+
+/* Error Toast */
+[data-sonner-toast][data-type="error"] {
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  background: rgba(254, 242, 242, 0.95) !important;
+}
+[data-sonner-toast][data-type="error"] [data-icon] {
+  color: #ef4444 !important;
+}
+.dark [data-sonner-toast][data-type="error"] {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Info Toast */
+[data-sonner-toast][data-type="info"] {
+  border-color: rgba(59, 130, 246, 0.3) !important;
+  background: rgba(239, 246, 255, 0.95) !important;
+}
+[data-sonner-toast][data-type="info"] [data-icon] {
+  color: #3b82f6 !important;
+}
+.dark [data-sonner-toast][data-type="info"] {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Warning Toast */
+[data-sonner-toast][data-type="warning"] {
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  background: rgba(254, 253, 242, 0.95) !important;
+}
+[data-sonner-toast][data-type="warning"] [data-icon] {
+  color: #f59e0b !important;
+}
+.dark [data-sonner-toast][data-type="warning"] {
+  background: rgba(245, 158, 11, 0.1) !important;
+  border-color: rgba(245, 158, 11, 0.2) !important;
+}
+
+/* Loading Toast */
+[data-sonner-toast][data-type="loading"] {
+  border-color: var(--border, #bfdbfe) !important;
+  background: var(--card-bg) !important;
+}
+
+/* Titles and Descriptions */
+[data-sonner-toast] [data-title] {
+  font-family: var(--font-outfit), sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  letter-spacing: -0.010em !important;
+  color: inherit !important;
+}
+
+[data-sonner-toast] [data-description] {
+  font-family: var(--font-inter), sans-serif !important;
+  font-size: 0.775rem !important;
+  font-weight: 500 !important;
+  color: inherit !important;
+  opacity: 0.8 !important;
+}
+

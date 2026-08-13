@@ -23,7 +23,7 @@ export default function ChapterHeader({
   setIsDrawerOpen,
 }) {
   return (
-    <div className="flex flex-col gap-3 p-3 sm:p-6 rounded-2xl sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 transition-all">
+    <div className="flex flex-col gap-3 p-3 sm:p-6 rounded-3xl bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 transition-all">
       {/* Top Header Row */}
       <div className="flex items-center justify-between gap-2.5">
         {/* Left: Back Arrow & Course Badges */}
@@ -41,7 +41,8 @@ export default function ChapterHeader({
             </span>
             <span
               className={`font-bold text-[11px] sm:text-xs px-2.5 py-0.5 rounded-full shrink-0 ${
-                tech?.badgeBg || "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                tech?.badgeBg ||
+                "bg-blue-500/10 text-blue-600 dark:text-blue-400"
               }`}
             >
               {tech?.name || course?.techId} Course

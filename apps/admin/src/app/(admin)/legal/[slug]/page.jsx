@@ -100,39 +100,39 @@ export default function LegalPageEditor() {
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-[#09090b] flex flex-col transition-colors duration-300">
       {/* Header Toolbar */}
-      <header className="h-20 border-b border-zinc-200 dark:border-zinc-900 px-12 flex items-center justify-between sticky top-0 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl z-120 transition-colors duration-300">
-        <div className="flex items-center gap-8">
+      <header className="min-h-16 py-3 border-b border-zinc-200 dark:border-zinc-900 px-4 sm:px-6 md:px-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sticky top-0 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl z-120 transition-colors duration-300">
+        <div className="flex items-center gap-3 sm:gap-6 min-w-0">
           <Link
             href="/dashboard"
-            className="w-10 h-10 rounded-full border border-zinc-200 dark:border-zinc-800 flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-zinc-500 hover:text-zinc-900 dark:hover:text-white bg-white dark:bg-transparent shadow-sm"
+            className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-full border border-zinc-200 dark:border-zinc-800 flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-zinc-500 hover:text-zinc-900 dark:hover:text-white bg-white dark:bg-transparent shadow-sm"
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={18} />
           </Link>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 dark:text-zinc-600">
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-zinc-500 dark:text-zinc-600 truncate">
               Legal Protocol Editor
             </span>
-            <span className="text-sm font-black text-zinc-900 dark:text-white italic tracking-tight uppercase">
+            <span className="text-xs sm:text-sm font-black text-zinc-900 dark:text-white italic tracking-tight uppercase truncate">
               {slug.replace(/-/g, " ")}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto [&>button]:flex-1 sm:[&>button]:flex-initial">
           <Button
             variant={isPreview ? "default" : "outline"}
             onClick={() => setIsPreview(!isPreview)}
-            className="rounded-full px-6 h-12 text-[10px] font-black uppercase tracking-widest"
+            className="rounded-full px-4 sm:px-6 h-10 sm:h-12 text-[10px] font-black uppercase tracking-wider sm:tracking-widest"
           >
-            <Eye size={16} className="mr-2" />
-            {isPreview ? "Close Logic View" : "Logic Preview"}
+            <Eye size={15} className="mr-1.5 sm:mr-2" />
+            {isPreview ? "Close Logic" : "Logic Preview"}
           </Button>
           <Button
             onClick={handleSave}
             disabled={isSaving}
-            className="rounded-full px-8 h-12 text-[10px] font-black uppercase tracking-widest bg-emerald-500 text-white hover:bg-emerald-400 shadow-xl shadow-emerald-500/20 border-none"
+            className="rounded-full px-5 sm:px-8 h-10 sm:h-12 text-[10px] font-black uppercase tracking-wider sm:tracking-widest bg-emerald-500 text-white hover:bg-emerald-400 shadow-xl shadow-emerald-500/20 border-none"
           >
-            <Save size={16} className="mr-2" />
+            <Save size={15} className="mr-1.5 sm:mr-2" />
             {isSaving ? "Syncing..." : "Commit Protocol"}
           </Button>
         </div>
@@ -141,22 +141,22 @@ export default function LegalPageEditor() {
       <div className="flex-1 flex overflow-hidden">
         {/* Editor Content */}
         <main
-          className={`flex-1 overflow-y-auto p-12 md:p-24 transition-all duration-700 ${isPreview ? "opacity-0 scale-95 pointer-events-none absolute inset-0" : "opacity-100 scale-100 relative"}`}
+          className={`flex-1 overflow-y-auto p-4 sm:p-8 md:p-12 lg:p-16 transition-all duration-700 ${isPreview ? "opacity-0 scale-95 pointer-events-none absolute inset-0" : "opacity-100 scale-100 relative"}`}
         >
-          <div className="max-w-4xl mx-auto flex flex-col gap-10">
-            <div className="flex flex-col gap-2">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500/60 mb-2">
+          <div className="max-w-4xl mx-auto flex flex-col gap-6 sm:gap-10">
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500/60 mb-1">
                 Primary Heading
               </span>
               <input
                 placeholder="ENTER PROTOCOL TITLE..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-transparent text-4xl md:text-5xl font-black font-outfit uppercase tracking-tighter text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-800 focus:outline-none transition-all"
+                className="w-full bg-transparent text-2xl sm:text-4xl md:text-5xl font-black font-outfit uppercase tracking-tighter text-zinc-900 dark:text-white placeholder:text-zinc-300 dark:placeholder:text-zinc-800 focus:outline-none transition-all"
               />
             </div>
 
-            <div className="flex items-center gap-6 border-y border-zinc-100 dark:border-zinc-900/50 py-6">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-6 border-y border-zinc-100 dark:border-zinc-900/50 py-4 sm:py-6">
               <div className="flex items-center gap-2">
                 <History size={14} className="text-zinc-400" />
                 <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
@@ -166,7 +166,7 @@ export default function LegalPageEditor() {
                     : "Never"}
                 </span>
               </div>
-              <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-800" />
+              <div className="hidden sm:block w-px h-4 bg-zinc-200 dark:bg-zinc-800" />
               <div className="flex items-center gap-2">
                 <CheckCircle2 size={14} className="text-emerald-500" />
                 <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">
@@ -192,22 +192,22 @@ export default function LegalPageEditor() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="absolute inset-0 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-lg z-115 overflow-y-auto p-12 md:p-24 shadow-2xl"
+              className="absolute inset-0 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-lg z-115 overflow-y-auto p-4 sm:p-8 md:p-12 shadow-2xl"
             >
-              <div className="max-w-4xl mx-auto bg-white dark:bg-[#0c0c0e] text-zinc-900 dark:text-white rounded-[2.5rem] p-12 md:p-20 shadow-2xl border border-zinc-100 dark:border-zinc-900">
-                <div className="flex items-center gap-4 mb-16">
+              <div className="max-w-4xl mx-auto bg-white dark:bg-[#0c0c0e] text-zinc-900 dark:text-white rounded-3xl sm:rounded-[2.5rem] p-6 sm:p-10 md:p-16 shadow-2xl border border-zinc-100 dark:border-zinc-900">
+                <div className="flex items-center gap-4 mb-8 sm:mb-16">
                   <span className="w-10 h-px bg-emerald-500"></span>
                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500">
                     Protocol Preview
                   </span>
                 </div>
 
-                <h1 className="text-5xl md:text-6xl font-black font-outfit uppercase tracking-tighter leading-tight text-zinc-900 dark:text-white mb-10">
+                <h1 className="text-2xl sm:text-4xl md:text-6xl font-black font-outfit uppercase tracking-tighter leading-tight text-zinc-900 dark:text-white mb-6 sm:mb-10">
                   {title || "Untitled Protocol"}
                 </h1>
 
                 <div
-                  className="prose dark:prose-invert max-w-none text-xl leading-relaxed text-zinc-700 dark:text-zinc-400 ql-editor"
+                  className="prose dark:prose-invert max-w-none text-base sm:text-xl leading-relaxed text-zinc-700 dark:text-zinc-400 ql-editor"
                   dangerouslySetInnerHTML={{ __html: content }}
                 />
               </div>

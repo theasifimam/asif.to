@@ -32,6 +32,7 @@ import {
   AdminSearch,
 } from "@/components/admin";
 import { coursesApi, topicsApi } from "@/lib/api";
+import { ViewToggle } from "@/components/ViewToggle";
 
 const statusStyles = {
   published:
@@ -49,6 +50,7 @@ export default function TopicsPage() {
     status: "all",
     page: 1,
   });
+  const [viewMode, setViewMode] = useState("table");
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
   const [loading, setLoading] = useState(true);
   const [reordering, setReordering] = useState(false);
@@ -100,15 +102,17 @@ export default function TopicsPage() {
   ]);
 
   const toggleStatus = async (topic) => {
-    const response = await topicsApi.setStatus(
-      topic._id,
-      topic.status === "published" ? "draft" : "published",
-    );
+    const nextStatus = topic.status === "published" ? "draft" : "published";
+    const response = await topicsApi.setStatus(topic._id, nextStatus);
     if (response.success) {
       toast.success(
-        topic.status === "published" ? "Topic unpublished" : "Topic published",
+        nextStatus === "published" ? "Topic published" : "Topic unpublished",
       );
-      load();
+      setTopics((current) =>
+        current.map((item) =>
+          item._id === topic._id ? { ...item, status: nextStatus } : item,
+        ),
+      );
     } else toast.error(response.error || "Unable to update status");
   };
 
@@ -139,12 +143,19 @@ export default function TopicsPage() {
   };
 
   const deleteTopic = async () => {
+    if (!deleteTarget) return;
     setDeleting(true);
     const response = await topicsApi.delete(deleteTarget._id);
     if (response.success) {
       toast.success("Topic deleted");
+      setTopics((current) =>
+        current.filter((item) => item._id !== deleteTarget._id),
+      );
+      setPagination((prev) => ({
+        ...prev,
+        total: Math.max(0, prev.total - 1),
+      }));
       setDeleteTarget(null);
-      load();
     } else toast.error(response.error || "Unable to delete topic");
     setDeleting(false);
   };
@@ -155,32 +166,35 @@ export default function TopicsPage() {
         eyebrow="Content / Topics"
         title="Course topics"
         description="Build search-ready topic pages beneath each course."
-        actions={<>
-          <Link href="/categories">
-            <Button variant="outline">
-              <Filter className="mr-2 h-4 w-4" /> Categories
-            </Button>
-          </Link>
-          <Link href="/topics/new">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" /> New topic
-            </Button>
-          </Link>
-        </>}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            <Link href="/categories" className="flex-2">
+              <Button variant="outline" className="w-full">
+                <Filter className="mr-2 h-4 w-4" /> Categories
+              </Button>
+            </Link>
+            <Link href="/topics/new" className="flex-2">
+              <Button className="w-full">
+                <Plus className="mr-2 h-4 w-4" /> New topic
+              </Button>
+            </Link>
+          </div>
+        }
       />
 
       <AdminFilters>
-          <AdminSearch
-            value={filters.search}
-            onChange={(search) =>
-              setFilters((current) => ({
-                ...current,
-                search,
-                page: 1,
-              }))
-            }
-            placeholder="Search title or slug"
-          />
+        <AdminSearch
+          value={filters.search}
+          onChange={(search) =>
+            setFilters((current) => ({
+              ...current,
+              search,
+              page: 1,
+            }))
+          }
+          placeholder="Search title or slug"
+        />
         <Select
           value={filters.course}
           onValueChange={(course) =>
@@ -238,152 +252,305 @@ export default function TopicsPage() {
         </p>
       )}
 
-      <AdminContent>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-190 text-left text-sm">
-            <thead className="border-b border-zinc-200/60 bg-zinc-50/80 text-xs uppercase tracking-wide text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-900/60">
-              <tr>
-                <th className="px-5 py-3">Topic</th>
-                <th className="px-5 py-3">Type</th>
-                <th className="px-5 py-3">Course</th>
-                <th className="px-5 py-3">Category</th>
-                <th className="px-5 py-3">Status</th>
-                <th className="px-5 py-3">Order</th>
-                <th className="px-5 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-              {loading ? (
-                <tr>
-                  <td colSpan="7" className="px-5 py-16 text-center">
-                    <Loader2 className="mx-auto h-5 w-5 animate-spin text-blue-600" />
-                  </td>
-                </tr>
-              ) : topics.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan="7"
-                    className="px-5 py-16 text-center text-zinc-500"
-                  >
-                    <FilePlus2 className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
-                    No topics match these filters.
-                  </td>
-                </tr>
-              ) : (
-                topics.map((topic, index) => (
-                  <tr
-                    key={topic._id}
-                    className="hover:bg-zinc-50 dark:hover:bg-zinc-900/40"
-                  >
-                    <td className="px-5 py-4">
-                      <p className="font-semibold text-zinc-900 dark:text-white">
-                        {topic.title}
-                      </p>
-                      <p className="mt-1 text-xs text-zinc-400">
-                        /{topic.slug}
-                      </p>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold capitalize text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">
-                        {topic.type || "article"}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-zinc-600 dark:text-zinc-300">
-                      {topic.course?.title || "-"}
-                    </td>
-                    <td className="px-5 py-4 text-zinc-600 dark:text-zinc-300">
-                      {topic.category?.name || "-"}
-                    </td>
-                    <td className="px-5 py-4">
+      <AdminContent plain={viewMode === "card"}>
+        {loading ? (
+          <div className="flex h-64 items-center justify-center rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
+            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+          </div>
+        ) : topics.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
+            <FilePlus2 className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
+            <p className="text-sm font-medium">
+              No topics match these filters.
+            </p>
+          </div>
+        ) : viewMode === "card" ? (
+          <div className="space-y-6">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {topics.map((topic, index) => (
+                <div
+                  key={topic._id}
+                  className="group flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs transition-all hover:border-blue-500/50 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800 text-[10px] font-black text-zinc-600 dark:text-zinc-400">
+                          #{topic.order}
+                        </span>
+                        <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                          {topic.type || "article"}
+                        </span>
+                        {topic.category?.name && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
+                            {topic.category.name}
+                          </span>
+                        )}
+                      </div>
                       <button
                         onClick={() => toggleStatus(topic)}
-                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[topic.status]}`}
+                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${statusStyles[topic.status]}`}
                       >
                         {topic.status}
                       </button>
-                    </td>
-                    <td className="px-5 py-4 text-zinc-600 dark:text-zinc-300">
-                      <div className="flex items-center gap-1">
-                        <span className="w-7 text-center tabular-nums">
-                          {topic.order}
-                        </span>
-                        {canReorder && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              title="Move topic up"
-                              disabled={reordering || index === 0}
-                              onClick={() => moveTopic(index, -1)}
-                            >
-                              <ArrowUp className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              title="Move topic down"
-                              disabled={
-                                reordering || index === topics.length - 1
-                              }
-                              onClick={() => moveTopic(index, 1)}
-                            >
-                              <ArrowDown className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex justify-end gap-1">
-                        <Link href={`/topics/${topic._id}/edit`}>
+                    </div>
+
+                    <div>
+                      <Link
+                        href={`/topics/${topic._id}/edit`}
+                        className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-2"
+                      >
+                        {topic.title}
+                      </Link>
+                      <p className="mt-1 text-xs text-zinc-400 truncate">
+                        /{topic.slug}
+                      </p>
+                    </div>
+
+                    {topic.course?.title && (
+                      <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                        Course: {topic.course.title}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-3.5 dark:border-zinc-800/80">
+                    <div className="flex items-center gap-1">
+                      {canReorder && (
+                        <>
                           <Button
                             variant="ghost"
                             size="icon"
-                            title="Edit topic"
+                            className="h-8 w-8 rounded-lg"
+                            title="Move up"
+                            disabled={reordering || index === 0}
+                            onClick={() => moveTopic(index, -1)}
                           >
-                            <Edit3 className="h-4 w-4" />
+                            <ArrowUp className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-lg"
+                            title="Move down"
+                            disabled={reordering || index === topics.length - 1}
+                            onClick={() => moveTopic(index, 1)}
+                          >
+                            <ArrowDown className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1 shrink-0">
+                      {topic.status === "published" && topic.course?.slug && (
+                        <Link
+                          href={`https://asif.to/${[
+                            topic.course.slug,
+                            topic.type === "interview"
+                              ? topic.category?.slug
+                              : null,
+                            topic.slug,
+                          ]
+                            .filter(Boolean)
+                            .map(encodeURIComponent)
+                            .join("/")}`}
+                          target="_blank"
+                        >
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-lg"
+                            title="Open public topic"
+                          >
+                            <ExternalLink className="h-4 w-4" />
                           </Button>
                         </Link>
-                        {topic.status === "published" && topic.course?.slug && (
-                          <Link
-                            href={`https://asif.to/${[
-                              topic.course.slug,
-                              topic.type === "interview"
-                                ? topic.category?.slug
-                                : null,
-                              topic.slug,
-                            ]
-                              .filter(Boolean)
-                              .map(encodeURIComponent)
-                              .join("/")}`}
-                            target="_blank"
-                          >
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              title="Open public topic"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </Button>
-                          </Link>
-                        )}
+                      )}
+                      <Link href={`/topics/${topic._id}/edit`}>
                         <Button
                           variant="ghost"
                           size="icon"
-                          title="Delete topic"
-                          onClick={() => setDeleteTarget(topic)}
+                          className="h-8 w-8 rounded-lg"
+                          title="Edit topic"
                         >
-                          <Trash2 className="h-4 w-4 text-red-500" />
+                          <Edit3 className="h-4 w-4" />
                         </Button>
-                      </div>
-                    </td>
+                      </Link>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Delete topic"
+                        onClick={() => setDeleteTarget(topic)}
+                        className="h-8 w-8 rounded-lg text-zinc-400 hover:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <AdminPagination
+              page={pagination.page}
+              pages={pagination.pages}
+              total={pagination.total || 0}
+              itemLabel="topics"
+              onPageChange={(page) =>
+                setFilters((current) => ({ ...current, page }))
+              }
+            />
+          </div>
+        ) : (
+          <div className="w-full bg-white dark:bg-zinc-900 rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-190 text-left text-sm">
+                <thead className="border-b border-zinc-200/70 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-950/40 text-[11px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                  <tr>
+                    <th className="px-6 py-4">Topic</th>
+                    <th className="px-6 py-4">Type</th>
+                    <th className="px-6 py-4">Course</th>
+                    <th className="px-6 py-4">Category</th>
+                    <th className="px-6 py-4">Status</th>
+                    <th className="px-6 py-4">Order</th>
+                    <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-        <AdminPagination page={pagination.page} pages={pagination.pages} total={pagination.total || 0} itemLabel="topics" onPageChange={(page) => setFilters((current) => ({ ...current, page }))} />
+                </thead>
+                <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
+                  {topics.map((topic, index) => (
+                    <tr
+                      key={topic._id}
+                      className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
+                    >
+                      <td className="px-6 py-4">
+                        <Link
+                          href={`/topics/${topic._id}/edit`}
+                          className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-1"
+                        >
+                          {topic.title}
+                        </Link>
+                        <p className="mt-0.5 text-xs text-zinc-400 truncate">
+                          /{topic.slug}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-2.5 py-0.5 text-[10px] font-black uppercase text-zinc-600 dark:text-zinc-300">
+                          {topic.type || "article"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-500/20">
+                          {topic.course?.title || "-"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                        {topic.category?.name || "-"}
+                      </td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => toggleStatus(topic)}
+                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${statusStyles[topic.status]}`}
+                        >
+                          {topic.status}
+                        </button>
+                      </td>
+                      <td className="px-6 py-4 text-zinc-600 dark:text-zinc-300">
+                        <div className="flex items-center gap-1">
+                          <span className="w-7 text-center font-black text-xs text-zinc-400">
+                            #{topic.order}
+                          </span>
+                          {canReorder && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                title="Move topic up"
+                                disabled={reordering || index === 0}
+                                onClick={() => moveTopic(index, -1)}
+                              >
+                                <ArrowUp className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                title="Move topic down"
+                                disabled={
+                                  reordering || index === topics.length - 1
+                                }
+                                onClick={() => moveTopic(index, 1)}
+                              >
+                                <ArrowDown className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-end gap-1">
+                          <Link href={`/topics/${topic._id}/edit`}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                              title="Edit topic"
+                            >
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          {topic.status === "published" &&
+                            topic.course?.slug && (
+                              <Link
+                                href={`https://asif.to/${[
+                                  topic.course.slug,
+                                  topic.type === "interview"
+                                    ? topic.category?.slug
+                                    : null,
+                                  topic.slug,
+                                ]
+                                  .filter(Boolean)
+                                  .map(encodeURIComponent)
+                                  .join("/")}`}
+                                target="_blank"
+                              >
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                  title="Open public topic"
+                                >
+                                  <ExternalLink className="h-4 w-4" />
+                                </Button>
+                              </Link>
+                            )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Delete topic"
+                            className="h-8 w-8 rounded-xl text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                            onClick={() => setDeleteTarget(topic)}
+                          >
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <AdminPagination
+              page={pagination.page}
+              pages={pagination.pages}
+              total={pagination.total || 0}
+              itemLabel="topics"
+              onPageChange={(page) =>
+                setFilters((current) => ({ ...current, page }))
+              }
+            />
+          </div>
+        )}
       </AdminContent>
 
       <ConfirmDialog

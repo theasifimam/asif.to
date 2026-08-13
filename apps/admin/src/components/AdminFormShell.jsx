@@ -2,7 +2,7 @@ import { Loader2 } from "lucide-react";
 import { AdminPage, AdminPageHeader } from "@/components/admin";
 
 export const formSectionClass =
-  "min-w-0 space-y-5  bg-white px-4 py-5 dark:bg-zinc-950 rounded-4xl border border-zinc-200/60 dark:border-zinc-800/60 sm:p-5";
+  "min-w-0 space-y-4 sm:space-y-5 bg-white px-3.5 py-4.5 dark:bg-zinc-950 rounded-3xl sm:rounded-4xl border border-zinc-200/60 dark:border-zinc-800/60 sm:p-6";
 export const formAsideClass = formSectionClass;
 
 export function AdminFormLoading() {

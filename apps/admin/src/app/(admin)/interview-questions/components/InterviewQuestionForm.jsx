@@ -17,7 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { coursesApi, interviewQuestionsApi } from "@/lib/api";
-import AdminFormShell, { AdminFormLoading, formSectionClass } from "@/components/AdminFormShell";
+import AdminFormShell, {
+  AdminFormLoading,
+  formSectionClass,
+} from "@/components/AdminFormShell";
 import FollowUpQuestionPicker from "@/components/FollowUpQuestionPicker";
 
 const initialForm = {
@@ -117,70 +120,69 @@ export default function InterviewQuestionForm({
     setSaving(false);
   };
 
-  if (loading)
-    return (
-      <AdminFormLoading />
-    );
+  if (loading) return <AdminFormLoading />;
 
   return (
-    <AdminFormShell eyebrow="Content / Interview Questions" title={questionId ? "Edit interview question" : "Create interview question"} description="Maintain a reusable, interview-ready answer for this course." back={<Link href="/interview-questions" className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"><ArrowLeft className="h-4 w-4" /> Back to questions</Link>} actions={<><Button variant="outline" onClick={() => setPreview((value) => !value)}><Eye className="h-4 w-4" />{preview ? "Edit" : "Preview"}</Button><Button onClick={save} disabled={saving}><Save className="h-4 w-4" />Save</Button></>}>
-      <div className="hidden">
-        <div>
-          <Link
-            href="/interview-questions"
-            className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
-          >
-            <ArrowLeft className="h-4 w-4" /> Back to questions
-          </Link>
-          <h1 className="mt-4 text-3xl font-bold text-zinc-950 dark:text-white">
-            {questionId
-              ? "Edit interview question"
-              : "Create interview question"}
-          </h1>
-        </div>
-        <div className="flex gap-2">
+    <AdminFormShell
+      eyebrow="Content / Interview Questions"
+      title={
+        questionId ? "Edit interview question" : "Create interview question"
+      }
+      description="Maintain a reusable, interview-ready answer for this course."
+      back={
+        <Link
+          href="/interview-questions"
+          className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back to questions
+        </Link>
+      }
+      actions={
+        <div className="flex items-center gap-2 w-full xs:w-auto">
           <Button
             variant="outline"
             onClick={() => setPreview((value) => !value)}
+            className="flex-1 xs:flex-initial"
           >
-            <Eye className="h-4 w-4" /> {preview ? "Edit" : "Preview"}
+            <Eye className="h-4 w-4" />
+            {preview ? "Edit" : "Preview"}
           </Button>
-          <Button onClick={save} disabled={saving}>
-            {saving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
+          <Button
+            onClick={save}
+            disabled={saving}
+            className="flex-1 xs:flex-initial"
+          >
+            <Save className="h-4 w-4" />
             Save
           </Button>
         </div>
-      </div>
-
+      }
+    >
       {preview ? (
-        <article className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-6 dark:border-zinc-800/60 dark:bg-zinc-950">
+        <article className="space-y-5 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-4 sm:p-6 dark:border-zinc-800/60 dark:bg-zinc-950">
           <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase text-zinc-500">
             <span>{form.difficulty}</span>
             <span>{form.questionType}</span>
           </div>
-          <h2 className="text-2xl font-bold text-zinc-950 dark:text-white">
+          <h2 className="text-xl sm:text-2xl font-bold text-zinc-950 dark:text-white">
             {form.question || "Untitled question"}
           </h2>
-          <div className="whitespace-pre-wrap leading-7 text-zinc-700 dark:text-zinc-300">
+          <div className="whitespace-pre-wrap leading-7 text-zinc-700 dark:text-zinc-300 text-sm sm:text-base">
             {form.answer}
           </div>
           {form.codeExample && (
-            <pre className="overflow-x-auto rounded-2xl bg-zinc-950 p-4 text-sm text-zinc-100">
+            <pre className="overflow-x-auto rounded-2xl bg-zinc-950 p-4 text-xs sm:text-sm text-zinc-100">
               <code>{form.codeExample}</code>
             </pre>
           )}
           {form.expectedOutput && (
-            <pre className="overflow-x-auto rounded-2xl bg-zinc-100 p-4 text-sm dark:bg-zinc-900">
+            <pre className="overflow-x-auto rounded-2xl bg-zinc-100 p-4 text-xs sm:text-sm dark:bg-zinc-900">
               <code>{form.expectedOutput}</code>
             </pre>
           )}
         </article>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px]">
           <section className="space-y-6">
             <div className={formSectionClass}>
               <div className="space-y-2">
@@ -220,7 +222,7 @@ export default function InterviewQuestionForm({
                     update("codeExample", event.target.value)
                   }
                   rows={8}
-                  className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 font-mono shadow-none dark:bg-zinc-900"
+                  className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 font-mono shadow-none dark:bg-zinc-900 text-xs sm:text-sm"
                 />
               </div>
               <div className="space-y-2">
@@ -231,12 +233,12 @@ export default function InterviewQuestionForm({
                     update("expectedOutput", event.target.value)
                   }
                   rows={4}
-                  className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 font-mono shadow-none dark:bg-zinc-900"
+                  className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 font-mono shadow-none dark:bg-zinc-900 text-xs sm:text-sm"
                 />
               </div>
             </div>
           </section>
-          <aside className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+          <aside className="space-y-5 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-4 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
             <div className="space-y-2">
               <Label>Course</Label>
               <Select
@@ -300,7 +302,12 @@ export default function InterviewQuestionForm({
                 placeholder="react, hooks, performance"
               />
             </div>
-            <FollowUpQuestionPicker course={form.course} value={form.followUps} onChange={(value) => update("followUps", value)} excludeId={questionId} />
+            <FollowUpQuestionPicker
+              course={form.course}
+              value={form.followUps}
+              onChange={(value) => update("followUps", value)}
+              excludeId={questionId}
+            />
           </aside>
         </div>
       )}

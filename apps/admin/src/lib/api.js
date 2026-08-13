@@ -394,6 +394,34 @@ export const quizApi = {
   delete: (id) => apiDelete(`/quiz/${id}`),
 };
 
+/** Shared admin planner / Kanban. */
+export const kanbanApi = {
+  boards: () => apiGet("/kanban/boards"),
+  getBoard: (id) => apiGet(`/kanban/boards/${id}`),
+  createBoard: (data) => apiPost("/kanban/boards", data),
+  updateBoard: (id, data) => apiPatch(`/kanban/boards/${id}`, data),
+  deleteBoard: (id) => apiDelete(`/kanban/boards/${id}`),
+  createColumn: (boardId, data) => apiPost(`/kanban/boards/${boardId}/columns`, data),
+  updateColumn: (id, data) => apiPatch(`/kanban/columns/${id}`, data),
+  archiveColumn: (id) => apiDelete(`/kanban/columns/${id}`),
+  reorderColumns: (boardId, items) => apiPatch(`/kanban/boards/${boardId}/columns/reorder`, { items }),
+  createLabel: (boardId, data) => apiPost(`/kanban/boards/${boardId}/labels`, data),
+  createCard: (boardId, data) => apiPost(`/kanban/boards/${boardId}/cards`, data),
+  updateCard: (id, data) => apiPatch(`/kanban/cards/${id}`, data),
+  reorderCards: (boardId, items) => apiPatch(`/kanban/boards/${boardId}/cards/reorder`, { items }),
+  duplicateCard: (id) => apiPost(`/kanban/cards/${id}/duplicate`),
+  deleteCard: (id) => apiDelete(`/kanban/cards/${id}`),
+};
+
+export const analyticsApi = {
+  overview: (params) => apiGet(`/analytics/overview?${new URLSearchParams(params)}`),
+  search: (type, params) => apiGet(`/analytics/search/${type}?${new URLSearchParams(params)}`),
+  content: (params) => apiGet(`/analytics/content?${new URLSearchParams(params)}`),
+  sources: (params) => apiGet(`/analytics/sources?${new URLSearchParams(params)}`),
+  page: (params) => apiGet(`/analytics/page?${new URLSearchParams(params)}`),
+  sync: () => apiPost("/analytics/sync"),
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPE DEFINITIONS (Placeholder types for API responses)
 // ═══════════════════════════════════════════════════════════════════════════

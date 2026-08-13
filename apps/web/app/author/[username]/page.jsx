@@ -1,6 +1,8 @@
 import React from "react";
 import AuthorClient from "@/components/AuthorClient";
-import { Metadata } from "next";
+import AsifAuthorProfile from "@/components/AsifAuthorProfile";
+import { authorIdentity, buildPersonSchema } from "@/lib/authorIdentity";
+import { absoluteUrl, assetUrl, jsonLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +18,12 @@ async function getAuthor(username) {
 
 export async function generateMetadata({ params }) {
   const { username } = await params;
+  if (username.toLowerCase() === "asif") return {
+    title: "Asif — Full-Stack JavaScript Developer and Author",
+    description: authorIdentity.shortBio,
+    alternates: { canonical: authorIdentity.url },
+    openGraph: { title: "Asif — Author and Developer behind asif.to", description: authorIdentity.shortBio, url: authorIdentity.url, type: "profile" },
+  };
   const user = await getAuthor(username);
 
   if (!user) {
@@ -60,6 +68,15 @@ export async function generateMetadata({ params }) {
 
 export default async function AuthorProfilePage({ params }) {
   const { username } = await params;
-
+  if (username.toLowerCase() === "asif") {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+    const safeFetch = async (path) => { try { const response = await fetch(`${baseUrl}${path}`, { next: { revalidate: 60 } }); return response.ok ? await response.json() : null; } catch { return null; } };
+    const [profileBody, coursesBody, articlesBody] = await Promise.all([safeFetch("/users/public/asif"), safeFetch("/courses"), safeFetch("/articles?status=published&limit=12")]);
+    const profile = profileBody?.data?.user || null;
+    const courses = coursesBody?.data || [];
+    const articles = articlesBody?.data || [];
+    const schema = { "@context": "https://schema.org", "@graph": [buildPersonSchema({ image: profile?.avatar ? assetUrl(profile.avatar) : undefined }), { "@type": "ProfilePage", "@id": `${authorIdentity.url}#profile`, url: authorIdentity.url, name: "Asif — Full-Stack JavaScript Developer", mainEntity: { "@id": `${authorIdentity.url}#person` }, isPartOf: { "@type": "WebSite", name: "asif.to", url: absoluteUrl("", "/") } }] };
+    return <><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(schema) }}/><AsifAuthorProfile profile={profile} courses={Array.isArray(courses) ? courses : courses?.data || []} articles={Array.isArray(articles) ? articles : []}/></>;
+  }
   return <AuthorClient username={username} />;
 }

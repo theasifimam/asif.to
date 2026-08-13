@@ -12,7 +12,6 @@ import {
   Link2,
   Check,
   ArrowLeft,
-  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -29,6 +28,7 @@ import BookmarkButton from "./BookmarkButton";
 import ArticleCard from "./ArticleCard";
 import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
+import AuthorIdentityCard from "./AuthorIdentityCard";
 
 const MarkdownPreview = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default.Markdown),
@@ -119,7 +119,7 @@ export default function ArticleClient({ slug }) {
         <div className="text-center">
           <h2 className="text-2xl font-bold font-outfit mb-2">Signal Lost</h2>
           <p className="text-zinc-500 text-sm">
-            We couldn't locate the requested investigation.
+            We could not locate the requested investigation.
           </p>
         </div>
         <Link
@@ -174,7 +174,7 @@ export default function ArticleClient({ slug }) {
           {/* Author & Action Row */}
           <div className="flex items-center justify-between pt-6 border-t border-zinc-200/60 dark:border-zinc-800/60 mt-2">
             <Link
-              href={`/author/${article.author.username}`}
+              href="/author/asif"
               className="flex items-center gap-3 group"
             >
               <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-zinc-100 dark:bg-zinc-800 relative border border-zinc-200 dark:border-zinc-700">
@@ -229,6 +229,8 @@ export default function ArticleClient({ slug }) {
               className="text-lg md:text-xl font-light leading-relaxed !bg-transparent !text-inherit wmde-markdown"
             />
           </div>
+
+          <AuthorIdentityCard publishedAt={article.createdAt} updatedAt={article.updatedAt} avatar={article.author?.avatar} />
 
           {/* Share Section */}
           <div className="flex flex-col gap-6 py-8 border-y border-zinc-200/60 dark:border-zinc-800/60 my-6">

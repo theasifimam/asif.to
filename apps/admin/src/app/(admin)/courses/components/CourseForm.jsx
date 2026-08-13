@@ -25,7 +25,10 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { coursesApi } from "@/lib/api";
-import AdminFormShell, { AdminFormLoading, formSectionClass } from "@/components/AdminFormShell";
+import AdminFormShell, {
+  AdminFormLoading,
+  formSectionClass,
+} from "@/components/AdminFormShell";
 
 const initialForm = {
   title: "",
@@ -181,7 +184,48 @@ export default function CourseForm({ courseId = null }) {
   const publicUrl = form.slug ? `https://asif.to/courses/${form.slug}` : "";
 
   return (
-    <AdminFormShell eyebrow="Learning / Courses" title={courseId ? "Edit course" : "Create course"} description="Course details, publishing controls, exam settings, and search metadata." back={<Link href="/courses" className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"><ArrowLeft className="h-4 w-4" /> Back to courses</Link>} actions={<><Button variant="outline" disabled={saving} onClick={() => persist("draft")}><Save className="h-4 w-4" />Save draft</Button><Button disabled={saving} onClick={() => setPublishOpen(true)}><Send className="h-4 w-4" />Publish</Button></>}>
+    <AdminFormShell
+      eyebrow="Learning / Courses"
+      title={courseId ? "Edit course" : "Create course"}
+      description="Course details, publishing controls, exam settings, and search metadata."
+      back={
+        <Link
+          href="/courses"
+          className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back to courses
+        </Link>
+      }
+      actions={
+        <div className="flex flex-wrap items-center gap-2 w-full xs:w-auto">
+          {courseId && publicUrl && (
+            <Button variant="outline" asChild className="flex-1 xs:flex-initial">
+              <a href={publicUrl} target="_blank" rel="noreferrer">
+                <ExternalLink className="h-4 w-4" />
+                View
+              </a>
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            disabled={saving}
+            onClick={() => persist("draft")}
+            className="flex-1 xs:flex-initial"
+          >
+            <Save className="h-4 w-4" />
+            Save draft
+          </Button>
+          <Button
+            disabled={saving}
+            onClick={() => setPublishOpen(true)}
+            className="flex-1 xs:flex-initial"
+          >
+            <Send className="h-4 w-4" />
+            Publish
+          </Button>
+        </div>
+      }
+    >
       <div className="hidden">
         <div className="flex items-start gap-3">
           <Button variant="outline" size="icon" asChild title="Back to courses">

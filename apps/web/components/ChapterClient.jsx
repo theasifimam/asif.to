@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import MobileChapterIndex from "@/components/MobileChapterIndex";
 import FocusHeader from "@/components/chapter/FocusHeader";
 import ChapterHeader from "@/components/chapter/ChapterHeader";
 import ChapterSidebar from "@/components/chapter/ChapterSidebar";
@@ -18,6 +19,7 @@ import { parseContentBlocks } from "@/components/chapter/chapterUtils";
 import { useGetChapterBySlugQuery } from "@/lib/api/courseApi";
 import { TECH_STACKS } from "@/lib/tutorialData";
 import { Loader2, AlertCircle } from "lucide-react";
+import AuthorIdentityCard from "@/components/AuthorIdentityCard";
 
 export default function ChapterClient({ courseSlug, chapterSlug }) {
   const params = useParams();
@@ -41,7 +43,7 @@ export default function ChapterClient({ courseSlug, chapterSlug }) {
           const savedComp = localStorage.getItem(
             `course_completed_${courseId}`,
           );
-          if (savedComp) setCompletedChapters(JSON.parse(savedComp));
+          if (savedComp) setCompletedChapters(JSON.parse(savedComp)); // eslint-disable-line react-hooks/set-state-in-effect
         }
       } catch {
         /* ignore */
@@ -76,7 +78,7 @@ export default function ChapterClient({ courseSlug, chapterSlug }) {
   const course = data?.data?.course;
   const activeCourseSlug = course?.slug || courseId;
   const chapter = data?.data?.chapter;
-  const allChapters = data?.data?.allChapters || [];
+  const allChapters = useMemo(() => data?.data?.allChapters || [], [data?.data?.allChapters]);
   const prevChapter = data?.data?.prevChapter;
   const nextChapter = data?.data?.nextChapter;
 
@@ -121,7 +123,7 @@ export default function ChapterClient({ courseSlug, chapterSlug }) {
     }
     const wordCount = text.split(/\s+/).filter(Boolean).length;
     return Math.max(1, Math.ceil(wordCount / 180));
-  }, [chapter?.content]);
+  }, [chapter]);
 
   // Keyboard shortcut listener for Focus Mode
   useEffect(() => {
@@ -219,12 +221,18 @@ export default function ChapterClient({ courseSlug, chapterSlug }) {
         ? "text-sm sm:text-xl leading-loose"
         : "text-sm sm:text-lg leading-relaxed";
 
-  let sectionHeadingCount = 0;
-
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground transition-colors duration-300">
       {/* Hide Global Header in Focus Mode */}
       {!isFocusMode && <Header />}
+
+      {/* Chapter list index bar under main navbar with auto-hide on scroll */}
+      {!isFocusMode && allChapters.length > 0 && (
+        <MobileChapterIndex
+          chapters={allChapters}
+          activeCourseSlug={activeCourseSlug}
+        />
+      )}
 
       {/* Focus Mode Sticky Top Bar */}
       {isFocusMode && (
@@ -328,6 +336,7 @@ export default function ChapterClient({ courseSlug, chapterSlug }) {
             />
             {/* Try It Challenge */}
             <TryItChallenge challenge={chapter?.tryItChallenge} />
+            <AuthorIdentityCard publishedAt={chapter?.createdAt} updatedAt={chapter?.updatedAt} compact />
             {/* Share Section */}
             <ChapterShareSection chapter={chapter} />
             {/* Bottom Prev / Next Navigation */}

@@ -37,7 +37,6 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
                     alt="asif.to"
                     className="w-9 h-9 rounded-xl object-contain shadow-sm group-hover:scale-105 transition-transform"
                   />
-                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-blue-600 rounded-full border-2 border-white dark:border-zinc-900" />
                 </div>
                 <div className="flex flex-col">
                   <span className="font-outfit font-black text-2xl tracking-tight text-foreground leading-none">
@@ -53,8 +52,8 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
               </Link>
               <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed">
                 Modern step-by-step coding courses, instant syntax cheatsheets,
-                interactive flashcards, and practice quizzes for React, Next.js, Express,
-                Node & MongoDB.
+                interactive flashcards, and practice quizzes for React, Next.js,
+                Express, Node & MongoDB.
               </p>
 
               {/* Bookmark & Share CTA Buttons */}
@@ -185,6 +184,12 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
                     className="hover:text-foreground transition-colors"
                   >
                     About Us
+                  </Link>
+                  <Link
+                    href="/author/asif"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Author: Asif
                   </Link>
                   <Link
                     href="/contact"

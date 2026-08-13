@@ -21,10 +21,8 @@ export default function FocusHeader({
 
   return (
     <header
-      className={`sticky top-0 z-50 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 shadow-xs transition-transform duration-300 ease-in-out ${
-        isNavVisible
-          ? "translate-y-0"
-          : "-translate-y-full pointer-events-none"
+      className={`sticky top-20 z-50 bg-white/98 dark:bg-zinc-900/98 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 shadow-xs transition-transform duration-300 ease-in-out ${
+        isNavVisible ? "translate-y-0" : "-translate-y-full pointer-events-none"
       }`}
     >
       <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 flex items-center justify-between gap-2 sm:gap-4 overflow-hidden">
@@ -74,7 +72,7 @@ export default function FocusHeader({
 
               {/* TOC Dropdown Menu */}
               {isTocOpen && (
-                <div className="absolute right-0 top-11 w-72 p-3 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl z-50 space-y-1">
+                <div className="absolute right-0 top-11 w-72 p-3 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl z-50 space-y-1">
                   <div className="text-[10px] font-black uppercase text-zinc-400 px-2 py-1 tracking-wider border-b border-zinc-100 dark:border-zinc-800 mb-1">
                     Table of Contents
                   </div>

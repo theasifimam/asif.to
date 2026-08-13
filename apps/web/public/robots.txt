@@ -1,0 +1,19 @@
+# robots.txt for asif.to
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /forgot-password
+Disallow: /bookmarks
+Disallow: /certificates
+
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /forgot-password
+Disallow: /bookmarks
+Disallow: /certificates
+
+Sitemap: https://asif.to/sitemap.xml
+Host: https://asif.to

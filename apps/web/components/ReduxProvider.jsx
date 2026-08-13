@@ -21,16 +21,7 @@ export function ReduxProvider({ children }) {
             <AuthHydrator>
                 {children}
             </AuthHydrator>
-            <Toaster
-        richColors
-        position="top-center"
-        toastOptions={{
-          style: {
-            fontFamily: "var(--font-inter)",
-            fontSize: "13px",
-            fontWeight: "600"
-          }
-        }} />
+            <Toaster richColors position="top-center" />
       
         </Provider>);
 

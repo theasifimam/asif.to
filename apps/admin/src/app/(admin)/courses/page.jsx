@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { coursesApi } from "@/lib/api";
+import { ViewToggle } from "@/components/ViewToggle";
 
 const initialPagination = { page: 1, pages: 1, total: 0, limit: 20 };
 
@@ -45,6 +46,7 @@ export default function CoursesAdminPage() {
     page: 1,
     limit: 20,
   });
+  const [viewMode, setViewMode] = useState("table");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [pagination, setPagination] = useState(initialPagination);
   const [loading, setLoading] = useState(true);
@@ -103,7 +105,11 @@ export default function CoursesAdminPage() {
       toast.success(
         status === "published" ? "Course published" : "Course moved to draft",
       );
-      load();
+      setCourses((current) =>
+        current.map((item) =>
+          item._id === course._id ? { ...item, status } : item,
+        ),
+      );
     } else {
       toast.error(response.error || "Unable to update course status");
     }
@@ -116,8 +122,14 @@ export default function CoursesAdminPage() {
     const response = await coursesApi.delete(deleteCourse._id);
     if (response.success) {
       toast.success("Course and its chapters deleted");
+      setCourses((current) =>
+        current.filter((item) => item._id !== deleteCourse._id),
+      );
+      setPagination((prev) => ({
+        ...prev,
+        total: Math.max(0, prev.total - 1),
+      }));
       setDeleteCourse(null);
-      load();
     } else {
       toast.error(response.error || "Unable to delete course");
     }
@@ -125,29 +137,30 @@ export default function CoursesAdminPage() {
   };
 
   return (
-    <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-      <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+    <main className="mx-auto max-w-7xl space-y-4 px-3 py-4 sm:space-y-6 sm:px-6 sm:py-8 lg:px-8">
+      <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
             Content / Courses
           </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">
+          <h1 className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-black tracking-tight text-zinc-950 dark:text-white">
             Courses
           </h1>
-          <p className="mt-2 text-sm text-zinc-500">
+          <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-500">
             Manage course publishing, metadata, and chapter collections.
           </p>
         </div>
-        <div className="flex gap-2">
-          <Link href="/courses/new">
-            <Button>
+        <div className="flex items-center gap-2">
+          <ViewToggle view={viewMode} onViewChange={setViewMode} />
+          <Link href="/courses/new" className="md:flex-2 sm:flex-2 sm:w-full">
+            <Button className="w-full">
               <Plus className="mr-2 h-4 w-4" /> New course
             </Button>
           </Link>
         </div>
       </header>
 
-      <section className="flex flex-col gap-3 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950 md:flex-row">
+      <section className="flex flex-col gap-3 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-3.5 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950 md:flex-row">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
           <Input
@@ -161,7 +174,10 @@ export default function CoursesAdminPage() {
           value={filters.status}
           onValueChange={(value) => setFilter("status", value)}
         >
-          <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900 md:w-48" aria-label="Filter by status">
+          <SelectTrigger
+            className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900 md:w-48"
+            aria-label="Filter by status"
+          >
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
           <SelectContent>
@@ -174,7 +190,10 @@ export default function CoursesAdminPage() {
           value={filters.level}
           onValueChange={(value) => setFilter("level", value)}
         >
-          <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900 md:w-56" aria-label="Filter by level">
+          <SelectTrigger
+            className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900 md:w-56"
+            aria-label="Filter by level"
+          >
             <SelectValue placeholder="All levels" />
           </SelectTrigger>
           <SelectContent>
@@ -189,68 +208,197 @@ export default function CoursesAdminPage() {
         </Select>
       </section>
 
-      <section className="overflow-hidden rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-190 text-left text-sm">
-            <thead className="border-b border-zinc-200/60 bg-zinc-50/80 text-xs uppercase tracking-wide text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-900/60">
-              <tr>
-                <th className="px-5 py-3">Course</th>
-                <th className="px-5 py-3">Level</th>
-                <th className="px-5 py-3">Chapters</th>
-                <th className="px-5 py-3">Status</th>
-                <th className="px-5 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-              {loading ? (
-                <tr>
-                  <td colSpan="5" className="px-5 py-16 text-center">
-                    <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />
-                  </td>
-                </tr>
-              ) : courses.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan="5"
-                    className="px-5 py-16 text-center text-zinc-500"
+      {loading ? (
+        <div className="flex h-64 items-center justify-center rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+        </div>
+      ) : courses.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
+          <BookOpen className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
+          <p className="text-sm font-medium">No courses match these filters.</p>
+        </div>
+      ) : viewMode === "card" ? (
+        <div className="space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {courses.map((course) => (
+              <div
+                key={course._id}
+                className="group flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs transition-all hover:border-blue-500/50 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
+                        {course.techId}
+                      </span>
+                      <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                        {course.level}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => toggleStatus(course)}
+                      disabled={updating === course._id}
+                      className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                        updating === course._id
+                          ? "bg-zinc-100 text-zinc-400"
+                          : statusStyles[course.status]
+                      }`}
+                      title="Toggle status"
+                    >
+                      {updating === course._id ? (
+                        <Loader2 className="inline h-2.5 w-2.5 animate-spin" />
+                      ) : (
+                        course.status
+                      )}
+                    </button>
+                  </div>
+
+                  <div>
+                    <Link
+                      href={`/courses/${course._id}`}
+                      className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-2"
+                    >
+                      {course.title}
+                    </Link>
+                    <p className="mt-1 text-xs text-zinc-400 truncate">
+                      /courses/{course.slug}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                    <Layers className="h-4 w-4 text-zinc-400" />
+                    <span>{course.chapterCount || 0} Chapters</span>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-3.5 dark:border-zinc-800/80">
+                  <Link
+                    href={`/courses/${course._id}`}
+                    className="text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
                   >
-                    <BookOpen className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
-                    No courses match these filters.
-                  </td>
+                    Manage chapters &rarr;
+                  </Link>
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    {course.status === "published" && (
+                      <a
+                        href={`https://asif.to/courses/${course.slug}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-lg"
+                          title="View public course"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      </a>
+                    )}
+                    <Link href={`/courses/${course._id}/edit`}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-lg"
+                        title="Edit course"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title="Delete course"
+                      onClick={() => setDeleteCourse(course)}
+                      className="h-8 w-8 rounded-lg text-zinc-400 hover:text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <footer className="flex items-center justify-between rounded-3xl border border-zinc-200/60 bg-white px-5 py-4 text-sm text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
+            <span>
+              {pagination.total} course{pagination.total === 1 ? "" : "s"}
+            </span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                title="Previous page"
+                disabled={loading || pagination.page <= 1}
+                onClick={() => setFilter("page", pagination.page - 1)}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="min-w-24 text-center text-xs font-medium">
+                Page {pagination.page} of {pagination.pages}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                title="Next page"
+                disabled={loading || pagination.page >= pagination.pages}
+                onClick={() => setFilter("page", pagination.page + 1)}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </footer>
+        </div>
+      ) : (
+        <section className="w-full bg-white dark:bg-zinc-900 rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-190 text-left text-sm">
+              <thead className="border-b border-zinc-200/70 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-950/40 text-[11px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                <tr>
+                  <th className="px-6 py-4">Course</th>
+                  <th className="px-6 py-4">Level</th>
+                  <th className="px-6 py-4">Chapters</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
-              ) : (
-                courses.map((course) => (
+              </thead>
+              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
+                {courses.map((course) => (
                   <tr
                     key={course._id}
-                    className="hover:bg-zinc-50 dark:hover:bg-zinc-900/40"
+                    className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
                   >
-                    <td className="px-5 py-4">
+                    <td className="px-6 py-4">
                       <Link
                         href={`/courses/${course._id}`}
-                        className="font-semibold text-zinc-900 hover:text-primary dark:text-white dark:hover:text-primary"
+                        className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-1"
                       >
                         {course.title}
                       </Link>
-                      <p className="mt-1 text-xs text-zinc-400">
-                        /courses/{course.slug} · {course.techId}
+                      <p className="mt-0.5 text-xs text-zinc-400 truncate">
+                        /courses/{course.slug} ·{" "}
+                        <span className="font-semibold text-zinc-500">
+                          {course.techId}
+                        </span>
                       </p>
                     </td>
-                    <td className="px-5 py-4 text-zinc-600 dark:text-zinc-300">
-                      <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold capitalize text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">
+                    <td className="px-6 py-4">
+                      <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-500/20">
                         {course.level}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-zinc-600 dark:text-zinc-300">
-                      <div className="flex items-center gap-1.5">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-600 dark:text-zinc-400">
                         <Layers className="h-4 w-4 text-zinc-400" />
                         <span>{course.chapterCount || 0}</span>
                       </div>
                     </td>
-                    <td className="px-5 py-4">
+                    <td className="px-6 py-4">
                       <button
                         onClick={() => toggleStatus(course)}
                         disabled={updating === course._id}
-                        className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
+                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
                           updating === course._id
                             ? "bg-zinc-100 text-zinc-400"
                             : statusStyles[course.status]
@@ -264,7 +412,7 @@ export default function CoursesAdminPage() {
                         )}
                       </button>
                     </td>
-                    <td className="px-5 py-4">
+                    <td className="px-6 py-4">
                       <div className="flex justify-end gap-1">
                         {course.status === "published" && (
                           <a
@@ -275,6 +423,7 @@ export default function CoursesAdminPage() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                               title="View public course"
                             >
                               <ExternalLink className="h-4 w-4" />
@@ -285,6 +434,7 @@ export default function CoursesAdminPage() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                             title="Manage chapters"
                           >
                             <FilePenLine className="h-4 w-4" />
@@ -294,6 +444,7 @@ export default function CoursesAdminPage() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                             title="Edit course"
                           >
                             <Pencil className="h-4 w-4" />
@@ -303,6 +454,7 @@ export default function CoursesAdminPage() {
                           variant="ghost"
                           size="icon"
                           title="Delete course"
+                          className="h-8 w-8 rounded-xl text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
                           onClick={() => setDeleteCourse(course)}
                         >
                           <Trash2 className="h-4 w-4 text-red-500" />
@@ -310,40 +462,42 @@ export default function CoursesAdminPage() {
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-        <footer className="flex items-center justify-between border-t border-zinc-200/60 px-5 py-4 text-sm text-zinc-500 dark:border-zinc-800/60">
-          <span>
-            {pagination.total} course{pagination.total === 1 ? "" : "s"}
-          </span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              title="Previous page"
-              disabled={loading || pagination.page <= 1}
-              onClick={() => setFilter("page", pagination.page - 1)}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="min-w-24 text-center text-xs font-medium">
-              Page {pagination.page} of {pagination.pages}
-            </span>
-            <Button
-              variant="outline"
-              size="icon"
-              title="Next page"
-              disabled={loading || pagination.page >= pagination.pages}
-              onClick={() => setFilter("page", pagination.page + 1)}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </footer>
-      </section>
+          <footer className="flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/70 px-6 py-3.5 text-xs text-zinc-400 font-medium">
+            <span>
+              {pagination.total} course{pagination.total === 1 ? "" : "s"}
+            </span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 rounded-xl"
+                title="Previous page"
+                disabled={loading || pagination.page <= 1}
+                onClick={() => setFilter("page", pagination.page - 1)}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="min-w-20 text-center text-xs font-bold text-zinc-600 dark:text-zinc-300">
+                {pagination.page} / {pagination.pages}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 rounded-xl"
+                title="Next page"
+                disabled={loading || pagination.page >= pagination.pages}
+                onClick={() => setFilter("page", pagination.page + 1)}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </footer>
+        </section>
+      )}
 
       <ConfirmDialog
         isOpen={Boolean(deleteCourse)}

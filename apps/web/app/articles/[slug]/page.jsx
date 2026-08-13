@@ -1,6 +1,6 @@
-import React from "react";
 import ArticleClient from "@/components/ArticleClient";
-import { Metadata } from "next";
+import { authorIdentity, buildPersonSchema } from "@/lib/authorIdentity";
+import { absoluteUrl, assetUrl, jsonLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -28,10 +28,12 @@ export async function generateMetadata({ params }) {
   const description = article.content
     ? article.content.replace(/<[^>]*>/g, "").substring(0, 160) + "..."
     : "Read the latest investigations on asif.to.";
+  const canonical = absoluteUrl(article.canonicalUrl, `/articles/${slugWithId}`);
 
   return {
     title: `${article.title} | asif.to`,
     description: description,
+    alternates: { canonical },
     openGraph: {
       title: article.title,
       description: description,
@@ -45,6 +47,8 @@ export async function generateMetadata({ params }) {
       type: "article",
       authors: [article.author?.fullName],
       publishedTime: article.createdAt,
+      modifiedTime: article.updatedAt,
+      url: canonical,
     },
     twitter: {
       card: "summary_large_image",
@@ -61,8 +65,10 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default function ArticlePage({ params }) {
-  const { slug: slugWithId } = React.use(params);
-
-  return <ArticleClient slug={slugWithId} />;
+export default async function ArticlePage({ params }) {
+  const { slug: slugWithId } = await params;
+  const article = await getArticle(slugWithId);
+  const canonical = absoluteUrl(article?.canonicalUrl, `/articles/${slugWithId}`);
+  const schema = article ? { "@context": "https://schema.org", "@graph": [buildPersonSchema({ image: article.author?.avatar ? assetUrl(article.author.avatar) : undefined }), { "@type": "TechArticle", "@id": `${canonical}#article`, headline: article.title, description: article.seoDescription || undefined, url: canonical, image: article.image ? assetUrl(article.image) : undefined, datePublished: article.createdAt, dateModified: article.updatedAt || article.createdAt, author: { "@id": `${authorIdentity.url}#person` }, publisher: { "@type": "Organization", name: "asif.to", url: absoluteUrl("", "/") }, mainEntityOfPage: canonical }] } : null;
+  return <>{schema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(schema) }}/>}<ArticleClient slug={slugWithId} /></>;
 }

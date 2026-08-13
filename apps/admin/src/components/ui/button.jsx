@@ -12,7 +12,7 @@ import { cva } from "class-variance-authority";
 const buttonVariants = cva(
   [
   "inline-flex items-center justify-center gap-2",
-  "rounded-[24px]",
+  "rounded-full",
   "font-semibold",
   "transition-smooth",
   "active:scale-[0.98]",
