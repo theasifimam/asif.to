@@ -6,6 +6,7 @@ import BottomNav from "@/components/BottomNav";
 import { ScrollNavProvider } from "@/components/ScrollNavProvider";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import { Suspense } from "react";
+import FloatingPlayground from "@/components/interactive-code/FloatingPlayground";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -78,6 +79,7 @@ export default function RootLayout({ children }) {
             <ScrollNavProvider>
               <Suspense fallback={null}><AnalyticsTracker /></Suspense>
               {children}
+              <FloatingPlayground />
               <BottomNav />
             </ScrollNavProvider>
           </ReduxProvider>

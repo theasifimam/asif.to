@@ -2,6 +2,16 @@ export const revalidate = 3600; // revalidate every hour
 
 const STATIC_ROUTES = [
   {
+    path: "/practice",
+    priority: 0.9,
+    changeFrequency: "weekly",
+  },
+  {
+    path: "/run",
+    priority: 0.9,
+    changeFrequency: "weekly",
+  },
+  {
     path: "",
     priority: 1.0,
     changeFrequency: "daily",
@@ -167,5 +177,22 @@ export default async function sitemap() {
     }
   }
 
-  return [...staticEntries, ...dynamicEntries];
+  const { TECHNOLOGIES } = await import("@/lib/playground/config");
+  const { PRACTICE_PROBLEMS } = await import("@/lib/playground/problems");
+  const practiceEntries = [
+    ...Object.keys(TECHNOLOGIES).map((technology) => ({
+      url: `${siteUrl}/practice/${technology}`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    })),
+    ...PRACTICE_PROBLEMS.map(({ technology, slug }) => ({
+      url: `${siteUrl}/practice/${technology}/${slug}`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    })),
+  ];
+
+  return [...staticEntries, ...practiceEntries, ...dynamicEntries];
 }

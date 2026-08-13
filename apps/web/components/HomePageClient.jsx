@@ -18,6 +18,7 @@ import {
   FileCode,
   Layers,
   MessageSquareText,
+  Code2,
 } from "lucide-react";
 
 export default function HomePageClient({ courses = [] }) {
@@ -109,6 +110,14 @@ export default function HomePageClient({ courses = [] }) {
               </button>
 
               <Link
+                href="/run"
+                className="h-9 shrink-0 inline-flex items-center gap-1.5 px-3.5 rounded-full text-xs font-bold bg-white text-blue-600 hover:bg-blue-50 transition-all whitespace-nowrap shadow-md"
+              >
+                <Code2 className="w-3.5 h-3.5" />
+                <span>Code Playground</span>
+              </Link>
+
+              <Link
                 href="/cheatsheets"
                 className="h-9 shrink-0 inline-flex items-center gap-1.5 px-3.5 rounded-full text-xs font-bold bg-white/15 text-white hover:bg-white/20 transition-all whitespace-nowrap"
               >
@@ -152,10 +161,10 @@ export default function HomePageClient({ courses = [] }) {
               color: "text-blue-600 bg-blue-500/10",
             },
             {
-              href: "/quiz",
-              icon: HelpCircle,
-              label: "Practice quiz",
-              detail: "Test your skills",
+              href: "/practice",
+              icon: Code2,
+              label: "Code practice",
+              detail: "Edit and run code",
               color: "text-purple-600 bg-purple-500/10",
             },
             {

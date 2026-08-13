@@ -131,7 +131,7 @@ export default function Header() {
         }`}
       >
         <div
-          className={`${containerMaxWidth} mx-auto bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl rounded-full px-3 sm:px-4 md:px-6 h-14 md:h-16 flex items-center justify-between shadow-lg shadow-black/5 dark:shadow-black/30 transition-all duration-300`}
+          className={`${containerMaxWidth} mx-auto bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl rounded-full px-3 sm:px-4 md:px-6 h-14 md:h-16 flex items-center justify-between shadow-md shadow-black/5 dark:shadow-black/30 transition-all duration-300`}
         >
           {/* Brand Logo */}
           <div className="flex items-center gap-3">

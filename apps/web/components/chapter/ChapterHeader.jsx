@@ -4,7 +4,6 @@ import React from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Maximize2,
   PanelLeftClose,
   PanelLeftOpen,
   List,
@@ -17,7 +16,6 @@ export default function ChapterHeader({
   progressPercentage,
   currentChapterIndex,
   allChapters = [],
-  setIsFocusMode,
   isSidebarOpen,
   setIsSidebarOpen,
   setIsDrawerOpen,
@@ -55,19 +53,6 @@ export default function ChapterHeader({
 
         {/* Right: Actions */}
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-          {/* Focus Mode Toggle */}
-          <button
-            onClick={() => setIsFocusMode(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 active:scale-95 transition-all"
-            title="Enter distraction-free Focus Mode (Press F)"
-          >
-            <Maximize2 className="w-3.5 h-3.5" />
-            <span className="hidden xs:inline sm:inline">Focus Mode</span>
-            <span className="hidden sm:inline-block text-[10px] bg-white/20 px-1.5 py-0.2 rounded font-mono">
-              F
-            </span>
-          </button>
-
           {/* Desktop Sidebar Toggle */}
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}

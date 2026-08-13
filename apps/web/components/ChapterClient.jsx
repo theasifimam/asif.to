@@ -6,7 +6,6 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MobileChapterIndex from "@/components/MobileChapterIndex";
-import FocusHeader from "@/components/chapter/FocusHeader";
 import ChapterHeader from "@/components/chapter/ChapterHeader";
 import ChapterSidebar from "@/components/chapter/ChapterSidebar";
 import ChapterDrawer from "@/components/chapter/ChapterDrawer";
@@ -29,9 +28,7 @@ export default function ChapterClient({ courseSlug, chapterSlug }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [sidebarSearch, setSidebarSearch] = useState("");
-  const [isFocusMode, setIsFocusMode] = useState(false);
   const [fontSize, setFontSize] = useState("md"); // 'sm', 'md', 'lg'
-  const [isTocOpen, setIsTocOpen] = useState(false);
 
   // Local state for completed chapters
   const [completedChapters, setCompletedChapters] = useState([]);
@@ -98,20 +95,6 @@ export default function ChapterClient({ courseSlug, chapterSlug }) {
     [chapter?.content, tech?.name],
   );
 
-  // Extract Table of Contents from headings
-  const tableOfContents = useMemo(() => {
-    let headingCount = 0;
-    return parsedBlocks
-      .filter((b) => b.type === "h1" || b.type === "h2" || b.type === "h3")
-      .map((b) => {
-        headingCount++;
-        return {
-          id: `heading-${headingCount}`,
-          text: b.text,
-          type: b.type,
-        };
-      });
-  }, [parsedBlocks]);
 
   // Calculate estimated reading time
   const estimatedReadingTime = useMemo(() => {
@@ -125,23 +108,6 @@ export default function ChapterClient({ courseSlug, chapterSlug }) {
     return Math.max(1, Math.ceil(wordCount / 180));
   }, [chapter]);
 
-  // Keyboard shortcut listener for Focus Mode
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName))
-        return;
-
-      if (e.key === "f" || e.key === "F") {
-        e.preventDefault();
-        setIsFocusMode((prev) => !prev);
-      } else if (e.key === "Escape" && isFocusMode) {
-        setIsFocusMode(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isFocusMode]);
 
   useEffect(() => {
     if (activeItemRef.current) {
@@ -223,67 +189,34 @@ export default function ChapterClient({ courseSlug, chapterSlug }) {
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground transition-colors duration-300">
-      {/* Hide Global Header in Focus Mode */}
-      {!isFocusMode && <Header />}
+      <Header />
 
       {/* Chapter list index bar under main navbar with auto-hide on scroll */}
-      {!isFocusMode && allChapters.length > 0 && (
+      {allChapters.length > 0 && (
         <MobileChapterIndex
           chapters={allChapters}
           activeCourseSlug={activeCourseSlug}
         />
       )}
 
-      {/* Focus Mode Sticky Top Bar */}
-      {isFocusMode && (
-        <FocusHeader
+      <main className="flex-1 w-full max-w-7xl mx-auto px-2 sm:px-6 pt-36 sm:pt-40 lg:pt-28 flex flex-col gap-3 sm:gap-6 pb-32 sm:pb-16">
+        {/* Standard Mode Top Header Bar */}
+        <ChapterHeader
+          courseId={activeCourseSlug}
           course={course}
-          chapter={chapter}
+          tech={tech}
+          progressPercentage={progressPercentage}
           currentChapterIndex={currentChapterIndex}
           allChapters={allChapters}
-          progressPercentage={progressPercentage}
-          tableOfContents={tableOfContents}
-          isTocOpen={isTocOpen}
-          setIsTocOpen={setIsTocOpen}
-          fontSize={fontSize}
-          setFontSize={setFontSize}
-          setIsFocusMode={setIsFocusMode}
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+          setIsDrawerOpen={setIsDrawerOpen}
         />
-      )}
-
-      <main
-        className={`flex-1 w-full mx-auto px-2 sm:px-6 transition-all duration-300 ${
-          isFocusMode
-            ? "max-w-4xl py-6 sm:py-10"
-            : "max-w-7xl pt-16 sm:pt-24 flex flex-col gap-3 sm:gap-6 pb-32 sm:pb-16"
-        }`}
-      >
-        {/* Standard Mode Top Header Bar */}
-        {!isFocusMode && (
-          <ChapterHeader
-            courseId={activeCourseSlug}
-            course={course}
-            tech={tech}
-            progressPercentage={progressPercentage}
-            currentChapterIndex={currentChapterIndex}
-            allChapters={allChapters}
-            setIsFocusMode={setIsFocusMode}
-            isSidebarOpen={isSidebarOpen}
-            setIsSidebarOpen={setIsSidebarOpen}
-            setIsDrawerOpen={setIsDrawerOpen}
-          />
-        )}
 
         {/* Layout Container */}
-        <div
-          className={
-            isFocusMode
-              ? "w-full"
-              : "grid grid-cols-1 lg:grid-cols-12 gap-6 relative"
-          }
-        >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
           {/* Desktop Sticky & Collapsible Chapter Sidebar */}
-          {!isFocusMode && isSidebarOpen && (
+          {isSidebarOpen && (
             <ChapterSidebar
               courseId={activeCourseSlug}
               chapter={chapter}
@@ -299,23 +232,20 @@ export default function ChapterClient({ courseSlug, chapterSlug }) {
           {/* Lesson Content Area */}
           <section
             className={`flex flex-col gap-6 transition-all duration-300 ${
-              isFocusMode
-                ? "w-full max-w-3xl mx-auto"
-                : isSidebarOpen
-                  ? "lg:col-span-8 xl:col-span-9"
-                  : "lg:col-span-12 max-w-4xl mx-auto w-full"
+              isSidebarOpen
+                ? "lg:col-span-8 xl:col-span-9"
+                : "lg:col-span-12 max-w-4xl mx-auto w-full"
             }`}
           >
-            {/* Top Quick Navigation (Standard Mode) */}
-            {!isFocusMode && (
-              <ChapterQuickNav
-                courseId={activeCourseSlug}
-                prevChapter={prevChapter}
-                nextChapter={nextChapter}
-                examEnabled={course?.examEnabled}
-                variant="top"
-              />
-            )}{" "}
+            {/* Top Quick Navigation */}
+            <ChapterQuickNav
+              courseId={activeCourseSlug}
+              prevChapter={prevChapter}
+              nextChapter={nextChapter}
+              examEnabled={course?.examEnabled}
+              variant="top"
+            />
+
             {/* Main Lesson Reader Document Card */}
             <ChapterDocumentCard
               chapter={chapter}
@@ -324,7 +254,7 @@ export default function ChapterClient({ courseSlug, chapterSlug }) {
               estimatedReadingTime={estimatedReadingTime}
               isCurrentCompleted={isCurrentCompleted}
               toggleChapterComplete={toggleChapterComplete}
-              isFocusMode={isFocusMode}
+              isFocusMode={false}
               isSimplePoints={isSimplePoints}
               parsedBlocks={parsedBlocks}
               fontBodyClass={fontBodyClass}
@@ -361,8 +291,7 @@ export default function ChapterClient({ courseSlug, chapterSlug }) {
         completedChapters={completedChapters}
       />
 
-      {/* Hide Footer in Focus Mode */}
-      {!isFocusMode && <Footer containerWidth="max-w-7xl" />}
+      <Footer containerWidth="max-w-7xl" />
     </div>
   );
 }

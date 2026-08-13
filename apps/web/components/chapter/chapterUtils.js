@@ -25,10 +25,14 @@ export function parseContentBlocks(contentArray, techName) {
       const firstLineEnd = trimmed.indexOf("\n");
       let lang = "javascript";
       let code = "";
+      let interactive = false;
 
       if (firstLineEnd !== -1) {
-        lang = trimmed.slice(3, firstLineEnd).trim() || "javascript";
+        const fenceMeta = trimmed.slice(3, firstLineEnd).trim() || "javascript";
+        const [parsedLang, ...flags] = fenceMeta.split(/\s+/);
+        lang = parsedLang;
         code = trimmed.slice(firstLineEnd + 1, -3).trim();
+        interactive = flags.includes("interactive");
       } else {
         code = trimmed.slice(3, -3).trim();
       }
@@ -45,6 +49,7 @@ export function parseContentBlocks(contentArray, techName) {
         code,
         lang,
         title: snippetTitle,
+        interactive: Boolean(interactive),
       });
       return;
     }

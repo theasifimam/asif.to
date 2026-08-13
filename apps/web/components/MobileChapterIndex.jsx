@@ -83,7 +83,7 @@ export default function MobileChapterIndex({ chapters, activeCourseSlug }) {
             : "pointer-events-none -translate-y-28 opacity-0"
         }`}
       >
-        <div className="mx-auto max-w-md overflow-hidden rounded-4xl border border-zinc-200/90 bg-white/95 shadow-xl shadow-black/10 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/95">
+        <div className="mx-auto max-w-md overflow-hidden rounded-4xl border border-zinc-200/90 bg-white/95 shadow-md backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/95">
           <button
             type="button"
             aria-expanded={open}

@@ -86,7 +86,7 @@ export default function CourseClient() {
         activeCourseSlug={activeCourseSlug}
       />
 
-      <main className="flex-1 w-full max-w-4xl mx-auto px-2 sm:px-6 pt-20 sm:pt-24 flex flex-col gap-6">
+      <main className="flex-1 w-full max-w-4xl mx-auto px-2 sm:px-6 pt-38 sm:pt-46 flex flex-col gap-6">
         {/* Back Button */}
         <div>
           <Link
@@ -222,7 +222,11 @@ export default function CourseClient() {
           </div>
         </section>
 
-        <AuthorIdentityCard publishedAt={course.createdAt} updatedAt={course.updatedAt} compact />
+        <AuthorIdentityCard
+          publishedAt={course.createdAt}
+          updatedAt={course.updatedAt}
+          compact
+        />
 
         {/* Course Index / Syllabus / Table of Contents */}
         <section className="space-y-4 mt-2">

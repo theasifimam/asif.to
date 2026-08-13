@@ -3,6 +3,7 @@
 import React from "react";
 import { Sparkles, Lightbulb } from "lucide-react";
 import CodeSnippetViewer from "@/components/CodeSnippetViewer";
+import InteractiveCode from "@/components/interactive-code";
 import { renderInlineFormatting } from "./chapterUtils";
 
 export default function ChapterBlocksRenderer({
@@ -89,6 +90,13 @@ export default function ChapterBlocksRenderer({
           );
         }
         if (block.type === "code") {
+          if (block.interactive) {
+            return (
+              <div key={idx} className="my-5 sm:my-8">
+                <InteractiveCode language={block.lang} code={block.code} title={block.title} />
+              </div>
+            );
+          }
           return (
             <div key={idx} className="my-3 sm:my-6">
               <CodeSnippetViewer code={block.code} title={block.title} />

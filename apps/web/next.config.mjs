@@ -1,4 +1,15 @@
 const nextConfig = {
+  // Allows CI/verification builds to avoid a .next directory held by a local dev server.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
+  async redirects() {
+    return [
+      {
+        source: '/robot.txt',
+        destination: '/robots.txt',
+        permanent: true,
+      },
+    ];
+  },
   images: {
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
