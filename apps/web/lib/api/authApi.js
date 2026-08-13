@@ -95,6 +95,22 @@ export const authApi = createApi({
       providesTags: ["Auth"],
     }),
 
+    updateAttemptVisibility: builder.mutation({
+      query: ({ attemptId, visibility }) => ({
+        url: `/users/me/quiz-attempts/${attemptId}/visibility`,
+        method: "PATCH",
+        data: { visibility },
+      }),
+      invalidatesTags: ["Auth"],
+    }),
+
+    getCertificate: builder.query({
+      query: (verificationId) => ({
+        url: `/users/certificates/${verificationId}`,
+        method: "GET",
+      }),
+    }),
+
     getPublicProfile: builder.query({
       query: (username) => ({
         url: `/users/public/${username}`,
@@ -161,6 +177,8 @@ export const {
   useSignoutMutation,
   useUpdatePasswordMutation,
   useGetProfileQuery,
+  useUpdateAttemptVisibilityMutation,
+  useGetCertificateQuery,
   useGetPublicProfileQuery,
   useUpdateProfileMutation,
   useToggleBookmarkMutation,

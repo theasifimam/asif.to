@@ -101,6 +101,24 @@ const userSchema = new Schema(
           default: Date.now,
         },
         certificateUrl: String,
+        verificationId: { type: String, trim: true },
+        score: Number,
+        total: Number,
+      },
+    ],
+    quizAttempts: [
+      {
+        courseId: { type: Schema.Types.ObjectId, ref: "Course" },
+        kind: { type: String, enum: ["practice", "final_exam"], default: "practice" },
+        score: { type: Number, required: true },
+        total: { type: Number, required: true },
+        percentage: { type: Number, required: true },
+        passed: { type: Boolean, default: false },
+        durationSeconds: { type: Number, default: 0 },
+        autoSubmitReason: { type: String, enum: ["manual", "timeout", "cheat"], default: "manual" },
+        visibility: { type: String, enum: ["private", "public"], default: "private" },
+        certificateId: String,
+        attemptedAt: { type: Date, default: Date.now },
       },
     ],
     expertise: [
@@ -133,7 +151,7 @@ const userSchema = new Schema(
         },
         itemType: {
           type: String,
-          enum: ["course", "chapter", "cheatsheet", "quiz_question"],
+          enum: ["course", "chapter", "cheatsheet", "quiz_question", "interview_question"],
           required: true,
         },
         savedAt: {

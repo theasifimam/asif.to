@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import fs from "fs/promises";
 import path from "path";
 import Course from "../models/Course.js";
-import QuizQuestion from "../models/QuizQuestion.js";
+import QuizQuestion from "../models/Question.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
@@ -78,9 +78,10 @@ async function seedExam(techId) {
 
   const operations = questions.map((item) => ({
     updateOne: {
-      filter: { question: item.question, courses: course._id },
+      filter: { type: "quiz", question: item.question, courses: course._id },
       update: {
         $set: {
+          type: "quiz",
           courses: [course._id],
           options: item.options,
           correctIndex: item.correctIndex,

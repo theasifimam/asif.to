@@ -18,6 +18,7 @@ import {
   Brain,
   Layers,
   GraduationCap,
+  MessagesSquare,
 } from "lucide-react";
 import SaveButton from "@/components/SaveButton";
 
@@ -150,6 +151,14 @@ export default function CourseClient() {
             >
               <Layers className="w-4 h-4 text-emerald-500" />
               <span>Flashcards</span>
+            </Link>
+
+            <Link
+              href={`/${activeCourseSlug}/interview-questions`}
+              className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 text-xs font-bold transition-all active:scale-95"
+            >
+              <MessagesSquare className="w-4 h-4 text-orange-500" />
+              <span>Interview Questions</span>
             </Link>
 
             {/* Save Course Button */}

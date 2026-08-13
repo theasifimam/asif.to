@@ -41,3 +41,25 @@ export const getChapterData = cache((courseSlug, chapterSlug) =>
     "chapter",
   ),
 );
+
+const getPublicInterviewQuestionsCached = cache((courseSlug, page = 1) =>
+  fetchPublicData(
+    `/interview-questions/public/${encodeURIComponent(courseSlug)}?page=${encodeURIComponent(page)}&limit=15`,
+    "interview questions",
+  ),
+);
+
+const getPublicInterviewQuestionCached = cache((courseSlug, questionSlug) =>
+  fetchPublicData(
+    `/interview-questions/public/${encodeURIComponent(courseSlug)}/${encodeURIComponent(questionSlug)}`,
+    "interview question",
+  ),
+);
+
+export async function getPublicInterviewQuestions(courseSlug, page) {
+  return getPublicInterviewQuestionsCached(courseSlug, page);
+}
+
+export async function getPublicInterviewQuestion(courseSlug, questionSlug) {
+  return getPublicInterviewQuestionCached(courseSlug, questionSlug);
+}

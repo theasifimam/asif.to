@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import Course from "../models/Course.js";
 import CourseTopic from "../models/CourseTopic.js";
 import TopicCategory from "../models/TopicCategory.js";
-import InterviewQuestion from "../models/InterviewQuestion.js";
+import InterviewQuestion from "../models/Question.js";
 
 function slugify(value = "") {
   return value
@@ -57,6 +57,7 @@ async function resolveInterviewQuestions(value, courseId) {
   const normalized = normalizeInterviewQuestions(value);
   if (!normalized.length) return [];
   const ids = await InterviewQuestion.find({
+    type: "interview",
     _id: { $in: normalized.map((item) => item.question) },
     course: courseId,
   }).distinct("_id");

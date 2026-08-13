@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import Course from "../models/Course.js";
-import QuizQuestion from "../models/QuizQuestion.js";
+import QuizQuestion from "../models/Question.js";
+import User from "../models/User.js";
+import { randomUUID } from "node:crypto";
 
 const resolveCourses = async (courseIds = []) => {
   const ids = Array.isArray(courseIds)
@@ -17,11 +19,16 @@ const buildQuestionPayload = async (body) => {
   const courses = await resolveCourses(body.courseIds || body.courses);
 
   return {
+    type: "quiz",
     courses: courses.map((course) => course._id),
     question: body.question,
     options: body.options,
     correctIndex: body.correctIndex,
     explanation: body.explanation || "",
+    quizEnabled: body.quizEnabled !== false,
+    flashcardEnabled: body.flashcardEnabled !== false,
+    flashcardAnswer: body.flashcardAnswer || "",
+    tag: body.tag || "",
     difficulty: body.difficulty || "medium",
     status: body.status || "published",
   };
@@ -30,8 +37,12 @@ const buildQuestionPayload = async (body) => {
 /** GET /api/v1/quiz — public practice questions filtered by course. */
 export const getQuizQuestions = async (req, res) => {
   try {
-    const { courseId, difficulty, limit = 20 } = req.query;
-    const filter = { status: "published" };
+    const { courseId, difficulty, format = "quiz", limit = 20 } = req.query;
+    const filter = {
+      type: "quiz",
+      status: "published",
+      [format === "flashcard" ? "flashcardEnabled" : "quizEnabled"]: { $ne: false },
+    };
     if (courseId) {
       if (mongoose.isValidObjectId(courseId)) {
         filter.courses = courseId;
@@ -54,7 +65,18 @@ export const getQuizQuestions = async (req, res) => {
       .limit(Math.min(Number(limit) || 20, 100))
       .populate("courses", "title slug techId")
       .lean();
-    res.status(200).json({ success: true, data: questions });
+    const data = format === "flashcard"
+      ? questions.map((item) => ({
+          _id: item._id,
+          front: item.question,
+          back: item.flashcardAnswer || [item.options?.[item.correctIndex], item.explanation].filter(Boolean).join(" — "),
+          tag: item.tag,
+          difficulty: item.difficulty,
+          techId: item.courses?.[0]?.techId || "javascript",
+          courses: item.courses,
+        }))
+      : questions;
+    res.status(200).json({ success: true, data });
   } catch (error) {
     console.error("[QUIZ] getQuizQuestions error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -80,7 +102,7 @@ export const getCourseExam = async (req, res) => {
       Math.max(Number(settings.questionCount) || 20, 1),
       100,
     );
-    const match = { status: "published", courses: course._id };
+    const match = { type: "quiz", status: "published", courses: course._id, quizEnabled: { $ne: false } };
     const questions = await QuizQuestion.aggregate([
       { $match: match },
       { $sample: { size: questionCount } },
@@ -116,20 +138,144 @@ export const getCourseExam = async (req, res) => {
   }
 };
 
+/** POST /api/v1/quiz/exam/:courseSlug/submit — securely record an authenticated attempt. */
+export const submitCourseExam = async (req, res) => {
+  try {
+    const course = await Course.findOne({
+      $or: [{ slug: req.params.courseSlug }, { techId: req.params.courseSlug }],
+      status: "published",
+      examEnabled: true,
+    }).select("_id slug title examSettings").lean();
+    if (!course) return res.status(404).json({ success: false, message: "Exam is not available." });
+
+    const questionIds = Array.isArray(req.body.questionIds) ? req.body.questionIds.filter(mongoose.isValidObjectId) : [];
+    const answers = Array.isArray(req.body.answers) ? req.body.answers : [];
+    if (!questionIds.length || questionIds.length !== answers.length)
+      return res.status(400).json({ success: false, message: "A complete exam submission is required." });
+
+    const questions = await QuizQuestion.find({ _id: { $in: questionIds }, type: "quiz", status: "published", courses: course._id }).select("_id correctIndex").lean();
+    if (questions.length !== questionIds.length)
+      return res.status(400).json({ success: false, message: "One or more submitted questions are invalid." });
+    const correct = new Map(questions.map((item) => [String(item._id), item.correctIndex]));
+    const score = questionIds.reduce((sum, id, index) => sum + (Number(answers[index]) === correct.get(String(id)) ? 1 : 0), 0);
+    const total = questionIds.length;
+    const percentage = Math.round((score / total) * 100);
+    const passingPercentage = course.examSettings?.passingPercentage || 70;
+    const passed = percentage >= passingPercentage;
+    const certificateId = passed ? randomUUID() : undefined;
+    const attempt = {
+      courseId: course._id,
+      kind: "final_exam",
+      score,
+      total,
+      percentage,
+      passed,
+      durationSeconds: Math.max(Number(req.body.durationSeconds) || 0, 0),
+      autoSubmitReason: ["timeout", "cheat"].includes(req.body.autoSubmitReason) ? req.body.autoSubmitReason : "manual",
+      visibility: "private",
+      certificateId,
+    };
+    const update = { $push: { quizAttempts: attempt } };
+    if (passed) {
+      update.$addToSet = { completedCourses: course._id };
+      update.$push.certificates = {
+        courseId: course._id,
+        verificationId: certificateId,
+        certificateUrl: `/certificates/${certificateId}`,
+        score,
+        total,
+      };
+    }
+    const user = await User.findByIdAndUpdate(req.user._id, update, { new: true }).select("quizAttempts certificates");
+    const savedAttempt = user.quizAttempts[user.quizAttempts.length - 1];
+    res.status(201).json({ success: true, data: { attempt: savedAttempt, certificate: passed ? user.certificates.find((item) => item.verificationId === certificateId) : null } });
+  } catch (error) {
+    console.error("[QUIZ] submitCourseExam error:", error);
+    res.status(500).json({ success: false, message: "Unable to record exam attempt." });
+  }
+};
+
+export const submitPracticeQuiz = async (req, res) => {
+  try {
+    const questionIds = Array.isArray(req.body.questionIds) ? req.body.questionIds.filter(mongoose.isValidObjectId) : [];
+    const answers = Array.isArray(req.body.answers) ? req.body.answers : [];
+    if (!questionIds.length || questionIds.length !== answers.length)
+      return res.status(400).json({ success: false, message: "A complete quiz submission is required." });
+    const questions = await QuizQuestion.find({ _id: { $in: questionIds }, type: "quiz", status: "published" }).select("_id correctIndex courses").lean();
+    if (questions.length !== questionIds.length)
+      return res.status(400).json({ success: false, message: "One or more quiz questions are invalid." });
+    const correct = new Map(questions.map((item) => [String(item._id), item.correctIndex]));
+    const score = questionIds.reduce((sum, id, index) => sum + (Number(answers[index]) === correct.get(String(id)) ? 1 : 0), 0);
+    const total = questionIds.length;
+    let courseId = null;
+    if (req.body.courseSlug) {
+      const course = await Course.findOne({ $or: [{ slug: req.body.courseSlug }, { techId: req.body.courseSlug }] }).select("_id").lean();
+      courseId = course?._id || null;
+    }
+    const attempt = {
+      ...(courseId && { courseId }),
+      kind: "practice",
+      score,
+      total,
+      percentage: Math.round((score / total) * 100),
+      passed: score / total >= 0.7,
+      visibility: "private",
+    };
+    const user = await User.findByIdAndUpdate(req.user._id, { $push: { quizAttempts: attempt } }, { new: true }).select("quizAttempts");
+    res.status(201).json({ success: true, data: { attempt: user.quizAttempts[user.quizAttempts.length - 1] } });
+  } catch (error) {
+    console.error("[QUIZ] submitPracticeQuiz error:", error);
+    res.status(500).json({ success: false, message: "Unable to record quiz attempt." });
+  }
+};
+
 /** GET /api/v1/quiz/admin/all — admin: all statuses. */
 export const getQuizQuestionsAdmin = async (req, res) => {
   try {
-    const { courseId } = req.query;
-    const filter = {};
-    if (courseId && mongoose.isValidObjectId(courseId))
-      filter.courses = courseId;
-    const questions = await QuizQuestion.find(filter)
-      .populate("courses", "title slug techId")
-      .sort({ createdAt: -1 })
-      .lean();
-    res.status(200).json({ success: true, data: questions });
+    const { courseId, type = "quiz", page = 1, limit = 20 } = req.query;
+    const filter = type === "all" ? {} : { type: type === "interview" ? "interview" : "quiz" };
+    if (courseId && mongoose.isValidObjectId(courseId)) {
+      if (type === "all") filter.$or = [{ courses: courseId }, { course: courseId }];
+      else if (type === "interview") filter.course = courseId;
+      else filter.courses = courseId;
+    }
+    const pageNumber = Math.max(Number(page) || 1, 1);
+    const pageSize = Math.min(Math.max(Number(limit) || 20, 1), 100);
+    const [questions, total] = await Promise.all([
+      QuizQuestion.find(filter)
+        .populate("courses", "title slug techId")
+        .populate("course", "title slug techId")
+        .sort({ createdAt: -1 })
+        .skip((pageNumber - 1) * pageSize)
+        .limit(pageSize)
+        .lean(),
+      QuizQuestion.countDocuments(filter),
+    ]);
+    res.status(200).json({
+      success: true,
+      data: questions,
+      pagination: {
+        page: pageNumber,
+        limit: pageSize,
+        total,
+        pages: Math.ceil(total / pageSize),
+      },
+    });
   } catch (error) {
     console.error("[QUIZ] getQuizQuestionsAdmin error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const getQuestionAdmin = async (req, res) => {
+  try {
+    const question = await QuizQuestion.findById(req.params.id)
+      .populate("courses", "title slug techId")
+      .populate("course", "title slug techId")
+      .lean();
+    if (!question) return res.status(404).json({ success: false, message: "Question not found." });
+    res.json({ success: true, data: question });
+  } catch (error) {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -167,7 +313,7 @@ export const createQuizQuestion = async (req, res) => {
 /** PATCH /api/v1/quiz/:id (admin). */
 export const updateQuizQuestion = async (req, res) => {
   try {
-    const existing = await QuizQuestion.findById(req.params.id);
+    const existing = await QuizQuestion.findOne({ _id: req.params.id, type: "quiz" });
     if (!existing)
       return res
         .status(404)
@@ -194,7 +340,7 @@ export const updateQuizQuestion = async (req, res) => {
 /** DELETE /api/v1/quiz/:id (admin). */
 export const deleteQuizQuestion = async (req, res) => {
   try {
-    const question = await QuizQuestion.findByIdAndDelete(req.params.id);
+    const question = await QuizQuestion.findOneAndDelete({ _id: req.params.id, type: "quiz" });
     if (!question)
       return res
         .status(404)

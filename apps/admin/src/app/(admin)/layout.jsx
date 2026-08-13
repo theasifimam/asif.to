@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -24,7 +24,6 @@ import {
   Info,
   GraduationCap,
   FileCode,
-  Layers,
   Clipboard,
   FolderTree,
   X,
@@ -56,8 +55,7 @@ const NAV_ITEMS = [
     group: "Courses & Learning",
     items: [
       { name: "Cheatsheets", href: "/cheatsheets", icon: FileCode },
-      { name: "Quiz Builder", href: "/quiz", icon: Clipboard },
-      { name: "Flashcards", href: "/flashcards", icon: Layers },
+      { name: "Question Bank", href: "/quiz", icon: Clipboard },
     ],
   },
   {
@@ -71,8 +69,6 @@ const NAV_ITEMS = [
         icon: MessageSquare,
       },
       { name: "Categories", href: "/categories", icon: FolderTree },
-      { name: "Article Editor", href: "/articles/new", icon: FileEdit },
-      { name: "Drafts", href: "/articles/drafts", icon: BookOpen },
       { name: "All Articles", href: "/articles/published", icon: BookOpen },
     ],
   },
@@ -86,15 +82,7 @@ const NAV_ITEMS = [
   {
     group: "System Pages",
     items: [
-      { name: "About", href: "/legal/about", icon: Info },
-      {
-        name: "Terms of Service",
-        href: "/legal/terms-conditions",
-        icon: ShieldAlert,
-      },
-      { name: "Privacy Policy", href: "/legal/privacy-policy", icon: FileText },
-      { name: "Cookie Policy", href: "/legal/cookie-usage", icon: Cookie },
-      { name: "Help & FAQ", href: "/legal/faq", icon: HelpCircle },
+      { name: "Legal & Help", href: "/legal", icon: Info },
     ],
   },
 ];
@@ -104,22 +92,17 @@ const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL;
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const [isUserMenuDialogOpen, setIsUserMenuDialogOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const { user, loading, logout } = useAuth();
   const router = useRouter();
-
-  // Close mobile menu on path change
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!loading && !user && pathname !== "/signin") {
@@ -147,7 +130,7 @@ export default function AdminLayout({ children }) {
     : user?.profilePicture?.url;
 
   return (
-    <div className="flex h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-200 overflow-hidden font-sans transition-colors duration-300">
+    <div className="flex h-dvh w-full max-w-full overflow-hidden bg-zinc-50 font-sans text-zinc-900 transition-colors duration-300 dark:bg-zinc-950 dark:text-zinc-200">
       {/* Toggle Overlay for Mobile */}
       <AnimatePresence>
         {isMobileMenuOpen && (
@@ -175,7 +158,7 @@ export default function AdminLayout({ children }) {
               : 0,
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className={`border-r border-zinc-200 dark:border-zinc-800 flex flex-col bg-white dark:bg-zinc-950 backdrop-blur-xl shrink-0 fixed inset-y-0 left-0 lg:relative h-full transition-colors duration-300 ${
+        className={`fixed inset-y-0 left-0 flex h-full max-w-[calc(100vw-1rem)] shrink-0 flex-col border-r border-zinc-200 bg-white backdrop-blur-xl transition-colors duration-300 dark:border-zinc-800 dark:bg-zinc-950 lg:relative ${
           isMobileMenuOpen ? "z-99 shadow-2xl shadow-black/50" : "z-99"
         }`}
       >
@@ -255,6 +238,7 @@ export default function AdminLayout({ children }) {
                     <Link
                       key={item.href}
                       href={targetHref}
+                      onClick={() => setIsMobileMenuOpen(false)}
                       title={isCollapsed && !isMobileMenuOpen ? item.name : ""}
                       className={`group flex items-center px-4 py-3 rounded-2xl transition-all duration-300 ${
                         isActive
@@ -447,9 +431,9 @@ export default function AdminLayout({ children }) {
       </motion.aside>
 
       {/* Main Panel */}
-      <div className="flex-1 flex flex-col relative overflow-hidden transition-colors duration-300">
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden transition-colors duration-300">
         {/* Global Masthead */}
-        <header className="h-16 border-b border-zinc-200 dark:border-zinc-900 px-4 md:px-12 flex items-center justify-between bg-white/50 dark:bg-zinc-950/20 backdrop-blur-md z-40 transition-colors duration-300">
+        <header className="z-40 flex h-16 shrink-0 items-center justify-between border-b border-zinc-200 bg-white/90 px-3 backdrop-blur-xl transition-colors duration-300 dark:border-zinc-900 dark:bg-zinc-950/90 sm:px-4 md:px-12">
           <div className="flex items-center gap-4 md:gap-8">
             {/* Mobile Menu Toggle */}
             <button
@@ -467,12 +451,12 @@ export default function AdminLayout({ children }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 md:gap-6">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3 md:gap-6">
             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-900/50 px-3 md:px-4 py-2 rounded-full border border-zinc-200 dark:border-zinc-800 transition-colors">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span className="hidden sm:inline">System Active</span>
             </div>
-            <button className="relative w-9 h-9 md:w-10 md:h-10 rounded-full border border-zinc-200 dark:border-zinc-800 flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all text-zinc-600 dark:text-zinc-400">
+            <button className="relative hidden h-9 w-9 items-center justify-center rounded-full border border-zinc-200 text-zinc-600 transition-all hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900 xs:flex md:h-10 md:w-10">
               <Bell size={18} />
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-zinc-950"></span>
             </button>
@@ -504,9 +488,18 @@ export default function AdminLayout({ children }) {
         </header>
 
         {/* Content Viewport */}
-        <main className="flex-1 overflow-y-auto bg-[radial-gradient(circle_at_top_right,rgba(0,0,0,0.03),transparent)] dark:bg-[radial-gradient(circle_at_top_right,rgba(24,24,27,0.3),transparent)]">
+        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain bg-[radial-gradient(circle_at_top_right,rgba(0,0,0,0.03),transparent)] dark:bg-[radial-gradient(circle_at_top_right,rgba(24,24,27,0.3),transparent)]">
           {children}
         </main>
+
+        <Link
+          href="/articles/new"
+          aria-label="Write a new article"
+          className="fixed bottom-4 right-4 z-50 inline-flex h-12 w-12 items-center justify-center gap-2 rounded-full bg-blue-600 text-sm font-bold text-white shadow-xl shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 active:translate-y-0 sm:bottom-7 sm:right-7 sm:h-14 sm:w-auto sm:px-6"
+        >
+          <FileEdit className="h-5 w-5" />
+          <span className="hidden sm:inline">Write article</span>
+        </Link>
       </div>
 
       {/* Logout Confirmation Dialog */}

@@ -31,6 +31,8 @@ export default function ExamResultCard({
   passingScore,
   passingPercentage,
   durationMinutes,
+  certificate,
+  submitError,
 }) {
   const [downloading, setDownloading] = useState(false);
   const requiredScore =
@@ -53,6 +55,7 @@ export default function ExamResultCard({
         score,
         total,
         date: today,
+        verificationUrl: certificate?.certificateUrl ? `${window.location.origin}${certificate.certificateUrl}` : "",
       });
     } finally {
       setDownloading(false);
@@ -61,6 +64,7 @@ export default function ExamResultCard({
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-2xl mx-auto">
+      {submitError && <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm font-semibold text-red-600 dark:text-red-400">{submitError}</div>}
       {/* Auto-submit warning */}
       {autoSubmitReason === "cheat" && (
         <div className="flex items-start gap-3 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-bold">
@@ -163,12 +167,12 @@ export default function ExamResultCard({
         {passed ? (
           <button
             onClick={handleDownload}
-            disabled={downloading}
+            disabled={downloading || !certificate || Boolean(submitError)}
             id="download-certificate-btn"
             className="flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-70 text-white font-bold text-sm shadow-lg shadow-emerald-500/30 transition-all active:scale-95"
           >
             <Download className="w-4 h-4" />
-            {downloading ? "Generating..." : "Download Certificate (PDF)"}
+            {downloading ? "Generating..." : !certificate && !submitError ? "Issuing certificate..." : "Download Certificate (PDF)"}
           </button>
         ) : (
           <div className="flex flex-col items-center gap-2">

@@ -15,6 +15,8 @@ import {
   toggleBookmark,
   toggleSavedItem,
   getMySavedItems,
+  updateAttemptVisibility,
+  getCertificate,
 } from "../controllers/user.controller.js";
 import { protect, authorize } from "../middlewares/auth.middleware.js";
 
@@ -29,9 +31,11 @@ router.get("/me/bookmarks", protect, getMyBookmarks);
 router.post("/me/bookmarks/toggle/:articleId", protect, toggleBookmark);
 router.post("/me/saves/toggle", protect, toggleSavedItem);
 router.get("/me/saves", protect, getMySavedItems);
+router.patch("/me/quiz-attempts/:attemptId/visibility", protect, updateAttemptVisibility);
 
 // ─── Public routes ──────────────────────────────────────────────────────────
 router.get("/public/:username", getPublicProfile);
+router.get("/certificates/:verificationId", getCertificate);
 
 // ─── Admin-only routes ───────────────────────────────────────────────────────
 router.get("/", protect, authorize("admin", "editor"), getUsers);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,12 +9,14 @@ import Footer from "@/components/Footer";
 import ArticleCard from "@/components/ArticleCard";
 import AuthModal from "@/components/AuthModal";
 import SaveButton from "@/components/SaveButton";
+import { generateCertificate } from "@/components/exam/generateCertificate";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { clearCredentials } from "@/lib/store/authSlice";
 import {
   useGetProfileQuery,
   useSignoutMutation,
   useGetMySavedItemsQuery,
+  useUpdateAttemptVisibilityMutation,
 } from "@/lib/api/authApi";
 import { useGetArticlesQuery } from "@/lib/api/articlesApi";
 import { getImageUrl } from "@/lib/config";
@@ -39,12 +41,18 @@ import {
   ShieldOff,
   Link2,
   BadgeCheck,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function UserProfilePage() {
   const params = useParams();
-  const usernameParam = params?.username;
+  const rawUsernameParam = decodeURIComponent(params?.username || "");
+  const usernameParam = rawUsernameParam.replace(/^@+/, "");
+  useEffect(() => {
+    if (rawUsernameParam && !rawUsernameParam.startsWith("@"))
+      window.history.replaceState(window.history.state, "", `/@${usernameParam}`);
+  }, [rawUsernameParam, usernameParam]);
 
   const dispatch = useAppDispatch();
   const {
@@ -57,10 +65,11 @@ export default function UserProfilePage() {
   const [authTab, setAuthTab] = useState("signin");
   const [activeTab, setActiveTab] = useState("saved");
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [downloadingCertificate, setDownloadingCertificate] = useState(null);
 
   const [signout, { isLoading: isSigningOut }] = useSignoutMutation();
 
-  const { data: profileRes, isLoading: profileLoading } = useGetProfileQuery(
+  const { data: profileRes, refetch: refetchProfile } = useGetProfileQuery(
     undefined,
     { skip: !isAuthenticated },
   );
@@ -102,6 +111,48 @@ export default function UserProfilePage() {
 
   const completedCourses = user?.completedCourses || [];
   const certificates = user?.certificates || [];
+  const quizAttempts = user?.quizAttempts || [];
+  const [updateAttemptVisibility, { isLoading: updatingPrivacy }] = useUpdateAttemptVisibilityMutation();
+
+  const changeScorePrivacy = async (attemptId, visibility) => {
+    try {
+      await updateAttemptVisibility({ attemptId, visibility }).unwrap();
+      await refetchProfile();
+      toast.success(`Score is now ${visibility}`);
+    } catch (error) {
+      toast.error(error?.data?.message || "Unable to update score privacy");
+    }
+  };
+
+  const downloadCertificate = async (certificate) => {
+    if (!Number.isFinite(certificate.score) || !certificate.total) {
+      toast.error("This older certificate does not contain a recorded score and cannot be regenerated.");
+      return;
+    }
+    setDownloadingCertificate(certificate._id);
+    try {
+      const verificationUrl = certificate.certificateUrl
+        ? `${window.location.origin}${certificate.certificateUrl}`
+        : "";
+      await generateCertificate({
+        studentName: user.fullName || user.username,
+        studentEmail: user.email || "",
+        courseName: certificate.courseId?.title || "Course",
+        score: certificate.score,
+        total: certificate.total,
+        date: new Date(certificate.issueDate).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        verificationUrl,
+      });
+    } catch {
+      toast.error("Unable to generate the certificate PDF. Please try again.");
+    } finally {
+      setDownloadingCertificate(null);
+    }
+  };
 
   const tabs = [
     { key: "saved", label: "Saved", icon: Bookmark },
@@ -203,7 +254,7 @@ export default function UserProfilePage() {
                   <div className="flex items-center gap-1.5">
                     <Link2 className="w-3.5 h-3.5 text-zinc-400" />
                     <span className="text-xs font-bold text-zinc-400">
-                      asif.to/{user.username}
+                      asif.to/@{user.username}
                     </span>
                   </div>
 
@@ -238,7 +289,7 @@ export default function UserProfilePage() {
                 {/* Profile Action Buttons */}
                 <div className="flex items-center gap-2 self-stretch sm:self-start justify-center">
                   <Link
-                    href={`/${user.username}/settings`}
+                    href={`/@${user.username}/settings`}
                     className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-foreground text-xs font-bold transition-all active:scale-95 shadow-sm"
                   >
                     <Edit3 className="w-4 h-4" />
@@ -378,6 +429,11 @@ export default function UserProfilePage() {
                               label: "Quiz Question",
                               title: item.question,
                               href: "/quiz",
+                            },
+                            interview_question: {
+                              label: item.course?.title || "Interview Question",
+                              title: item.question,
+                              href: `/${item.course?.slug}/interview-questions/${item.slug}`,
                             },
                           }[item.itemType];
 
@@ -570,17 +626,7 @@ export default function UserProfilePage() {
                             </p>
                           </div>
 
-                          {cert.certificateUrl && (
-                            <a
-                              href={cert.certificateUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline"
-                            >
-                              <span>View Certificate</span>
-                              <ChevronRight className="w-3.5 h-3.5" />
-                            </a>
-                          )}
+                          {cert.certificateUrl && <div className="flex items-end justify-between gap-3"><div className="flex flex-col items-start gap-2"><a href={cert.certificateUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:underline dark:text-amber-400"><span>View Certificate</span><ChevronRight className="h-3.5 w-3.5" /></a><button type="button" onClick={() => downloadCertificate(cert)} disabled={downloadingCertificate === cert._id || !Number.isFinite(cert.score) || !cert.total} className="inline-flex items-center gap-1.5 rounded-full bg-amber-600 px-3 py-2 text-xs font-bold text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"><Download className="h-3.5 w-3.5" />{downloadingCertificate === cert._id ? "Generating…" : "Download PDF"}</button></div><img src={`/api/certificate-qr?data=${encodeURIComponent(`${process.env.NEXT_PUBLIC_SITE_URL || "https://asif.to"}${cert.certificateUrl}`)}`} alt="QR code to verify certificate" className="h-16 w-16 rounded-lg border border-amber-200 bg-white p-1" /></div>}
                         </div>
                       ))}
                     </div>
@@ -607,7 +653,9 @@ export default function UserProfilePage() {
 
               {/* Quiz & Revision */}
               {activeTab === "quiz" && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-5">
+                  <div><h3 className="mb-4 flex items-center gap-2 text-sm font-extrabold uppercase tracking-wider text-zinc-400"><BookOpen className="h-4 w-4 text-blue-500" />Quiz attempts ({quizAttempts.length})</h3>{quizAttempts.length ? <div className="space-y-3">{[...quizAttempts].reverse().map((attempt) => <div key={attempt._id} className="flex flex-col gap-4 rounded-3xl border border-zinc-100 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90 sm:flex-row sm:items-center"><div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-lg font-black ${attempt.passed ? "bg-emerald-500/10 text-emerald-600" : "bg-red-500/10 text-red-500"}`}>{attempt.percentage}%</div><div className="min-w-0 flex-1"><h4 className="font-bold text-foreground">{attempt.courseId?.title || "Course quiz"}</h4><p className="mt-1 text-xs text-zinc-500">{attempt.score}/{attempt.total} correct · {attempt.passed ? "Passed" : "Not passed"} · {new Date(attempt.attemptedAt).toLocaleDateString()}</p>{attempt.certificateId && <Link href={`/certificates/${attempt.certificateId}`} className="mt-2 inline-flex text-xs font-bold text-emerald-600 hover:underline">View earned certificate</Link>}</div><label className="flex items-center gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-300"><span>Public score</span><input type="checkbox" checked={attempt.visibility === "public"} disabled={updatingPrivacy} onChange={(event) => changeScorePrivacy(attempt._id, event.target.checked ? "public" : "private")} className="h-4 w-4 accent-blue-600" /></label></div>)}</div> : <p className="rounded-3xl bg-white p-8 text-center text-sm text-zinc-500 dark:bg-zinc-900">Your logged-in quiz attempts will appear here.</p>}</div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="p-6 rounded-4xl bg-white dark:bg-zinc-900/90 shadow-sm border border-zinc-100 dark:border-zinc-800 flex flex-col justify-between gap-4">
                     <div className="space-y-2">
                       <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
@@ -649,7 +697,7 @@ export default function UserProfilePage() {
                       <span>Practice Flashcards</span>
                     </Link>
                   </div>
-                </div>
+                </div></div>
               )}
 
               {/* My Articles */}

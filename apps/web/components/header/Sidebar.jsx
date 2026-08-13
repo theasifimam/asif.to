@@ -190,7 +190,7 @@ export default function Sidebar({
               ) : (
                 <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700/60 shadow-sm">
                   <Link
-                    href={user?.username ? `/${user.username}` : "/"}
+                    href={user?.username ? `/@${user.username}` : "/"}
                     onClick={onClose}
                     className="flex items-center gap-3 overflow-hidden"
                   >

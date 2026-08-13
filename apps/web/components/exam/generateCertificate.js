@@ -127,6 +127,7 @@ export async function generateCertificate({
   score,
   total,
   date,
+  verificationUrl,
 }) {
   const canvas = document.createElement("canvas");
   canvas.width = PAGE_WIDTH;
@@ -229,6 +230,19 @@ export async function generateCertificate({
   ctx.fillStyle = "#8a94a3";
   ctx.font = "14px Arial, sans-serif";
   ctx.fillText(studentEmail || "", PAGE_WIDTH / 2, 900);
+
+  if (verificationUrl) {
+    try {
+      const qr = await loadImage(`/api/certificate-qr?data=${encodeURIComponent(verificationUrl)}`);
+      ctx.drawImage(qr, 1160, 665, 105, 105);
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#556274";
+      ctx.font = "12px Arial, sans-serif";
+      ctx.fillText("Scan to verify", 1212, 788);
+    } catch {
+      // Certificate remains downloadable if the QR service is unavailable.
+    }
+  }
 
   const jpegBytes = dataUrlToBytes(canvas.toDataURL("image/jpeg", 0.96));
   const pdfBlob = createImagePdf(jpegBytes, PAGE_WIDTH, PAGE_HEIGHT);

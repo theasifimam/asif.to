@@ -38,7 +38,7 @@ export const getCheatsheetBySlug = async (req, res) => {
 /** POST /api/v1/cheatsheets (admin) */
 export const createCheatsheet = async (req, res) => {
   try {
-    const { techId, title, snippets, order, status } = req.body;
+    const { techId, title, description, seoTitle, seoDescription, keywords, canonicalUrl, snippets, order, status } = req.body;
     if (!techId || !title) {
       return res.status(400).json({ success: false, message: "techId and title are required." });
     }
@@ -49,6 +49,7 @@ export const createCheatsheet = async (req, res) => {
 
     const cs = await Cheatsheet.create({
       techId, slug, title,
+      description: description || "", seoTitle: seoTitle || "", seoDescription: seoDescription || "", keywords: keywords || [], canonicalUrl: canonicalUrl || "",
       snippets: snippets || [],
       order: order ?? 0,
       status: status || "published",
@@ -64,7 +65,7 @@ export const createCheatsheet = async (req, res) => {
 export const updateCheatsheet = async (req, res) => {
   try {
     const { id } = req.params;
-    const allowed = ["techId", "title", "slug", "snippets", "order", "status"];
+    const allowed = ["techId", "title", "slug", "description", "seoTitle", "seoDescription", "keywords", "canonicalUrl", "snippets", "order", "status"];
     const updates = {};
     allowed.forEach((k) => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
 

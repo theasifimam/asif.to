@@ -5,7 +5,7 @@ import Article from "../models/Article.js";
 import Course from "../models/Course.js";
 import Chapter from "../models/Chapter.js";
 import Cheatsheet from "../models/Cheatsheet.js";
-import QuizQuestion from "../models/QuizQuestion.js";
+import QuizQuestion from "../models/Question.js";
 
 // ─── Admin: List all users ──────────────────────────────────────────────────
 // GET /api/v1/users?page=1&limit=10&search=&role=&status=
@@ -60,13 +60,15 @@ export const getUsers = async (req, res) => {
 export const getPublicProfile = async (req, res) => {
   try {
     const { username } = req.params;
-    const user = await User.findOne({ username }).select(
-      "-password -role -status -isVerified -lastLogin -updatedAt -__v",
-    );
+    const user = await User.findOne({ username })
+      .select("fullName username avatar bio location socials expertise quizAttempts createdAt")
+      .populate("quizAttempts.courseId", "title slug thumbnail")
+      .lean();
     if (!user) {
       res.status(404).json({ success: false, message: "User not found." });
       return;
     }
+    user.quizAttempts = (user.quizAttempts || []).filter((attempt) => attempt.visibility === "public");
     res.status(200).json({ success: true, data: { user } });
   } catch (error) {
     console.error("[USERS] GetPublicProfile error:", error);
@@ -354,6 +356,9 @@ export const getMyProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id)
       .select("-password")
+      .populate("completedCourses", "title slug thumbnail")
+      .populate("certificates.courseId", "title slug thumbnail")
+      .populate("quizAttempts.courseId", "title slug thumbnail")
       .populate({
         path: "bookmarks",
         populate: { path: "author topic" },
@@ -366,6 +371,34 @@ export const getMyProfile = async (req, res) => {
   } catch (error) {
     console.error("[USERS] GetMyProfile error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const updateAttemptVisibility = async (req, res) => {
+  try {
+    const visibility = req.body.visibility === "public" ? "public" : "private";
+    const user = await User.findOneAndUpdate(
+      { _id: req.user._id, "quizAttempts._id": req.params.attemptId },
+      { $set: { "quizAttempts.$.visibility": visibility } },
+      { new: true },
+    ).select("quizAttempts");
+    if (!user) return res.status(404).json({ success: false, message: "Quiz attempt not found." });
+    res.json({ success: true, data: user.quizAttempts.id(req.params.attemptId) });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Unable to update score privacy." });
+  }
+};
+
+export const getCertificate = async (req, res) => {
+  try {
+    const user = await User.findOne({ "certificates.verificationId": req.params.verificationId })
+      .select("fullName username certificates")
+      .populate("certificates.courseId", "title slug");
+    const certificate = user?.certificates?.find((item) => item.verificationId === req.params.verificationId);
+    if (!certificate) return res.status(404).json({ success: false, message: "Certificate not found." });
+    res.json({ success: true, data: { certificate, student: { fullName: user.fullName, username: user.username } } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Unable to verify certificate." });
   }
 };
 
@@ -499,7 +532,7 @@ export const getMyBookmarks = async (req, res) => {
 export const toggleSavedItem = async (req, res) => {
   try {
     const { itemId, itemType } = req.body;
-    const VALID_TYPES = ["course", "chapter", "cheatsheet", "quiz_question"];
+    const VALID_TYPES = ["course", "chapter", "cheatsheet", "quiz_question", "interview_question"];
 
     if (!itemId || !itemType || !VALID_TYPES.includes(itemType)) {
       res
@@ -559,12 +592,13 @@ export const getMySavedItems = async (req, res) => {
       chapter: [],
       cheatsheet: [],
       quiz_question: [],
+      interview_question: [],
     };
     savedItems.forEach((s) => {
       if (byType[s.itemType]) byType[s.itemType].push(s.itemId);
     });
 
-    const [courses, chapters, cheatsheets, quizQuestions] = await Promise.all([
+    const [courses, chapters, cheatsheets, quizQuestions, interviewQuestions] = await Promise.all([
       byType.course.length
         ? Course.find({ _id: { $in: byType.course } })
             .select("title slug techId thumbnail")
@@ -582,8 +616,14 @@ export const getMySavedItems = async (req, res) => {
             .lean()
         : [],
       byType.quiz_question.length
-        ? QuizQuestion.find({ _id: { $in: byType.quiz_question } })
+        ? QuizQuestion.find({ _id: { $in: byType.quiz_question }, type: "quiz" })
             .select("question options correctIndex")
+            .lean()
+        : [],
+      byType.interview_question.length
+        ? QuizQuestion.find({ _id: { $in: byType.interview_question }, type: "interview" })
+            .select("question slug course difficulty")
+            .populate("course", "title slug")
             .lean()
         : [],
     ]);
@@ -602,6 +642,10 @@ export const getMySavedItems = async (req, res) => {
           );
         else if (s.itemType === "quiz_question")
           item = quizQuestions.find(
+            (q) => q._id.toString() === s.itemId.toString(),
+          );
+        else if (s.itemType === "interview_question")
+          item = interviewQuestions.find(
             (q) => q._id.toString() === s.itemId.toString(),
           );
         return { itemType: s.itemType, savedAt: s.savedAt, ...item };

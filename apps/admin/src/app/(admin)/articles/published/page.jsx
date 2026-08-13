@@ -12,6 +12,7 @@ import ArticleControls from "./components/ArticleControls";
 import ArticleListView from "./components/ArticleListView";
 import ArticleCardView from "./components/ArticleCardView";
 import ArticleDeleteDialog from "./components/ArticleDeleteDialog";
+import { AdminPage } from "@/components/admin";
 import ArticleMetrics from "./components/ArticleMetrics";
 
 export default function PublishedPage() {
@@ -155,7 +156,7 @@ export default function PublishedPage() {
   );
 
   return (
-    <div className="p-6 md:p-12 flex flex-col gap-8 md:gap-12 max-w-400 mx-auto text-zinc-900 dark:text-zinc-400 transition-colors duration-300">
+    <AdminPage>
       <ArticleHeader />
 
       <ArticleControls
@@ -235,6 +236,6 @@ export default function PublishedPage() {
         submitting={submitting}
         handleDelete={handleDelete}
       />
-    </div>
+    </AdminPage>
   );
 }

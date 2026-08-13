@@ -115,7 +115,7 @@ courseSchema.pre("findOneAndDelete", async function () {
       model("Chapter").deleteMany({ course: courseId }),
       model("CourseTopic").deleteMany({ course: courseId }),
       model("TopicCategory").deleteMany({ course: courseId }),
-      model("InterviewQuestion").deleteMany({ course: courseId }),
+      model("Question").deleteMany({ $or: [{ course: courseId }, { courses: courseId }] }),
     ]);
   }
 });
@@ -128,7 +128,7 @@ courseSchema.pre(
       model("Chapter").deleteMany({ course: this._id }),
       model("CourseTopic").deleteMany({ course: this._id }),
       model("TopicCategory").deleteMany({ course: this._id }),
-      model("InterviewQuestion").deleteMany({ course: this._id }),
+      model("Question").deleteMany({ $or: [{ course: this._id }, { courses: this._id }] }),
     ]);
   },
 );

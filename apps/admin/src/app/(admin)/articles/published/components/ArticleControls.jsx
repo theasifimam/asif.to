@@ -1,5 +1,6 @@
 import React from 'react';
-import { Search, LayoutList, LayoutGrid } from 'lucide-react';
+import { LayoutList, LayoutGrid } from 'lucide-react';
+import { AdminFilters, AdminSearch } from '@/components/admin';
 
 export default function ArticleControls({
   searchQuery,
@@ -11,18 +12,14 @@ export default function ArticleControls({
   stats
 }) {
   return (
-    <section className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white dark:bg-zinc-950/60 p-4 rounded-3xl border border-zinc-200 dark:border-zinc-800/80 shadow-sm">
+    <AdminFilters className="items-stretch md:items-center">
       {/* Search Input */}
-      <div className="flex items-center gap-3 px-4 py-2.5 bg-zinc-100 dark:bg-zinc-900/60 rounded-2xl flex-1 max-w-md border border-zinc-200/50 dark:border-zinc-800/50">
-        <Search size={18} className="text-zinc-400" />
-        <input
-          type="text"
+      <AdminSearch
           placeholder="Search articles by title or author..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="bg-transparent border-none outline-none text-xs font-medium w-full text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400"
-        />
-      </div>
+          onChange={setSearchQuery}
+          className="max-w-md"
+      />
 
       <div className="flex flex-wrap items-center justify-between md:justify-end gap-3">
         {/* Status Filter Tabs */}
@@ -64,6 +61,6 @@ export default function ArticleControls({
           </button>
         </div>
       </div>
-    </section>
+    </AdminFilters>
   );
 }

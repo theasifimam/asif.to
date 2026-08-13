@@ -17,6 +17,7 @@ import {
   Play,
   FileCode,
   Layers,
+  MessageSquareText,
 } from "lucide-react";
 
 export default function HomePageClient({ courses = [] }) {
@@ -68,7 +69,7 @@ export default function HomePageClient({ courses = [] }) {
             <p className="text-xs sm:text-sm text-blue-100 mt-2 max-w-xl leading-relaxed font-medium">
               Your go-to hub for structured web development tutorials, instant
               syntax cheatsheets, interactive revision flashcards, and practice
-              quizzes designed for phone & desktop.
+              quizzes and interview practice designed for phone & desktop.
             </p>
 
             {/* Instant Search Bar */}
@@ -120,8 +121,26 @@ export default function HomePageClient({ courses = [] }) {
                 <Layers className="w-3.5 h-3.5" />
                 <span>Revision Deck</span>
               </Link>
+
+              <a
+                href="#interview-prep"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold bg-white/15 text-white hover:bg-white/20 transition-all whitespace-nowrap"
+              >
+                <MessageSquareText className="w-3.5 h-3.5" />
+                <span>Interview Prep</span>
+              </a>
             </div>
           </div>
+        </section>
+
+        <section aria-labelledby="explore-learning" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <h2 id="explore-learning" className="sr-only">Explore learning resources</h2>
+          {[
+            { href: "#courses", icon: BookOpen, label: "Courses", detail: "Structured lessons", color: "text-blue-600 bg-blue-500/10" },
+            { href: "/quiz", icon: HelpCircle, label: "Practice quiz", detail: "Test your skills", color: "text-purple-600 bg-purple-500/10" },
+            { href: "#interview-prep", icon: MessageSquareText, label: "Interviews", detail: "Questions & answers", color: "text-orange-600 bg-orange-500/10" },
+            { href: "/cheatsheets", icon: FileCode, label: "Cheatsheets", detail: "Quick references", color: "text-emerald-600 bg-emerald-500/10" },
+          ].map(({ href, icon: Icon, label, detail, color }) => <Link key={label} href={href} className="group rounded-3xl border border-zinc-200/70 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"><span className={`flex h-10 w-10 items-center justify-center rounded-2xl ${color}`}><Icon className="h-5 w-5" /></span><h3 className="mt-3 text-sm font-black text-foreground group-hover:text-blue-600">{label}</h3><p className="mt-0.5 text-[11px] font-medium text-zinc-500">{detail}</p></Link>)}
         </section>
 
         {/* Tech Stack Selector Grid */}
@@ -134,7 +153,7 @@ export default function HomePageClient({ courses = [] }) {
         />
 
         {/* Structured Courses Section (W3Schools Style Modernized) */}
-        <section className="w-full mt-2">
+        <section id="courses" className="w-full mt-2 scroll-mt-24">
           <div className="flex items-center justify-between gap-3 mb-4">
             <div>
               <h2 className="text-lg sm:text-xl font-black tracking-tight text-foreground">
@@ -226,9 +245,37 @@ export default function HomePageClient({ courses = [] }) {
                       className="shrink-0"
                     />
                   </div>
+                  <Link
+                    href={`/${course.slug}/interview-questions`}
+                    className="mt-3 flex items-center justify-center gap-2 rounded-full py-2 text-xs font-bold text-orange-600 hover:bg-orange-500/10 dark:text-orange-400"
+                  >
+                    <MessageSquareText className="w-3.5 h-3.5" />
+                    Interview Questions
+                  </Link>
                 </div>
               );
             })}
+          </div>
+        </section>
+
+        <section id="interview-prep" className="scroll-mt-24 rounded-[2.5rem] bg-gradient-to-br from-orange-500/10 via-rose-500/10 to-amber-500/10 p-6 shadow-sm sm:p-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
+                <MessageSquareText className="h-5 w-5" />
+                <span className="text-xs font-black uppercase tracking-[0.18em]">Interview Prep</span>
+              </div>
+              <h2 className="mt-2 text-xl font-black tracking-tight text-foreground sm:text-2xl">Practice questions by course</h2>
+              <p className="mt-1 text-xs font-medium text-zinc-500 dark:text-zinc-400">Open a course to get interview-ready answers, relevant chapters, topics, and articles.</p>
+            </div>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            {allCourses.slice(0, 4).map((course) => (
+              <Link key={course._id || course.id} href={`/${course.slug}/interview-questions`} className="group flex items-center justify-between gap-3 rounded-3xl bg-white/80 p-4 transition-all hover:bg-white hover:shadow-md dark:bg-zinc-900/80 dark:hover:bg-zinc-900">
+                <span className="min-w-0"><span className="block truncate font-extrabold text-foreground group-hover:text-orange-600 dark:group-hover:text-orange-400">{course.title}</span><span className="mt-1 block text-xs text-zinc-500">Course interview questions</span></span>
+                <ChevronRight className="h-5 w-5 shrink-0 text-orange-500 transition-transform group-hover:translate-x-1" />
+              </Link>
+            ))}
           </div>
         </section>
 

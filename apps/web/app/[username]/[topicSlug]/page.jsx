@@ -4,6 +4,7 @@ import CourseTopicPage, {
 } from "@/components/CourseTopicPage";
 import { getChapterData, getPublicTopic } from "@/lib/publicContent";
 import { absoluteUrl, assetUrl, getSiteUrl, jsonLd } from "@/lib/seo";
+import InterviewQuestionsGuide, { buildInterviewGuideMetadata } from "@/components/interview/InterviewQuestionsGuide";
 
 export const dynamic = "force-dynamic";
 
@@ -128,8 +129,12 @@ function chapterStructuredData(data, courseSlug, chapterSlug) {
   };
 }
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, searchParams }) {
   const { username: courseSlug, topicSlug } = await params;
+  if (topicSlug === "interview-questions") {
+    const { page } = await searchParams;
+    return buildInterviewGuideMetadata(courseSlug, page);
+  }
   const topic = await getPublicTopic(courseSlug, [topicSlug]);
   if (topic) return buildTopicMetadata(courseSlug, [topicSlug]);
 
@@ -144,8 +149,12 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function PublicTopicPage({ params }) {
+export default async function PublicTopicPage({ params, searchParams }) {
   const { username: courseSlug, topicSlug } = await params;
+  if (topicSlug === "interview-questions") {
+    const { page } = await searchParams;
+    return <InterviewQuestionsGuide courseSlug={courseSlug} requestedPage={page} />;
+  }
   const topic = await getPublicTopic(courseSlug, [topicSlug]);
 
   if (topic) {

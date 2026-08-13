@@ -388,20 +388,10 @@ export const quizApi = {
     apiGet(`/quiz?${params ? new URLSearchParams(params) : ""}`),
   listAll: (params) =>
     apiGet(`/quiz/admin/all${params ? `?${new URLSearchParams(params)}` : ""}`),
+  get: (id) => apiGet(`/quiz/admin/${id}`),
   create: (data) => apiPost("/quiz", data),
   update: (id, data) => apiPatch(`/quiz/${id}`, data),
   delete: (id) => apiDelete(`/quiz/${id}`),
-};
-
-/** Flashcards */
-export const flashcardsApi = {
-  list: (params) =>
-    apiGet(`/flashcards?${params ? new URLSearchParams(params) : ""}`),
-  listAll: (techId) =>
-    apiGet(`/flashcards/admin/all${techId ? `?techId=${techId}` : ""}`),
-  create: (data) => apiPost("/flashcards", data),
-  update: (id, data) => apiPatch(`/flashcards/${id}`, data),
-  delete: (id) => apiDelete(`/flashcards/${id}`),
 };
 
 // ═══════════════════════════════════════════════════════════════════════════

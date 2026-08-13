@@ -1,7 +1,10 @@
 import mongoose from "mongoose";
-import InterviewQuestion from "../models/InterviewQuestion.js";
+import InterviewQuestion from "../models/Question.js";
 import CourseTopic from "../models/CourseTopic.js";
+import "../models/TopicCategory.js";
 import Course from "../models/Course.js";
+import Chapter from "../models/Chapter.js";
+import Article from "../models/Article.js";
 
 function slugify(value = "") {
   return value
@@ -63,8 +66,72 @@ function publicQuestion(question) {
   };
 }
 
+function escapeRegex(value = "") {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function relatedExpressions(question) {
+  return [...new Set((question.tags || [])
+    .map((tag) => String(tag).trim())
+    .filter((tag) => tag.length > 1)
+    .slice(0, 5)
+    .map((tag) => new RegExp(escapeRegex(tag), "i")))];
+}
+
+async function getQuestionContext(course, question) {
+  const expressions = relatedExpressions(question);
+  const topicMatch = expressions.length
+    ? {
+        course: course._id,
+        status: "published",
+        type: "article",
+        $or: [
+          { title: { $in: expressions } },
+          { excerpt: { $in: expressions } },
+          { keywords: { $in: expressions } },
+        ],
+      }
+    : { course: course._id, status: "published", type: "article" };
+  const chapterMatch = expressions.length
+    ? {
+        course: course._id,
+        status: "published",
+        $or: [
+          { title: { $in: expressions } },
+          { summary: { $in: expressions } },
+          { keywords: { $in: expressions } },
+        ],
+      }
+    : { course: course._id, status: "published" };
+  const articleMatch = expressions.length
+    ? {
+        status: "published",
+        $or: [
+          { title: { $in: expressions } },
+          { content: { $in: expressions } },
+        ],
+      }
+    : { status: "published" };
+
+  let [topics, chapters, articles] = await Promise.all([
+    CourseTopic.find(topicMatch).sort({ order: 1 }).limit(3).select("title slug excerpt category").populate("category", "name slug").lean(),
+    Chapter.find(chapterMatch).sort({ order: 1 }).limit(4).select("title slug summary order").lean(),
+    Article.find(articleMatch).sort({ createdAt: -1 }).limit(3).select("title slug image createdAt").lean(),
+  ]);
+
+  // New courses may not have tag-matched content yet. Keep the learning path useful.
+  if (!topics.length && expressions.length)
+    topics = await CourseTopic.find({ course: course._id, status: "published", type: "article" }).sort({ order: 1 }).limit(3).select("title slug excerpt category").populate("category", "name slug").lean();
+  if (!chapters.length && expressions.length)
+    chapters = await Chapter.find({ course: course._id, status: "published" }).sort({ order: 1 }).limit(4).select("title slug summary order").lean();
+
+  return { topics, chapters, articles };
+}
+
 export const listPublicInterviewQuestions = async (req, res) => {
   try {
+    const pageNumber = Math.max(Number(req.query.page) || 1, 1);
+    const pageSize = Math.min(Math.max(Number(req.query.limit) || 15, 1), 50);
     const course = await Course.findOne({
       slug: req.params.courseSlug,
       status: "published",
@@ -76,26 +143,53 @@ export const listPublicInterviewQuestions = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Course not found." });
 
-    const publishedQuestionIds = await CourseTopic.distinct(
-      "interviewQuestions.question",
-      {
-        course: course._id,
-        type: "interview",
-        status: "published",
-      },
-    );
-    const questions = await InterviewQuestion.find({
-      _id: { $in: publishedQuestionIds },
-      course: course._id,
-    })
-      .select(
-        "question answer difficulty questionType tags slug codeExample expectedOutput followUps",
-      )
-      .sort({ question: 1 })
-      .lean();
+    const [questions, total, questionIndex] = await Promise.all([
+      InterviewQuestion.aggregate([
+        { $match: { type: "interview", course: course._id } },
+        {
+          $addFields: {
+            difficultyOrder: {
+              $switch: {
+                branches: [
+                  { case: { $eq: ["$difficulty", "easy"] }, then: 1 },
+                  { case: { $eq: ["$difficulty", "medium"] }, then: 2 },
+                  { case: { $eq: ["$difficulty", "hard"] }, then: 3 },
+                ],
+                default: 4,
+              },
+            },
+          },
+        },
+        { $sort: { difficultyOrder: 1, question: 1 } },
+        { $skip: (pageNumber - 1) * pageSize },
+        { $limit: pageSize },
+        { $project: { difficultyOrder: 0 } },
+      ]),
+      InterviewQuestion.countDocuments({ type: "interview", course: course._id }),
+      InterviewQuestion.aggregate([
+        { $match: { type: "interview", course: course._id } },
+        { $addFields: { difficultyOrder: { $switch: { branches: [
+          { case: { $eq: ["$difficulty", "easy"] }, then: 1 },
+          { case: { $eq: ["$difficulty", "medium"] }, then: 2 },
+          { case: { $eq: ["$difficulty", "hard"] }, then: 3 },
+        ], default: 4 } } } },
+        { $sort: { difficultyOrder: 1, question: 1 } },
+        { $project: { _id: 1, question: 1, slug: 1, difficulty: 1 } },
+      ]),
+    ]);
     res.json({
       success: true,
-      data: { course, questions: questions.map(publicQuestion) },
+      data: {
+        course,
+        questions: questions.map(publicQuestion),
+        questionIndex,
+        pagination: {
+          page: pageNumber,
+          limit: pageSize,
+          total,
+          pages: Math.ceil(total / pageSize),
+        },
+      },
     });
   } catch (error) {
     console.error("[INTERVIEW QUESTIONS] public list error:", error);
@@ -117,6 +211,7 @@ export const getPublicInterviewQuestion = async (req, res) => {
         .json({ success: false, message: "Question not found." });
 
     const question = await InterviewQuestion.findOne({
+      type: "interview",
       course: course._id,
       slug: req.params.questionSlug,
     })
@@ -124,21 +219,14 @@ export const getPublicInterviewQuestion = async (req, res) => {
         "question answer difficulty questionType tags slug codeExample expectedOutput followUps",
       )
       .lean();
-    const isPublished =
-      question &&
-      (await CourseTopic.exists({
-        course: course._id,
-        type: "interview",
-        status: "published",
-        "interviewQuestions.question": question._id,
-      }));
-    if (!isPublished)
+    if (!question)
       return res
         .status(404)
         .json({ success: false, message: "Question not found." });
+    const context = await getQuestionContext(course, question);
     res.json({
       success: true,
-      data: { course, question: publicQuestion(question) },
+      data: { course, question: publicQuestion(question), ...context },
     });
   } catch (error) {
     console.error("[INTERVIEW QUESTIONS] public detail error:", error);
@@ -157,7 +245,7 @@ export const listInterviewQuestions = async (req, res) => {
       page = 1,
       limit = 20,
     } = req.query;
-    const filter = {};
+    const filter = { type: "interview" };
     if (course) {
       const selectedCourse = await resolveCourse(course);
       if (!selectedCourse)
@@ -213,7 +301,7 @@ export const listInterviewQuestions = async (req, res) => {
 export const getInterviewQuestion = async (req, res) => {
   try {
     const question = await populateQuestion(
-      InterviewQuestion.findById(req.params.id),
+      InterviewQuestion.findOne({ _id: req.params.id, type: "interview" }),
     ).lean();
     if (!question)
       return res
@@ -235,6 +323,7 @@ export const createInterviewQuestion = async (req, res) => {
       });
 
     const question = await InterviewQuestion.create({
+      type: "interview",
       course: course._id,
       question: req.body.question,
       answer: req.body.answer || "",
@@ -249,7 +338,7 @@ export const createInterviewQuestion = async (req, res) => {
     });
     res.status(201).json({
       success: true,
-      data: await populateQuestion(InterviewQuestion.findById(question._id)),
+      data: await populateQuestion(InterviewQuestion.findOne({ _id: question._id, type: "interview" })),
     });
   } catch (error) {
     res
@@ -260,7 +349,7 @@ export const createInterviewQuestion = async (req, res) => {
 
 export const updateInterviewQuestion = async (req, res) => {
   try {
-    const question = await InterviewQuestion.findById(req.params.id);
+    const question = await InterviewQuestion.findOne({ _id: req.params.id, type: "interview" });
     if (!question)
       return res
         .status(404)
@@ -307,7 +396,7 @@ export const updateInterviewQuestion = async (req, res) => {
     await question.save();
     res.json({
       success: true,
-      data: await populateQuestion(InterviewQuestion.findById(question._id)),
+      data: await populateQuestion(InterviewQuestion.findOne({ _id: question._id, type: "interview" })),
     });
   } catch (error) {
     res
@@ -318,7 +407,7 @@ export const updateInterviewQuestion = async (req, res) => {
 
 export const deleteInterviewQuestion = async (req, res) => {
   try {
-    const question = await InterviewQuestion.findById(req.params.id);
+    const question = await InterviewQuestion.findOne({ _id: req.params.id, type: "interview" });
     if (!question)
       return res
         .status(404)

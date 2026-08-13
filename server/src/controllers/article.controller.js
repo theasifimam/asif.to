@@ -120,7 +120,7 @@ export const getArticleBySlug = async (req, res) => {
  */
 export const createArticle = async (req, res) => {
   try {
-    const { title, content, topic, status } = req.body;
+    const { title, content, topic, status, seoTitle, seoDescription, keywords, canonicalUrl } = req.body;
 
     if (!title || !content || !topic) {
       // Delete uploaded file if validation fails
@@ -154,6 +154,7 @@ export const createArticle = async (req, res) => {
       topic: Array.isArray(topic) ? topic : [topic],
       image: imageUrl,
       status: articleStatus,
+      seoTitle: seoTitle || "", seoDescription: seoDescription || "", keywords: keywords || [], canonicalUrl: canonicalUrl || "",
       readCount: 0,
       views: []
     });
@@ -172,7 +173,7 @@ export const createArticle = async (req, res) => {
 export const updateArticle = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, topic, status } = req.body;
+    const { title, content, topic, status, seoTitle, seoDescription, keywords, canonicalUrl } = req.body;
 
     const article = await Article.findById(id);
     if (!article) {
@@ -200,6 +201,10 @@ export const updateArticle = async (req, res) => {
     if (content) updateData.content = content;
     if (topic) updateData.topic = Array.isArray(topic) ? topic : [topic];
     if (status && ["draft", "published"].includes(status)) updateData.status = status;
+    if (seoTitle !== undefined) updateData.seoTitle = seoTitle;
+    if (seoDescription !== undefined) updateData.seoDescription = seoDescription;
+    if (keywords !== undefined) updateData.keywords = Array.isArray(keywords) ? keywords : String(keywords).split(",").map((item) => item.trim()).filter(Boolean);
+    if (canonicalUrl !== undefined) updateData.canonicalUrl = canonicalUrl;
 
     if (req.file) {
       // New image uploaded, delete old one and set new path

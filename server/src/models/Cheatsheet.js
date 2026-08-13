@@ -28,6 +28,11 @@ const cheatsheetSchema = new Schema(
       required: true,
       trim: true,
     },
+    description: { type: String, default: "" },
+    seoTitle: { type: String, default: "" },
+    seoDescription: { type: String, default: "" },
+    keywords: { type: [String], default: [] },
+    canonicalUrl: { type: String, default: "" },
     // Code snippet examples — array of { name, code, language }
     snippets: [snippetSchema],
     // Controls display order

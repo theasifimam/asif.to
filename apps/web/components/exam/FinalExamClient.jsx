@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useSelector } from "react-redux";
 import {
@@ -13,7 +13,7 @@ import {
   CheckSquare,
   Maximize,
 } from "lucide-react";
-import { useGetCourseExamQuery } from "@/lib/api/courseApi";
+import { useGetCourseExamQuery, useSubmitCourseExamMutation } from "@/lib/api/courseApi";
 import ExamTimer from "./ExamTimer";
 import ExamQuestion from "./ExamQuestion";
 import ExamResultCard from "./ExamResultCard";
@@ -59,7 +59,7 @@ export default function FinalExamClient({ courseId, course }) {
     error,
   } = useGetCourseExamQuery(courseId);
   const exam = examResponse?.data;
-  const questions = exam?.questions || [];
+  const questions = useMemo(() => exam?.questions || [], [exam?.questions]);
   const settings = exam?.settings || {};
   const totalQuestions = questions.length;
   const durationMinutes = settings.durationMinutes || 30;
@@ -67,6 +67,9 @@ export default function FinalExamClient({ courseId, course }) {
   const passingScore = Math.ceil((totalQuestions * passingPercentage) / 100);
   const cooldownHours = settings.cooldownHours ?? 24;
   const courseName = exam?.course?.title || course?.title || courseId;
+  const [submitCourseExam] = useSubmitCourseExamMutation();
+  const startedAt = useRef(null);
+  const [submittedQuestions, setSubmittedQuestions] = useState([]);
 
   // ── Cooldown check ──────────────────────────────────────────────────────────
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
@@ -75,7 +78,8 @@ export default function FinalExamClient({ courseId, course }) {
     if (lastAttempt) {
       const hoursSince = (Date.now() - lastAttempt.getTime()) / 3600000;
       if (hoursSince < cooldownHours) {
-        setCooldownRemaining(Math.ceil(cooldownHours - hoursSince));
+        const remaining = Math.ceil(cooldownHours - hoursSince);
+        queueMicrotask(() => setCooldownRemaining(remaining));
       }
     }
   }, [courseId, cooldownHours]);
@@ -86,21 +90,47 @@ export default function FinalExamClient({ courseId, course }) {
 
   // ── Answers array (index = question index, value = selected option index or null) ──
   const [answers, setAnswers] = useState([]);
-  useEffect(() => {
-    setAnswers(new Array(totalQuestions).fill(null));
-  }, [totalQuestions]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [autoSubmitReason, setAutoSubmitReason] = useState(null);
   const [score, setScore] = useState(null);
+  const [certificate, setCertificate] = useState(null);
+  const [submitError, setSubmitError] = useState("");
 
   // ── Anti-cheat ─────────────────────────────────────────────────────────────
+  // ── Exam actions ───────────────────────────────────────────────────────────
+  const submitExam = useCallback(
+    async (finalAnswers, submissionReason = "manual") => {
+      const exactQuestions = submittedQuestions.length ? submittedQuestions : questions;
+      const computed = exactQuestions.reduce((acc, q, idx) => {
+        return acc + (finalAnswers[idx] === q.correctIndex ? 1 : 0);
+      }, 0);
+      setScore(computed);
+      setExamCooldown(courseId);
+      clearExamSession(courseId);
+      setPhase(PHASE_RESULT);
+      try {
+        const response = await submitCourseExam({
+          courseSlug: courseId,
+          questionIds: exactQuestions.map((question) => question._id),
+          answers: finalAnswers,
+          durationSeconds: startedAt.current ? Math.round((Date.now() - startedAt.current) / 1000) : 0,
+          autoSubmitReason: submissionReason,
+        }).unwrap();
+        setScore(response.data.attempt.score);
+        setCertificate(response.data.certificate);
+      } catch (error) {
+        setSubmitError(error?.data?.message || "Your result could not be saved. Please try submitting again.");
+      }
+    },
+    [questions, submittedQuestions, courseId, submitCourseExam],
+  );
+
   const handleAutoSubmit = useCallback(
     (reason) => {
       setAutoSubmitReason(reason);
-      submitExam(answers);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+      submitExam(answers, reason);
     },
-    [answers],
+    [answers, submitExam],
   );
 
   const {
@@ -111,33 +141,26 @@ export default function FinalExamClient({ courseId, course }) {
     enterFullscreen,
   } = useProctoredExam(phase === PHASE_EXAM, handleAutoSubmit);
 
-  // ── Exam actions ───────────────────────────────────────────────────────────
   const startExam = () => {
-    clearExamSession(courseId); // fresh timer
+    clearExamSession(courseId);
     setAnswers(new Array(totalQuestions).fill(null));
     setCurrentIndex(0);
     setAutoSubmitReason(null);
     setScore(null);
+    setCertificate(null);
+    setSubmitError("");
+    setSubmittedQuestions(questions.map((question) => ({
+      ...question,
+      options: [...question.options],
+    })));
+    startedAt.current = Date.now();
     setPhase(PHASE_EXAM);
     enterFullscreen();
   };
 
-  const submitExam = useCallback(
-    (finalAnswers) => {
-      const computed = questions.reduce((acc, q, idx) => {
-        return acc + (finalAnswers[idx] === q.correctIndex ? 1 : 0);
-      }, 0);
-      setScore(computed);
-      setExamCooldown(courseId);
-      clearExamSession(courseId);
-      setPhase(PHASE_RESULT);
-    },
-    [questions, courseId],
-  );
-
   const handleTimerExpire = useCallback(() => {
     setAutoSubmitReason("timeout");
-    submitExam(answers);
+    submitExam(answers, "timeout");
   }, [answers, submitExam]);
 
   const handleRetry = () => {
@@ -449,7 +472,7 @@ export default function FinalExamClient({ courseId, course }) {
       <ExamResultCard
         score={score}
         total={totalQuestions}
-        questions={questions}
+        questions={submittedQuestions}
         answers={answers}
         studentName={user?.name || user?.username || "Student"}
         studentEmail={user?.email || ""}
@@ -460,6 +483,8 @@ export default function FinalExamClient({ courseId, course }) {
         passingScore={passingScore}
         passingPercentage={passingPercentage}
         durationMinutes={durationMinutes}
+        certificate={certificate}
+        submitError={submitError}
       />
     );
   }

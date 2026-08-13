@@ -5,20 +5,16 @@ import { useEffect, useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
-  ChevronLeft,
-  ChevronRight,
   Edit3,
   ExternalLink,
   FilePlus2,
   Filter,
   Loader2,
   Plus,
-  Search,
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -27,6 +23,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import {
+  AdminContent,
+  AdminFilters,
+  AdminPage,
+  AdminPageHeader,
+  AdminPagination,
+  AdminSearch,
+} from "@/components/admin";
 import { coursesApi, topicsApi } from "@/lib/api";
 
 const statusStyles = {
@@ -58,19 +62,21 @@ export default function TopicsPage() {
 
   const load = async () => {
     setLoading(true);
+    const topicParams = {
+      page: filters.page,
+      limit: canReorder ? 100 : 20,
+    };
+    if (filters.search.trim()) topicParams.search = filters.search.trim();
+    if (filters.course !== "all") topicParams.course = filters.course;
+    if (filters.type !== "all") topicParams.type = filters.type;
+    if (filters.status !== "all") topicParams.status = filters.status;
     const [topicResponse, courseResponse] = await Promise.all([
-      topicsApi.list({
-        ...filters,
-        course: filters.course === "all" ? "" : filters.course,
-        type: filters.type === "all" ? "" : filters.type,
-        status: filters.status === "all" ? "" : filters.status,
-        limit: canReorder ? 100 : 20,
-      }),
+      topicsApi.list(topicParams),
       courses.length ? Promise.resolve(null) : coursesApi.listAll(),
     ]);
     if (topicResponse.success) {
-      const payload = topicResponse.data?.data || {};
-      setTopics(Array.isArray(payload) ? payload : payload.data || []);
+      const payload = topicResponse.data?.data;
+      setTopics(Array.isArray(payload) ? payload : []);
       setPagination(
         topicResponse.data?.pagination || { page: 1, pages: 1, total: 0 },
       );
@@ -144,20 +150,12 @@ export default function TopicsPage() {
   };
 
   return (
-    <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-      <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
-            Content / Topics
-          </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">
-            Course topics
-          </h1>
-          <p className="mt-2 text-sm text-zinc-500">
-            Build search-ready topic pages beneath each course.
-          </p>
-        </div>
-        <div className="flex gap-2">
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="Content / Topics"
+        title="Course topics"
+        description="Build search-ready topic pages beneath each course."
+        actions={<>
           <Link href="/categories">
             <Button variant="outline">
               <Filter className="mr-2 h-4 w-4" /> Categories
@@ -168,25 +166,21 @@ export default function TopicsPage() {
               <Plus className="mr-2 h-4 w-4" /> New topic
             </Button>
           </Link>
-        </div>
-      </header>
+        </>}
+      />
 
-      <section className="flex flex-col gap-3 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950 md:flex-row">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-          <Input
+      <AdminFilters>
+          <AdminSearch
             value={filters.search}
-            onChange={(event) =>
+            onChange={(search) =>
               setFilters((current) => ({
                 ...current,
-                search: event.target.value,
+                search,
                 page: 1,
               }))
             }
             placeholder="Search title or slug"
-            className="rounded-2xl bg-zinc-100 pl-9 dark:bg-zinc-900"
           />
-        </div>
         <Select
           value={filters.course}
           onValueChange={(course) =>
@@ -235,16 +229,16 @@ export default function TopicsPage() {
             <SelectItem value="published">Published</SelectItem>
           </SelectContent>
         </Select>
-      </section>
+      </AdminFilters>
 
       {filters.course !== "all" && !canReorder && (
         <p className="text-xs text-zinc-500">
-          Clear search, type, and status filters to reorder this course's
+          Clear search, type, and status filters to reorder this course&apos;s
           topics.
         </p>
       )}
 
-      <section className="overflow-hidden rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
+      <AdminContent>
         <div className="overflow-x-auto">
           <table className="w-full min-w-190 text-left text-sm">
             <thead className="border-b border-zinc-200/60 bg-zinc-50/80 text-xs uppercase tracking-wide text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-900/60">
@@ -389,41 +383,8 @@ export default function TopicsPage() {
             </tbody>
           </table>
         </div>
-        <footer className="flex items-center justify-between border-t border-zinc-200/60 px-5 py-4 text-sm text-zinc-500 dark:border-zinc-800/60">
-          <span>{pagination.total || 0} topics</span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              disabled={pagination.page <= 1}
-              onClick={() =>
-                setFilters((current) => ({
-                  ...current,
-                  page: current.page - 1,
-                }))
-              }
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span>
-              {pagination.page || 1} / {pagination.pages || 1}
-            </span>
-            <Button
-              variant="outline"
-              size="icon"
-              disabled={pagination.page >= pagination.pages}
-              onClick={() =>
-                setFilters((current) => ({
-                  ...current,
-                  page: current.page + 1,
-                }))
-              }
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </footer>
-      </section>
+        <AdminPagination page={pagination.page} pages={pagination.pages} total={pagination.total || 0} itemLabel="topics" onPageChange={(page) => setFilters((current) => ({ ...current, page }))} />
+      </AdminContent>
 
       <ConfirmDialog
         isOpen={Boolean(deleteTarget)}
@@ -435,6 +396,6 @@ export default function TopicsPage() {
         confirmText="Delete"
         variant="destructive"
       />
-    </main>
+    </AdminPage>
   );
 }

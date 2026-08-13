@@ -91,7 +91,7 @@ const courseTopicSchema = new Schema(
       {
         question: {
           type: Schema.Types.ObjectId,
-          ref: "InterviewQuestion",
+          ref: "Question",
           required: true,
         },
         order: {

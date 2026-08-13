@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { toast } from "sonner";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -8,6 +10,7 @@ import SaveButton from "@/components/SaveButton";
 import {
   useGetCoursesQuery,
   useGetQuizQuestionsQuery,
+  useSubmitPracticeQuizMutation,
 } from "@/lib/api/courseApi";
 import { TECH_STACKS } from "@/lib/tutorialData";
 import {
@@ -20,8 +23,6 @@ import {
   Sparkles,
   Loader2,
   GraduationCap,
-  ShieldCheck,
-  Clock,
 } from "lucide-react";
 
 export default function QuizPage() {
@@ -31,6 +32,9 @@ export default function QuizPage() {
   const [isAnswered, setIsAnswered] = useState(false);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
+  const [answers, setAnswers] = useState([]);
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const [submitPracticeQuiz] = useSubmitPracticeQuizMutation();
 
   const { data, isLoading } = useGetQuizQuestionsQuery(
     selectedCourseSlug ? { courseId: selectedCourseSlug } : undefined,
@@ -63,6 +67,11 @@ export default function QuizPage() {
     if (selectedOption === question.correctIndex) {
       setScore((prev) => prev + 1);
     }
+    setAnswers((current) => {
+      const next = [...current];
+      next[currentIndex] = selectedOption;
+      return next;
+    });
     setIsAnswered(true);
   };
 
@@ -73,6 +82,13 @@ export default function QuizPage() {
       setIsAnswered(false);
     } else {
       setIsFinished(true);
+      if (isAuthenticated) {
+        submitPracticeQuiz({
+          courseSlug: selectedCourseSlug,
+          questionIds: QUIZ_QUESTIONS.map((item) => item._id),
+          answers: QUIZ_QUESTIONS.map((_, index) => answers[index]),
+        }).unwrap().then(() => toast.success("Quiz score saved to your profile")).catch(() => toast.error("Quiz completed, but the score could not be saved"));
+      }
     }
   };
 
@@ -82,6 +98,7 @@ export default function QuizPage() {
     setIsAnswered(false);
     setScore(0);
     setIsFinished(false);
+    setAnswers([]);
   };
 
   const handleSelectCourse = (slug) => {
@@ -91,6 +108,7 @@ export default function QuizPage() {
     setIsAnswered(false);
     setScore(0);
     setIsFinished(false);
+    setAnswers([]);
   };
 
   if (isLoading || areCoursesLoading) {
@@ -309,7 +327,7 @@ export default function QuizPage() {
             </h3>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm font-medium">
               There are currently no practice questions for this specific
-              filter. Try switching to "All Courses".
+              filter. Try switching to &quot;All Courses&quot;.
             </p>
             <button
               onClick={() => handleSelectCourse(null)}

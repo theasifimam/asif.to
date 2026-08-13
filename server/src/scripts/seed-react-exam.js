@@ -3,30 +3,25 @@ import dotenv from "dotenv";
 import { fileURLToPath, pathToFileURL } from "url";
 import path from "path";
 import Course from "../models/Course.js";
-import QuizQuestion from "../models/QuizQuestion.js";
+import QuizQuestion from "../models/Question.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
-const examDataPath = path.resolve(
-  __dirname,
-  "../../../apps/web/lib/reactjsExamData.js",
-);
+const examDataPath = path.resolve(__dirname, "./cssExamData.js");
 
-async function seedReactExam() {
+async function seedCssExam() {
   if (!process.env.MONGO_URI)
     throw new Error("MONGO_URI is not defined in server/.env");
   await mongoose.connect(process.env.MONGO_URI);
 
-  const { REACTJS_EXAM_QUESTIONS } = await import(
-    pathToFileURL(examDataPath).href
-  );
+  const { CSS_EXAM_QUESTIONS } = await import(pathToFileURL(examDataPath).href);
   const course = await Course.findOne({
-    $or: [{ techId: "reactjs" }, { slug: "reactjs" }],
+    $or: [{ techId: "mongodb" }, { slug: "mongodb" }],
   });
   if (!course)
     throw new Error(
-      "React.js course was not found. Create the course before seeding its exam.",
+      "mongodb course was not found. Create the course before seeding its exam.",
     );
 
   course.examEnabled = true;
@@ -38,11 +33,12 @@ async function seedReactExam() {
   };
   await course.save();
 
-  const operations = REACTJS_EXAM_QUESTIONS.map((item) => ({
+  const operations = CSS_EXAM_QUESTIONS.map((item) => ({
     updateOne: {
-      filter: { question: item.question },
+      filter: { type: "quiz", question: item.question },
       update: {
         $set: {
+          type: "quiz",
           courses: [course._id],
           options: item.options,
           correctIndex: item.correctIndex,
@@ -57,7 +53,7 @@ async function seedReactExam() {
 
   const result = await QuizQuestion.bulkWrite(operations);
   console.log(
-    `React exam seeded: ${REACTJS_EXAM_QUESTIONS.length} questions processed.`,
+    `mongodb exam seeded: ${CSS_EXAM_QUESTIONS.length} questions processed.`,
   );
   console.log(
     `Inserted: ${result.upsertedCount}; updated: ${result.modifiedCount}.`,
@@ -65,8 +61,8 @@ async function seedReactExam() {
   await mongoose.disconnect();
 }
 
-seedReactExam().catch(async (error) => {
-  console.error("React exam seed failed:", error);
+seedCssExam().catch(async (error) => {
+  console.error("mongodb exam seed failed:", error);
   await mongoose.disconnect().catch(() => {});
   process.exit(1);
 });

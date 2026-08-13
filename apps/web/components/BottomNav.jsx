@@ -17,7 +17,7 @@ export default function BottomNav() {
   );
 
   const isHomeActive = pathname === "/";
-  const profilePath = user?.username ? `/${user.username}` : null;
+  const profilePath = user?.username ? `/@${user.username}` : null;
   const isProfileActive = profilePath ? pathname.startsWith(profilePath) : false;
 
   return (

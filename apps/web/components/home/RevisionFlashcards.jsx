@@ -14,7 +14,7 @@ import {
 
 export default function RevisionFlashcards({ selectedTech }) {
   const { data, isLoading } = useGetFlashcardsQuery(
-    selectedTech ? { techId: selectedTech } : undefined,
+    selectedTech ? { courseId: selectedTech, limit: 100 } : { limit: 100 },
   );
 
   const allCards = data?.data || [];

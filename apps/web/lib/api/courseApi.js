@@ -57,9 +57,21 @@ export const courseApi = createApi({
       ],
     }),
 
+    submitCourseExam: builder.mutation({
+      query: ({ courseSlug, ...data }) => ({
+        url: `/quiz/exam/${courseSlug}/submit`,
+        method: "POST",
+        data,
+      }),
+    }),
+
+    submitPracticeQuiz: builder.mutation({
+      query: (data) => ({ url: "/quiz/practice/submit", method: "POST", data }),
+    }),
+
     // ── Flashcards ───────────────────────────────────────────────────────────
     getFlashcards: builder.query({
-      query: (params) => ({ url: "/flashcards", method: "GET", params }),
+      query: (params) => ({ url: "/quiz", method: "GET", params: { ...params, format: "flashcard" } }),
       providesTags: ["Flashcards"],
     }),
   }),
@@ -73,5 +85,7 @@ export const {
   useGetCheatsheetBySlugQuery,
   useGetQuizQuestionsQuery,
   useGetCourseExamQuery,
+  useSubmitCourseExamMutation,
+  useSubmitPracticeQuizMutation,
   useGetFlashcardsQuery,
 } = courseApi;

@@ -132,7 +132,7 @@ export default function ProfileSettingsPage() {
         const token = localStorage.getItem("asif_token") || "";
         dispatch(setCredentials({ user: res.data.user, token }));
         toast.success("Profile updated successfully!");
-        router.push(`/${username}`);
+        router.push(`/@${username}`);
       }
     } catch (err) {
       toast.error(err?.data?.message || "Failed to update profile");
@@ -421,8 +421,8 @@ export default function ProfileSettingsPage() {
           <div className="flex items-center justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={() => router.push("/profile")}
-              className="px-6 py-3 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-bold transition-all active:scale-95"
+              onClick={() => router.push(`/@${username}`)}
+              className="px-6 py-3 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-bold transition-all active:scale-95 flex-1"
             >
               Cancel
             </button>

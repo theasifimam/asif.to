@@ -244,10 +244,24 @@ export default function InterviewQuestionsPage() {
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex justify-end gap-1">
+                        {item.course?.slug && item.slug && (
+                          <Link
+                            href={`https://asif.to/courses/${item.course.slug}/interview-questions/${item.slug}`}
+                            target="_blank"
+                          >
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="View on asif.to"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"
-                          title="Preview question"
+                          title="Preview in admin"
                           onClick={() => setPreview(item)}
                         >
                           <Eye className="h-4 w-4" />

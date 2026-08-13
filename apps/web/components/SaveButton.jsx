@@ -8,6 +8,7 @@ import {
   useGetMySavedItemsQuery,
 } from "@/lib/api/authApi";
 import { toast } from "sonner";
+import AuthModal from "@/components/AuthModal";
 
 /**
  * SaveButton — reusable bookmark/save toggle for any content type.
@@ -26,6 +27,8 @@ export default function SaveButton({
   className = "",
 }) {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const [isAuthOpen, setIsAuthOpen] = React.useState(false);
+  const pendingSave = React.useRef(false);
   const [toggleSaved, { isLoading: isToggling }] = useToggleSavedItemMutation();
 
   // Fetch user's saved items to compute current state
@@ -46,7 +49,8 @@ export default function SaveButton({
     e.stopPropagation();
 
     if (!isAuthenticated) {
-      toast.error("Sign in to save items");
+      pendingSave.current = true;
+      setIsAuthOpen(true);
       return;
     }
 
@@ -67,11 +71,20 @@ export default function SaveButton({
     }
   };
 
+  React.useEffect(() => {
+    if (!isAuthenticated || !pendingSave.current || !itemId) return;
+    pendingSave.current = false;
+    toggleSaved({ itemId, itemType })
+      .unwrap()
+      .then(() => toast.success("Saved to your library"))
+      .catch(() => toast.error("Failed to save item"));
+  }, [isAuthenticated, itemId, itemType, toggleSaved]);
+
   const iconSize = size === "sm" ? "w-3.5 h-3.5" : "w-4 h-4";
   const btnSize =
     size === "sm" ? "px-2.5 py-1.5 text-[10px]" : "px-3.5 py-2 text-xs";
 
-  return (
+  return (<>
     <button
       onClick={handleToggle}
       disabled={isToggling}
@@ -95,5 +108,6 @@ export default function SaveButton({
         <span>{isSaved ? "Saved" : label || "Save"}</span>
       )}
     </button>
-  );
+    <AuthModal isOpen={isAuthOpen} onOpenChange={setIsAuthOpen} defaultTab="signup" />
+  </>);
 }

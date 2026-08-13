@@ -3,8 +3,7 @@ import User from "../models/User.js";
 import Topic from "../models/Topic.js";
 import Course from "../models/Course.js";
 import Chapter from "../models/Chapter.js";
-import QuizQuestion from "../models/QuizQuestion.js";
-import Flashcard from "../models/Flashcard.js";
+import QuizQuestion from "../models/Question.js";
 import Cheatsheet from "../models/Cheatsheet.js";
 
 /**
@@ -90,8 +89,8 @@ export const getDashboardStats = async (req, res) => {
 
     // 2. Secondary Platform Metrics
     const totalUsers = await User.countDocuments();
-    const totalQuizzes = await QuizQuestion.countDocuments();
-    const totalFlashcards = await Flashcard.countDocuments();
+    const totalQuizzes = await QuizQuestion.countDocuments({ type: "quiz" });
+    const totalFlashcards = await QuizQuestion.countDocuments({ type: "quiz", flashcardEnabled: { $ne: false } });
     const totalCheatsheets = await Cheatsheet.countDocuments();
     const totalArticles = await Article.countDocuments({ status: "published" });
 

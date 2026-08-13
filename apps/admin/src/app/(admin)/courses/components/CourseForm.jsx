@@ -25,6 +25,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { coursesApi } from "@/lib/api";
+import AdminFormShell, { AdminFormLoading, formSectionClass } from "@/components/AdminFormShell";
 
 const initialForm = {
   title: "",
@@ -174,18 +175,14 @@ export default function CourseForm({ courseId = null }) {
   };
 
   if (loading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-7 w-7 animate-spin text-primary" />
-      </div>
-    );
+    return <AdminFormLoading />;
   }
 
   const publicUrl = form.slug ? `https://asif.to/courses/${form.slug}` : "";
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
-      <header className="flex flex-col gap-4 border-b border-zinc-200 pb-5 dark:border-zinc-800 sm:flex-row sm:items-center sm:justify-between">
+    <AdminFormShell eyebrow="Learning / Courses" title={courseId ? "Edit course" : "Create course"} description="Course details, publishing controls, exam settings, and search metadata." back={<Link href="/courses" className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"><ArrowLeft className="h-4 w-4" /> Back to courses</Link>} actions={<><Button variant="outline" disabled={saving} onClick={() => persist("draft")}><Save className="h-4 w-4" />Save draft</Button><Button disabled={saving} onClick={() => setPublishOpen(true)}><Send className="h-4 w-4" />Publish</Button></>}>
+      <div className="hidden">
         <div className="flex items-start gap-3">
           <Button variant="outline" size="icon" asChild title="Back to courses">
             <Link href="/courses">
@@ -228,11 +225,11 @@ export default function CourseForm({ courseId = null }) {
             Publish
           </Button>
         </div>
-      </header>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <main className="space-y-6">
-          <section className="space-y-5 border-b border-zinc-200 pb-6 dark:border-zinc-800">
+          <section className={formSectionClass}>
             <div className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-primary" />
               <h2 className="text-base font-semibold">Course content</h2>
@@ -489,6 +486,6 @@ export default function CourseForm({ courseId = null }) {
         variant="default"
         loading={saving}
       />
-    </div>
+    </AdminFormShell>
   );
 }
