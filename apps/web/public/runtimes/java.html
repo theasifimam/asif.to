@@ -3,28 +3,11 @@
 const send = (payload) => parent.postMessage({ source: "asif-java-runtime", ...payload }, "*");
 let ready;
 let running = false;
-const formatBytes = (value) => value ? `${(value / 1048576).toFixed(1)} MB` : "unknown size";
-async function download(url, file) {
-  const response = await fetch(url, { mode: "cors" });
-  if (!response.ok) throw new Error(`Could not download ${file} (${response.status}).`);
-  const total = Number(response.headers.get("content-length")) || 0;
-  if (!response.body) return new Uint8Array(await response.arrayBuffer());
-  const reader = response.body.getReader(); const chunks = []; let loaded = 0;
-  while (true) {
-    const { done, value } = await reader.read(); if (done) break;
-    chunks.push(value); loaded += value.byteLength;
-    send({ type: "progress", message: `Downloading the Java compiler library (${formatBytes(total)})...`, file, loaded, total });
-  }
-  const bytes = new Uint8Array(loaded); let offset = 0;
-  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
-  return bytes;
-}
 async function initialize() {
   if (!ready) ready = (async () => {
     send({ type: "status", message: "Downloading the browser OpenJDK runtime..." });
-    await cheerpjInit({ status: "none", version: 17 });
-    const tools = await download("https://raw.githubusercontent.com/leaningtech/javafiddle/main/static/tools.jar", "tools.jar");
-    cheerpOSAddStringFile("/str/tools.jar", tools);
+    await cheerpjInit({ status: "none" });
+    send({ type: "progress", message: "Preparing the Java compiler library (17.5 MB)...", file: "tools.jar", loaded: 0, total: 18307716 });
   })();
   return ready;
 }
@@ -41,7 +24,7 @@ window.addEventListener("message", async (event) => {
     const code = String(event.data.code || "");
     const className = code.match(/public\s+class\s+([A-Za-z_$][\w$]*)/)?.[1] || "Main";
     cheerpOSAddStringFile(`/str/${className}.java`, code);
-    const classPath = "/str/tools.jar:/files/";
+    const classPath = "/app/runtimes/tools.jar:/files/";
     const compileCode = await cheerpjRunMain("com.sun.tools.javac.Main", classPath, `/str/${className}.java`, "-d", "/files/", "-Xlint");
     if (compileCode === 0) { send({ type: "status", message: "Running Java..." }); await cheerpjRunMain(className, classPath); }
     const text = consoleNode.innerText || captured.join("\n");

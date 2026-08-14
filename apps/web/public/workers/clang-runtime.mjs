@@ -37,8 +37,12 @@ self.onmessage = async ({ data }) => {
     await project.writeFile(sourceName, data.code);
     self.postMessage({ type: "status", message: `Compiling ${isCpp ? "C++" : "C"}...` });
     const args = [`/project/${sourceName}`, "-o", "/project/program.wasm"];
-    if (isCpp) args.unshift("-x", "c++");
-    const process = await clang.entrypoint.run({ args, mount: { "/project": project } });
+    if (isCpp) args.unshift("-std=c++17");
+    const compilerCommand = isCpp && clang.commands?.["clang++"] ? clang.commands["clang++"] : clang.entrypoint;
+    // Some releases expose only the clang entrypoint. In that case explicitly
+    // link the WASI C++ runtime, which clang++ would normally select for us.
+    if (isCpp && compilerCommand === clang.entrypoint) args.push("-lc++", "-lc++abi");
+    const process = await compilerCommand.run({ args, mount: { "/project": project } });
     const compiled = await process.wait();
     if (!compiled.ok) return self.postMessage({ type: "result", stdout: compiled.stdout || "", stderr: compiled.stderr || `Compilation failed with exit code ${compiled.code}.` });
     self.postMessage({ type: "status", message: "Running compiled WebAssembly..." });

@@ -59,20 +59,20 @@ export default function BrowserRuntimeEditor({ language, languageOptions, onLang
 
   const ensureWorker = useCallback(() => {
     if (workerRef.current) return workerRef.current;
-    const worker = new Worker(config.worker, { type: "module", name: `asif-${language}-runtime` });
+    const worker = new Worker(config.worker, { type: config.workerType || "module", name: `asif-${language}-runtime` });
     worker.onmessage = (event) => finish(event.data || {});
     worker.onerror = (event) => finish({ type: "error", error: event.message || "The browser runtime could not start." });
     workerRef.current = worker; return worker;
-  }, [config.worker, finish, language]);
+  }, [config.worker, config.workerType, finish, language]);
 
   const run = useCallback(() => {
     clearTimeout(watchdogRef.current);
     setOutput(""); setError(""); setProgress(null); setStatus("loading"); setStatusText(config.loading);
-    if ((language === "c" || language === "cpp") && !window.crossOriginIsolated) {
+    if (language === "c" && !window.crossOriginIsolated) {
       finish({ type: "error", error: `${config.label} needs an isolated browser page to run its WebAssembly compiler. Open this editor from /play, /run, /playground, or /practice and reload once.` });
       return;
     }
-    watchdogRef.current = setTimeout(() => finish({ type: "error", error: `${config.label} did not finish loading. Check your connection or content blocker, then run it again.` }), language === "c" || language === "cpp" ? 600000 : language === "java" ? 360000 : 180000);
+    watchdogRef.current = setTimeout(() => finish({ type: "error", error: `${config.label} did not finish loading. Check your connection or content blocker, then run it again.` }), language === "c" ? 600000 : language === "java" ? 360000 : 180000);
     if (language === "java") { pendingJavaRef.current = source; if (!javaMounted) { setJavaMounted(true); } else if (javaReadyRef.current && javaRef.current?.contentWindow) { javaRef.current.contentWindow.postMessage({ type: "run", code: source }, "*"); } return; }
     ensureWorker().postMessage({ type: "run", language, code: source });
   }, [config.label, config.loading, ensureWorker, finish, javaMounted, language, source]);
@@ -111,6 +111,6 @@ export default function BrowserRuntimeEditor({ language, languageOptions, onLang
       <div className="relative min-h-0 border-b border-zinc-800 lg:border-b-0 lg:border-r"><div className="flex h-9 items-center justify-between border-b border-zinc-800 bg-zinc-900 px-3 text-[11px] font-bold text-zinc-400"><span>{config.file.slice(1)}</span><span>{config.note}</span></div><RuntimeCodeEditor language={language} label={config.label} value={source} onChange={(next) => { setSource(next); setSaveStatus("Saving..."); }} /></div>
       <div className="flex min-h-0 flex-col"><div className="flex h-9 shrink-0 items-center justify-between border-b border-zinc-800 bg-zinc-900 px-3"><strong className="text-[11px] uppercase tracking-wide text-zinc-400">Output</strong><button type="button" onClick={() => { setOutput(""); setError(""); }} className="rounded p-1 text-zinc-500 hover:text-white" aria-label="Clear output"><Trash2 className="h-3.5 w-3.5" /></button></div><div className="relative min-h-0 flex-1 overflow-auto p-4" aria-live="polite">{status === "loading" && <div className="absolute inset-0 grid place-items-center bg-zinc-950/90 p-6 text-center"><div className="w-full max-w-sm"><Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-400" /><p className="mt-3 text-sm font-bold">{statusText}</p>{progress && <><progress className="mt-4 h-2 w-full accent-blue-500" max={progress.total || 1} value={progress.total ? Math.min(progress.loaded || 0, progress.total) : undefined} aria-label="Runtime download progress" /><p className="mt-2 text-xs tabular-nums text-zinc-400">{progress.file ? `${progress.file} · ` : ""}{formatBytes(progress.loaded)}{progress.total ? ` of ${formatBytes(progress.total)}` : " downloaded"}</p></>}<p className="mt-2 text-xs text-zinc-500">First use can take longer. The runtime is cached by your browser.</p></div></div>}{!output && !error && status !== "loading" && <p className="text-sm text-zinc-500">Run your code to see its exact output here.</p>}{output && <pre className="m-0 whitespace-pre font-mono text-sm leading-5 text-zinc-100">{output}</pre>}{error && <pre className="mt-3 whitespace-pre-wrap border-l-2 border-red-500 pl-3 font-mono text-xs text-red-400">{error}</pre>}</div></div>
     </div>
-    {javaMounted && <iframe ref={javaRef} src={config.iframe} sandbox="allow-scripts" className="hidden" title="Isolated Java browser runtime" />}
+    {javaMounted && <iframe ref={javaRef} src={config.iframe} sandbox="allow-scripts allow-same-origin" credentialless="true" referrerPolicy="no-referrer" className="hidden" title="Isolated credentialless Java browser runtime" />}
   </section>;
 }
