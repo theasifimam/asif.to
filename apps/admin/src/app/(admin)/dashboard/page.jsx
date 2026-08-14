@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import {
   TrendingUp,
   Users,
@@ -166,99 +165,113 @@ export default function DashboardPage() {
               <span>Readership Analytics</span>
             </div>
             <div className="flex items-center gap-2">
-              <h2 className="text-2xl font-black font-outfit text-zinc-900 dark:text-white tracking-tight">Course Readership</h2>
+              <h2 className="text-2xl font-black font-outfit text-zinc-900 dark:text-white tracking-tight">
+                Course Readership
+              </h2>
               <span className="group/tooltip relative inline-flex" tabIndex={0}>
                 <Info className="h-4 w-4 text-zinc-400" />
-                <span role="tooltip" className="pointer-events-none absolute left-1/2 top-6 z-30 hidden w-64 -translate-x-1/2 rounded-xl bg-zinc-950 p-3 text-[11px] font-medium normal-case leading-relaxed text-white shadow-xl group-hover/tooltip:block group-focus/tooltip:block">The bars compare real all-time chapter visits between courses. This is not a date trend because historical chapter-view dates were not recorded.</span>
+                <span
+                  role="tooltip"
+                  className="pointer-events-none absolute left-1/2 top-6 z-30 hidden w-64 -translate-x-1/2 rounded-xl bg-zinc-950 p-3 text-[11px] font-medium normal-case leading-relaxed text-white shadow-xl group-hover/tooltip:block group-focus/tooltip:block"
+                >
+                  The bars compare real all-time chapter visits between courses.
+                  This is not a date trend because historical chapter-view dates
+                  were not recorded.
+                </span>
               </span>
             </div>
           </div>
-          <span className="rounded-full bg-blue-500/10 px-4 py-2 text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400">All-time captured data</span>
+          <span className="rounded-full bg-blue-500/10 px-4 py-2 text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+            All-time captured data
+          </span>
         </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
-          >
-            {/* Left Metrics */}
-            <div className="lg:col-span-5 flex flex-col gap-4">
-              <span className="text-xs font-extrabold text-zinc-400 uppercase tracking-widest">
-                {activeGrowth.label}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
+        >
+          {/* Left Metrics */}
+          <div className="lg:col-span-5 flex flex-col gap-4">
+            <span className="text-xs font-extrabold text-zinc-400 uppercase tracking-widest">
+              {activeGrowth.label}
+            </span>
+            <div className="flex items-baseline gap-3">
+              <span className="text-5xl font-black font-outfit text-zinc-900 dark:text-white tracking-tight">
+                {activeGrowth.reads}
               </span>
-              <div className="flex items-baseline gap-3">
-                <span className="text-5xl font-black font-outfit text-zinc-900 dark:text-white tracking-tight">
-                  {activeGrowth.reads}
-                </span>
-              </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-                {activeGrowth.subtext}
-              </p>
+            </div>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+              {activeGrowth.subtext}
+            </p>
 
-              <p className="mt-3 border-t border-zinc-100 pt-4 text-[11px] leading-relaxed text-zinc-400 dark:border-zinc-800">A read is recorded whenever a public chapter page increments its view counter. Repeat visits are included.</p>
+            <p className="mt-3 border-t border-zinc-100 pt-4 text-[11px] leading-relaxed text-zinc-400 dark:border-zinc-800">
+              A read is recorded whenever a public chapter page increments its
+              view counter. Repeat visits are included.
+            </p>
+          </div>
+
+          {/* Right Visual Bar Chart Visualization */}
+          <div className="lg:col-span-7 flex flex-col gap-3 bg-zinc-50 dark:bg-zinc-950/60 p-5 sm:p-6 rounded-3xl border border-zinc-200/50 dark:border-zinc-800/50">
+            <div className="flex items-center justify-between text-xs font-bold text-zinc-500 mb-1">
+              <span>Reads by course</span>
+              <span className="text-blue-600 dark:text-blue-400 font-extrabold uppercase text-[10px] tracking-wider px-2.5 py-0.5 rounded-full bg-blue-500/10">
+                Actual view counters
+              </span>
             </div>
 
-            {/* Right Visual Bar Chart Visualization */}
-            <div className="lg:col-span-7 flex flex-col gap-3 bg-zinc-50 dark:bg-zinc-950/60 p-5 sm:p-6 rounded-3xl border border-zinc-200/50 dark:border-zinc-800/50">
-              <div className="flex items-center justify-between text-xs font-bold text-zinc-500 mb-1">
-                <span>Reads by course</span>
-                <span className="text-blue-600 dark:text-blue-400 font-extrabold uppercase text-[10px] tracking-wider px-2.5 py-0.5 rounded-full bg-blue-500/10">
-                  Actual view counters
-                </span>
-              </div>
-
-              <div className="h-44 flex items-end justify-between gap-3 sm:gap-5 pt-3">
-                {chartItems.length > 0 ? (
-                  chartItems.map((item) => {
-                    const heightPercent =
-                      chartMax > 0
-                        ? Math.max(12, Math.round((item.value / chartMax) * 100))
-                        : 12;
-                    return (
-                      <div
-                        key={item.id || item.label}
-                        className="group/bar relative flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2"
-                        tabIndex={0}
-                      >
-                        {/* Bar area without full-height background track */}
-                        <div className="w-full flex-1 flex items-end justify-center">
-                          {/* Thick Plain Primary Color Rounded Pill Bar */}
-                          <div
-                            aria-label={`${item.label}: ${item.value.toLocaleString()} reads`}
-                            className="w-full max-w-[36px] sm:max-w-[52px] rounded-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-400 transition-all duration-500 ease-out shadow-sm shadow-blue-600/20 hover:shadow-md hover:shadow-blue-500/30 active:scale-[0.98] cursor-pointer min-h-[22px]"
-                            style={{ height: `${heightPercent}%` }}
-                          />
-                        </div>
-
-                        <span className="max-w-full truncate text-[10px] sm:text-[11px] font-extrabold text-zinc-400 transition-colors group-hover/bar:text-blue-600 dark:group-hover/bar:text-blue-400 text-center">
-                          {item.shortLabel || item.label}
-                        </span>
-
-                        {/* Modern Tooltip */}
-                        <span
-                          role="tooltip"
-                          className="pointer-events-none absolute bottom-11 left-1/2 z-30 hidden w-max max-w-56 -translate-x-1/2 rounded-2xl bg-zinc-950/95 backdrop-blur-md px-3.5 py-2.5 text-center text-[11px] font-semibold text-white shadow-2xl border border-zinc-800 group-hover/bar:block group-focus/bar:block"
-                        >
-                          <strong className="block text-xs font-black text-blue-400 mb-0.5">
-                            {item.label}
-                          </strong>
-                          <span className="text-zinc-300 font-bold">
-                            {item.value.toLocaleString()}
-                          </span>{" "}
-                          all-time chapter reads
-                        </span>
+            <div className="h-44 flex items-end justify-between gap-3 sm:gap-5 pt-3">
+              {chartItems.length > 0 ? (
+                chartItems.map((item) => {
+                  const heightPercent =
+                    chartMax > 0
+                      ? Math.max(12, Math.round((item.value / chartMax) * 100))
+                      : 12;
+                  return (
+                    <div
+                      key={item.id || item.label}
+                      className="group/bar relative flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2"
+                      tabIndex={0}
+                    >
+                      {/* Bar area without full-height background track */}
+                      <div className="w-full flex-1 flex items-end justify-center">
+                        {/* Thick Plain Primary Color Rounded Pill Bar */}
+                        <div
+                          aria-label={`${item.label}: ${item.value.toLocaleString()} reads`}
+                          className="w-full max-w-[36px] sm:max-w-[52px] rounded-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-400 transition-all duration-500 ease-out shadow-sm shadow-blue-600/20 hover:shadow-md hover:shadow-blue-500/30 active:scale-[0.98] cursor-pointer min-h-[22px]"
+                          style={{ height: `${heightPercent}%` }}
+                        />
                       </div>
-                    );
-                  })
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-xs font-bold text-zinc-400">
-                    No readership data available
-                  </div>
-                )}
-              </div>
+
+                      <span className="max-w-full truncate text-[10px] sm:text-[11px] font-extrabold text-zinc-400 transition-colors group-hover/bar:text-blue-600 dark:group-hover/bar:text-blue-400 text-center">
+                        {item.shortLabel || item.label}
+                      </span>
+
+                      {/* Modern Tooltip */}
+                      <span
+                        role="tooltip"
+                        className="pointer-events-none absolute bottom-11 left-1/2 z-30 hidden w-max max-w-56 -translate-x-1/2 rounded-2xl bg-zinc-950/95 backdrop-blur-md px-3.5 py-2.5 text-center text-[11px] font-semibold text-white shadow-2xl border border-zinc-800 group-hover/bar:block group-focus/bar:block"
+                      >
+                        <strong className="block text-xs font-black text-blue-400 mb-0.5">
+                          {item.label}
+                        </strong>
+                        <span className="text-zinc-300 font-bold">
+                          {item.value.toLocaleString()}
+                        </span>{" "}
+                        all-time chapter reads
+                      </span>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-xs font-bold text-zinc-400">
+                  No readership data available
+                </div>
+              )}
             </div>
-          </motion.div>
+          </div>
+        </motion.div>
       </section>
 
       {/* Main Grid: Top Courses & Technology Stack */}
@@ -316,7 +329,9 @@ export default function DashboardPage() {
                     <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] sm:text-xs font-bold text-zinc-400 mt-2">
                       <span>{course.chapterCount} Chapters</span>
                       <span>&bull;</span>
-                      <span>{course.publicationRate || "0%"} Chapters Published</span>
+                      <span>
+                        {course.publicationRate || "0%"} Chapters Published
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -346,10 +361,22 @@ export default function DashboardPage() {
                 Curriculum Focus
               </span>
               <div className="flex items-center gap-2">
-                <h3 className="text-xl font-black font-outfit text-zinc-900 dark:text-white">Technology Distribution</h3>
-                <span className="group/tooltip relative inline-flex" tabIndex={0}>
+                <h3 className="text-xl font-black font-outfit text-zinc-900 dark:text-white">
+                  Technology Distribution
+                </h3>
+                <span
+                  className="group/tooltip relative inline-flex"
+                  tabIndex={0}
+                >
                   <Info className="h-4 w-4 text-zinc-400" />
-                  <span role="tooltip" className="pointer-events-none absolute right-0 top-6 z-30 hidden w-64 rounded-xl bg-zinc-950 p-3 text-[11px] font-medium leading-relaxed text-white shadow-xl group-hover/tooltip:block group-focus/tooltip:block">Each bar is the technology’s share of all published course chapters. For example, 25% means one quarter of the published curriculum belongs to that technology.</span>
+                  <span
+                    role="tooltip"
+                    className="pointer-events-none absolute right-0 top-6 z-30 hidden w-64 rounded-xl bg-zinc-950 p-3 text-[11px] font-medium leading-relaxed text-white shadow-xl group-hover/tooltip:block group-focus/tooltip:block"
+                  >
+                    Each bar is the technology’s share of all published course
+                    chapters. For example, 25% means one quarter of the
+                    published curriculum belongs to that technology.
+                  </span>
                 </span>
               </div>
             </div>
@@ -362,7 +389,11 @@ export default function DashboardPage() {
                 );
 
                 return (
-                  <div key={item.techId} className="group/progress relative flex flex-col gap-1.5" tabIndex={0}>
+                  <div
+                    key={item.techId}
+                    className="group/progress relative flex flex-col gap-1.5"
+                    tabIndex={0}
+                  >
                     <div className="flex justify-between gap-3 text-xs font-bold">
                       <span className="text-zinc-700 dark:text-zinc-200">
                         {item.label}
@@ -374,10 +405,22 @@ export default function DashboardPage() {
                     <div className="h-2.5 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                       <div
                         className="h-full min-w-1 rounded-full transition-[width] duration-500"
-                        style={{ width: `${percentage}%`, backgroundColor: item.color || "#2563eb" }}
+                        style={{
+                          width: `${percentage}%`,
+                          backgroundColor: item.color || "#2563eb",
+                        }}
                       />
                     </div>
-                    <span role="tooltip" className="pointer-events-none absolute bottom-full right-0 z-30 mb-2 hidden w-60 rounded-xl bg-zinc-950 px-3 py-2 text-[11px] font-medium leading-relaxed text-white shadow-xl group-hover/progress:block group-focus/progress:block">{item.label} has {item.chapters} published {item.chapters === 1 ? "chapter" : "chapters"}, representing {percentage}% of {dashboardData?.counts?.publishedChapters || 0} published chapters.</span>
+                    <span
+                      role="tooltip"
+                      className="pointer-events-none absolute bottom-full right-0 z-30 mb-2 hidden w-60 rounded-xl bg-zinc-950 px-3 py-2 text-[11px] font-medium leading-relaxed text-white shadow-xl group-hover/progress:block group-focus/progress:block"
+                    >
+                      {item.label} has {item.chapters} published{" "}
+                      {item.chapters === 1 ? "chapter" : "chapters"},
+                      representing {percentage}% of{" "}
+                      {dashboardData?.counts?.publishedChapters || 0} published
+                      chapters.
+                    </span>
                   </div>
                 );
               })}

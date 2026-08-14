@@ -24,8 +24,8 @@ function SelectTrigger({ className, size = "default", children, ...props }) {
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "data-placeholder:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:ring-ring flex h-12 w-full items-center justify-between gap-2 rounded-[14px] bg-input px-4 py-3 text-sm whitespace-nowrap shadow-none transition-[color,box-shadow] outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        size === "sm" && "h-8 rounded-xl px-3 py-2",
+        "flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-zinc-900 shadow-xs transition-all outline-none data-placeholder:text-zinc-400 focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-100 dark:data-placeholder:text-zinc-500 dark:focus-visible:border-blue-500 dark:focus-visible:ring-blue-500/30 whitespace-nowrap *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-zinc-400 dark:[&_svg:not([class*='text-'])]:text-zinc-500",
+        size === "sm" && "h-8 rounded-xl px-3 py-1.5 text-xs",
         className,
       )}
       {...props}

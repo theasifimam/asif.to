@@ -1,0 +1,458 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Check, AlertTriangle, ChevronDown, ChevronRight, Copy, Download, Share2, WandSparkles, ExternalLink, Expand, FileCode2, FilePlus2, Folder, FolderOpen, FolderPlus, FolderTree, GripHorizontal, GripVertical, Loader2, Maximize2, Minimize2, Minus, Moon, MoreHorizontal, PanelLeftClose, PanelLeftOpen, Pencil, Play, Plus, RotateCcw, ShieldCheck, Sun, Terminal, Trash2, Monitor, Code2, X
+} from "lucide-react";
+import {
+  SandpackCodeEditor, SandpackPreview, SandpackProvider, useSandpack,
+} from "@codesandbox/sandpack-react";
+import BetterConsole from "./BetterConsole";
+import {
+  executeCurrentFiles, normalizeFiles, VSCODE_DARK_THEME, VSCODE_LIGHT_THEME,
+} from "./sandpackConfig";
+import { sandpackTemplateFor } from "@/lib/playground/config";
+import {
+  decodeShareState, encodeShareState, explainError, formatSource, RECENT_PRACTICE_KEY, storageKey, unsupportedFeedback,
+} from "@/lib/playground/client";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+function FileExplorer({ isDark = true, onFileSelect }) {
+  const { sandpack } = useSandpack();
+  const [editMode, setEditMode] = useState(null);
+  const [pathValue, setPathValue] = useState("");
+  const [error, setError] = useState("");
+  const [virtualFolders, setVirtualFolders] = useState([]);
+  const [expandedFolders, setExpandedFolders] = useState(() => new Set());
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const files = Object.keys(sandpack.files).sort((a, b) => a.localeCompare(b));
+  const folders = Array.from(
+    new Set([
+      ...virtualFolders,
+      ...files.flatMap((path) => {
+        const parts = path.split("/").filter(Boolean).slice(0, -1);
+        return parts.map(
+          (_, index) => `/${parts.slice(0, index + 1).join("/")}`,
+        );
+      }),
+    ]),
+  ).sort((a, b) => a.localeCompare(b));
+
+  const beginCreate = () => {
+    setEditMode({ type: "create" });
+    setPathValue("/");
+    setError("");
+  };
+  const beginCreateFolder = () => {
+    setEditMode({ type: "folder" });
+    setPathValue("/");
+    setError("");
+  };
+  const beginRename = (path) => {
+    setEditMode({ type: "rename", path });
+    setPathValue(path);
+    setError("");
+  };
+  const cancelEdit = () => {
+    setEditMode(null);
+    setPathValue("");
+    setError("");
+  };
+  const savePath = () => {
+    const nextPath = `/${pathValue.trim().replace(/^\/+/, "")}`;
+    if (nextPath === "/" || nextPath.endsWith("/"))
+      return setError(
+        editMode?.type === "folder"
+          ? "Enter a folder name."
+          : "Enter a file name with an extension.",
+      );
+    if (editMode?.type === "folder") {
+      if (folders.includes(nextPath))
+        return setError("This folder already exists.");
+      setVirtualFolders((current) => [...current, nextPath]);
+      setExpandedFolders((current) => new Set([...current, nextPath]));
+      cancelEdit();
+      return;
+    }
+    if (sandpack.files[nextPath] && nextPath !== editMode?.path)
+      return setError("A file with this path already exists.");
+    if (editMode?.type === "create") {
+      sandpack.addFile(nextPath, "", false);
+    } else if (editMode?.type === "rename") {
+      const source = sandpack.files[editMode.path]?.code || "";
+      sandpack.addFile(nextPath, source, false);
+      sandpack.deleteFile(editMode.path, false);
+    }
+    requestAnimationFrame(() => sandpack.setActiveFile(nextPath));
+    onFileSelect?.();
+    cancelEdit();
+  };
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    if (deleteTarget.type === "file") {
+      sandpack.deleteFile(deleteTarget.path, false);
+      if (sandpack.activeFile === deleteTarget.path)
+        requestAnimationFrame(() =>
+          sandpack.setActiveFile(
+            files.find((file) => file !== deleteTarget.path),
+          ),
+        );
+    } else {
+      const prefix = `${deleteTarget.path}/`;
+      const remaining = files.find((file) => !file.startsWith(prefix));
+      if (!remaining) {
+        setDeleteTarget(null);
+        setError("A project must keep at least one file.");
+        return;
+      }
+      files
+        .filter((file) => file.startsWith(prefix))
+        .forEach((file) => sandpack.deleteFile(file, false));
+      setVirtualFolders((current) =>
+        current.filter(
+          (folder) =>
+            folder !== deleteTarget.path && !folder.startsWith(prefix),
+        ),
+      );
+      if (sandpack.activeFile.startsWith(prefix))
+        requestAnimationFrame(() => sandpack.setActiveFile(remaining));
+    }
+    setDeleteTarget(null);
+  };
+  const toggleFolder = (path) =>
+    setExpandedFolders((current) => {
+      const next = new Set(current);
+      if (next.has(path)) next.delete(path);
+      else next.add(path);
+      return next;
+    });
+  const ancestorsAreExpanded = (path, isFolder = false) => {
+    const parts = path.split("/").filter(Boolean);
+    const ancestorCount = isFolder ? parts.length - 1 : parts.length - 1;
+    for (let index = 1; index <= ancestorCount; index++) {
+      const ancestor = `/${parts.slice(0, index).join("/")}`;
+      if (ancestor !== path && !expandedFolders.has(ancestor)) return false;
+    }
+    return true;
+  };
+  const entries = [
+    ...folders.map((path) => ({ type: "folder", path })),
+    ...files.map((path) => ({ type: "file", path })),
+  ].sort(
+    (a, b) => a.path.localeCompare(b.path) || (a.type === "folder" ? -1 : 1),
+  );
+
+  return (
+    <aside
+      className={`flex h-full min-h-0 flex-col border-r transition-colors ${
+        isDark ? "border-zinc-800 bg-[#181818]" : "border-zinc-200 bg-[#f8f8f8]"
+      }`}
+      aria-label="Project file explorer"
+    >
+      <div
+        className={`flex h-10 items-center justify-between border-b px-2 ${
+          isDark ? "border-zinc-800" : "border-zinc-200"
+        }`}
+      >
+        <span
+          className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-wider ${
+            isDark ? "text-zinc-400" : "text-zinc-500"
+          }`}
+        >
+          <FolderTree className="h-3.5 w-3.5" />
+          Explorer
+        </span>
+        <div className="flex">
+          <button
+            type="button"
+            onClick={beginCreate}
+            className={`rounded p-1.5 transition ${
+              isDark
+                ? "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                : "text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900"
+            }`}
+            title="Create file"
+            aria-label="Create file"
+          >
+            <FilePlus2 className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={beginCreateFolder}
+            className={`rounded p-1.5 transition ${
+              isDark
+                ? "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                : "text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900"
+            }`}
+            title="Create folder"
+            aria-label="Create folder"
+          >
+            <FolderPlus className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+      {editMode && (
+        <div
+          className={`border-b p-2 ${
+            isDark ? "border-zinc-800" : "border-zinc-200"
+          }`}
+        >
+          <div className="flex gap-1">
+            <input
+              autoFocus
+              value={pathValue}
+              onChange={(event) => setPathValue(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") savePath();
+                if (event.key === "Escape") cancelEdit();
+              }}
+              className={`min-w-0 flex-1 rounded border px-2 py-1.5 font-mono text-[11px] outline-none ${
+                isDark
+                  ? "border-blue-500 bg-zinc-950 text-white"
+                  : "border-blue-500 bg-white text-zinc-900"
+              }`}
+              aria-label={
+                editMode.type === "create"
+                  ? "New file path"
+                  : "Rename file path"
+              }
+            />
+            <button
+              type="button"
+              onClick={savePath}
+              className="rounded bg-blue-600 p-1.5 text-white"
+              title="Save"
+            >
+              <Check className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={cancelEdit}
+              className={`rounded p-1.5 ${
+                isDark
+                  ? "bg-zinc-800 text-zinc-300"
+                  : "bg-zinc-200 text-zinc-700"
+              }`}
+              title="Cancel"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          {error && (
+            <p className="mt-1.5 text-[10px] font-semibold text-red-500">
+              {error}
+            </p>
+          )}
+        </div>
+      )}
+      <div className="min-h-0 flex-1 overflow-y-auto py-1">
+        {entries.map((entry) => {
+          const depth = entry.path.split("/").filter(Boolean).length - 1;
+          const name = entry.path.split("/").filter(Boolean).pop();
+          if (!ancestorsAreExpanded(entry.path, entry.type === "folder"))
+            return null;
+          if (entry.type === "folder") {
+            const expanded = expandedFolders.has(entry.path);
+            return (
+              <div
+                key={`folder-${entry.path}`}
+                className={`group flex items-center gap-1 pr-1 ${
+                  isDark ? "hover:bg-zinc-800/70" : "hover:bg-zinc-200/70"
+                }`}
+                style={{ paddingLeft: `${depth * 12 + 4}px` }}
+              >
+                <button
+                  type="button"
+                  onClick={() => toggleFolder(entry.path)}
+                  className={`flex min-w-0 flex-1 items-center gap-1.5 py-2 text-left font-mono text-[11px] ${
+                    isDark ? "text-zinc-300" : "text-zinc-700"
+                  }`}
+                  aria-expanded={expanded}
+                >
+                  <span className={isDark ? "text-zinc-500" : "text-zinc-400"}>
+                    {expanded ? (
+                      <ChevronDown className="h-3 w-3" />
+                    ) : (
+                      <ChevronRight className="h-3 w-3" />
+                    )}
+                  </span>
+                  {expanded ? (
+                    <FolderOpen className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+                  ) : (
+                    <Folder className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+                  )}
+                  <span className="truncate">{name}</span>
+                </button>
+                <div className="hidden shrink-0 items-center group-hover:flex group-focus-within:flex">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditMode({ type: "create" });
+                      setPathValue(`${entry.path}/`);
+                      setError("");
+                      setExpandedFolders(
+                        (current) => new Set([...current, entry.path]),
+                      );
+                    }}
+                    className={`rounded p-1 transition ${
+                      isDark
+                        ? "text-zinc-400 hover:bg-zinc-700 hover:text-white"
+                        : "text-zinc-600 hover:bg-zinc-300 hover:text-zinc-900"
+                    }`}
+                    title={`Create file in ${entry.path}`}
+                  >
+                    <FilePlus2 className="h-3 w-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setDeleteTarget({ type: "folder", path: entry.path })
+                    }
+                    className="rounded p-1 text-zinc-400 hover:bg-red-500/20 hover:text-red-500"
+                    title={`Delete ${entry.path}`}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+            );
+          }
+          const isActive = sandpack.activeFile === entry.path;
+          return (
+            <div
+              key={entry.path}
+              className={`group flex items-center gap-1 pr-1 ${
+                isActive
+                  ? isDark
+                    ? "bg-[#37373d]"
+                    : "bg-[#e4e4e7]"
+                  : isDark
+                    ? "hover:bg-zinc-800/70"
+                    : "hover:bg-zinc-200/70"
+              }`}
+              style={{ paddingLeft: `${depth * 12 + 20}px` }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  sandpack.setActiveFile(entry.path);
+                  onFileSelect?.();
+                }}
+                className={`flex min-w-0 flex-1 items-center gap-2 py-2 text-left font-mono text-[11px] ${
+                  isActive
+                    ? isDark
+                      ? "font-bold text-white"
+                      : "font-bold text-zinc-950"
+                    : isDark
+                      ? "text-zinc-300"
+                      : "text-zinc-700"
+                }`}
+              >
+                <FileCode2 className="h-3.5 w-3.5 shrink-0 text-blue-500" />
+                <span className="truncate" title={entry.path}>
+                  {name}
+                </span>
+              </button>
+              <div className="hidden shrink-0 items-center group-hover:flex group-focus-within:flex">
+                <button
+                  type="button"
+                  onClick={() => beginRename(entry.path)}
+                  className={`rounded p-1 transition ${
+                    isDark
+                      ? "text-zinc-400 hover:bg-zinc-700 hover:text-white"
+                      : "text-zinc-600 hover:bg-zinc-300 hover:text-zinc-900"
+                  }`}
+                  title={`Rename ${entry.path}`}
+                >
+                  <Pencil className="h-3 w-3" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    files.length === 1
+                      ? setError("A project must keep at least one file.")
+                      : setDeleteTarget({ type: "file", path: entry.path })
+                  }
+                  className="rounded p-1 text-zinc-400 hover:bg-red-500/20 hover:text-red-500"
+                  title={`Delete ${entry.path}`}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {!editMode && error && (
+        <p
+          className={`border-t p-2 text-[10px] font-semibold text-red-500 ${
+            isDark ? "border-zinc-800" : "border-zinc-200"
+          }`}
+        >
+          {error}
+        </p>
+      )}
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/70 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-file-title"
+        >
+          <div
+            className={`w-full max-w-sm rounded-2xl border p-5 shadow-2xl ${
+              isDark
+                ? "border-zinc-700 bg-zinc-900 text-white"
+                : "border-zinc-300 bg-white text-zinc-900"
+            }`}
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
+              <Trash2 className="h-5 w-5" />
+            </div>
+            <h3 id="delete-file-title" className="mt-4 text-base font-black">
+              Delete {deleteTarget.type}?
+            </h3>
+            <p
+              className={`mt-2 text-sm leading-relaxed ${
+                isDark ? "text-zinc-400" : "text-zinc-600"
+              }`}
+            >
+              This will remove{" "}
+              <span className="font-mono font-bold">{deleteTarget.path}</span>
+              {deleteTarget.type === "folder"
+                ? " and every file inside it"
+                : ""}
+              . Reset can restore starter files, but newly created work cannot
+              be recovered.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className={`rounded-full px-4 py-2 text-xs font-bold transition ${
+                  isDark
+                    ? "bg-zinc-800 text-zinc-200 hover:bg-zinc-700"
+                    : "bg-zinc-200 text-zinc-800 hover:bg-zinc-300"
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="rounded-full bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </aside>
+  );
+}
+
+
+export default FileExplorer;

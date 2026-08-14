@@ -1,17 +1,6 @@
 const nextConfig = {
   // Allows CI/verification builds to avoid a .next directory held by a local dev server.
   distDir: process.env.NEXT_DIST_DIR || '.next',
-  async headers() {
-    const wasmIsolationHeaders = [
-      { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-      { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
-    ];
-    return [
-      // Interactive C/C++ snippets can be opened from any tutorial route. Wasmer
-      // needs cross-origin isolation even for single-threaded WASIX programs.
-      { source: '/:path*', headers: wasmIsolationHeaders },
-    ];
-  },
   async redirects() {
     return [
       {

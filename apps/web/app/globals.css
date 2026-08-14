@@ -311,48 +311,20 @@ pre.ql-syntax::-webkit-scrollbar-thumb:hover {
 .ql-editor pre,
 pre.hljs,
 .wmde-markdown pre {
-  background-color: #1a1b26 !important;
-  color: #a9b1d6 !important;
-  padding: 2rem !important;
-  border-radius: 1.5rem !important;
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+  padding: 1.75rem 1.5rem !important;
+  border-radius: 1.25rem !important;
   white-space: pre-wrap !important;
   word-break: break-word !important;
-  padding: 2rem !important;
-  border-radius: 1.5rem !important;
-  overflow-x: hidden !important;
+  overflow-x: auto !important;
   max-width: 100% !important;
-  margin: 2.5rem 0 !important;
+  margin: 2.25rem 0 !important;
   font-family: "JetBrains Mono", "Fira Code", monospace !important;
   font-size: 0.9rem !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-}
-
-/* Maximized state for code blocks */
-pre.code-block-maximized {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  margin: 0 !important;
-  z-index: 9999 !important;
-  border-radius: 0 !important;
-  padding: 5rem 2rem 2rem !important;
-  overflow-y: auto !important;
-  white-space: pre-wrap !important;
-}
-
-body.has-maximized-code {
-  overflow: hidden !important;
-}
-
-/* Ensure code tags inside don't have their own background */
-.prose pre code,
-.ql-editor pre code,
-.wmde-markdown pre code {
-  background-color: transparent !important;
-  padding: 0 !important;
-  border-radius: 0 !important;
+  line-height: 1.7 !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
 }
 
 .dark .prose pre,
@@ -360,6 +332,98 @@ body.has-maximized-code {
 .dark pre.hljs,
 .dark .wmde-markdown pre {
   background-color: #0b0e14 !important;
+  color: #e2e8f0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+}
+
+/* Light mode Prism & HLJS syntax tokens */
+:root:not(.dark) .wmde-markdown pre code,
+:root:not(.dark) .topic-markdown pre code,
+:root:not(.dark) pre.hljs code,
+[data-color-mode="light"] .wmde-markdown pre code {
+  color: #0f172a !important;
+}
+
+:root:not(.dark) .token.comment,
+:root:not(.dark) .token.prolog,
+:root:not(.dark) .token.doctype,
+:root:not(.dark) .token.cdata,
+:root:not(.dark) .hljs-comment,
+:root:not(.dark) .hljs-quote,
+[data-color-mode="light"] .token.comment,
+[data-color-mode="light"] .hljs-comment {
+  color: #64748b !important;
+  font-style: italic;
+}
+
+:root:not(.dark) .token.punctuation,
+[data-color-mode="light"] .token.punctuation {
+  color: #475569 !important;
+}
+
+:root:not(.dark) .token.property,
+:root:not(.dark) .token.tag,
+:root:not(.dark) .token.boolean,
+:root:not(.dark) .token.number,
+:root:not(.dark) .token.constant,
+:root:not(.dark) .token.symbol,
+:root:not(.dark) .token.deleted,
+:root:not(.dark) .hljs-number,
+:root:not(.dark) .hljs-literal,
+[data-color-mode="light"] .token.number,
+[data-color-mode="light"] .hljs-number {
+  color: #d97706 !important;
+}
+
+:root:not(.dark) .token.selector,
+:root:not(.dark) .token.attr-name,
+:root:not(.dark) .token.string,
+:root:not(.dark) .token.char,
+:root:not(.dark) .token.builtin,
+:root:not(.dark) .token.inserted,
+:root:not(.dark) .hljs-string,
+:root:not(.dark) .hljs-title,
+[data-color-mode="light"] .token.string,
+[data-color-mode="light"] .hljs-string {
+  color: #059669 !important;
+}
+
+:root:not(.dark) .token.operator,
+:root:not(.dark) .token.entity,
+:root:not(.dark) .token.url,
+:root:not(.dark) .hljs-operator,
+[data-color-mode="light"] .token.operator {
+  color: #0284c7 !important;
+}
+
+:root:not(.dark) .token.atrule,
+:root:not(.dark) .token.attr-value,
+:root:not(.dark) .token.keyword,
+:root:not(.dark) .hljs-keyword,
+:root:not(.dark) .hljs-selector-tag,
+[data-color-mode="light"] .token.keyword,
+[data-color-mode="light"] .hljs-keyword {
+  color: #2563eb !important;
+  font-weight: 600;
+}
+
+:root:not(.dark) .token.function,
+:root:not(.dark) .token.class-name,
+:root:not(.dark) .hljs-function,
+:root:not(.dark) .hljs-class,
+[data-color-mode="light"] .token.function,
+[data-color-mode="light"] .hljs-function {
+  color: #7c3aed !important;
+  font-weight: 600;
+}
+
+:root:not(.dark) .token.regex,
+:root:not(.dark) .token.important,
+:root:not(.dark) .token.variable,
+:root:not(.dark) .hljs-variable,
+[data-color-mode="light"] .token.variable {
+  color: #dc2626 !important;
 }
 
 /* Public course topic reader */

@@ -1,43 +1,20 @@
 import { cn } from "@/lib/utils";
-import { InputHTMLAttributes, forwardRef } from "react";
+import { forwardRef } from "react";
 
-
-
-
-
-/**
- * Input - Soft Neo-Bento styled input component
- *
- * Features:
- * - Pill-shaped "pod" design (14px radius)
- * - No visible borders
- * - Soft background
- */
 const Input = forwardRef(
   ({ className, type, error, ...props }, ref) => {
     return (
       <input
         type={type}
         className={cn(
-          // Base styles - pill-shaped pod
-          "flex h-12 w-full rounded-[14px] px-4 py-3",
-          "bg-input",
-          "text-sm text-foreground placeholder:text-muted-foreground",
-          // Focus state
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-          // Disabled state
-          "disabled:cursor-not-allowed disabled:opacity-50",
-          // Error state
-          error &&
-          "ring-2 ring-destructive ring-offset-2 ring-offset-background",
-          // Transitions
-          "transition-smooth",
+          "flex h-10 w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-zinc-900 shadow-xs transition-all outline-none placeholder:text-zinc-400 focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus-visible:border-blue-500 dark:focus-visible:ring-blue-500/30 dark:[color-scheme:dark]",
+          error && "border-red-500 ring-2 ring-red-500/20",
           className
         )}
         ref={ref}
-        {...props} />);
-
-
+        {...props}
+      />
+    );
   }
 );
 
