@@ -7,9 +7,9 @@ const nextConfig = {
       { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
     ];
     return [
-      { source: '/playground', headers: wasmIsolationHeaders },
-      { source: '/run', headers: wasmIsolationHeaders },
-      { source: '/practice/:path*', headers: wasmIsolationHeaders },
+      // Interactive C/C++ snippets can be opened from any tutorial route. Wasmer
+      // needs cross-origin isolation even for single-threaded WASIX programs.
+      { source: '/:path*', headers: wasmIsolationHeaders },
     ];
   },
   async redirects() {
