@@ -70,5 +70,5 @@ export default async function ArticlePage({ params }) {
   const article = await getArticle(slugWithId);
   const canonical = absoluteUrl(article?.canonicalUrl, `/articles/${slugWithId}`);
   const schema = article ? { "@context": "https://schema.org", "@graph": [buildPersonSchema({ image: article.author?.avatar ? assetUrl(article.author.avatar) : undefined }), { "@type": "TechArticle", "@id": `${canonical}#article`, headline: article.title, description: article.seoDescription || undefined, url: canonical, image: article.image ? assetUrl(article.image) : undefined, datePublished: article.createdAt, dateModified: article.updatedAt || article.createdAt, author: { "@id": `${authorIdentity.url}#person` }, publisher: { "@type": "Organization", name: "asif.to", url: absoluteUrl("", "/") }, mainEntityOfPage: canonical }] } : null;
-  return <>{schema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(schema) }}/>}<ArticleClient slug={slugWithId} /></>;
+  return <>{schema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(schema) }}/>}<ArticleClient slug={slugWithId} initialData={article} /></>;
 }

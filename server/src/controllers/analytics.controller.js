@@ -195,9 +195,9 @@ export const getSearchReport = async (req, res) => {
       : "queries";
     const field =
       type === "queries" ? "query" : type === "pages" ? "page" : "key";
-    const dimension = ["queries", "pages"].includes(type)
-      ? "queryPage"
-      : type.slice(0, -1).replace("appearanc", "appearance");
+    const primaryDimension = { queries: "query", pages: "page", countries: "country", devices: "device", appearance: "appearance" }[type];
+    const hasPrimary = await SearchMetric.exists({ dimension: primaryDimension, date: { $gte: dates.start, $lt: dates.end } });
+    const dimension = !hasPrimary && ["queries", "pages"].includes(type) ? "queryPage" : primaryDimension;
     const match = { dimension, date: { $gte: dates.start, $lt: dates.end } };
     if (req.query.search)
       match[field] = { $regex: escapeRegex(req.query.search), $options: "i" };
@@ -276,8 +276,9 @@ export const getSearchReport = async (req, res) => {
 };
 
 async function pagePerformance(start, end) {
+  const dimension = await SearchMetric.exists({ dimension: "page", date: { $gte: start, $lt: end } }) ? "page" : "queryPage";
   return SearchMetric.aggregate([
-    { $match: { dimension: "queryPage", date: { $gte: start, $lt: end } } },
+    { $match: { dimension, date: { $gte: start, $lt: end } } },
     {
       $group: {
         _id: "$page",
@@ -335,17 +336,15 @@ export const getContentInsights = async (req, res) => {
       previousClicks: previousMap.get(row._id)?.clicks || 0,
       growth: pct(row.clicks, previousMap.get(row._id)?.clicks || 0),
     }));
+    const normalizePath = (value) => {
+      try { return new URL(value, "https://asif.to").pathname.replace(/\/$/, "") || "/"; }
+      catch { return String(value || "").replace(/\/$/, "") || "/"; }
+    };
     const matchContent = (items, urlFor) =>
       items
         .map((item) => {
           const path = urlFor(item);
-          const row = enriched.find((entry) => {
-            try {
-              return new URL(entry.page).pathname === path;
-            } catch {
-              return entry.page === path;
-            }
-          });
+          const row = enriched.find((entry) => normalizePath(entry.page) === normalizePath(path));
           return {
             id: item._id,
             title: item.title,
@@ -363,7 +362,7 @@ export const getContentInsights = async (req, res) => {
         })
         .sort((a, b) => b.clicks - a.clicks);
     const content = {
-      courses: matchContent(courses, (item) => `/${item.slug}`),
+      courses: matchContent(courses, (item) => `/courses/${item.slug}`),
       chapters: matchContent(
         chapters,
         (item) => `/${item.course?.slug}/${item.slug}`,

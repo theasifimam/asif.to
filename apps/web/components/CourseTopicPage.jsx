@@ -98,6 +98,23 @@ function structuredData(courseSlug, topic, questions) {
         },
       })),
     });
+  } else {
+    graph.push({
+      "@type": "LearningResource",
+      "@id": `${canonical}#topic`,
+      name: topic.title,
+      headline: topic.seoTitle || topic.title,
+      description: topic.seoDescription || topic.excerpt,
+      url: canonical,
+      datePublished: topic.publishedAt || undefined,
+      dateModified: topic.updatedAt || undefined,
+      learningResourceType: "Tutorial",
+      isPartOf: {
+        "@type": "Course",
+        name: topic.course.title,
+        url: `${siteUrl}/courses/${encodeURIComponent(courseSlug)}`,
+      },
+    });
   }
 
   return { "@context": "https://schema.org", "@graph": graph };
@@ -131,6 +148,7 @@ export async function buildTopicMetadata(courseSlug, topicPath) {
     description,
     keywords: topic.keywords || [],
     alternates: { canonical },
+    robots: { index: true, follow: true },
     openGraph: {
       title,
       description,

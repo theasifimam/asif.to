@@ -4,6 +4,9 @@ import React from "react";
 import { ArrowUpDown, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const COUNTRY_NAMES = { ind: "India", usa: "United States", gbr: "United Kingdom", can: "Canada", aus: "Australia", deu: "Germany", fra: "France", are: "United Arab Emirates", sgp: "Singapore", nld: "Netherlands", bra: "Brazil", jpn: "Japan" };
+const displayKey = (type, key) => type === "countries" ? COUNTRY_NAMES[String(key).toLowerCase()] || String(key).toUpperCase() : key;
+
 export default function ReportTable({
   title,
   type,
@@ -75,7 +78,7 @@ export default function ReportTable({
                     className="max-w-lg truncate px-6 py-4 font-bold text-zinc-900 dark:text-white"
                     title={row.key}
                   >
-                    {row.key || "(not available)"}
+                    {displayKey(type, row.key) || "(not available)"}
                   </td>
                   <td className="px-6 py-4 text-right font-black text-blue-600 dark:text-blue-400">
                     {row.clicks.toLocaleString()}

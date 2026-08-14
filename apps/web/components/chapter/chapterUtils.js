@@ -26,6 +26,7 @@ export function parseContentBlocks(contentArray, techName) {
       let lang = "javascript";
       let code = "";
       let interactive = false;
+      let showPlay = false;
 
       if (firstLineEnd !== -1) {
         const fenceMeta = trimmed.slice(3, firstLineEnd).trim() || "javascript";
@@ -33,6 +34,7 @@ export function parseContentBlocks(contentArray, techName) {
         lang = parsedLang;
         code = trimmed.slice(firstLineEnd + 1, -3).trim();
         interactive = flags.includes("interactive");
+        showPlay = flags.includes("play");
       } else {
         code = trimmed.slice(3, -3).trim();
       }
@@ -50,6 +52,7 @@ export function parseContentBlocks(contentArray, techName) {
         lang,
         title: snippetTitle,
         interactive: Boolean(interactive),
+        showPlay,
       });
       return;
     }

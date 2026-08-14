@@ -1,21 +1,14 @@
 "use client";
 
-import React from "react";
 import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), {
   ssr: false,
-  loading: () =>
-  <div className="h-125 w-full bg-zinc-50 dark:bg-zinc-900/20 animate-pulse rounded-3xl" />
-
+  loading: () => (
+    <div className="h-125 w-full bg-zinc-50 dark:bg-zinc-900/20 animate-pulse rounded-3xl" />
+  ),
 });
-
-
-
-
-
-
 
 const Editor = ({ value, onChange, placeholder }) => {
   const { theme } = useTheme();
@@ -23,8 +16,8 @@ const Editor = ({ value, onChange, placeholder }) => {
   return (
     <div
       className="md-editor-wrapper"
-      data-color-mode={theme === "dark" ? "dark" : "light"}>
-      
+      data-color-mode={theme === "dark" ? "dark" : "light"}
+    >
       <MDEditor
         value={value}
         onChange={(val) => onChange(val || "")}
@@ -32,9 +25,10 @@ const Editor = ({ value, onChange, placeholder }) => {
         height={500}
         className="w-full font-inter"
         textareaProps={{
-          placeholder: placeholder || "START WRITING..."
-        }} />
-      
+          placeholder: placeholder || "START WRITING...",
+        }}
+      />
+
       <style jsx global>{`
         .md-editor-wrapper {
           --md-border-color: #e4e4e7; /* zinc-200 */
@@ -75,8 +69,8 @@ const Editor = ({ value, onChange, placeholder }) => {
           border: 1px solid #1a1f26 !important;
         }
       `}</style>
-    </div>);
-
+    </div>
+  );
 };
 
 export default Editor;

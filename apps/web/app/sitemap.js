@@ -98,10 +98,11 @@ export default async function sitemap() {
   }));
 
   // 2. Fetch dynamic content in parallel
-  const [coursesData, cheatsheetsData, articlesData] = await Promise.all([
+  const [coursesData, cheatsheetsData, articlesData, searchIndex] = await Promise.all([
     fetchApi("/courses"),
     fetchApi("/cheatsheets"),
     fetchApi("/articles?status=published&limit=100"),
+    fetchApi("/search/index"),
   ]);
 
   const dynamicEntries = [];
@@ -175,6 +176,17 @@ export default async function sitemap() {
         priority: 0.7,
       });
     }
+  }
+
+  // Topics and individual interview questions use canonical course-scoped routes.
+  const searchableItems = Array.isArray(searchIndex?.items) ? searchIndex.items : [];
+  const existingUrls = new Set(dynamicEntries.map((entry) => entry.url));
+  for (const item of searchableItems) {
+    if (!["topic", "question"].includes(item.type) || !item.url) continue;
+    const url = `${siteUrl}${item.url}`;
+    if (existingUrls.has(url)) continue;
+    existingUrls.add(url);
+    dynamicEntries.push({ url, lastModified: now, changeFrequency: "weekly", priority: item.type === "topic" ? 0.8 : 0.7 });
   }
 
   const { TECHNOLOGIES } = await import("@/lib/playground/config");

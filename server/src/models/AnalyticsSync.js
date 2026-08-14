@@ -7,6 +7,7 @@ const analyticsSyncSchema = new Schema(
     lastStartedAt: Date,
     lastSyncedAt: Date,
     syncedThrough: Date,
+    dimensionSyncedThrough: { type: Map, of: Date, default: {} },
     rowsSynced: { type: Number, default: 0 },
     error: { type: String, default: "" },
   },

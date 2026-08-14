@@ -1,9 +1,10 @@
 import { TECHNOLOGIES } from "./config";
 
-const js = (slug, title, difficulty, topics, description, code, hints = []) => ({
+const js = (slug, title, difficulty, topics, description, code, hints = [], testCases = []) => ({
   slug, title, technology: "javascript", difficulty, topics, description, hints,
   examples: [{ input: "Use the sample call in the starter file", output: "Compare the console value with the expected comment" }],
   starterFiles: { "/index.js": code },
+  testCases,
 });
 const web = (technology, slug, title, difficulty, topics, description, html, css = "", script = "") => ({
   slug, title, technology, difficulty, topics, description,
@@ -22,8 +23,8 @@ const next = (slug, title, difficulty, topics, description, code) => ({
 });
 
 export const PRACTICE_PROBLEMS = [
-  js("reverse-a-string", "Reverse a String", "Easy", ["Strings", "Algorithms"], "Write a function that returns the supplied string in reverse order. Preserve spaces and punctuation.", `function reverseString(value) {\n  // Write your solution here\n  return value;\n}\n\nconsole.log(reverseString("hello")); // expected: olleh`, ["Strings can be converted to arrays."]),
-  js("remove-duplicates", "Remove Duplicates From Array", "Easy", ["Arrays", "Algorithms"], "Return a new array containing each value only once, without changing the input array.", `function unique(values) {\n  return values;\n}\n\nconsole.log(unique([1, 2, 2, 3, 3])); // expected: [1, 2, 3]`),
+  js("reverse-a-string", "Reverse a String", "Easy", ["Strings", "Algorithms"], "Write a function that returns the supplied string in reverse order. Preserve spaces and punctuation.", `function reverseString(value) {\n  // Write your solution here\n  return value;\n}\n\nconsole.log(reverseString("hello")); // expected: olleh`, ["Strings can be converted to arrays."], [{ functionName: "reverseString", args: ["hello"], expected: "olleh" }, { functionName: "reverseString", args: ["Asif to"], expected: "ot fisA" }, { functionName: "reverseString", args: [""], expected: "" }]),
+  js("remove-duplicates", "Remove Duplicates From Array", "Easy", ["Arrays", "Algorithms"], "Return a new array containing each value only once, without changing the input array.", `function unique(values) {\n  return values;\n}\n\nconsole.log(unique([1, 2, 2, 3, 3])); // expected: [1, 2, 3]`, [], [{ functionName: "unique", args: [[1, 2, 2, 3, 3]], expected: [1, 2, 3] }, { functionName: "unique", args: [[]], expected: [] }]),
   js("character-frequency", "Character Frequency", "Medium", ["Strings", "Objects"], "Count how often every character occurs and return an object of character-to-count pairs.", `function frequency(text) {\n  const counts = {};\n  // Build the frequency map\n  return counts;\n}\n\nconsole.log(frequency("banana"));`),
   js("flatten-an-array", "Flatten an Array", "Medium", ["Arrays", "Algorithms"], "Flatten a nested array of arbitrary depth without mutating it.", `function flatten(values) {\n  // Return one flat array\n  return values;\n}\n\nconsole.log(flatten([1, [2, [3, 4]]]));`),
   js("debounce-function", "Debounce Function", "Hard", ["Functions", "Async/Await"], "Implement debounce so a function runs only after calls have stopped for the given delay.", `function debounce(fn, delay) {\n  // Return a debounced function\n}\n\nconst say = debounce((value) => console.log(value), 200);\nsay("first");\nsay("latest");`),

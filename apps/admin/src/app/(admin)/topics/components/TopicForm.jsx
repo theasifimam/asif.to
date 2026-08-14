@@ -277,12 +277,12 @@ export default function TopicForm({ topicId = null }) {
             <span className="font-semibold capitalize">{form.status}</span>
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={save} disabled={saving}>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <Button variant="outline" onClick={save} disabled={saving} className="flex-1 sm:flex-initial">
             <Save className="mr-2 h-4 w-4" /> Save draft
           </Button>
           {form.status !== "published" && (
-            <Button onClick={() => setPublishOpen(true)} disabled={saving}>
+            <Button onClick={() => setPublishOpen(true)} disabled={saving} className="w-full sm:w-auto">
               <Send className="mr-2 h-4 w-4" /> Publish
             </Button>
           )}
@@ -296,6 +296,7 @@ export default function TopicForm({ topicId = null }) {
                   toast.success("Topic unpublished");
                 }
               }}
+              className="flex-1 sm:flex-initial"
             >
               <Check className="mr-2 h-4 w-4" /> Published
             </Button>

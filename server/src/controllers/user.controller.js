@@ -4,7 +4,6 @@ import bcrypt from "bcrypt";
 import Article from "../models/Article.js";
 import Course from "../models/Course.js";
 import Chapter from "../models/Chapter.js";
-import Cheatsheet from "../models/Cheatsheet.js";
 import QuizQuestion from "../models/Question.js";
 
 // ─── Admin: List all users ──────────────────────────────────────────────────
@@ -611,7 +610,7 @@ export const getMySavedItems = async (req, res) => {
             .lean()
         : [],
       byType.cheatsheet.length
-        ? Cheatsheet.find({ _id: { $in: byType.cheatsheet } })
+        ? Article.find({ _id: { $in: byType.cheatsheet }, type: "cheatsheet" })
             .select("title slug techId")
             .lean()
         : [],

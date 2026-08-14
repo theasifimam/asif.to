@@ -10,18 +10,18 @@ import {
   Users,
   Hash,
   Bell,
-  Search,
   LogOut,
   Info,
   GraduationCap,
   FileCode,
   Clipboard,
   FolderTree,
-  X,
   MessageSquare,
   KanbanSquare,
   ChartNoAxesCombined,
+  SearchCheck,
 } from "lucide-react";
+import AdminGlobalSearch from "@/components/search/AdminGlobalSearch";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
@@ -49,24 +49,24 @@ const NAV_ITEMS = [
     ],
   },
   {
-    group: "Courses & Learning",
-    items: [
-      { name: "Cheatsheets", href: "/cheatsheets", icon: FileCode },
-      { name: "Question Bank", href: "/quiz", icon: Clipboard },
-    ],
-  },
-  {
     group: "Content",
     items: [
-      { name: "Courses", href: "/courses", icon: GraduationCap },
+      { name: "All Articles", href: "/articles/published", icon: BookOpen },
       { name: "Topics", href: "/topics", icon: Hash },
       {
         name: "Interview Questions",
         href: "/interview-questions",
         icon: MessageSquare,
       },
+      { name: "Courses", href: "/courses", icon: GraduationCap },
       { name: "Categories", href: "/categories", icon: FolderTree },
-      { name: "All Articles", href: "/articles/published", icon: BookOpen },
+    ],
+  },
+  {
+    group: "Courses & Learning",
+    items: [
+      { name: "Cheatsheets", href: "/cheatsheets", icon: FileCode },
+      { name: "Question Bank", href: "/quiz", icon: Clipboard },
     ],
   },
   {
@@ -78,7 +78,10 @@ const NAV_ITEMS = [
   },
   {
     group: "System Pages",
-    items: [{ name: "Legal & Help", href: "/legal", icon: Info }],
+    items: [
+      { name: "SEO Settings", href: "/seo-settings", icon: SearchCheck },
+      { name: "Legal & Help", href: "/legal", icon: Info },
+    ],
   },
 ];
 
@@ -198,12 +201,7 @@ export default function AdminLayout({ children }) {
               </span>
             </Link>
 
-            <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-500 group cursor-pointer hover:text-zinc-900 dark:hover:text-white transition-colors">
-              <Search size={18} />
-              <span className="text-[11px] font-bold uppercase tracking-[0.2em] border-b border-transparent group-hover:border-zinc-400 dark:group-hover:border-zinc-500 pb-0.5 hidden md:inline">
-                Search...
-              </span>
-            </div>
+            <AdminGlobalSearch />
           </div>
 
           <div className="flex min-w-0 items-center gap-2 sm:gap-3 md:gap-6">

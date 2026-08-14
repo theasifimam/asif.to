@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Eye, Loader2, Save } from "lucide-react";
+import { ArrowLeft, Eye, Save } from "lucide-react";
 import { toast } from "sonner";
 import Editor from "@/components/Editor";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,7 @@ const initialForm = {
   codeExample: "",
   expectedOutput: "",
   followUps: "",
+  seoTitle: "", seoDescription: "", keywords: "", canonicalUrl: "", ogImage: "",
 };
 
 function slugify(value) {
@@ -73,6 +74,7 @@ export default function InterviewQuestionForm({
           course: item.course?._id || item.course || "",
           tags: (item.tags || []).join(", "),
           followUps: (item.followUps || []).join("\n"),
+          keywords: (item.keywords || []).join(", "),
         });
         setSlugEdited(true);
       } else if (questionId) {
@@ -106,6 +108,7 @@ export default function InterviewQuestionForm({
         .split("\n")
         .map((item) => item.trim())
         .filter(Boolean),
+      keywords: form.keywords.split(",").map((item) => item.trim()).filter(Boolean),
     };
     const response = questionId
       ? await interviewQuestionsApi.update(questionId, payload)
@@ -308,6 +311,12 @@ export default function InterviewQuestionForm({
               onChange={(value) => update("followUps", value)}
               excludeId={questionId}
             />
+            <div className="border-t border-zinc-200 pt-5 dark:border-zinc-800"><h3 className="text-sm font-black">Search metadata</h3><p className="mt-1 text-xs text-zinc-500">Empty fields use the question and answer as fallbacks.</p></div>
+            <div className="space-y-2"><Label>SEO title ({form.seoTitle.length}/70)</Label><Input maxLength={70} value={form.seoTitle} onChange={(event) => update("seoTitle", event.target.value)} /></div>
+            <div className="space-y-2"><Label>SEO description ({form.seoDescription.length}/170)</Label><Textarea maxLength={170} rows={3} value={form.seoDescription} onChange={(event) => update("seoDescription", event.target.value)} /></div>
+            <div className="space-y-2"><Label>SEO keywords</Label><Input value={form.keywords} onChange={(event) => update("keywords", event.target.value)} placeholder="react, useEffect, interview" /></div>
+            <div className="space-y-2"><Label>Canonical URL</Label><Input value={form.canonicalUrl} onChange={(event) => update("canonicalUrl", event.target.value)} /></div>
+            <div className="space-y-2"><Label>Open Graph image URL</Label><Input value={form.ogImage} onChange={(event) => update("ogImage", event.target.value)} /></div>
           </aside>
         </div>
       )}

@@ -43,6 +43,11 @@ const courseSchema = new Schema(
       trim: true,
       maxlength: 500,
     },
+    interviewSeoTitle: { type: String, default: "", trim: true, maxlength: 70 },
+    interviewSeoDescription: { type: String, default: "", trim: true, maxlength: 170 },
+    interviewKeywords: { type: [String], default: [] },
+    interviewCanonicalUrl: { type: String, default: "", trim: true, maxlength: 500 },
+    interviewOgImage: { type: String, default: "", trim: true, maxlength: 1000 },
     techId: {
       type: String,
       required: true,

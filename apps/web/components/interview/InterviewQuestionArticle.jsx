@@ -15,6 +15,7 @@ import {
   getPublicInterviewQuestions,
 } from "@/lib/publicContent";
 import { absoluteUrl, getSiteUrl, jsonLd } from "@/lib/seo";
+import { notFound } from "next/navigation";
 
 export async function buildInterviewQuestionMetadata(courseSlug, questionSlug) {
   const data = await getPublicInterviewQuestion(courseSlug, questionSlug);
@@ -23,20 +24,26 @@ export async function buildInterviewQuestionMetadata(courseSlug, questionSlug) {
       title: "Interview Question Not Found",
       robots: { index: false, follow: false },
     };
-  const title = `${data.question.question} | ${data.course.title} Interview Answer`;
-  const description = String(data.question.answer)
-    .replace(/[#*]/g, "")
-    .replace(/\s+/g, " ")
-    .slice(0, 158);
+  const title =
+    data.question.seoTitle ||
+    `${data.question.question} | ${data.course.title} Interview Answer`;
+  const description =
+    data.question.seoDescription ||
+    String(data.question.answer)
+      .replace(/[#*]/g, "")
+      .replace(/\s+/g, " ")
+      .slice(0, 158);
   const canonical = absoluteUrl(
-    "",
+    data.question.canonicalUrl,
     `/${data.course.slug}/interview-questions/${data.question.slug}`,
   );
   return {
     title,
     description,
     keywords: [
-      ...(data.question.tags || []),
+      ...(data.question.keywords?.length
+        ? data.question.keywords
+        : data.question.tags || []),
       `${data.course.title} interview questions`,
     ],
     alternates: { canonical },
@@ -47,8 +54,14 @@ export async function buildInterviewQuestionMetadata(courseSlug, questionSlug) {
       url: canonical,
       type: "article",
       siteName: "asif.to",
+      ...(data.question.ogImage ? { images: [data.question.ogImage] } : {}),
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      ...(data.question.ogImage ? { images: [data.question.ogImage] } : {}),
+    },
   };
 }
 
@@ -60,15 +73,7 @@ export default async function InterviewQuestionArticle({
     getPublicInterviewQuestion(courseSlug, questionSlug),
     getPublicInterviewQuestions(courseSlug, 1),
   ]);
-  if (!data)
-    return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
-        <Header />
-        <main className="mx-auto max-w-3xl px-4 pt-28 text-center">
-          Question not found.
-        </main>
-      </div>
-    );
+  if (!data) notFound();
   const { course, question } = data;
   const index = list?.questionIndex || [];
   const position = index.findIndex((item) => item._id === question._id);

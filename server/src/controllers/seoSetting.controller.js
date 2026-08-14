@@ -1,0 +1,6 @@
+import SeoSetting from "../models/SeoSetting.js";
+const normalizePath = (value = "") => { const path = String(value).trim().split(/[?#]/)[0]; return `/${path.replace(/^\/+|\/+$/g, "")}`.replace(/^\/$/, "/"); };
+const keywords = (value) => [...new Set((Array.isArray(value) ? value : String(value || "").split(",")).map((item) => String(item).trim()).filter(Boolean))];
+export async function getPublicSeoSetting(req, res) { const item = await SeoSetting.findOne({ path: normalizePath(req.query.path) }).lean(); res.json({ success: true, data: item || null }); }
+export async function listSeoSettings(_req, res) { const items = await SeoSetting.find().sort({ path: 1 }).lean(); res.json({ success: true, data: items }); }
+export async function upsertSeoSetting(req, res) { try { const path = normalizePath(req.body.path); const item = await SeoSetting.findOneAndUpdate({ path }, { $set: { path, title: req.body.title || "", description: req.body.description || "", keywords: keywords(req.body.keywords), canonicalUrl: req.body.canonicalUrl || "", ogImage: req.body.ogImage || "", noIndex: Boolean(req.body.noIndex) } }, { new: true, upsert: true, runValidators: true }); res.json({ success: true, data: item }); } catch (error) { res.status(400).json({ success: false, message: error.message || "Unable to save SEO settings" }); } }

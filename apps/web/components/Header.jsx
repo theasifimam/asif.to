@@ -31,6 +31,7 @@ import {
 import { toast } from "sonner";
 import { usePathname } from "next/navigation";
 import { useScrollNavVisible } from "@/components/ScrollNavProvider";
+import GlobalSearch from "@/components/search/GlobalSearch";
 
 const Sidebar = dynamic(() => import("./header/Sidebar"), { ssr: false });
 const LogoutConfirm = dynamic(() => import("./header/LogoutConfirm"), {
@@ -259,22 +260,25 @@ export default function Header() {
                       View All
                     </Link>
                   </div>
-                  {cheatsheets.map((cs) => (
-                    <Link
-                      key={cs._id || cs.id}
-                      href="/cheatsheets"
-                      onClick={() => setCheatsheetsDropdownOpen(false)}
-                      className="flex items-center gap-2.5 p-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-foreground text-xs font-bold"
-                    >
-                      <Sparkles className="w-4 h-4 text-blue-500" />
-                      <div className="flex flex-col">
-                        <span className="line-clamp-1">{cs.title}</span>
-                        <span className="text-[10px] text-zinc-400 font-normal">
-                          {cs.snippets?.length ?? 0} Code Snippets
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
+                  {cheatsheets.map((cs) => {
+                    const csSlug = cs.slug || cs.id || cs._id;
+                    return (
+                      <Link
+                        key={cs._id || cs.id}
+                        href={`/cheatsheets/${csSlug}`}
+                        onClick={() => setCheatsheetsDropdownOpen(false)}
+                        className="flex items-center gap-2.5 p-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-foreground text-xs font-bold"
+                      >
+                        <Sparkles className="w-4 h-4 text-blue-500" />
+                        <div className="flex flex-col">
+                          <span className="line-clamp-1">{cs.title}</span>
+                          <span className="text-[10px] text-zinc-400 font-normal">
+                            Article reference
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -306,6 +310,7 @@ export default function Header() {
 
           {/* User Profile & Actions (Theme toggle visible on mobile, profile on desktop) */}
           <div className="flex items-center gap-2">
+            <GlobalSearch />
             <div className="hidden md:flex items-center gap-2">
               {!isInitialized ? (
                 <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 animate-pulse" />

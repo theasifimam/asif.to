@@ -3,7 +3,7 @@ import { Schema, model } from "mongoose";
 const searchMetricSchema = new Schema(
   {
     date: { type: Date, required: true },
-    dimension: { type: String, enum: ["total", "queryPage", "country", "device", "appearance"], required: true },
+    dimension: { type: String, enum: ["total", "query", "page", "queryPage", "country", "device", "appearance"], required: true },
     query: { type: String, default: "", maxlength: 1000 },
     page: { type: String, default: "", maxlength: 2048 },
     key: { type: String, default: "", maxlength: 1000 },

@@ -24,6 +24,11 @@ const questionSchema = new Schema({
   codeExample: { type: String, default: "" },
   expectedOutput: { type: String, default: "" },
   followUps: { type: [String], default: [] },
+  seoTitle: { type: String, default: "", trim: true, maxlength: 70 },
+  seoDescription: { type: String, default: "", trim: true, maxlength: 170 },
+  keywords: { type: [String], default: [] },
+  canonicalUrl: { type: String, default: "", trim: true, maxlength: 500 },
+  ogImage: { type: String, default: "", trim: true, maxlength: 1000 },
   author: { type: Schema.Types.ObjectId, ref: "User", default: null },
 
   difficulty: { type: String, enum: ["easy", "medium", "hard"], default: "medium" },

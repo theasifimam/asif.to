@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
+import MarkdownCodePlayground from "@/components/interactive-code/MarkdownCodePlayground";
 
 const Markdown = dynamic(
   () =>
@@ -13,7 +14,7 @@ export default function TopicMarkdown({ content }) {
   const { resolvedTheme } = useTheme();
 
   return (
-    <div
+    <MarkdownCodePlayground
       data-color-mode={resolvedTheme === "dark" ? "dark" : "light"}
       className="topic-markdown"
     >
@@ -22,6 +23,6 @@ export default function TopicMarkdown({ content }) {
         className="wmde-markdown"
         style={{ backgroundColor: "transparent", color: "inherit" }}
       />
-    </div>
+    </MarkdownCodePlayground>
   );
 }

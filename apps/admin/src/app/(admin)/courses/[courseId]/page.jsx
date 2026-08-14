@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { chaptersApi, coursesApi } from "@/lib/api";
 import { ViewToggle } from "@/components/ViewToggle";
+import { AdminPage, AdminPageHeader } from "@/components/admin";
 
 const initialPagination = { page: 1, pages: 1, total: 0, limit: 20 };
 
@@ -71,7 +72,7 @@ export default function CourseChaptersPage() {
     setLoading(true);
     const [courseResponse, chaptersResponse] = await Promise.all([
       coursesApi.getById(courseId),
-      chaptersApi.listByCourse(courseId, {
+      chaptersApi.list(courseId, {
         search: debouncedSearch,
         status: filters.status,
         page: filters.page,
@@ -172,62 +173,53 @@ export default function CourseChaptersPage() {
   };
 
   return (
-    <main className="mx-auto max-w-7xl space-y-4 px-3 py-4 sm:space-y-6 sm:px-6 sm:py-8 lg:px-8">
-      <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-        <div className="flex items-start gap-3 min-w-0">
-          <Button
-            variant="outline"
-            size="icon"
-            asChild
-            title="Back to courses"
-            className="shrink-0 mt-1"
+    <AdminPage size="xl">
+      <AdminPageHeader
+        eyebrow="Content / Courses / Chapters"
+        title={course?.title || "Course chapters"}
+        description={
+          course
+            ? `/courses/${course.slug} · ${pagination.total} chapters`
+            : "Loading course"
+        }
+        back={
+          <Link
+            href="/courses"
+            className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
           >
-            <Link href="/courses">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
-              Content / Courses / Chapters
-            </p>
-            <h1 className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-black tracking-tight text-zinc-950 dark:text-white line-clamp-2">
-              {course?.title || "Course chapters"}
-            </h1>
-            <p className="mt-1 text-xs sm:text-sm text-zinc-500 truncate">
-              {course
-                ? `/courses/${course.slug} · ${pagination.total} chapters`
-                : "Loading course"}
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 [&>a]:flex-1 sm:[&>a]:flex-initial [&>button]:flex-1 sm:[&>button]:flex-initial">
-          <ViewToggle view={viewMode} onViewChange={setViewMode} />
-          {course?.status === "published" && (
-            <Button variant="outline" asChild className="w-full sm:w-auto">
-              <a
-                href={`https://asif.to/courses/${course.slug}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <ExternalLink className="mr-2 h-4 w-4" />
-                View course
-              </a>
+            <ArrowLeft className="h-4 w-4" /> Back to courses
+          </Link>
+        }
+        actions={
+          <>
+            <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            {course?.status === "published" && (
+              <Button variant="outline" asChild className="flex-1 sm:flex-initial">
+                <a
+                  href={`https://asif.to/courses/${course.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  View course
+                </a>
+              </Button>
+            )}
+            <Button variant="outline" asChild className="flex-1 sm:flex-initial">
+              <Link href={`/courses/${courseId}/edit`}>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit course
+              </Link>
             </Button>
-          )}
-          <Button variant="outline" asChild className="w-full sm:w-auto">
-            <Link href={`/courses/${courseId}/edit`}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit course
-            </Link>
-          </Button>
-          <Button asChild className="w-full sm:w-auto">
-            <Link href={`/courses/${courseId}/chapters/new`}>
-              <Plus className="mr-2 h-4 w-4" />
-              New chapter
-            </Link>
-          </Button>
-        </div>
-      </header>
+            <Button asChild className="w-full sm:w-auto">
+              <Link href={`/courses/${courseId}/chapters/new`}>
+                <Plus className="mr-2 h-4 w-4" />
+                New chapter
+              </Link>
+            </Button>
+          </>
+        }
+      />
 
       <section className="flex flex-col gap-3 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-3.5 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950 md:flex-row">
         <div className="relative flex-1">
@@ -590,6 +582,6 @@ export default function CourseChaptersPage() {
         variant="destructive"
         loading={updating === deleteChapter?._id}
       />
-    </main>
+    </AdminPage>
   );
 }

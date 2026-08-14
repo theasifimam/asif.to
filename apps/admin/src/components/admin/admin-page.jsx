@@ -26,7 +26,7 @@ export function AdminPageHeader({
 }) {
   return (
     <header className="flex min-w-0 flex-col justify-between gap-4 md:flex-row md:items-end">
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         {back}
         {eyebrow && (
           <p
@@ -46,7 +46,7 @@ export function AdminPageHeader({
         )}
       </div>
       {actions && (
-        <div className="grid grid-cols-1 gap-2 xs:flex xs:flex-wrap [&_button]:w-full xs:[&_button]:w-auto [&_a]:w-full xs:[&_a]:w-auto">
+        <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2.5 shrink-0">
           {actions}
         </div>
       )}

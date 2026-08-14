@@ -338,6 +338,11 @@ export const createCourse = async (req, res) => {
       seoDescription,
       keywords,
       canonicalUrl,
+      interviewSeoTitle,
+      interviewSeoDescription,
+      interviewKeywords,
+      interviewCanonicalUrl,
+      interviewOgImage,
     } = req.body;
 
     if (!title || !subtitle || !techId) {
@@ -374,6 +379,11 @@ export const createCourse = async (req, res) => {
       seoDescription: seoDescription || "",
       keywords: normalizeKeywords(keywords),
       canonicalUrl: canonicalUrl || "",
+      interviewSeoTitle: interviewSeoTitle || "",
+      interviewSeoDescription: interviewSeoDescription || "",
+      interviewKeywords: normalizeKeywords(interviewKeywords),
+      interviewCanonicalUrl: interviewCanonicalUrl || "",
+      interviewOgImage: interviewOgImage || "",
       order: order ?? 0,
       status: status || "published",
       examEnabled: Boolean(examEnabled),
@@ -412,6 +422,11 @@ export const updateCourse = async (req, res) => {
       "seoDescription",
       "keywords",
       "canonicalUrl",
+      "interviewSeoTitle",
+      "interviewSeoDescription",
+      "interviewKeywords",
+      "interviewCanonicalUrl",
+      "interviewOgImage",
       "order",
       "status",
       "slug",
@@ -426,6 +441,7 @@ export const updateCourse = async (req, res) => {
     if (req.body.keywords !== undefined) {
       updates.keywords = normalizeKeywords(req.body.keywords);
     }
+    if (req.body.interviewKeywords !== undefined) updates.interviewKeywords = normalizeKeywords(req.body.interviewKeywords);
 
     if (req.body.slug !== undefined) {
       const formattedSlug = slugify(req.body.slug);

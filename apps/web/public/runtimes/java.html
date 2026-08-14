@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><script src="https://cjrtnc.leaningtech.com/4.3/loader.js" crossorigin="anonymous"></script></head><body><pre id="console"></pre><div id="output"></div><script>
+const send = (payload) => parent.postMessage({ source: "asif-java-runtime", ...payload }, "*");
+let ready;
+let running = false;
+const formatBytes = (value) => value ? `${(value / 1048576).toFixed(1)} MB` : "unknown size";
+async function download(url, file) {
+  const response = await fetch(url, { mode: "cors" });
+  if (!response.ok) throw new Error(`Could not download ${file} (${response.status}).`);
+  const total = Number(response.headers.get("content-length")) || 0;
+  if (!response.body) return new Uint8Array(await response.arrayBuffer());
+  const reader = response.body.getReader(); const chunks = []; let loaded = 0;
+  while (true) {
+    const { done, value } = await reader.read(); if (done) break;
+    chunks.push(value); loaded += value.byteLength;
+    send({ type: "progress", message: `Downloading the Java compiler library (${formatBytes(total)})...`, file, loaded, total });
+  }
+  const bytes = new Uint8Array(loaded); let offset = 0;
+  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+  return bytes;
+}
+async function initialize() {
+  if (!ready) ready = (async () => {
+    send({ type: "status", message: "Downloading the browser OpenJDK runtime..." });
+    await cheerpjInit({ status: "none", version: 17 });
+    const tools = await download("https://raw.githubusercontent.com/leaningtech/javafiddle/main/static/tools.jar", "tools.jar");
+    cheerpOSAddStringFile("/str/tools.jar", tools);
+  })();
+  return ready;
+}
+window.addEventListener("message", async (event) => {
+  if (event.data?.type !== "run" || running) return;
+  running = true;
+  const consoleNode = document.getElementById("console"); consoleNode.textContent = "";
+  const captured = [];
+  const originalLog = console.log; const originalError = console.error;
+  console.log = (...args) => { captured.push(args.join(" ")); originalLog(...args); };
+  console.error = (...args) => { captured.push(args.join(" ")); originalError(...args); };
+  try {
+    await initialize(); send({ type: "status", message: "Compiling Java..." });
+    const code = String(event.data.code || "");
+    const className = code.match(/public\s+class\s+([A-Za-z_$][\w$]*)/)?.[1] || "Main";
+    cheerpOSAddStringFile(`/str/${className}.java`, code);
+    const classPath = "/str/tools.jar:/files/";
+    const compileCode = await cheerpjRunMain("com.sun.tools.javac.Main", classPath, `/str/${className}.java`, "-d", "/files/", "-Xlint");
+    if (compileCode === 0) { send({ type: "status", message: "Running Java..." }); await cheerpjRunMain(className, classPath); }
+    const text = consoleNode.innerText || captured.join("\n");
+    send({ type: "result", stdout: compileCode === 0 ? text : "", stderr: compileCode === 0 ? "" : text || `javac exited with code ${compileCode}.` });
+  } catch (error) { send({ type: "error", error: error?.message || String(error) }); }
+  finally { console.log = originalLog; console.error = originalError; running = false; }
+});
+send({ type: "ready" });
+</script></body></html>

@@ -4,7 +4,10 @@ import React from "react";
 import { Code } from "lucide-react";
 import CodeSnippetViewer from "@/components/CodeSnippetViewer";
 
-export default function StandaloneCodeSnippets({ standaloneSnippets = [], techName }) {
+export default function StandaloneCodeSnippets({
+  standaloneSnippets = [],
+  techName,
+}) {
   if (!standaloneSnippets || standaloneSnippets.length === 0) return null;
 
   return (
@@ -18,7 +21,9 @@ export default function StandaloneCodeSnippets({ standaloneSnippets = [], techNa
           <CodeSnippetViewer
             key={index}
             code={sn.code}
+            language={sn.language || sn.lang}
             title={sn.title || `${techName || "Code"} Example ${index + 1}`}
+            showPlay={sn.showPlay === true || sn.playgroundEnabled === true}
           />
         ))}
       </div>

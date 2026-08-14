@@ -167,19 +167,19 @@ export default function TopicsPage() {
         title="Course topics"
         description="Build search-ready topic pages beneath each course."
         actions={
-          <div className="flex flex-wrap items-center gap-2">
+          <>
             <ViewToggle view={viewMode} onViewChange={setViewMode} />
-            <Link href="/categories" className="flex-2">
-              <Button variant="outline" className="w-full">
+            <Link href="/categories">
+              <Button variant="outline">
                 <Filter className="mr-2 h-4 w-4" /> Categories
               </Button>
             </Link>
-            <Link href="/topics/new" className="flex-2">
-              <Button className="w-full">
+            <Button asChild className="w-full sm:w-auto">
+              <Link href="/topics/new">
                 <Plus className="mr-2 h-4 w-4" /> New topic
-              </Button>
-            </Link>
-          </div>
+              </Link>
+            </Button>
+          </>
         }
       />
 

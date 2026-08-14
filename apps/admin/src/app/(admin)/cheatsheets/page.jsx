@@ -57,7 +57,7 @@ export default function CheatsheetsPage() {
         const query = search.trim().toLowerCase();
         return (
           (!query ||
-            [item.title, item.description, item.slug].some((value) =>
+            [item.title, item.content, item.slug].some((value) =>
               value?.toLowerCase().includes(query),
             )) &&
           (tech === "all" || item.techId === tech) &&
@@ -94,23 +94,23 @@ export default function CheatsheetsPage() {
       <AdminPageHeader
         eyebrow="Learning / Reference"
         title="Cheatsheets"
-        description="Create and manage syntax reference cheatsheets for technology tracks."
+        description="Create and manage article-based reference guides from the unified articles collection."
         actions={
-          <div className="flex items-center gap-2 w-full">
+          <>
             <ViewToggle view={viewMode} onViewChange={setViewMode} />
-            <Link href="/cheatsheets/new" className="w-full">
-              <Button className="w-full">
+            <Button asChild className="flex-1 sm:flex-initial">
+              <Link href="/cheatsheets/new">
                 <Plus className="mr-2 h-4 w-4" /> New cheatsheet
-              </Button>
-            </Link>
-          </div>
+              </Link>
+            </Button>
+          </>
         }
       />
       <AdminFilters>
         <AdminSearch
           value={search}
           onChange={updateFilter(setSearch)}
-          placeholder="Search titles, descriptions, or slugs"
+          placeholder="Search titles, content, or slugs"
         />
         <Select value={tech} onValueChange={updateFilter(setTech)}>
           <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 dark:bg-zinc-900 md:w-44">
@@ -173,7 +173,7 @@ export default function CheatsheetsPage() {
                         </span>
                       </div>
                       <span className="text-xs font-semibold text-zinc-400">
-                        {item.snippets?.length || 0} snippets
+                        Article
                       </span>
                     </div>
 
@@ -189,9 +189,9 @@ export default function CheatsheetsPage() {
                       </p>
                     </div>
 
-                    {item.description && (
+                    {item.seoDescription && (
                       <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">
-                        {item.description}
+                        {item.seoDescription}
                       </p>
                     )}
                   </div>
@@ -245,7 +245,7 @@ export default function CheatsheetsPage() {
                   <tr>
                     <th className="px-6 py-4">Cheatsheet</th>
                     <th className="px-6 py-4">Technology</th>
-                    <th className="px-6 py-4">Snippets</th>
+                    <th className="px-6 py-4">Content type</th>
                     <th className="px-6 py-4">Status</th>
                     <th className="px-6 py-4">Order</th>
                     <th className="px-6 py-4 text-right">Actions</th>
@@ -275,7 +275,7 @@ export default function CheatsheetsPage() {
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
-                          {item.snippets?.length || 0} snippets
+                          Article
                         </span>
                       </td>
                       <td className="px-6 py-4">

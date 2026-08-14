@@ -1,16 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Search } from "lucide-react";
 import { DIFFICULTIES } from "@/lib/playground/config";
 
 const difficultyStyle = { Easy: "text-emerald-600 bg-emerald-500/10", Medium: "text-amber-600 bg-amber-500/10", Hard: "text-red-600 bg-red-500/10" };
 
-export default function ProblemFilters({ problems, technology, topics }) {
-  const [topic, setTopic] = useState("All");
-  const [difficulty, setDifficulty] = useState("All");
-  const [query, setQuery] = useState("");
+export default function ProblemFilters({ problems, technology, topics, initialTopic = "All", initialDifficulty = "All", initialQuery = "" }) {
+  const [topic, setTopic] = useState(initialTopic);
+  const [difficulty, setDifficulty] = useState(initialDifficulty);
+  const [query, setQuery] = useState(initialQuery);
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (topic !== "All") params.set("topic", topic); if (difficulty !== "All") params.set("difficulty", difficulty); if (query) params.set("q", query);
+    window.history.replaceState(null, "", `${window.location.pathname}${params.size ? `?${params}` : ""}`);
+  }, [topic, difficulty, query]);
   const visible = useMemo(() => problems.filter((problem) =>
     (topic === "All" || problem.topics.includes(topic)) &&
     (difficulty === "All" || problem.difficulty === difficulty) &&
@@ -30,7 +35,7 @@ export default function ProblemFilters({ problems, technology, topics }) {
           <div className="mt-4 flex flex-wrap gap-2">{problem.topics.map((value) => <span key={value} className="rounded-full bg-zinc-100 px-2.5 py-1 text-[10px] font-bold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">{value}</span>)}</div>
         </Link>)}
       </div>
-      {!visible.length && <p className="rounded-3xl border border-dashed border-zinc-300 p-10 text-center text-sm text-zinc-500 dark:border-zinc-700">No problems match these filters.</p>}
+      {!visible.length && <div className="rounded-3xl border border-dashed border-zinc-300 p-10 text-center text-sm text-zinc-500 dark:border-zinc-700"><p>No problems match these filters.</p><button type="button" onClick={() => { setTopic("All"); setDifficulty("All"); setQuery(""); }} className="mt-3 font-bold text-blue-600 hover:underline">Clear filters</button></div>}
     </div>
   );
 }

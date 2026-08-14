@@ -9,9 +9,11 @@ import { slugify } from "../utils/slugify.js";
  */
 export const getArticles = async (req, res) => {
   try {
-    const { limit = 10, page = 1, topic, author, status, search } = req.query;
+    const { limit = 10, page = 1, topic, author, status, search, type = "article" } = req.query;
 
     const filter = {};
+    if (type === "article") filter.type = { $in: ["article", null] };
+    else if (type !== "all") filter.type = type;
     if (topic) filter.topic = topic;
     if (author) filter.author = author;
 
@@ -120,7 +122,7 @@ export const getArticleBySlug = async (req, res) => {
  */
 export const createArticle = async (req, res) => {
   try {
-    const { title, content, topic, status, seoTitle, seoDescription, keywords, canonicalUrl } = req.body;
+    const { title, content, topic, status, seoTitle, seoDescription, keywords, canonicalUrl, type = "article", techId, order } = req.body;
 
     if (!title || !content || !topic) {
       // Delete uploaded file if validation fails
@@ -147,6 +149,7 @@ export const createArticle = async (req, res) => {
     }
 
     const newArticle = await Article.create({
+      type: type === "cheatsheet" ? "cheatsheet" : "article",
       title,
       slug,
       content,
@@ -155,6 +158,7 @@ export const createArticle = async (req, res) => {
       image: imageUrl,
       status: articleStatus,
       seoTitle: seoTitle || "", seoDescription: seoDescription || "", keywords: keywords || [], canonicalUrl: canonicalUrl || "",
+      techId: techId || "", order: Number(order) || 0,
       readCount: 0,
       views: []
     });
@@ -173,7 +177,7 @@ export const createArticle = async (req, res) => {
 export const updateArticle = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, topic, status, seoTitle, seoDescription, keywords, canonicalUrl } = req.body;
+    const { title, content, topic, status, seoTitle, seoDescription, keywords, canonicalUrl, type, techId, order } = req.body;
 
     const article = await Article.findById(id);
     if (!article) {
@@ -205,6 +209,9 @@ export const updateArticle = async (req, res) => {
     if (seoDescription !== undefined) updateData.seoDescription = seoDescription;
     if (keywords !== undefined) updateData.keywords = Array.isArray(keywords) ? keywords : String(keywords).split(",").map((item) => item.trim()).filter(Boolean);
     if (canonicalUrl !== undefined) updateData.canonicalUrl = canonicalUrl;
+    if (type && ["article", "cheatsheet"].includes(type)) updateData.type = type;
+    if (techId !== undefined) updateData.techId = techId;
+    if (order !== undefined) updateData.order = Number(order) || 0;
 
     if (req.file) {
       // New image uploaded, delete old one and set new path

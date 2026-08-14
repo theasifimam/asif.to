@@ -43,6 +43,7 @@ const initialForm = {
   seoDescription: "",
   keywords: "",
   canonicalUrl: "",
+  interviewSeoTitle: "", interviewSeoDescription: "", interviewKeywords: "", interviewCanonicalUrl: "", interviewOgImage: "",
   order: 0,
   status: "draft",
   examEnabled: false,
@@ -93,6 +94,7 @@ export default function CourseForm({ courseId = null }) {
         ...initialForm,
         ...course,
         keywords: (course.keywords || []).join(", "),
+        interviewKeywords: (course.interviewKeywords || []).join(", "),
         learningOutcomes: (course.learningOutcomes || []).join("\n"),
         examEnabled: Boolean(course.examEnabled),
         examSettings: {
@@ -128,6 +130,7 @@ export default function CourseForm({ courseId = null }) {
       .split(",")
       .map((item) => item.trim())
       .filter(Boolean),
+    interviewKeywords: form.interviewKeywords.split(",").map((item) => item.trim()).filter(Boolean),
     learningOutcomes: form.learningOutcomes
       .split("\n")
       .map((item) => item.trim())
@@ -197,11 +200,11 @@ export default function CourseForm({ courseId = null }) {
         </Link>
       }
       actions={
-        <div className="flex flex-wrap items-center gap-2 w-full xs:w-auto">
+        <>
           {courseId && publicUrl && (
-            <Button variant="outline" asChild className="flex-1 xs:flex-initial">
+            <Button variant="outline" asChild className="flex-1 sm:flex-initial">
               <a href={publicUrl} target="_blank" rel="noreferrer">
-                <ExternalLink className="h-4 w-4" />
+                <ExternalLink className="mr-2 h-4 w-4" />
                 View
               </a>
             </Button>
@@ -210,20 +213,20 @@ export default function CourseForm({ courseId = null }) {
             variant="outline"
             disabled={saving}
             onClick={() => persist("draft")}
-            className="flex-1 xs:flex-initial"
+            className="flex-1 sm:flex-initial"
           >
-            <Save className="h-4 w-4" />
+            <Save className="mr-2 h-4 w-4" />
             Save draft
           </Button>
           <Button
             disabled={saving}
             onClick={() => setPublishOpen(true)}
-            className="flex-1 xs:flex-initial"
+            className="w-full sm:w-auto"
           >
-            <Send className="h-4 w-4" />
+            <Send className="mr-2 h-4 w-4" />
             Publish
           </Button>
-        </div>
+        </>
       }
     >
       <div className="hidden">
@@ -315,6 +318,7 @@ export default function CourseForm({ courseId = null }) {
                 rows={3}
                 onChange={(event) => update("subtitle", event.target.value)}
                 placeholder="A concise description of the course and its audience."
+                className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 shadow-none dark:bg-zinc-900"
               />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -361,6 +365,7 @@ export default function CourseForm({ courseId = null }) {
                 placeholder={
                   "Build reusable components\nManage application state\nShip a production project"
                 }
+                className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 shadow-none dark:bg-zinc-900"
               />
               <p className="text-xs text-muted-foreground">
                 One outcome per line.
@@ -368,7 +373,7 @@ export default function CourseForm({ courseId = null }) {
             </div>
           </section>
 
-          <section className="space-y-5">
+          <section className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
             <div>
               <h2 className="text-base font-semibold">Search metadata</h2>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -380,7 +385,7 @@ export default function CourseForm({ courseId = null }) {
               <div className="flex items-center justify-between gap-3">
                 <Label htmlFor="course-seo-title">SEO title</Label>
                 <span className="text-xs text-muted-foreground">
-                  {form.seoTitle.length}/70
+                  {(form.seoTitle || "").length}/70
                 </span>
               </div>
               <Input
@@ -394,7 +399,7 @@ export default function CourseForm({ courseId = null }) {
               <div className="flex items-center justify-between gap-3">
                 <Label htmlFor="course-seo-description">SEO description</Label>
                 <span className="text-xs text-muted-foreground">
-                  {form.seoDescription.length}/170
+                  {(form.seoDescription || "").length}/170
                 </span>
               </div>
               <Textarea
@@ -405,6 +410,7 @@ export default function CourseForm({ courseId = null }) {
                 onChange={(event) =>
                   update("seoDescription", event.target.value)
                 }
+                className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 shadow-none dark:bg-zinc-900"
               />
             </div>
             <div className="space-y-2">
@@ -429,18 +435,19 @@ export default function CourseForm({ courseId = null }) {
               />
             </div>
           </section>
+          <section className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950"><div><h2 className="text-base font-semibold">Interview guide metadata</h2><p className="mt-1 text-sm text-muted-foreground">Controls the course interview-question landing page.</p></div><div className="space-y-2"><Label>SEO title ({form.interviewSeoTitle.length}/70)</Label><Input maxLength={70} value={form.interviewSeoTitle} onChange={(e) => update("interviewSeoTitle", e.target.value)}/></div><div className="space-y-2"><Label>SEO description ({form.interviewSeoDescription.length}/170)</Label><Textarea maxLength={170} rows={3} value={form.interviewSeoDescription} onChange={(e) => update("interviewSeoDescription", e.target.value)}/></div><div className="space-y-2"><Label>Keywords</Label><Input value={form.interviewKeywords} onChange={(e) => update("interviewKeywords", e.target.value)}/></div><div className="space-y-2"><Label>Canonical URL</Label><Input value={form.interviewCanonicalUrl} onChange={(e) => update("interviewCanonicalUrl", e.target.value)}/></div><div className="space-y-2"><Label>Open Graph image URL</Label><Input value={form.interviewOgImage} onChange={(e) => update("interviewOgImage", e.target.value)}/></div></section>
         </main>
 
-        <aside className="space-y-6 lg:border-l lg:border-zinc-200 lg:pl-6 dark:lg:border-zinc-800">
-          <section className="space-y-4 border-b border-zinc-200 pb-6 dark:border-zinc-800">
-            <h2 className="text-sm font-semibold">Placement</h2>
+        <aside className="space-y-6">
+          <div className="space-y-4 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+            <h2 className="font-semibold text-zinc-900 dark:text-white text-sm">Placement</h2>
             <div className="space-y-2">
               <Label>Status</Label>
               <Select
                 value={form.status}
                 onValueChange={(value) => update("status", value)}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -455,7 +462,7 @@ export default function CourseForm({ courseId = null }) {
                 value={form.level}
                 onValueChange={(value) => update("level", value)}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -477,12 +484,12 @@ export default function CourseForm({ courseId = null }) {
                 onChange={(event) => update("order", event.target.value)}
               />
             </div>
-          </section>
+          </div>
 
-          <section className="space-y-4">
+          <div className="space-y-4 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-sm font-semibold">Final exam</h2>
+                <h2 className="font-semibold text-zinc-900 dark:text-white text-sm">Final exam</h2>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Enable assessment after the course.
                 </p>
@@ -516,7 +523,7 @@ export default function CourseForm({ courseId = null }) {
                 </div>
               ))}
             </div>
-          </section>
+          </div>
         </aside>
       </div>
 

@@ -18,6 +18,8 @@ import quizRoutes from "./routes/quiz.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
 import kanbanRoutes from "./routes/kanban.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
+import searchRoutes from "./routes/search.routes.js";
+import seoSettingRoutes from "./routes/seoSetting.routes.js";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -82,6 +84,8 @@ app.use("/api/v1/quiz", quizRoutes);
 app.use("/api/v1/contact", contactRoutes);
 app.use("/api/v1/kanban", kanbanRoutes);
 app.use("/api/v1/analytics", analyticsRoutes);
+app.use("/api/v1/search", searchRoutes);
+app.use("/api/v1/seo-settings", seoSettingRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {

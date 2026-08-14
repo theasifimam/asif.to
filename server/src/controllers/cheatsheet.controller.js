@@ -1,19 +1,24 @@
-import Cheatsheet from "../models/Cheatsheet.js";
+import Article from "../models/Article.js";
+import { slugify } from "../utils/slugify.js";
 
-function slugify(str) {
-  return str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-}
+const populateArticle = (query) =>
+  query
+    .populate("author", "fullName name username avatar")
+    .populate("topic", "name slug");
 
-/** GET /api/v1/cheatsheets — list all published cheatsheets */
 export const getCheatsheets = async (req, res) => {
   try {
-    const { techId, status } = req.query;
-    const filter = {};
+    const { techId, status, search } = req.query;
+    const filter = { type: "cheatsheet" };
     if (techId) filter.techId = techId;
     if (status && status !== "all") filter.status = status;
     else if (!status) filter.status = "published";
-
-    const cheatsheets = await Cheatsheet.find(filter)
+    if (search) {
+      filter.$or = ["title", "content", "keywords"].map((field) => ({
+        [field]: { $regex: search, $options: "i" },
+      }));
+    }
+    const cheatsheets = await populateArticle(Article.find(filter))
       .sort({ order: 1, createdAt: -1 })
       .lean();
     res.status(200).json({ success: true, data: cheatsheets });
@@ -23,66 +28,70 @@ export const getCheatsheets = async (req, res) => {
   }
 };
 
-/** GET /api/v1/cheatsheets/:slug */
 export const getCheatsheetBySlug = async (req, res) => {
   try {
-    const cs = await Cheatsheet.findOne({ slug: req.params.slug }).lean();
-    if (!cs) return res.status(404).json({ success: false, message: "Cheatsheet not found." });
-    res.status(200).json({ success: true, data: cs });
+    const cheatsheet = await populateArticle(
+      Article.findOne({ slug: req.params.slug, type: "cheatsheet" }),
+    ).lean();
+    if (!cheatsheet)
+      return res.status(404).json({ success: false, message: "Cheatsheet not found." });
+    res.status(200).json({ success: true, data: cheatsheet });
   } catch (error) {
     console.error("[CHEATSHEETS] getCheatsheetBySlug error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
-/** POST /api/v1/cheatsheets (admin) */
 export const createCheatsheet = async (req, res) => {
   try {
-    const { techId, title, description, seoTitle, seoDescription, keywords, canonicalUrl, snippets, order, status } = req.body;
-    if (!techId || !title) {
-      return res.status(400).json({ success: false, message: "techId and title are required." });
-    }
-
+    const { techId, title, content, status, order, seoTitle, seoDescription, keywords, canonicalUrl } = req.body;
+    if (!techId || !title || !content)
+      return res.status(400).json({ success: false, message: "Technology, title, and content are required." });
     let slug = slugify(title);
-    const existing = await Cheatsheet.findOne({ slug });
-    if (existing) slug = `${slug}-${Date.now()}`;
-
-    const cs = await Cheatsheet.create({
-      techId, slug, title,
-      description: description || "", seoTitle: seoTitle || "", seoDescription: seoDescription || "", keywords: keywords || [], canonicalUrl: canonicalUrl || "",
-      snippets: snippets || [],
-      order: order ?? 0,
-      status: status || "published",
+    if (await Article.exists({ slug })) slug = `${slug}-${Date.now()}`;
+    const cheatsheet = await Article.create({
+      type: "cheatsheet", techId, title, slug, content,
+      author: req.user._id, topic: [], image: "",
+      status: status === "published" ? "published" : "draft",
+      order: Number(order) || 0, seoTitle: seoTitle || "",
+      seoDescription: seoDescription || "",
+      keywords: Array.isArray(keywords) ? keywords : [],
+      canonicalUrl: canonicalUrl || "",
     });
-    res.status(201).json({ success: true, data: cs });
+    res.status(201).json({ success: true, data: cheatsheet });
   } catch (error) {
     console.error("[CHEATSHEETS] createCheatsheet error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
-/** PATCH /api/v1/cheatsheets/:id (admin) */
 export const updateCheatsheet = async (req, res) => {
   try {
-    const { id } = req.params;
-    const allowed = ["techId", "title", "slug", "description", "seoTitle", "seoDescription", "keywords", "canonicalUrl", "snippets", "order", "status"];
-    const updates = {};
-    allowed.forEach((k) => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
-
-    const cs = await Cheatsheet.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
-    if (!cs) return res.status(404).json({ success: false, message: "Cheatsheet not found." });
-    res.status(200).json({ success: true, data: cs });
+    const allowed = ["techId", "title", "slug", "content", "status", "order", "seoTitle", "seoDescription", "keywords", "canonicalUrl"];
+    const updates = { updatedAt: new Date() };
+    allowed.forEach((key) => { if (req.body[key] !== undefined) updates[key] = req.body[key]; });
+    if (updates.order !== undefined) updates.order = Number(updates.order) || 0;
+    if (updates.title && !updates.slug) updates.slug = slugify(updates.title);
+    if (updates.slug && await Article.exists({ slug: updates.slug, _id: { $ne: req.params.id } }))
+      updates.slug = `${updates.slug}-${Date.now()}`;
+    const cheatsheet = await Article.findOneAndUpdate(
+      { _id: req.params.id, type: "cheatsheet" }, updates,
+      { new: true, runValidators: true },
+    );
+    if (!cheatsheet)
+      return res.status(404).json({ success: false, message: "Cheatsheet not found." });
+    res.status(200).json({ success: true, data: cheatsheet });
   } catch (error) {
     console.error("[CHEATSHEETS] updateCheatsheet error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
-/** DELETE /api/v1/cheatsheets/:id (admin) */
 export const deleteCheatsheet = async (req, res) => {
   try {
-    const cs = await Cheatsheet.findByIdAndDelete(req.params.id);
-    if (!cs) return res.status(404).json({ success: false, message: "Cheatsheet not found." });
+    const cheatsheet = await Article.findOneAndDelete({ _id: req.params.id, type: "cheatsheet" });
+    if (!cheatsheet)
+      return res.status(404).json({ success: false, message: "Cheatsheet not found." });
     res.status(200).json({ success: true, message: "Cheatsheet deleted." });
   } catch (error) {
     console.error("[CHEATSHEETS] deleteCheatsheet error:", error);

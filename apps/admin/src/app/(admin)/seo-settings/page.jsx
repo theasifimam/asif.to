@@ -1,0 +1,22 @@
+"use client";
+import { useEffect, useState } from "react";
+import { Save, SearchCheck } from "lucide-react";
+import { toast } from "sonner";
+import { seoSettingsApi } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+const KNOWN_PATHS = ["/practice", "/practice/javascript", "/practice/react", "/practice/html", "/practice/css", "/practice/web", "/practice/nextjs", "/cheatsheets"];
+const empty = { path: "/practice", title: "", description: "", keywords: "", canonicalUrl: "", ogImage: "", noIndex: false };
+export default function SeoSettingsPage() {
+  const [items, setItems] = useState([]); const [form, setForm] = useState(empty); const [saving, setSaving] = useState(false);
+  useEffect(() => { seoSettingsApi.list().then((response) => { if (response.success) setItems(response.data?.data || []); else toast.error(response.error); }); }, []);
+  const choose = (path) => { const item = items.find((entry) => entry.path === path); setForm(item ? { ...item, keywords: (item.keywords || []).join(", ") } : { ...empty, path }); };
+  const save = async () => { setSaving(true); const response = await seoSettingsApi.save({ ...form, keywords: form.keywords.split(",").map((value) => value.trim()).filter(Boolean) }); setSaving(false); if (!response.success) return toast.error(response.error); const saved = response.data?.data; setItems((current) => [...current.filter((item) => item.path !== saved.path), saved].sort((a,b) => a.path.localeCompare(b.path))); toast.success("SEO settings saved"); };
+  return <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-8"><header><p className="text-xs font-black uppercase tracking-widest text-blue-600">Search appearance</p><h1 className="mt-2 text-3xl font-black">Route SEO settings</h1><p className="mt-2 text-sm text-zinc-500">Override metadata for landing pages and code-defined routes. Content editors retain their own SEO fields.</p></header>
+    <div className="grid gap-6 lg:grid-cols-[260px_1fr]"><aside className="rounded-3xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950"><p className="px-3 py-2 text-[10px] font-black uppercase tracking-wider text-zinc-400">Common routes</p>{[...new Set([...KNOWN_PATHS, ...items.map((item) => item.path)])].map((path) => <button key={path} onClick={() => choose(path)} className={`block w-full rounded-xl px-3 py-2 text-left text-xs font-bold ${form.path === path ? "bg-blue-600 text-white" : "hover:bg-zinc-100 dark:hover:bg-zinc-900"}`}>{path}</button>)}</aside>
+      <main className="space-y-5 rounded-3xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950"><div className="flex items-center gap-2"><SearchCheck className="h-5 w-5 text-blue-600"/><h2 className="font-black">Metadata override</h2></div><div className="space-y-2"><Label>Route path</Label><Input value={form.path} onChange={(e) => setForm((v) => ({ ...v, path: e.target.value }))} placeholder="/practice/javascript/problem-slug"/></div><div className="space-y-2"><Label>SEO title ({form.title.length}/70)</Label><Input maxLength={70} value={form.title} onChange={(e) => setForm((v) => ({ ...v, title: e.target.value }))}/></div><div className="space-y-2"><Label>SEO description ({form.description.length}/170)</Label><Textarea maxLength={170} rows={4} value={form.description} onChange={(e) => setForm((v) => ({ ...v, description: e.target.value }))}/></div><div className="space-y-2"><Label>Keywords</Label><Input value={form.keywords} onChange={(e) => setForm((v) => ({ ...v, keywords: e.target.value }))} placeholder="javascript, coding practice"/></div><div className="space-y-2"><Label>Canonical URL</Label><Input value={form.canonicalUrl} onChange={(e) => setForm((v) => ({ ...v, canonicalUrl: e.target.value }))} placeholder={`https://asif.to${form.path}`}/></div><div className="space-y-2"><Label>Open Graph image URL</Label><Input value={form.ogImage} onChange={(e) => setForm((v) => ({ ...v, ogImage: e.target.value }))}/></div><label className="flex items-center gap-3 text-sm font-bold"><input type="checkbox" checked={form.noIndex} onChange={(e) => setForm((v) => ({ ...v, noIndex: e.target.checked }))}/> Exclude this route from search engines</label><Button onClick={save} disabled={saving}><Save className="h-4 w-4"/>{saving ? "Saving…" : "Save metadata"}</Button></main></div>
+  </div>;
+}

@@ -29,6 +29,7 @@ import ArticleCard from "./ArticleCard";
 import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
 import AuthorIdentityCard from "./AuthorIdentityCard";
+import MarkdownCodePlayground from "@/components/interactive-code/MarkdownCodePlayground";
 
 const MarkdownPreview = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default.Markdown),
@@ -48,12 +49,12 @@ const WhatsAppIcon = ({ size = 18 }) => (
   </svg>
 );
 
-export default function ArticleClient({ slug }) {
+export default function ArticleClient({ slug, initialData }) {
   const { theme } = useTheme();
   const id = slug.substring(slug.lastIndexOf("-") + 1);
   const { data: response, isLoading, error } = useGetArticleByIdQuery(id);
   const { data: moreArticles } = useGetArticlesQuery({ limit: 4 });
-  const article = response?.data;
+  const article = response?.data || initialData;
   const [copied, setCopied] = useState(false);
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -100,7 +101,9 @@ export default function ArticleClient({ slug }) {
     }
   }, [article, isLoading]);
 
-  if (isLoading) {
+  const isInitialLoading = !article && isLoading;
+
+  if (isInitialLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -222,6 +225,7 @@ export default function ArticleClient({ slug }) {
 
         {/* Article Body Content */}
         <article className="w-full max-w-4xl px-6 flex flex-col gap-10">
+          <MarkdownCodePlayground className="article-markdown-playground">
           <div data-color-mode={theme === "dark" ? "dark" : "light"}>
             <MarkdownPreview
               source={article.content}
@@ -229,6 +233,7 @@ export default function ArticleClient({ slug }) {
               className="text-lg md:text-xl font-light leading-relaxed !bg-transparent !text-inherit wmde-markdown"
             />
           </div>
+          </MarkdownCodePlayground>
 
           <AuthorIdentityCard publishedAt={article.createdAt} updatedAt={article.updatedAt} avatar={article.author?.avatar} />
 

@@ -6,8 +6,9 @@ import { getChapterData, getPublicTopic } from "@/lib/publicContent";
 import { absoluteUrl, assetUrl, getSiteUrl, jsonLd } from "@/lib/seo";
 import InterviewQuestionsGuide, { buildInterviewGuideMetadata } from "@/components/interview/InterviewQuestionsGuide";
 import { authorIdentity, buildPersonSchema } from "@/lib/authorIdentity";
+import { notFound } from "next/navigation";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 function chapterPath(data, courseSlug, chapterSlug) {
   return `/${encodeURIComponent(data.course.slug || courseSlug)}/${encodeURIComponent(data.chapter.slug || chapterSlug)}`;
@@ -165,6 +166,7 @@ export default async function PublicTopicPage({ params, searchParams }) {
   }
 
   const chapterData = await getChapterData(courseSlug, topicSlug);
+  if (!chapterData?.course || !chapterData?.chapter) notFound();
 
   return (
     <>
@@ -178,7 +180,7 @@ export default async function PublicTopicPage({ params, searchParams }) {
           }}
         />
       )}
-      <ChapterClient courseSlug={courseSlug} chapterSlug={topicSlug} />
+      <ChapterClient courseSlug={courseSlug} chapterSlug={topicSlug} initialData={chapterData} />
     </>
   );
 }

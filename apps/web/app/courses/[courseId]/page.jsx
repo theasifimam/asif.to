@@ -2,9 +2,11 @@ import CourseClient from "@/components/CourseClient";
 import JsonLd from "@/components/JsonLd";
 import { buildCourseSchema } from "@/lib/courseSchema";
 import { getCourse } from "@/lib/publicContent";
+import { notFound } from "next/navigation";
 import { absoluteUrl } from "@/lib/seo";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
+export function generateStaticParams() { return []; }
 
 function coursePath(course, fallbackSlug) {
   return `/courses/${encodeURIComponent(course.slug || fallbackSlug)}`;
@@ -13,6 +15,7 @@ function coursePath(course, fallbackSlug) {
 export async function generateMetadata({ params }) {
   const { courseId } = await params;
   const course = await getCourse(courseId);
+  if (!course) notFound();
 
   if (!course) {
     return {
@@ -72,7 +75,7 @@ export default async function CourseOverviewPage({ params }) {
   return (
     <>
       <JsonLd data={buildCourseSchema(course, courseId)} />
-      <CourseClient />
+      <CourseClient initialData={course} />
     </>
   );
 }

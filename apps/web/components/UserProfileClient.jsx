@@ -421,7 +421,7 @@ export default function UserProfileClient({ username }) {
                             cheatsheet: {
                               label: "Cheatsheet",
                               title: item.title,
-                              href: "/cheatsheets",
+                              href: item.slug ? `/cheatsheets/${item.slug}` : "/cheatsheets",
                             },
                             quiz_question: {
                               label: "Quiz Question",

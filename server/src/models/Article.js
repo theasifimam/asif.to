@@ -1,6 +1,12 @@
 import { Schema, Document, model } from "mongoose";
 
 const articleSchema = new Schema({
+  type: {
+    type: String,
+    enum: ["article", "cheatsheet"],
+    default: "article",
+    index: true,
+  },
   title: {
     type: String,
     required: true,
@@ -36,7 +42,7 @@ const articleSchema = new Schema({
   ],
   image: {
     type: String,
-    required: true,
+    default: "",
   },
   topic: [
     {
@@ -50,6 +56,8 @@ const articleSchema = new Schema({
     enum: ["draft", "published"],
     default: "published",
   },
+  techId: { type: String, default: "", trim: true, index: true },
+  order: { type: Number, default: 0 },
   createdAt: {
     type: Date,
     default: Date.now,

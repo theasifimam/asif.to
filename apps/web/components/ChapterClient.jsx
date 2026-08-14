@@ -20,7 +20,7 @@ import { TECH_STACKS } from "@/lib/tutorialData";
 import { Loader2, AlertCircle } from "lucide-react";
 import AuthorIdentityCard from "@/components/AuthorIdentityCard";
 
-export default function ChapterClient({ courseSlug, chapterSlug }) {
+export default function ChapterClient({ courseSlug, chapterSlug, initialData }) {
   const params = useParams();
   const courseId = courseSlug || params?.courseId || params?.username;
   const chapterId = chapterSlug || params?.chapterId || params?.topicSlug;
@@ -72,10 +72,10 @@ export default function ChapterClient({ courseSlug, chapterSlug }) {
     { skip: !courseId || !chapterId },
   );
 
-  const course = data?.data?.course;
+  const course = data?.data?.course || initialData?.course;
   const activeCourseSlug = course?.slug || courseId;
-  const chapter = data?.data?.chapter;
-  const allChapters = useMemo(() => data?.data?.allChapters || [], [data?.data?.allChapters]);
+  const chapter = data?.data?.chapter || initialData?.chapter;
+  const allChapters = useMemo(() => data?.data?.allChapters || initialData?.allChapters || [], [data?.data?.allChapters, initialData?.allChapters]);
   const prevChapter = data?.data?.prevChapter;
   const nextChapter = data?.data?.nextChapter;
 
@@ -118,7 +118,9 @@ export default function ChapterClient({ courseSlug, chapterSlug }) {
     }
   }, [chapterId, allChapters]);
 
-  if (isLoading) {
+  const isInitialLoading = !chapter && isLoading;
+
+  if (isInitialLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
         <Header />

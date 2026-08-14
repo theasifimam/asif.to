@@ -18,10 +18,12 @@ export async function generateMetadata({ params }) {
     return { title: "Redirecting...", robots: { index: false, follow: false } };
   }
 
+  const isProfile = rawSlug.startsWith("@");
+
   return {
     title: `@${cleanUsername} - Profile | asif.to`,
     description: `View @${cleanUsername}'s learning progress and profile on asif.to.`,
-    robots: { index: false, follow: false },
+    ...(isProfile ? { robots: { index: false, follow: false } } : {}),
   };
 }
 

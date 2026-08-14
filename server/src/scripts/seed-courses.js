@@ -9,7 +9,6 @@ import { fileURLToPath } from "url";
 import mongoose from "mongoose";
 import Course from "../models/Course.js";
 import Chapter from "../models/Chapter.js";
-import Cheatsheet from "../models/Cheatsheet.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

@@ -27,6 +27,13 @@ export default function MobileBottomNavbar({
     { name: "Users", href: "/users", icon: Users },
   ];
 
+  const checkIsActive = (href) => {
+    if (pathname === href) return true;
+    if (!href || href === "/") return false;
+    const baseHref = href.startsWith("/articles") ? "/articles" : href;
+    return pathname.startsWith(baseHref + "/") || pathname === baseHref;
+  };
+
   return (
     <div
       className={`fixed bottom-0 left-0 right-0 z-45 h-16 border-t border-zinc-200 bg-white/95 backdrop-blur-md dark:border-zinc-850 dark:bg-zinc-950/95 lg:hidden flex items-center justify-around px-2 shadow-lg shadow-black/5 dark:shadow-black/25 transition-all duration-300 ease-in-out ${
@@ -36,7 +43,7 @@ export default function MobileBottomNavbar({
       }`}
     >
       {primaryTabs.map((tab) => {
-        const isActive = pathname === tab.href;
+        const isActive = checkIsActive(tab.href);
         return (
           <Link
             key={tab.href}
@@ -88,7 +95,7 @@ export default function MobileBottomNavbar({
                         ? `/users/${user._id}`
                         : item.href;
                     const isActive =
-                      pathname === targetHref || pathname === item.href;
+                      checkIsActive(targetHref) || checkIsActive(item.href);
                     return (
                       <Link
                         key={item.href}

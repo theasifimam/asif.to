@@ -1,4 +1,47 @@
 export const FREE_PLAYGROUND_MODES = {
+  python: {
+    label: "Python",
+    description: "Run Python in an isolated browser WebAssembly worker, loaded only when needed.",
+    files: { "/main.py": `for row in range(1, 6):
+    print("*" * row)` },
+  },
+  c: {
+    label: "C",
+    description: "Compile C to WebAssembly entirely in your browser with lazy-loaded Clang.",
+    files: { "/main.c": `#include <stdio.h>
+int main(void) {
+  for (int row = 1; row <= 5; row++) {
+    for (int col = 0; col < row; col++) printf("*");
+    printf("\\n");
+  }
+  return 0;
+}` },
+  },
+  cpp: {
+    label: "C++",
+    description: "Compile C++ to WebAssembly entirely in your browser with lazy-loaded Clang.",
+    files: { "/main.cpp": `#include <iostream>
+using namespace std;
+int main() {
+  for (int row = 1; row <= 5; row++) {
+    for (int col = 0; col < row; col++) cout << "*";
+    cout << "\\n";
+  }
+  return 0;
+}` },
+  },
+  java: {
+    label: "Java",
+    description: "Compile and run Java in an isolated browser OpenJDK runtime loaded on demand.",
+    files: { "/Main.java": `public class Main {
+  public static void main(String[] args) {
+    for (int row = 1; row <= 5; row++) {
+      for (int col = 0; col < row; col++) System.out.print("*");
+      System.out.println();
+    }
+  }
+}` },
+  },
   javascript: {
     label: "JavaScript",
     description: "Practice variables, conditions, loops, functions, arrays, objects, promises, and algorithms.",

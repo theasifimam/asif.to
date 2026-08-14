@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { coursesApi, interviewQuestionsApi } from "@/lib/api";
 import { ViewToggle } from "@/components/ViewToggle";
+import { AdminPage, AdminPageHeader } from "@/components/admin";
 
 export default function InterviewQuestionsPage() {
   const [questions, setQuestions] = useState([]);
@@ -105,32 +106,22 @@ export default function InterviewQuestionsPage() {
     setFilters((current) => ({ ...current, [key]: value, page: 1 }));
 
   return (
-    <main className="mx-auto max-w-7xl space-y-4 px-3 py-4 sm:space-y-6 sm:px-6 sm:py-8 lg:px-8">
-      <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
-            Content / Interview Questions
-          </p>
-          <h1 className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-black tracking-tight text-zinc-950 dark:text-white">
-            Question library
-          </h1>
-          <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-500">
-            Maintain canonical questions that can be reused across interview
-            topics.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 md:w-80 sm:w-full">
-          <ViewToggle view={viewMode} onViewChange={setViewMode} />
-          <Link
-            href="/interview-questions/new"
-            className="md:flex-1 sm:flex-2 sm:w-full"
-          >
-            <Button className="w-full">
-              <Plus className="h-4 w-4" /> Question
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="Content / Interview Questions"
+        title="Question library"
+        description="Maintain canonical questions that can be reused across interview topics."
+        actions={
+          <>
+            <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            <Button asChild className="flex-1 sm:flex-initial">
+              <Link href="/interview-questions/new">
+                <Plus className="h-4 w-4" /> Question
+              </Link>
             </Button>
-          </Link>
-        </div>
-      </header>
+          </>
+        }
+      />
 
       <section className="grid gap-3 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-3.5 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950 md:grid-cols-2 xl:grid-cols-[200px_minmax(220px,1fr)_170px_190px_minmax(180px,0.6fr)]">
         <Select
@@ -534,6 +525,6 @@ export default function InterviewQuestionsPage() {
         confirmText="Delete"
         variant="destructive"
       />
-    </main>
+    </AdminPage>
   );
 }

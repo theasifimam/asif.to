@@ -214,11 +214,11 @@ export default function ChapterFormPage() {
         </Link>
       }
       actions={
-        <div className="flex flex-wrap items-center gap-2 w-full xs:w-auto">
+        <>
           {!isNew && form.status === "published" && publicUrl && (
-            <Button variant="outline" asChild className="flex-1 xs:flex-initial">
+            <Button variant="outline" asChild className="flex-1 sm:flex-initial">
               <a href={publicUrl} target="_blank" rel="noreferrer">
-                <ExternalLink className="h-4 w-4" />
+                <ExternalLink className="mr-2 h-4 w-4" />
                 View
               </a>
             </Button>
@@ -227,71 +227,22 @@ export default function ChapterFormPage() {
             variant="outline"
             disabled={saving}
             onClick={() => persist("draft")}
-            className="flex-1 xs:flex-initial"
+            className="flex-1 sm:flex-initial"
           >
-            <Save className="h-4 w-4" />
+            <Save className="mr-2 h-4 w-4" />
             Save draft
           </Button>
           <Button
             disabled={saving}
             onClick={() => setPublishOpen(true)}
-            className="flex-1 xs:flex-initial"
+            className="w-full sm:w-auto"
           >
-            <Send className="h-4 w-4" />
+            <Send className="mr-2 h-4 w-4" />
             Publish
           </Button>
-        </div>
+        </>
       }
     >
-      <div className="hidden">
-        <div className="flex items-start gap-3">
-          <Button
-            variant="outline"
-            size="icon"
-            asChild
-            title="Back to chapters"
-          >
-            <Link href={`/courses/${courseId}`}>
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {isNew ? "Create chapter" : "Edit chapter"}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {course?.title}
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {!isNew && form.status === "published" && publicUrl && (
-            <Button variant="outline" asChild>
-              <a href={publicUrl} target="_blank" rel="noreferrer">
-                <ExternalLink className="h-4 w-4" />
-                View
-              </a>
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            disabled={saving}
-            onClick={() => persist("draft")}
-          >
-            {saving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            Save draft
-          </Button>
-          <Button disabled={saving} onClick={() => setPublishOpen(true)}>
-            <Send className="h-4 w-4" />
-            Publish
-          </Button>
-        </div>
-      </div>
-
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <main className="space-y-6">
           <section className={formSectionClass}>
@@ -335,6 +286,7 @@ export default function ChapterFormPage() {
                 maxLength={320}
                 rows={3}
                 onChange={(event) => update("summary", event.target.value)}
+                className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 shadow-none dark:bg-zinc-900"
               />
             </div>
             <div className="space-y-2">
@@ -344,6 +296,9 @@ export default function ChapterFormPage() {
                 onChange={(value) => update("contentBody", value)}
                 placeholder="Write the chapter tutorial and code examples."
               />
+              <p className="text-xs leading-5 text-muted-foreground">
+                Code blocks are read-only by default. Add <code className="rounded bg-zinc-100 px-1.5 py-0.5 dark:bg-zinc-900">play</code> after the language to show the Play button, for example <code className="rounded bg-zinc-100 px-1.5 py-0.5 dark:bg-zinc-900">```javascript play</code>. Use <code className="rounded bg-zinc-100 px-1.5 py-0.5 dark:bg-zinc-900">interactive</code> to embed the full editor.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="chapter-challenge">Try it challenge</Label>
@@ -354,11 +309,12 @@ export default function ChapterFormPage() {
                 onChange={(event) =>
                   update("tryItChallenge", event.target.value)
                 }
+                className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 shadow-none dark:bg-zinc-900"
               />
             </div>
           </section>
 
-          <section className="space-y-5">
+          <section className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
             <div>
               <h2 className="text-base font-semibold">Search metadata</h2>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -369,7 +325,7 @@ export default function ChapterFormPage() {
               <div className="flex items-center justify-between gap-3">
                 <Label htmlFor="chapter-seo-title">SEO title</Label>
                 <span className="text-xs text-muted-foreground">
-                  {form.seoTitle.length}/70
+                  {(form.seoTitle || "").length}/70
                 </span>
               </div>
               <Input
@@ -383,7 +339,7 @@ export default function ChapterFormPage() {
               <div className="flex items-center justify-between gap-3">
                 <Label htmlFor="chapter-seo-description">SEO description</Label>
                 <span className="text-xs text-muted-foreground">
-                  {form.seoDescription.length}/170
+                  {(form.seoDescription || "").length}/170
                 </span>
               </div>
               <Textarea
@@ -394,6 +350,7 @@ export default function ChapterFormPage() {
                 onChange={(event) =>
                   update("seoDescription", event.target.value)
                 }
+                className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 shadow-none dark:bg-zinc-900"
               />
             </div>
             <div className="space-y-2">
@@ -419,31 +376,33 @@ export default function ChapterFormPage() {
           </section>
         </main>
 
-        <aside className="space-y-5 lg:border-l lg:border-zinc-200 lg:pl-6 dark:lg:border-zinc-800">
-          <h2 className="text-sm font-semibold">Placement</h2>
-          <div className="space-y-2">
-            <Label>Status</Label>
-            <Select
-              value={form.status}
-              onValueChange={(value) => update("status", value)}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="published">Published</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="chapter-order">Display order</Label>
-            <Input
-              id="chapter-order"
-              type="number"
-              value={form.order}
-              onChange={(event) => update("order", event.target.value)}
-            />
+        <aside className="space-y-6">
+          <div className="space-y-4 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+            <h2 className="font-semibold text-zinc-900 dark:text-white text-sm">Placement</h2>
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select
+                value={form.status}
+                onValueChange={(value) => update("status", value)}
+              >
+                <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="chapter-order">Display order</Label>
+              <Input
+                id="chapter-order"
+                type="number"
+                value={form.order}
+                onChange={(event) => update("order", event.target.value)}
+              />
+            </div>
           </div>
         </aside>
       </div>

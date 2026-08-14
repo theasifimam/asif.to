@@ -48,7 +48,10 @@ async function fetchRows(startDate, endDate, dimensions) {
 
 const dimensionPlans = [
   { dimension: "total", api: ["date"], map: ([date]) => ({ date: day(date) }) },
-  { dimension: "queryPage", api: ["date", "query", "page"], map: ([date, query, page]) => ({ date: day(date), query, page }) },
+  // Keep query and page independent. Combining both dimensions produces a
+  // very high-cardinality response that Google can truncate to top rows.
+  { dimension: "query", api: ["date", "query"], map: ([date, query]) => ({ date: day(date), query }) },
+  { dimension: "page", api: ["date", "page"], map: ([date, page]) => ({ date: day(date), page }) },
   { dimension: "country", api: ["date", "country"], map: ([date, key]) => ({ date: day(date), key }) },
   { dimension: "device", api: ["date", "device"], map: ([date, key]) => ({ date: day(date), key }) },
   // Google does not permit searchAppearance to be grouped with any other
@@ -66,29 +69,38 @@ export async function syncSearchConsole() {
   );
   try {
     const today = new Date(); const end = new Date(today); end.setUTCDate(end.getUTCDate() - 3);
-    const previous = status.syncedThrough ? new Date(status.syncedThrough) : null;
-    const start = previous ? new Date(previous) : new Date(end);
-    start.setUTCDate(start.getUTCDate() - (previous ? 7 : Number(process.env.GSC_INITIAL_SYNC_DAYS || 480)));
-    let rowsSynced = 0;
+    let rowsSynced = 0; const planErrors = []; const dimensionCursors = {};
     for (const plan of dimensionPlans) {
-      const rows = await fetchRows(isoDay(start), isoDay(end), plan.api);
-      if (rows.length) {
-        const operations = rows.map((row) => {
-          const identity = {
-            dimension: plan.dimension,
-            query: "",
-            page: "",
-            key: "",
-            ...plan.map(row.keys || [], { startDate: isoDay(start), endDate: isoDay(end) }),
-          };
-          return { updateOne: { filter: identity, update: { $set: { ...identity, clicks: row.clicks || 0, impressions: row.impressions || 0, ctr: row.ctr || 0, position: row.position || 0 } }, upsert: true } };
-        });
-        for (let index = 0; index < operations.length; index += 1000) await SearchMetric.bulkWrite(operations.slice(index, index + 1000), { ordered: false });
-        rowsSynced += rows.length;
+      try {
+        // Each dimension owns its cursor. A pre-existing device sync must not
+        // prevent newly added query/page dimensions from being backfilled.
+        const previous = status.dimensionSyncedThrough?.get?.(plan.dimension) || status.dimensionSyncedThrough?.[plan.dimension];
+        const start = previous ? new Date(previous) : new Date(end);
+        start.setUTCDate(start.getUTCDate() - (previous ? 7 : Number(process.env.GSC_INITIAL_SYNC_DAYS || 480)));
+        const rows = await fetchRows(isoDay(start), isoDay(end), plan.api);
+        if (rows.length) {
+          const operations = rows.map((row) => {
+            const identity = {
+              dimension: plan.dimension,
+              query: "",
+              page: "",
+              key: "",
+              ...plan.map(row.keys || [], { startDate: isoDay(start), endDate: isoDay(end) }),
+            };
+            return { updateOne: { filter: identity, update: { $set: { ...identity, clicks: row.clicks || 0, impressions: row.impressions || 0, ctr: row.ctr || 0, position: row.position || 0 } }, upsert: true } };
+          });
+          for (let index = 0; index < operations.length; index += 1000) await SearchMetric.bulkWrite(operations.slice(index, index + 1000), { ordered: false });
+          rowsSynced += rows.length;
+        }
+        dimensionCursors[`dimensionSyncedThrough.${plan.dimension}`] = end;
+      } catch (error) {
+        planErrors.push(`${plan.dimension}: ${error.message || error}`);
+        console.error(`[GSC SYNC] ${plan.dimension}`, error);
       }
     }
-    await AnalyticsSync.findByIdAndUpdate(status._id, { status: "success", lastSyncedAt: new Date(), syncedThrough: end, rowsSynced, error: "" });
-    return { rowsSynced, syncedThrough: end };
+    if (!rowsSynced && planErrors.length) throw new Error(planErrors.join("; "));
+    await AnalyticsSync.findByIdAndUpdate(status._id, { $set: { status: "success", lastSyncedAt: new Date(), syncedThrough: end, rowsSynced, error: planErrors.join("; ").slice(0, 1000), ...dimensionCursors } });
+    return { rowsSynced, syncedThrough: end, warnings: planErrors };
   } catch (error) {
     await AnalyticsSync.findByIdAndUpdate(status._id, { status: "error", error: String(error.message || error).slice(0, 1000) }); throw error;
   }

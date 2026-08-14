@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -32,16 +31,28 @@ export default function SidebarNavigation({
                 item.name === "My Profile" && user?._id
                   ? `/users/${user._id}`
                   : item.href;
+
+              const checkIsActive = (href) => {
+                if (pathname === href) return true;
+                if (!href || href === "/") return false;
+                const baseHref = href.startsWith("/articles")
+                  ? "/articles"
+                  : href;
+                return (
+                  pathname.startsWith(baseHref + "/") || pathname === baseHref
+                );
+              };
+
               const isActive =
-                pathname === targetHref || pathname === item.href;
+                checkIsActive(targetHref) || checkIsActive(item.href);
               return (
                 <Link
                   key={item.href}
                   href={targetHref}
                   title={isCollapsed ? item.name : ""}
-                  className={`group flex items-center px-4 py-3 rounded-2xl transition-all duration-300 ${
+                  className={`group flex items-center px-4 py-3 rounded-4xl transition-all duration-300 ${
                     isActive
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 border border-blue-600"
+                      ? "bg-blue-600 text-white shadow-xs shadow-blue-500/25 border border-blue-600"
                       : "hover:bg-zinc-100 dark:hover:bg-zinc-900/60 hover:text-zinc-900 dark:hover:text-zinc-200 cursor-pointer"
                   } ${isCollapsed ? "justify-center" : "justify-between"}`}
                 >

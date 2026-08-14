@@ -99,7 +99,7 @@ export default function ChapterBlocksRenderer({
           }
           return (
             <div key={idx} className="my-3 sm:my-6">
-              <CodeSnippetViewer code={block.code} title={block.title} />
+              <CodeSnippetViewer code={block.code} language={block.lang} title={block.title} showPlay={block.showPlay} />
             </div>
           );
         }

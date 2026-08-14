@@ -7,11 +7,11 @@ import { Button } from '@/components/ui/button';
 export default function ArticleHeader() {
   return (
     <AdminPageHeader eyebrow="Content / Articles" title="Articles" description="Search, review, publish, and manage editorial content." actions={
-        <Link
-          href="/articles/new"
-        >
-          <Button><Plus className="mr-2 h-4 w-4" /> New article</Button>
+      <Button asChild className="w-full sm:w-auto">
+        <Link href="/articles/new">
+          <Plus className="mr-2 h-4 w-4" /> New article
         </Link>
+      </Button>
     } />
   );
 }

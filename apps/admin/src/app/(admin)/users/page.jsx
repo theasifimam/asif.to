@@ -75,24 +75,24 @@ export default function UsersPage() {
         title="Users"
         description="Manage roles, permissions, and account status for all editorial users."
         actions={
-          <div className="flex items-center gap-2 w-full">
+          <>
             <ViewToggle view={viewMode} onViewChange={setViewMode} />
             <Button
               variant="outline"
               size="icon"
               onClick={refetch}
               title="Refresh users"
-              className="md:flex-2 sm:flex-1 sm:w-full"
+              className="flex-1 sm:flex-initial"
             >
               <RefreshCw className={loading ? "animate-spin" : ""} size={16} />
             </Button>
             <Button
               onClick={() => setIsAddOpen(true)}
-              className="md:flex-3 sm:flex-3 sm:w-full"
+              className="w-full sm:w-auto"
             >
               <UserPlus className="mr-2 h-4 w-4" /> Add user
             </Button>
-          </div>
+          </>
         }
       />
       <AdminFilters>

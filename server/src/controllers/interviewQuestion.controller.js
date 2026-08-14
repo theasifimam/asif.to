@@ -35,7 +35,7 @@ function validationMessage(error) {
 }
 
 const questionFields =
-  "course question answer difficulty questionType tags slug codeExample expectedOutput followUps author createdAt updatedAt";
+  "course question answer difficulty questionType tags slug codeExample expectedOutput followUps seoTitle seoDescription keywords canonicalUrl ogImage author createdAt updatedAt";
 
 async function resolveCourse(value) {
   if (!value) return null;
@@ -63,6 +63,11 @@ function publicQuestion(question) {
     codeExample: question.codeExample || "",
     expectedOutput: question.expectedOutput || "",
     followUps: question.followUps || [],
+    seoTitle: question.seoTitle || "",
+    seoDescription: question.seoDescription || "",
+    keywords: question.keywords || [],
+    canonicalUrl: question.canonicalUrl || "",
+    ogImage: question.ogImage || "",
   };
 }
 
@@ -136,7 +141,7 @@ export const listPublicInterviewQuestions = async (req, res) => {
       slug: req.params.courseSlug,
       status: "published",
     })
-      .select("_id title slug")
+      .select("_id title slug interviewSeoTitle interviewSeoDescription interviewKeywords interviewCanonicalUrl interviewOgImage")
       .lean();
     if (!course)
       return res
@@ -203,7 +208,7 @@ export const getPublicInterviewQuestion = async (req, res) => {
       slug: req.params.courseSlug,
       status: "published",
     })
-      .select("_id title slug")
+      .select("_id title slug interviewSeoTitle interviewSeoDescription interviewKeywords interviewCanonicalUrl interviewOgImage")
       .lean();
     if (!course)
       return res
@@ -216,7 +221,7 @@ export const getPublicInterviewQuestion = async (req, res) => {
       slug: req.params.questionSlug,
     })
       .select(
-        "question answer difficulty questionType tags slug codeExample expectedOutput followUps",
+        "question answer difficulty questionType tags slug codeExample expectedOutput followUps seoTitle seoDescription keywords canonicalUrl ogImage createdAt updatedAt",
       )
       .lean();
     if (!question)
@@ -334,6 +339,11 @@ export const createInterviewQuestion = async (req, res) => {
       codeExample: req.body.codeExample || "",
       expectedOutput: req.body.expectedOutput || "",
       followUps: parseList(req.body.followUps),
+      seoTitle: req.body.seoTitle || "",
+      seoDescription: req.body.seoDescription || "",
+      keywords: parseList(req.body.keywords),
+      canonicalUrl: req.body.canonicalUrl || "",
+      ogImage: req.body.ogImage || "",
       author: req.user._id,
     });
     res.status(201).json({
@@ -384,11 +394,16 @@ export const updateInterviewQuestion = async (req, res) => {
       "questionType",
       "codeExample",
       "expectedOutput",
+      "seoTitle",
+      "seoDescription",
+      "canonicalUrl",
+      "ogImage",
     ];
     for (const key of allowed)
       if (req.body[key] !== undefined) question[key] = req.body[key];
     if (req.body.tags !== undefined)
       question.tags = parseList(req.body.tags).map((tag) => tag.toLowerCase());
+    if (req.body.keywords !== undefined) question.keywords = parseList(req.body.keywords);
     if (req.body.followUps !== undefined)
       question.followUps = parseList(req.body.followUps);
     if (req.body.question !== undefined || req.body.slug !== undefined)

@@ -63,3 +63,19 @@ export async function getPublicInterviewQuestions(courseSlug, page) {
 export async function getPublicInterviewQuestion(courseSlug, questionSlug) {
   return getPublicInterviewQuestionCached(courseSlug, questionSlug);
 }
+
+export const getCheatsheets = cache(() =>
+  fetchPublicData("/cheatsheets?status=published", "cheatsheets"),
+);
+
+export const getCheatsheet = cache((slug) =>
+  fetchPublicData(`/cheatsheets/${encodeURIComponent(slug)}`, "cheatsheet"),
+);
+
+export const getCourses = cache(() =>
+  fetchPublicData("/courses?status=published", "courses"),
+);
+
+export const getSeoSetting = cache((path) =>
+  fetchPublicData(`/seo-settings/public?path=${encodeURIComponent(path)}`, "SEO setting"),
+);

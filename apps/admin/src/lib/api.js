@@ -422,6 +422,11 @@ export const analyticsApi = {
   sync: () => apiPost("/analytics/sync"),
 };
 
+export const seoSettingsApi = {
+  list: () => apiGet("/seo-settings"),
+  save: (data) => apiPut("/seo-settings", data),
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPE DEFINITIONS (Placeholder types for API responses)
 // ═══════════════════════════════════════════════════════════════════════════

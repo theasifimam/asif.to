@@ -23,22 +23,16 @@ import {
 
 export default function HomePageClient({ courses = [] }) {
   const [selectedTech, setSelectedTech] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("COURSES"); // COURSES | CHEATSHEETS
   const allCourses = courses;
 
-  // Filter courses based on selected tech and search query
+  // Filter courses by the selected technology. Global content search opens from the hero.
   const filteredCourses = useMemo(() => {
     return allCourses.filter((c) => {
       const matchesTech = !selectedTech || c.techId === selectedTech;
-      const matchesSearch =
-        !searchQuery ||
-        c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.techId.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesTech && matchesSearch;
+      return matchesTech;
     });
-  }, [allCourses, selectedTech, searchQuery]);
+  }, [allCourses, selectedTech]);
 
   const activeTechIds = useMemo(() => {
     return Array.from(new Set(allCourses.map((c) => c.techId)));
@@ -81,18 +75,13 @@ export default function HomePageClient({ courses = [] }) {
               <input
                 type="text"
                 placeholder="Search courses, hooks, syntax, MongoDB queries..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                readOnly
+                aria-label="Open global search"
+                onFocus={() => window.dispatchEvent(new CustomEvent("asif:open-search"))}
+                onClick={() => window.dispatchEvent(new CustomEvent("asif:open-search"))}
                 className="w-full h-12 pl-11 pr-12 rounded-full bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs sm:text-sm shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-400/30 font-semibold"
               />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
-                >
-                  Clear
-                </button>
-              )}
+              <kbd className="absolute right-4 top-1/2 -translate-y-1/2 hidden rounded bg-zinc-100 px-2 py-1 text-[10px] font-bold text-zinc-500 dark:bg-zinc-800 sm:block">⌘K</kbd>
             </div>
 
             {/* Quick Action Navigation Pills */}

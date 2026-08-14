@@ -1,6 +1,17 @@
 const nextConfig = {
   // Allows CI/verification builds to avoid a .next directory held by a local dev server.
   distDir: process.env.NEXT_DIST_DIR || '.next',
+  async headers() {
+    const wasmIsolationHeaders = [
+      { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+      { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
+    ];
+    return [
+      { source: '/playground', headers: wasmIsolationHeaders },
+      { source: '/run', headers: wasmIsolationHeaders },
+      { source: '/practice/:path*', headers: wasmIsolationHeaders },
+    ];
+  },
   async redirects() {
     return [
       {

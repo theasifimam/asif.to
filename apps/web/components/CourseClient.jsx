@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MobileChapterIndex from "@/components/MobileChapterIndex";
 import { TECH_STACKS } from "@/lib/tutorialData";
-import { useGetCourseBySlugQuery } from "@/lib/api/courseApi";
+import { useGetCourseBySlugQuery, useGetCheatsheetsQuery } from "@/lib/api/courseApi";
 import {
   ArrowLeft,
   Play,
@@ -24,21 +24,25 @@ import {
 import SaveButton from "@/components/SaveButton";
 import AuthorIdentityCard from "@/components/AuthorIdentityCard";
 
-export default function CourseClient() {
+export default function CourseClient({ initialData }) {
   const params = useParams();
   const courseId = params?.courseId;
 
   const { data, isLoading, isError } = useGetCourseBySlugQuery(courseId, {
     skip: !courseId,
   });
-  const course = data?.data;
+  const { data: cheatsheetsData } = useGetCheatsheetsQuery();
+  const course = data?.data || initialData;
+  const cheatsheets = cheatsheetsData?.data || [];
+  const courseCheatsheet = cheatsheets.find((cs) => cs.techId === course?.techId);
+  const isInitialLoading = !course && isLoading;
   const activeCourseSlug = course?.slug || courseId;
   const tech = course ? TECH_STACKS.find((t) => t.id === course.techId) : null;
   const firstChapterSlug = course?.chapters?.[0]?.slug || "ch-1";
   const examEnabled = Boolean(course?.examEnabled);
   const examSettings = course?.examSettings || {};
 
-  if (isLoading) {
+  if (isInitialLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 pb-24 sm:pb-12">
         <Header />
@@ -135,13 +139,23 @@ export default function CourseClient() {
               <span>Start Learning Course (Lesson 1)</span>
             </Link>
 
-            <Link
-              href="/cheatsheets"
-              className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 text-xs font-bold transition-all active:scale-95"
-            >
-              <FileCode className="w-4 h-4" />
-              <span>View {tech?.name} Cheatsheet</span>
-            </Link>
+            {courseCheatsheet ? (
+              <Link
+                href={`/cheatsheets/${courseCheatsheet.slug}`}
+                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 text-xs font-bold transition-all active:scale-95"
+              >
+                <FileCode className="w-4 h-4 text-emerald-500" />
+                <span>View {tech?.name || course?.techId} Cheatsheet</span>
+              </Link>
+            ) : (
+              <div
+                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 text-xs font-bold cursor-not-allowed"
+                aria-disabled="true"
+              >
+                <FileCode className="w-4 h-4 text-zinc-400" />
+                <span>Cheatsheet Coming Soon</span>
+              </div>
+            )}
 
             <Link
               href="/quiz"

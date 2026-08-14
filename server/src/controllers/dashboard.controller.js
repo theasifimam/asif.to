@@ -4,7 +4,6 @@ import Topic from "../models/Topic.js";
 import Course from "../models/Course.js";
 import Chapter from "../models/Chapter.js";
 import QuizQuestion from "../models/Question.js";
-import Cheatsheet from "../models/Cheatsheet.js";
 
 /**
  * Get dashboard overview stats with REAL chapter readership captured from web apps
@@ -93,8 +92,8 @@ export const getDashboardStats = async (req, res) => {
     const totalUsers = await User.countDocuments();
     const totalQuizzes = await QuizQuestion.countDocuments({ type: "quiz" });
     const totalFlashcards = await QuizQuestion.countDocuments({ type: "quiz", flashcardEnabled: { $ne: false } });
-    const totalCheatsheets = await Cheatsheet.countDocuments();
-    const totalArticles = await Article.countDocuments({ status: "published" });
+    const totalCheatsheets = await Article.countDocuments({ type: "cheatsheet" });
+    const totalArticles = await Article.countDocuments({ type: { $in: ["article", null] }, status: "published" });
 
     // 3. Real readership analytics. Chapter counters are all-time only, so the
     // dashboard intentionally compares courses instead of inventing a timeline.

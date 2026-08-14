@@ -119,14 +119,14 @@ export default function QuestionsPage() {
       title="Question bank"
       description="Manage quiz/practice and detailed interview questions from one collection."
       actions={
-        <div className="flex items-center gap-2 sm:w-full">
+        <>
           <ViewToggle view={viewMode} onViewChange={setViewMode} />
-          <Link href="/quiz/new" className="md:flex-1 sm:flex-2 sm:w-full">
-            <Button className="w-full">
+          <Button asChild className="flex-1 sm:flex-initial">
+            <Link href="/quiz/new">
               <Plus className="mr-2 h-4 w-4" /> Question
-            </Button>
-          </Link>
-        </div>
+            </Link>
+          </Button>
+        </>
       }
     >
       <AdminFilters>

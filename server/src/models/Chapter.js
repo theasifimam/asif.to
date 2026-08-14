@@ -4,6 +4,7 @@ const codeSnippetSchema = new Schema({
   title: { type: String, default: "" },
   code: { type: String, required: true },
   language: { type: String, default: "javascript" },
+  showPlay: { type: Boolean, default: false },
 });
 
 const chapterSchema = new Schema(

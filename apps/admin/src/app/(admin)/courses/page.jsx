@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import { coursesApi } from "@/lib/api";
 import { ViewToggle } from "@/components/ViewToggle";
+import { AdminPage, AdminPageHeader } from "@/components/admin";
 
 const initialPagination = { page: 1, pages: 1, total: 0, limit: 20 };
 
@@ -137,28 +138,22 @@ export default function CoursesAdminPage() {
   };
 
   return (
-    <main className="mx-auto max-w-7xl space-y-4 px-3 py-4 sm:space-y-6 sm:px-6 sm:py-8 lg:px-8">
-      <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
-            Content / Courses
-          </p>
-          <h1 className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-black tracking-tight text-zinc-950 dark:text-white">
-            Courses
-          </h1>
-          <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-500">
-            Manage course publishing, metadata, and chapter collections.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <ViewToggle view={viewMode} onViewChange={setViewMode} />
-          <Link href="/courses/new" className="md:flex-2 sm:flex-2 sm:w-full">
-            <Button className="w-full">
-              <Plus className="mr-2 h-4 w-4" /> New course
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="Content / Courses"
+        title="Courses"
+        description="Manage course publishing, metadata, and chapter collections."
+        actions={
+          <>
+            <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            <Button asChild className="flex-1 sm:flex-initial">
+              <Link href="/courses/new">
+                <Plus className="mr-2 h-4 w-4" /> New course
+              </Link>
             </Button>
-          </Link>
-        </div>
-      </header>
+          </>
+        }
+      />
 
       <section className="flex flex-col gap-3 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-3.5 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950 md:flex-row">
         <div className="relative flex-1">
@@ -509,6 +504,6 @@ export default function CoursesAdminPage() {
         variant="destructive"
         loading={updating === deleteCourse?._id}
       />
-    </main>
+    </AdminPage>
   );
 }
