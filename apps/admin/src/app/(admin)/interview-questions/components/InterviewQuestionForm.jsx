@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { coursesApi, interviewQuestionsApi } from "@/lib/api";
+import { coursesApi, interviewQuestionsApi, topicCategoriesApi } from "@/lib/api";
 import AdminFormShell, {
   AdminFormLoading,
   formSectionClass,
@@ -24,6 +24,7 @@ import AdminFormShell, {
 import FollowUpQuestionPicker from "@/components/editor/FollowUpQuestionPicker";
 
 const initialForm = {
+  category: "",
   course: "",
   question: "",
   slug: "",
@@ -51,6 +52,7 @@ export default function InterviewQuestionForm({
 }) {
   const [form, setForm] = useState({ ...initialForm, course: initialCourse });
   const [courses, setCourses] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [slugEdited, setSlugEdited] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -59,18 +61,22 @@ export default function InterviewQuestionForm({
   useEffect(() => {
     Promise.all([
       coursesApi.listAll(),
+      topicCategoriesApi.list("all"),
       questionId
         ? interviewQuestionsApi.get(questionId)
         : Promise.resolve(null),
-    ]).then(([courseResponse, questionResponse]) => {
+    ]).then(([courseResponse, categoryResponse, questionResponse]) => {
       if (courseResponse.success) setCourses(courseResponse.data?.data || []);
       else toast.error(courseResponse.error || "Unable to load courses");
+
+      if (categoryResponse?.success) setCategories(categoryResponse.data?.data || []);
 
       if (questionResponse?.success) {
         const item = questionResponse.data?.data;
         setForm({
           ...initialForm,
           ...item,
+          category: item.category?._id || item.category || "",
           course: item.course?._id || item.course || "",
           tags: (item.tags || []).join(", "),
           followUps: (item.followUps || []).join("\n"),
@@ -95,11 +101,12 @@ export default function InterviewQuestionForm({
     }));
 
   const save = async () => {
-    if (!form.course || !form.question.trim() || !form.answer.trim())
-      return toast.error("Course, question, and answer are required");
+    if ((!form.category && !form.course) || !form.question.trim() || !form.answer.trim())
+      return toast.error("Category (or course), question, and answer are required");
     setSaving(true);
     const payload = {
       ...form,
+      course: form.course === "none" ? null : form.course,
       tags: form.tags
         .split(",")
         .map((item) => item.trim())
@@ -243,15 +250,37 @@ export default function InterviewQuestionForm({
           </section>
           <aside className="space-y-5 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-4 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
             <div className="space-y-2">
-              <Label>Course</Label>
+              <Label className="font-bold">Interview Category (Primary)</Label>
               <Select
-                value={form.course}
+                value={form.category}
+                onValueChange={(value) => update("category", value)}
+              >
+                <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900">
+                  <SelectValue placeholder="Select category (e.g. Next.js)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat._id} value={cat._id}>
+                      {cat.name} ({cat.slug})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-zinc-500">
+                Primary interview category landing page taxonomy.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Course (Optional)</Label>
+              <Select
+                value={form.course || "none"}
                 onValueChange={(value) => update("course", value)}
               >
                 <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900">
-                  <SelectValue placeholder="Select course" />
+                  <SelectValue placeholder="Optional course link" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="none">No associated course</SelectItem>
                   {courses.map((course) => (
                     <SelectItem key={course._id} value={course._id}>
                       {course.title}
@@ -259,9 +288,6 @@ export default function InterviewQuestionForm({
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-zinc-500">
-                This question can be reused only by topics in this course.
-              </p>
             </div>
             <div className="space-y-2">
               <Label>Difficulty</Label>

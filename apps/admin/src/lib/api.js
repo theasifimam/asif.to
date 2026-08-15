@@ -299,10 +299,19 @@ export const interviewQuestionsApi = {
   delete: (id) => apiDelete(`/interview-questions/${id}`),
 };
 
-/** Course-scoped topic categories. */
+/** Course and standalone topic categories. */
 export const topicCategoriesApi = {
-  list: (course) =>
-    apiGet(`/topic-categories?${new URLSearchParams({ course })}`),
+  list: (course) => {
+    const params = course
+      ? typeof course === "object"
+        ? course
+        : course !== "all"
+        ? { course }
+        : {}
+      : {};
+    return apiGet(`/topic-categories?${new URLSearchParams(params)}`);
+  },
+  get: (id) => apiGet(`/topic-categories/${id}`),
   create: (data) => apiPost("/topic-categories", data),
   update: (id, data) => apiPatch(`/topic-categories/${id}`, data),
   delete: (id) => apiDelete(`/topic-categories/${id}`),

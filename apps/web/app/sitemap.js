@@ -22,6 +22,11 @@ const STATIC_ROUTES = [
     changeFrequency: "daily",
   },
   {
+    path: "/interview-questions",
+    priority: 0.9,
+    changeFrequency: "daily",
+  },
+  {
     path: "/quiz",
     priority: 0.8,
     changeFrequency: "daily",
@@ -132,6 +137,9 @@ export default async function sitemap() {
     } else if (item.type === "question") {
       priority = 0.7;
       changeFrequency = "weekly";
+    } else if (item.type === "interview-category") {
+      priority = 0.8;
+      changeFrequency = "weekly";
     }
 
     const url = `${siteUrl}${urlPath}`;
@@ -144,21 +152,22 @@ export default async function sitemap() {
         priority,
       });
     }
+  }
 
-    // Add Course Interview Questions Guide index (/:courseSlug/interview-questions) for each course
-    if (item.type === "course") {
-      const courseSlug = urlPath.split("/").pop();
-      if (courseSlug) {
-        const interviewUrl = `${siteUrl}/${courseSlug}/interview-questions`;
-        if (!existingUrls.has(interviewUrl)) {
-          existingUrls.add(interviewUrl);
-          dynamicEntries.push({
-            url: interviewUrl,
-            lastModified: item.updatedAt ? new Date(item.updatedAt) : now,
-            changeFrequency: "weekly",
-            priority: 0.8,
-          });
-        }
+  // Explicitly fetch all published interview categories with questions
+  const interviewCategories = await fetchApi("/topic-categories/public");
+  if (Array.isArray(interviewCategories)) {
+    for (const cat of interviewCategories) {
+      if (!cat.slug || cat.noindex) continue;
+      const catUrl = `${siteUrl}/interview-questions/${cat.slug}`;
+      if (!existingUrls.has(catUrl)) {
+        existingUrls.add(catUrl);
+        dynamicEntries.push({
+          url: catUrl,
+          lastModified: cat.updatedAt ? new Date(cat.updatedAt) : now,
+          changeFrequency: "weekly",
+          priority: 0.8,
+        });
       }
     }
   }

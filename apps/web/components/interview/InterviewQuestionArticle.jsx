@@ -124,8 +124,8 @@ export default async function InterviewQuestionArticle({
         >
           <ArrowLeft className="h-4 w-4" /> All {course.title} questions
         </Link>
-        <article className="mt-5 overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:rounded-4xl">
-          <header className="border-b border-zinc-100 p-5 dark:border-zinc-800 sm:p-9">
+        <article className="mt-5 overflow-hidden">
+          <header className="border-b border-zinc-200 py-5 dark:border-zinc-800 sm:py-9">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-xs font-black uppercase tracking-[0.16em] text-orange-600">
                 {course.title} · {question.difficulty} · {question.questionType}
@@ -151,7 +151,7 @@ export default async function InterviewQuestionArticle({
               ))}
             </div>
           </header>
-          <div className="p-5 sm:p-9">
+          <div className="py-5 text-justify sm:py-9">
             <div className="mb-5 flex items-center gap-2 text-sm font-black uppercase tracking-wide text-orange-600">
               <MessageSquareText className="h-5 w-5" /> Detailed interview
               answer

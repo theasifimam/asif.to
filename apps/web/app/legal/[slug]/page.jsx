@@ -227,7 +227,7 @@ export default function LegalPage() {
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 pt-20 sm:pt-28 pb-16 space-y-8">
         {/* Document Header */}
-        <div className="p-6 sm:p-10 rounded-2xl sm:rounded-[2.5rem] bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-4">
+        <div className="space-y-4 py-6 sm:py-10">
           <div className="flex items-center gap-2.5">
             <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
               <IconComponent className="w-5 h-5" />
@@ -250,7 +250,7 @@ export default function LegalPage() {
           <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
             {page?.content ? (
               <div
-                className="prose prose-zinc dark:prose-invert max-w-none text-zinc-600 dark:text-zinc-300 leading-relaxed font-medium"
+                className="prose prose-zinc dark:prose-invert max-w-none text-justify text-zinc-600 dark:text-zinc-300 leading-relaxed font-medium"
                 dangerouslySetInnerHTML={{ __html: page.content }}
               />
             ) : fallback?.content ? (

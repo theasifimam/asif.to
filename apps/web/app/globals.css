@@ -177,149 +177,52 @@ body {
 }
 
 /* Prose refinements for Quill output */
+.prose,
+.wmde-markdown {
+  text-align: justify;
+}
+
 .prose .ql-video {
   margin: 3rem 0;
 }
 
-.prose blockquote {
-  font-style: italic;
-  border-left-width: 4px;
-  padding-left: 2rem;
-}
-
-/* ─── List Styles for Quill ─── */
-.ql-editor ul,
-.ql-editor ol {
-  padding-left: 1.5em !important;
-  margin-bottom: 1.5rem !important;
-  list-style-position: outside !important;
-}
-
-.ql-editor ul {
-  list-style-type: disc !important;
-}
-
-.ql-editor ol {
-  list-style-type: decimal !important;
-}
-
-.ql-editor li {
-  margin-bottom: 0.75rem !important;
-  display: list-item !important;
-  padding-left: 0.5em !important;
-}
-
-/* Nested Lists */
-.ql-editor li > ul,
-.ql-editor li > ol {
-  margin-top: 0.75rem !important;
-  margin-bottom: 0.75rem !important;
-}
-
-.ql-editor ul ul {
-  list-style-type: circle !important;
-}
-.ql-editor ul ul ul {
-  list-style-type: square !important;
-}
-
-/* Indent support */
-.ql-indent-1 {
-  padding-left: 3em !important;
-}
-.ql-indent-2 {
-  padding-left: 4.5em !important;
-}
-.ql-indent-3 {
-  padding-left: 6em !important;
-}
-.ql-indent-4 {
-  padding-left: 7.5em !important;
-}
-.ql-indent-5 {
-  padding-left: 9em !important;
-}
-.ql-indent-6 {
-  padding-left: 10.5em !important;
-}
-.ql-indent-7 {
-  padding-left: 12em !important;
-}
-.ql-indent-8 {
-  padding-left: 13.5em !important;
-} /* ─── Code Snippets for Quill (Syntax Highlighted) ─── */
+/* ─── Code Snippets & Markdown Code Blocks ─── */
 pre.ql-syntax {
-  background-color: #1a1b26 !important; /* Premium deep blue-black */
-  color: #a9b1d6; /* Removed !important to allow hljs classes to work */
+  background-color: #1a1b26 !important;
+  color: #a9b1d6;
   border-radius: 1.5rem !important;
-  padding: 2.5rem 2rem 2rem !important;
-  font-family:
-    "JetBrains Mono", "Fira Code", "Roboto Mono", monospace !important;
+  padding: 1.25rem 1.5rem !important;
+  font-family: "JetBrains Mono", "Fira Code", monospace !important;
   font-size: 0.95rem !important;
   line-height: 1.7 !important;
-  margin: 3rem 0 !important;
+  margin: 2rem 0 !important;
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   white-space: pre-wrap !important;
   word-break: break-word !important;
-  overflow-x: hidden !important;
-  max-width: 100% !important;
-  position: relative;
-  tab-size: 2;
-}
-
-/* Stylish "Code" indicator label */
-pre.ql-syntax::before {
-  content: "SIGNAL CODE";
-  position: absolute;
-  top: 0.75rem;
-  left: 2rem;
-  font-family: var(--font-outfit);
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: 0.2em;
-  color: rgba(255, 255, 255, 0.2);
-  text-transform: uppercase;
-  pointer-events: none;
-}
-
-/* Scrollbar styling for code blocks */
-pre.ql-syntax::-webkit-scrollbar {
-  height: 8px;
-}
-
-pre.ql-syntax::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-pre.ql-syntax::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-pre.ql-syntax::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
 }
 
 .dark pre.ql-syntax {
-  background-color: #0b0e14 !important; /* Extremely dark for dark mode depth */
+  background-color: #0b0e14 !important;
   border-color: rgba(255, 255, 255, 0.03) !important;
 }
 
-/* Fallback for standard pre tags within articles */
+/* Fallback & Markdown Code Block Snippet Formatting */
 .prose pre,
 .ql-editor pre,
 pre.hljs,
-.wmde-markdown pre {
+.wmde-markdown pre,
+.topic-markdown pre,
+.w-md-editor-preview pre {
   background-color: #f8fafc !important;
   color: #0f172a !important;
-  padding: 1.75rem 1.5rem !important;
+  padding: 1rem 1.25rem !important;
   border-radius: 1.25rem !important;
   white-space: pre-wrap !important;
   word-break: break-word !important;
   overflow-x: auto !important;
   max-width: 100% !important;
-  margin: 2.25rem 0 !important;
+  margin: 1.75rem 0 !important;
   font-family: "JetBrains Mono", "Fira Code", monospace !important;
   font-size: 0.9rem !important;
   line-height: 1.7 !important;
@@ -330,162 +233,29 @@ pre.hljs,
 .dark .prose pre,
 .dark .ql-editor pre,
 .dark pre.hljs,
-.dark .wmde-markdown pre {
+.dark .wmde-markdown pre,
+.dark .topic-markdown pre,
+.dark .w-md-editor-preview pre {
   background-color: #0b0e14 !important;
   color: #e2e8f0 !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
 }
 
-/* Light mode Prism & HLJS syntax tokens */
-:root:not(.dark) .wmde-markdown pre code,
-:root:not(.dark) .topic-markdown pre code,
-:root:not(.dark) pre.hljs code,
-[data-color-mode="light"] .wmde-markdown pre code {
-  color: #0f172a !important;
-}
-
-:root:not(.dark) .token.comment,
-:root:not(.dark) .token.prolog,
-:root:not(.dark) .token.doctype,
-:root:not(.dark) .token.cdata,
-:root:not(.dark) .hljs-comment,
-:root:not(.dark) .hljs-quote,
-[data-color-mode="light"] .token.comment,
-[data-color-mode="light"] .hljs-comment {
-  color: #64748b !important;
-  font-style: italic;
-}
-
-:root:not(.dark) .token.punctuation,
-[data-color-mode="light"] .token.punctuation {
-  color: #475569 !important;
-}
-
-:root:not(.dark) .token.property,
-:root:not(.dark) .token.tag,
-:root:not(.dark) .token.boolean,
-:root:not(.dark) .token.number,
-:root:not(.dark) .token.constant,
-:root:not(.dark) .token.symbol,
-:root:not(.dark) .token.deleted,
-:root:not(.dark) .hljs-number,
-:root:not(.dark) .hljs-literal,
-[data-color-mode="light"] .token.number,
-[data-color-mode="light"] .hljs-number {
-  color: #d97706 !important;
-}
-
-:root:not(.dark) .token.selector,
-:root:not(.dark) .token.attr-name,
-:root:not(.dark) .token.string,
-:root:not(.dark) .token.char,
-:root:not(.dark) .token.builtin,
-:root:not(.dark) .token.inserted,
-:root:not(.dark) .hljs-string,
-:root:not(.dark) .hljs-title,
-[data-color-mode="light"] .token.string,
-[data-color-mode="light"] .hljs-string {
-  color: #059669 !important;
-}
-
-:root:not(.dark) .token.operator,
-:root:not(.dark) .token.entity,
-:root:not(.dark) .token.url,
-:root:not(.dark) .hljs-operator,
-[data-color-mode="light"] .token.operator {
-  color: #0284c7 !important;
-}
-
-:root:not(.dark) .token.atrule,
-:root:not(.dark) .token.attr-value,
-:root:not(.dark) .token.keyword,
-:root:not(.dark) .hljs-keyword,
-:root:not(.dark) .hljs-selector-tag,
-[data-color-mode="light"] .token.keyword,
-[data-color-mode="light"] .hljs-keyword {
-  color: #2563eb !important;
-  font-weight: 600;
-}
-
-:root:not(.dark) .token.function,
-:root:not(.dark) .token.class-name,
-:root:not(.dark) .hljs-function,
-:root:not(.dark) .hljs-class,
-[data-color-mode="light"] .token.function,
-[data-color-mode="light"] .hljs-function {
-  color: #7c3aed !important;
-  font-weight: 600;
-}
-
-:root:not(.dark) .token.regex,
-:root:not(.dark) .token.important,
-:root:not(.dark) .token.variable,
-:root:not(.dark) .hljs-variable,
-[data-color-mode="light"] .token.variable {
-  color: #dc2626 !important;
-}
-
-/* Public course topic reader */
-.topic-markdown .wmde-markdown {
-  color: #3f3f46;
-  font-family: var(--font-inter);
-  font-size: 1rem;
-  line-height: 1.85;
-}
-
-.dark .topic-markdown .wmde-markdown {
-  color: #d4d4d8;
-}
-
-.topic-markdown .wmde-markdown h1,
-.topic-markdown .wmde-markdown h2,
-.topic-markdown .wmde-markdown h3,
-.topic-markdown .wmde-markdown h4 {
-  border-bottom: 0;
-  color: #18181b;
-  font-family: var(--font-outfit);
-  font-weight: 800;
-  letter-spacing: 0;
-  line-height: 1.3;
-  scroll-margin-top: 7rem;
-}
-
-.dark .topic-markdown .wmde-markdown h1,
-.dark .topic-markdown .wmde-markdown h2,
-.dark .topic-markdown .wmde-markdown h3,
-.dark .topic-markdown .wmde-markdown h4 {
-  color: #fafafa;
-}
-
-.topic-markdown .wmde-markdown h1 {
-  font-size: 1.75rem;
-  margin: 2rem 0 1rem;
-}
-
-.topic-markdown .wmde-markdown h2 {
-  font-size: 1.5rem;
-  margin: 2.25rem 0 1rem;
-}
-
-.topic-markdown .wmde-markdown h3 {
-  font-size: 1.25rem;
-  margin: 1.75rem 0 0.75rem;
-}
-
-.topic-markdown .wmde-markdown p,
-.topic-markdown .wmde-markdown ul,
-.topic-markdown .wmde-markdown ol {
-  margin-bottom: 1.25rem;
-}
-
-.topic-markdown .wmde-markdown ul,
-.topic-markdown .wmde-markdown ol {
-  padding-left: 1.5rem;
-}
-
-.topic-markdown .wmde-markdown li + li {
-  margin-top: 0.5rem;
+/* Eliminate inner double padding on code elements inside pre containers */
+.wmde-markdown pre code,
+.wmde-markdown code.hljs,
+.topic-markdown pre code,
+.prose pre code,
+.ql-editor pre code,
+pre.hljs code,
+.w-md-editor-preview pre code {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: block !important;
 }
 
 .topic-markdown .wmde-markdown a {

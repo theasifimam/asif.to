@@ -2,6 +2,7 @@ import Article from "../models/Article.js";
 import Chapter from "../models/Chapter.js";
 import Course from "../models/Course.js";
 import CourseTopic from "../models/CourseTopic.js";
+import TopicCategory from "../models/TopicCategory.js";
 import Question from "../models/Question.js";
 
 const CACHE_MS = 60_000;
@@ -22,12 +23,13 @@ export async function getSearchIndex(_req, res) {
     if (cachedIndex && Date.now() - cachedAt < CACHE_MS)
       return res.json({ success: true, data: cachedIndex });
 
-    const [courses, chapters, topics, articles, questions] = await Promise.all([
+    const [courses, chapters, topics, articles, categories, questions] = await Promise.all([
       Course.find({ status: "published" }).select("title slug subtitle keywords techId order updatedAt").lean(),
       Chapter.find({ status: "published" }).select("title slug summary keywords content course order updatedAt").populate("course", "title slug techId").lean(),
       CourseTopic.find({ status: "published" }).select("title slug excerpt keywords content type course category order updatedAt").populate("course", "title slug techId").populate("category", "name slug").lean(),
       Article.find({ status: "published" }).select("title slug content seoDescription keywords type techId order topic updatedAt").populate("topic", "name").lean(),
-      Question.find({ type: "interview", status: "published" }).select("question slug answer tags difficulty course updatedAt").populate("course", "title slug techId status").lean(),
+      TopicCategory.find({ status: "published", noindex: { $ne: true } }).select("name slug description seoTitle seoDescription keywords updatedAt").lean(),
+      Question.find({ type: "interview", status: "published" }).select("question slug answer tags difficulty category course updatedAt").populate("category", "name slug").populate("course", "title slug techId status").lean(),
     ]);
 
     const items = [];
@@ -64,14 +66,22 @@ export async function getSearchIndex(_req, res) {
       category: (item.topic || []).map((topic) => topic.name).filter(Boolean).join(" · "), technology: item.techId, priority: item.type === "cheatsheet" ? 8 : 6,
       updatedAt: item.updatedAt,
     }));
-    questions.filter((item) => item.course?.status === "published").forEach((item) => items.push({
-      id: `question:${item._id}`, type: "question", title: item.question,
-      url: `/${item.course.slug}/interview-questions/${item.slug}`, description: plainText(item.answer).slice(0, 180),
-      adminUrl: `/interview-questions/${item._id}/edit`,
-      keywords: item.tags, content: plainText(item.answer).slice(0, 500), course: item.course.title,
-      category: `${item.difficulty || ""} Interview Question`.trim(), technology: item.course.techId, priority: 5,
-      updatedAt: item.updatedAt,
+    categories.forEach((item) => items.push({
+      id: `interview-category:${item._id}`, type: "interview-category", title: item.seoTitle || `${item.name} Interview Questions and Answers`,
+      url: `/interview-questions/${item.slug}`, description: item.seoDescription || item.description || `Interview preparation guide for ${item.name}`,
+      adminUrl: `/categories`, keywords: item.keywords, priority: 9, updatedAt: item.updatedAt,
     }));
+    questions.forEach((item) => {
+      const catSlug = item.category?.slug || item.course?.slug || "general";
+      items.push({
+        id: `question:${item._id}`, type: "question", title: item.question,
+        url: `/interview-questions/${catSlug}`, description: plainText(item.answer).slice(0, 180),
+        adminUrl: `/interview-questions/${item._id}/edit`,
+        keywords: item.tags, content: plainText(item.answer).slice(0, 500), course: item.course?.title || item.category?.name,
+        category: `${item.difficulty || ""} Interview Question`.trim(), technology: catSlug, priority: 5,
+        updatedAt: item.updatedAt,
+      });
+    });
 
     cachedIndex = { items, generatedAt: new Date().toISOString() };
     cachedAt = Date.now();

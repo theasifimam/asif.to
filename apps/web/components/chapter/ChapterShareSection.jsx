@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { Share2, Facebook, Twitter, Linkedin, Link2, Check } from "lucide-react";
+import {
+  Share2,
+  Facebook,
+  Twitter,
+  Linkedin,
+  Link2,
+  Check,
+} from "lucide-react";
 
 export default function ChapterShareSection({ chapter }) {
   const [copied, setCopied] = useState(false);
@@ -17,7 +24,7 @@ export default function ChapterShareSection({ chapter }) {
   };
 
   return (
-    <div className="p-4 sm:p-8 rounded-2xl sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 space-y-4">
+    <div className="p-4 sm:p-8 rounded-4xl sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 space-y-4">
       <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2">
         <Share2 className="w-4 h-4 text-blue-500" />
         Share this Chapter
@@ -92,7 +99,11 @@ export default function ChapterShareSection({ chapter }) {
           }`}
           title="Copy link to clipboard"
         >
-          {copied ? <Check className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
+          {copied ? (
+            <Check className="w-4 h-4" />
+          ) : (
+            <Link2 className="w-4 h-4" />
+          )}
         </button>
         {typeof navigator !== "undefined" && navigator.share && (
           <button

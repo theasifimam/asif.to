@@ -18,10 +18,10 @@ export default function ChapterDocumentCard({
 }) {
   return (
     <div
-      className={`rounded-none sm:rounded-[2.5rem] bg-transparent sm:bg-white dark:sm:bg-zinc-900/90 border-0 sm:border border-zinc-200/60 dark:border-zinc-800/60 flex flex-col gap-4 sm:gap-6 transition-all ${
+      className={`flex flex-col gap-4 py-2 sm:gap-6 sm:py-10 transition-all ${
         isFocusMode
-          ? "px-2 py-2 sm:p-12 shadow-none sm:shadow-xl"
-          : "px-2 py-2 sm:p-10 shadow-none sm:shadow-xs"
+          ? "sm:py-12"
+          : ""
       }`}
     >
       <ChapterReaderHeader

@@ -13,7 +13,7 @@ export default function ChapterQuickNav({
 }) {
   if (variant === "top") {
     return (
-      <div className="flex items-center justify-between p-2.5 sm:p-4 rounded-3xl sm:rounded-3xl bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 text-xs font-bold gap-2">
+      <div className="flex items-center justify-between p-2.5 sm:p-4 rounded-4xl sm:rounded-4xl bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 text-xs font-bold gap-2">
         {prevChapter ? (
           <Link
             href={`/${courseId}/${prevChapter.slug}`}
@@ -59,7 +59,7 @@ export default function ChapterQuickNav({
 
   // Bottom variant
   return (
-    <div className="flex items-center justify-between p-3.5 sm:p-5 rounded-2xl sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 text-xs font-bold gap-2">
+    <div className="flex items-center justify-between p-3.5 sm:p-5 rounded-4xl sm:rounded-4xl bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 text-xs font-bold gap-2">
       {prevChapter ? (
         <Link
           href={`/${courseId}/${prevChapter.slug}`}

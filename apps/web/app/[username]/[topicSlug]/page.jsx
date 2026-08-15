@@ -4,9 +4,8 @@ import CourseTopicPage, {
 } from "@/components/courses/CourseTopicPage";
 import { getChapterData, getPublicTopic } from "@/lib/publicContent";
 import { absoluteUrl, assetUrl, getSiteUrl, jsonLd } from "@/lib/seo";
-import InterviewQuestionsGuide, { buildInterviewGuideMetadata } from "@/components/interview/InterviewQuestionsGuide";
 import { authorIdentity, buildPersonSchema } from "@/lib/authorIdentity";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 
 export const revalidate = 60;
 
@@ -136,8 +135,9 @@ function chapterStructuredData(data, courseSlug, chapterSlug) {
 export async function generateMetadata({ params, searchParams }) {
   const { username: courseSlug, topicSlug } = await params;
   if (topicSlug === "interview-questions") {
-    const { page } = await searchParams;
-    return buildInterviewGuideMetadata(courseSlug, page);
+    // 301 Redirect to category interview landing page
+    const targetSlug = courseSlug.replace(/-complete-course.*$/, "").replace(/-course$/, "");
+    permanentRedirect(`/interview-questions/${targetSlug}`);
   }
   const topic = await getPublicTopic(courseSlug, [topicSlug]);
   if (topic) return buildTopicMetadata(courseSlug, [topicSlug]);
@@ -156,8 +156,8 @@ export async function generateMetadata({ params, searchParams }) {
 export default async function PublicTopicPage({ params, searchParams }) {
   const { username: courseSlug, topicSlug } = await params;
   if (topicSlug === "interview-questions") {
-    const { page } = await searchParams;
-    return <InterviewQuestionsGuide courseSlug={courseSlug} requestedPage={page} />;
+    const targetSlug = courseSlug.replace(/-complete-course.*$/, "").replace(/-course$/, "");
+    permanentRedirect(`/interview-questions/${targetSlug}`);
   }
   const topic = await getPublicTopic(courseSlug, [topicSlug]);
 

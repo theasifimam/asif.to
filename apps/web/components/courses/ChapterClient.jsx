@@ -17,10 +17,15 @@ import TryItChallenge from "@/components/chapter/TryItChallenge";
 import { parseContentBlocks } from "@/components/chapter/chapterUtils";
 import { useGetChapterBySlugQuery } from "@/lib/api/courseApi";
 import { TECH_STACKS } from "@/lib/tutorialData";
-import { Loader2, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import AuthorIdentityCard from "@/components/authors/AuthorIdentityCard";
+import { ChapterReaderSkeleton } from "@/components/courses/ReaderSkeletons";
 
-export default function ChapterClient({ courseSlug, chapterSlug, initialData }) {
+export default function ChapterClient({
+  courseSlug,
+  chapterSlug,
+  initialData,
+}) {
   const params = useParams();
   const courseId = courseSlug || params?.courseId || params?.username;
   const chapterId = chapterSlug || params?.chapterId || params?.topicSlug;
@@ -75,7 +80,10 @@ export default function ChapterClient({ courseSlug, chapterSlug, initialData }) 
   const course = data?.data?.course || initialData?.course;
   const activeCourseSlug = course?.slug || courseId;
   const chapter = data?.data?.chapter || initialData?.chapter;
-  const allChapters = useMemo(() => data?.data?.allChapters || initialData?.allChapters || [], [data?.data?.allChapters, initialData?.allChapters]);
+  const allChapters = useMemo(
+    () => data?.data?.allChapters || initialData?.allChapters || [],
+    [data?.data?.allChapters, initialData?.allChapters],
+  );
   const prevChapter = data?.data?.prevChapter;
   const nextChapter = data?.data?.nextChapter;
 
@@ -95,7 +103,6 @@ export default function ChapterClient({ courseSlug, chapterSlug, initialData }) 
     [chapter?.content, tech?.name],
   );
 
-
   // Calculate estimated reading time
   const estimatedReadingTime = useMemo(() => {
     let text = "";
@@ -107,7 +114,6 @@ export default function ChapterClient({ courseSlug, chapterSlug, initialData }) 
     const wordCount = text.split(/\s+/).filter(Boolean).length;
     return Math.max(1, Math.ceil(wordCount / 180));
   }, [chapter]);
-
 
   useEffect(() => {
     if (activeItemRef.current) {
@@ -121,18 +127,7 @@ export default function ChapterClient({ courseSlug, chapterSlug, initialData }) 
   const isInitialLoading = !chapter && isLoading;
 
   if (isInitialLoading) {
-    return (
-      <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
-        <Header />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-3 text-zinc-400">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-            <span className="text-xs font-bold">Loading lesson...</span>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
+    return <ChapterReaderSkeleton />;
   }
 
   if (isError || !chapter) {
@@ -216,7 +211,7 @@ export default function ChapterClient({ courseSlug, chapterSlug, initialData }) 
         />
 
         {/* Layout Container */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 relative">
           {/* Desktop Sticky & Collapsible Chapter Sidebar */}
           {isSidebarOpen && (
             <ChapterSidebar
@@ -233,7 +228,7 @@ export default function ChapterClient({ courseSlug, chapterSlug, initialData }) 
 
           {/* Lesson Content Area */}
           <section
-            className={`flex flex-col gap-6 transition-all duration-300 ${
+            className={`flex flex-col gap-3 transition-all duration-300 ${
               isSidebarOpen
                 ? "lg:col-span-8 xl:col-span-9"
                 : "lg:col-span-12 max-w-4xl mx-auto w-full"
@@ -268,7 +263,11 @@ export default function ChapterClient({ courseSlug, chapterSlug, initialData }) 
             />
             {/* Try It Challenge */}
             <TryItChallenge challenge={chapter?.tryItChallenge} />
-            <AuthorIdentityCard publishedAt={chapter?.createdAt} updatedAt={chapter?.updatedAt} compact />
+            <AuthorIdentityCard
+              publishedAt={chapter?.createdAt}
+              updatedAt={chapter?.updatedAt}
+              compact
+            />
             {/* Share Section */}
             <ChapterShareSection chapter={chapter} />
             {/* Bottom Prev / Next Navigation */}

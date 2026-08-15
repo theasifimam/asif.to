@@ -6,7 +6,10 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import MobileChapterIndex from "@/components/courses/MobileChapterIndex";
 import { TECH_STACKS } from "@/lib/tutorialData";
-import { useGetCourseBySlugQuery, useGetCheatsheetsQuery } from "@/lib/api/courseApi";
+import {
+  useGetCourseBySlugQuery,
+  useGetCheatsheetsQuery,
+} from "@/lib/api/courseApi";
 import {
   ArrowLeft,
   Play,
@@ -34,7 +37,9 @@ export default function CourseClient({ initialData }) {
   const { data: cheatsheetsData } = useGetCheatsheetsQuery();
   const course = data?.data || initialData;
   const cheatsheets = cheatsheetsData?.data || [];
-  const courseCheatsheet = cheatsheets.find((cs) => cs.techId === course?.techId);
+  const courseCheatsheet = cheatsheets.find(
+    (cs) => cs.techId === course?.techId,
+  );
   const isInitialLoading = !course && isLoading;
   const activeCourseSlug = course?.slug || courseId;
   const tech = course ? TECH_STACKS.find((t) => t.id === course.techId) : null;
@@ -83,7 +88,7 @@ export default function CourseClient({ initialData }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground transition-colors duration-300 pb-24 sm:pb-12">
+    <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground transition-colors duration-300 sm:pb-24">
       <Header />
       <MobileChapterIndex
         chapters={course.chapters}

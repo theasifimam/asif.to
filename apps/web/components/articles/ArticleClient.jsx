@@ -230,7 +230,7 @@ export default function ArticleClient({ slug, initialData }) {
             <MarkdownPreview
               source={article.content}
               style={{ backgroundColor: "transparent", color: "inherit" }}
-              className="text-lg md:text-xl font-light leading-relaxed !bg-transparent !text-inherit wmde-markdown"
+            className="text-justify text-lg md:text-xl font-light leading-relaxed !bg-transparent !text-inherit wmde-markdown"
             />
           </div>
           </MarkdownCodePlayground>

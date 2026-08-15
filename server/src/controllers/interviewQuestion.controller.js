@@ -35,7 +35,7 @@ function validationMessage(error) {
 }
 
 const questionFields =
-  "course question answer difficulty questionType tags slug codeExample expectedOutput followUps seoTitle seoDescription keywords canonicalUrl ogImage author createdAt updatedAt";
+  "category course question answer difficulty questionType tags slug codeExample expectedOutput followUps seoTitle seoDescription keywords canonicalUrl ogImage author createdAt updatedAt";
 
 async function resolveCourse(value) {
   if (!value) return null;
@@ -47,15 +47,16 @@ async function resolveCourse(value) {
 function populateQuestion(query) {
   return query
     .select(questionFields)
+    .populate("category", "name slug")
     .populate("course", "title slug status")
     .populate("author", "fullName email");
 }
 
 function publicQuestion(question) {
-  return {
-    _id: question._id,
-    question: question.question,
-    answer: question.answer,
+ return {
+   id: question._id,
+   question: question.question,
+   answer: question.answer,
     difficulty: question.difficulty,
     questionType: question.questionType,
     tags: question.tags || [],
@@ -239,10 +240,13 @@ export const getPublicInterviewQuestion = async (req, res) => {
   }
 };
 
+
 export const listInterviewQuestions = async (req, res) => {
   try {
     const {
       course,
+      category,
+      categoryId,
       search = "",
       difficulty,
       questionType,
@@ -251,13 +255,17 @@ export const listInterviewQuestions = async (req, res) => {
       limit = 20,
     } = req.query;
     const filter = { type: "interview" };
-    if (course) {
+    if (course && course !== "all") {
       const selectedCourse = await resolveCourse(course);
       if (!selectedCourse)
         return res
           .status(404)
           .json({ success: false, message: "Course not found." });
       filter.course = selectedCourse._id;
+    }
+    const catId = category || categoryId;
+    if (catId && catId !== "all" && mongoose.Types.ObjectId.isValid(catId)) {
+      filter.category = catId;
     }
     if (difficulty && ["easy", "medium", "hard"].includes(difficulty))
       filter.difficulty = difficulty;
@@ -320,16 +328,16 @@ export const getInterviewQuestion = async (req, res) => {
 
 export const createInterviewQuestion = async (req, res) => {
   try {
-    const course = await resolveCourse(req.body.course || req.body.courseId);
-    if (!course)
-      return res.status(400).json({
-        success: false,
-        message: "A valid course is required.",
-      });
+    let course = null;
+    if (req.body.course || req.body.courseId) {
+      course = await resolveCourse(req.body.course || req.body.courseId);
+    }
+    const categoryId = req.body.category || req.body.categoryId;
 
     const question = await InterviewQuestion.create({
       type: "interview",
-      course: course._id,
+      category: categoryId && mongoose.Types.ObjectId.isValid(categoryId) ? categoryId : null,
+      course: course ? course._id : null,
       question: req.body.question,
       answer: req.body.answer || "",
       difficulty: req.body.difficulty || "medium",
@@ -344,8 +352,8 @@ export const createInterviewQuestion = async (req, res) => {
       keywords: parseList(req.body.keywords),
       canonicalUrl: req.body.canonicalUrl || "",
       ogImage: req.body.ogImage || "",
-      author: req.user._id,
     });
+
     res.status(201).json({
       success: true,
       data: await populateQuestion(InterviewQuestion.findOne({ _id: question._id, type: "interview" })),
@@ -364,27 +372,24 @@ export const updateInterviewQuestion = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: "Interview question not found." });
-    if (req.body.course !== undefined || req.body.courseId !== undefined) {
-      const course = await resolveCourse(req.body.course || req.body.courseId);
-      if (!course)
-        return res.status(400).json({
-          success: false,
-          message: "A valid course is required.",
-        });
 
-      if (String(course._id) !== String(question.course)) {
-        const incompatibleTopic = await CourseTopic.exists({
-          course: { $ne: course._id },
-          "interviewQuestions.question": question._id,
-        });
-        if (incompatibleTopic)
-          return res.status(409).json({
-            success: false,
-            message:
-              "Remove this question from its current course topics before changing its course.",
-          });
+    if (req.body.course !== undefined || req.body.courseId !== undefined) {
+      const courseVal = req.body.course || req.body.courseId;
+      if (courseVal) {
+        const course = await resolveCourse(courseVal);
+        if (!course)
+          return res
+            .status(404)
+            .json({ success: false, message: "Course not found." });
         question.course = course._id;
+      } else {
+        question.course = null;
       }
+    }
+
+    if (req.body.category !== undefined || req.body.categoryId !== undefined) {
+      const catVal = req.body.category || req.body.categoryId;
+      question.category = catVal && mongoose.Types.ObjectId.isValid(catVal) ? catVal : null;
     }
 
     const allowed = [

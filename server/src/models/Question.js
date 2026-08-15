@@ -2,6 +2,7 @@ import { Schema, model } from "mongoose";
 
 const questionSchema = new Schema({
   type: { type: String, enum: ["quiz", "interview"], required: true, index: true },
+  category: { type: Schema.Types.ObjectId, ref: "TopicCategory", default: null, index: true },
   course: { type: Schema.Types.ObjectId, ref: "Course", default: null },
   courses: [{ type: Schema.Types.ObjectId, ref: "Course" }],
   question: { type: String, required: true, trim: true, maxlength: 500 },
@@ -35,9 +36,9 @@ const questionSchema = new Schema({
   status: { type: String, enum: ["draft", "published"], default: "published" },
 }, { timestamps: true, collection: "questions" });
 
+questionSchema.index({ type: 1, category: 1, status: 1 });
 questionSchema.index({ type: 1, courses: 1, status: 1 });
 questionSchema.index({ type: 1, course: 1, difficulty: 1, questionType: 1 });
-questionSchema.index({ type: 1, course: 1, slug: 1 }, { unique: true, partialFilterExpression: { type: "interview" } });
 questionSchema.index({ legacyFlashcardId: 1 }, { unique: true, partialFilterExpression: { legacyFlashcardId: { $type: "objectId" } } });
 questionSchema.index({ question: "text", answer: "text", tags: "text" });
 
@@ -48,7 +49,7 @@ questionSchema.pre("validate", function validateByType() {
     if (!this.courses?.length) this.invalidate("courses", "Quiz questions require at least one course.");
   }
   if (this.type === "interview") {
-    if (!this.course) this.invalidate("course", "Interview questions require a course.");
+    if (!this.category && !this.course) this.invalidate("category", "Interview questions require a category or course.");
     if (!this.answer) this.invalidate("answer", "Interview questions require a detailed answer.");
     if (!this.slug) this.invalidate("slug", "Interview questions require a slug.");
   }

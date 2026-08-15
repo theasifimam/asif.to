@@ -143,103 +143,13 @@ function validationMessage(error) {
   if (error?.code === 11000)
     return "A topic with this slug already exists in the selected course.";
   if (error?.name === "ValidationError")
-    return Object.values(error.errors)
-      .map((item) => item.message)
-      .join(" ");
-  return "Internal server error";
-}
-
-export const getTopicCategories = async (req, res) => {
-  try {
-    const course = await resolveCourse(req.query.course || req.query.courseId);
-    if (!course)
-      return res
-        .status(404)
-        .json({ success: false, message: "Course not found." });
-    const categories = await TopicCategory.find({ course: course._id })
-      .sort({ order: 1, name: 1 })
-      .lean();
-    res.json({ success: true, data: categories });
-  } catch (error) {
-    console.error("[COURSE TOPICS] get categories error:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-};
-
-export const createTopicCategory = async (req, res) => {
-  try {
-    const { name, description = "", order = 0 } = req.body;
-    const course = await resolveCourse(req.body.course || req.body.courseId);
-    if (!course)
-      return res
-        .status(404)
-        .json({ success: false, message: "Course not found." });
-    if (!name?.trim())
-      return res
-        .status(400)
-        .json({ success: false, message: "Category name is required." });
-    const category = await TopicCategory.create({
-      name,
-      slug: slugify(req.body.slug || name),
-      description,
-      order,
-      course: course._id,
-    });
-    res.status(201).json({ success: true, data: category });
-  } catch (error) {
-    console.error("[COURSE TOPICS] create category error:", error);
-    res
-      .status(error.code === 11000 ? 409 : 500)
-      .json({ success: false, message: validationMessage(error) });
-  }
-};
-
-export const updateTopicCategory = async (req, res) => {
-  try {
-    const updates = {};
-    if (req.body.name !== undefined) updates.name = req.body.name;
-    if (req.body.description !== undefined)
-      updates.description = req.body.description;
-    if (req.body.order !== undefined) updates.order = req.body.order;
-    if (req.body.slug !== undefined) updates.slug = slugify(req.body.slug);
-    const category = await TopicCategory.findByIdAndUpdate(
-      req.params.id,
-      updates,
-      { new: true, runValidators: true },
-    );
-    if (!category)
-      return res
-        .status(404)
-        .json({ success: false, message: "Category not found." });
-    res.json({ success: true, data: category });
-  } catch (error) {
-    console.error("[COURSE TOPICS] update category error:", error);
-    res
-      .status(error.code === 11000 ? 409 : 500)
-      .json({ success: false, message: validationMessage(error) });
-  }
-};
-
-export const deleteTopicCategory = async (req, res) => {
-  try {
-    const category = await TopicCategory.findById(req.params.id);
-    if (!category)
-      return res
-        .status(404)
-        .json({ success: false, message: "Category not found." });
-    if (await CourseTopic.exists({ category: category._id })) {
-      return res.status(409).json({
-        success: false,
-        message: "Cannot delete a category that contains topics.",
-      });
+    if (error?.name === "ValidationError") {
+      return Object.values(error.errors)
+        .map((err) => err.message)
+        .join(", ");
     }
-    await category.deleteOne();
-    res.json({ success: true, message: "Category deleted successfully." });
-  } catch (error) {
-    console.error("[COURSE TOPICS] delete category error:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-};
+  return "An unexpected error occurred.";
+}
 
 export const listCourseTopics = async (req, res) => {
   try {
@@ -295,6 +205,7 @@ export const listCourseTopics = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+export const listCourseTopicsAdmin = listCourseTopics;
 
 export const getCourseTopicAdmin = async (req, res) => {
   try {
@@ -672,6 +583,231 @@ export const getPublicTopic = async (req, res) => {
     res.json({ success: true, data });
   } catch (error) {
     console.error("[COURSE TOPICS] public detail error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// ── Topic Categories Controller ─────────────────────────────────────────────
+
+export const getTopicCategories = async (req, res) => {
+  try {
+    const { course } = req.query;
+    const filter = {};
+    if (course && course !== "all") {
+      const selectedCourse = await resolveCourse(course);
+      if (!selectedCourse)
+        return res
+          .status(404)
+          .json({ success: false, message: "Course not found." });
+      filter.course = selectedCourse._id;
+    }
+    const categories = await TopicCategory.find(filter)
+      .sort({ order: 1, name: 1 })
+      .populate("course", "title slug status")
+      .lean();
+    res.json({ success: true, data: categories });
+  } catch (error) {
+    console.error("[TOPIC CATEGORIES] list error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const getTopicCategory = async (req, res) => {
+  try {
+    const category = await TopicCategory.findById(req.params.id)
+      .populate("course", "title slug status")
+      .lean();
+    if (!category)
+      return res
+        .status(404)
+        .json({ success: false, message: "Category not found." });
+    res.json({ success: true, data: category });
+  } catch (error) {
+    console.error("[TOPIC CATEGORIES] get error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const createTopicCategory = async (req, res) => {
+  try {
+    let courseObj = null;
+    if (req.body.course && req.body.course !== "none") {
+      courseObj = await resolveCourse(req.body.course);
+      if (!courseObj)
+        return res
+          .status(404)
+          .json({ success: false, message: "Course not found." });
+    }
+    const category = await TopicCategory.create({
+      ...req.body,
+      course: courseObj ? courseObj._id : null,
+      slug: slugify(req.body.slug || req.body.name),
+      status: req.body.status || "published",
+    });
+    res.status(201).json({ success: true, data: category });
+  } catch (error) {
+    console.error("[TOPIC CATEGORIES] create error:", error);
+    res
+      .status(error.code === 11000 ? 409 : 400)
+      .json({ success: false, message: validationMessage(error) });
+  }
+};
+
+export const updateTopicCategory = async (req, res) => {
+  try {
+    const category = await TopicCategory.findById(req.params.id);
+    if (!category)
+      return res
+        .status(404)
+        .json({ success: false, message: "Category not found." });
+
+    if (req.body.course !== undefined) {
+      if (req.body.course && req.body.course !== "none") {
+        const courseObj = await resolveCourse(req.body.course);
+        if (!courseObj)
+          return res
+            .status(404)
+            .json({ success: false, message: "Course not found." });
+        category.course = courseObj._id;
+      } else {
+        category.course = null;
+      }
+    }
+
+    const allowed = [
+      "name",
+      "description",
+      "content",
+      "status",
+      "order",
+      "thumbnail",
+      "seoTitle",
+      "seoDescription",
+      "keywords",
+      "canonicalUrl",
+      "ogTitle",
+      "ogDescription",
+      "ogImage",
+      "twitterTitle",
+      "twitterDescription",
+      "twitterImage",
+      "noindex",
+      "nofollow",
+    ];
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) category[key] = req.body[key];
+    }
+    if (req.body.name !== undefined || req.body.slug !== undefined) {
+      category.slug = slugify(req.body.slug || req.body.name);
+    }
+    await category.save();
+    res.json({ success: true, data: category });
+  } catch (error) {
+    console.error("[TOPIC CATEGORIES] update error:", error);
+    res
+      .status(error.code === 11000 ? 409 : 400)
+      .json({ success: false, message: validationMessage(error) });
+  }
+};
+
+export const deleteTopicCategory = async (req, res) => {
+  try {
+    const category = await TopicCategory.findById(req.params.id);
+    if (!category)
+      return res
+        .status(404)
+        .json({ success: false, message: "Category not found." });
+
+    const inUse = await CourseTopic.exists({ category: category._id });
+    if (inUse)
+      return res.status(409).json({
+        success: false,
+        message: "Remove or reassign topics in this category before deleting it.",
+      });
+
+    await category.deleteOne();
+    res.json({ success: true, message: "Category deleted successfully." });
+  } catch (error) {
+    console.error("[TOPIC CATEGORIES] delete error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const listPublicInterviewCategories = async (req, res) => {
+  try {
+    const categories = await TopicCategory.find({ status: "published" })
+      .sort({ order: 1, name: 1 })
+      .populate("course", "title slug")
+      .lean();
+
+    const result = [];
+    for (const cat of categories) {
+      const questionCount = await InterviewQuestion.countDocuments({
+        type: "interview",
+        category: cat._id,
+      });
+      if (questionCount > 0) {
+        result.push({ ...cat, questionCount });
+      }
+    }
+    res.json({ success: true, data: result });
+  } catch (error) {
+    console.error("[TOPIC CATEGORIES] public list error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const getPublicInterviewCategory = async (req, res) => {
+  try {
+    const { categorySlug } = req.params;
+    const { page = 1, limit = 15 } = req.query;
+
+    const category = await TopicCategory.findOne({
+      slug: categorySlug,
+      status: "published",
+    })
+      .populate("course", "title slug")
+      .lean();
+
+    if (!category) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Category not found." });
+    }
+
+    const filter = { type: "interview", category: category._id };
+    const pageNumber = Math.max(Number(page) || 1, 1);
+    const pageSize = Math.min(Math.max(Number(limit) || 15, 1), 100);
+
+    const [questions, total, questionIndex] = await Promise.all([
+      InterviewQuestion.find(filter)
+        .sort({ updatedAt: -1, question: 1 })
+        .skip((pageNumber - 1) * pageSize)
+        .limit(pageSize)
+        .lean(),
+      InterviewQuestion.countDocuments(filter),
+      InterviewQuestion.find(filter)
+        .sort({ updatedAt: -1, question: 1 })
+        .select("question slug")
+        .lean(),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        category,
+        questions,
+        questionIndex,
+        pagination: {
+          page: pageNumber,
+          limit: pageSize,
+          total,
+          pages: Math.max(Math.ceil(total / pageSize), 1),
+        },
+      },
+    });
+  } catch (error) {
+    console.error("[TOPIC CATEGORIES] public category error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };

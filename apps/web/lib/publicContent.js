@@ -64,6 +64,17 @@ export async function getPublicInterviewQuestion(courseSlug, questionSlug) {
   return getPublicInterviewQuestionCached(courseSlug, questionSlug);
 }
 
+export const getPublicInterviewCategories = cache(() =>
+  fetchPublicData("/topic-categories/public", "interview categories"),
+);
+
+export const getPublicInterviewCategory = cache((categorySlug, page = 1) =>
+  fetchPublicData(
+    `/topic-categories/public/${encodeURIComponent(categorySlug)}?page=${encodeURIComponent(page)}&limit=15`,
+    "interview category",
+  ),
+);
+
 export const getCheatsheets = cache(() =>
   fetchPublicData("/cheatsheets?status=published", "cheatsheets"),
 );

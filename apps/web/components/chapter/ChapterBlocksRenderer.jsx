@@ -16,7 +16,7 @@ export default function ChapterBlocksRenderer({
 
   if (isSimplePoints) {
     return (
-      <div className="space-y-3 mt-2">
+      <div className="mt-2 space-y-3 text-justify">
         <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-blue-500" />
           Key Chapter Explanations
@@ -40,7 +40,7 @@ export default function ChapterBlocksRenderer({
 
   return (
     <div
-      className={`space-y-6 ${fontBodyClass} font-medium text-zinc-700 dark:text-zinc-300`}
+      className={`space-y-6 ${fontBodyClass} text-justify font-medium text-zinc-700 dark:text-zinc-300`}
     >
       {parsedBlocks.map((block, idx) => {
         if (block.type === "h1") {

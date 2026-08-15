@@ -26,7 +26,7 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
       <div
         className={`w-full ${containerWidth} mx-auto px-4 sm:px-6 pb-28 md:pb-12 transition-all duration-300`}
       >
-        <div className="p-6 sm:p-10 rounded-2xl sm:rounded-[3rem] bg-white dark:bg-zinc-900/90 shadow-lg shadow-black/5 dark:shadow-black/20 flex flex-col gap-8">
+        <div className="p-6 sm:p-10 rounded-4xl sm:rounded-[3rem] bg-white dark:bg-zinc-900/90 shadow-lg shadow-black/5 dark:shadow-black/20 flex flex-col gap-8">
           <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
             {/* Brand */}
             <div className="flex flex-col gap-3.5 max-w-sm">

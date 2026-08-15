@@ -383,25 +383,44 @@ h6 {
 /* ─── Code Snippets & Markdown Code Blocks ─── */
 .wmde-markdown pre,
 .ql-editor pre,
-pre.hljs {
+pre.hljs,
+.w-md-editor-text-input pre,
+.w-md-editor-preview pre {
   background-color: #f8fafc !important;
   color: #0f172a !important;
-  padding: 1.5rem !important;
+  padding: 1rem 1.25rem !important;
   border-radius: 1.25rem !important;
   border: 1px solid #e2e8f0 !important;
   font-family: "JetBrains Mono", "Fira Code", monospace !important;
   font-size: 0.9rem !important;
   line-height: 1.7 !important;
   overflow-x: auto !important;
-  margin: 1.75rem 0 !important;
+  margin: 1.5rem 0 !important;
 }
 
 .dark .wmde-markdown pre,
 .dark .ql-editor pre,
-.dark pre.hljs {
+.dark pre.hljs,
+.dark .w-md-editor-text-input pre,
+.dark .w-md-editor-preview pre {
   background-color: #0b0e14 !important;
   color: #e2e8f0 !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Eliminate inner double padding on code elements inside pre containers */
+.wmde-markdown pre code,
+.wmde-markdown code.hljs,
+.ql-editor pre code,
+pre.hljs code,
+.w-md-editor-text-input pre code,
+.w-md-editor-preview pre code {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: block !important;
 }
 
 /* ─── Premium Sonner Toast Redesign ─── */
