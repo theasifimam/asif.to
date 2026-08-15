@@ -1,4 +1,5 @@
 import { Inter, Outfit } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ReduxProvider } from "@/components/ReduxProvider";
@@ -7,6 +8,7 @@ import { ScrollNavProvider } from "@/components/ScrollNavProvider";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import { Suspense } from "react";
 import FloatingPlayground from "@/components/interactive-code/FloatingPlayground";
+import GoogleAnalyticsPageView from "@/components/GoogleAnalyticsPageView";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -64,6 +66,8 @@ export const viewport = {
 };
 
 export default function RootLayout({ children }) {
+  const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -78,6 +82,26 @@ export default function RootLayout({ children }) {
           <ReduxProvider>
             <ScrollNavProvider>
               <Suspense fallback={null}><AnalyticsTracker /></Suspense>
+              {gaMeasurementId && (
+                <>
+                  <Script
+                    src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
+                    strategy="afterInteractive"
+                  />
+                  <Script id="google-analytics" strategy="afterInteractive">
+                    {`
+                      window.dataLayer = window.dataLayer || [];
+                      function gtag(){dataLayer.push(arguments);}
+                      window.gtag = gtag;
+                      gtag('js', new Date());
+                      gtag('config', '${gaMeasurementId}');
+                    `}
+                  </Script>
+                  <Suspense fallback={null}>
+                    <GoogleAnalyticsPageView />
+                  </Suspense>
+                </>
+              )}
               {children}
               <FloatingPlayground />
               <BottomNav />
