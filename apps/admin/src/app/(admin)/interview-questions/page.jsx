@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { ConfirmDialog } from "@/components/confirm-dialog";
+import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { coursesApi, interviewQuestionsApi } from "@/lib/api";
-import { ViewToggle } from "@/components/ViewToggle";
+import { ViewToggle } from "@/components/ui/ViewToggle";
 import { AdminPage, AdminPageHeader } from "@/components/admin";
 
 export default function InterviewQuestionsPage() {
@@ -123,15 +123,15 @@ export default function InterviewQuestionsPage() {
         }
       />
 
-      <section className="grid gap-3 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-3.5 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950 md:grid-cols-2 xl:grid-cols-[200px_minmax(220px,1fr)_170px_190px_minmax(180px,0.6fr)]">
+      <section className="grid gap-3 rounded-3xl border border-zinc-200/80 bg-white/90 p-3 sm:p-4 dark:border-zinc-800/80 dark:bg-[#121215]/90 md:grid-cols-2 xl:grid-cols-[200px_minmax(220px,1fr)_170px_190px_minmax(180px,0.6fr)] shadow-xs">
         <Select
           value={filters.course}
           onValueChange={(value) => setFilter("course", value)}
         >
-          <SelectTrigger className="h-12 rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900">
+          <SelectTrigger className="h-10 rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b]">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
             <SelectItem value="all">All courses</SelectItem>
             {courses.map((course) => (
               <SelectItem key={course._id} value={course._id}>
@@ -141,22 +141,22 @@ export default function InterviewQuestionsPage() {
           </SelectContent>
         </Select>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
           <Input
             value={filters.search}
             onChange={(event) => setFilter("search", event.target.value)}
-            placeholder="Search questions"
-            className="rounded-2xl bg-zinc-100 pl-9 dark:bg-zinc-900"
+            placeholder="Search questions..."
+            className="h-10 rounded-full border-zinc-200/80 bg-zinc-50/80 pl-9.5 text-xs font-medium dark:border-zinc-800/80 dark:bg-[#18181b]"
           />
         </div>
         <Select
           value={filters.difficulty}
           onValueChange={(value) => setFilter("difficulty", value)}
         >
-          <SelectTrigger className="h-12 rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900">
+          <SelectTrigger className="h-10 rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b]">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
             <SelectItem value="all">All difficulties</SelectItem>
             <SelectItem value="easy">Easy</SelectItem>
             <SelectItem value="medium">Medium</SelectItem>
@@ -167,10 +167,10 @@ export default function InterviewQuestionsPage() {
           value={filters.questionType}
           onValueChange={(value) => setFilter("questionType", value)}
         >
-          <SelectTrigger className="h-12 rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900">
+          <SelectTrigger className="h-10 rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b]">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
             <SelectItem value="all">All types</SelectItem>
             <SelectItem value="conceptual">Conceptual</SelectItem>
             <SelectItem value="coding">Coding</SelectItem>
@@ -182,8 +182,8 @@ export default function InterviewQuestionsPage() {
         <Input
           value={filters.tag}
           onChange={(event) => setFilter("tag", event.target.value)}
-          placeholder="Filter by tag"
-          className="rounded-2xl bg-zinc-100 dark:bg-zinc-900"
+          placeholder="Filter by tag..."
+          className="h-10 rounded-full border-zinc-200/80 bg-zinc-50/80 px-4 text-xs font-medium dark:border-zinc-800/80 dark:bg-[#18181b]"
         />
       </section>
 
@@ -330,17 +330,17 @@ export default function InterviewQuestionsPage() {
           </footer>
         </div>
       ) : (
-        <section className="w-full bg-white dark:bg-zinc-900 rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs overflow-hidden">
+        <section className="admin-surface w-full rounded-[28px] sm:rounded-4xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-205 text-left text-sm">
-              <thead className="border-b border-zinc-200/70 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-950/40 text-[11px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+            <table className="admin-table w-full min-w-205 text-left text-sm">
+              <thead className="border-b border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/75 dark:bg-[#18181b]/60 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">
                 <tr>
-                  <th className="px-6 py-4">Question</th>
-                  <th className="px-6 py-4">Course</th>
-                  <th className="px-6 py-4">Difficulty</th>
-                  <th className="px-6 py-4">Type</th>
-                  <th className="px-6 py-4">Tags</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-6 py-4.5">Question</th>
+                  <th className="px-6 py-4.5">Course</th>
+                  <th className="px-6 py-4.5">Difficulty</th>
+                  <th className="px-6 py-4.5">Type</th>
+                  <th className="px-6 py-4.5">Tags</th>
+                  <th className="px-6 py-4.5 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
@@ -349,9 +349,9 @@ export default function InterviewQuestionsPage() {
                     key={item._id}
                     className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
                   >
-                    <td className="max-w-xl px-6 py-4">
+                    <td className="max-w-xl px-6 py-4.5">
                       <p
-                        className="font-bold text-zinc-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer line-clamp-2"
+                        className="font-bold font-outfit text-zinc-950 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer line-clamp-2"
                         onClick={() => setPreview(item)}
                       >
                         {item.question}
@@ -360,34 +360,34 @@ export default function InterviewQuestionsPage() {
                         #{item.slug}
                       </p>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4.5">
                       <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-500/20">
                         {item.course?.title || "Unassigned"}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4.5">
                       <span className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-2.5 py-0.5 text-[10px] font-black uppercase text-zinc-600 dark:text-zinc-300">
                         {item.difficulty}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4.5">
                       <span className="text-xs font-semibold capitalize text-zinc-600 dark:text-zinc-400">
                         {item.questionType}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4.5">
                       <div className="flex max-w-56 flex-wrap gap-1">
                         {(item.tags || []).slice(0, 3).map((tag) => (
                           <span
                             key={tag}
-                            className="rounded-lg bg-zinc-100 px-2 py-0.5 text-[10px] font-bold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+                            className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[10px] font-bold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
                           >
                             {tag}
                           </span>
                         ))}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4.5">
                       <div className="flex justify-end gap-1">
                         {item.course?.slug && item.slug && (
                           <Link
@@ -397,7 +397,7 @@ export default function InterviewQuestionsPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                              className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                               title="View on asif.to"
                             >
                               <Eye className="h-4 w-4" />
@@ -407,7 +407,7 @@ export default function InterviewQuestionsPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                          className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                           title="Preview in admin"
                           onClick={() => setPreview(item)}
                         >
@@ -417,7 +417,7 @@ export default function InterviewQuestionsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                             title="Edit question"
                           >
                             <Edit3 className="h-4 w-4" />
@@ -427,10 +427,10 @@ export default function InterviewQuestionsPage() {
                           variant="ghost"
                           size="icon"
                           title="Delete question"
-                          className="h-8 w-8 rounded-xl text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                          className="h-8 w-8 rounded-full text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
                           onClick={() => setDeleteTarget(item)}
                         >
-                          <Trash2 className="h-4 w-4 text-red-500" />
+                          <Trash2 className="h-4 w-4 text-rose-500" />
                         </Button>
                       </div>
                     </td>
@@ -445,7 +445,7 @@ export default function InterviewQuestionsPage() {
               <Button
                 variant="outline"
                 size="icon"
-                className="h-8 w-8 rounded-xl"
+                className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
                 disabled={pagination.page <= 1}
                 onClick={() =>
                   setFilters((current) => ({
@@ -462,7 +462,7 @@ export default function InterviewQuestionsPage() {
               <Button
                 variant="outline"
                 size="icon"
-                className="h-8 w-8 rounded-xl"
+                className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
                 disabled={pagination.page >= pagination.pages}
                 onClick={() =>
                   setFilters((current) => ({

@@ -21,24 +21,15 @@ export default function ProfileHeroHeader({
   getInitials,
 }) {
   return (
-    <header className="relative overflow-hidden rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl shadow-sm transition-all duration-300">
-      {/* Subtle Ambient Background Mesh & Glow */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-gradient-to-b from-blue-500/15 via-indigo-500/10 to-transparent dark:from-blue-500/20 dark:via-purple-500/10 dark:to-transparent rounded-full blur-3xl" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-indigo-500/10 to-transparent dark:from-purple-500/15 rounded-full blur-2xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:20px_20px] opacity-40 dark:opacity-30 mask-radial-at-top" />
-      </div>
-
-      {/* Top Decorative Border Accent */}
-      <div className="h-1 w-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-80" />
+    <header className="admin-surface relative overflow-hidden">
 
       {/* Profile Content Body */}
       <div className="p-6 sm:p-8 md:p-10 relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
         {/* Avatar with Status Ring */}
         <div className="relative shrink-0 group">
-          <Avatar className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl sm:rounded-[2rem] ring-4 ring-white dark:ring-zinc-900 shadow-2xl shadow-indigo-500/10 shrink-0 transition-transform duration-500 group-hover:scale-[1.02] overflow-hidden bg-zinc-100 dark:bg-zinc-950">
+          <Avatar className="h-28 w-28 shrink-0 overflow-hidden rounded-3xl border-4 border-white bg-zinc-100 shadow-sm transition-transform duration-200 group-hover:scale-[1.01] dark:border-zinc-900 dark:bg-zinc-950 sm:h-36 sm:w-36">
             <AvatarImage src={avatarUrl || ""} className="object-cover" />
-            <AvatarFallback className="text-3xl sm:text-4xl font-black bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900 text-zinc-700 dark:text-zinc-200">
+            <AvatarFallback className="bg-zinc-100 text-3xl font-black text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 sm:text-4xl">
               {getInitials(user.fullName)}
             </AvatarFallback>
           </Avatar>

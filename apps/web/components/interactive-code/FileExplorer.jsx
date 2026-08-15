@@ -147,28 +147,28 @@ function FileExplorer({ isDark = true, onFileSelect }) {
   return (
     <aside
       className={`flex h-full min-h-0 flex-col border-r transition-colors ${
-        isDark ? "border-zinc-800 bg-[#181818]" : "border-zinc-200 bg-[#f8f8f8]"
+        isDark ? "border-zinc-800/80 bg-[#141416]" : "border-zinc-200/90 bg-white"
       }`}
       aria-label="Project file explorer"
     >
       <div
-        className={`flex h-10 items-center justify-between border-b px-2 ${
-          isDark ? "border-zinc-800" : "border-zinc-200"
+        className={`flex h-10 items-center justify-between border-b px-2.5 ${
+          isDark ? "border-zinc-800/80 bg-[#121214]" : "border-zinc-200/90 bg-zinc-50"
         }`}
       >
         <span
-          className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-wider ${
+          className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider font-outfit ${
             isDark ? "text-zinc-400" : "text-zinc-500"
           }`}
         >
           <FolderTree className="h-3.5 w-3.5" />
           Explorer
         </span>
-        <div className="flex">
+        <div className="flex items-center gap-0.5">
           <button
             type="button"
             onClick={beginCreate}
-            className={`rounded p-1.5 transition ${
+            className={`rounded-lg p-1.5 transition cursor-pointer ${
               isDark
                 ? "text-zinc-400 hover:bg-zinc-800 hover:text-white"
                 : "text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900"
@@ -176,12 +176,12 @@ function FileExplorer({ isDark = true, onFileSelect }) {
             title="Create file"
             aria-label="Create file"
           >
-            <FilePlus2 className="h-4 w-4" />
+            <FilePlus2 className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
             onClick={beginCreateFolder}
-            className={`rounded p-1.5 transition ${
+            className={`rounded-lg p-1.5 transition cursor-pointer ${
               isDark
                 ? "text-zinc-400 hover:bg-zinc-800 hover:text-white"
                 : "text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900"
@@ -189,7 +189,7 @@ function FileExplorer({ isDark = true, onFileSelect }) {
             title="Create folder"
             aria-label="Create folder"
           >
-            <FolderPlus className="h-4 w-4" />
+            <FolderPlus className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
@@ -208,7 +208,7 @@ function FileExplorer({ isDark = true, onFileSelect }) {
                 if (event.key === "Enter") savePath();
                 if (event.key === "Escape") cancelEdit();
               }}
-              className={`min-w-0 flex-1 rounded border px-2 py-1.5 font-mono text-[11px] outline-none ${
+              className={`min-w-0 flex-1 rounded-lg border px-2 py-1.5 font-mono text-[11px] outline-none ${
                 isDark
                   ? "border-blue-500 bg-zinc-950 text-white"
                   : "border-blue-500 bg-white text-zinc-900"
@@ -222,7 +222,7 @@ function FileExplorer({ isDark = true, onFileSelect }) {
             <button
               type="button"
               onClick={savePath}
-              className="rounded bg-blue-600 p-1.5 text-white"
+              className="rounded-lg bg-blue-600 p-1.5 text-white cursor-pointer"
               title="Save"
             >
               <Check className="h-3.5 w-3.5" />
@@ -230,7 +230,7 @@ function FileExplorer({ isDark = true, onFileSelect }) {
             <button
               type="button"
               onClick={cancelEdit}
-              className={`rounded p-1.5 ${
+              className={`rounded-lg p-1.5 cursor-pointer ${
                 isDark
                   ? "bg-zinc-800 text-zinc-300"
                   : "bg-zinc-200 text-zinc-700"
@@ -247,7 +247,7 @@ function FileExplorer({ isDark = true, onFileSelect }) {
           )}
         </div>
       )}
-      <div className="min-h-0 flex-1 overflow-y-auto py-1">
+      <div className="min-h-0 flex-1 overflow-y-auto p-1.5 space-y-0.5">
         {entries.map((entry) => {
           const depth = entry.path.split("/").filter(Boolean).length - 1;
           const name = entry.path.split("/").filter(Boolean).pop();
@@ -258,15 +258,15 @@ function FileExplorer({ isDark = true, onFileSelect }) {
             return (
               <div
                 key={`folder-${entry.path}`}
-                className={`group flex items-center gap-1 pr-1 ${
-                  isDark ? "hover:bg-zinc-800/70" : "hover:bg-zinc-200/70"
+                className={`group flex items-center gap-1 pr-1 rounded-lg transition-colors ${
+                  isDark ? "hover:bg-zinc-800/70" : "hover:bg-zinc-100"
                 }`}
                 style={{ paddingLeft: `${depth * 12 + 4}px` }}
               >
                 <button
                   type="button"
                   onClick={() => toggleFolder(entry.path)}
-                  className={`flex min-w-0 flex-1 items-center gap-1.5 py-2 text-left font-mono text-[11px] ${
+                  className={`flex min-w-0 flex-1 items-center gap-1.5 py-1.5 text-left font-mono text-[11px] cursor-pointer ${
                     isDark ? "text-zinc-300" : "text-zinc-700"
                   }`}
                   aria-expanded={expanded}
@@ -296,10 +296,10 @@ function FileExplorer({ isDark = true, onFileSelect }) {
                         (current) => new Set([...current, entry.path]),
                       );
                     }}
-                    className={`rounded p-1 transition ${
+                    className={`rounded p-1 transition cursor-pointer ${
                       isDark
                         ? "text-zinc-400 hover:bg-zinc-700 hover:text-white"
-                        : "text-zinc-600 hover:bg-zinc-300 hover:text-zinc-900"
+                        : "text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900"
                     }`}
                     title={`Create file in ${entry.path}`}
                   >
@@ -310,7 +310,7 @@ function FileExplorer({ isDark = true, onFileSelect }) {
                     onClick={() =>
                       setDeleteTarget({ type: "folder", path: entry.path })
                     }
-                    className="rounded p-1 text-zinc-400 hover:bg-red-500/20 hover:text-red-500"
+                    className="rounded p-1 text-zinc-400 hover:bg-red-500/20 hover:text-red-500 cursor-pointer"
                     title={`Delete ${entry.path}`}
                   >
                     <Trash2 className="h-3 w-3" />
@@ -323,16 +323,16 @@ function FileExplorer({ isDark = true, onFileSelect }) {
           return (
             <div
               key={entry.path}
-              className={`group flex items-center gap-1 pr-1 ${
+              className={`group flex items-center gap-1 pr-1 rounded-lg transition-colors ${
                 isActive
                   ? isDark
-                    ? "bg-[#37373d]"
-                    : "bg-[#e4e4e7]"
+                    ? "bg-blue-600/20 text-blue-300"
+                    : "bg-blue-50 text-blue-700"
                   : isDark
                     ? "hover:bg-zinc-800/70"
-                    : "hover:bg-zinc-200/70"
+                    : "hover:bg-zinc-100"
               }`}
-              style={{ paddingLeft: `${depth * 12 + 20}px` }}
+              style={{ paddingLeft: `${depth * 12 + 16}px` }}
             >
               <button
                 type="button"
@@ -340,11 +340,11 @@ function FileExplorer({ isDark = true, onFileSelect }) {
                   sandpack.setActiveFile(entry.path);
                   onFileSelect?.();
                 }}
-                className={`flex min-w-0 flex-1 items-center gap-2 py-2 text-left font-mono text-[11px] ${
+                className={`flex min-w-0 flex-1 items-center gap-2 py-1.5 text-left font-mono text-[11px] cursor-pointer ${
                   isActive
                     ? isDark
-                      ? "font-bold text-white"
-                      : "font-bold text-zinc-950"
+                      ? "font-bold text-blue-300"
+                      : "font-bold text-blue-700"
                     : isDark
                       ? "text-zinc-300"
                       : "text-zinc-700"
@@ -359,10 +359,10 @@ function FileExplorer({ isDark = true, onFileSelect }) {
                 <button
                   type="button"
                   onClick={() => beginRename(entry.path)}
-                  className={`rounded p-1 transition ${
+                  className={`rounded p-1 transition cursor-pointer ${
                     isDark
                       ? "text-zinc-400 hover:bg-zinc-700 hover:text-white"
-                      : "text-zinc-600 hover:bg-zinc-300 hover:text-zinc-900"
+                      : "text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900"
                   }`}
                   title={`Rename ${entry.path}`}
                 >
@@ -375,7 +375,7 @@ function FileExplorer({ isDark = true, onFileSelect }) {
                       ? setError("A project must keep at least one file.")
                       : setDeleteTarget({ type: "file", path: entry.path })
                   }
-                  className="rounded p-1 text-zinc-400 hover:bg-red-500/20 hover:text-red-500"
+                  className="rounded p-1 text-zinc-400 hover:bg-red-500/20 hover:text-red-500 cursor-pointer"
                   title={`Delete ${entry.path}`}
                 >
                   <Trash2 className="h-3 w-3" />
@@ -402,20 +402,20 @@ function FileExplorer({ isDark = true, onFileSelect }) {
           aria-labelledby="delete-file-title"
         >
           <div
-            className={`w-full max-w-sm rounded-2xl border p-5 shadow-2xl ${
+            className={`w-full max-w-sm rounded-3xl border p-6 shadow-2xl ${
               isDark
-                ? "border-zinc-700 bg-zinc-900 text-white"
-                : "border-zinc-300 bg-white text-zinc-900"
+                ? "border-zinc-800 bg-[#18181b] text-white shadow-black/80"
+                : "border-zinc-200 bg-white text-zinc-900 shadow-zinc-400/40"
             }`}
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-red-500/10 text-red-500">
               <Trash2 className="h-5 w-5" />
             </div>
-            <h3 id="delete-file-title" className="mt-4 text-base font-black">
+            <h3 id="delete-file-title" className="mt-4 text-base font-black font-outfit">
               Delete {deleteTarget.type}?
             </h3>
             <p
-              className={`mt-2 text-sm leading-relaxed ${
+              className={`mt-2 text-xs leading-relaxed font-medium ${
                 isDark ? "text-zinc-400" : "text-zinc-600"
               }`}
             >
@@ -431,10 +431,10 @@ function FileExplorer({ isDark = true, onFileSelect }) {
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
-                className={`rounded-full px-4 py-2 text-xs font-bold transition ${
+                className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
                   isDark
                     ? "bg-zinc-800 text-zinc-200 hover:bg-zinc-700"
-                    : "bg-zinc-200 text-zinc-800 hover:bg-zinc-300"
+                    : "bg-zinc-100 text-zinc-800 hover:bg-zinc-200"
                 }`}
               >
                 Cancel
@@ -442,7 +442,7 @@ function FileExplorer({ isDark = true, onFileSelect }) {
               <button
                 type="button"
                 onClick={confirmDelete}
-                className="rounded-full bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700"
+                className="rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-500 cursor-pointer shadow-sm"
               >
                 Delete
               </button>

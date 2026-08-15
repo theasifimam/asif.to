@@ -14,7 +14,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Button, Card } from "@/components/ui";
-import Editor from "@/components/Editor";
+import Editor from "@/components/editor/Editor";
 import { pagesApi, Page } from "@/lib/api";
 import { toast } from "sonner";
 

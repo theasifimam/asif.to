@@ -1,6 +1,6 @@
 import { cache } from "react";
-import HomePageClient from "@/components/HomePageClient";
-import JsonLd from "@/components/JsonLd";
+import HomePageClient from "@/components/home/HomePageClient";
+import JsonLd from "@/components/seo/JsonLd";
 import {
   buildCourseItemListSchema,
   getUniqueListableCourses,

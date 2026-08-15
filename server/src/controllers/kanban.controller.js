@@ -37,7 +37,7 @@ export const getBoard = async (req, res) => {
   try {
     const board = await KanbanBoard.findOne({ _id: req.params.id, archived: false }).lean();
     if (!board) return res.status(404).json({ success: false, message: "Board not found" });
-    const [columns, cards, labels] = await Promise.all([
+    const [columns, cards, labels, archivedColumns] = await Promise.all([
       KanbanColumn.find({ board: board._id, archived: false }).sort({ order: 1 }).lean(),
       KanbanCard.find({ board: board._id, archived: false })
         .sort({ column: 1, order: 1 })
@@ -45,8 +45,9 @@ export const getBoard = async (req, res) => {
         .populate("parentCourse", "title slug")
         .lean(),
       KanbanLabel.find({ board: board._id }).sort({ name: 1 }).lean(),
+      KanbanColumn.find({ board: board._id, archived: true }).sort({ order: 1 }).lean(),
     ]);
-    res.json({ success: true, data: { board, columns, cards, labels } });
+    res.json({ success: true, data: { board, columns, cards, labels, archivedColumns } });
   } catch (error) { sendError(res, error, "Unable to load board"); }
 };
 

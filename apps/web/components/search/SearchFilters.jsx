@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Search as SearchIcon, SlidersHorizontal, Loader2 } from 'lucide-react';
-import CategoryTabs from '@/components/CategoryTabs';
+import CategoryTabs from '@/components/articles/CategoryTabs';
 
 
 

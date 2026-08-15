@@ -2,10 +2,11 @@
 
 import React from "react";
 import { useParams } from "next/navigation";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import { useGetPageBySlugQuery } from "@/lib/api/pagesApi";
 import { ShieldCheck, FileText, Cookie, Mail } from "lucide-react";
+import { PrivacyPolicy, TermsOfService } from "@/components/legal/LegalPolicies";
 
 const LEGAL_FALLBACKS = {
   "privacy-policy": {
@@ -182,6 +183,14 @@ const LEGAL_FALLBACKS = {
     ),
   },
 };
+
+// Comprehensive source-controlled policies. CMS content can still override
+// these fallbacks when an intentionally published legal page exists.
+LEGAL_FALLBACKS["privacy-policy"].content = <PrivacyPolicy />;
+LEGAL_FALLBACKS["privacy-policy"].subtitle = "Effective and Last Updated: August 15, 2026";
+LEGAL_FALLBACKS["terms-conditions"].content = <TermsOfService />;
+LEGAL_FALLBACKS["terms-conditions"].title = "Terms of Service";
+LEGAL_FALLBACKS["terms-conditions"].subtitle = "Effective and Last Updated: August 15, 2026";
 
 export default function LegalPage() {
   const params = useParams();

@@ -1,27 +1,14 @@
 import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
- * MetricCard - Display key metrics in the Neo-Bento style
+ * MetricCard - Modern Bento Metric Card inspired by reference SaaS dashboard
  *
  * Features:
- * - Large prominent value display
- * - Optional trend indicator
- * - Icon support
- * - Accent variant with primary glow
+ * - Bold numerical typography (Outfit)
+ * - Circular icon container
+ * - Soft trend indicator pill
+ * - Clean uppercase tracked labels
+ * - 24px-28px rounded geometry with subtle border & diffuse shadow
  */
 export function MetricCard({
   title,
@@ -29,92 +16,91 @@ export function MetricCard({
   subtitle,
   icon: Icon,
   trend,
+  tone = "primary",
   accentColor = false,
-  className
+  className,
 }) {
   return (
     <div
       className={cn(
-        "relative flex flex-col overflow-hidden",
-        "rounded-3xl p-6 transition-all duration-300 ease-out",
-        "hover:-translate-y-1",
-        accentColor ?
-        "bg-primary text-primary-foreground" :
-        "bg-card text-card-foreground",
-        className
+        "admin-surface relative flex flex-col justify-between overflow-hidden p-6 sm:p-7 transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700",
+        accentColor &&
+          "bg-blue-600 text-white border-blue-600 dark:bg-blue-600 dark:text-white dark:border-blue-600 shadow-lg shadow-blue-600/20",
+        className,
       )}
-      style={{
-        boxShadow: accentColor ? "var(--shadow-glow)" : "var(--shadow-card)"
-      }}>
-      
-      {/* Decorative background blur for accent variant */}
-      {accentColor &&
-      <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/20 blur-3xl" />
-      }
-
-      {/* Header with icon */}
-      <div className="mb-4 flex items-start justify-between">
+    >
+      {/* Top row: Label + Circular Icon Container */}
+      <div className="mb-4 flex items-center justify-between gap-3">
         <span
           className={cn(
-            "text-[10px] font-black uppercase tracking-[0.2em]",
-            accentColor ?
-            "text-primary-foreground/70" :
-            "text-muted-foreground/80"
-          )}>
-          
-          <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-current" />
+            "text-[10px] sm:text-[11px] font-black uppercase tracking-[0.18em]",
+            accentColor
+              ? "text-blue-100"
+              : "text-zinc-400 dark:text-zinc-500",
+          )}
+        >
           {title}
         </span>
-        {Icon &&
-        <Icon
-          className={cn(
-            "h-5 w-5",
-            accentColor ?
-            "text-primary-foreground/70" :
-            "text-muted-foreground"
-          )} />
-
-        }
+        {Icon && (
+          <div
+            className={cn(
+              "flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full transition-colors",
+              accentColor
+                ? "bg-white/20 text-white"
+                : "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400",
+            )}
+          >
+            <Icon className="h-4.5 w-4.5" />
+          </div>
+        )}
       </div>
 
-      {/* Main value */}
+      {/* Main Value Display */}
       <div className="relative z-10 mb-2">
-        <span className="text-4xl font-black tracking-tight">{value}</span>
-      </div>
-
-      {/* Subtitle and trend */}
-      <div className="flex items-center justify-between">
-        {subtitle &&
         <span
           className={cn(
-            "text-sm",
-            accentColor ?
-            "text-primary-foreground/70" :
-            "text-muted-foreground"
-          )}>
-          
+            "text-3xl sm:text-4xl font-black font-outfit tracking-tight",
+            accentColor ? "text-white" : "text-zinc-950 dark:text-white",
+          )}
+        >
+          {value}
+        </span>
+      </div>
+
+      {/* Bottom row: Subtitle & Trend badge */}
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+        {subtitle && (
+          <span
+            className={cn(
+              "text-xs font-medium",
+              accentColor
+                ? "text-blue-100"
+                : "text-zinc-500 dark:text-zinc-400",
+            )}
+          >
             {subtitle}
           </span>
-        }
-        {trend &&
-        <span
-          className={cn(
-            "flex items-center gap-1 text-xs font-semibold",
-            trend.isPositive ?
-            accentColor ?
-            "text-primary-foreground" :
-            "text-green-400" :
-            accentColor ?
-            "text-primary-foreground" :
-            "text-red-400"
-          )}>
-          
-            {trend.isPositive ? "↑" : "↓"} {trend.value}%
+        )}
+        {trend && (
+          <span
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-extrabold",
+              trend.isPositive
+                ? accentColor
+                  ? "bg-white/20 text-white"
+                  : "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
+                : accentColor
+                  ? "bg-white/20 text-white"
+                  : "bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300",
+            )}
+          >
+            <span>{trend.isPositive ? "↑" : "↓"}</span>
+            <span>{trend.value}%</span>
           </span>
-        }
+        )}
       </div>
-    </div>);
-
+    </div>
+  );
 }
 
 export default MetricCard;

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Clock, Check } from "lucide-react";
-import SaveButton from "@/components/SaveButton";
+import SaveButton from "@/components/articles/SaveButton";
 
 export default function ChapterReaderHeader({
   chapter,

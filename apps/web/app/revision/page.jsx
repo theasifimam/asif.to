@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import RevisionFlashcards from "@/components/home/RevisionFlashcards";
 import { TECH_STACKS } from "@/lib/tutorialData";
 import { Layers, Sparkles } from "lucide-react";

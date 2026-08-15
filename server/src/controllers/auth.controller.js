@@ -1,6 +1,8 @@
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import { getPermissionsForRole } from "../utils/permissions.js";
 
 import { sendWelcomeEmail } from "../services/email.service.js";
 import { verifyAndConsumeOtp } from "./otp.controller.js";
@@ -17,7 +19,179 @@ const signToken = (id) => {
   });
 };
 
-const sendTokenResponse = (res, statusCode, user, token) => {
+const safeEqual = (left = "", right = "") => {
+  const a = Buffer.from(String(left));
+  const b = Buffer.from(String(right));
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+};
+
+async function availableUsername(name, email) {
+  const base =
+    String(name || email?.split("@")[0] || "learner")
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 24) || "learner";
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const candidate = attempt
+      ? `${base.slice(0, 20)}-${crypto.randomBytes(3).toString("hex")}`
+      : base;
+    if (candidate.length >= 3 && !(await User.exists({ username: candidate })))
+      return candidate;
+  }
+  return `learner-${crypto.randomUUID().slice(0, 12)}`;
+}
+
+// Server-to-server callback used by Auth.js after a provider has validated the
+// OAuth response. It never accepts provider access tokens and never returns a
+// password, internal secret, or OAuth credential.
+export const upsertOAuthUser = async (req, res) => {
+  try {
+    const expected = process.env.AUTH_INTERNAL_SECRET;
+    if (!expected || !safeEqual(req.get("x-auth-internal-secret"), expected)) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized authentication callback.",
+      });
+    }
+    const { provider, providerAccountId, name, email, image, emailVerified } =
+      req.body || {};
+    if (
+      !["google", "github"].includes(provider) ||
+      !providerAccountId ||
+      !email
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "The provider did not return a usable email address.",
+      });
+    }
+    const normalizedEmail = String(email).trim().toLowerCase();
+    let user = await User.findOne({
+      oauthAccounts: {
+        $elemMatch: { provider, providerAccountId: String(providerAccountId) },
+      },
+    });
+    if (!user) {
+      user = await User.findOne({ email: normalizedEmail });
+      if (user && !emailVerified)
+        return res.status(409).json({
+          success: false,
+          message:
+            "This email already belongs to an account and the provider did not verify it.",
+        });
+      if (user) {
+        user.oauthAccounts ||= [];
+        if (
+          !user.oauthAccounts.some(
+            (account) =>
+              account.provider === provider &&
+              account.providerAccountId === String(providerAccountId),
+          )
+        ) {
+          user.oauthAccounts.push({
+            provider,
+            providerAccountId: String(providerAccountId),
+          });
+        }
+      } else {
+        user = new User({
+          fullName: String(name || normalizedEmail.split("@")[0])
+            .trim()
+            .slice(0, 120),
+          username: await availableUsername(name, normalizedEmail),
+          email: normalizedEmail,
+          avatar: image || undefined,
+          provider,
+          providerAccountId: String(providerAccountId),
+          oauthAccounts: [
+            { provider, providerAccountId: String(providerAccountId) },
+          ],
+          isVerified: Boolean(emailVerified),
+          status: "active",
+          role: "reader",
+        });
+      }
+    }
+    if (["suspended", "banned", "deactivated"].includes(user.status))
+      return res
+        .status(403)
+        .json({ success: false, message: "This account has been suspended." });
+    if (!user.avatar && image) user.avatar = image;
+    if (!user.fullName && name) user.fullName = String(name).slice(0, 120);
+    user.provider ||= provider;
+    user.providerAccountId ||= String(providerAccountId);
+    user.lastLogin = new Date();
+    await user.save({ validateBeforeSave: false });
+    return res.json({
+      success: true,
+      data: {
+        user: {
+          id: String(user._id),
+          name: user.fullName,
+          email: user.email,
+          image: user.avatar,
+          username: user.username,
+          provider,
+          createdAt: user.createdAt,
+        },
+      },
+    });
+  } catch (error) {
+    console.error(
+      "[AUTH] OAuth account persistence failed:",
+      error?.code || error?.message,
+    );
+    return res.status(error?.code === 11000 ? 409 : 500).json({
+      success: false,
+      message:
+        error?.code === 11000
+          ? "This OAuth account is already linked."
+          : "Unable to complete sign in.",
+    });
+  }
+};
+
+export const issueOAuthSession = async (req, res) => {
+  try {
+    const expected = process.env.AUTH_INTERNAL_SECRET;
+    if (!expected || !safeEqual(req.get("x-auth-internal-secret"), expected)) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized authentication session request.",
+      });
+    }
+    const user = await User.findById(req.body?.userId).select(
+      "fullName username email avatar role status provider createdAt sessionsRevokedAt",
+    );
+    if (!user || ["suspended", "banned", "deactivated"].includes(user.status))
+      return res
+        .status(403)
+        .json({ success: false, message: "This account is unavailable." });
+    if (
+      user.sessionsRevokedAt &&
+      Number(req.body?.authenticatedAt || 0) <= user.sessionsRevokedAt.getTime()
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: "This session has been revoked. Please sign in again.",
+      });
+    }
+    return res.json({
+      success: true,
+      data: { token: signToken(String(user._id)), user },
+    });
+  } catch (error) {
+    console.error("[AUTH] OAuth session issue failed:", error?.message);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to create the application session.",
+    });
+  }
+};
+
+const sendTokenResponse = async (res, statusCode, user, token) => {
   const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -29,6 +203,7 @@ const sendTokenResponse = (res, statusCode, user, token) => {
 
   // Remove password before sending
   const { password: _, ...userData } = user.toObject ? user.toObject() : user;
+  userData.permissions = await getPermissionsForRole(userData.role);
 
   res.status(statusCode).json({
     success: true,
@@ -48,12 +223,10 @@ export const signup = async (req, res) => {
     const normalizedEmail = email?.toLowerCase().trim();
 
     if (!fullName || !username || !normalizedEmail || !password || !otp) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          message: "fullName, username, email, password and OTP are required.",
-        });
+      res.status(400).json({
+        success: false,
+        message: "fullName, username, email, password and OTP are required.",
+      });
       return;
     }
 
@@ -93,7 +266,7 @@ export const signup = async (req, res) => {
       console.error("[AUTH] Welcome email failed:", err),
     );
 
-    sendTokenResponse(res, 201, newUser, token);
+    await sendTokenResponse(res, 201, newUser, token);
   } catch (error) {
     console.error("[AUTH] Signup error:", error);
     if (error.code === 11000) {
@@ -118,28 +291,31 @@ export const signin = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      res
-        .status(400)
-        .json({ success: false, message: "Email/Username and password are required." });
+      res.status(400).json({
+        success: false,
+        message: "Email/Username and password are required.",
+      });
       return;
     }
 
     const login = email.toLowerCase();
     const user = await User.findOne({
-      $or: [{ email: login }, { username: login }]
+      $or: [{ email: login }, { username: login }],
     }).select("+password");
     if (!user) {
       res.status(401).json({ success: false, message: "Invalid credentials." });
       return;
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = user.password
+      ? await bcrypt.compare(password, user.password)
+      : false;
     if (!isMatch) {
       res.status(401).json({ success: false, message: "Invalid credentials." });
       return;
     }
 
-    if (user.status === "suspended") {
+    if (["suspended", "banned", "deactivated"].includes(user.status)) {
       res
         .status(403)
         .json({ success: false, message: "Your account has been suspended." });
@@ -151,7 +327,7 @@ export const signin = async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     const token = signToken(String(user._id));
-    sendTokenResponse(res, 200, user, token);
+    await sendTokenResponse(res, 200, user, token);
   } catch (error) {
     console.error("[AUTH] Signin error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -179,27 +355,27 @@ export const adminSignin = async (req, res) => {
     }
 
     // Only allow admin, editor, author roles
-    const allowedRoles = ["admin", "editor", "author"];
+    const allowedRoles = ["super_admin", "admin", "editor", "author"];
     if (!allowedRoles.includes(user.role)) {
-      res
-        .status(403)
-        .json({
-          success: false,
-          message: "Access denied. Admin privileges required.",
-        });
+      res.status(403).json({
+        success: false,
+        message: "Access denied. Admin privileges required.",
+      });
       return;
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = user.password
+      ? await bcrypt.compare(password, user.password)
+      : false;
     if (!isMatch) {
       res.status(401).json({ success: false, message: "Invalid credentials." });
       return;
     }
 
-    if (user.status === "suspended") {
+    if (["suspended", "banned", "deactivated"].includes(user.status)) {
       res
         .status(403)
-        .json({ success: false, message: "Your account has been suspended." });
+        .json({ success: false, message: `Your account is ${user.status}.` });
       return;
     }
 
@@ -207,7 +383,7 @@ export const adminSignin = async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     const token = signToken(String(user._id));
-    sendTokenResponse(res, 200, user, token);
+    await sendTokenResponse(res, 200, user, token);
   } catch (error) {
     console.error("[AUTH] Admin signin error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -224,7 +400,12 @@ export const getMe = async (req, res) => {
     }
     res.status(200).json({
       success: true,
-      data: { user },
+      data: {
+        user: {
+          ...user.toObject(),
+          permissions: req.user.effectivePermissions || [],
+        },
+      },
     });
   } catch (error) {
     console.error("[AUTH] GetMe error:", error);
@@ -247,18 +428,25 @@ export const updatePassword = async (req, res) => {
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          message: "Current and new passwords are required.",
-        });
+      res.status(400).json({
+        success: false,
+        message: "Current and new passwords are required.",
+      });
       return;
     }
 
     const user = await User.findById(req.user._id).select("+password");
     if (!user) {
       res.status(404).json({ success: false, message: "User not found." });
+      return;
+    }
+
+    if (!user.password) {
+      res.status(400).json({
+        success: false,
+        message:
+          "This account uses OAuth sign in and does not have a password yet.",
+      });
       return;
     }
 
@@ -271,12 +459,10 @@ export const updatePassword = async (req, res) => {
     }
 
     if (newPassword.length < 8) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          message: "New password must be at least 8 characters.",
-        });
+      res.status(400).json({
+        success: false,
+        message: "New password must be at least 8 characters.",
+      });
       return;
     }
 
@@ -284,7 +470,7 @@ export const updatePassword = async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     const token = signToken(String(user._id));
-    sendTokenResponse(res, 200, user, token);
+    await sendTokenResponse(res, 200, user, token);
   } catch (error) {
     console.error("[AUTH] UpdatePassword error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -317,22 +503,18 @@ export const resetPassword = async (req, res) => {
     const { email, otp, newPassword } = req.body;
 
     if (!email || !otp || !newPassword) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          message: "Email, OTP, and new password are required.",
-        });
+      res.status(400).json({
+        success: false,
+        message: "Email, OTP, and new password are required.",
+      });
       return;
     }
 
     if (newPassword.length < 8) {
-      res
-        .status(400)
-        .json({
-          success: false,
-          message: "New password must be at least 8 characters.",
-        });
+      res.status(400).json({
+        success: false,
+        message: "New password must be at least 8 characters.",
+      });
       return;
     }
 
@@ -355,7 +537,7 @@ export const resetPassword = async (req, res) => {
 
     // Optionally sign them in
     const token = signToken(String(user._id));
-    sendTokenResponse(res, 200, user, token);
+    await sendTokenResponse(res, 200, user, token);
   } catch (error) {
     console.error("[AUTH] ResetPassword error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });

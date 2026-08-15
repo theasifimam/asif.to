@@ -16,7 +16,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { ConfirmDialog } from "@/components/confirm-dialog";
+import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { coursesApi } from "@/lib/api";
-import { ViewToggle } from "@/components/ViewToggle";
+import { ViewToggle } from "@/components/ui/ViewToggle";
 import { AdminPage, AdminPageHeader } from "@/components/admin";
 
 const initialPagination = { page: 1, pages: 1, total: 0, limit: 20 };
@@ -155,14 +155,14 @@ export default function CoursesAdminPage() {
         }
       />
 
-      <section className="flex flex-col gap-3 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-3.5 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950 md:flex-row">
+      <section className="flex flex-col gap-3 rounded-3xl border border-zinc-200/80 bg-white/90 p-3 sm:p-4 dark:border-zinc-800/80 dark:bg-[#121215]/90 md:flex-row shadow-xs">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
           <Input
             value={filters.search}
             onChange={(event) => setFilter("search", event.target.value)}
-            placeholder="Search title, slug, technology, or keyword"
-            className="rounded-2xl bg-zinc-100 pl-9 dark:bg-zinc-900"
+            placeholder="Search courses by title, slug, technology..."
+            className="rounded-full border-zinc-200/80 bg-zinc-50/80 pl-9.5 text-xs font-medium dark:border-zinc-800/80 dark:bg-[#18181b] h-10"
           />
         </div>
         <Select
@@ -170,12 +170,12 @@ export default function CoursesAdminPage() {
           onValueChange={(value) => setFilter("status", value)}
         >
           <SelectTrigger
-            className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900 md:w-48"
+            className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b] md:w-40"
             aria-label="Filter by status"
           >
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
             <SelectItem value="all">All statuses</SelectItem>
             <SelectItem value="published">Published</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
@@ -186,12 +186,12 @@ export default function CoursesAdminPage() {
           onValueChange={(value) => setFilter("level", value)}
         >
           <SelectTrigger
-            className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900 md:w-56"
+            className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b] md:w-48"
             aria-label="Filter by level"
           >
             <SelectValue placeholder="All levels" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
             <SelectItem value="all">All levels</SelectItem>
             <SelectItem value="Beginner">Beginner</SelectItem>
             <SelectItem value="Intermediate">Intermediate</SelectItem>
@@ -204,11 +204,11 @@ export default function CoursesAdminPage() {
       </section>
 
       {loading ? (
-        <div className="flex h-64 items-center justify-center rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
+        <div className="flex h-64 items-center justify-center rounded-3xl border border-zinc-200/80 bg-white dark:border-zinc-800/80 dark:bg-[#121215]">
           <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
         </div>
       ) : courses.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
+        <div className="flex flex-col items-center justify-center py-16 rounded-3xl border border-zinc-200/80 bg-white text-zinc-500 dark:border-zinc-800/80 dark:bg-[#121215]">
           <BookOpen className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
           <p className="text-sm font-medium">No courses match these filters.</p>
         </div>
@@ -218,22 +218,22 @@ export default function CoursesAdminPage() {
             {courses.map((course) => (
               <div
                 key={course._id}
-                className="group flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs transition-all hover:border-blue-500/50 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950"
+                className="admin-surface group flex flex-col justify-between p-5 rounded-3xl transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
+                      <span className="text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
                         {course.techId}
                       </span>
-                      <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                      <span className="text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200/50 dark:border-blue-800/50">
                         {course.level}
                       </span>
                     </div>
                     <button
                       onClick={() => toggleStatus(course)}
                       disabled={updating === course._id}
-                      className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                      className={`rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider transition-all ${
                         updating === course._id
                           ? "bg-zinc-100 text-zinc-400"
                           : statusStyles[course.status]
@@ -251,7 +251,7 @@ export default function CoursesAdminPage() {
                   <div>
                     <Link
                       href={`/courses/${course._id}`}
-                      className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-2"
+                      className="font-bold text-zinc-950 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-2 text-sm sm:text-base"
                     >
                       {course.title}
                     </Link>
@@ -284,7 +284,7 @@ export default function CoursesAdminPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 rounded-lg"
+                          className="h-8 w-8 rounded-full"
                           title="View public course"
                         >
                           <ExternalLink className="h-4 w-4" />
@@ -295,7 +295,7 @@ export default function CoursesAdminPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 rounded-lg"
+                        className="h-8 w-8 rounded-full"
                         title="Edit course"
                       >
                         <Pencil className="h-4 w-4" />
@@ -306,9 +306,9 @@ export default function CoursesAdminPage() {
                       size="icon"
                       title="Delete course"
                       onClick={() => setDeleteCourse(course)}
-                      className="h-8 w-8 rounded-lg text-zinc-400 hover:text-red-600"
+                      className="h-8 w-8 rounded-full text-zinc-400 hover:text-rose-600"
                     >
-                      <Trash2 className="h-4 w-4 text-red-500" />
+                      <Trash2 className="h-4 w-4 text-rose-500" />
                     </Button>
                   </div>
                 </div>
@@ -316,7 +316,7 @@ export default function CoursesAdminPage() {
             ))}
           </div>
 
-          <footer className="flex items-center justify-between rounded-3xl border border-zinc-200/60 bg-white px-5 py-4 text-sm text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
+          <footer className="flex items-center justify-between rounded-3xl border border-zinc-200/80 bg-white px-5 py-4 text-xs font-semibold text-zinc-500 dark:border-zinc-800/80 dark:bg-[#121215]">
             <span>
               {pagination.total} course{pagination.total === 1 ? "" : "s"}
             </span>
@@ -324,38 +324,40 @@ export default function CoursesAdminPage() {
               <Button
                 variant="outline"
                 size="icon"
+                className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
                 title="Previous page"
                 disabled={loading || pagination.page <= 1}
                 onClick={() => setFilter("page", pagination.page - 1)}
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-3.5 w-3.5" />
               </Button>
-              <span className="min-w-24 text-center text-xs font-medium">
+              <span className="min-w-20 text-center text-xs font-bold text-zinc-700 dark:text-zinc-300">
                 Page {pagination.page} of {pagination.pages}
               </span>
               <Button
                 variant="outline"
                 size="icon"
+                className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
                 title="Next page"
                 disabled={loading || pagination.page >= pagination.pages}
                 onClick={() => setFilter("page", pagination.page + 1)}
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3.5 w-3.5" />
               </Button>
             </div>
           </footer>
         </div>
       ) : (
-        <section className="w-full bg-white dark:bg-zinc-900 rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs overflow-hidden">
+        <section className="admin-surface w-full overflow-hidden rounded-[28px] sm:rounded-[32px]">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-190 text-left text-sm">
-              <thead className="border-b border-zinc-200/70 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-950/40 text-[11px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+            <table className="admin-table w-full min-w-190 text-left text-sm">
+              <thead className="border-b border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/75 dark:bg-[#18181b]/60 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">
                 <tr>
-                  <th className="px-6 py-4">Course</th>
-                  <th className="px-6 py-4">Level</th>
-                  <th className="px-6 py-4">Chapters</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-6 py-4.5">Course</th>
+                  <th className="px-6 py-4.5">Level</th>
+                  <th className="px-6 py-4.5">Chapters</th>
+                  <th className="px-6 py-4.5">Status</th>
+                  <th className="px-6 py-4.5 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
@@ -364,10 +366,10 @@ export default function CoursesAdminPage() {
                     key={course._id}
                     className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
                   >
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4.5">
                       <Link
                         href={`/courses/${course._id}`}
-                        className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-1"
+                        className="font-bold font-outfit text-zinc-950 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-1"
                       >
                         {course.title}
                       </Link>
@@ -378,22 +380,22 @@ export default function CoursesAdminPage() {
                         </span>
                       </p>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-500/20">
+                    <td className="px-6 py-4.5">
+                      <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[9px] font-black uppercase text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-500/20">
                         {course.level}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4.5">
                       <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-600 dark:text-zinc-400">
                         <Layers className="h-4 w-4 text-zinc-400" />
                         <span>{course.chapterCount || 0}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4.5">
                       <button
                         onClick={() => toggleStatus(course)}
                         disabled={updating === course._id}
-                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                        className={`rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider transition-all ${
                           updating === course._id
                             ? "bg-zinc-100 text-zinc-400"
                             : statusStyles[course.status]
@@ -407,7 +409,7 @@ export default function CoursesAdminPage() {
                         )}
                       </button>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4.5">
                       <div className="flex justify-end gap-1">
                         {course.status === "published" && (
                           <a
@@ -418,7 +420,7 @@ export default function CoursesAdminPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                              className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                               title="View public course"
                             >
                               <ExternalLink className="h-4 w-4" />
@@ -429,7 +431,7 @@ export default function CoursesAdminPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                             title="Manage chapters"
                           >
                             <FilePenLine className="h-4 w-4" />
@@ -439,7 +441,7 @@ export default function CoursesAdminPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                             title="Edit course"
                           >
                             <Pencil className="h-4 w-4" />
@@ -449,10 +451,10 @@ export default function CoursesAdminPage() {
                           variant="ghost"
                           size="icon"
                           title="Delete course"
-                          className="h-8 w-8 rounded-xl text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
                           onClick={() => setDeleteCourse(course)}
+                          className="h-8 w-8 rounded-full text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
                         >
-                          <Trash2 className="h-4 w-4 text-red-500" />
+                          <Trash2 className="h-4 w-4 text-rose-500" />
                         </Button>
                       </div>
                     </td>
@@ -461,7 +463,8 @@ export default function CoursesAdminPage() {
               </tbody>
             </table>
           </div>
-          <footer className="flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/70 px-6 py-3.5 text-xs text-zinc-400 font-medium">
+
+          <footer className="flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/70 px-6 py-4 text-xs font-semibold text-zinc-500">
             <span>
               {pagination.total} course{pagination.total === 1 ? "" : "s"}
             </span>
@@ -469,25 +472,23 @@ export default function CoursesAdminPage() {
               <Button
                 variant="outline"
                 size="icon"
-                className="h-8 w-8 rounded-xl"
-                title="Previous page"
+                className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
                 disabled={loading || pagination.page <= 1}
                 onClick={() => setFilter("page", pagination.page - 1)}
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-3.5 w-3.5" />
               </Button>
-              <span className="min-w-20 text-center text-xs font-bold text-zinc-600 dark:text-zinc-300">
+              <span className="min-w-16 text-center text-xs font-bold text-zinc-700 dark:text-zinc-300">
                 {pagination.page} / {pagination.pages}
               </span>
               <Button
                 variant="outline"
                 size="icon"
-                className="h-8 w-8 rounded-xl"
-                title="Next page"
+                className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
                 disabled={loading || pagination.page >= pagination.pages}
                 onClick={() => setFilter("page", pagination.page + 1)}
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3.5 w-3.5" />
               </Button>
             </div>
           </footer>

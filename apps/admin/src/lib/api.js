@@ -55,6 +55,7 @@ export async function apiGet(endpoint) {
       method: "GET",
       headers: {
         ...getAuthHeaders(),
+        "Content-Type": "application/json",
         "ngrok-skip-browser-warning": "true",
       },
       credentials: "include", // Ensure cookies are sent
@@ -77,6 +78,7 @@ export async function apiPost(endpoint, body) {
       method: "POST",
       headers: {
         ...getAuthHeaders(),
+        "Content-Type": "application/json",
         "ngrok-skip-browser-warning": "true",
       },
       body: body ? JSON.stringify(body) : undefined,
@@ -100,6 +102,7 @@ export async function apiPut(endpoint, body) {
       method: "PUT",
       headers: {
         ...getAuthHeaders(),
+        "Content-Type": "application/json",
         "ngrok-skip-browser-warning": "true",
       },
       body: body ? JSON.stringify(body) : undefined,
@@ -123,6 +126,7 @@ export async function apiPatch(endpoint, body) {
       method: "PATCH",
       headers: {
         ...getAuthHeaders(),
+        "Content-Type": "application/json",
         "ngrok-skip-browser-warning": "true",
       },
       body: body ? JSON.stringify(body) : undefined,
@@ -420,11 +424,20 @@ export const analyticsApi = {
   sources: (params) => apiGet(`/analytics/sources?${new URLSearchParams(params)}`),
   page: (params) => apiGet(`/analytics/page?${new URLSearchParams(params)}`),
   sync: () => apiPost("/analytics/sync"),
+  platform: () => apiGet("/analytics/platform"),
+  ga4: (params) => apiGet(`/analytics/ga4?${new URLSearchParams(params)}`),
+  realtime: () => apiGet("/analytics/ga4/realtime"),
 };
 
 export const seoSettingsApi = {
   list: () => apiGet("/seo-settings"),
   save: (data) => apiPut("/seo-settings", data),
+};
+
+export const playgroundSettingsApi = {
+  get: () => apiGet("/playground-settings"),
+  save: (data) => apiPut("/playground-settings", data),
+  publish: () => apiPost("/playground-settings/publish"),
 };
 
 // ═══════════════════════════════════════════════════════════════════════════

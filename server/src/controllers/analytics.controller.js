@@ -6,10 +6,12 @@ import SearchMetric from "../models/SearchMetric.js";
 import Article from "../models/Article.js";
 import Chapter from "../models/Chapter.js";
 import Course from "../models/Course.js";
+import User from "../models/User.js";
 import {
   isSearchConsoleConfigured,
   syncSearchConsole,
 } from "../services/searchConsole.service.js";
+import { ga4Error, getGa4Realtime, getGa4Workspace, isGa4Configured } from "../services/googleAnalytics.service.js";
 
 const utcDay = (date) =>
   new Date(`${date.toISOString().slice(0, 10)}T00:00:00.000Z`);
@@ -587,6 +589,33 @@ export const startSync = async (req, res) => {
       .json({ success: false, message: "Search Console is not configured" });
   syncSearchConsole().catch((error) => console.error("[GSC SYNC]", error));
   res.status(202).json({ success: true, message: "Sync started" });
+};
+
+export const getGa4 = async (req, res) => {
+  try {
+    const data = await getGa4Workspace(req.query.start, req.query.end);
+    res.json({ success: true, data });
+  } catch (error) {
+    const safe = ga4Error(error);
+    console.error(`[GA4] ${safe.code}: ${error?.message || "request failed"}`);
+    res.status(safe.status).json({ success: false, message: safe.message, code: safe.code, configured: isGa4Configured() });
+  }
+};
+
+export const getRealtime = async (req, res) => {
+  try { res.json({ success: true, data: await getGa4Realtime() }); }
+  catch (error) { const safe = ga4Error(error); res.status(safe.status).json({ success: false, message: safe.message, code: safe.code }); }
+};
+
+export const getPlatform = async (req, res) => {
+  try {
+    const [articles, courses, chapters, authors, recent] = await Promise.all([
+      Article.countDocuments({ status: "published" }), Course.countDocuments({ status: "published" }), Chapter.countDocuments({ status: "published" }),
+      User.countDocuments({ role: { $in: ["author", "editor", "admin"] } }),
+      Article.find({ status: "published" }).select("title slug type createdAt updatedAt author").populate("author", "fullName").sort({ createdAt: -1 }).limit(12).lean(),
+    ]);
+    res.json({ success: true, data: { counts: { articles, courses, chapters, authors, publishedContent: articles + courses + chapters }, recent } });
+  } catch { res.status(500).json({ success: false, message: "Unable to load platform analytics" }); }
 };
 
 function sourceFrom(referrer, url) {

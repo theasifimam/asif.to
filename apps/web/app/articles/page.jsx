@@ -1,8 +1,8 @@
 "use client";
 
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import ArticleCard from "@/components/ArticleCard";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import ArticleCard from "@/components/articles/ArticleCard";
 import { useGetArticlesQuery } from "@/lib/api/articlesApi";
 import { Loader2, Sparkles } from "lucide-react";
 import { format } from "date-fns";

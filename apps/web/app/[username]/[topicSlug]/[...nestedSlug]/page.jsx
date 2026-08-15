@@ -1,6 +1,6 @@
 import CourseTopicPage, {
   buildTopicMetadata,
-} from "@/components/CourseTopicPage";
+} from "@/components/courses/CourseTopicPage";
 import InterviewQuestionArticle, {
   buildInterviewQuestionMetadata,
 } from "@/components/interview/InterviewQuestionArticle";

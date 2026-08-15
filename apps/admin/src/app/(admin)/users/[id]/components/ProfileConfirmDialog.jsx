@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { Button } from "@/components/ui";
+import React, { useState } from "react";
+import { Button, Input } from "@/components/ui";
 
 export default function ProfileConfirmDialog({
   isOpen,
@@ -12,7 +12,9 @@ export default function ProfileConfirmDialog({
   variant,
   loading,
   confirmText,
+  requireReason = false,
 }) {
+  const [reason, setReason] = useState("");
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -25,6 +27,18 @@ export default function ProfileConfirmDialog({
             {description}
           </p>
         </div>
+        {requireReason && (
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+              Reason
+            </label>
+            <Input
+              value={reason}
+              onChange={(event) => setReason(event.target.value)}
+              placeholder="Explain why this action is necessary"
+            />
+          </div>
+        )}
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
@@ -35,8 +49,8 @@ export default function ProfileConfirmDialog({
             Cancel
           </Button>
           <Button
-            onClick={onConfirm}
-            disabled={loading}
+            onClick={() => onConfirm(reason.trim())}
+            disabled={loading || (requireReason && !reason.trim())}
             variant={variant === "destructive" ? "destructive" : "default"}
             className="flex-1 h-12 rounded-full font-black text-xs uppercase tracking-widest shadow-md cursor-pointer"
           >

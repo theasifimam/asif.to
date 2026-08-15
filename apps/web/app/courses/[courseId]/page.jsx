@@ -1,15 +1,15 @@
-import CourseClient from "@/components/CourseClient";
-import JsonLd from "@/components/JsonLd";
+import CourseClient from "@/components/courses/CourseClient";
+import JsonLd from "@/components/seo/JsonLd";
 import { buildCourseSchema } from "@/lib/courseSchema";
 import { getCourse } from "@/lib/publicContent";
 import { notFound } from "next/navigation";
-import { absoluteUrl } from "@/lib/seo";
+import { absoluteUrl, assetUrl } from "@/lib/seo";
 
 export const revalidate = 60;
 export function generateStaticParams() { return []; }
 
 function coursePath(course, fallbackSlug) {
-  return `/courses/${encodeURIComponent(course.slug || fallbackSlug)}`;
+  return `/courses/${encodeURIComponent(course?.slug || fallbackSlug)}`;
 }
 
 export async function generateMetadata({ params }) {
@@ -17,45 +17,64 @@ export async function generateMetadata({ params }) {
   const course = await getCourse(courseId);
   if (!course) notFound();
 
-  if (!course) {
-    return {
-      title: "Course Not Found",
-      robots: { index: false, follow: false },
-    };
-  }
-
-  const title = course.seoTitle || course.title;
+  const technology = course.techId || course.title;
+  const title =
+    course.seoTitle ||
+    `${course.title} Course – Learn ${technology} | asif.to`;
   const description =
     course.seoDescription ||
     course.subtitle ||
-    `Learn ${course.title} with step-by-step lessons on asif.to.`;
+    `Learn ${technology} with a practical, step-by-step course on asif.to. Read the syllabus, follow the lessons, and practise with real code examples.`;
+  const keywords = Array.from(
+    new Set([
+      ...(Array.isArray(course.keywords) ? course.keywords : []),
+      course.title,
+      `${course.title} course`,
+      `${technology} tutorial`,
+      `${technology} course`,
+      "asif.to courses",
+      "coding courses",
+    ].filter(Boolean)),
+  );
+  const slug = course.slug || courseId;
   const canonical = absoluteUrl(
     course.canonicalUrl,
     coursePath(course, courseId),
   );
-  const image = absoluteUrl(
-    "",
-    `/courses/${encodeURIComponent(course.slug || courseId)}/opengraph-image`,
-  );
+  const image = course.thumbnail
+    ? assetUrl(course.thumbnail)
+    : absoluteUrl("", `/courses/${encodeURIComponent(slug)}/opengraph-image`);
 
   return {
     title,
     description,
-    keywords: course.keywords || [],
+    keywords,
     alternates: { canonical },
-    robots: { index: true, follow: true },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+    },
     openGraph: {
       title,
       description,
       url: canonical,
       siteName: "asif.to",
-      type: "website",
+      type: "article",
+      publishedTime: course.createdAt || undefined,
+      modifiedTime: course.updatedAt || undefined,
       images: [
         {
           url: image,
           width: 1200,
           height: 630,
-          alt: `${course.title} Course | asif.to`,
+          alt: `${course.title} course on asif.to`,
         },
       ],
     },
@@ -71,6 +90,7 @@ export async function generateMetadata({ params }) {
 export default async function CourseOverviewPage({ params }) {
   const { courseId } = await params;
   const course = await getCourse(courseId);
+  if (!course) notFound();
 
   return (
     <>

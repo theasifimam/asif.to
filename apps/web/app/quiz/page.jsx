@@ -4,9 +4,9 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import Link from "next/link";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import SaveButton from "@/components/SaveButton";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import SaveButton from "@/components/articles/SaveButton";
 import {
   useGetCoursesQuery,
   useGetQuizQuestionsQuery,

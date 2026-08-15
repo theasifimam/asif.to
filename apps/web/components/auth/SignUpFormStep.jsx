@@ -1,6 +1,6 @@
 "use client";
 
-import { User, AtSign, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { User, AtSign, Mail, Lock, Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 import { inputClass } from "./authConstants";
 
 export default function SignUpFormStep({
@@ -19,19 +19,32 @@ export default function SignUpFormStep({
   handleSendOtp,
   otpSending,
   isBusy,
+  onBack,
 }) {
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
-          Join asif.to
-        </h2>
-        <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mt-1">
-          Create your account & verify email via OTP
-        </p>
+    <div className="flex flex-col gap-4.5">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+            Create with Email
+          </h2>
+          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mt-1">
+            Fill in your details to receive verification OTP
+          </p>
+        </div>
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800 text-xs font-bold text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-all shrink-0 cursor-pointer mt-1"
+          >
+            <ArrowLeft size={13} />
+            <span>Options</span>
+          </button>
+        )}
       </div>
 
-      <form onSubmit={handleSendOtp} className="flex flex-col gap-4">
+      <form onSubmit={handleSendOtp} className="flex flex-col gap-3.5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-extrabold text-foreground uppercase tracking-wider ml-1">
@@ -142,7 +155,7 @@ export default function SignUpFormStep({
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-foreground transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-foreground transition-colors cursor-pointer"
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -172,7 +185,7 @@ export default function SignUpFormStep({
         <button
           type="submit"
           disabled={isBusy}
-          className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 active:scale-98"
+          className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 active:scale-98 cursor-pointer"
         >
           {otpSending ? (
             <Loader2 size={16} className="animate-spin" />

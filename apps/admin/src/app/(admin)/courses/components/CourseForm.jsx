@@ -11,7 +11,7 @@ import {
   Send,
 } from "lucide-react";
 import { toast } from "sonner";
-import { ConfirmDialog } from "@/components/confirm-dialog";
+import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,7 +28,7 @@ import { coursesApi } from "@/lib/api";
 import AdminFormShell, {
   AdminFormLoading,
   formSectionClass,
-} from "@/components/AdminFormShell";
+} from "@/components/forms/AdminFormShell";
 
 const initialForm = {
   title: "",

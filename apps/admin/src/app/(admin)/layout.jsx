@@ -20,6 +20,7 @@ import {
   KanbanSquare,
   ChartNoAxesCombined,
   SearchCheck,
+  Code2,
 } from "lucide-react";
 import AdminGlobalSearch from "@/components/search/AdminGlobalSearch";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,6 +33,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import AccessDenied from "@/components/auth/AccessDenied";
+import {
+  canAccessPath,
+  hasPermission,
+  permissionForPath,
+} from "@/lib/permissions";
 
 import {
   Sidebar,
@@ -43,44 +50,130 @@ const NAV_ITEMS = [
   {
     group: "Overview",
     items: [
-      { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-      { name: "Planner", href: "/planner", icon: KanbanSquare },
-      { name: "Analytics", href: "/analytics", icon: ChartNoAxesCombined },
+      {
+        name: "Dashboard",
+        href: "/dashboard",
+        icon: LayoutDashboard,
+        description: "Metrics & activity overview",
+      },
+      {
+        name: "Planner",
+        href: "/planner",
+        icon: KanbanSquare,
+        permission: "planner.view",
+        description: "Kanban boards & tasks",
+      },
+      {
+        name: "Analytics",
+        href: "/analytics",
+        icon: ChartNoAxesCombined,
+        permission: "analytics.view",
+        description: "GA4, Search & insights",
+      },
     ],
   },
   {
     group: "Content",
     items: [
-      { name: "All Articles", href: "/articles/published", icon: BookOpen },
-      { name: "Topics", href: "/topics", icon: Hash },
+      {
+        name: "All Articles",
+        href: "/articles/published",
+        icon: BookOpen,
+        permission: "articles.create",
+        description: "Manage & publish articles",
+      },
+      {
+        name: "Topics",
+        href: "/topics",
+        icon: Hash,
+        permission: "topics.view",
+        description: "Curriculum topics & order",
+      },
       {
         name: "Interview Questions",
         href: "/interview-questions",
         icon: MessageSquare,
+        permission: "interview_questions.view",
+        description: "Q&A bank & solutions",
       },
-      { name: "Courses", href: "/courses", icon: GraduationCap },
-      { name: "Categories", href: "/categories", icon: FolderTree },
+      {
+        name: "Courses",
+        href: "/courses",
+        icon: GraduationCap,
+        permission: "courses.view",
+        description: "Courses, chapters & lessons",
+      },
+      {
+        name: "Categories",
+        href: "/categories",
+        icon: FolderTree,
+        permission: "topics.view",
+        description: "Taxonomy & hierarchy",
+      },
     ],
   },
   {
     group: "Courses & Learning",
     items: [
-      { name: "Cheatsheets", href: "/cheatsheets", icon: FileCode },
-      { name: "Question Bank", href: "/quiz", icon: Clipboard },
+      {
+        name: "Cheatsheets",
+        href: "/cheatsheets",
+        icon: FileCode,
+        permission: "cheatsheets.view",
+        description: "Developer quick sheets",
+      },
+      {
+        name: "Question Bank",
+        href: "/quiz",
+        icon: Clipboard,
+        permission: "question_bank.view",
+        description: "Quizzes & assessments",
+      },
     ],
   },
   {
     group: "Management",
     items: [
-      { name: "Users", href: "/users", icon: Users },
-      { name: "Messages", href: "/messages", icon: MessageSquare },
+      {
+        name: "Users",
+        href: "/users",
+        icon: Users,
+        permission: "users.view",
+        description: "Accounts, roles & invites",
+      },
+      {
+        name: "Messages",
+        href: "/messages",
+        icon: MessageSquare,
+        permission: "users.edit",
+        description: "User inbox & inquiries",
+      },
     ],
   },
   {
     group: "System Pages",
     items: [
-      { name: "SEO Settings", href: "/seo-settings", icon: SearchCheck },
-      { name: "Legal & Help", href: "/legal", icon: Info },
+      {
+        name: "SEO Settings",
+        href: "/seo-settings",
+        icon: SearchCheck,
+        permission: "seo.view",
+        description: "Meta tags & indexing",
+      },
+      {
+        name: "Code Playground",
+        href: "/playground-settings",
+        icon: Code2,
+        permission: "playground.manage",
+        description: "Editor, languages & runtimes",
+      },
+      {
+        name: "Legal & Help",
+        href: "/legal",
+        icon: Info,
+        permission: "settings.manage",
+        description: "Policies & documentation",
+      },
     ],
   },
 ];
@@ -151,14 +244,24 @@ export default function AdminLayout({ children }) {
     );
   }
 
-  const avatarUrl = user?.avatar
-    ? user.avatar.startsWith("http")
-      ? user.avatar
-      : `${STORAGE_URL}${user.avatar}`
-    : user?.profilePicture?.url;
+  const avatarUrl =
+    user?.avatar && !user.avatar.includes("ui-avatars.com")
+      ? user.avatar.startsWith("http")
+        ? user.avatar
+        : `${STORAGE_URL}${user.avatar}`
+      : null;
+  const visibleNavItems = NAV_ITEMS.map((group) => ({
+    ...group,
+    items: group.items.filter(
+      (item) =>
+        hasPermission(user, item.permission) && canAccessPath(user, item.href),
+    ),
+  })).filter((group) => group.items.length > 0);
+  const requiredPermission = permissionForPath(pathname);
+  const canViewPage = hasPermission(user, requiredPermission);
 
   return (
-    <div className="flex h-dvh w-full max-w-full overflow-hidden bg-zinc-50 font-sans text-zinc-900 transition-colors duration-300 dark:bg-zinc-950 dark:text-zinc-200">
+    <div className="flex h-dvh w-full max-w-full overflow-hidden bg-white font-sans text-zinc-900 transition-colors duration-300 dark:bg-[#09090b] dark:text-zinc-200">
       {/* Desktop Sidebar */}
       <Sidebar
         isCollapsed={isCollapsed}
@@ -166,7 +269,7 @@ export default function AdminLayout({ children }) {
         pathname={pathname}
         user={user}
         avatarUrl={avatarUrl}
-        navItems={NAV_ITEMS}
+        navItems={visibleNavItems}
         setIsLogoutDialogOpen={setIsLogoutDialogOpen}
       />
 
@@ -176,15 +279,15 @@ export default function AdminLayout({ children }) {
           isNavVisible ? "pb-16 lg:pb-0" : "pb-0 lg:pb-0"
         }`}
       >
-        {/* Global Masthead */}
+        {/* Global Minimal Header - Transparent & Seamless */}
         <header
-          className={`z-40 flex h-16 shrink-0 items-center justify-between border-b border-zinc-200 bg-white/90 px-3 backdrop-blur-xl transition-all duration-300 ease-in-out dark:border-zinc-900 dark:bg-zinc-950/90 sm:px-4 md:px-12 ${
+          className={`z-40 flex h-16 shrink-0 items-center justify-between bg-white/20 backdrop-blur-md dark:bg-zinc-900/30 dark:backdrop-blur-md px-4 transition-all duration-200 ease-out sm:px-6 md:px-8 lg:px-10 ${
             isNavVisible
               ? "translate-y-0 opacity-100"
               : "-translate-y-full opacity-0 pointer-events-none -mb-16"
           }`}
         >
-          <div className="flex items-center gap-4 md:gap-8">
+          <div className="flex items-center gap-2 md:gap-6">
             {/* Logo in top header for mobile since sidebar is hidden */}
             <Link
               href="/dashboard"
@@ -193,9 +296,9 @@ export default function AdminLayout({ children }) {
               <img
                 src="/logo.png"
                 alt="asif.to logo"
-                className="w-7 h-7 rounded-lg object-contain shadow-sm shrink-0"
+                className="w-7 h-7 rounded-xl object-contain shadow-xs shrink-0"
               />
-              <span className="font-outfit font-black text-sm tracking-tight text-zinc-900 dark:text-white leading-none">
+              <span className="font-outfit font-black text-sm tracking-tight text-zinc-950 dark:text-white leading-none">
                 asif
                 <span className="text-blue-600 dark:text-blue-400">.to</span>
               </span>
@@ -204,14 +307,14 @@ export default function AdminLayout({ children }) {
             <AdminGlobalSearch />
           </div>
 
-          <div className="flex min-w-0 items-center gap-2 sm:gap-3 md:gap-6">
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-900/50 px-3 md:px-4 py-2 rounded-full border border-zinc-200 dark:border-zinc-800 transition-colors">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3 md:gap-2">
+            <div className="hidden items-center h-10 gap-2 rounded-full border border-zinc-200/80 bg-zinc-50/80 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition-colors dark:border-zinc-800/80 dark:bg-zinc-900/60 sm:flex">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="hidden sm:inline">System Active</span>
+              <span className="hidden sm:inline">Active</span>
             </div>
-            <button className="relative hidden h-9 w-9 items-center justify-center rounded-full border border-zinc-200 text-zinc-600 transition-all hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900 xs:flex md:h-10 md:w-10">
-              <Bell size={18} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-zinc-950"></span>
+            <button className="relative hidden h-9 w-9 items-center justify-center rounded-full border border-zinc-200/80 text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800/80 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white xs:flex md:h-10 md:w-10">
+              <Bell size={17} />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-blue-600 rounded-full border-2 border-white dark:border-[#121215]"></span>
             </button>
 
             <HeaderAccount
@@ -225,51 +328,59 @@ export default function AdminLayout({ children }) {
         {/* Content Viewport */}
         <main
           ref={mainRef}
-          className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain bg-[radial-gradient(circle_at_top_right,rgba(0,0,0,0.03),transparent)] dark:bg-[radial-gradient(circle_at_top_right,rgba(24,24,27,0.3),transparent)]"
+          className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain bg-[#f3f4f6] dark:bg-[#09090b]"
         >
-          {children}
+          {canViewPage ? (
+            children
+          ) : (
+            <AccessDenied permission={requiredPermission} />
+          )}
         </main>
 
-        <Link
-          href="/articles/new"
-          aria-label="Write a new article"
-          className={`fixed right-4 lg:right-7 z-40 inline-flex h-12 w-12 items-center justify-center gap-2 rounded-full bg-blue-600 text-sm font-bold text-white shadow-xl shadow-blue-600/25 transition-all duration-300 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 active:translate-y-0 sm:h-14 sm:w-auto sm:px-6 ${
-            isNavVisible
-              ? "bottom-20 lg:bottom-7 translate-y-0"
-              : "bottom-4 lg:bottom-7 translate-y-0"
-          }`}
-        >
-          <FileEdit className="h-5 w-5" />
-          <span className="hidden sm:inline">Write article</span>
-        </Link>
+        {hasPermission(user, "articles.create") &&
+          pathname !== "/articles/new" &&
+          !pathname.startsWith("/articles/edit/") && (
+            <Link
+              href="/articles/new"
+              aria-label="Write a new article"
+              className={`fixed right-4 lg:right-8 z-40 inline-flex h-12 w-12 items-center justify-center gap-2 rounded-full bg-blue-600 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 active:translate-y-0 sm:h-13 sm:w-auto sm:px-6 ${
+                isNavVisible
+                  ? "bottom-20 lg:bottom-8 translate-y-0"
+                  : "bottom-4 lg:bottom-8 translate-y-0"
+              }`}
+            >
+              <FileEdit className="h-4.5 w-4.5" />
+              <span className="hidden sm:inline">Write article</span>
+            </Link>
+          )}
       </div>
 
       {/* Mobile Bottom Navbar */}
       <MobileBottomNavbar
-        navItems={NAV_ITEMS}
+        navItems={visibleNavItems}
         user={user}
         isVisible={isNavVisible}
       />
 
       {/* Logout Confirmation Dialog */}
       <Dialog open={isLogoutDialogOpen} onOpenChange={setIsLogoutDialogOpen}>
-        <DialogContent className="max-w-100 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-8 rounded-4xl gap-8">
-          <DialogHeader className="gap-4">
-            <div className="w-16 h-16 rounded-3xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center text-red-500 mb-2">
-              <LogOut size={32} />
+        <DialogContent className="max-w-100 border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#121215] p-8 rounded-[28px] sm:rounded-4xl gap-7 shadow-2xl">
+          <DialogHeader className="gap-4 items-center sm:items-start text-center sm:text-left">
+            <div className="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center text-rose-600 dark:text-rose-400 mb-1">
+              <LogOut size={26} />
             </div>
-            <DialogTitle className="text-2xl font-black font-outfit uppercase tracking-tighter text-zinc-900 dark:text-white leading-none">
+            <DialogTitle className="text-2xl font-black font-outfit uppercase tracking-tight text-zinc-950 dark:text-white leading-none">
               Log Out?
             </DialogTitle>
-            <DialogDescription className="text-zinc-500 dark:text-zinc-400 text-[13px] font-medium leading-relaxed">
+            <DialogDescription className="text-zinc-500 dark:text-zinc-400 text-xs font-medium leading-relaxed">
               Are you sure you want to log out of asif.to Admin Panel?
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-900">
+          <DialogFooter className="flex flex-col sm:flex-row gap-2.5 pt-3 border-t border-zinc-100 dark:border-zinc-800">
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={() => setIsLogoutDialogOpen(false)}
-              className="flex-1 rounded-full text-[11px] font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-all h-12"
+              className="flex-1 rounded-full text-xs font-bold text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white transition-all h-11 border-zinc-200/80 dark:border-zinc-800"
             >
               Cancel
             </Button>
@@ -279,7 +390,7 @@ export default function AdminLayout({ children }) {
                 setIsLogoutDialogOpen(false);
                 logout();
               }}
-              className="flex-1 rounded-full bg-red-500 hover:bg-red-600 text-white text-[11px] font-black uppercase tracking-widest transition-all h-12 shadow-lg shadow-red-500/20"
+              className="flex-1 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all h-11 shadow-sm shadow-rose-600/20"
             >
               Log Out
             </Button>

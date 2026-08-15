@@ -1,14 +1,16 @@
 import { Inter, Outfit } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { ReduxProvider } from "@/components/ReduxProvider";
-import BottomNav from "@/components/BottomNav";
-import { ScrollNavProvider } from "@/components/ScrollNavProvider";
-import AnalyticsTracker from "@/components/AnalyticsTracker";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { ReduxProvider } from "@/components/providers/ReduxProvider";
+import BottomNav from "@/components/layout/BottomNav";
+import { ScrollNavProvider } from "@/components/layout/ScrollNavProvider";
+import AnalyticsTracker from "@/components/analytics/AnalyticsTracker";
 import { Suspense } from "react";
 import FloatingPlayground from "@/components/interactive-code/FloatingPlayground";
-import GoogleAnalyticsPageView from "@/components/GoogleAnalyticsPageView";
+import GoogleAnalyticsPageView from "@/components/analytics/GoogleAnalyticsPageView";
+import AuthSessionProvider from "@/components/auth/AuthSessionProvider";
+import AuthBridge from "@/components/auth/AuthBridge";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -23,7 +25,8 @@ const outfit = Outfit({
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://asif.to"),
   title: {
-    default: "asif.to — Step-by-Step Web & Full-Stack Coding Courses & Tutorials",
+    default:
+      "asif.to — Step-by-Step Web & Full-Stack Coding Courses & Tutorials",
     template: "%s | asif.to Tutorials",
   },
   description:
@@ -65,7 +68,7 @@ export const viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children, modal }) {
   const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
   return (
@@ -79,34 +82,41 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange
         >
-          <ReduxProvider>
-            <ScrollNavProvider>
-              <Suspense fallback={null}><AnalyticsTracker /></Suspense>
-              {gaMeasurementId && (
-                <>
-                  <Script
-                    src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
-                    strategy="afterInteractive"
-                  />
-                  <Script id="google-analytics" strategy="afterInteractive">
-                    {`
+          <AuthSessionProvider>
+            <ReduxProvider>
+              <AuthBridge>
+                <ScrollNavProvider>
+                  <Suspense fallback={null}>
+                    <AnalyticsTracker />
+                  </Suspense>
+                  {gaMeasurementId && (
+                    <>
+                      <Script
+                        src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
+                        strategy="afterInteractive"
+                      />
+                      <Script id="google-analytics" strategy="afterInteractive">
+                        {`
                       window.dataLayer = window.dataLayer || [];
                       function gtag(){dataLayer.push(arguments);}
                       window.gtag = gtag;
                       gtag('js', new Date());
                       gtag('config', '${gaMeasurementId}');
                     `}
-                  </Script>
-                  <Suspense fallback={null}>
-                    <GoogleAnalyticsPageView />
-                  </Suspense>
-                </>
-              )}
-              {children}
-              <FloatingPlayground />
-              <BottomNav />
-            </ScrollNavProvider>
-          </ReduxProvider>
+                      </Script>
+                      <Suspense fallback={null}>
+                        <GoogleAnalyticsPageView />
+                      </Suspense>
+                    </>
+                  )}
+                  {children}
+                  {modal}
+                  <FloatingPlayground />
+                  <BottomNav />
+                </ScrollNavProvider>
+              </AuthBridge>
+            </ReduxProvider>
+          </AuthSessionProvider>
         </ThemeProvider>
       </body>
     </html>

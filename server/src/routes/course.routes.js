@@ -16,7 +16,8 @@ import {
   trackChapterView,
   getCourseAnalytics,
 } from "../controllers/course.controller.js";
-import { protect, authorize } from "../middlewares/auth.middleware.js";
+import { protect } from "../middlewares/auth.middleware.js";
+import { requirePermission } from "../utils/permissions.js";
 
 const router = Router();
 
@@ -25,14 +26,14 @@ router.get("/", getCourses);
 router.get(
   "/admin/all",
   protect,
-  authorize("admin", "editor"),
+  requirePermission("courses.view"),
   getCoursesAdmin,
 );
 // Static prefixes must come before /:slug to avoid conflicts.
 router.get(
   "/analytics/overview",
   protect,
-  authorize("admin", "editor"),
+  requirePermission("courses.view"),
   getCourseAnalytics,
 );
 router.get("/slug/:slug", getCourseBySlug);
@@ -47,42 +48,42 @@ router.post("/chapters/:id/view", trackChapterView);
 router.get(
   "/admin/:id",
   protect,
-  authorize("admin", "editor"),
+  requirePermission("courses.view"),
   getCourseByIdAdmin,
 );
-router.post("/", protect, authorize("admin", "editor"), createCourse);
-router.patch("/:id", protect, authorize("admin", "editor"), updateCourse);
-router.delete("/:id", protect, authorize("admin"), deleteCourse);
+router.post("/", protect, requirePermission("courses.manage"), createCourse);
+router.patch("/:id", protect, requirePermission("courses.manage"), updateCourse);
+router.delete("/:id", protect, requirePermission("courses.manage"), deleteCourse);
 
 // ── Admin — Chapter CRUD ──────────────────────────────────────────────────────
 router.get(
   "/:courseId/chapters",
   protect,
-  authorize("admin", "editor"),
+  requirePermission("courses.view"),
   getChapters,
 );
 router.post(
   "/:courseId/chapters",
   protect,
-  authorize("admin", "editor"),
+  requirePermission("courses.manage"),
   createChapter,
 );
 router.patch(
   "/chapters/reorder",
   protect,
-  authorize("admin", "editor"),
+  requirePermission("courses.manage"),
   reorderChapters,
 );
 router.patch(
   "/chapters/:id",
   protect,
-  authorize("admin", "editor"),
+  requirePermission("courses.manage"),
   updateChapter,
 );
 router.delete(
   "/chapters/:id",
   protect,
-  authorize("admin", "editor"),
+  requirePermission("courses.manage"),
   deleteChapter,
 );
 

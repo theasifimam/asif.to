@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUpRight, Clock, Sparkles } from "lucide-react";
 import { getImageUrl } from "@/lib/config";
-import BookmarkButton from "../BookmarkButton";
+import BookmarkButton from "../articles/BookmarkButton";
 
 export default function SpotlightHero({ leadArticle, trendingArticles = [] }) {
   if (!leadArticle) return null;

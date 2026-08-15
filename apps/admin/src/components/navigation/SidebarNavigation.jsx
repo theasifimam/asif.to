@@ -10,16 +10,16 @@ export default function SidebarNavigation({
   navItems,
 }) {
   return (
-    <nav className="flex-1 px-4 flex flex-col gap-10 overflow-y-auto no-scrollbar">
+    <nav className="no-scrollbar flex flex-1 flex-col gap-6 overflow-y-auto px-3.5 pb-4">
       {navItems.map((group) => (
-        <div key={group.group} className="flex flex-col gap-4">
+        <div key={group.group} className="flex flex-col gap-1.5">
           <AnimatePresence mode="wait">
             {!isCollapsed && (
               <motion.h3
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="px-4 text-[10px] font-black rounded-full uppercase tracking-[0.4em] text-zinc-400 dark:text-zinc-700 truncate"
+                className="truncate px-3.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500"
               >
                 {group.group}
               </motion.h3>
@@ -49,37 +49,51 @@ export default function SidebarNavigation({
                 <Link
                   key={item.href}
                   href={targetHref}
-                  title={isCollapsed ? item.name : ""}
-                  className={`group flex items-center px-4 py-3 rounded-4xl transition-all duration-300 ${
+                  title={isCollapsed ? `${item.name}${item.description ? ` — ${item.description}` : ""}` : ""}
+                  className={`group flex items-center rounded-2xl transition-all duration-200 ${
+                    isCollapsed
+                      ? "h-11 w-11 justify-center p-0 mx-auto"
+                      : "px-3 py-2.5 justify-start"
+                  } ${
                     isActive
-                      ? "bg-blue-600 text-white shadow-xs shadow-blue-500/25 border border-blue-600"
-                      : "hover:bg-zinc-100 dark:hover:bg-zinc-900/60 hover:text-zinc-900 dark:hover:text-zinc-200 cursor-pointer"
-                  } ${isCollapsed ? "justify-center" : "justify-between"}`}
+                      ? "bg-blue-600 text-white font-bold dark:bg-blue-600 dark:text-white"
+                      : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100 font-medium"
+                  }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <item.icon
-                      size={18}
-                      strokeWidth={isActive ? 2.5 : 2}
-                      className={
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={`flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-xl transition-colors ${
                         isActive
                           ? "text-white"
-                          : "text-zinc-500 dark:text-zinc-500 group-hover:text-zinc-800 dark:group-hover:text-zinc-200"
-                      }
-                    />
+                          : "text-zinc-500 group-hover:text-zinc-900 dark:text-zinc-400 dark:group-hover:text-white"
+                      }`}
+                    >
+                      <item.icon
+                        size={18}
+                        strokeWidth={isActive ? 2.5 : 2}
+                      />
+                    </div>
                     {!isCollapsed && (
-                      <span
-                        className={`text-[13px] font-bold tracking-tight ${isActive ? "font-extrabold" : ""} truncate`}
-                      >
-                        {item.name}
-                      </span>
+                      <div className="flex flex-col min-w-0 leading-tight">
+                        <span
+                          className={`truncate text-[13px] tracking-tight font-bold ${
+                            isActive ? "text-white" : "text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-950 dark:group-hover:text-white"
+                          }`}
+                        >
+                          {item.name}
+                        </span>
+                        {item.description && (
+                          <span
+                            className={`truncate text-[10px] tracking-tight mt-0.5 ${
+                              isActive ? "text-blue-100/80 font-medium" : "text-zinc-400 dark:text-zinc-500 font-normal"
+                            }`}
+                          >
+                            {item.description}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
-                  {!isCollapsed && isActive && (
-                    <motion.div
-                      layoutId="active"
-                      className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"
-                    />
-                  )}
                 </Link>
               );
             })}

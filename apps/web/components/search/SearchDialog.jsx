@@ -109,18 +109,22 @@ export default function SearchDialog({
   };
   return createPortal(
     <div
-      className="fixed inset-0 z-100 bg-black/50 backdrop-blur-sm p-0 sm:p-6"
+      className="fixed inset-0 z-100 bg-black/40 backdrop-blur-md dark:bg-black/60 p-3 sm:p-6 flex flex-col items-center pt-[6vh] sm:pt-[10vh] overflow-y-auto"
       onMouseDown={(event) => event.target === event.currentTarget && onClose()}
     >
-      <section
-        role="dialog"
-        aria-modal="true"
-        aria-label="Search asif.to"
+      <div
+        className="w-full max-w-2xl flex flex-col gap-3 relative"
         onKeyDown={keyDown}
-        className="mx-auto flex h-full sm:h-auto sm:max-h-[82vh] w-full max-w-2xl flex-col bg-white dark:bg-zinc-900 sm:mt-[7vh] sm:rounded-4xl shadow-2xl overflow-hidden"
       >
-        <div className="flex items-center gap-3 border-b border-zinc-200 dark:border-zinc-800 px-4 py-3">
-          <Search className="h-5 w-5 text-zinc-400" aria-hidden="true" />
+        {/* Floating Pill Capsule Search Input Island */}
+        <div
+          role="search"
+          className="flex items-center gap-3 w-full rounded-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl px-4.5 py-3 sm:py-3.5 shadow-2xl shadow-black/20 border border-zinc-200/80 dark:border-zinc-700/80 ring-1 ring-black/5 dark:ring-white/10 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/40 transition-all"
+        >
+          <Search
+            className="h-5 w-5 text-zinc-400 dark:text-zinc-400 shrink-0 ml-0.5"
+            aria-hidden="true"
+          />
           <label htmlFor="global-search-input" className="sr-only">
             Search tutorials, topics, questions
           </label>
@@ -138,21 +142,42 @@ export default function SearchDialog({
               results[selected] ? `search-result-${selected}` : undefined
             }
             placeholder="Search tutorials, topics, questions..."
-            className="min-w-0 flex-1 bg-transparent py-2 text-base outline-none placeholder:text-zinc-400"
+            className="min-w-0 flex-1 bg-transparent text-base sm:text-lg text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 font-medium outline-none"
           />
+          {query && (
+            <button
+              onClick={() => {
+                setQuery("");
+                inputRef.current?.focus();
+              }}
+              aria-label="Clear search"
+              className="rounded-full p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
           <button
             onClick={onClose}
             aria-label="Close search"
-            className="rounded-xl p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="hidden sm:inline-flex items-center justify-center px-2.5 py-1 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-700/80 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-700 transition"
+          >
+            Esc
+          </button>
+          <button
+            onClick={onClose}
+            aria-label="Close search"
+            className="sm:hidden rounded-full p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
+
+        {/* Floating Pill Shaped Category Tab Bar Island */}
         {query && !loading && !error && (
           <div
             role="tablist"
             aria-label="Search result categories"
-            className="flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-zinc-200 px-3 py-2.5 dark:border-zinc-800 scrollbar-none"
+            className="self-center flex items-center gap-1.5 overflow-x-auto rounded-full bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl p-1.5 shadow-xl shadow-black/15 border border-zinc-200/80 dark:border-zinc-800/80 ring-1 ring-black/5 dark:ring-white/10 max-w-full scrollbar-none"
           >
             {FILTERS.filter((value) => value === "all" || counts[value]).map(
               (value) => (
@@ -168,7 +193,7 @@ export default function SearchDialog({
                   className={`shrink-0 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
                     activeType === value
                       ? "bg-blue-600 text-white shadow-sm"
-                      : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                      : "text-zinc-600 hover:bg-zinc-200/70 dark:text-zinc-300 dark:hover:bg-zinc-800"
                   }`}
                 >
                   <span>{FILTER_LABELS[value]}</span>
@@ -186,82 +211,96 @@ export default function SearchDialog({
             )}
           </div>
         )}
-        <div
-          id="global-search-results"
-          role="listbox"
-          className="flex-1 overflow-y-auto p-3"
-          aria-live="polite"
-        >
-          {loading ? (
-            <div className="flex items-center justify-center gap-2 py-16 text-sm text-zinc-500">
-              <LoaderCircle className="h-5 w-5 animate-spin" /> Loading search
-              index…
-            </div>
-          ) : error ? (
-            <p className="py-16 text-center text-sm text-red-600">{error}</p>
-          ) : query ? (
-            results.length ? (
-              <div className="space-y-1">
-                <p className="px-4 pb-2 text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-                  {activeType === "all"
-                    ? "Top results"
-                    : FILTER_LABELS[activeType]}
-                </p>
-                {results.map((item, index) => (
-                  <div
-                    key={item.id}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      choose(item);
-                    }}
+
+        {/* Floating Results & History Islands Container (Transparent Surroundings) */}
+        {(query || loading || error || recent.length > 0) && (
+          <div
+            id="global-search-results"
+            role="listbox"
+            className="flex-1 overflow-y-auto max-h-[58vh] sm:max-h-[64vh] flex flex-col gap-2.5 p-1 scrollbar-none"
+            aria-live="polite"
+          >
+            {loading ? (
+              <div className="flex items-center justify-center gap-2 py-12 rounded-3xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl shadow-lg border border-zinc-200/80 dark:border-zinc-800/80 text-sm text-zinc-500">
+                <LoaderCircle className="h-5 w-5 animate-spin text-blue-500" />{" "}
+                Loading search index…
+              </div>
+            ) : error ? (
+              <div className="py-12 text-center rounded-3xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl shadow-lg border border-zinc-200/80 dark:border-zinc-800/80 text-sm text-red-600">
+                {error}
+              </div>
+            ) : query ? (
+              results.length ? (
+                <>
+                  {results.map((item, index) => (
+                    <div
+                      key={item.id}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        choose(item);
+                      }}
+                    >
+                      <SearchResult
+                        id={`search-result-${index}`}
+                        item={item}
+                        query={query}
+                        selected={index === selected}
+                        onSelect={() => setSelected(index)}
+                      />
+                    </div>
+                  ))}
+                  <a
+                    href={`/search?q=${encodeURIComponent(query)}`}
+                    onClick={() => rememberSearch(query)}
+                    className="flex items-center justify-center gap-2 rounded-4xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl p-3.5 text-sm font-bold text-blue-600 shadow-md shadow-black/5 dark:shadow-black/20 border border-zinc-200/80 dark:border-zinc-800/80 ring-1 ring-black/5 dark:ring-white/10 hover:bg-blue-50 dark:hover:bg-blue-950/30 hover:shadow-lg transition"
                   >
-                    <SearchResult
-                      id={`search-result-${index}`}
-                      item={item}
-                      query={query}
-                      selected={index === selected}
-                      onSelect={() => setSelected(index)}
-                    />
-                  </div>
-                ))}
-                <a
-                  href={`/search?q=${encodeURIComponent(query)}`}
-                  onClick={() => rememberSearch(query)}
-                  className="mt-2 flex items-center justify-center gap-2 rounded-xl p-3 text-sm font-bold text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30"
-                >
-                  View all results <ArrowRight className="h-4 w-4" />
-                </a>
-              </div>
+                    View all results <ArrowRight className="h-4 w-4" />
+                  </a>
+                </>
+              ) : (
+                <div className="py-12 px-4 text-center rounded-4xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl shadow-lg border border-zinc-200/80 dark:border-zinc-800/80">
+                  <p className="font-bold text-zinc-900 dark:text-zinc-100">
+                    No results for “{query}”
+                  </p>
+                  <p className="mt-1.5 text-sm text-zinc-500">
+                    Try fewer words or a related developer term.
+                  </p>
+                  <button
+                    onClick={() => setQuery("")}
+                    className="mt-4 text-sm font-bold text-blue-600 hover:underline"
+                  >
+                    Clear search
+                  </button>
+                </div>
+              )
             ) : (
-              <div className="py-16 text-center">
-                <p className="font-bold">No results for “{query}”</p>
-                <p className="mt-2 text-sm text-zinc-500">
-                  Try fewer words or a related developer term.
-                </p>
-                <button
-                  onClick={() => setQuery("")}
-                  className="mt-4 text-sm font-bold text-blue-600"
-                >
-                  Clear search
-                </button>
-              </div>
-            )
-          ) : (
-            <div>
-              <p className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-                Recent searches
-              </p>
-              {recent.length ? (
-                recent.map((value) => (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between px-2 py-0.5">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+                    Recent searches
+                  </span>
+                  {recent.length > 0 && (
+                    <button
+                      onClick={() => {
+                        clearRecentSearches();
+                        setRecent([]);
+                      }}
+                      className="flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Clear all
+                    </button>
+                  )}
+                </div>
+                {recent.map((value) => (
                   <div
                     key={value}
-                    className="flex items-center rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    className="flex items-center rounded-4xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl p-1 sm:p-1.5 shadow-md shadow-black/5 dark:shadow-black/20 border border-zinc-200/80 dark:border-zinc-800/80 ring-1 ring-black/5 dark:ring-white/10 hover:border-blue-500/50 hover:shadow-lg transition-all"
                   >
                     <button
                       onClick={() => setQuery(value)}
-                      className="flex flex-1 items-center gap-3 p-3 text-left text-sm"
+                      className="flex flex-1 items-center gap-3 p-2.5 text-left text-sm font-medium text-zinc-800 dark:text-zinc-200"
                     >
-                      <Clock className="h-4 w-4 text-zinc-400" />
+                      <Clock className="h-4 w-4 text-zinc-400 shrink-0" />
                       {value}
                     </button>
                     <button
@@ -270,35 +309,26 @@ export default function SearchDialog({
                         removeRecentSearch(value);
                         setRecent(getRecentSearches());
                       }}
-                      className="p-3"
+                      className="p-2.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   </div>
-                ))
-              ) : (
-                <p className="px-3 py-10 text-center text-sm text-zinc-500">
-                  Search courses, lessons, questions, cheatsheets, and practice.
-                </p>
-              )}
-              {recent.length > 0 && (
-                <button
-                  onClick={() => {
-                    clearRecentSearches();
-                    setRecent([]);
-                  }}
-                  className="mx-3 mt-2 flex items-center gap-2 text-xs font-bold text-zinc-500"
-                >
-                  <Trash2 className="h-3.5 w-3.5" /> Clear recent searches
-                </button>
-              )}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Bottom Quick Navigation Hints Island */}
+        <div className="self-center hidden sm:flex items-center gap-3 rounded-full bg-white/85 dark:bg-zinc-900/85 backdrop-blur-xl px-4 py-1.5 text-[11px] font-medium text-zinc-500 dark:text-zinc-400 shadow-md border border-zinc-200/80 dark:border-zinc-800/80 ring-1 ring-black/5 dark:ring-white/10 select-none">
+          <span>↑↓ Navigate</span>
+          <span className="text-zinc-300 dark:text-zinc-700">·</span>
+          <span>↵ Open</span>
+          <span className="text-zinc-300 dark:text-zinc-700">·</span>
+          <span>Esc Close</span>
         </div>
-        <div className="hidden sm:flex justify-end border-t border-zinc-200 dark:border-zinc-800 px-4 py-2 text-[10px] text-zinc-400">
-          ↑↓ Navigate · Enter Open · Esc Close
-        </div>
-      </section>
+      </div>
     </div>,
     document.body,
   );

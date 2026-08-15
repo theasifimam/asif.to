@@ -5,12 +5,12 @@ import Link from "next/link";
 import { ArrowLeft, ImagePlus, Save, Send, X } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import Editor from "@/components/Editor";
+import Editor from "@/components/editor/Editor";
 import AdminFormShell, {
   AdminFormLoading,
   formAsideClass,
   formSectionClass,
-} from "@/components/AdminFormShell";
+} from "@/components/forms/AdminFormShell";
 import { articlesApi, articleTopicsApi } from "@/lib/api";
 import { Button, Input, Label, Textarea } from "@/components/ui";
 
@@ -150,7 +150,7 @@ export default function ArticleForm({ articleId = null }) {
       }
     >
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <section className="space-y-6">
+        <section className="space-y-6 min-w-0">
           <div className={formSectionClass}>
             <div className="space-y-2">
               <Label>Title</Label>
@@ -199,7 +199,7 @@ export default function ArticleForm({ articleId = null }) {
             </div>
           </div>
         </section>
-        <aside className="space-y-6">
+        <aside className="space-y-6 min-w-0">
           <div className={formAsideClass}>
             <h2 className="font-semibold text-zinc-900 dark:text-white">
               Publishing

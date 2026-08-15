@@ -5,15 +5,15 @@ import { cn } from "@/lib/utils";
 
 export function AdminPage({ children, className, size = "xl" }) {
   return (
-    <main
+    <div
       className={cn(
-        "mx-auto min-w-0 space-y-4 px-3 py-4 sm:space-y-6 sm:px-6 sm:py-8 lg:px-8",
+        "mx-auto min-w-0 space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 lg:px-10 lg:py-10",
         size === "lg" ? "max-w-6xl" : "max-w-7xl",
         className,
       )}
     >
       {children}
-    </main>
+    </div>
   );
 }
 
@@ -25,24 +25,26 @@ export function AdminPageHeader({
   actions,
 }) {
   return (
-    <header className="flex min-w-0 flex-col justify-between gap-4 md:flex-row md:items-end">
+    <header className="flex min-w-0 flex-col justify-between gap-5 md:flex-row md:items-end">
       <div className="min-w-0 flex-1">
         {back}
         {eyebrow && (
           <p
             className={cn(
-              "text-xs font-bold uppercase tracking-[0.18em] text-blue-600",
+              "text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400",
               back && "mt-4",
             )}
           >
             {eyebrow}
           </p>
         )}
-        <h1 className="mt-2 wrap-break-word text-2xl font-black tracking-tight text-zinc-950 dark:text-white sm:text-3xl">
+        <h1 className="mt-1.5 wrap-break-word font-outfit text-3xl font-black tracking-[-0.035em] text-zinc-950 dark:text-white sm:text-4xl">
           {title}
         </h1>
         {description && (
-          <p className="mt-2 text-sm text-zinc-500">{description}</p>
+          <p className="mt-2 max-w-2xl text-xs sm:text-sm font-medium leading-relaxed text-zinc-500 dark:text-zinc-400">
+            {description}
+          </p>
         )}
       </div>
       {actions && (
@@ -58,7 +60,7 @@ export function AdminFilters({ children, className }) {
   return (
     <section
       className={cn(
-        "flex min-w-0 flex-col gap-3 rounded-4xl border border-zinc-200/60 bg-white px-3 py-4 dark:border-zinc-800/60 dark:bg-zinc-950 sm:p-5 md:flex-row",
+        "admin-surface flex min-w-0 flex-col gap-3 p-3.5 sm:p-4 md:flex-row md:items-center rounded-[28px] sm:rounded-4xl",
         className,
       )}
     >
@@ -76,12 +78,12 @@ export function AdminSearch({
 }) {
   return (
     <div className={cn("relative flex-1", className)}>
-      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+      <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
       <Input
         value={value}
         onChange={(event) => onChange(event.target.value, event)}
         placeholder={placeholder}
-        className="rounded-2xl bg-zinc-100 pl-9 dark:bg-zinc-900"
+        className="rounded-full border border-zinc-200/80 bg-zinc-50/80 pl-10 text-xs sm:text-sm shadow-none focus-visible:bg-white dark:border-zinc-800 dark:bg-zinc-900/60 dark:focus-visible:bg-zinc-900"
         {...props}
       />
     </div>
@@ -98,7 +100,12 @@ export function AdminContent({
     return <div className={cn("min-w-0", className)}>{children}</div>;
   }
   return (
-    <section className={cn("min-w-0 overflow-hidden rounded-4xl", className)}>
+    <section
+      className={cn(
+        "admin-surface min-w-0 overflow-hidden rounded-[28px] sm:rounded-4xl",
+        className,
+      )}
+    >
       {children}
     </section>
   );
@@ -108,7 +115,7 @@ export function AdminLoading({ label = "Loading…", className }) {
   return (
     <div
       className={cn(
-        "flex items-center justify-center gap-3 py-16 text-sm text-zinc-500",
+        "flex items-center justify-center gap-3 py-16 text-xs sm:text-sm font-semibold text-zinc-500",
         className,
       )}
     >
@@ -128,16 +135,20 @@ export function AdminEmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center px-5 py-16 text-center",
+        "flex flex-col items-center justify-center px-6 py-16 text-center",
         className,
       )}
     >
       {Icon && (
-        <Icon className="mb-3 h-8 w-8 text-zinc-300 dark:text-zinc-700" />
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800/80 text-zinc-400">
+          <Icon className="h-6 w-6" />
+        </div>
       )}
-      <p className="font-semibold text-zinc-700 dark:text-zinc-300">{title}</p>
+      <p className="font-bold text-zinc-900 dark:text-zinc-100">{title}</p>
       {description && (
-        <p className="mt-1 max-w-md text-sm text-zinc-500">{description}</p>
+        <p className="mt-1.5 max-w-md text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
+          {description}
+        </p>
       )}
       {action && <div className="mt-5">{action}</div>}
     </div>
@@ -157,11 +168,11 @@ export function AdminPagination({
   return (
     <footer
       className={cn(
-        "flex flex-wrap items-center justify-between gap-3 border-t border-zinc-200/60 px-3 py-4 text-xs text-zinc-500 dark:border-zinc-800/60 sm:px-5 sm:text-sm",
+        "flex flex-wrap items-center justify-between gap-3 border-t border-zinc-100 px-4 py-3.5 text-xs text-zinc-500 dark:border-zinc-800/80 sm:px-6",
         className,
       )}
     >
-      <span>
+      <span className="font-semibold text-zinc-500 dark:text-zinc-400">
         {typeof total === "number"
           ? `${total} ${itemLabel}`
           : `Page ${safePage} of ${safePages}`}
@@ -171,22 +182,24 @@ export function AdminPagination({
           variant="outline"
           size="icon"
           aria-label="Previous page"
+          className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
           disabled={safePage <= 1}
           onClick={() => onPageChange(safePage - 1)}
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-3.5 w-3.5" />
         </Button>
-        <span className="min-w-14 text-center tabular-nums">
+        <span className="min-w-12 text-center text-xs font-bold tabular-nums text-zinc-700 dark:text-zinc-300">
           {safePage} / {safePages}
         </span>
         <Button
           variant="outline"
           size="icon"
           aria-label="Next page"
+          className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
           disabled={safePage >= safePages}
           onClick={() => onPageChange(safePage + 1)}
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-3.5 w-3.5" />
         </Button>
       </div>
     </footer>

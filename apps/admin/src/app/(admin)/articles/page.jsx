@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Edit3, Eye, FileText, Loader2, Plus, Search, Trash2, User } from "lucide-react";
+import { Edit3, FileText, Loader2, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { articlesApi } from "@/lib/api";
-import AdminFormShell from "@/components/AdminFormShell";
+import AdminFormShell from "@/components/forms/AdminFormShell";
 import { Button, Input } from "@/components/ui";
-import { ConfirmDialog } from "@/components/confirm-dialog";
-import { ViewToggle } from "@/components/ViewToggle";
+import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
+import { ViewToggle } from "@/components/ui/ViewToggle";
 
 export default function ArticlesPage() {
   const [articles, setArticles] = useState([]);
@@ -108,7 +108,7 @@ export default function ArticlesPage() {
           {filtered.map((article) => (
             <div
               key={article._id}
-              className="group flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs transition-all hover:border-blue-500/50 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950"
+              className="admin-surface group flex flex-col justify-between p-5 transition-colors hover:border-zinc-300 dark:hover:border-zinc-700"
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-2">
@@ -170,16 +170,16 @@ export default function ArticlesPage() {
           ))}
         </div>
       ) : (
-        <section className="w-full bg-white dark:bg-zinc-900 rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs overflow-hidden">
+        <section className="admin-surface w-full rounded-[28px] sm:rounded-[32px] overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-190 text-left text-sm">
-              <thead className="border-b border-zinc-200/70 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-950/40 text-[11px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+            <table className="admin-table w-full min-w-190 text-left text-sm">
+              <thead className="border-b border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/75 dark:bg-[#18181b]/60 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">
                 <tr>
-                  <th className="px-6 py-4">Article</th>
-                  <th className="px-6 py-4">Author</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4">Views</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-6 py-4.5">Article</th>
+                  <th className="px-6 py-4.5">Author</th>
+                  <th className="px-6 py-4.5">Status</th>
+                  <th className="px-6 py-4.5">Views</th>
+                  <th className="px-6 py-4.5 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
@@ -188,10 +188,10 @@ export default function ArticlesPage() {
                     key={article._id}
                     className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
                   >
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4.5">
                       <Link
                         href={`/articles/edit/${article._id}`}
-                        className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-1"
+                        className="font-bold font-outfit text-zinc-950 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-1"
                       >
                         {article.title}
                       </Link>
@@ -199,7 +199,7 @@ export default function ArticlesPage() {
                         /{article.slug}
                       </p>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4.5">
                       <div className="flex items-center gap-2">
                         <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 text-[10px] font-black">
                           {article.author?.fullName?.charAt(0) || "A"}
@@ -209,7 +209,7 @@ export default function ArticlesPage() {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4.5">
                       <span
                         className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
                           article.status === "published"
@@ -220,18 +220,18 @@ export default function ArticlesPage() {
                         {article.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4.5">
                       <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
                         {article.readCount || 0} reads
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4.5">
                       <div className="flex justify-end gap-1">
                         <Link href={`/articles/edit/${article._id}`}>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                             title="Edit article"
                           >
                             <Edit3 className="h-4 w-4" />
@@ -241,10 +241,10 @@ export default function ArticlesPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => setDeleteTarget(article)}
-                          className="h-8 w-8 rounded-xl text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                          className="h-8 w-8 rounded-full text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
                           title="Delete article"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4 text-rose-500" />
                         </Button>
                       </div>
                     </td>

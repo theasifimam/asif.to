@@ -1,317 +1,276 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useRef, useState } from "react";
+import { Camera, ExternalLink, Mail, MapPin, UserRound } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter
 } from "@/components/ui/dialog";
-import { Loader2, Camera, Twitter, Linkedin, Globe, Github, Instagram, Phone } from 'lucide-react';
-import { Input, Button, Avatar, AvatarFallback, AvatarImage } from '@/components/ui';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button,
+  Input,
+} from "@/components/ui";
+import { Textarea } from "@/components/ui/textarea";
 
-const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL;
+const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
+const initialForm = {
+  fullName: "",
+  username: "",
+  email: "",
+  location: "",
+  bio: "",
+  website: "",
+  twitter: "",
+  linkedin: "",
+  github: "",
+};
+
+const initials = (name = "") =>
+  name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+const cleanHandle = (value = "") => value.trim().replace(/^@/, "");
 
 export function EditUserModal({ isOpen, onClose, user, onUpdate, submitting }) {
-  const [fullName, setFullName] = useState('');
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [mNumber, setMNumber] = useState('');
-  const [location, setLocation] = useState('');
-  const [bio, setBio] = useState('');
+  const [form, setForm] = useState(() => ({
+    ...initialForm,
+    fullName: user?.fullName || "",
+    username: user?.username || "",
+    email: user?.email || "",
+    location: user?.location || "",
+    bio: user?.bio || "",
+    website: user?.socials?.website || "",
+    twitter: cleanHandle(user?.socials?.twitter),
+    linkedin: cleanHandle(user?.socials?.linkedin),
+    github: cleanHandle(user?.socials?.github),
+  }));
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [preview, setPreview] = useState(() =>
+    user?.avatar
+      ? user.avatar.startsWith("http")
+        ? user.avatar
+        : `${STORAGE_URL}${user.avatar}`
+      : "",
+  );
+  const inputRef = useRef(null);
 
-  // Social Handles State
-  const [twitter, setTwitter] = useState('');
-  const [linkedin, setLinkedin] = useState('');
-  const [website, setWebsite] = useState('');
-  const [github, setGithub] = useState('');
-  const [instagram, setInstagram] = useState('');
+  const updateField = (field) => (event) =>
+    setForm((current) => ({ ...current, [field]: event.target.value }));
 
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  const fileInputRef = useRef(null);
-
-  const cleanHandle = (val) => {
-    if (!val) return "";
-    let s = val.trim();
-    s = s.replace(/^@/, "");
-    try {
-      if (s.startsWith("http://") || s.startsWith("https://")) {
-        const url = new URL(s);
-        const parts = url.pathname.split("/").filter(Boolean);
-        return parts[0] || "";
-      }
-    } catch (e) {
-      // fallback
-    }
-    return s;
+  const chooseAvatar = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setAvatarFile(file);
+    setPreview(URL.createObjectURL(file));
   };
 
-  useEffect(() => {
-    if (user && isOpen) {
-      setFullName(user.fullName || '');
-      setUsername(user.username || '');
-      setEmail(user.email || '');
-      setMNumber(user.mNumber || '');
-      setLocation(user.location || '');
-      setBio(user.bio || '');
-
-      setTwitter(cleanHandle(user.socials?.twitter || ''));
-      setLinkedin(cleanHandle(user.socials?.linkedin || ''));
-      setWebsite(user.socials?.website || '');
-      setGithub(cleanHandle(user.socials?.github || ''));
-      setInstagram(cleanHandle(user.socials?.instagram || ''));
-
-      const avatarUrl = user.avatar ?
-        (user.avatar.startsWith('http') ? user.avatar : `${STORAGE_URL}${user.avatar}`) :
-        user?.profilePicture?.url || null;
-      setPreviewUrl(avatarUrl);
-      setSelectedImage(null);
-    }
-  }, [user, isOpen]);
-
-  const handleImageSelect = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedImage(file);
-      setPreviewUrl(URL.createObjectURL(file));
-    }
-  };
-
-  const handleSubmit = async () => {
-    const formData = new FormData();
-    formData.append('fullName', fullName);
-    formData.append('username', username);
-    formData.append('email', email);
-    formData.append('mNumber', mNumber);
-    formData.append('location', location);
-    formData.append('bio', bio);
-    formData.append('socials', JSON.stringify({
-      twitter: cleanHandle(twitter),
-      linkedin: cleanHandle(linkedin),
-      website: website.trim(),
-      github: cleanHandle(github),
-      instagram: cleanHandle(instagram)
-    }));
-
-    if (selectedImage) {
-      formData.append('avatar', selectedImage);
-    }
-
-    await onUpdate(formData);
-  };
-
-  const getInitials = (name) => {
-    return name?.split(' ').map((n) => n[0]).join('').toUpperCase() || "?";
+  const submit = async (event) => {
+    event.preventDefault();
+    const data = new FormData();
+    data.append("fullName", form.fullName.trim());
+    data.append("username", form.username.trim().toLowerCase());
+    data.append("email", form.email.trim().toLowerCase());
+    data.append("location", form.location.trim());
+    data.append("bio", form.bio.trim());
+    data.append(
+      "socials",
+      JSON.stringify({
+        website: form.website.trim(),
+        twitter: cleanHandle(form.twitter),
+        linkedin: cleanHandle(form.linkedin),
+        github: cleanHandle(form.github),
+      }),
+    );
+    if (avatarFile) data.append("avatar", avatarFile);
+    await onUpdate(data);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(o) => { if (!o && !submitting) onClose(); }}>
-      <DialogContent className="bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white rounded-[2rem] p-0 sm:max-w-[580px] shadow-2xl overflow-hidden focus:outline-none">
-        <div className="max-h-[85vh] overflow-y-auto px-8 py-8 scrollbar-hide">
-          <DialogHeader className="mb-6">
-            <DialogTitle className="text-3xl font-black font-outfit uppercase tracking-tighter">Edit Personnel Profile</DialogTitle>
-            <DialogDescription className="text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-widest text-[10px]">
-              Modify profile details and social media usernames.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="flex flex-col gap-6">
-            {/* Avatar Upload */}
-            <div className="flex flex-col items-center gap-3">
-              <div className="relative group">
-                <Avatar className="w-24 h-24 border-4 border-zinc-100 dark:border-zinc-900 shadow-xl overflow-hidden cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                  <AvatarImage src={previewUrl || ""} className="object-cover" />
-                  <AvatarFallback className="text-2xl font-black bg-zinc-100 dark:bg-zinc-800 text-zinc-400 uppercase">
-                    {getInitials(fullName)}
-                  </AvatarFallback>
-                </Avatar>
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-0 right-0 p-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-lg shadow-lg hover:scale-110 active:scale-95 transition-all border-2 border-white dark:border-zinc-900">
-                  <Camera size={14} />
-                </button>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleImageSelect}
-                  disabled={submitting} />
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Profile Photo</span>
-            </div>
-
-            {/* Basic Info */}
-            <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Full Name</label>
-                  <Input
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="John Doe"
-                    className="w-full h-11 bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 text-xs font-bold" />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Username</label>
-                  <Input
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="johndoe"
-                    className="w-full h-11 bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 text-xs font-bold" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Email Address</label>
-                  <Input
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="john@example.com"
-                    className="w-full h-11 bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 text-xs font-bold" />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Phone Number</label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
-                    <Input
-                      value={mNumber}
-                      onChange={(e) => setMNumber(e.target.value)}
-                      placeholder="+1 (555) 000-0000"
-                      className="w-full h-11 pl-9 bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-bold" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Location Node</label>
-                <Input
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="New York, USA"
-                  className="w-full h-11 bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 text-xs font-bold" />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Biography / Description</label>
-                <textarea
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder="Tell us about yourself or author narrative..."
-                  rows={3}
-                  className="w-full bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors resize-none scrollbar-hide" />
-              </div>
-
-              {/* Social Handles Header */}
-              <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/80">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Social Media Usernames (Handles Only)</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Twitter / X */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-1">
-                    <Twitter size={12} className="text-sky-400" /> Twitter / X
-                  </label>
-                  <div className="flex items-center rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 overflow-hidden text-xs font-bold focus-within:border-zinc-400 dark:focus-within:border-zinc-600">
-                    <span className="px-3 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-r border-zinc-200 dark:border-zinc-800 text-[11px] font-mono shrink-0 select-none">
-                      x.com/
-                    </span>
-                    <Input
-                      value={twitter}
-                      onChange={(e) => setTwitter(cleanHandle(e.target.value))}
-                      placeholder="username"
-                      className="border-0 bg-transparent h-10 px-3 focus:ring-0 text-xs font-bold shadow-none" />
-                  </div>
-                </div>
-
-                {/* LinkedIn */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-1">
-                    <Linkedin size={12} className="text-blue-500" /> LinkedIn
-                  </label>
-                  <div className="flex items-center rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 overflow-hidden text-xs font-bold focus-within:border-zinc-400 dark:focus-within:border-zinc-600">
-                    <span className="px-2.5 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-r border-zinc-200 dark:border-zinc-800 text-[10px] font-mono shrink-0 select-none">
-                      linkedin.com/in/
-                    </span>
-                    <Input
-                      value={linkedin}
-                      onChange={(e) => setLinkedin(cleanHandle(e.target.value))}
-                      placeholder="username"
-                      className="border-0 bg-transparent h-10 px-3 focus:ring-0 text-xs font-bold shadow-none" />
-                  </div>
-                </div>
-
-                {/* GitHub */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-1">
-                    <Github size={12} /> GitHub
-                  </label>
-                  <div className="flex items-center rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 overflow-hidden text-xs font-bold focus-within:border-zinc-400 dark:focus-within:border-zinc-600">
-                    <span className="px-3 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-r border-zinc-200 dark:border-zinc-800 text-[11px] font-mono shrink-0 select-none">
-                      github.com/
-                    </span>
-                    <Input
-                      value={github}
-                      onChange={(e) => setGithub(cleanHandle(e.target.value))}
-                      placeholder="username"
-                      className="border-0 bg-transparent h-10 px-3 focus:ring-0 text-xs font-bold shadow-none" />
-                  </div>
-                </div>
-
-                {/* Instagram */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-1">
-                    <Instagram size={12} className="text-pink-500" /> Instagram
-                  </label>
-                  <div className="flex items-center rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 overflow-hidden text-xs font-bold focus-within:border-zinc-400 dark:focus-within:border-zinc-600">
-                    <span className="px-2.5 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-r border-zinc-200 dark:border-zinc-800 text-[10px] font-mono shrink-0 select-none">
-                      instagram.com/
-                    </span>
-                    <Input
-                      value={instagram}
-                      onChange={(e) => setInstagram(cleanHandle(e.target.value))}
-                      placeholder="username"
-                      className="border-0 bg-transparent h-10 px-3 focus:ring-0 text-xs font-bold shadow-none" />
-                  </div>
-                </div>
-
-                {/* Website */}
-                <div className="flex flex-col gap-1 sm:col-span-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-1">
-                    <Globe size={12} className="text-emerald-500" /> Personal Website
-                  </label>
-                  <div className="flex items-center rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 overflow-hidden text-xs font-bold focus-within:border-zinc-400 dark:focus-within:border-zinc-600">
-                    <span className="px-3 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-r border-zinc-200 dark:border-zinc-800 text-[11px] font-mono shrink-0 select-none">
-                      https://
-                    </span>
-                    <Input
-                      value={website}
-                      onChange={(e) => setWebsite(e.target.value)}
-                      placeholder="yourdomain.com"
-                      className="border-0 bg-transparent h-10 px-3 focus:ring-0 text-xs font-bold shadow-none" />
-                  </div>
-                </div>
-              </div>
-            </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-h-[92vh] overflow-hidden rounded-3xl border-zinc-200 bg-white p-0 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950 sm:max-w-2xl">
+        <form onSubmit={submit} className="flex max-h-[92vh] flex-col">
+          <div className="border-b border-zinc-100 px-6 py-6 dark:border-zinc-900 sm:px-8">
+            <DialogHeader className="text-left">
+              <DialogTitle className="text-xl font-black tracking-tight text-zinc-950 dark:text-white">
+                Update user
+              </DialogTitle>
+              <DialogDescription>
+                Change public profile information for @{user?.username}. Role
+                and account status are managed separately.
+              </DialogDescription>
+            </DialogHeader>
           </div>
 
-          <DialogFooter className="mt-8 gap-3 sm:flex-row flex-col">
-            <Button variant="ghost" onClick={onClose} disabled={submitting} className="flex-1 px-6 py-5 rounded-full text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">Cancel</Button>
+          <div className="overflow-y-auto px-6 py-6 sm:px-8">
+            <section className="flex flex-col gap-5 border-b border-zinc-100 pb-6 dark:border-zinc-900 sm:flex-row sm:items-center">
+              <Avatar className="h-20 w-20 border border-zinc-200 dark:border-zinc-800">
+                <AvatarImage
+                  src={preview}
+                  alt={form.fullName}
+                  className="object-cover"
+                />
+                <AvatarFallback className="text-lg font-black">
+                  {initials(form.fullName)}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <input
+                  ref={inputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={chooseAvatar}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => inputRef.current?.click()}
+                >
+                  <Camera className="mr-2 h-4 w-4" /> Change photo
+                </Button>
+                <p className="mt-2 text-xs text-zinc-400">
+                  PNG, JPG or WebP. Keep files reasonably small.
+                </p>
+              </div>
+            </section>
+
+            <section className="space-y-4 py-6">
+              <div>
+                <h3 className="text-sm font-black text-zinc-900 dark:text-white">
+                  Identity
+                </h3>
+                <p className="mt-1 text-xs text-zinc-500">
+                  Core account and public profile information.
+                </p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Full name" icon={UserRound}>
+                  <Input
+                    required
+                    value={form.fullName}
+                    onChange={updateField("fullName")}
+                  />
+                </Field>
+                <Field label="Username">
+                  <Input
+                    required
+                    minLength={3}
+                    value={form.username}
+                    onChange={updateField("username")}
+                  />
+                </Field>
+                <Field label="Email" icon={Mail}>
+                  <Input
+                    required
+                    type="email"
+                    value={form.email}
+                    onChange={updateField("email")}
+                  />
+                </Field>
+                <Field label="Location" icon={MapPin}>
+                  <Input
+                    value={form.location}
+                    onChange={updateField("location")}
+                    placeholder="City, country"
+                  />
+                </Field>
+              </div>
+              <Field label="Bio">
+                <Textarea
+                  value={form.bio}
+                  maxLength={500}
+                  onChange={updateField("bio")}
+                  placeholder="Short public biography"
+                  className="min-h-24 resize-y"
+                />
+                <p className="text-right text-[10px] text-zinc-400">
+                  {form.bio.length}/500
+                </p>
+              </Field>
+            </section>
+
+            <section className="space-y-4 border-t border-zinc-100 pt-6 dark:border-zinc-900">
+              <div>
+                <h3 className="text-sm font-black text-zinc-900 dark:text-white">
+                  Links
+                </h3>
+                <p className="mt-1 text-xs text-zinc-500">
+                  Optional public website and professional profiles.
+                </p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Website" icon={ExternalLink}>
+                  <Input
+                    type="url"
+                    value={form.website}
+                    onChange={updateField("website")}
+                    placeholder="https://example.com"
+                  />
+                </Field>
+                <Field label="GitHub">
+                  <Input
+                    value={form.github}
+                    onChange={updateField("github")}
+                    placeholder="username"
+                  />
+                </Field>
+                <Field label="LinkedIn">
+                  <Input
+                    value={form.linkedin}
+                    onChange={updateField("linkedin")}
+                    placeholder="username"
+                  />
+                </Field>
+                <Field label="X / Twitter">
+                  <Input
+                    value={form.twitter}
+                    onChange={updateField("twitter")}
+                    placeholder="username"
+                  />
+                </Field>
+              </div>
+            </section>
+          </div>
+
+          <DialogFooter className="flex-row border-t border-zinc-100 bg-zinc-50/70 px-6 py-4 dark:border-zinc-900 dark:bg-zinc-900/40 sm:px-8">
+            <Button type="button" variant="ghost" onClick={onClose}>
+              Cancel
+            </Button>
             <Button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-5 rounded-full text-[10px] font-black uppercase tracking-widest bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-xl shadow-zinc-900/10 dark:shadow-none">
-              {submitting ? <Loader2 size={16} className="animate-spin" /> : "Save Profile Shift"}
+              type="submit"
+              disabled={
+                submitting || !form.fullName.trim() || !form.email.trim()
+              }
+            >
+              {submitting ? "Saving…" : "Save changes"}
             </Button>
           </DialogFooter>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function Field({ label, icon: Icon, children }) {
+  return (
+    <label className="space-y-2">
+      <span className="flex items-center gap-1.5 text-xs font-bold text-zinc-700 dark:text-zinc-300">
+        {Icon && <Icon className="h-3.5 w-3.5 text-zinc-400" />}
+        {label}
+      </span>
+      {children}
+    </label>
   );
 }

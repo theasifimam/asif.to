@@ -1,17 +1,22 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
 
 export const dashboardApi = createApi({
   reducerPath: "dashboardApi",
   baseQuery: fetchBaseQuery({
     baseUrl: API_URL,
+    credentials: "include",
     prepareHeaders: (headers) => {
-      const token =
-        localStorage.getItem("asif_admin_token") ||
-        localStorage.getItem("asif_admin_token");
-      if (token) {
-        headers.set("authorization", `Bearer ${token}`);
+      if (typeof window !== "undefined") {
+        const token =
+          localStorage.getItem("asif_admin_token") ||
+          localStorage.getItem("token") ||
+          localStorage.getItem("asif_token");
+        if (token) {
+          headers.set("authorization", `Bearer ${token}`);
+        }
       }
       return headers;
     },

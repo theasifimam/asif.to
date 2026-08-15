@@ -50,6 +50,7 @@ function BrowserRuntimeWorkspace({
   playgroundId = "scratch",
   fillViewport = false,
   starter,
+  executionEnabled = true,
 }) {
   const config = BROWSER_RUNTIME_CONFIG[language];
   const { sandpack } = useSandpack();
@@ -148,6 +149,7 @@ function BrowserRuntimeWorkspace({
   }, [config.worker, config.workerType, finish, language]);
 
   const run = useCallback(() => {
+    if (!executionEnabled) return;
     clearTimeout(watchdogRef.current);
     setOutput("");
     setError("");
@@ -248,10 +250,10 @@ function BrowserRuntimeWorkspace({
 
   const runtimeOutput = (
     <section
-      className="flex h-full min-h-0 flex-col bg-[#1e1e1e] text-zinc-200"
+      className="flex h-full w-full min-h-0 flex-1 flex-col bg-[#1e1e1e] text-zinc-200"
       aria-label="Console output"
     >
-      <header className="flex h-10 shrink-0 items-center justify-between border-b border-zinc-800 px-3">
+      <header className="flex h-10 w-full shrink-0 items-center justify-between border-b border-zinc-800 px-3">
         <h3 className="text-xs font-black uppercase tracking-wide">Console</h3>
         <button
           type="button"
@@ -259,14 +261,14 @@ function BrowserRuntimeWorkspace({
             setOutput("");
             setError("");
           }}
-          className="rounded p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+          className="rounded p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-white cursor-pointer"
           aria-label="Clear console"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
       </header>
       <div
-        className="relative min-h-0 flex-1 overflow-auto p-3 font-mono text-xs"
+        className="relative min-h-0 w-full flex-1 overflow-auto p-3 font-mono text-xs"
         aria-live="polite"
       >
         {status === "loading" && (
@@ -304,10 +306,14 @@ function BrowserRuntimeWorkspace({
           </p>
         )}
         {output && (
-          <pre className="m-0 whitespace-pre-wrap text-zinc-200">{output}</pre>
+          <pre className="m-0 w-full whitespace-pre-wrap wrap-break-word text-zinc-200">
+            {output}
+          </pre>
         )}
         {error && (
-          <pre className="m-0 whitespace-pre-wrap text-red-400">{error}</pre>
+          <pre className="m-0 w-full whitespace-pre-wrap wrap-break-word text-red-400">
+            {error}
+          </pre>
         )}
       </div>
     </section>
@@ -325,6 +331,7 @@ function BrowserRuntimeWorkspace({
       playgroundId={playgroundId}
       starterFiles={{ [config.file]: starter }}
       runtimeAdapter={{ run, status, output: runtimeOutput }}
+      executionEnabled={executionEnabled !== false}
     />
   );
 
@@ -409,9 +416,9 @@ function BrowserRuntimeWorkspace({
           <button
             type="button"
             onClick={run}
-            disabled={status === "loading"}
+            disabled={!executionEnabled || status === "loading"}
             className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-3 py-2 text-xs font-black hover:bg-blue-500 disabled:cursor-wait disabled:opacity-60"
-            title="Run (Ctrl/Cmd + Enter)"
+            title={!executionEnabled ? "Execution is temporarily disabled" : "Run (Ctrl/Cmd + Enter)"}
           >
             {status === "loading" ? (
               <Loader2 className="h-4 w-4 animate-spin" />

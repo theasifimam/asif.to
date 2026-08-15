@@ -28,25 +28,25 @@ export default function ReportTable({
   ];
 
   return (
-    <section className="w-full bg-white dark:bg-zinc-900 rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs overflow-hidden">
-      <header className="flex flex-col gap-3 border-b border-zinc-200/70 dark:border-zinc-800 p-5 sm:p-6 sm:flex-row sm:items-center sm:justify-between bg-zinc-50/50 dark:bg-zinc-950/20">
-        <h2 className="text-base sm:text-lg font-black tracking-tight text-zinc-900 dark:text-white">
+    <section className="admin-surface w-full overflow-hidden rounded-3xl">
+      <header className="flex flex-col gap-3 border-b border-zinc-100 dark:border-zinc-800/80 p-5 dark:border-zinc-800 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <h2 className="text-base sm:text-lg font-black font-outfit tracking-tight text-zinc-950 dark:text-white">
           {title}
         </h2>
-        <label className="flex h-10 items-center rounded-2xl bg-zinc-100 dark:bg-zinc-800/80 px-3.5 border border-zinc-200/50 dark:border-zinc-700/50">
+        <label className="flex h-10 items-center rounded-full bg-zinc-50 dark:bg-[#18181b] px-3.5 border border-zinc-200/80 dark:border-zinc-800/80">
           <Search size={14} className="text-zinc-400 shrink-0" />
           <input
             value={search}
             onChange={(e) => onSearch(e.target.value)}
             placeholder={`Search ${type}...`}
-            className="w-48 sm:w-56 bg-transparent px-2 text-xs font-semibold outline-none placeholder:text-zinc-400"
+            className="w-48 sm:w-56 bg-transparent px-2 text-xs font-medium outline-none placeholder:text-zinc-400 dark:text-zinc-200"
           />
         </label>
       </header>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[680px] text-left text-sm">
-          <thead className="border-b border-zinc-200/70 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-950/40 text-[11px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+        <table className="admin-table w-full min-w-[680px] text-left text-sm">
+          <thead className="border-b border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/60 dark:bg-zinc-900/30 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">
             <tr>
               <th className="px-6 py-4">{type}</th>
               {columns.map(([key, label]) => (
@@ -75,7 +75,7 @@ export default function ReportTable({
                   }`}
                 >
                   <td
-                    className="max-w-lg truncate px-6 py-4 font-bold text-zinc-900 dark:text-white"
+                    className="max-w-lg truncate px-6 py-4 font-bold text-zinc-950 dark:text-zinc-100"
                     title={row.key}
                   >
                     {displayKey(type, row.key) || "(not available)"}
@@ -98,7 +98,7 @@ export default function ReportTable({
               <tr>
                 <td
                   colSpan="5"
-                  className="px-6 py-16 text-center text-xs font-bold text-zinc-400"
+                  className="px-6 py-16 text-center text-xs font-semibold text-zinc-400"
                 >
                   No Search Console data available for this period.
                 </td>
@@ -116,23 +116,23 @@ export default function ReportTable({
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-xl"
+            className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
             disabled={page <= 1}
             onClick={() => onPage(page - 1)}
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-3.5 w-3.5" />
           </Button>
-          <span className="min-w-20 text-center text-xs font-bold text-zinc-600 dark:text-zinc-300">
+          <span className="min-w-16 text-center text-xs font-bold text-zinc-700 dark:text-zinc-300">
             {page} / {report?.pagination?.pages || 1}
           </span>
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-xl"
+            className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
             disabled={page >= (report?.pagination?.pages || 1)}
             onClick={() => onPage(page + 1)}
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3.5 w-3.5" />
           </Button>
         </div>
       </footer>

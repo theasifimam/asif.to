@@ -49,6 +49,7 @@ export default function PlannerPage() {
   const [boardId, setBoardId] = useState("");
   const [board, setBoard] = useState(null);
   const [columns, setColumns] = useState([]);
+  const [archivedColumns, setArchivedColumns] = useState([]);
   const [cards, setCards] = useState([]);
   const [labels, setLabels] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -110,6 +111,7 @@ export default function PlannerPage() {
       const payload = unwrap(response);
       setBoard(payload.board);
       setColumns(payload.columns || []);
+      setArchivedColumns(payload.archivedColumns || []);
       setCards(payload.cards || []);
       setLabels(payload.labels || []);
       if (payload.columns?.length > 0)
@@ -458,6 +460,15 @@ export default function PlannerPage() {
     if (response.success) loadBoard(boardId, true);
     else toast.error(response.error);
   };
+  const unarchiveColumn = async (column) => {
+    const response = await kanbanApi.updateColumn(column._id, {
+      archived: false,
+    });
+    if (response.success) {
+      toast.success(`Restored column “${column.name}”`);
+      loadBoard(boardId, true);
+    } else toast.error(response.error);
+  };
   const clearFilters = () =>
     setFilters({
       search: "",
@@ -521,7 +532,7 @@ export default function PlannerPage() {
                 <Button variant="outline" size="sm" className="h-8 w-8 p-0">
                   <Settings2 size={14} />
                 </Button>
-                <div className="invisible absolute right-0 top-9 z-40 w-40 rounded-2xl border border-zinc-200 bg-white p-1 opacity-0 shadow-xl group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100 dark:border-zinc-800 dark:bg-zinc-950">
+                <div className="invisible absolute right-0 top-full mt-1.5 z-40 w-40 rounded-2xl border border-zinc-200 bg-white p-1 opacity-0 shadow-xl group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100 dark:border-zinc-800 dark:bg-zinc-950 before:absolute before:inset-x-0 before:-top-2 before:h-2 before:content-['']">
                   <button
                     onClick={renameBoard}
                     className="w-full rounded-xl px-3 py-2 text-left text-xs hover:bg-zinc-100 dark:hover:bg-zinc-900"
@@ -540,6 +551,26 @@ export default function PlannerPage() {
                   >
                     <Archive size={13} /> Archive board
                   </button>
+                  {archivedColumns.length > 0 && (
+                    <>
+                      <div className="border-t border-zinc-100 dark:border-zinc-800/80 my-1"></div>
+                      <div className="px-3 py-1 text-[9px] font-black uppercase tracking-wider text-zinc-400">
+                        Restore Columns
+                      </div>
+                      {archivedColumns.map((col) => (
+                        <button
+                          key={col._id}
+                          onClick={() => unarchiveColumn(col)}
+                          className="w-full rounded-xl px-3 py-1.5 text-left text-[11px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 flex items-center justify-between gap-2"
+                        >
+                          <span className="truncate">{col.name}</span>
+                          <span className="text-[10px] text-blue-600 font-bold shrink-0">
+                            Restore
+                          </span>
+                        </button>
+                      ))}
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -572,7 +603,7 @@ export default function PlannerPage() {
                 >
                   <Plus size={15} /> Template
                 </Button>
-                <div className="invisible absolute right-0 top-11 z-40 w-44 rounded-2xl border border-zinc-200 bg-white p-1 opacity-0 shadow-xl group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100 dark:border-zinc-800 dark:bg-zinc-950">
+                <div className="invisible absolute right-0 top-full mt-1.5 z-40 w-44 rounded-2xl border border-zinc-200 bg-white p-1 opacity-0 shadow-xl group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100 dark:border-zinc-800 dark:bg-zinc-950 before:absolute before:inset-x-0 before:-top-2 before:h-2 before:content-['']">
                   {Object.keys(TEMPLATES).map((name) => (
                     <button
                       key={name}
@@ -596,7 +627,7 @@ export default function PlannerPage() {
                 <Button variant="outline" size="sm" className="h-9 sm:h-10">
                   <Settings2 size={15} />
                 </Button>
-                <div className="invisible absolute right-0 top-11 z-40 w-40 rounded-2xl border border-zinc-200 bg-white p-1 opacity-0 shadow-xl group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100 dark:border-zinc-800 dark:bg-zinc-950">
+                <div className="invisible absolute right-0 top-full mt-1.5 z-40 w-40 rounded-2xl border border-zinc-200 bg-white p-1 opacity-0 shadow-xl group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100 dark:border-zinc-800 dark:bg-zinc-950 before:absolute before:inset-x-0 before:-top-2 before:h-2 before:content-['']">
                   <button
                     onClick={renameBoard}
                     className="w-full rounded-xl px-3 py-2 text-left text-xs hover:bg-zinc-100 dark:hover:bg-zinc-900"
@@ -615,6 +646,26 @@ export default function PlannerPage() {
                   >
                     <Archive size={13} /> Archive board
                   </button>
+                  {archivedColumns.length > 0 && (
+                    <>
+                      <div className="border-t border-zinc-100 dark:border-zinc-800/80 my-1"></div>
+                      <div className="px-3 py-1 text-[9px] font-black uppercase tracking-wider text-zinc-400">
+                        Restore Columns
+                      </div>
+                      {archivedColumns.map((col) => (
+                        <button
+                          key={col._id}
+                          onClick={() => unarchiveColumn(col)}
+                          className="w-full rounded-xl px-3 py-1.5 text-left text-[11px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 flex items-center justify-between gap-2"
+                        >
+                          <span className="truncate">{col.name}</span>
+                          <span className="text-[10px] text-blue-600 font-bold shrink-0">
+                            Restore
+                          </span>
+                        </button>
+                      ))}
+                    </>
+                  )}
                 </div>
               </div>
             </div>

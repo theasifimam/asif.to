@@ -33,8 +33,8 @@ function Workspace(props) {
       data-editor-theme={props.editorTheme}
       className={`asif-playground relative flex flex-col overflow-hidden border shadow-2xl transition-colors ${
         isDark
-          ? "border-[#3c3c3c] bg-[#1e1e1e] text-white"
-          : "border-zinc-300 bg-white text-zinc-900"
+          ? "border-zinc-800/80 bg-[#141416] text-white shadow-black/70"
+          : "border-zinc-200/90 bg-white text-zinc-900 shadow-zinc-300/40"
       } ${
         fullscreen
           ? "fixed inset-0 z-100 h-screen rounded-none"
@@ -84,7 +84,19 @@ function Workspace(props) {
         saveStatus={saveStatus}
         formatting={formatting}
         runtimeAdapter={workspace.runtimeAdapter}
+        executionEnabled={props.executionEnabled !== false}
       />
+
+      {props.executionEnabled === false && (
+        <div
+          className="flex shrink-0 items-center gap-2 border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs font-bold text-amber-300"
+          role="status"
+          aria-live="polite"
+        >
+          <span aria-hidden="true">⚠</span>
+          Code execution is temporarily disabled. You can still edit and copy your code.
+        </div>
+      )}
 
       {restoring && (
         <div
@@ -105,34 +117,42 @@ function Workspace(props) {
 
       {resetOpen && (
         <div
-          className="absolute inset-0 z-50 grid place-items-center bg-black/60 p-4"
+          className="absolute inset-0 z-50 grid place-items-center bg-black/65 backdrop-blur-xs p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="reset-title"
         >
           <div
-            className={`max-w-sm rounded-2xl border p-5 shadow-2xl ${isDark ? "border-zinc-700 bg-zinc-900" : "border-zinc-200 bg-white"}`}
+            className={`w-full max-w-sm rounded-3xl border p-6 shadow-2xl ${
+              isDark
+                ? "border-zinc-800 bg-[#18181b] text-white shadow-black/80"
+                : "border-zinc-200 bg-white text-zinc-900 shadow-zinc-400/40"
+            }`}
           >
-            <h2 id="reset-title" className="font-black">
-              Reset code?
+            <h2 id="reset-title" className="font-outfit text-base font-black">
+              Reset starter code?
             </h2>
-            <p className="mt-2 text-sm opacity-75">
-              Your current changes will be replaced with the starter code.
+            <p className="mt-2 text-xs font-medium leading-relaxed opacity-75">
+              Your current edits will be discarded and reverted back to the initial starter template.
             </p>
-            <div className="mt-5 flex justify-end gap-2">
+            <div className="mt-6 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => workspace.setters.setResetOpen(false)}
-                className="rounded-lg px-3 py-2 text-sm font-bold"
+                className={`rounded-xl px-3.5 py-2 text-xs font-bold transition cursor-pointer ${
+                  isDark
+                    ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white"
+                    : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 hover:text-zinc-950"
+                }`}
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={confirmReset}
-                className="rounded-lg bg-red-600 px-3 py-2 text-sm font-bold text-white"
+                className="rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-500 shadow-sm cursor-pointer"
               >
-                Reset
+                Reset Code
               </button>
             </div>
           </div>

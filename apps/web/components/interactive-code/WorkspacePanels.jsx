@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   GripVertical,
   Loader2,
@@ -7,6 +8,17 @@ import {
   Code2,
   Monitor,
   Terminal,
+  Play,
+  RotateCcw,
+  MoreHorizontal,
+  Minimize2,
+  Expand,
+  WandSparkles,
+  Share2,
+  Copy,
+  Download,
+  Plus,
+  Minus,
 } from "lucide-react";
 import {
   SandpackCodeEditor,
@@ -14,6 +26,16 @@ import {
 } from "@codesandbox/sandpack-react";
 import FileExplorer from "./FileExplorer";
 import BetterConsole from "./BetterConsole";
+import { executeCurrentFiles } from "./sandpackConfig";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function WorkspacePanels({ workspace }) {
   const {
@@ -22,6 +44,7 @@ export function WorkspacePanels({ workspace }) {
       split,
       outputSplit,
       fontSize,
+      fullscreen,
       explorerOpen,
       runtimeIssue,
       device,
@@ -29,16 +52,109 @@ export function WorkspacePanels({ workspace }) {
       customInput,
       customOutput,
       previewBusy,
+      shareStatus,
+      formatting,
     },
-    setters: { setPanel, setDevice, setCustomInput },
-    refs: { splitRef, outputRef },
+    setters: { setPanel, setDevice, setCustomInput, setFontSize },
+    refs: { splitRef, outputRef, workspaceRef },
     computed: { isDark, consoleFirst },
-    handlers: { runTests, runCustom, startResize, moveResize, stopResize },
+    handlers: {
+      runTests,
+      runCustom,
+      startResize,
+      moveResize,
+      stopResize,
+      reset,
+      formatActive,
+      share,
+      toggleFullscreen,
+    },
     sandpack,
     language,
+    title,
     testCases,
     runtimeAdapter,
+    executionEnabled,
   } = workspace;
+
+  const [executing, setExecuting] = useState(false);
+  const isRunning = executing || runtimeAdapter?.status === "loading";
+
+  const handleRun = async () => {
+    if (executionEnabled === false) return;
+    if (isRunning) return;
+    if (runtimeAdapter) {
+      setPanel("console");
+      runtimeAdapter.run();
+      return;
+    }
+    setExecuting(true);
+    setPanel(consoleFirst ? "console" : "preview");
+    try {
+      await executeCurrentFiles(sandpack);
+    } catch {
+      // ignore
+    } finally {
+      setTimeout(() => setExecuting(false), 500);
+    }
+  };
+
+  const handleCopy = async () => {
+    const source = Object.entries(sandpack.files)
+      .map(([name, file]) => `// ${name}\n${file.code}`)
+      .join("\n\n");
+    await navigator.clipboard.writeText(source);
+  };
+
+  const handleDownload = async () => {
+    const entries = Object.entries(sandpack.files);
+    if (entries.length > 1) {
+      const { default: JSZip } = await import("jszip");
+      const archive = new JSZip();
+      entries.forEach(([path, file]) => {
+        const projectPath = path.replace(/^\/+/, "");
+        if (projectPath) archive.file(projectPath, file.code || "");
+      });
+      const blob = await archive.generateAsync({
+        type: "blob",
+        compression: "DEFLATE",
+        compressionOptions: { level: 6 },
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${
+        String(title || "project")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "") || "project"
+      }.zip`;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      return;
+    }
+    const activePath = sandpack.activeFile || Object.keys(sandpack.files)[0];
+    const source = sandpack.files[activePath]?.code || "";
+    const filename = activePath.split("/").filter(Boolean).pop() || "index.js";
+    const extension = filename.split(".").pop()?.toLowerCase();
+    const mimeTypes = {
+      html: "text/html",
+      css: "text/css",
+      js: "text/javascript",
+      jsx: "text/jsx",
+      ts: "text/typescript",
+      tsx: "text/tsx",
+      json: "application/json",
+    };
+    const url = URL.createObjectURL(
+      new Blob([source], { type: mimeTypes[extension] || "text/plain" }),
+    );
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div
@@ -51,20 +167,22 @@ export function WorkspacePanels({ workspace }) {
       {/* Left Side: File Explorer + Code Editor */}
       <div
         className={`${
-          panel === "code" || panel === "files" ? "flex flex-col" : "hidden"
+          panel === "code" || panel === "files"
+            ? "flex flex-col w-full"
+            : "hidden"
         } min-h-0 min-w-0 flex-1 lg:grid ${
           explorerOpen ? "lg:grid-cols-[190px_minmax(0,1fr)]" : "lg:grid-cols-1"
         }`}
       >
         <div
           className={`${
-            panel === "files" ? "block" : "hidden"
+            panel === "files" ? "block w-full" : "hidden"
           } h-full min-h-0 ${explorerOpen ? "lg:block" : "lg:hidden"}`}
         >
           <FileExplorer isDark={isDark} onFileSelect={() => setPanel("code")} />
         </div>
         <div
-          className={`${panel === "code" ? "block" : "hidden"} h-full min-h-0 min-w-0 lg:block`}
+          className={`${panel === "code" ? "block w-full" : "hidden"} h-full min-h-0 min-w-0 lg:block`}
         >
           <SandpackCodeEditor
             showTabs
@@ -97,16 +215,16 @@ export function WorkspacePanels({ workspace }) {
         />
       </button>
 
-      {/* Right Side: Output (Preview & Console) */}
+      {/* Right Side: Output (Preview & Console) - Takes full 100% width on smaller devices */}
       <div
         ref={outputRef}
-        className={`playground-output relative min-h-0 min-w-0 flex-1 border-l transition-colors ${
+        className={`playground-output relative min-h-0 min-w-0 flex-1 w-full transition-colors ${
           isDark ? "border-zinc-800" : "border-zinc-200"
         } ${
           panel === "preview" || panel === "console" || panel === "tests"
-            ? "flex flex-col"
+            ? "flex flex-col w-full"
             : "hidden"
-        } lg:flex lg:flex-col ${consoleFirst ? "" : "playground-output-split"}`}
+        } lg:flex lg:flex-col lg:border-l ${consoleFirst ? "" : "playground-output-split"}`}
         style={{ "--preview-size": `${outputSplit}%` }}
       >
         {consoleFirst && !runtimeAdapter && (
@@ -125,8 +243,8 @@ export function WorkspacePanels({ workspace }) {
         {!consoleFirst && (
           <div
             className={`${
-              panel === "preview" ? "flex flex-1" : "hidden"
-            } relative min-h-0 overflow-hidden lg:block`}
+              panel === "preview" ? "flex flex-1 w-full" : "hidden"
+            } relative min-h-0 overflow-hidden lg:block w-full`}
           >
             {previewBusy && (
               <div
@@ -256,8 +374,8 @@ export function WorkspacePanels({ workspace }) {
         )}
         <div
           className={`${
-            panel === "console" ? "flex flex-1" : "hidden"
-          } min-h-0 overflow-hidden lg:block`}
+            panel === "console" ? "flex flex-1 w-full" : "hidden"
+          } min-h-0 overflow-hidden lg:block w-full h-full`}
         >
           {runtimeAdapter ? (
             runtimeAdapter.output
@@ -274,7 +392,9 @@ export function WorkspacePanels({ workspace }) {
             <button
               type="button"
               onClick={runTests}
-              className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white"
+              disabled={executionEnabled === false}
+              title={executionEnabled === false ? "Test execution is temporarily disabled" : "Run tests"}
+              className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               Run tests
             </button>
@@ -327,7 +447,9 @@ export function WorkspacePanels({ workspace }) {
               <button
                 type="button"
                 onClick={runCustom}
-                className="mt-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white"
+                disabled={executionEnabled === false}
+                title={executionEnabled === false ? "Test execution is temporarily disabled" : "Run custom test"}
+                className="mt-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Run Test
               </button>
@@ -344,39 +466,217 @@ export function WorkspacePanels({ workspace }) {
         </div>
       </div>
 
-      {/* Mobile Quick-Switch Floating Pill */}
-      <div className="pointer-events-none absolute bottom-3 right-3 z-30 lg:hidden">
-        {panel === "code" ? (
+      {/* Mobile Floating Island Control Dock (Centered Horizontally) */}
+      <div className="pointer-events-none absolute bottom-3 inset-x-0 z-30 flex justify-center items-center lg:hidden px-3">
+        <div
+          className={`pointer-events-auto flex items-center gap-1.5 p-1 rounded-full border shadow-2xl backdrop-blur-2xl transition-all ${
+            isDark
+              ? "bg-[#18181b]/95 border-zinc-700/80 text-white shadow-black/70"
+              : "bg-white/95 border-zinc-200/90 text-zinc-900 shadow-zinc-400/40"
+          }`}
+        >
+          {/* 1. Play / Run Button */}
           <button
             type="button"
-            onClick={() => setPanel(consoleFirst ? "console" : "preview")}
-            className={`pointer-events-auto inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold shadow-xl backdrop-blur transition active:scale-95 ${
-              isDark
-                ? "border-zinc-700 bg-zinc-900/95 text-zinc-200 hover:bg-zinc-800 hover:text-white"
-                : "border-zinc-300 bg-white/95 text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900"
-            }`}
+            onClick={handleRun}
+            disabled={isRunning || executionEnabled === false}
+            className="h-8.5 w-8.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center shadow-sm active:scale-95 transition-all disabled:opacity-60 cursor-pointer shrink-0"
+            title={executionEnabled === false ? "Execution is temporarily disabled" : "Run code (Ctrl + Enter)"}
+            aria-label={executionEnabled === false ? "Execution temporarily disabled" : "Run code"}
           >
-            {consoleFirst ? (
-              <Terminal className="h-3.5 w-3.5 text-amber-500" />
+            {isRunning ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Monitor className="h-3.5 w-3.5 text-blue-500" />
+              <Play className="h-4 w-4 ml-0.5 fill-current" />
             )}
-            <span>View Output →</span>
           </button>
-        ) : panel === "preview" || panel === "console" ? (
+
+          {/* 2. Reset Starter Code Button */}
           <button
             type="button"
-            onClick={() => setPanel("code")}
-            className={`pointer-events-auto inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold shadow-xl backdrop-blur transition active:scale-95 ${
+            onClick={reset}
+            className={`h-8.5 w-8.5 rounded-full flex items-center justify-center active:scale-95 transition-all cursor-pointer shrink-0 ${
               isDark
-                ? "border-zinc-700 bg-zinc-900/95 text-zinc-200 hover:bg-zinc-800 hover:text-white"
-                : "border-zinc-300 bg-white/95 text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900"
+                ? "bg-zinc-800/90 text-zinc-300 hover:bg-zinc-700 hover:text-white"
+                : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900"
             }`}
+            title="Reset starter code"
+            aria-label="Reset starter code"
           >
-            <Code2 className="h-3.5 w-3.5 text-blue-500" />
-            <span>← Back to Code</span>
+            <RotateCcw className="h-4 w-4" />
           </button>
-        ) : null}
+
+          {/* 3. View Output / Back to Code Toggle Button (Icon only) */}
+          <button
+            type="button"
+            onClick={() =>
+              setPanel(
+                panel === "code"
+                  ? consoleFirst
+                    ? "console"
+                    : "preview"
+                  : "code",
+              )
+            }
+            className={`h-8.5 w-8.5 rounded-full flex items-center justify-center active:scale-95 transition-all cursor-pointer shrink-0 ${
+              panel !== "code"
+                ? "bg-blue-600 text-white shadow-sm"
+                : isDark
+                  ? "bg-zinc-800/90 text-blue-400 hover:bg-zinc-700 hover:text-blue-300"
+                  : "bg-zinc-100 text-blue-600 hover:bg-zinc-200 hover:text-blue-700"
+            }`}
+            title={panel === "code" ? "View Output" : "Back to Code"}
+            aria-label={panel === "code" ? "View Output" : "Back to Code"}
+          >
+            {panel === "code" ? (
+              consoleFirst ? (
+                <Terminal className="h-4 w-4 text-amber-400" />
+              ) : (
+                <Monitor className="h-4 w-4" />
+              )
+            ) : (
+              <Code2 className="h-4 w-4" />
+            )}
+          </button>
+
+          {/* 4. More Options Dropdown Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className={`h-8.5 w-8.5 rounded-full flex items-center justify-center active:scale-95 transition-all cursor-pointer shrink-0 ${
+                  isDark
+                    ? "bg-zinc-800/90 text-zinc-300 hover:bg-zinc-700 hover:text-white"
+                    : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900"
+                }`}
+                title="Options & Settings"
+                aria-label="Options & Settings"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="center"
+              side="top"
+              sideOffset={8}
+              container={workspaceRef?.current || undefined}
+              className={`w-52 p-1.5 shadow-2xl backdrop-blur-md rounded-2xl ${
+                isDark
+                  ? "!bg-[#18181b] !border-zinc-800 !text-zinc-100 shadow-black/80"
+                  : "!bg-white !border-zinc-200 !text-zinc-900 shadow-zinc-400/40"
+              }`}
+            >
+              <DropdownMenuLabel
+                className={`text-[10px] font-black uppercase tracking-wider ${
+                  isDark ? "!text-zinc-400" : "!text-zinc-500"
+                }`}
+              >
+                File Actions
+              </DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  disabled={formatting}
+                  onSelect={formatActive}
+                  className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
+                    isDark
+                      ? "!text-zinc-200 hover:!bg-zinc-800/80 hover:!text-white data-highlighted:!bg-blue-600 data-highlighted:!text-white"
+                      : "!text-zinc-800 hover:!bg-zinc-100 hover:!text-zinc-950 data-highlighted:!bg-blue-600 data-highlighted:!text-white"
+                  }`}
+                >
+                  <WandSparkles className={`h-4 w-4 shrink-0 ${isDark ? "!text-zinc-400" : "!text-zinc-500"}`} />
+                  <span>{formatting ? "Formatting..." : "Format Code"}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={share}
+                  className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
+                    isDark
+                      ? "!text-zinc-200 hover:!bg-zinc-800/80 hover:!text-white data-highlighted:!bg-blue-600 data-highlighted:!text-white"
+                      : "!text-zinc-800 hover:!bg-zinc-100 hover:!text-zinc-950 data-highlighted:!bg-blue-600 data-highlighted:!text-white"
+                  }`}
+                >
+                  <Share2 className={`h-4 w-4 shrink-0 ${isDark ? "!text-zinc-400" : "!text-zinc-500"}`} />
+                  <span>{shareStatus || "Share Snippet"}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={handleCopy}
+                  className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
+                    isDark
+                      ? "!text-zinc-200 hover:!bg-zinc-800/80 hover:!text-white data-highlighted:!bg-blue-600 data-highlighted:!text-white"
+                      : "!text-zinc-800 hover:!bg-zinc-100 hover:!text-zinc-950 data-highlighted:!bg-blue-600 data-highlighted:!text-white"
+                  }`}
+                >
+                  <Copy className={`h-4 w-4 shrink-0 ${isDark ? "!text-zinc-400" : "!text-zinc-500"}`} />
+                  <span>Copy Code</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={handleDownload}
+                  className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
+                    isDark
+                      ? "!text-zinc-200 hover:!bg-zinc-800/80 hover:!text-white data-highlighted:!bg-blue-600 data-highlighted:!text-white"
+                      : "!text-zinc-800 hover:!bg-zinc-100 hover:!text-zinc-950 data-highlighted:!bg-blue-600 data-highlighted:!text-white"
+                  }`}
+                >
+                  <Download className={`h-4 w-4 shrink-0 ${isDark ? "!text-zinc-400" : "!text-zinc-500"}`} />
+                  <span>Download</span>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator
+                className={isDark ? "!bg-zinc-800" : "!bg-zinc-200"}
+              />
+              <DropdownMenuLabel
+                className={`text-[10px] font-black uppercase tracking-wider ${
+                  isDark ? "!text-zinc-400" : "!text-zinc-500"
+                }`}
+              >
+                Text Size
+              </DropdownMenuLabel>
+              <div className="flex items-center justify-between px-2.5 py-1.5 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setFontSize((v) => Math.max(11, v - 1))}
+                  className={`h-7 w-7 rounded-lg flex items-center justify-center cursor-pointer transition-all ${
+                    isDark ? "!bg-zinc-800 !text-zinc-300 hover:!bg-zinc-700 hover:!text-white" : "!bg-zinc-100 !text-zinc-700 hover:!bg-zinc-200 hover:!text-zinc-900"
+                  }`}
+                  aria-label="Decrease text size"
+                >
+                  <Minus className="h-3.5 w-3.5" />
+                </button>
+                <span className={`font-mono text-xs font-bold ${isDark ? "!text-zinc-200" : "!text-zinc-800"}`}>
+                  {fontSize}px
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setFontSize((v) => Math.min(20, v + 1))}
+                  className={`h-7 w-7 rounded-lg flex items-center justify-center cursor-pointer transition-all ${
+                    isDark ? "!bg-zinc-800 !text-zinc-300 hover:!bg-zinc-700 hover:!text-white" : "!bg-zinc-100 !text-zinc-700 hover:!bg-zinc-200 hover:!text-zinc-900"
+                  }`}
+                  aria-label="Increase text size"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* 5. Minimise / Maximise Fullscreen Button */}
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            className={`h-8.5 w-8.5 rounded-full flex items-center justify-center active:scale-95 transition-all cursor-pointer shrink-0 ${
+              isDark
+                ? "bg-zinc-800/90 text-zinc-300 hover:bg-zinc-700 hover:text-white"
+                : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900"
+            }`}
+            title={fullscreen ? "Exit fullscreen" : "Open fullscreen"}
+            aria-label={fullscreen ? "Exit fullscreen" : "Open fullscreen"}
+          >
+            {fullscreen ? (
+              <Minimize2 className="h-4 w-4" />
+            ) : (
+              <Expand className="h-4 w-4" />
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

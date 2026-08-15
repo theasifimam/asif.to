@@ -46,35 +46,30 @@ export function BentoCard({
   };
 
   const variants = {
-    // Standard dark floating card
-    default: "bg-card text-card-foreground shadow-card",
-    // Subtle lime tint for secondary items
-    accent: "bg-primary/10 text-foreground border border-primary/20",
-    // Subdued for background info
-    muted: "bg-muted/30 text-muted-foreground",
-    // High-impact Neo Volt card
-    neon: "bg-primary text-primary-foreground accent-glow shadow-glow",
+    // Standard floating card
+    default: "admin-surface p-6 sm:p-7",
+    // Subtle primary tint for highlighted items
+    accent: "rounded-3xl p-6 sm:p-7 bg-blue-50/80 text-blue-950 border border-blue-200/60 dark:bg-blue-500/10 dark:text-blue-200 dark:border-blue-500/20 shadow-xs",
+    // Subdued neutral for background info
+    muted: "rounded-3xl p-6 sm:p-7 bg-zinc-100/70 dark:bg-zinc-900/50 border border-zinc-200/50 dark:border-zinc-800/50 text-zinc-600 dark:text-zinc-400",
+    // Primary highlight card
+    primary: "rounded-3xl p-6 sm:p-7 bg-blue-600 text-white shadow-lg shadow-blue-600/20 border border-blue-600",
   };
 
   return (
     <div
       className={cn(
         "relative flex flex-col overflow-hidden",
-        "rounded-3xl p-6 transition-smooth",
-        variants[variant],
+        "rounded-3xl transition-all duration-200",
+        variants[variant] || variants.default,
         colSpan[span],
         rowSpanClass[rowSpan],
-        hover && "hover:-translate-y-1 hover:shadow-elevated",
-        onClick && "cursor-pointer active:scale-[0.98]",
+        hover && "hover:border-zinc-300 dark:hover:border-zinc-700",
+        onClick && "cursor-pointer active:scale-[0.985]",
         className,
       )}
       onClick={onClick}
     >
-      {/* Decorative background blur for Neon variant */}
-      {variant === "neon" && (
-        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/20 blur-3xl" />
-      )}
-
       {children}
     </div>
   );

@@ -1,8 +1,8 @@
-import CheatsheetReader from "@/components/CheatsheetReader";
+import CheatsheetReader from "@/components/courses/CheatsheetReader";
 import { getCheatsheet } from "@/lib/publicContent";
 import { absoluteUrl } from "@/lib/seo";
 import { notFound } from "next/navigation";
-import JsonLd from "@/components/JsonLd";
+import JsonLd from "@/components/seo/JsonLd";
 
 export const revalidate = 60;
 export function generateStaticParams() {

@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { usePlaygroundControl, languageAllowed, runtimeAllowed } from "@/lib/playground/control";
 
 const SandpackCodeEditor = dynamic(() => import("./SandpackCodeEditor"), { ssr: false, loading: RuntimeLoading });
 const BrowserRuntimeEditor = dynamic(() => import("./runtime/BrowserRuntimeEditor"), { ssr: false, loading: RuntimeLoading });
@@ -13,6 +14,7 @@ function RuntimeLoading() {
 }
 
 export default function InteractiveCodeSandbox(props) {
+  const control = usePlaygroundControl();
   useEffect(() => {
     // A short-lived self-hosted Sandpack experiment registered its worker at
     // the application origin. Removing the files is not enough: an active
@@ -42,7 +44,12 @@ export default function InteractiveCodeSandbox(props) {
     return () => { active = false; };
   }, []);
 
+  if (!control.editorEnabled) return <div className="rounded-3xl border border-amber-500/30 bg-amber-500/10 p-8 text-center text-sm font-bold text-amber-200">{control.maintenanceMessage || "The interactive editor is temporarily unavailable."}</div>;
+  if (!languageAllowed(control, props.language)) return <div className="rounded-3xl border border-zinc-700 bg-zinc-900 p-8 text-center text-sm font-bold text-zinc-300">This language is temporarily unavailable.</div>;
+  if (!runtimeAllowed(control, props.language)) return <div className="rounded-3xl border border-amber-500/30 bg-amber-500/10 p-8 text-center text-sm font-bold text-amber-200">This code runtime is temporarily unavailable.</div>;
+  const languageOptions = (props.languageOptions || []).filter((option) => languageAllowed(control, option.value) && control.languages?.[option.value]?.selectable !== false);
+  const nextProps = { ...props, languageOptions, executionEnabled: control.executionEnabled && control.languages?.[props.language]?.executionEnabled !== false, playgroundControl: control };
   return BROWSER_LANGUAGES.has(props.language)
-    ? <BrowserRuntimeEditor key={props.language} {...props} />
-    : <SandpackCodeEditor {...props} />;
+    ? <BrowserRuntimeEditor key={props.language} {...nextProps} />
+    : <SandpackCodeEditor {...nextProps} />;
 }

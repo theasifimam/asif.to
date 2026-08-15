@@ -1,7 +1,7 @@
-import ChapterClient from "@/components/ChapterClient";
+import ChapterClient from "@/components/courses/ChapterClient";
 import CourseTopicPage, {
   buildTopicMetadata,
-} from "@/components/CourseTopicPage";
+} from "@/components/courses/CourseTopicPage";
 import { getChapterData, getPublicTopic } from "@/lib/publicContent";
 import { absoluteUrl, assetUrl, getSiteUrl, jsonLd } from "@/lib/seo";
 import InterviewQuestionsGuide, { buildInterviewGuideMetadata } from "@/components/interview/InterviewQuestionsGuide";

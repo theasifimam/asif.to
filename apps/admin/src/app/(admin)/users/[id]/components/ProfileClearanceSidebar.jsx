@@ -1,13 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Ban,
-  CheckCircle2,
-  Key,
-  Trash2,
-  Lock,
-} from "lucide-react";
+import { Ban, CheckCircle2, Key, Trash2, Lock } from "lucide-react";
 import { format } from "date-fns";
 import {
   Button,
@@ -24,6 +18,7 @@ export default function ProfileClearanceSidebar({
   isOwnProfile,
   setConfirmAction,
   setIsPwOpen,
+  canManageRoles,
 }) {
   return (
     <aside className="lg:col-span-4 space-y-8">
@@ -36,7 +31,7 @@ export default function ProfileClearanceSidebar({
               Clearance Level
             </label>
             <Select
-              disabled={isOwnProfile}
+              disabled={!canManageRoles}
               value={user.role}
               onValueChange={(val) =>
                 setConfirmAction({
@@ -57,11 +52,24 @@ export default function ProfileClearanceSidebar({
                 <SelectItem value="author">Contributing Author</SelectItem>
                 <SelectItem value="editor">Editor-in-Chief</SelectItem>
                 <SelectItem value="admin">System Admin</SelectItem>
+                <SelectItem value="super_admin">Super Admin</SelectItem>
               </SelectContent>
             </Select>
-            {isOwnProfile && (
+            {isOwnProfile && !canManageRoles && (
               <p className="text-[9px] font-bold text-zinc-450 flex items-center gap-1.5 mt-1 px-1">
-                <Lock size={11} className="text-zinc-400" /> You cannot change your own clearance level.
+                <Lock size={11} className="text-zinc-400" /> You cannot change
+                your own clearance level.
+              </p>
+            )}
+            {isOwnProfile && canManageRoles && (
+              <p className="text-[9px] font-bold text-amber-600 dark:text-amber-400">
+                Changing your own role signs you out immediately. At least one
+                other active super admin must remain.
+              </p>
+            )}
+            {!isOwnProfile && !canManageRoles && (
+              <p className="text-[9px] font-bold text-zinc-500">
+                Only a super admin can change roles.
               </p>
             )}
           </div>
@@ -73,10 +81,15 @@ export default function ProfileClearanceSidebar({
             <Button
               variant="outline"
               onClick={() => setIsPwOpen(true)}
+              disabled={user.provider !== "credentials"}
               className="w-full h-12 rounded-full border-zinc-200 dark:border-zinc-800 gap-2.5 font-black uppercase tracking-widest text-[9px] hover:bg-zinc-50 dark:hover:bg-zinc-950 bg-white dark:bg-transparent shadow-sm transition-all cursor-pointer"
             >
               <Key size={14} />
-              {isOwnProfile ? "Change My Password" : "Rotate Password Cipher"}
+              {user.provider !== "credentials"
+                ? "Managed by OAuth provider"
+                : isOwnProfile
+                  ? "Change My Password"
+                  : "Reset password"}
             </Button>
           </div>
 
@@ -94,7 +107,9 @@ export default function ProfileClearanceSidebar({
                 </span>
               </div>
               <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
-                <span className="text-zinc-450 dark:text-zinc-555">Last Login</span>
+                <span className="text-zinc-450 dark:text-zinc-555">
+                  Last Login
+                </span>
                 <span className="text-zinc-700 dark:text-zinc-200">
                   {user.lastLogin
                     ? format(new Date(user.lastLogin), "MMM d, yyyy")
@@ -112,7 +127,8 @@ export default function ProfileClearanceSidebar({
         <div className="bg-rose-50/10 dark:bg-rose-950/5 border border-rose-100/30 dark:border-rose-900/10 rounded-[2rem] p-7 space-y-4">
           {isOwnProfile ? (
             <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200/50 dark:border-zinc-800/50 text-center text-[10px] font-bold text-zinc-450 leading-relaxed uppercase tracking-wider">
-              Self-Account Protection Active. Account suspension & deletion are restricted.
+              Self-Account Protection Active. Account suspension & deletion are
+              restricted.
             </div>
           ) : (
             <>
@@ -132,6 +148,7 @@ export default function ProfileClearanceSidebar({
                         : "Re-authorizing user access.",
                     variant:
                       user.status === "active" ? "destructive" : "default",
+                    requireReason: user.status === "active",
                   })
                 }
                 className={`w-full h-12 rounded-full gap-2.5 font-black uppercase tracking-widest text-[9px] cursor-pointer ${
@@ -151,22 +168,43 @@ export default function ProfileClearanceSidebar({
                 )}
               </Button>
 
+              {user.status !== "banned" && (
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setConfirmAction({
+                      type: "ban",
+                      isOpen: true,
+                      title: "Ban this account?",
+                      description:
+                        "The user will immediately lose access. Published content remains preserved.",
+                      variant: "destructive",
+                      requireReason: true,
+                    })
+                  }
+                  className="w-full h-12 rounded-full gap-2.5 font-black uppercase tracking-widest text-[9px] border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-900"
+                >
+                  <Ban size={14} /> Ban account
+                </Button>
+              )}
+
               <Button
                 variant="ghost"
                 onClick={() =>
                   setConfirmAction({
                     type: "delete",
                     isOpen: true,
-                    title: "Delete User Permanently?",
+                    title: "Deactivate this account?",
                     description:
-                      "This will purge all user metadata. There is no recovery sequence.",
+                      "The user will lose access, while published content and attribution are preserved.",
                     variant: "destructive",
+                    requireReason: true,
                   })
                 }
                 className="w-full h-12 rounded-full gap-2.5 font-black uppercase tracking-widest text-[9px] text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 cursor-pointer"
               >
                 <Trash2 size={14} />
-                Purge Data Record
+                Deactivate account
               </Button>
             </>
           )}

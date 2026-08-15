@@ -6,10 +6,14 @@ import {
   updateArticle,
   deleteArticle,
   publishArticle,
-  getArticleBySlug } from
-"../controllers/article.controller.js";
-import { protect, authorize } from "../middlewares/auth.middleware.js";
-import { uploadArticleImage } from "../middlewares/upload.middleware.js";
+  getArticleBySlug,
+} from "../controllers/article.controller.js";
+import { protect } from "../middlewares/auth.middleware.js";
+import { requireAnyPermission, requirePermission } from "../utils/permissions.js";
+import {
+  compressArticleImage,
+  uploadArticleImage,
+} from "../middlewares/upload.middleware.js";
 
 const router = Router();
 
@@ -22,31 +26,33 @@ router.get("/slug/:slug", getArticleBySlug);
 router.post(
   "/",
   protect,
-  authorize("admin", "editor", "author"),
+  requirePermission("articles.create"),
   uploadArticleImage.single("image"),
-  createArticle
+  compressArticleImage,
+  createArticle,
 );
 
 router.patch(
   "/:id",
   protect,
-  authorize("admin", "editor", "author"),
+  requireAnyPermission("articles.edit_own", "articles.edit_all"),
   uploadArticleImage.single("image"),
-  updateArticle
+  compressArticleImage,
+  updateArticle,
 );
 
 router.patch(
   "/:id/publish",
   protect,
-  authorize("admin", "editor", "author"),
-  publishArticle
+  requirePermission("articles.publish"),
+  publishArticle,
 );
 
 router.delete(
   "/:id",
   protect,
-  authorize("admin", "editor", "author"),
-  deleteArticle
+  requirePermission("articles.delete"),
+  deleteArticle,
 );
 
 export default router;

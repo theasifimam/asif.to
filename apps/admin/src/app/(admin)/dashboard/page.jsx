@@ -15,6 +15,8 @@ import {
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useGetDashboardStatsQuery } from "@/redux/services/dashboardApi";
+import { useAuth } from "@/contexts/AuthContext";
+import { hasPermission } from "@/lib/permissions";
 
 const ICON_MAP = {
   Users,
@@ -26,10 +28,12 @@ const ICON_MAP = {
 };
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const {
     data: response,
     isLoading,
     isError,
+    error,
     refetch,
   } = useGetDashboardStatsQuery();
   const dashboardData = response?.data;
@@ -46,20 +50,39 @@ export default function DashboardPage() {
   }
 
   if (isError) {
+    const errorMessage =
+      error?.data?.message ||
+      error?.error ||
+      (error?.status === 401
+        ? "Your session has expired. Please sign in again."
+        : error?.status === 403
+          ? "Access restricted. You need admin, editor, or author permissions."
+          : "Unable to connect to the backend server. Please verify the API is running and retry.");
+
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center gap-6">
+      <div className="min-h-[70vh] flex flex-col items-center justify-center gap-6 text-center px-4">
         <h3 className="text-xl font-black font-outfit uppercase tracking-tight text-zinc-900 dark:text-white">
           Connection Issue
         </h3>
-        <p className="text-xs text-zinc-500 font-semibold">
-          Unable to fetch course analytics. Please retry.
+        <p className="text-xs text-zinc-500 font-semibold max-w-md">
+          {errorMessage}
         </p>
-        <button
-          onClick={() => refetch()}
-          className="rounded-full px-6 py-2.5 bg-blue-600 text-white font-bold text-xs uppercase tracking-wider hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20"
-        >
-          Retry Connection
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => refetch()}
+            className="rounded-full px-6 py-2.5 bg-blue-600 text-white font-bold text-xs uppercase tracking-wider hover:bg-blue-700 transition-all shadow-xs shadow-blue-500/20 cursor-pointer"
+          >
+            Retry Connection
+          </button>
+          {error?.status === 401 && (
+            <Link
+              href="/login"
+              className="rounded-full px-6 py-2.5 bg-zinc-800 text-white font-bold text-xs uppercase tracking-wider hover:bg-zinc-700 transition-all"
+            >
+              Sign In
+            </Link>
+          )}
+        </div>
       </div>
     );
   }
@@ -78,40 +101,40 @@ export default function DashboardPage() {
     value: Math.max(0, Number(item?.value) || 0),
   }));
   const chartMax = Math.max(0, ...chartItems.map((item) => item.value));
+  const visibleStats = (dashboardData?.stats || []).filter(
+    (stat) => stat.icon !== "Users" || hasPermission(user, "users.view"),
+  );
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 flex flex-col gap-8 max-w-7xl mx-auto text-zinc-800 dark:text-zinc-300 font-sans">
-      {/* High-Impact Hero Banner - Course First */}
-      <section className="relative overflow-hidden rounded-[2.5rem] bg-linear-to-br from-blue-600 via-indigo-600 to-purple-700 text-white p-8 sm:p-10 shadow-xl shadow-blue-500/15 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="absolute -right-8 -bottom-8 w-56 h-56 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-        <div className="absolute top-2 right-12 w-28 h-28 rounded-full bg-blue-400/20 blur-xl pointer-events-none" />
-
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-extrabold tracking-wider uppercase mb-3 text-white">
-            <GraduationCap className="w-3.5 h-3.5 text-yellow-300" />
-            <span>Course Platform Control Hub</span>
+    <div className="mx-auto flex max-w-7xl flex-col gap-6 sm:gap-8 p-4 font-sans text-zinc-800 dark:text-zinc-300 sm:p-6 md:p-8 lg:p-10">
+      {/* High-Impact Hero Banner - Calm Floating Canvas */}
+      <section className="admin-surface flex flex-col items-start justify-between gap-6 overflow-hidden p-6 sm:p-8 md:flex-row md:items-center rounded-[28px] sm:rounded-[36px]">
+        <div className="max-w-2xl">
+          <div className="mb-3.5 inline-flex items-center gap-2 rounded-full border border-blue-200/80 bg-blue-50/90 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-blue-700 dark:border-blue-900/60 dark:bg-blue-500/10 dark:text-blue-300">
+            <GraduationCap className="h-3.5 w-3.5" />
+            <span>Platform Overview</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-tight font-outfit">
+          <h1 className="font-outfit text-2xl sm:text-3xl md:text-4xl font-black leading-tight tracking-[-0.035em] text-zinc-950 dark:text-white">
             Course Learning & Engagements
           </h1>
-          <p className="text-xs sm:text-sm text-blue-100 mt-2 leading-relaxed font-medium">
+          <p className="mt-2 max-w-xl text-xs sm:text-sm font-medium leading-relaxed text-zinc-500 dark:text-zinc-400">
             Monitor real-time course readership growth across days, months, and
             years. Manage chapters, student completion rates, and curriculum
             analytics.
           </p>
         </div>
 
-        <div className="relative z-10 flex flex-wrap gap-3 w-full md:w-auto">
+        <div className="flex w-full flex-wrap items-center gap-2.5 md:w-auto">
           <Link
             href="/courses"
-            className="flex-1 md:flex-initial inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white text-blue-600 font-extrabold text-xs uppercase tracking-wider hover:bg-blue-50 transition-all shadow-md active:scale-95"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-blue-600 px-5 py-3 text-xs font-bold text-white shadow-sm shadow-blue-600/20 transition-all duration-200 hover:bg-blue-700 active:scale-[.985] md:flex-initial"
           >
             <BookOpen className="w-4 h-4" />
             <span>Manage Courses</span>
           </Link>
           <Link
             href="/quiz"
-            className="flex-1 md:flex-initial inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white/15 backdrop-blur-md text-white font-extrabold text-xs uppercase tracking-wider hover:bg-white/25 transition-all active:scale-95"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-zinc-200/80 bg-white px-5 py-3 text-xs font-bold text-zinc-700 transition-all duration-200 hover:bg-zinc-50 hover:border-zinc-300 active:scale-[.985] dark:border-zinc-800 dark:bg-[#18181b] dark:text-zinc-200 dark:hover:bg-zinc-800 md:flex-initial"
           >
             <BrainCircuit className="w-4 h-4" />
             <span>Quiz Builder</span>
@@ -119,34 +142,34 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Course Stats Grid */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {(dashboardData?.stats || []).map((stat, i) => {
+      {/* Bento Metric Cards Grid */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {visibleStats.map((stat, i) => {
           const StatIcon = ICON_MAP[stat.icon] || BookOpen;
           return (
             <motion.div
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }}
+              transition={{ delay: i * 0.06 }}
               key={stat.label}
             >
-              <div className="p-6 rounded-4xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 shadow-sm hover:shadow-md transition-all flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <div className="w-11 h-11 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
-                    <StatIcon className="w-5.5 h-5.5" />
+              <div className="admin-surface flex min-h-42 flex-col justify-between p-6 rounded-[28px] sm:rounded-4xl transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700">
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+                    <StatIcon className="w-5 h-5" />
                   </div>
-                  <span className="text-[11px] font-extrabold tracking-wider bg-blue-500/10 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full">
+                  <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300 border border-blue-200/50 dark:border-blue-500/20">
                     {stat.trend}
                   </span>
                 </div>
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                  <span className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.18em]">
                     {stat.label}
                   </span>
-                  <span className="text-3xl font-black font-outfit text-zinc-900 dark:text-white tracking-tight">
+                  <span className="text-3xl font-black font-outfit text-zinc-950 dark:text-white tracking-tight">
                     {stat.value}
                   </span>
-                  <span className="text-[11px] text-zinc-400 font-medium mt-1">
+                  <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium mt-1">
                     {stat.description}
                   </span>
                 </div>
@@ -156,8 +179,8 @@ export default function DashboardPage() {
         })}
       </section>
 
-      {/* Real all-time readership by course */}
-      <section className="p-6 sm:p-8 rounded-[2.5rem] bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm flex flex-col gap-6">
+      {/* Real all-time readership by course (Bento Feature Card) */}
+      <section className="admin-surface flex flex-col gap-6 p-6 sm:p-8 rounded-[28px] sm:rounded-[36px]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-zinc-800 pb-5">
           <div>
             <div className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">
@@ -165,14 +188,14 @@ export default function DashboardPage() {
               <span>Readership Analytics</span>
             </div>
             <div className="flex items-center gap-2">
-              <h2 className="text-2xl font-black font-outfit text-zinc-900 dark:text-white tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-black font-outfit text-zinc-950 dark:text-white tracking-tight">
                 Course Readership
               </h2>
               <span className="group/tooltip relative inline-flex" tabIndex={0}>
                 <Info className="h-4 w-4 text-zinc-400" />
                 <span
                   role="tooltip"
-                  className="pointer-events-none absolute left-1/2 top-6 z-30 hidden w-64 -translate-x-1/2 rounded-xl bg-zinc-950 p-3 text-[11px] font-medium normal-case leading-relaxed text-white shadow-xl group-hover/tooltip:block group-focus/tooltip:block"
+                  className="pointer-events-none absolute left-1/2 top-6 z-30 hidden w-64 -translate-x-1/2 rounded-2xl bg-zinc-950 p-3 text-[11px] font-medium normal-case leading-relaxed text-white shadow-xl group-hover/tooltip:block group-focus/tooltip:block"
                 >
                   The bars compare real all-time chapter visits between courses.
                   This is not a date trend because historical chapter-view dates
@@ -181,7 +204,7 @@ export default function DashboardPage() {
               </span>
             </div>
           </div>
-          <span className="rounded-full bg-blue-500/10 px-4 py-2 text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+          <span className="rounded-full bg-blue-50 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-wider text-blue-700 dark:bg-blue-500/10 dark:text-blue-300 border border-blue-200/50 dark:border-blue-500/20 w-fit">
             All-time captured data
           </span>
         </div>
@@ -194,11 +217,11 @@ export default function DashboardPage() {
         >
           {/* Left Metrics */}
           <div className="lg:col-span-5 flex flex-col gap-4">
-            <span className="text-xs font-extrabold text-zinc-400 uppercase tracking-widest">
+            <span className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.18em]">
               {activeGrowth.label}
             </span>
             <div className="flex items-baseline gap-3">
-              <span className="text-5xl font-black font-outfit text-zinc-900 dark:text-white tracking-tight">
+              <span className="text-4xl sm:text-5xl font-black font-outfit text-zinc-950 dark:text-white tracking-tight">
                 {activeGrowth.reads}
               </span>
             </div>
@@ -206,18 +229,18 @@ export default function DashboardPage() {
               {activeGrowth.subtext}
             </p>
 
-            <p className="mt-3 border-t border-zinc-100 pt-4 text-[11px] leading-relaxed text-zinc-400 dark:border-zinc-800">
+            <p className="mt-2 border-t border-zinc-100 dark:border-zinc-800/80 pt-4 text-[11px] leading-relaxed text-zinc-400 dark:text-zinc-500">
               A read is recorded whenever a public chapter page increments its
               view counter. Repeat visits are included.
             </p>
           </div>
 
           {/* Right Visual Bar Chart Visualization */}
-          <div className="lg:col-span-7 flex flex-col gap-3 bg-zinc-50 dark:bg-zinc-950/60 p-5 sm:p-6 rounded-3xl border border-zinc-200/50 dark:border-zinc-800/50">
+          <div className="lg:col-span-7 flex flex-col gap-3 bg-zinc-50/80 dark:bg-[#18181b]/70 p-5 sm:p-6 rounded-[28px] border border-zinc-200/60 dark:border-zinc-800/60">
             <div className="flex items-center justify-between text-xs font-bold text-zinc-500 mb-1">
               <span>Reads by course</span>
-              <span className="text-blue-600 dark:text-blue-400 font-extrabold uppercase text-[10px] tracking-wider px-2.5 py-0.5 rounded-full bg-blue-500/10">
-                Actual view counters
+              <span className="text-blue-600 dark:text-blue-400 font-black uppercase text-[9px] tracking-widest px-2.5 py-0.5 rounded-full bg-blue-500/10">
+                Actual counters
               </span>
             </div>
 
@@ -234,21 +257,20 @@ export default function DashboardPage() {
                       className="group/bar relative flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2"
                       tabIndex={0}
                     >
-                      {/* Bar area without full-height background track */}
+                      {/* Bar area */}
                       <div className="w-full flex-1 flex items-end justify-center">
-                        {/* Thick Plain Primary Color Rounded Pill Bar */}
                         <div
                           aria-label={`${item.label}: ${item.value.toLocaleString()} reads`}
-                          className="w-full max-w-[36px] sm:max-w-[52px] rounded-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-400 transition-all duration-500 ease-out shadow-sm shadow-blue-600/20 hover:shadow-md hover:shadow-blue-500/30 active:scale-[0.98] cursor-pointer min-h-[22px]"
+                          className="w-full max-w-9 sm:max-w-12 rounded-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-400 transition-all duration-300 ease-out shadow-xs cursor-pointer min-h-5"
                           style={{ height: `${heightPercent}%` }}
                         />
                       </div>
 
-                      <span className="max-w-full truncate text-[10px] sm:text-[11px] font-extrabold text-zinc-400 transition-colors group-hover/bar:text-blue-600 dark:group-hover/bar:text-blue-400 text-center">
+                      <span className="max-w-full truncate text-[10px] sm:text-[11px] font-bold text-zinc-400 transition-colors group-hover/bar:text-blue-600 dark:group-hover/bar:text-blue-400 text-center">
                         {item.shortLabel || item.label}
                       </span>
 
-                      {/* Modern Tooltip */}
+                      {/* Tooltip */}
                       <span
                         role="tooltip"
                         className="pointer-events-none absolute bottom-11 left-1/2 z-30 hidden w-max max-w-56 -translate-x-1/2 rounded-2xl bg-zinc-950/95 backdrop-blur-md px-3.5 py-2.5 text-center text-[11px] font-semibold text-white shadow-2xl border border-zinc-800 group-hover/bar:block group-focus/bar:block"
@@ -259,7 +281,7 @@ export default function DashboardPage() {
                         <span className="text-zinc-300 font-bold">
                           {item.value.toLocaleString()}
                         </span>{" "}
-                        all-time chapter reads
+                        all-time reads
                       </span>
                     </div>
                   );
@@ -274,14 +296,16 @@ export default function DashboardPage() {
         </motion.div>
       </section>
 
-      {/* Main Grid: Top Courses & Technology Stack */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Top Performing Courses */}
-        <section className="lg:col-span-8 flex flex-col gap-6">
-          <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-4">
+      {/* Bento Lower Grid: Top Courses & Technology Stack */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+        {/* Top Performing Courses (Bento Wide Card) */}
+        <section className="lg:col-span-8 flex flex-col gap-4">
+          <div className="flex items-center justify-between pb-2">
             <div className="flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              <h2 className="text-xl font-black font-outfit tracking-tight text-zinc-900 dark:text-white">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+                <BookOpen className="w-4 h-4" />
+              </div>
+              <h2 className="text-lg sm:text-xl font-black font-outfit tracking-tight text-zinc-950 dark:text-white">
                 Top Performing Courses
               </h2>
             </div>
@@ -294,57 +318,55 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3.5">
             {(dashboardData?.topCourses || []).map((course, i) => (
               <div
                 key={course.id}
-                className="p-4 sm:p-6 rounded-3xl sm:rounded-4xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 hover:border-blue-500/50 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs group min-w-0"
+                className="admin-surface p-4 sm:p-6 rounded-[28px] sm:rounded-4xl transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group min-w-0"
               >
-                <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
-                  <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl sm:rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
+                <div className="flex items-start gap-3.5 min-w-0 flex-1">
+                  <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
                     0{i + 1}
                   </span>
                   <div className="flex flex-col min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
+                      <span className="text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
                         {course.techId}
                       </span>
                       <span
-                        className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                        className={`text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full ${
                           course.status === "published"
-                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                            : "bg-amber-500/10 text-amber-600"
+                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
+                            : "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"
                         }`}
                       >
                         {course.status}
                       </span>
                     </div>
-                    <h3 className="text-sm sm:text-base font-black font-outfit text-zinc-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+                    <h3 className="text-sm sm:text-base font-bold font-outfit text-zinc-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
                       {course.title}
                     </h3>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-1 sm:line-clamp-2 mt-0.5">
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-1 mt-0.5">
                       {course.subtitle}
                     </p>
 
-                    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] sm:text-xs font-bold text-zinc-400 mt-2">
+                    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] font-semibold text-zinc-400 mt-2">
                       <span>{course.chapterCount} Chapters</span>
                       <span>&bull;</span>
-                      <span>
-                        {course.publicationRate || "0%"} Chapters Published
-                      </span>
+                      <span>{course.publicationRate || "0%"} Published</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-zinc-100 dark:border-zinc-800">
-                  <span className="text-sm sm:text-lg font-black font-outfit text-zinc-900 dark:text-white">
+                <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-zinc-100 dark:border-zinc-800/80 gap-2">
+                  <span className="text-sm sm:text-base font-black font-outfit text-zinc-950 dark:text-white">
                     {course.formattedReads} reads
                   </span>
                   <Link
                     href={`/courses/${course.id}`}
-                    className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-blue-500/10 hover:bg-blue-600 text-blue-600 hover:text-white dark:text-blue-400 dark:hover:text-white text-xs font-extrabold transition-all"
+                    className="px-3.5 py-1.5 rounded-full bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white dark:bg-blue-500/10 dark:hover:bg-blue-600 dark:text-blue-300 dark:hover:text-white text-xs font-bold transition-all"
                   >
-                    Manage Course
+                    Manage
                   </Link>
                 </div>
               </div>
@@ -352,35 +374,20 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* Technology Stack & Platform Ecosystem */}
-        <section className="lg:col-span-4 flex flex-col gap-6">
-          {/* Tech Distribution */}
-          <div className="p-6 sm:p-7 rounded-[2.5rem] bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm flex flex-col gap-6">
-            <div>
-              <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block mb-1">
-                Curriculum Focus
-              </span>
-              <div className="flex items-center gap-2">
-                <h3 className="text-xl font-black font-outfit text-zinc-900 dark:text-white">
-                  Technology Distribution
-                </h3>
-                <span
-                  className="group/tooltip relative inline-flex"
-                  tabIndex={0}
-                >
-                  <Info className="h-4 w-4 text-zinc-400" />
-                  <span
-                    role="tooltip"
-                    className="pointer-events-none absolute right-0 top-6 z-30 hidden w-64 rounded-xl bg-zinc-950 p-3 text-[11px] font-medium leading-relaxed text-white shadow-xl group-hover/tooltip:block group-focus/tooltip:block"
-                  >
-                    Each bar is the technology’s share of all published course
-                    chapters. For example, 25% means one quarter of the
-                    published curriculum belongs to that technology.
-                  </span>
-                </span>
+        {/* Technology Stack & Platform Ecosystem (Bento Column) */}
+        <section className="lg:col-span-4 flex flex-col gap-4">
+          <div className="pb-2">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+                <BarChart3 className="w-4 h-4" />
               </div>
+              <h3 className="text-lg sm:text-xl font-black font-outfit text-zinc-950 dark:text-white">
+                Curriculum Focus
+              </h3>
             </div>
+          </div>
 
+          <div className="admin-surface p-6 sm:p-7 rounded-[28px] sm:rounded-[36px] flex flex-col gap-6">
             <div className="flex flex-col gap-4">
               {(dashboardData?.techDistribution || []).map((item) => {
                 const percentage = Math.min(
@@ -398,11 +405,11 @@ export default function DashboardPage() {
                       <span className="text-zinc-700 dark:text-zinc-200">
                         {item.label}
                       </span>
-                      <span className="text-zinc-900 dark:text-white font-extrabold text-right">
+                      <span className="text-zinc-950 dark:text-white font-extrabold text-right">
                         {item.chapters} Chapters ({percentage}%)
                       </span>
                     </div>
-                    <div className="h-2.5 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                    <div className="h-2 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                       <div
                         className="h-full min-w-1 rounded-full transition-[width] duration-500"
                         style={{
@@ -411,44 +418,34 @@ export default function DashboardPage() {
                         }}
                       />
                     </div>
-                    <span
-                      role="tooltip"
-                      className="pointer-events-none absolute bottom-full right-0 z-30 mb-2 hidden w-60 rounded-xl bg-zinc-950 px-3 py-2 text-[11px] font-medium leading-relaxed text-white shadow-xl group-hover/progress:block group-focus/progress:block"
-                    >
-                      {item.label} has {item.chapters} published{" "}
-                      {item.chapters === 1 ? "chapter" : "chapters"},
-                      representing {percentage}% of{" "}
-                      {dashboardData?.counts?.publishedChapters || 0} published
-                      chapters.
-                    </span>
                   </div>
                 );
               })}
             </div>
 
             {/* Platform Ecosystem Secondary Counts */}
-            <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800/80 grid grid-cols-3 gap-3 text-center">
-              <div className="flex flex-col p-2 bg-zinc-50 dark:bg-zinc-950/50 rounded-2xl">
-                <span className="text-[10px] font-extrabold text-zinc-400 uppercase">
+            <div className="pt-5 border-t border-zinc-100 dark:border-zinc-800/80 grid grid-cols-3 gap-2.5 text-center">
+              <div className="flex flex-col p-2.5 bg-zinc-50 dark:bg-[#18181b]/70 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50">
+                <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
                   Quizzes
                 </span>
-                <span className="text-xl font-black font-outfit text-zinc-900 dark:text-white">
+                <span className="text-lg sm:text-xl font-black font-outfit text-zinc-950 dark:text-white mt-0.5">
                   {dashboardData?.counts?.quizzes || 0}
                 </span>
               </div>
-              <div className="flex flex-col p-2 bg-zinc-50 dark:bg-zinc-950/50 rounded-2xl">
-                <span className="text-[10px] font-extrabold text-zinc-400 uppercase">
+              <div className="flex flex-col p-2.5 bg-zinc-50 dark:bg-[#18181b]/70 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50">
+                <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
                   Flashcards
                 </span>
-                <span className="text-xl font-black font-outfit text-zinc-900 dark:text-white">
+                <span className="text-lg sm:text-xl font-black font-outfit text-zinc-950 dark:text-white mt-0.5">
                   {dashboardData?.counts?.flashcards || 0}
                 </span>
               </div>
-              <div className="flex flex-col p-2 bg-zinc-50 dark:bg-zinc-950/50 rounded-2xl">
-                <span className="text-[10px] font-extrabold text-zinc-400 uppercase">
-                  Cheatsheets
+              <div className="flex flex-col p-2.5 bg-zinc-50 dark:bg-[#18181b]/70 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50">
+                <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
+                  Cheats
                 </span>
-                <span className="text-xl font-black font-outfit text-zinc-900 dark:text-white">
+                <span className="text-lg sm:text-xl font-black font-outfit text-zinc-950 dark:text-white mt-0.5">
                   {dashboardData?.counts?.cheatsheets || 0}
                 </span>
               </div>

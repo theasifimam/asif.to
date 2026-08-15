@@ -18,7 +18,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { ConfirmDialog } from "@/components/confirm-dialog";
+import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { chaptersApi, coursesApi } from "@/lib/api";
-import { ViewToggle } from "@/components/ViewToggle";
+import { ViewToggle } from "@/components/ui/ViewToggle";
 import { AdminPage, AdminPageHeader } from "@/components/admin";
 
 const initialPagination = { page: 1, pages: 1, total: 0, limit: 20 };

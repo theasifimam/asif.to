@@ -6,9 +6,9 @@ import {
   MessageSquareText,
   Tag,
 } from "lucide-react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import SaveButton from "@/components/SaveButton";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import SaveButton from "@/components/articles/SaveButton";
 import InterviewAnswer from "./InterviewAnswer";
 import {
   getPublicInterviewQuestion,

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Eye, Save } from "lucide-react";
 import { toast } from "sonner";
-import Editor from "@/components/Editor";
+import Editor from "@/components/editor/Editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,8 +20,8 @@ import { coursesApi, interviewQuestionsApi } from "@/lib/api";
 import AdminFormShell, {
   AdminFormLoading,
   formSectionClass,
-} from "@/components/AdminFormShell";
-import FollowUpQuestionPicker from "@/components/FollowUpQuestionPicker";
+} from "@/components/forms/AdminFormShell";
+import FollowUpQuestionPicker from "@/components/editor/FollowUpQuestionPicker";
 
 const initialForm = {
   course: "",

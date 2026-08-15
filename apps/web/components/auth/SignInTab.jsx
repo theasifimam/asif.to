@@ -1,6 +1,7 @@
 "use client";
 
 import { Mail, Lock, Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
+import OAuthButtons from "./OAuthButtons";
 import { inputClass } from "./authConstants";
 
 export default function SignInTab({
@@ -15,19 +16,21 @@ export default function SignInTab({
   isBusy,
   onClose,
   onForgotPassword,
+  callbackUrl = "/",
 }) {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4.5">
       <div>
         <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
           Welcome Back
         </h2>
         <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mt-1">
-          Access your web development courses, cheatsheets & notes
+          Access your courses, cheatsheets & bookmarks
         </p>
       </div>
 
-      <form onSubmit={handleSignin} className="flex flex-col gap-4">
+      {/* Primary Email & Password Form */}
+      <form onSubmit={handleSignin} className="flex flex-col gap-3.5">
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-extrabold text-foreground uppercase tracking-wider ml-1">
             Email or Username
@@ -87,7 +90,7 @@ export default function SignInTab({
         <button
           type="submit"
           disabled={isBusy}
-          className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed active:scale-98"
+          className="mt-1 w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed active:scale-98 cursor-pointer"
         >
           {isLoading ? (
             <Loader2 size={16} className="animate-spin" />
@@ -98,6 +101,19 @@ export default function SignInTab({
           )}
         </button>
       </form>
+
+      {/* Divider */}
+      <div className="relative my-0.5 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-zinc-200/80 dark:border-zinc-800" />
+        </div>
+        <span className="relative bg-white dark:bg-zinc-900 px-3 text-[10px] font-black uppercase tracking-wider text-zinc-400">
+          or continue with
+        </span>
+      </div>
+
+      {/* Social OAuth Sign In Underneath */}
+      <OAuthButtons callbackUrl={callbackUrl} />
     </div>
   );
 }

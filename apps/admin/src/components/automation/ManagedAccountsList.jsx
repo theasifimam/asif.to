@@ -87,68 +87,72 @@ export function ManagedAccountsList({ accounts, loading, onAddAccount, onRemoveA
                         <div>
                             <Label htmlFor="notes">Notes (Optional)</Label>
                             <Input
-                id="notes"
-                value={newNotes}
-                onChange={(e) => setNewNotes(e.target.value)}
-                placeholder="Purpose of this account..." />
-              
+                                id="notes"
+                                value={newNotes}
+                                onChange={(e) => setNewNotes(e.target.value)}
+                                placeholder="Purpose of this account..."
+                            />
                         </div>
-                        <Button type="submit" disabled={adding} className="w-full">
+                        <Button type="submit" disabled={adding} className="w-full rounded-full">
                             {adding ? "Adding..." : "Add Account"}
                         </Button>
                     </form>
                 </NeoModal>
             </div>
 
-            <div className="border rounded-md overflow-hidden">
-                <table className="w-full text-sm">
-                    <thead className="bg-muted/50 border-b">
+            <div className="admin-surface overflow-hidden rounded-[28px] sm:rounded-[32px]">
+                <table className="admin-table w-full text-sm">
+                    <thead className="bg-zinc-50/75 dark:bg-[#18181b]/60 border-b border-zinc-100 dark:border-zinc-800/80">
                         <tr>
-                            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-[300px]">User</th>
-                            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Notes</th>
-                            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Added On</th>
-                            <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
+                            <th className="px-6 py-4.5 text-left text-[10px] sm:text-[11px] font-black uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500 w-[300px]">User</th>
+                            <th className="px-6 py-4.5 text-left text-[10px] sm:text-[11px] font-black uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">Notes</th>
+                            <th className="px-6 py-4.5 text-left text-[10px] sm:text-[11px] font-black uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">Added On</th>
+                            <th className="px-6 py-4.5 text-right text-[10px] sm:text-[11px] font-black uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {loading ?
-            <tr>
-                                <td colSpan={4} className="p-4 text-center">Loading...</td>
-                            </tr> :
-            accounts.length === 0 ?
-            <tr>
-                                <td colSpan={4} className="p-4 text-center text-muted-foreground">
+                    <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
+                        {loading ? (
+                            <tr>
+                                <td colSpan={4} className="p-16 text-center text-xs font-semibold text-zinc-400">Loading accounts...</td>
+                            </tr>
+                        ) : accounts.length === 0 ? (
+                            <tr>
+                                <td colSpan={4} className="p-16 text-center text-xs font-semibold text-zinc-400">
                                     No managed accounts yet. Add one to get started.
                                 </td>
-                            </tr> :
-
-            accounts.map((account) =>
-            <tr key={account._id} className="border-b transition-colors hover:bg-muted/50">
-                                    <td className="p-4">
+                            </tr>
+                        ) : (
+                            accounts.map((account) => (
+                                <tr key={account._id} className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors">
+                                    <td className="px-6 py-4.5">
                                         <div className="flex items-center gap-3">
-                                            <Avatar>
+                                            <Avatar className="h-9 w-9 border border-zinc-200/80 dark:border-zinc-700/80">
                                                 <AvatarImage src={account.user.profilePicture?.url} />
-                                                <AvatarFallback>{account.user.username?.[0]?.toUpperCase()}</AvatarFallback>
+                                                <AvatarFallback className="font-bold text-xs">{account.user.username?.[0]?.toUpperCase()}</AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <div className="font-medium">{account.user.fullName}</div>
-                                                <div className="text-sm text-muted-foreground">@{account.user.username}</div>
+                                                <div className="font-bold font-outfit text-zinc-950 dark:text-white text-sm">{account.user.fullName}</div>
+                                                <div className="text-xs text-zinc-400">@{account.user.username}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="p-4">{account.notes || "-"}</td>
-                                    <td className="p-4">{new Date(account.createdAt).toLocaleDateString()}</td>
-                                    <td className="p-4 text-right">
-                                        <Button variant="ghost" size="icon" onClick={() => handleRemove(account._id)}>
-                                            <Trash className="h-4 w-4 text-red-500" />
+                                    <td className="px-6 py-4.5 text-xs text-zinc-600 dark:text-zinc-300 font-medium">{account.notes || "—"}</td>
+                                    <td className="px-6 py-4.5 text-xs text-zinc-500 font-medium">{new Date(account.createdAt).toLocaleDateString()}</td>
+                                    <td className="px-6 py-4.5 text-right">
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-8 w-8 rounded-full text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                                          onClick={() => handleRemove(account._id)}
+                                        >
+                                            <Trash className="h-4 w-4 text-rose-500" />
                                         </Button>
                                     </td>
                                 </tr>
-            )
-            }
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
         </div>);
-
 }

@@ -19,6 +19,7 @@ export function useWorkspace({
   starterFiles,
   testCases = [],
   runtimeAdapter = null,
+  executionEnabled = true,
 }) {
   const [panel, setPanel] = useState("code");
   const [split, setSplit] = useState(50);
@@ -213,6 +214,7 @@ export function useWorkspace({
   };
 
   const runTests = () => {
+    if (!executionEnabled) return;
     const source = sandpack.files["/index.js"]?.code || "";
     const results = testCases.map((test) => {
       try {
@@ -234,6 +236,7 @@ export function useWorkspace({
   };
 
   const runCustom = () => {
+    if (!executionEnabled) return;
     try {
       const source = sandpack.files["/index.js"]?.code || "";
       const first = testCases[0];
@@ -266,6 +269,7 @@ export function useWorkspace({
     const runShortcut = (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
         event.preventDefault();
+        if (!executionEnabled) return;
         if (runtimeAdapter) runtimeAdapter.run();
         else executeCurrentFiles(sandpack);
         setPanel(consoleFirst ? "console" : "preview");
@@ -286,7 +290,7 @@ export function useWorkspace({
     };
     window.addEventListener("keydown", runShortcut);
     return () => window.removeEventListener("keydown", runShortcut);
-  }, [consoleFirst, formatActive, runtimeAdapter, sandpack]);
+  }, [consoleFirst, executionEnabled, formatActive, runtimeAdapter, sandpack]);
 
   const toggleFullscreen = async () => {
     if (document.fullscreenElement) await document.exitFullscreen();
@@ -433,5 +437,6 @@ export function useWorkspace({
     editorTheme,
     testCases,
     runtimeAdapter,
+    executionEnabled,
   };
 }

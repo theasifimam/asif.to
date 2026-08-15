@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
-import Editor from "@/components/Editor";
-import AdminFormShell, { formAsideClass, formSectionClass } from "@/components/AdminFormShell";
+import Editor from "@/components/editor/Editor";
+import AdminFormShell, { formAsideClass, formSectionClass } from "@/components/forms/AdminFormShell";
 import { Button, Input, Label, Textarea } from "@/components/ui";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { coursesApi, interviewQuestionsApi, quizApi } from "@/lib/api";
-import FollowUpQuestionPicker from "@/components/FollowUpQuestionPicker";
+import FollowUpQuestionPicker from "@/components/editor/FollowUpQuestionPicker";
 
 const initialForm = { type: "quiz", question: "", courseIds: [], course: "", options: ["", "", "", ""], correctIndex: 0, explanation: "", quizEnabled: true, flashcardEnabled: true, flashcardAnswer: "", tag: "", answer: "", slug: "", questionType: "conceptual", tags: "", codeExample: "", expectedOutput: "", followUps: "", difficulty: "medium", status: "published" };
 const slugify = (value) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");

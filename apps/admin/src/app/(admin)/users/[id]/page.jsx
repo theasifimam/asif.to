@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
 import {
-  useGetUserByIdQuery,
+  useGetManagedUserQuery,
   useUpdateUserMutation,
   useUpdateUserRoleMutation,
   useUpdateUserStatusMutation,
@@ -15,7 +15,6 @@ import {
 } from "@/redux/services/userApi";
 import { EditUserModal } from "../EditUserModal";
 import { PasswordResetModal } from "../PasswordResetModal";
-import { articlesApi } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   ProfileTopNav,
@@ -31,6 +30,7 @@ import {
   STATUS_CONFIG,
   getInitials,
 } from "./components";
+import UserAdminHistory from "./components/UserAdminHistory";
 
 const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL;
 
@@ -42,11 +42,8 @@ export default function UserProfilePage() {
   const isOwnProfile = currentUser?._id === id;
 
   // RTK Query hooks
-  const {
-    data: userResponse,
-    isLoading: userLoading,
-    refetch: refetchUser,
-  } = useGetUserByIdQuery(id);
+  const { data: userResponse, isLoading: userLoading } =
+    useGetManagedUserQuery(id);
   const [updateUser, { isLoading: updateLoading }] = useUpdateUserMutation();
   const [updateRole, { isLoading: roleLoading }] = useUpdateUserRoleMutation();
   const [updateStatus, { isLoading: statusLoading }] =
@@ -55,56 +52,21 @@ export default function UserProfilePage() {
   const [resetPassword, { isLoading: resetLoading }] =
     useResetUserPasswordMutation();
 
-  const [recentArticles, setRecentArticles] = useState([]);
-  const [stats, setStats] = useState({
-    articles: 0,
-    drafts: 0,
-    totalViews: 0,
-  });
-  const [articlesLoading, setArticlesLoading] = useState(false);
-
   const user = userResponse?.data?.user;
+  const recentArticles = userResponse?.data?.recentArticles || [];
+  const contentStats = userResponse?.data?.content || [];
+  const stats = {
+    articles: contentStats.reduce((total, item) => total + item.count, 0),
+    drafts: contentStats.find((item) => item._id === "draft")?.count || 0,
+    totalViews: contentStats.reduce((total, item) => total + item.views, 0),
+  };
 
   // Modal states
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isPwOpen, setIsPwOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
 
-  const fetchArticles = useCallback(async () => {
-    if (!id) return;
-    setArticlesLoading(true);
-    try {
-      const [articlesRes, draftsRes] = await Promise.all([
-        articlesApi.list({ author: id, limit: 5 }),
-        articlesApi.list({ author: id, status: "draft", limit: 1 }),
-      ]);
-
-      const articlesData = articlesRes.data?.data || articlesRes.data || [];
-      const draftsData = draftsRes.data?.data || draftsRes.data || [];
-
-      setRecentArticles(Array.isArray(articlesData) ? articlesData : []);
-      const totalViews = (
-        Array.isArray(articlesData) ? articlesData : []
-      ).reduce((acc, art) => acc + (art.readCount || 0), 0);
-      setStats({
-        articles:
-          articlesRes.data?.pagination?.totalCount || articlesData.length || 0,
-        drafts:
-          draftsRes.data?.pagination?.totalCount || draftsData.length || 0,
-        totalViews: totalViews,
-      });
-    } catch (err) {
-      console.error("Failed to load user production stats", err);
-    } finally {
-      setArticlesLoading(false);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    fetchArticles();
-  }, [fetchArticles]);
-
-  const handleAction = async () => {
+  const handleAction = async (reason = "") => {
     if (!confirmAction || !user) return;
     try {
       const { type, data } = confirmAction;
@@ -115,24 +77,22 @@ export default function UserProfilePage() {
           return;
         }
         const newStatus = user.status === "active" ? "suspended" : "active";
-        await updateStatus({ id, status: newStatus }).unwrap();
+        await updateStatus({ id, status: newStatus, reason }).unwrap();
         toast.success(`User state updated to ${newStatus}`);
+      } else if (type === "ban") {
+        await updateStatus({ id, status: "banned", reason }).unwrap();
+        toast.success("User account banned");
       } else if (type === "delete") {
         if (isOwnProfile) {
           toast.error("You cannot delete your own account.");
           setConfirmAction(null);
           return;
         }
-        await deleteUser(id).unwrap();
-        toast.success("User record purged");
+        await deleteUser({ id, reason }).unwrap();
+        toast.success("User account deactivated");
         router.push("/users");
         return;
       } else if (type === "role") {
-        if (isOwnProfile) {
-          toast.error("You cannot modify your own role clearance.");
-          setConfirmAction(null);
-          return;
-        }
         await updateRole({ id, role: data.role }).unwrap();
         toast.success(`Access level updated to ${data.role}`);
       }
@@ -171,18 +131,19 @@ export default function UserProfilePage() {
     statusLoading ||
     deleteLoading ||
     resetLoading;
-  const loading = userLoading || articlesLoading;
+  const loading = userLoading;
 
   if (loading) return <ProfileSkeleton />;
   if (!user) return <ProfileNotFound router={router} />;
 
   const roleConf = ROLE_CONFIG[user.role] || ROLE_CONFIG.reader;
   const statusConf = STATUS_CONFIG[user.status] || STATUS_CONFIG.active;
-  const avatarUrl = user.avatar
-    ? user.avatar.startsWith("http")
-      ? user.avatar
-      : `${STORAGE_URL}${user.avatar}`
-    : user?.profilePicture?.url || null;
+  const avatarUrl =
+    user.avatar && !user.avatar.includes("ui-avatars.com")
+      ? user.avatar.startsWith("http")
+        ? user.avatar
+        : `${STORAGE_URL}${user.avatar}`
+      : null;
 
   return (
     <motion.div
@@ -225,8 +186,15 @@ export default function UserProfilePage() {
             isOwnProfile={isOwnProfile}
             setConfirmAction={setConfirmAction}
             setIsPwOpen={setIsPwOpen}
+            canManageRoles={currentUser?.role === "super_admin"}
           />
         </div>
+        <UserAdminHistory
+          userId={id}
+          notes={userResponse?.data?.notes}
+          audit={userResponse?.data?.audit}
+          isOwnProfile={isOwnProfile}
+        />
       </main>
 
       {/* Confirmation Dialog */}
@@ -241,6 +209,7 @@ export default function UserProfilePage() {
             variant={confirmAction.variant}
             loading={isActionLoading}
             confirmText="Confirm Action"
+            requireReason={confirmAction.requireReason}
           />
         )}
       </AnimatePresence>

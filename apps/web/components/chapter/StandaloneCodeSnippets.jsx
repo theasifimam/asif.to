@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Code } from "lucide-react";
-import CodeSnippetViewer from "@/components/CodeSnippetViewer";
+import CodeSnippetViewer from "@/components/articles/CodeSnippetViewer";
 
 export default function StandaloneCodeSnippets({
   standaloneSnippets = [],

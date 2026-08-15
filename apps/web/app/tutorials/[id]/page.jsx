@@ -3,11 +3,11 @@
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import CodeSnippetViewer from "@/components/CodeSnippetViewer";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import CodeSnippetViewer from "@/components/articles/CodeSnippetViewer";
 import { TUTORIALS, TECH_STACKS } from "@/lib/tutorialData";
-import AuthorIdentityCard from "@/components/AuthorIdentityCard";
+import AuthorIdentityCard from "@/components/authors/AuthorIdentityCard";
 import {
   ArrowLeft,
   Clock,

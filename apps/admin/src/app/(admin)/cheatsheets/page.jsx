@@ -21,9 +21,9 @@ import {
   AdminPagination,
   AdminSearch,
 } from "@/components/admin";
-import { ConfirmDialog } from "@/components/confirm-dialog";
+import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { TECH_IDS } from "./components/CheatsheetForm";
-import { ViewToggle } from "@/components/ViewToggle";
+import { ViewToggle } from "@/components/ui/ViewToggle";
 
 const PAGE_SIZE = 20;
 
@@ -110,13 +110,13 @@ export default function CheatsheetsPage() {
         <AdminSearch
           value={search}
           onChange={updateFilter(setSearch)}
-          placeholder="Search titles, content, or slugs"
+          placeholder="Search titles, content, or slugs..."
         />
         <Select value={tech} onValueChange={updateFilter(setTech)}>
-          <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 dark:bg-zinc-900 md:w-44">
+          <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b] md:w-44">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
             <SelectItem value="all">All technologies</SelectItem>
             {TECH_IDS.map((item) => (
               <SelectItem key={item} value={item}>
@@ -126,10 +126,10 @@ export default function CheatsheetsPage() {
           </SelectContent>
         </Select>
         <Select value={status} onValueChange={updateFilter(setStatus)}>
-          <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 dark:bg-zinc-900 md:w-40">
+          <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b] md:w-40">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
             <SelectItem value="all">All statuses</SelectItem>
             <SelectItem value="published">Published</SelectItem>
             <SelectItem value="draft">Drafts</SelectItem>
@@ -238,17 +238,17 @@ export default function CheatsheetsPage() {
             />
           </div>
         ) : (
-          <div className="w-full bg-white dark:bg-zinc-900 rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs overflow-hidden">
+          <div className="admin-surface w-full rounded-[28px] sm:rounded-4xl overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-190 text-left text-sm">
-                <thead className="border-b border-zinc-200/70 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-950/40 text-[11px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+              <table className="admin-table w-full min-w-190 text-left text-sm">
+                <thead className="border-b border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/75 dark:bg-[#18181b]/60 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">
                   <tr>
-                    <th className="px-6 py-4">Cheatsheet</th>
-                    <th className="px-6 py-4">Technology</th>
-                    <th className="px-6 py-4">Content type</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4">Order</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
+                    <th className="px-6 py-4.5">Cheatsheet</th>
+                    <th className="px-6 py-4.5">Technology</th>
+                    <th className="px-6 py-4.5">Content type</th>
+                    <th className="px-6 py-4.5">Status</th>
+                    <th className="px-6 py-4.5">Order</th>
+                    <th className="px-6 py-4.5 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
@@ -257,10 +257,10 @@ export default function CheatsheetsPage() {
                       key={item._id}
                       className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
                     >
-                      <td className="max-w-xl px-6 py-4">
+                      <td className="max-w-xl px-6 py-4.5">
                         <Link
                           href={`/cheatsheets/${item._id}/edit`}
-                          className="font-bold text-zinc-900 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 transition-colors line-clamp-1"
+                          className="font-bold font-outfit text-zinc-950 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 transition-colors line-clamp-1"
                         >
                           {item.title}
                         </Link>
@@ -268,17 +268,17 @@ export default function CheatsheetsPage() {
                           /{item.slug}
                         </p>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4.5">
                         <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-500/20">
                           {item.techId}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4.5">
                         <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
                           Article
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4.5">
                         <span
                           className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
                             item.status === "published"
@@ -289,16 +289,16 @@ export default function CheatsheetsPage() {
                           {item.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-xs font-black text-zinc-400">
+                      <td className="px-6 py-4.5 text-xs font-black text-zinc-400">
                         #{item.order ?? 0}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4.5">
                         <div className="flex justify-end gap-1">
                           <Link href={`/cheatsheets/${item._id}/edit`}>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                              className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                               title="Edit cheatsheet"
                             >
                               <Edit3 className="h-4 w-4" />
@@ -308,10 +308,10 @@ export default function CheatsheetsPage() {
                             variant="ghost"
                             size="icon"
                             title="Delete cheatsheet"
-                            className="h-8 w-8 rounded-xl text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                            className="h-8 w-8 rounded-full text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
                             onClick={() => setDeleteTarget(item)}
                           >
-                            <Trash2 className="h-4 w-4 text-red-500" />
+                            <Trash2 className="h-4 w-4 text-rose-500" />
                           </Button>
                         </div>
                       </td>

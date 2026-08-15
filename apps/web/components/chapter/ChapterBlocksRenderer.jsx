@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Sparkles, Lightbulb } from "lucide-react";
-import CodeSnippetViewer from "@/components/CodeSnippetViewer";
+import CodeSnippetViewer from "@/components/articles/CodeSnippetViewer";
 import InteractiveCode from "@/components/interactive-code";
 import { renderInlineFormatting } from "./chapterUtils";
 

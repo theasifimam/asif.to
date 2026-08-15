@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import multer from "multer";
 
 import connectDB from "./configs/db.js";
 import authRoutes from "./routes/auth.routes.js";
@@ -20,6 +21,7 @@ import kanbanRoutes from "./routes/kanban.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
 import searchRoutes from "./routes/search.routes.js";
 import seoSettingRoutes from "./routes/seoSetting.routes.js";
+import playgroundSettingRoutes from "./routes/playgroundSetting.routes.js";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -28,6 +30,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.resolve(__dirname, "../.env"), override: false });
+dotenv.config({
+  path: path.resolve(__dirname, "../.env.auth.local"),
+  override: false,
+});
 
 const app = express();
 
@@ -86,8 +92,33 @@ app.use("/api/v1/kanban", kanbanRoutes);
 app.use("/api/v1/analytics", analyticsRoutes);
 app.use("/api/v1/search", searchRoutes);
 app.use("/api/v1/seo-settings", seoSettingRoutes);
+app.use("/api/v1/playground-settings", playgroundSettingRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
+app.use((error, _req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    const isTooLarge = error.code === "LIMIT_FILE_SIZE";
+    return res.status(isTooLarge ? 413 : 400).json({
+      success: false,
+      code: error.code,
+      message: isTooLarge
+        ? "The selected image is too large. Avatars support up to 15 MB and article images up to 25 MB before compression."
+        : "The image upload could not be completed.",
+    });
+  }
+  if (["INVALID_IMAGE_TYPE", "IMAGE_PROCESSING_FAILED"].includes(error.code)) {
+    return res.status(400).json({
+      success: false,
+      code: error.code,
+      message:
+        error.code === "INVALID_IMAGE_TYPE"
+          ? error.message
+          : "The image could not be processed. Try another JPG, PNG, WebP, or GIF file.",
+    });
+  }
+  return next(error);
+});
+
 app.use((req, res) => {
   res
     .status(404)

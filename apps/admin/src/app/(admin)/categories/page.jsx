@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ConfirmDialog } from "@/components/confirm-dialog";
+import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { coursesApi, topicCategoriesApi } from "@/lib/api";
 
 const emptyForm = { name: "", slug: "", description: "", order: 0 };

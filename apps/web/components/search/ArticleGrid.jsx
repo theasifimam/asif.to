@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import ArticleCard from '@/components/ArticleCard';
+import ArticleCard from '@/components/articles/ArticleCard';
 import { Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 

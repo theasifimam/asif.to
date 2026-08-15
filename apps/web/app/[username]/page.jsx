@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { getCourse } from "@/lib/publicContent";
 import { TECH_STACKS, COURSES } from "@/lib/tutorialData";
-import UserProfileClient from "@/components/UserProfileClient";
+import UserProfileClient from "@/components/authors/UserProfileClient";
 
 export const dynamic = "force-dynamic";
 

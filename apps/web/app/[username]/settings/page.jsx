@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import {
   User,
   MapPin,
@@ -19,7 +19,8 @@ import {
   ShieldCheck,
   Camera,
   Sparkles,
-  CheckCircle2,
+  Bell,
+  Eye,
 } from "lucide-react";
 import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
 import {
@@ -28,14 +29,17 @@ import {
 } from "@/lib/api/authApi";
 import { toast } from "sonner";
 import { getImageUrl } from "@/lib/config";
-import { setCredentials } from "@/lib/store/authSlice";
+import { setCredentials, setOAuthCredentials } from "@/lib/store/authSlice";
+import AccountManagementSettings from "@/components/auth/AccountManagementSettings";
 
 export default function ProfileSettingsPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { isAuthenticated, user: storeUser } = useAppSelector(
-    (state) => state.auth,
-  );
+  const {
+    isAuthenticated,
+    isInitialized,
+    user: storeUser,
+  } = useAppSelector((state) => state.auth);
   const username = storeUser?.username;
   const { data: profileRes, isLoading: profileLoading } = useGetProfileQuery(
     undefined,
@@ -55,20 +59,29 @@ export default function ProfileSettingsPage() {
       linkedin: "",
       website: "",
     },
+    settings: {
+      newsletter: true,
+      notifications: true,
+      profileVisibility: "public",
+      showLearningActivity: true,
+      showAchievements: true,
+    },
   });
 
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/");
+    if (isInitialized && !isAuthenticated) {
+      router.replace(`/login?callbackUrl=${encodeURIComponent("/account")}`);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isInitialized, router]);
 
   useEffect(() => {
     if (profileRes?.data?.user) {
       const u = profileRes.data.user;
+      // Initialize the editable draft when the remote profile is available.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         fullName: u.fullName || "",
         bio: u.bio || "",
@@ -78,6 +91,13 @@ export default function ProfileSettingsPage() {
           twitter: u.socials?.twitter || "",
           linkedin: u.socials?.linkedin || "",
           website: u.socials?.website || "",
+        },
+        settings: {
+          newsletter: u.settings?.newsletter ?? true,
+          notifications: u.settings?.notifications ?? true,
+          profileVisibility: u.settings?.profileVisibility || "public",
+          showLearningActivity: u.settings?.showLearningActivity ?? true,
+          showAchievements: u.settings?.showAchievements ?? true,
         },
       });
       if (u.avatar) {
@@ -123,6 +143,7 @@ export default function ProfileSettingsPage() {
       data.append("location", formData.location);
       data.append("mNumber", formData.mNumber);
       data.append("socials", JSON.stringify(formData.socials));
+      data.append("settings", JSON.stringify(formData.settings));
       if (avatarFile) {
         data.append("avatar", avatarFile);
       }
@@ -130,7 +151,11 @@ export default function ProfileSettingsPage() {
       const res = await updateProfile(data).unwrap();
       if (res.success) {
         const token = localStorage.getItem("asif_token") || "";
-        dispatch(setCredentials({ user: res.data.user, token }));
+        dispatch(
+          token
+            ? setCredentials({ user: res.data.user, token })
+            : setOAuthCredentials({ user: res.data.user }),
+        );
         toast.success("Profile updated successfully!");
         router.push(`/@${username}`);
       }
@@ -418,6 +443,92 @@ export default function ProfileSettingsPage() {
           </section>
 
           {/* Form Actions */}
+          <section className="space-y-6 rounded-3xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
+            <div className="flex items-start gap-3 border-b border-zinc-100 pb-4 dark:border-zinc-800">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                <Bell size={18} />
+              </div>
+              <div>
+                <h2 className="text-sm font-extrabold">
+                  Preferences & privacy
+                </h2>
+                <p className="mt-1 text-xs text-zinc-500">
+                  Control communication and what appears publicly.
+                </p>
+              </div>
+            </div>
+            <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+              <SettingToggle
+                label="Email newsletter"
+                description="Receive occasional learning updates and newly published resources."
+                checked={formData.settings.newsletter}
+                onChange={(checked) =>
+                  setFormData((current) => ({
+                    ...current,
+                    settings: { ...current.settings, newsletter: checked },
+                  }))
+                }
+              />
+              <SettingToggle
+                label="Account notifications"
+                description="Receive important account, course, and activity notifications."
+                checked={formData.settings.notifications}
+                onChange={(checked) =>
+                  setFormData((current) => ({
+                    ...current,
+                    settings: { ...current.settings, notifications: checked },
+                  }))
+                }
+              />
+              <SettingToggle
+                label="Public profile"
+                description="Allow people to view your public profile at your @username URL."
+                checked={formData.settings.profileVisibility === "public"}
+                onChange={(checked) =>
+                  setFormData((current) => ({
+                    ...current,
+                    settings: {
+                      ...current.settings,
+                      profileVisibility: checked ? "public" : "private",
+                    },
+                  }))
+                }
+                icon={Eye}
+              />
+              <SettingToggle
+                label="Show learning activity"
+                description="Display public quiz attempts and learning activity on your profile."
+                checked={formData.settings.showLearningActivity}
+                disabled={formData.settings.profileVisibility === "private"}
+                onChange={(checked) =>
+                  setFormData((current) => ({
+                    ...current,
+                    settings: {
+                      ...current.settings,
+                      showLearningActivity: checked,
+                    },
+                  }))
+                }
+              />
+              <SettingToggle
+                label="Show achievements"
+                description="Allow achievements and certificates to appear on your public profile."
+                checked={formData.settings.showAchievements}
+                disabled={formData.settings.profileVisibility === "private"}
+                onChange={(checked) =>
+                  setFormData((current) => ({
+                    ...current,
+                    settings: {
+                      ...current.settings,
+                      showAchievements: checked,
+                    },
+                  }))
+                }
+              />
+            </div>
+          </section>
+
+          {/* Form Actions */}
           <div className="flex items-center justify-end gap-3 pt-2">
             <button
               type="button"
@@ -462,9 +573,49 @@ export default function ProfileSettingsPage() {
             </p>
           </div>
         </div>
+        <AccountManagementSettings user={profileRes?.data?.user || storeUser} />
       </main>
 
       <Footer />
     </div>
+  );
+}
+
+function SettingToggle({
+  label,
+  description,
+  checked,
+  onChange,
+  disabled = false,
+  icon: Icon,
+}) {
+  return (
+    <label
+      className={`flex items-center justify-between gap-5 py-4 ${disabled ? "opacity-50" : "cursor-pointer"}`}
+    >
+      <span className="flex gap-3">
+        <span className="mt-0.5">
+          {Icon && <Icon size={16} className="text-zinc-400" />}
+        </span>
+        <span>
+          <span className="block text-sm font-bold">{label}</span>
+          <span className="mt-1 block text-xs leading-5 text-zinc-500">
+            {description}
+          </span>
+        </span>
+      </span>
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={checked}
+        disabled={disabled}
+        onChange={(event) => onChange(event.target.checked)}
+      />
+      <span className="relative h-6 w-11 shrink-0 rounded-full bg-zinc-200 transition peer-checked:bg-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500 peer-focus-visible:ring-offset-2 dark:bg-zinc-700">
+        <span
+          className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition ${checked ? "left-6" : "left-1"}`}
+        />
+      </span>
+    </label>
   );
 }

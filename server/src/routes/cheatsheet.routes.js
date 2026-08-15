@@ -6,7 +6,8 @@ import {
   updateCheatsheet,
   deleteCheatsheet,
 } from "../controllers/cheatsheet.controller.js";
-import { protect, authorize } from "../middlewares/auth.middleware.js";
+import { protect } from "../middlewares/auth.middleware.js";
+import { requirePermission } from "../utils/permissions.js";
 
 const router = Router();
 
@@ -15,8 +16,8 @@ router.get("/", getCheatsheets);
 router.get("/:slug", getCheatsheetBySlug);
 
 // Admin
-router.post("/", protect, authorize("admin", "editor"), createCheatsheet);
-router.patch("/:id", protect, authorize("admin", "editor"), updateCheatsheet);
-router.delete("/:id", protect, authorize("admin"), deleteCheatsheet);
+router.post("/", protect, requirePermission("cheatsheets.manage"), createCheatsheet);
+router.patch("/:id", protect, requirePermission("cheatsheets.manage"), updateCheatsheet);
+router.delete("/:id", protect, requirePermission("cheatsheets.manage"), deleteCheatsheet);
 
 export default router;

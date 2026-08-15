@@ -31,6 +31,12 @@ const authSlice = createSlice({
         localStorage.removeItem("asif_user");
       }
     },
+    setOAuthCredentials(state, action) {
+      state.user = action.payload.user;
+      state.token = null;
+      state.isAuthenticated = true;
+      state.isInitialized = true;
+    },
     // Hydrate from localStorage on app load
     hydrateAuth(state) {
       if (typeof window !== "undefined") {
@@ -76,6 +82,11 @@ const authSlice = createSlice({
     // But we can listen for fulfilled actions if we want, or just update credentials manually in components
   },
 });
-export const { setCredentials, clearCredentials, hydrateAuth, toggleBookmark } =
-  authSlice.actions;
+export const {
+  setCredentials,
+  setOAuthCredentials,
+  clearCredentials,
+  hydrateAuth,
+  toggleBookmark,
+} = authSlice.actions;
 export default authSlice.reducer;

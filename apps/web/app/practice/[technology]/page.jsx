@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import ProblemFilters from "@/components/practice/ProblemFilters";
 import { TECHNOLOGIES } from "@/lib/playground/config";
 import { getProblems, isTechnology } from "@/lib/playground/problems";
 import { ArrowLeft } from "lucide-react";
-import JsonLd from "@/components/JsonLd";
+import JsonLd from "@/components/seo/JsonLd";
 import { getSeoSetting } from "@/lib/publicContent";
 import { mergePageMetadata } from "@/lib/pageMetadata";
 import { absoluteUrl } from "@/lib/seo";

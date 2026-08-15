@@ -8,15 +8,17 @@ import {
   updateInterviewQuestion,
   deleteInterviewQuestion,
 } from "../controllers/interviewQuestion.controller.js";
-import { protect, authorize } from "../middlewares/auth.middleware.js";
+import { protect } from "../middlewares/auth.middleware.js";
+import { requirePermission } from "../utils/permissions.js";
 
 const router = Router();
-const canManage = [protect, authorize("admin", "editor")];
+const canView = [protect, requirePermission("interview_questions.view")];
+const canManage = [protect, requirePermission("interview_questions.manage")];
 
 router.get("/public/:courseSlug", listPublicInterviewQuestions);
 router.get("/public/:courseSlug/:questionSlug", getPublicInterviewQuestion);
-router.get("/", ...canManage, listInterviewQuestions);
-router.get("/:id", ...canManage, getInterviewQuestion);
+router.get("/", ...canView, listInterviewQuestions);
+router.get("/:id", ...canView, getInterviewQuestion);
 router.post("/", ...canManage, createInterviewQuestion);
 router.patch("/:id", ...canManage, updateInterviewQuestion);
 router.delete("/:id", ...canManage, deleteInterviewQuestion);

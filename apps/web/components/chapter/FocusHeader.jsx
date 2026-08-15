@@ -2,7 +2,7 @@
 
 import React from "react";
 import { ArrowLeft, List, Minimize2 } from "lucide-react";
-import { useScrollNavVisible } from "@/components/ScrollNavProvider";
+import { useScrollNavVisible } from "@/components/layout/ScrollNavProvider";
 
 export default function FocusHeader({
   course,

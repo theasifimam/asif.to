@@ -10,7 +10,8 @@ import {
   updateQuizQuestion,
   deleteQuizQuestion,
 } from "../controllers/quiz.controller.js";
-import { protect, authorize } from "../middlewares/auth.middleware.js";
+import { protect } from "../middlewares/auth.middleware.js";
+import { requirePermission } from "../utils/permissions.js";
 
 const router = Router();
 
@@ -24,12 +25,12 @@ router.post("/practice/submit", protect, submitPracticeQuiz);
 router.get(
   "/admin/all",
   protect,
-  authorize("admin", "editor"),
+  requirePermission("question_bank.view"),
   getQuizQuestionsAdmin,
 );
-router.get("/admin/:id", protect, authorize("admin", "editor"), getQuestionAdmin);
-router.post("/", protect, authorize("admin", "editor"), createQuizQuestion);
-router.patch("/:id", protect, authorize("admin", "editor"), updateQuizQuestion);
-router.delete("/:id", protect, authorize("admin"), deleteQuizQuestion);
+router.get("/admin/:id", protect, requirePermission("question_bank.view"), getQuestionAdmin);
+router.post("/", protect, requirePermission("question_bank.manage"), createQuizQuestion);
+router.patch("/:id", protect, requirePermission("question_bank.manage"), updateQuizQuestion);
+router.delete("/:id", protect, requirePermission("question_bank.manage"), deleteQuizQuestion);
 
 export default router;

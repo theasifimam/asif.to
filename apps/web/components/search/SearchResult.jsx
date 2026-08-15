@@ -71,7 +71,11 @@ export default function SearchResult({ item, query, selected, onSelect, id }) {
       role="option"
       aria-selected={selected}
       onMouseEnter={onSelect}
-      className={`block rounded-2xl p-3 outline-none transition ${selected ? "bg-zinc-100 dark:bg-zinc-800/80 ring-2 ring-blue-500/40" : "hover:bg-zinc-100 dark:hover:bg-zinc-800/60"}`}
+      className={`block rounded-4xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl p-3.5 outline-none shadow-md shadow-black/5 dark:shadow-black/20 border border-zinc-200/80 dark:border-zinc-800/80 ring-1 ring-black/5 dark:ring-white/10 transition-all duration-150 ${
+        selected
+          ? "ring-2 ring-blue-500 border-blue-500/80 shadow-xl shadow-blue-500/10 scale-[1.01] -translate-y-0.5"
+          : "hover:border-blue-500/50 hover:shadow-lg hover:scale-[1.005]"
+      }`}
     >
       <div className="flex items-start gap-3">
         <span
@@ -80,7 +84,7 @@ export default function SearchResult({ item, query, selected, onSelect, id }) {
         >
           <Icon className="h-5 w-5" />
         </span>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="mb-1 flex flex-wrap items-center gap-2">
             <span
               className={`rounded-md px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${appearance.badge}`}

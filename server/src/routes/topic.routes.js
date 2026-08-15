@@ -10,16 +10,18 @@ import {
   getPublicTopics,
   getPublicTopic,
 } from "../controllers/courseTopic.controller.js";
-import { protect, authorize } from "../middlewares/auth.middleware.js";
+import { protect } from "../middlewares/auth.middleware.js";
+import { requirePermission } from "../utils/permissions.js";
 
 const router = Router();
-const canManage = [protect, authorize("admin", "editor")];
+const canView = [protect, requirePermission("topics.view")];
+const canManage = [protect, requirePermission("topics.manage")];
 
 router.get("/public/:courseSlug", getPublicTopics);
 router.get("/public/:courseSlug/:topicSlug", getPublicTopic);
 router.get("/public/:courseSlug/*topicPath", getPublicTopic);
-router.get("/", ...canManage, listCourseTopics);
-router.get("/:id", ...canManage, getCourseTopicAdmin);
+router.get("/", ...canView, listCourseTopics);
+router.get("/:id", ...canView, getCourseTopicAdmin);
 router.post("/", ...canManage, createCourseTopic);
 router.patch("/reorder", ...canManage, reorderCourseTopics);
 router.patch("/:id/publish", ...canManage, publishCourseTopic);

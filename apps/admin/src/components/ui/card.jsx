@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { HTMLAttributes, forwardRef } from "react";
+import { forwardRef } from "react";
 
 /**
  * Card - Soft Neo-Bento styled card component
@@ -15,8 +15,7 @@ const Card = forwardRef(
       <div
         ref={ref}
         className={cn(
-          "rounded-[24px] bg-card text-card-foreground",
-          "shadow-card",
+          "rounded-[24px] border border-zinc-200/80 bg-card text-card-foreground shadow-[0_1px_2px_rgba(24,24,27,0.025),0_12px_32px_-24px_rgba(24,24,27,0.2)] dark:border-zinc-800/80",
           className
         )}
         {...props} />);
@@ -47,7 +46,7 @@ const CardTitle = forwardRef(
       <h3
         ref={ref}
         className={cn(
-          "text-sm font-bold uppercase tracking-wider text-muted-foreground",
+          "text-base font-bold tracking-tight text-zinc-950 dark:text-zinc-50",
           className
         )}
         {...props} />);

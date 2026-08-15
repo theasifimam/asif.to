@@ -3,8 +3,8 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Award, BadgeCheck, Loader2, XCircle } from "lucide-react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import { useGetCertificateQuery } from "@/lib/api/authApi";
 
 export default function CertificateVerificationPage() {

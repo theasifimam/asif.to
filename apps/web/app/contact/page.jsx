@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import { Mail, MapPin, Send, CheckCircle2, MessageSquare, Loader2 } from "lucide-react";
 import { useSubmitContactMessageMutation } from "@/lib/api/contactApi";
 import { toast } from "sonner";

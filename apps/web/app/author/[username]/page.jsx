@@ -1,6 +1,6 @@
 import React from "react";
-import AuthorClient from "@/components/AuthorClient";
-import AsifAuthorProfile from "@/components/AsifAuthorProfile";
+import AuthorClient from "@/components/authors/AuthorClient";
+import AsifAuthorProfile from "@/components/authors/AsifAuthorProfile";
 import { authorIdentity, buildPersonSchema } from "@/lib/authorIdentity";
 import { absoluteUrl, assetUrl, jsonLd } from "@/lib/seo";
 

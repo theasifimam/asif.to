@@ -96,6 +96,7 @@ function Toolbar({
   saveStatus,
   formatting,
   runtimeAdapter,
+  executionEnabled = true,
 }) {
   const { sandpack, listen } = useSandpack();
   const [copied, setCopied] = useState(false);
@@ -134,6 +135,7 @@ function Toolbar({
   }, [language, listen, onRuntimeIssue]);
 
   const run = async () => {
+    if (!executionEnabled) return;
     if (executing || runtimeAdapter?.status === "loading") return;
     if (runtimeAdapter) {
       onSelect("console");
@@ -229,23 +231,109 @@ function Toolbar({
   );
   const isDark = editorTheme === "dark";
 
+  const renderLanguageDropdown = (align = "start") => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className={`flex items-center gap-1.5 rounded-xl border px-2.5 py-1 text-xs font-bold transition active:scale-95 cursor-pointer ${
+            isDark
+              ? "border-zinc-700/80 bg-zinc-900/90 text-zinc-100 hover:border-zinc-500 hover:bg-zinc-800"
+              : "border-zinc-200 bg-zinc-50 text-zinc-800 shadow-xs hover:border-zinc-300 hover:bg-zinc-100"
+          }`}
+          aria-label="Select technology language"
+          title="Select technology language"
+        >
+          <Code2 className="h-3.5 w-3.5 shrink-0 text-blue-500" />
+          <span className="max-w-27.5 truncate font-outfit sm:max-w-40">
+            {activeLanguageObj?.label || language}
+          </span>
+          <ChevronDown className="h-3 w-3 shrink-0 opacity-70" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align={align}
+        className={`w-64 p-1.5 shadow-2xl backdrop-blur-md rounded-2xl ${
+          isDark
+            ? "border-zinc-800! bg-[#18181b]! text-zinc-100! shadow-black/80"
+            : "border-zinc-200! bg-white! text-zinc-900! shadow-zinc-400/40"
+        }`}
+      >
+        <DropdownMenuLabel
+          className={`text-[10px] font-black uppercase tracking-wider ${
+            isDark ? "text-zinc-400!" : "text-zinc-500!"
+          }`}
+        >
+          Switch Technology
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator
+          className={isDark ? "bg-zinc-800!" : "bg-zinc-200!"}
+        />
+        {languageOptions.map((opt) => {
+          const isSelected = opt.value === language;
+          return (
+            <DropdownMenuItem
+              key={opt.value}
+              onSelect={() => onLanguageChange(opt.value)}
+              className={`flex cursor-pointer items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
+                isSelected
+                  ? isDark
+                    ? "bg-blue-600/30! font-bold! text-blue-300!"
+                    : "bg-blue-50! font-bold! text-blue-700!"
+                  : isDark
+                    ? "text-zinc-100! hover:bg-zinc-800! hover:text-white! data-highlighted:bg-blue-600! data-highlighted:text-white!"
+                    : "text-zinc-800! hover:bg-zinc-100! hover:text-zinc-950! data-highlighted:bg-blue-600! data-highlighted:text-white!"
+              }`}
+            >
+              <div className="flex min-w-0 flex-col">
+                <span
+                  className={`truncate ${isSelected ? "font-bold" : "font-semibold"} ${isDark ? (isSelected ? "text-blue-300!" : "text-zinc-100!") : isSelected ? "text-blue-700!" : "text-zinc-900!"}`}
+                >
+                  {opt.label}
+                </span>
+                {opt.description && (
+                  <span
+                    className={`line-clamp-1 text-[10px] font-medium ${
+                      isSelected
+                        ? isDark
+                          ? "text-blue-300/90!"
+                          : "text-blue-600/90!"
+                        : isDark
+                          ? "text-zinc-400!"
+                          : "text-zinc-500!"
+                    }`}
+                  >
+                    {opt.description}
+                  </span>
+                )}
+              </div>
+              {isSelected && (
+                <Check className="ml-2 h-4 w-4 shrink-0 text-blue-500" />
+              )}
+            </DropdownMenuItem>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
     <div
-      className={`flex items-center justify-between gap-2 border-b px-2.5 py-2 transition-colors sm:px-4 ${
+      className={`flex h-11 sm:h-12 items-center justify-between gap-2 border-b px-2.5 sm:px-4 transition-colors ${
         isDark
-          ? "border-zinc-800 bg-[#1e1e1e] text-white"
-          : "border-zinc-200 bg-[#f3f3f3] text-zinc-900"
+          ? "border-zinc-800/80 bg-[#161618] text-white"
+          : "border-zinc-200/90 bg-white text-zinc-900"
       }`}
     >
-      {/* Left side: Explorer toggle + asif.to Logo/Branding + Language picker or Title */}
+      {/* Left side: Explorer toggle + asif.to Logo/Branding + (Desktop Language Selector or Title) */}
       <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
         <button
           type="button"
           onClick={onToggleExplorer}
-          className={`hidden h-8 w-8 items-center justify-center rounded-lg transition lg:inline-flex ${
+          className={`hidden h-8 w-8 items-center justify-center rounded-xl transition cursor-pointer lg:inline-flex ${
             isDark
               ? "text-zinc-400 hover:bg-zinc-800 hover:text-white"
-              : "text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900"
+              : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
           }`}
           title={explorerOpen ? "Collapse file explorer" : "Show file explorer"}
           aria-label={
@@ -264,110 +352,32 @@ function Toolbar({
           href="/"
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex shrink-0 items-center gap-1.5 rounded-lg px-1 py-0.5 transition hover:opacity-85"
+          className="group flex shrink-0 items-center gap-1.5 rounded-xl px-1.5 py-1 transition hover:opacity-85"
           title="asif.to - Learn & Practice"
           aria-label="asif.to home"
         >
           <img
             src="/logo.png"
             alt="asif.to logo"
-            className="h-5 w-5 rounded-md object-contain shadow-xs transition-transform group-hover:scale-105"
+            className="h-5 w-5 rounded-lg object-contain shadow-xs transition-transform group-hover:scale-105"
           />
           <span className="font-outfit text-xs font-black tracking-tight leading-none sm:text-sm">
             asif<span className="text-blue-500">.to</span>
           </span>
         </a>
 
-        <span
-          className={`text-xs ${isDark ? "text-zinc-600" : "text-zinc-300"}`}
-        >
-          /
-        </span>
-
+        {/* Desktop Language Selector / Title */}
         {languageOptions && onLanguageChange ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-bold transition active:scale-95 ${
-                  isDark
-                    ? "border-zinc-700 bg-zinc-900 text-zinc-100 hover:border-zinc-500 hover:bg-zinc-800"
-                    : "border-zinc-300 bg-white text-zinc-800 shadow-sm hover:border-zinc-400 hover:bg-zinc-100"
-                }`}
-                aria-label="Select technology language"
-                title="Select technology language"
-              >
-                <Code2 className="h-3.5 w-3.5 shrink-0 text-blue-500" />
-                <span className="max-w-27.5 truncate sm:max-w-40">
-                  {activeLanguageObj?.label || language}
-                </span>
-                <ChevronDown className="h-3 w-3 shrink-0 opacity-70" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              className={`w-64 p-1.5 shadow-2xl backdrop-blur-md ${
-                isDark
-                  ? "border-zinc-800 bg-zinc-900 text-zinc-100 shadow-black/80"
-                  : "border-zinc-200 bg-white text-zinc-900 shadow-zinc-400/30"
-              }`}
+          <>
+            <span
+              className={`hidden text-xs lg:inline ${isDark ? "text-zinc-600" : "text-zinc-300"}`}
             >
-              <DropdownMenuLabel
-                className={`text-[10px] font-black uppercase tracking-wider ${
-                  isDark ? "text-zinc-400" : "text-zinc-500"
-                }`}
-              >
-                Switch Technology
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator
-                className={isDark ? "bg-zinc-800" : "bg-zinc-200"}
-              />
-              {languageOptions.map((opt) => {
-                const isSelected = opt.value === language;
-                return (
-                  <DropdownMenuItem
-                    key={opt.value}
-                    onSelect={() => onLanguageChange(opt.value)}
-                    className={`flex cursor-pointer items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs font-semibold transition ${
-                      isSelected
-                        ? isDark
-                          ? "bg-blue-600/30 font-bold text-blue-300"
-                          : "bg-blue-50 font-bold text-blue-700"
-                        : isDark
-                          ? "text-zinc-100 hover:bg-zinc-800 hover:text-white data-highlighted:bg-zinc-800 data-highlighted:text-white"
-                          : "text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900 data-highlighted:bg-zinc-100 data-highlighted:text-zinc-900"
-                    }`}
-                  >
-                    <div className="flex min-w-0 flex-col">
-                      <span
-                        className={`truncate ${isSelected ? "font-bold" : "font-semibold"} ${isDark ? (isSelected ? "text-blue-300" : "text-zinc-100") : isSelected ? "text-blue-700" : "text-zinc-800"}`}
-                      >
-                        {opt.label}
-                      </span>
-                      {opt.description && (
-                        <span
-                          className={`line-clamp-1 text-[10px] font-medium ${
-                            isSelected
-                              ? isDark
-                                ? "text-blue-300/90"
-                                : "text-blue-600/90"
-                              : isDark
-                                ? "text-zinc-400"
-                                : "text-zinc-500"
-                          }`}
-                        >
-                          {opt.description}
-                        </span>
-                      )}
-                    </div>
-                    {isSelected && (
-                      <Check className="ml-2 h-4 w-4 shrink-0 text-blue-500" />
-                    )}
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+              /
+            </span>
+            <div className="hidden lg:block">
+              {renderLanguageDropdown("start")}
+            </div>
+          </>
         ) : (
           <div
             className={`flex min-w-0 items-center gap-1.5 text-xs font-black sm:text-sm ${
@@ -382,234 +392,256 @@ function Toolbar({
         )}
       </div>
 
-      {/* Right side: Icon-only header action buttons */}
+      {/* Right side: Mobile Language Selector (on mobile) or Desktop Actions (on desktop) */}
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-        <button
-          type="button"
-          onClick={run}
-          disabled={isRunning}
-          className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-md shadow-emerald-600/20 transition hover:bg-emerald-500 active:scale-95 disabled:cursor-wait disabled:bg-emerald-600/60"
-          title={executing ? "Executing code…" : "Run code (Ctrl + Enter)"}
-          aria-label={executing ? "Executing code" : "Run code"}
-        >
-          {isRunning ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Play className="ml-0.5 h-4 w-4 fill-current" />
-          )}
-        </button>
+        {/* Mobile Language Selector on the Right */}
+        {languageOptions && onLanguageChange && (
+          <div className="block lg:hidden">{renderLanguageDropdown("end")}</div>
+        )}
 
-        <button
-          type="button"
-          onClick={onReset}
-          className={`inline-flex h-8 w-8 items-center justify-center rounded-lg transition active:scale-95 ${
-            isDark
-              ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white"
-              : "bg-zinc-200 text-zinc-700 hover:bg-zinc-300 hover:text-zinc-900"
-          }`}
-          title="Reset starter code"
-          aria-label="Reset starter code"
-        >
-          <RotateCcw className="h-4 w-4" />
-        </button>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className={`inline-flex h-8 w-8 items-center justify-center rounded-lg transition active:scale-95 ${
-                isDark
-                  ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white"
-                  : "bg-zinc-200 text-zinc-700 hover:bg-zinc-300 hover:text-zinc-900"
-              }`}
-              title="Editor options & settings"
-              aria-label="Editor options & settings"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className={`w-56 p-1.5 shadow-2xl backdrop-blur-md ${
-              isDark
-                ? "border-zinc-700 bg-zinc-900 text-zinc-100 shadow-black/80"
-                : "border-zinc-200 bg-white text-zinc-900 shadow-zinc-400/30"
-            }`}
+        {/* Desktop action buttons */}
+        <div className="hidden lg:flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <button
+            type="button"
+            onClick={run}
+            disabled={isRunning || !executionEnabled}
+            className="relative inline-flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-sm shadow-emerald-600/20 transition hover:bg-emerald-500 active:scale-95 disabled:cursor-wait disabled:bg-emerald-600/60 cursor-pointer"
+            title={
+              !executionEnabled
+                ? "Execution disabled"
+                : executing
+                  ? "Executing code…"
+                  : "Run code (Ctrl + Enter)"
+            }
+            aria-label={
+              !executionEnabled
+                ? "Execution disabled"
+                : executing
+                  ? "Executing code"
+                  : "Run code"
+            }
           >
-            <DropdownMenuLabel
-              className={`text-[10px] font-black uppercase tracking-wider ${
-                isDark ? "text-zinc-400" : "text-zinc-500"
+            {isRunning ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Play className="ml-0.5 h-4 w-4 fill-current" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={onReset}
+            className={`inline-flex h-8 w-8 items-center justify-center rounded-xl transition active:scale-95 cursor-pointer ${
+              isDark
+                ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white"
+                : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900"
+            }`}
+            title="Reset starter code"
+            aria-label="Reset starter code"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className={`inline-flex h-8 w-8 items-center justify-center rounded-xl transition active:scale-95 cursor-pointer ${
+                  isDark
+                    ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white"
+                    : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900"
+                }`}
+                title="Editor options & settings"
+                aria-label="Editor options & settings"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className={`w-56 p-1.5 shadow-2xl backdrop-blur-md rounded-2xl ${
+                isDark
+                  ? "border-zinc-800! bg-[#18181b]! text-zinc-100! shadow-black/80"
+                  : "border-zinc-200! bg-white! text-zinc-900! shadow-zinc-400/40"
               }`}
             >
-              File actions
-            </DropdownMenuLabel>
-            <DropdownMenuGroup>
-              <DropdownMenuItem
-                disabled={formatting}
-                onSelect={onFormat}
-                className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-semibold transition ${
-                  isDark
-                    ? "text-zinc-100 hover:bg-zinc-800 hover:text-white data-highlighted:bg-zinc-800 data-highlighted:text-white"
-                    : "text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900 data-highlighted:bg-zinc-100 data-highlighted:text-zinc-900"
+              <DropdownMenuLabel
+                className={`text-[10px] font-black uppercase tracking-wider ${
+                  isDark ? "text-zinc-400!" : "text-zinc-500!"
                 }`}
               >
-                {formatting ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                ) : (
-                  <WandSparkles
-                    className={`h-4 w-4 shrink-0 ${isDark ? "text-zinc-400" : "text-zinc-500"}`}
-                  />
-                )}
-                <span>
-                  {formatting ? "Formatting..." : "Format active file"}
-                </span>
-                <span
-                  className={`ml-auto text-[10px] font-mono ${isDark ? "text-zinc-400" : "text-zinc-500"}`}
+                File actions
+              </DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  disabled={formatting}
+                  onSelect={onFormat}
+                  className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
+                    isDark
+                      ? "text-zinc-100! hover:bg-zinc-800! hover:text-white! data-highlighted:bg-blue-600! data-highlighted:text-white!"
+                      : "text-zinc-800! hover:bg-zinc-100! hover:text-zinc-950! data-highlighted:bg-blue-600! data-highlighted:text-white!"
+                  }`}
                 >
-                  Ctrl+Shift+F
-                </span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={onShare}
-                className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-semibold transition ${
-                  isDark
-                    ? "text-zinc-100 hover:bg-zinc-800 hover:text-white data-highlighted:bg-zinc-800 data-highlighted:text-white"
-                    : "text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900 data-highlighted:bg-zinc-100 data-highlighted:text-zinc-900"
-                }`}
-              >
-                <Share2
-                  className={`h-4 w-4 shrink-0 ${isDark ? "text-zinc-400" : "text-zinc-500"}`}
-                />
-                <span>{shareStatus || "Share playground"}</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={copy}
-                className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-semibold transition ${
-                  isDark
-                    ? "text-zinc-100 hover:bg-zinc-800 hover:text-white data-highlighted:bg-zinc-800 data-highlighted:text-white"
-                    : "text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900 data-highlighted:bg-zinc-100 data-highlighted:text-zinc-900"
-                }`}
-              >
-                {copied ? (
-                  <Check className="h-4 w-4 shrink-0 text-emerald-400" />
-                ) : (
-                  <Copy
+                  {formatting ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                  ) : (
+                    <WandSparkles
+                      className={`h-4 w-4 shrink-0 ${isDark ? "text-zinc-400!" : "text-zinc-500!"}`}
+                    />
+                  )}
+                  <span>
+                    {formatting ? "Formatting..." : "Format active file"}
+                  </span>
+                  <span
+                    className={`ml-auto text-[10px] font-mono ${isDark ? "text-zinc-400!" : "text-zinc-500!"}`}
+                  >
+                    Ctrl+Shift+F
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={onShare}
+                  className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
+                    isDark
+                      ? "text-zinc-100! hover:bg-zinc-800! hover:text-white! data-highlighted:bg-blue-600! data-highlighted:text-white!"
+                      : "text-zinc-800! hover:bg-zinc-100! hover:text-zinc-950! data-highlighted:bg-blue-600! data-highlighted:text-white!"
+                  }`}
+                >
+                  <Share2
+                    className={`h-4 w-4 shrink-0 ${isDark ? "text-zinc-400!" : "text-zinc-500!"}`}
+                  />
+                  <span>{shareStatus || "Share playground"}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={copy}
+                  className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
+                    isDark
+                      ? "text-zinc-100! hover:bg-zinc-800! hover:text-white! data-highlighted:bg-zinc-800! data-highlighted:text-white!"
+                      : "text-zinc-800! hover:bg-zinc-100! hover:text-zinc-950! data-highlighted:bg-zinc-100! data-highlighted:text-zinc-950!"
+                  }`}
+                >
+                  {copied ? (
+                    <Check className="h-4 w-4 shrink-0 text-emerald-500" />
+                  ) : (
+                    <Copy
+                      className={`h-4 w-4 shrink-0 ${
+                        isDark ? "text-zinc-400!" : "text-zinc-500!"
+                      }`}
+                    />
+                  )}
+                  <span>
+                    {copied ? "Copied to clipboard" : "Copy all files"}
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={download}
+                  className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
+                    isDark
+                      ? "text-zinc-100! hover:bg-zinc-800! hover:text-white! data-highlighted:bg-zinc-800! data-highlighted:text-white!"
+                      : "text-zinc-800! hover:bg-zinc-100! hover:text-zinc-950! data-highlighted:bg-zinc-100! data-highlighted:text-zinc-950!"
+                  }`}
+                >
+                  <Download
                     className={`h-4 w-4 shrink-0 ${
-                      isDark ? "text-zinc-400" : "text-zinc-500"
+                      isDark ? "text-zinc-400!" : "text-zinc-500!"
                     }`}
                   />
+                  <span>
+                    {Object.keys(sandpack.files).length > 1
+                      ? "Download project (.zip)"
+                      : "Download active file"}
+                  </span>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator
+                className={isDark ? "!bg-zinc-800!" : "bg-zinc-200!"}
+              />
+              <DropdownMenuLabel
+                className={`text-[10px] font-black uppercase tracking-wider ${
+                  isDark ? "text-zinc-400!" : "text-zinc-500!"
+                }`}
+              >
+                Appearance
+              </DropdownMenuLabel>
+              <DropdownMenuItem
+                onSelect={onThemeChange}
+                className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
+                  isDark
+                    ? "text-zinc-100! hover:bg-zinc-800! hover:text-white! data-highlighted:bg-blue-600! data-highlighted:text-white!"
+                    : "text-zinc-800! hover:bg-zinc-100! hover:text-zinc-950! data-highlighted:bg-blue-600! data-highlighted:text-white!"
+                }`}
+              >
+                {isDark ? (
+                  <Sun className="h-4 w-4 shrink-0 text-amber-400" />
+                ) : (
+                  <Moon className="h-4 w-4 shrink-0 text-indigo-500" />
                 )}
-                <span>{copied ? "Copied to clipboard" : "Copy all files"}</span>
+                <span>Use {isDark ? "light" : "dark"} theme</span>
               </DropdownMenuItem>
               <DropdownMenuItem
-                onSelect={download}
-                className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-semibold transition ${
+                onSelect={() => setFontSize((value) => Math.min(20, value + 1))}
+                className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
                   isDark
-                    ? "text-zinc-100 hover:bg-zinc-800 hover:text-white data-highlighted:bg-zinc-800 data-highlighted:text-white"
-                    : "text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900 data-highlighted:bg-zinc-100 data-highlighted:text-zinc-900"
+                    ? "text-zinc-100! hover:bg-zinc-800! hover:text-white! data-highlighted:bg-blue-600! data-highlighted:text-white!"
+                    : "text-zinc-800! hover:bg-zinc-100! hover:text-zinc-950! data-highlighted:bg-blue-600! data-highlighted:text-white!"
                 }`}
               >
-                <Download
+                <Plus
                   className={`h-4 w-4 shrink-0 ${
-                    isDark ? "text-zinc-400" : "text-zinc-500"
+                    isDark ? "text-zinc-400!" : "text-zinc-500!"
                   }`}
                 />
-                <span>
-                  {Object.keys(sandpack.files).length > 1
-                    ? "Download project (.zip)"
-                    : "Download active file"}
+                <span>Increase text size</span>
+                <span
+                  className={`ml-auto font-mono text-[10px] ${
+                    isDark ? "text-zinc-400!" : "text-zinc-500!"
+                  }`}
+                >
+                  {fontSize}px
                 </span>
               </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator
-              className={isDark ? "bg-zinc-800" : "bg-zinc-200"}
-            />
-            <DropdownMenuLabel
-              className={`text-[10px] font-black uppercase tracking-wider ${
-                isDark ? "text-zinc-400" : "text-zinc-500"
-              }`}
-            >
-              Appearance
-            </DropdownMenuLabel>
-            <DropdownMenuItem
-              onSelect={onThemeChange}
-              className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-semibold transition ${
-                isDark
-                  ? "text-zinc-100 hover:bg-zinc-800 hover:text-white data-highlighted:bg-zinc-800 data-highlighted:text-white"
-                  : "text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900 data-highlighted:bg-zinc-100 data-highlighted:text-zinc-900"
-              }`}
-            >
-              {isDark ? (
-                <Sun className="h-4 w-4 shrink-0 text-amber-400" />
-              ) : (
-                <Moon className="h-4 w-4 shrink-0 text-indigo-500" />
-              )}
-              <span>Use {isDark ? "light" : "dark"} theme</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() => setFontSize((value) => Math.min(20, value + 1))}
-              className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-semibold transition ${
-                isDark
-                  ? "text-zinc-100 hover:bg-zinc-800 hover:text-white data-highlighted:bg-zinc-800 data-highlighted:text-white"
-                  : "text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900 data-highlighted:bg-zinc-100 data-highlighted:text-zinc-900"
-              }`}
-            >
-              <Plus
-                className={`h-4 w-4 shrink-0 ${
-                  isDark ? "text-zinc-400" : "text-zinc-500"
-                }`}
-              />
-              <span>Increase text size</span>
-              <span
-                className={`ml-auto font-mono text-[10px] ${
-                  isDark ? "text-zinc-400" : "text-zinc-500"
+              <DropdownMenuItem
+                onSelect={() => setFontSize((value) => Math.max(11, value - 1))}
+                className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
+                  isDark
+                    ? "text-zinc-100! hover:bg-zinc-800! hover:text-white! data-highlighted:bg-blue-600! data-highlighted:text-white!"
+                    : "text-zinc-800! hover:bg-zinc-100! hover:text-zinc-950! data-highlighted:bg-blue-600! data-highlighted:text-white!"
                 }`}
               >
-                {fontSize}px
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() => setFontSize((value) => Math.max(11, value - 1))}
-              className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-semibold transition ${
-                isDark
-                  ? "text-zinc-100 hover:bg-zinc-800 hover:text-white data-highlighted:bg-zinc-800 data-highlighted:text-white"
-                  : "text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900 data-highlighted:bg-zinc-100 data-highlighted:text-zinc-900"
-              }`}
-            >
-              <Minus
-                className={`h-4 w-4 shrink-0 ${
-                  isDark ? "text-zinc-400" : "text-zinc-500"
-                }`}
+                <Minus
+                  className={`h-4 w-4 shrink-0 ${
+                    isDark ? "text-zinc-400!" : "text-zinc-500!"
+                  }`}
+                />
+                <span>Decrease text size</span>
+                <span
+                  className={`ml-auto font-mono text-[10px] ${
+                    isDark ? "text-zinc-400!" : "text-zinc-500!"
+                  }`}
+                >
+                  {fontSize}px
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator
+                className={isDark ? "bg-zinc-800!" : "bg-zinc-200!"}
               />
-              <span>Decrease text size</span>
-              <span
-                className={`ml-auto font-mono text-[10px] ${
-                  isDark ? "text-zinc-400" : "text-zinc-500"
+              <DropdownMenuItem
+                onSelect={onResetLayout}
+                className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
+                  isDark
+                    ? "text-zinc-100! hover:bg-zinc-800! hover:text-white! data-highlighted:bg-blue-600! data-highlighted:text-white!"
+                    : "text-zinc-800! hover:bg-zinc-100! hover:text-zinc-950! data-highlighted:bg-blue-600! data-highlighted:text-white!"
                 }`}
               >
-                {fontSize}px
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator
-              className={isDark ? "bg-zinc-800" : "bg-zinc-200"}
-            />
-            <DropdownMenuItem
-              onSelect={onResetLayout}
-              className={`flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-semibold transition ${
-                isDark
-                  ? "text-zinc-100 hover:bg-zinc-800 hover:text-white data-highlighted:bg-zinc-800 data-highlighted:text-white"
-                  : "text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900 data-highlighted:bg-zinc-100 data-highlighted:text-zinc-900"
-              }`}
-            >
-              <Maximize2
-                className={`h-4 w-4 shrink-0 ${
-                  isDark ? "text-zinc-400" : "text-zinc-500"
-                }`}
-              />
-              <span>Reset panel layout</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+                <Maximize2
+                  className={`h-4 w-4 shrink-0 ${
+                    isDark ? "text-zinc-400!" : "text-zinc-500!"
+                  }`}
+                />
+                <span>Reset panel layout</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
         <button
           type="button"

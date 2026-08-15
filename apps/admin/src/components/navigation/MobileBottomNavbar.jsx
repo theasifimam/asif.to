@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, GraduationCap, Users, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,12 +20,11 @@ export default function MobileBottomNavbar({
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Bottom tab buttons configuration
-  const primaryTabs = [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Courses", href: "/courses", icon: GraduationCap },
-    { name: "Users", href: "/users", icon: Users },
-  ];
+  const permittedItems = navItems.flatMap((group) => group.items);
+  const preferredTabHrefs = ["/dashboard", "/courses", "/users"];
+  const primaryTabs = preferredTabHrefs
+    .map((href) => permittedItems.find((item) => item.href === href))
+    .filter(Boolean);
 
   const checkIsActive = (href) => {
     if (pathname === href) return true;
@@ -36,7 +35,7 @@ export default function MobileBottomNavbar({
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 z-45 h-16 border-t border-zinc-200 bg-white/95 backdrop-blur-md dark:border-zinc-850 dark:bg-zinc-950/95 lg:hidden flex items-center justify-around px-2 shadow-lg shadow-black/5 dark:shadow-black/25 transition-all duration-300 ease-in-out ${
+      className={`fixed bottom-0 left-0 right-0 z-45 flex h-16 items-center justify-around border-t border-zinc-200/80 bg-white/95 px-2 shadow-[0_-8px_28px_-24px_rgba(0,0,0,.3)] backdrop-blur-md transition-all duration-200 ease-out dark:border-zinc-800 dark:bg-zinc-950/95 lg:hidden ${
         isVisible
           ? "translate-y-0 opacity-100"
           : "translate-y-full opacity-0 pointer-events-none"

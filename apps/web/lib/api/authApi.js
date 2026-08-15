@@ -126,6 +126,20 @@ export const authApi = createApi({
       }),
       invalidatesTags: ["Auth"],
     }),
+    deactivateAccount: builder.mutation({
+      query: (confirmation) => ({
+        url: "/users/me/deactivate",
+        method: "POST",
+        data: { confirmation },
+      }),
+    }),
+    deleteAccount: builder.mutation({
+      query: (confirmation) => ({
+        url: "/users/me/account",
+        method: "DELETE",
+        data: { confirmation },
+      }),
+    }),
 
     // Bookmark Endpoints
     toggleBookmark: builder.mutation({
@@ -181,6 +195,8 @@ export const {
   useGetCertificateQuery,
   useGetPublicProfileQuery,
   useUpdateProfileMutation,
+  useDeactivateAccountMutation,
+  useDeleteAccountMutation,
   useToggleBookmarkMutation,
   useGetBookmarksQuery,
   useToggleSavedItemMutation,

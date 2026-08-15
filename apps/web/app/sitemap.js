@@ -47,12 +47,12 @@ const STATIC_ROUTES = [
     changeFrequency: "monthly",
   },
   {
-    path: "/legal/terms",
+    path: "/terms",
     priority: 0.3,
     changeFrequency: "monthly",
   },
   {
-    path: "/legal/privacy",
+    path: "/privacy",
     priority: 0.3,
     changeFrequency: "monthly",
   },
@@ -99,7 +99,7 @@ export default async function sitemap() {
 
   // 2. Fetch dynamic content in parallel
   const [coursesData, cheatsheetsData, articlesData, searchIndex] = await Promise.all([
-    fetchApi("/courses"),
+    fetchApi("/courses?status=published"),
     fetchApi("/cheatsheets"),
     fetchApi("/articles?status=published&limit=100"),
     fetchApi("/search/index"),
@@ -109,15 +109,20 @@ export default async function sitemap() {
 
   // 3. Courses & Chapter Routes
   if (Array.isArray(coursesData)) {
+    const listedCourseUrls = new Set();
     for (const course of coursesData) {
       const courseSlug = course?.slug;
       if (!courseSlug) continue;
+
+      const courseUrl = `${siteUrl}/courses/${encodeURIComponent(courseSlug)}`;
+      if (listedCourseUrls.has(courseUrl)) continue;
+      listedCourseUrls.add(courseUrl);
 
       const courseUpdated = course.updatedAt ? new Date(course.updatedAt) : now;
 
       // Course overview page
       dynamicEntries.push({
-        url: `${siteUrl}/courses/${courseSlug}`,
+        url: courseUrl,
         lastModified: courseUpdated,
         changeFrequency: "daily",
         priority: 0.9,

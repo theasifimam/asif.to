@@ -15,8 +15,8 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import Editor from "@/components/Editor";
-import { ConfirmDialog } from "@/components/confirm-dialog";
+import Editor from "@/components/editor/Editor";
+import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

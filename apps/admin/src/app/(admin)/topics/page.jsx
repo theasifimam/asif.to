@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ConfirmDialog } from "@/components/confirm-dialog";
+import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import {
   AdminContent,
   AdminFilters,
@@ -32,7 +32,7 @@ import {
   AdminSearch,
 } from "@/components/admin";
 import { coursesApi, topicsApi } from "@/lib/api";
-import { ViewToggle } from "@/components/ViewToggle";
+import { ViewToggle } from "@/components/ui/ViewToggle";
 
 const statusStyles = {
   published:
@@ -201,10 +201,10 @@ export default function TopicsPage() {
             setFilters((current) => ({ ...current, course, page: 1 }))
           }
         >
-          <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900 md:w-56">
+          <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b] md:w-56">
             <SelectValue placeholder="All courses" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
             <SelectItem value="all">All courses</SelectItem>
             {courses.map((course) => (
               <SelectItem key={course._id} value={course._id}>
@@ -219,13 +219,14 @@ export default function TopicsPage() {
             setFilters((current) => ({ ...current, type, page: 1 }))
           }
         >
-          <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900 md:w-40">
+          <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b] md:w-44">
             <SelectValue placeholder="All types" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
             <SelectItem value="all">All types</SelectItem>
-            <SelectItem value="article">Articles</SelectItem>
-            <SelectItem value="interview">Interviews</SelectItem>
+            <SelectItem value="concept">Concept</SelectItem>
+            <SelectItem value="guide">Guide</SelectItem>
+            <SelectItem value="faq">FAQ</SelectItem>
           </SelectContent>
         </Select>
         <Select
@@ -234,13 +235,13 @@ export default function TopicsPage() {
             setFilters((current) => ({ ...current, status, page: 1 }))
           }
         >
-          <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900 md:w-40">
-            <SelectValue placeholder="All status" />
+          <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b] md:w-44">
+            <SelectValue placeholder="All statuses" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All status</SelectItem>
-            <SelectItem value="draft">Drafts</SelectItem>
+          <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
+            <SelectItem value="all">All statuses</SelectItem>
             <SelectItem value="published">Published</SelectItem>
+            <SelectItem value="draft">Draft</SelectItem>
           </SelectContent>
         </Select>
       </AdminFilters>
@@ -402,18 +403,18 @@ export default function TopicsPage() {
             />
           </div>
         ) : (
-          <div className="w-full bg-white dark:bg-zinc-900 rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs overflow-hidden">
+          <div className="admin-surface w-full rounded-[28px] sm:rounded-4xl overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-190 text-left text-sm">
-                <thead className="border-b border-zinc-200/70 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-950/40 text-[11px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+              <table className="admin-table w-full min-w-190 text-left text-sm">
+                <thead className="border-b border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/75 dark:bg-[#18181b]/60 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">
                   <tr>
-                    <th className="px-6 py-4">Topic</th>
-                    <th className="px-6 py-4">Type</th>
-                    <th className="px-6 py-4">Course</th>
-                    <th className="px-6 py-4">Category</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4">Order</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
+                    <th className="px-6 py-4.5">Topic</th>
+                    <th className="px-6 py-4.5">Type</th>
+                    <th className="px-6 py-4.5">Course</th>
+                    <th className="px-6 py-4.5">Category</th>
+                    <th className="px-6 py-4.5">Status</th>
+                    <th className="px-6 py-4.5">Order</th>
+                    <th className="px-6 py-4.5 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
@@ -422,10 +423,10 @@ export default function TopicsPage() {
                       key={topic._id}
                       className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
                     >
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4.5">
                         <Link
                           href={`/topics/${topic._id}/edit`}
-                          className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-1"
+                          className="font-bold font-outfit text-zinc-950 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-1"
                         >
                           {topic.title}
                         </Link>
@@ -433,28 +434,28 @@ export default function TopicsPage() {
                           /{topic.slug}
                         </p>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4.5">
                         <span className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-2.5 py-0.5 text-[10px] font-black uppercase text-zinc-600 dark:text-zinc-300">
                           {topic.type || "article"}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4.5">
                         <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-500/20">
                           {topic.course?.title || "-"}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                      <td className="px-6 py-4.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
                         {topic.category?.name || "-"}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4.5">
                         <button
                           onClick={() => toggleStatus(topic)}
-                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${statusStyles[topic.status]}`}
+                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider transition-all ${statusStyles[topic.status]}`}
                         >
                           {topic.status}
                         </button>
                       </td>
-                      <td className="px-6 py-4 text-zinc-600 dark:text-zinc-300">
+                      <td className="px-6 py-4.5 text-zinc-600 dark:text-zinc-300">
                         <div className="flex items-center gap-1">
                           <span className="w-7 text-center font-black text-xs text-zinc-400">
                             #{topic.order}
@@ -464,36 +465,36 @@ export default function TopicsPage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                 title="Move topic up"
                                 disabled={reordering || index === 0}
                                 onClick={() => moveTopic(index, -1)}
                               >
-                                <ArrowUp className="h-4 w-4" />
+                                <ArrowUp className="h-3.5 w-3.5" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                 title="Move topic down"
                                 disabled={
                                   reordering || index === topics.length - 1
                                 }
                                 onClick={() => moveTopic(index, 1)}
                               >
-                                <ArrowDown className="h-4 w-4" />
+                                <ArrowDown className="h-3.5 w-3.5" />
                               </Button>
                             </>
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4.5">
                         <div className="flex justify-end gap-1">
                           <Link href={`/topics/${topic._id}/edit`}>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                              className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                               title="Edit topic"
                             >
                               <Edit3 className="h-4 w-4" />
@@ -517,7 +518,7 @@ export default function TopicsPage() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                  className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                   title="Open public topic"
                                 >
                                   <ExternalLink className="h-4 w-4" />
@@ -528,10 +529,10 @@ export default function TopicsPage() {
                             variant="ghost"
                             size="icon"
                             title="Delete topic"
-                            className="h-8 w-8 rounded-xl text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
                             onClick={() => setDeleteTarget(topic)}
+                            className="h-8 w-8 rounded-full text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
                           >
-                            <Trash2 className="h-4 w-4 text-red-500" />
+                            <Trash2 className="h-4 w-4 text-rose-500" />
                           </Button>
                         </div>
                       </td>

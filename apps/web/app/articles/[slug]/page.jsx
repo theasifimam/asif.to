@@ -1,4 +1,4 @@
-import ArticleClient from "@/components/ArticleClient";
+import ArticleClient from "@/components/articles/ArticleClient";
 import { authorIdentity, buildPersonSchema } from "@/lib/authorIdentity";
 import { absoluteUrl, assetUrl, jsonLd } from "@/lib/seo";
 

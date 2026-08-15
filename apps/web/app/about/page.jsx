@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { BookOpen, CheckCircle2, Code2, Compass, UserRound } from "lucide-react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import { absoluteUrl } from "@/lib/seo";
 
 export const metadata = {

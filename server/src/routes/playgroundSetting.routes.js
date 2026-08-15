@@ -1,0 +1,10 @@
+import { Router } from "express";
+import { protect } from "../middlewares/auth.middleware.js";
+import { requirePermission } from "../utils/permissions.js";
+import { getPublicPlaygroundSetting, getPlaygroundSetting, savePlaygroundSetting, publishPlaygroundSetting } from "../controllers/playgroundSetting.controller.js";
+const router = Router();
+router.get("/public", getPublicPlaygroundSetting);
+router.get("/", protect, requirePermission("playground.manage"), getPlaygroundSetting);
+router.put("/", protect, requirePermission("playground.manage"), savePlaygroundSetting);
+router.post("/publish", protect, requirePermission("playground.manage"), publishPlaygroundSetting);
+export default router;

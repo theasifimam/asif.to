@@ -1,4 +1,4 @@
-import { absoluteUrl, getSiteUrl } from "@/lib/seo";
+import { absoluteUrl, assetUrl, getSiteUrl } from "@/lib/seo";
 import { authorIdentity, buildPersonSchema } from "@/lib/authorIdentity";
 
 function coursePath(course, fallbackSlug = "") {
@@ -25,6 +25,17 @@ export function buildCourseSchema(course, fallbackSlug) {
       course.subtitle ||
       `Learn ${course.title} with step-by-step lessons on asif.to.`,
     url,
+    ...(course.thumbnail ? { image: assetUrl(course.thumbnail) } : {}),
+    ...(course.keywords?.length ? { keywords: course.keywords.join(", ") } : {}),
+    ...(course.level ? { educationalLevel: course.level } : {}),
+    ...(course.chapters?.length
+      ? { numberOfItems: course.chapters.length }
+      : {}),
+    mainEntityOfPage: url,
+    hasCourseInstance: {
+      "@type": "CourseInstance",
+      courseMode: "online",
+    },
     datePublished: course.createdAt || undefined,
     dateModified: course.updatedAt || undefined,
     author: { "@id": `${authorIdentity.url}#person` },

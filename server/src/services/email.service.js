@@ -227,6 +227,23 @@ export const sendWelcomeEmail = async (to, fullName) => {
   });
 };
 
+export const sendUserInvitationEmail = async (to, role, inviteUrl) => {
+  const from = process.env.EMAIL_FROM || "asif.to <noreply@asif.to>";
+  await getTransporter().sendMail({
+    from,
+    to,
+    subject: `You're invited to join asif.to as ${role}`,
+    text: `You have been invited to join asif.to as ${role}. Accept your invitation within 7 days: ${inviteUrl}`,
+    html: renderEmailLayout({
+      preheader: `Join the asif.to editorial workspace as ${role}.`,
+      eyebrow: "Team invitation",
+      title: "You’re invited to asif.to",
+      intro: `You have been invited to join the asif.to workspace as <strong>${escapeHtml(role)}</strong>. This secure invitation expires in seven days.`,
+      content: `${renderButton("Accept invitation", inviteUrl)}${renderNotice("Sign in with the same email address that received this invitation. If you were not expecting it, you can safely ignore this email.")}`,
+    }),
+  });
+};
+
 /**
  * Send a contact form notification to support.
  */

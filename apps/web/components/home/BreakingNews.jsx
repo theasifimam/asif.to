@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import ArticleCard from "../ArticleCard";
+import ArticleCard from "../articles/ArticleCard";
 import { format } from "date-fns";
 import { ArrowRight, Sparkles } from "lucide-react";
 
