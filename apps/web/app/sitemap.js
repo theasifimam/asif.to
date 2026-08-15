@@ -97,101 +97,70 @@ export default async function sitemap() {
     priority: route.priority,
   }));
 
-  // 2. Fetch dynamic content in parallel
-  const [coursesData, cheatsheetsData, articlesData, searchIndex] = await Promise.all([
-    fetchApi("/courses?status=published"),
-    fetchApi("/cheatsheets"),
-    fetchApi("/articles?status=published&limit=100"),
-    fetchApi("/search/index"),
-  ]);
+  // 2. Fetch search index from backend (covers all dynamic content: courses, chapters, topics, articles, cheatsheets, questions)
+  const searchIndex = await fetchApi("/search/index");
 
   const dynamicEntries = [];
+  const existingUrls = new Set();
 
-  // 3. Courses & Chapter Routes
-  if (Array.isArray(coursesData)) {
-    const listedCourseUrls = new Set();
-    for (const course of coursesData) {
-      const courseSlug = course?.slug;
-      if (!courseSlug) continue;
+  const searchableItems = Array.isArray(searchIndex?.items) ? searchIndex.items : [];
 
-      const courseUrl = `${siteUrl}/courses/${encodeURIComponent(courseSlug)}`;
-      if (listedCourseUrls.has(courseUrl)) continue;
-      listedCourseUrls.add(courseUrl);
+  for (const item of searchableItems) {
+    if (!item.url) continue;
 
-      const courseUpdated = course.updatedAt ? new Date(course.updatedAt) : now;
+    let urlPath = item.url;
+    let changeFrequency = "weekly";
+    let priority = 0.7;
 
-      // Course overview page
+    // Handle chapter routing redirects: canonical URL is /:courseSlug/:chapterSlug, not /courses/:courseSlug/:chapterSlug
+    if (item.type === "chapter" && urlPath.startsWith("/courses/")) {
+      urlPath = urlPath.replace("/courses/", "/");
+      priority = 0.8;
+      changeFrequency = "weekly";
+    } else if (item.type === "course") {
+      priority = 0.9;
+      changeFrequency = "daily";
+    } else if (item.type === "cheatsheet") {
+      priority = 0.8;
+      changeFrequency = "weekly";
+    } else if (item.type === "article") {
+      priority = 0.7;
+      changeFrequency = "monthly";
+    } else if (item.type === "topic") {
+      priority = 0.8;
+      changeFrequency = "weekly";
+    } else if (item.type === "question") {
+      priority = 0.7;
+      changeFrequency = "weekly";
+    }
+
+    const url = `${siteUrl}${urlPath}`;
+    if (!existingUrls.has(url)) {
+      existingUrls.add(url);
       dynamicEntries.push({
-        url: courseUrl,
-        lastModified: courseUpdated,
-        changeFrequency: "daily",
-        priority: 0.9,
+        url,
+        lastModified: item.updatedAt ? new Date(item.updatedAt) : now,
+        changeFrequency,
+        priority,
       });
+    }
 
-      // Course interview questions page
-      dynamicEntries.push({
-        url: `${siteUrl}/${courseSlug}/interview-questions`,
-        lastModified: courseUpdated,
-        changeFrequency: "weekly",
-        priority: 0.8,
-      });
-
-      // Individual chapter reader pages
-      if (Array.isArray(course.chapters)) {
-        for (const chapter of course.chapters) {
-          const chapterSlug = chapter?.slug;
-          if (!chapterSlug) continue;
-
+    // Add Course Interview Questions Guide index (/:courseSlug/interview-questions) for each course
+    if (item.type === "course") {
+      const courseSlug = urlPath.split("/").pop();
+      if (courseSlug) {
+        const interviewUrl = `${siteUrl}/${courseSlug}/interview-questions`;
+        if (!existingUrls.has(interviewUrl)) {
+          existingUrls.add(interviewUrl);
           dynamicEntries.push({
-            url: `${siteUrl}/${courseSlug}/${chapterSlug}`,
-            lastModified: chapter.updatedAt ? new Date(chapter.updatedAt) : courseUpdated,
+            url: interviewUrl,
+            lastModified: item.updatedAt ? new Date(item.updatedAt) : now,
             changeFrequency: "weekly",
             priority: 0.8,
           });
         }
       }
     }
-  }
-
-  // 4. Cheatsheet Routes
-  if (Array.isArray(cheatsheetsData)) {
-    for (const cs of cheatsheetsData) {
-      const slug = cs?.slug;
-      if (!slug) continue;
-
-      dynamicEntries.push({
-        url: `${siteUrl}/cheatsheets/${slug}`,
-        lastModified: cs.updatedAt ? new Date(cs.updatedAt) : now,
-        changeFrequency: "weekly",
-        priority: 0.8,
-      });
-    }
-  }
-
-  // 5. Published Article Routes
-  if (Array.isArray(articlesData)) {
-    for (const article of articlesData) {
-      const slug = article?.slug;
-      if (!slug) continue;
-
-      dynamicEntries.push({
-        url: `${siteUrl}/articles/${slug}`,
-        lastModified: article.updatedAt ? new Date(article.updatedAt) : now,
-        changeFrequency: "monthly",
-        priority: 0.7,
-      });
-    }
-  }
-
-  // Topics and individual interview questions use canonical course-scoped routes.
-  const searchableItems = Array.isArray(searchIndex?.items) ? searchIndex.items : [];
-  const existingUrls = new Set(dynamicEntries.map((entry) => entry.url));
-  for (const item of searchableItems) {
-    if (!["topic", "question"].includes(item.type) || !item.url) continue;
-    const url = `${siteUrl}${item.url}`;
-    if (existingUrls.has(url)) continue;
-    existingUrls.add(url);
-    dynamicEntries.push({ url, lastModified: now, changeFrequency: "weekly", priority: item.type === "topic" ? 0.8 : 0.7 });
   }
 
   const { TECHNOLOGIES } = await import("@/lib/playground/config");

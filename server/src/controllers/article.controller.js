@@ -1,4 +1,4 @@
-
+import mongoose from "mongoose";
 import Article from "../models/Article.js";
 import fs from "fs";
 
@@ -65,6 +65,11 @@ export const getArticles = async (req, res) => {
 export const getArticleById = async (req, res) => {
   try {
     const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.status(404).json({ success: false, message: "Article not found." });
+      return;
+    }
 
     const article = await Article.findById(id).
     populate("author", "fullName name email avatar").
