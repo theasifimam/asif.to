@@ -37,20 +37,12 @@ const Editor = memo(function Editor({ value, onChange, placeholder }) {
 
   return (
     <div
-      className={`md-editor-wrapper`}
+      className="md-editor-wrapper"
       data-color-mode={theme === "dark" ? "dark" : "light"}
     >
-      <div className="flex justify-between items-center mb-2 px-1">
-        <span className="text-[10px] font-black text-zinc-500 uppercase tracking-wider">
-          Markdown Editor
-        </span>
-      </div>
-
       <MDEditor
         value={draft}
         onChange={handleChange}
-        // Live preview parses the complete Markdown document on every keypress.
-        // Keep typing responsive in the editing surface.
         preview="edit"
         height={500}
         className="w-full font-inter"
