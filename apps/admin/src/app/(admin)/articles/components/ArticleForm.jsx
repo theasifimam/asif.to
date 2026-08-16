@@ -11,8 +11,16 @@ import AdminFormShell, {
   formAsideClass,
   formSectionClass,
 } from "@/components/forms/AdminFormShell";
+import DiscussButton from "@/components/messaging/DiscussButton";
 import { articlesApi, articleTopicsApi } from "@/lib/api";
 import { Button, Input, Label, Textarea } from "@/components/ui";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function ArticleForm({ articleId = null }) {
   const router = useRouter();
@@ -131,6 +139,7 @@ export default function ArticleForm({ articleId = null }) {
       }
       actions={
         <div className="flex gap-2 w-full">
+          {articleId && <DiscussButton entityType="article" entityId={articleId} className="flex-1" />}
           <Button
             variant="outline"
             disabled={saving}
@@ -206,14 +215,18 @@ export default function ArticleForm({ articleId = null }) {
             </h2>
             <div className="space-y-2">
               <Label>Status</Label>
-              <select
+              <Select
                 value={form.status}
-                onChange={(event) => update("status", event.target.value)}
-                className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 text-sm outline-none dark:bg-zinc-900"
+                onValueChange={(value) => update("status", value)}
               >
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-              </select>
+                <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 text-sm dark:bg-zinc-900">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label>

@@ -1,5 +1,6 @@
 import Course from "../models/Course.js";
 import Chapter from "../models/Chapter.js";
+import { logActivity } from "../services/activity.service.js";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -389,6 +390,7 @@ export const createCourse = async (req, res) => {
       examEnabled: Boolean(examEnabled),
       examSettings: examSettings || undefined,
     });
+    await logActivity({ actor: req.user, action: "course.created", entityType: "course", entityId: course._id, entityTitle: course.title, description: "created", severity: "info", url: `/courses/${course._id}` });
 
     res.status(201).json({ success: true, data: course });
   } catch (error) {
@@ -465,6 +467,7 @@ export const updateCourse = async (req, res) => {
 
     updates.updatedAt = new Date();
 
+    const previous = await Course.findById(id).lean();
     const course = await Course.findByIdAndUpdate(id, updates, {
       new: true,
       runValidators: true,
@@ -475,6 +478,8 @@ export const updateCourse = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Course not found." });
     }
+    const seoChanged = ["seoTitle", "seoDescription", "keywords", "canonicalUrl", "interviewSeoTitle", "interviewSeoDescription"].some((key) => updates[key] !== undefined);
+    await logActivity({ actor: req.user, action: seoChanged ? "course.seo_updated" : "course.updated", entityType: "course", entityId: course._id, entityTitle: course.title, description: seoChanged ? "changed SEO metadata for" : "updated", severity: seoChanged ? "important" : "info", before: previous ? { title: previous.title, status: previous.status } : undefined, after: { changedFields: Object.keys(updates).filter((key) => key !== "updatedAt") }, url: `/courses/${course._id}` });
 
     res.status(200).json({ success: true, data: course });
   } catch (error) {
@@ -507,6 +512,7 @@ export const deleteCourse = async (req, res) => {
     // Delete all associated chapters
     await Chapter.deleteMany({ course: id });
     await Course.findByIdAndDelete(id);
+    await logActivity({ actor: req.user, action: "course.deleted", entityType: "course", entityId: course._id, entityTitle: course.title, description: "permanently deleted", severity: "critical", url: "/courses" });
 
     res
       .status(200)
@@ -641,6 +647,7 @@ export const createChapter = async (req, res) => {
       order: chapterOrder,
       status: status || "published",
     });
+    await logActivity({ actor: req.user, action: "chapter.created", entityType: "chapter", entityId: chapter._id, entityTitle: chapter.title, description: `added a chapter to ${course.title}:`, severity: "info", metadata: { courseId: course._id }, url: `/courses/${course._id}/chapters/${chapter._id}` });
 
     res.status(201).json({ success: true, data: chapter });
   } catch (error) {
@@ -683,7 +690,7 @@ export const updateChapter = async (req, res) => {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
     });
 
-    const currentChapter = await Chapter.findById(id).select("course").lean();
+    const currentChapter = await Chapter.findById(id).select("course title status").lean();
     if (!currentChapter) {
       return res
         .status(404)
@@ -726,6 +733,8 @@ export const updateChapter = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Chapter not found." });
     }
+    const seoChanged = ["seoTitle", "seoDescription", "keywords", "canonicalUrl"].some((key) => updates[key] !== undefined);
+    await logActivity({ actor: req.user, action: seoChanged ? "chapter.seo_updated" : "chapter.updated", entityType: "chapter", entityId: chapter._id, entityTitle: chapter.title, description: seoChanged ? "changed SEO metadata for" : "updated", severity: seoChanged ? "important" : "info", before: { title: currentChapter.title, status: currentChapter.status }, after: { changedFields: Object.keys(updates).filter((key) => key !== "content") }, metadata: { courseId: chapter.course }, url: `/courses/${chapter.course}/chapters/${chapter._id}` });
 
     res.status(200).json({ success: true, data: chapter });
   } catch (error) {
@@ -753,6 +762,7 @@ export const deleteChapter = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Chapter not found." });
     }
+    await logActivity({ actor: req.user, action: "chapter.deleted", entityType: "chapter", entityId: chapter._id, entityTitle: chapter.title, description: "permanently deleted", severity: "critical", metadata: { courseId: chapter.course }, url: `/courses/${chapter.course}` });
     res.status(200).json({ success: true, message: "Chapter deleted." });
   } catch (error) {
     console.error("[CHAPTERS] deleteChapter error:", error);

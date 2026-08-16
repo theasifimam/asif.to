@@ -5,6 +5,7 @@ import { topicsApi } from "../api/topicsApi";
 import { pagesApi } from "../api/pagesApi";
 import { courseApi } from "../api/courseApi";
 import { contactApi } from "../api/contactApi";
+import { libraryApi } from "../api/libraryApi";
 import authReducer from "./authSlice";
 
 export const store = configureStore({
@@ -16,6 +17,7 @@ export const store = configureStore({
     [pagesApi.reducerPath]: pagesApi.reducer,
     [courseApi.reducerPath]: courseApi.reducer,
     [contactApi.reducerPath]: contactApi.reducer,
+    [libraryApi.reducerPath]: libraryApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -25,5 +27,6 @@ export const store = configureStore({
       pagesApi.middleware,
       courseApi.middleware,
       contactApi.middleware,
+      libraryApi.middleware,
     ),
 });

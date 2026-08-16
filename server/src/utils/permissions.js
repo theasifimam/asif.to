@@ -19,6 +19,12 @@ export const PERMISSION_CATALOG = Object.freeze([
   ["question_bank.manage", "Manage question bank", "Editorial resources"],
   ["planner.view", "View planner", "Planning"],
   ["planner.manage", "Manage planner", "Planning"],
+  ["messages.view", "Access internal team messages", "Team messaging"],
+  ["messages.send", "Send internal team messages", "Team messaging"],
+  ["messages.channels.manage", "Manage team channels", "Team messaging"],
+  ["messages.attach", "Attach files to team messages", "Team messaging"],
+  ["messages.pin", "Pin important channel messages", "Team messaging"],
+  ["messages.moderate", "Moderate team messages", "Team messaging"],
   ["analytics.view", "View analytics", "Administration"],
   ["seo.view", "View and manage SEO", "Administration"],
   ["users.view", "View users", "User management"],
@@ -38,7 +44,7 @@ export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({
   author: [
     "content.read", "articles.create", "articles.edit_own", "analytics.view",
     "topics.view", "interview_questions.view", "courses.view",
-    "cheatsheets.view", "question_bank.view",
+    "cheatsheets.view", "question_bank.view", "messages.view", "messages.send", "messages.attach",
   ],
   editor: [
     "content.read", "articles.create", "articles.edit_own", "articles.edit_all",
@@ -47,6 +53,7 @@ export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({
     "courses.manage", "cheatsheets.view", "cheatsheets.manage",
     "question_bank.view", "question_bank.manage", "planner.view",
     "planner.manage", "analytics.view", "seo.view", "users.view",
+    "messages.view", "messages.send", "messages.attach", "messages.pin",
   ],
   admin: PERMISSION_CATALOG.map(([key]) => key).filter(
     (key) => key !== "roles.manage" && key !== "settings.manage",

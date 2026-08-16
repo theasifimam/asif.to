@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "migrate:cheatsheets": "node src/scripts/migrate-cheatsheets-to-articles.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test --test-isolation=none src/tests/*.test.js",
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "seed:react-exam": "node src/scripts/seed-react-exam.js",
@@ -36,6 +36,7 @@
     "multer": "^2.1.1",
     "nodemailer": "^8.0.2",
     "nodemon": "^3.1.14",
-    "sharp": "^0.35.3"
+    "sharp": "^0.35.3",
+    "socket.io": "^4.8.3"
   }
 }

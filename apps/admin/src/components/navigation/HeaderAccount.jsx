@@ -53,7 +53,7 @@ export default function HeaderAccount({
         <button
           type="button"
           aria-label="User Account Menu"
-          className="flex items-center gap-2 ml-1 md:ml-2 group/header-user cursor-pointer transition-all hover:opacity-90 outline-none rounded-full border border-zinc-200 dark:border-zinc-900 p-0.5"
+          className="flex items-center gap-2 group/header-user cursor-pointer transition-all hover:opacity-90 outline-none rounded-full border border-zinc-200 dark:border-zinc-900 p-0.5"
         >
           <div className="flex-col items-end leading-none hidden xs:flex">
             <span className="text-[11px] font-black text-zinc-900 dark:text-white uppercase tracking-tight truncate max-w-28 md:max-w-36">

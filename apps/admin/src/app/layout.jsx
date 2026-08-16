@@ -1,6 +1,6 @@
 import { Inter, Outfit } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { Toaster } from "sonner";
+import { AdminToaster } from "@/components/ui/toaster";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ReduxProvider } from "@/redux/provider";
@@ -37,7 +37,7 @@ export default function RootLayout({ children }) {
               disableTransitionOnChange
             >
               {children}
-              <Toaster richColors position="top-right" theme="dark" />
+              <AdminToaster />
             </ThemeProvider>
           </ReduxProvider>
         </AuthProvider>

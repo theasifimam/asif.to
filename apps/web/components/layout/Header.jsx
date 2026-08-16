@@ -196,6 +196,13 @@ export default function Header() {
 
           {/* Desktop Navigation with Dropdowns */}
           <nav className="hidden md:flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800/80 p-1 rounded-full text-xs font-bold">
+            <Link
+              href="/library"
+              className={`flex items-center gap-1 px-4 py-1.5 rounded-full transition-all ${pathname.startsWith("/library") ? "bg-blue-600 text-white shadow-sm" : "text-zinc-600 dark:text-zinc-300 hover:text-foreground"}`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>My Library</span>
+            </Link>
             {/* Courses Dropdown */}
             <div className="relative" ref={coursesRef}>
               <button
@@ -372,23 +379,6 @@ export default function Header() {
           </div>
         </div>
       </header>
-
-      <Sidebar
-        isOpen={isMenuOpen}
-        onClose={() => setIsMenuOpen(false)}
-        user={displayedUser}
-        isAuthenticated={Boolean(oauthSession?.user) || isAuthenticated}
-        isInitialized={oauthStatus !== "loading" && isInitialized}
-        onLogoutClick={() => setIsLogoutConfirmOpen(true)}
-        onSignInClick={() => {
-          setIsMenuOpen(false);
-          router.push(
-            `/login?callbackUrl=${encodeURIComponent(pathname || "/")}`,
-          );
-        }}
-        navLinks={navLinksForSidebar}
-        currentTime={currentTime}
-      />
 
       <LogoutConfirm
         isOpen={isLogoutConfirmOpen}

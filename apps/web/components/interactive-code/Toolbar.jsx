@@ -28,6 +28,8 @@ import {
   MoreHorizontal,
   PanelLeftClose,
   PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
   Pencil,
   Play,
   Plus,
@@ -88,6 +90,8 @@ function Toolbar({
   onResetLayout,
   explorerOpen,
   onToggleExplorer,
+  consoleOpen = true,
+  onToggleConsole,
   onRuntimeIssue,
   onFormat,
   onReset,
@@ -386,7 +390,7 @@ function Toolbar({
           >
             <Code2 className="h-4 w-4 shrink-0 text-blue-500" />
             <span className="max-w-32.5 truncate sm:max-w-65">
-              {title || language || "Code Playground"}
+              {sandpack?.activeFile ? sandpack.activeFile.split("/").pop() : (title || language || "Code Playground")}
             </span>
           </div>
         )}
@@ -441,6 +445,26 @@ function Toolbar({
           >
             <RotateCcw className="h-4 w-4" />
           </button>
+
+          {onToggleConsole && (
+            <button
+              type="button"
+              onClick={onToggleConsole}
+              className={`inline-flex h-8 w-8 items-center justify-center rounded-xl transition active:scale-95 cursor-pointer ${
+                isDark
+                  ? "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white"
+                  : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 hover:text-zinc-900"
+              }`}
+              title={consoleOpen ? "Collapse console" : "Open console"}
+              aria-label={consoleOpen ? "Collapse console" : "Open console"}
+            >
+              {consoleOpen ? (
+                <PanelRightClose className="h-4 w-4" />
+              ) : (
+                <PanelRightOpen className="h-4 w-4" />
+              )}
+            </button>
+          )}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -624,6 +648,23 @@ function Toolbar({
               <DropdownMenuSeparator
                 className={isDark ? "bg-zinc-800!" : "bg-zinc-200!"}
               />
+              {onToggleConsole && (
+                <DropdownMenuItem
+                  onSelect={onToggleConsole}
+                  className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
+                    isDark
+                      ? "text-zinc-100! hover:bg-zinc-800! hover:text-white! data-highlighted:bg-blue-600! data-highlighted:text-white!"
+                      : "text-zinc-800! hover:bg-zinc-100! hover:text-zinc-950! data-highlighted:bg-blue-600! data-highlighted:text-white!"
+                  }`}
+                >
+                  <Terminal
+                    className={`h-4 w-4 shrink-0 ${
+                      isDark ? "text-zinc-400!" : "text-zinc-500!"
+                    }`}
+                  />
+                  <span>{consoleOpen ? "Collapse console" : "Open console"}</span>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 onSelect={onResetLayout}
                 className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${

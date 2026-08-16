@@ -7,6 +7,13 @@ import { toast } from "sonner";
 import { articlesApi } from "@/lib/api";
 import AdminFormShell from "@/components/forms/AdminFormShell";
 import { Button, Input } from "@/components/ui";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 
@@ -22,7 +29,8 @@ export default function ArticlesPage() {
   const load = useCallback(async () => {
     setLoading(true);
     const response = await articlesApi.list({ status, limit: 100 });
-    if (response.success) setArticles(response.data?.data || response.data || []);
+    if (response.success)
+      setArticles(response.data?.data || response.data || []);
     else toast.error(response.error || "Unable to load articles");
     setLoading(false);
   }, [status]);
@@ -37,10 +45,12 @@ export default function ArticlesPage() {
       articles.filter(
         (article) =>
           article.title?.toLowerCase().includes(search.toLowerCase()) ||
-          article.author?.fullName?.toLowerCase().includes(search.toLowerCase()) ||
-          article.slug?.toLowerCase().includes(search.toLowerCase())
+          article.author?.fullName
+            ?.toLowerCase()
+            .includes(search.toLowerCase()) ||
+          article.slug?.toLowerCase().includes(search.toLowerCase()),
       ),
-    [articles, search]
+    [articles, search],
   );
 
   const remove = async () => {
@@ -49,7 +59,9 @@ export default function ArticlesPage() {
     const response = await articlesApi.delete(deleteTarget._id);
     if (response.success) {
       toast.success("Article deleted");
-      setArticles((current) => current.filter((item) => item._id !== deleteTarget._id));
+      setArticles((current) =>
+        current.filter((item) => item._id !== deleteTarget._id),
+      );
       setDeleteTarget(null);
     } else {
       toast.error(response.error || "Unable to delete article");
@@ -59,18 +71,21 @@ export default function ArticlesPage() {
 
   return (
     <AdminFormShell
-      eyebrow="Content / Articles"
-      title="Article library"
-      description="Manage published articles and drafts with the same structured workflow as course topics."
+      eyebrow="Content & Curriculum"
+      title="Articles"
+      description="Manage educational content, tutorials, and written guides."
       actions={
-        <div className="flex items-center gap-2">
-          <ViewToggle view={viewMode} onViewChange={setViewMode} />
-          <Link href="/articles/new">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" /> New article
-            </Button>
-          </Link>
-        </div>
+        <>
+          <ViewToggle
+            view={viewMode}
+            onViewChange={setViewMode}
+          />
+          <Button size="sm" className="shadow-lg shadow-blue-500/20" asChild>
+            <Link href="/articles/new">
+              <Plus className="mr-1.5 h-4 w-4" /> New article
+            </Link>
+          </Button>
+        </>
       }
     >
       <section className="flex flex-col gap-3 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-3.5 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950 md:flex-row">
@@ -83,15 +98,18 @@ export default function ArticlesPage() {
             className="rounded-2xl bg-zinc-100 pl-9 dark:bg-zinc-900"
           />
         </div>
-        <select
-          value={status}
-          onChange={(event) => setStatus(event.target.value)}
-          className="h-12 rounded-2xl border-0 bg-zinc-100 px-4 text-sm outline-none dark:bg-zinc-900 md:w-48"
-        >
-          <option value="all">All status</option>
-          <option value="published">Published</option>
-          <option value="draft">Drafts</option>
-        </select>
+        <div className="md:w-48">
+          <Select value={status} onValueChange={setStatus}>
+            <SelectTrigger className="h-12 rounded-2xl border-0 bg-zinc-100 px-4 text-sm dark:bg-zinc-900">
+              <SelectValue placeholder="Select status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All status</SelectItem>
+              <SelectItem value="published">Published</SelectItem>
+              <SelectItem value="draft">Drafts</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </section>
 
       {loading ? (
@@ -101,7 +119,9 @@ export default function ArticlesPage() {
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
           <FileText className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
-          <p className="text-sm font-medium">No articles match these filters.</p>
+          <p className="text-sm font-medium">
+            No articles match these filters.
+          </p>
         </div>
       ) : viewMode === "card" ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -151,7 +171,12 @@ export default function ArticlesPage() {
 
                 <div className="flex items-center gap-1 shrink-0">
                   <Link href={`/articles/edit/${article._id}`}>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" title="Edit article">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-lg"
+                      title="Edit article"
+                    >
                       <Edit3 className="h-4 w-4" />
                     </Button>
                   </Link>
@@ -170,7 +195,7 @@ export default function ArticlesPage() {
           ))}
         </div>
       ) : (
-        <section className="admin-surface w-full rounded-[28px] sm:rounded-[32px] overflow-hidden">
+        <section className="admin-surface w-full rounded-[28px] sm:rounded-4xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="admin-table w-full min-w-190 text-left text-sm">
               <thead className="border-b border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/75 dark:bg-[#18181b]/60 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">

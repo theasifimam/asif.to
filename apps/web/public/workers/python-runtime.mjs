@@ -36,8 +36,25 @@ self.onmessage = async ({ data }) => {
   try {
     const pyodide = await runtime();
     self.postMessage({ type: "status", message: "Running Python..." });
-    await pyodide.loadPackagesFromImports(data.code);
-    await pyodide.runPythonAsync(data.code);
+    if (data.files) {
+      for (const [path, fileObj] of Object.entries(data.files)) {
+        if (!fileObj.code) continue;
+        const parts = path.split("/").filter(Boolean);
+        let currentPath = "";
+        for (let i = 0; i < parts.length - 1; i++) {
+          currentPath += "/" + parts[i];
+          try {
+            pyodide.FS.mkdir(currentPath);
+          } catch (e) {
+            // ignore if exists
+          }
+        }
+        pyodide.FS.writeFile(path, fileObj.code);
+      }
+    }
+    const codeToRun = data.code || "";
+    await pyodide.loadPackagesFromImports(codeToRun);
+    await pyodide.runPythonAsync(codeToRun);
     self.postMessage({ type: "result", stdout, stderr });
   } catch (error) {
     self.postMessage({ type: "error", error: error?.message || String(error) });

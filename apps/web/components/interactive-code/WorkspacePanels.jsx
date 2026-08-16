@@ -46,6 +46,7 @@ export function WorkspacePanels({ workspace }) {
       fontSize,
       fullscreen,
       explorerOpen,
+      consoleOpen,
       runtimeIssue,
       device,
       tests,
@@ -55,7 +56,7 @@ export function WorkspacePanels({ workspace }) {
       shareStatus,
       formatting,
     },
-    setters: { setPanel, setDevice, setCustomInput, setFontSize },
+    setters: { setPanel, setDevice, setCustomInput, setFontSize, setConsoleOpen },
     refs: { splitRef, outputRef, workspaceRef },
     computed: { isDark, consoleFirst },
     handlers: {
@@ -83,6 +84,9 @@ export function WorkspacePanels({ workspace }) {
   const handleRun = async () => {
     if (executionEnabled === false) return;
     if (isRunning) return;
+    if (consoleFirst) {
+      setConsoleOpen(true);
+    }
     if (runtimeAdapter) {
       setPanel("console");
       runtimeAdapter.run();
@@ -156,13 +160,19 @@ export function WorkspacePanels({ workspace }) {
     URL.revokeObjectURL(url);
   };
 
+  const isOutputPanelVisible = consoleFirst ? consoleOpen : true;
+
   return (
     <div
       ref={splitRef}
       className={`relative flex min-h-0 flex-1 flex-col transition-colors lg:grid ${
         isDark ? "bg-zinc-950" : "bg-zinc-100"
       }`}
-      style={{ gridTemplateColumns: `${split}% 8px minmax(0, 1fr)` }}
+      style={{
+        gridTemplateColumns: isOutputPanelVisible
+          ? `${split}% 8px minmax(0, 1fr)`
+          : "1fr",
+      }}
     >
       {/* Left Side: File Explorer + Code Editor */}
       <div
@@ -185,35 +195,36 @@ export function WorkspacePanels({ workspace }) {
           className={`${panel === "code" ? "block w-full" : "hidden"} h-full min-h-0 min-w-0 lg:block`}
         >
           <SandpackCodeEditor
-            showTabs
+            showTabs={false}
             showLineNumbers
-            wrapContent={false}
-            closableTabs={false}
+            wrapContent={true}
             style={{ height: "100%", fontSize }}
           />
         </div>
       </div>
 
       {/* Desktop Split Resize Bar */}
-      <button
-        type="button"
-        onPointerDown={(event) => startResize("horizontal", event)}
-        onPointerMove={moveResize}
-        onPointerUp={stopResize}
-        onPointerCancel={stopResize}
-        onLostPointerCapture={stopResize}
-        className={`group hidden touch-none cursor-col-resize items-center justify-center border-x transition hover:bg-blue-600 lg:flex ${
-          isDark ? "border-zinc-800 bg-zinc-900" : "border-zinc-300 bg-zinc-200"
-        }`}
-        aria-label="Resize editor and output panels"
-        title="Drag to resize panels"
-      >
-        <GripVertical
-          className={`h-5 w-5 group-hover:text-white ${
-            isDark ? "text-zinc-500" : "text-zinc-400"
+      {isOutputPanelVisible && (
+        <button
+          type="button"
+          onPointerDown={(event) => startResize("horizontal", event)}
+          onPointerMove={moveResize}
+          onPointerUp={stopResize}
+          onPointerCancel={stopResize}
+          onLostPointerCapture={stopResize}
+          className={`group hidden touch-none cursor-col-resize items-center justify-center border-x transition hover:bg-blue-600 lg:flex ${
+            isDark ? "border-zinc-800 bg-zinc-900" : "border-zinc-300 bg-zinc-200"
           }`}
-        />
-      </button>
+          aria-label="Resize editor and output panels"
+          title="Drag to resize panels"
+        >
+          <GripVertical
+            className={`h-5 w-5 group-hover:text-white ${
+              isDark ? "text-zinc-500" : "text-zinc-400"
+            }`}
+          />
+        </button>
+      )}
 
       {/* Right Side: Output (Preview & Console) - Takes full 100% width on smaller devices */}
       <div
@@ -224,8 +235,18 @@ export function WorkspacePanels({ workspace }) {
           panel === "preview" || panel === "console" || panel === "tests"
             ? "flex flex-col w-full"
             : "hidden"
-        } lg:flex lg:flex-col lg:border-l ${consoleFirst ? "" : "playground-output-split"}`}
-        style={{ "--preview-size": `${outputSplit}%` }}
+        } ${
+          isOutputPanelVisible
+            ? "lg:flex lg:flex-col lg:border-l"
+            : "lg:hidden"
+        } ${
+          !consoleFirst && consoleOpen ? "playground-output-split" : ""
+        }`}
+        style={
+          !consoleFirst && consoleOpen
+            ? { "--preview-size": `${outputSplit}%` }
+            : undefined
+        }
       >
         {consoleFirst && !runtimeAdapter && (
           <div
@@ -244,7 +265,7 @@ export function WorkspacePanels({ workspace }) {
           <div
             className={`${
               panel === "preview" ? "flex flex-1 w-full" : "hidden"
-            } relative min-h-0 overflow-hidden lg:block w-full`}
+            } relative min-h-0 overflow-hidden lg:flex lg:flex-col w-full h-full`}
           >
             {previewBusy && (
               <div
@@ -347,9 +368,29 @@ export function WorkspacePanels({ workspace }) {
                 />
               </div>
             )}
+
+            {/* Quick Open Console Button when console is collapsed on desktop */}
+            {!consoleOpen && (
+              <div className="hidden lg:block absolute bottom-2.5 right-2.5 z-30">
+                <button
+                  type="button"
+                  onClick={() => setConsoleOpen(true)}
+                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold shadow-lg backdrop-blur transition-all active:scale-95 cursor-pointer ${
+                    isDark
+                      ? "bg-zinc-900/90 text-zinc-300 hover:bg-zinc-800 hover:text-white border border-zinc-700/80"
+                      : "bg-white/95 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 border border-zinc-300/80 shadow-zinc-400/20"
+                  }`}
+                  title="Open console"
+                  aria-label="Open console"
+                >
+                  <Terminal className="h-3.5 w-3.5 text-amber-500" />
+                  <span>Console</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
-        {!consoleFirst && (
+        {!consoleFirst && consoleOpen && (
           <button
             type="button"
             onPointerDown={(event) => startResize("vertical", event)}
@@ -375,12 +416,17 @@ export function WorkspacePanels({ workspace }) {
         <div
           className={`${
             panel === "console" ? "flex flex-1 w-full" : "hidden"
-          } min-h-0 overflow-hidden lg:block w-full h-full`}
+          } min-h-0 overflow-hidden ${
+            consoleOpen ? "lg:block" : "lg:hidden"
+          } w-full h-full`}
         >
           {runtimeAdapter ? (
             runtimeAdapter.output
           ) : (
-            <BetterConsole standalone={consoleFirst} />
+            <BetterConsole
+              standalone={consoleFirst}
+              onCollapse={() => setConsoleOpen(false)}
+            />
           )}
         </div>
         <div

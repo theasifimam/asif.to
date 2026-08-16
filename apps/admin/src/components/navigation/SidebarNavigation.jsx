@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import MessageNavBadge from "./MessageNavBadge";
 
 export default function SidebarNavigation({
   isCollapsed,
@@ -49,8 +50,12 @@ export default function SidebarNavigation({
                 <Link
                   key={item.href}
                   href={targetHref}
-                  title={isCollapsed ? `${item.name}${item.description ? ` — ${item.description}` : ""}` : ""}
-                  className={`group flex items-center rounded-2xl transition-all duration-200 ${
+                  title={
+                    isCollapsed
+                      ? `${item.name}${item.description ? ` — ${item.description}` : ""}`
+                      : ""
+                  }
+                  className={`group relative flex items-center rounded-2xl transition-all duration-200 ${
                     isCollapsed
                       ? "h-11 w-11 justify-center p-0 mx-auto"
                       : "px-3 py-2.5 justify-start"
@@ -68,16 +73,15 @@ export default function SidebarNavigation({
                           : "text-zinc-500 group-hover:text-zinc-900 dark:text-zinc-400 dark:group-hover:text-white"
                       }`}
                     >
-                      <item.icon
-                        size={18}
-                        strokeWidth={isActive ? 2.5 : 2}
-                      />
+                      <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
                     </div>
                     {!isCollapsed && (
                       <div className="flex flex-col min-w-0 leading-tight">
                         <span
                           className={`truncate text-[13px] tracking-tight font-bold ${
-                            isActive ? "text-white" : "text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-950 dark:group-hover:text-white"
+                            isActive
+                              ? "text-white"
+                              : "text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-950 dark:group-hover:text-white"
                           }`}
                         >
                           {item.name}
@@ -85,7 +89,9 @@ export default function SidebarNavigation({
                         {item.description && (
                           <span
                             className={`truncate text-[10px] tracking-tight mt-0.5 ${
-                              isActive ? "text-blue-100/80 font-medium" : "text-zinc-400 dark:text-zinc-500 font-normal"
+                              isActive
+                                ? "text-blue-100/80 font-medium dark:text-blue-200/70"
+                                : "text-zinc-400 dark:text-zinc-500 font-normal"
                             }`}
                           >
                             {item.description}
@@ -94,6 +100,7 @@ export default function SidebarNavigation({
                       </div>
                     )}
                   </div>
+                  {item.href === "/messages" && <MessageNavBadge compact={isCollapsed} />}
                 </Link>
               );
             })}

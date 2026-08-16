@@ -21,6 +21,7 @@ import AdminFormShell, {
   AdminFormLoading,
   formSectionClass,
 } from "@/components/forms/AdminFormShell";
+import DiscussButton from "@/components/messaging/DiscussButton";
 import FollowUpQuestionPicker from "@/components/editor/FollowUpQuestionPicker";
 
 const initialForm = {
@@ -149,6 +150,7 @@ export default function InterviewQuestionForm({
       }
       actions={
         <div className="flex items-center gap-2 w-full xs:w-auto">
+          {questionId && <DiscussButton entityType="interview_question" entityId={questionId} />}
           <Button
             variant="outline"
             onClick={() => setPreview((value) => !value)}

@@ -37,7 +37,7 @@ function Workspace(props) {
           : "border-zinc-200/90 bg-white text-zinc-900 shadow-zinc-300/40"
       } ${
         fullscreen
-          ? "fixed inset-0 z-100 h-screen rounded-none"
+          ? "fixed inset-0 z-100 h-dvh rounded-none"
           : props.fillViewport
             ? "h-[calc(100dvh-130px)] min-h-120 rounded-2xl sm:rounded-3xl"
             : "min-h-115 h-[68vh] max-h-175 lg:h-130 rounded-2xl sm:rounded-3xl"
@@ -73,9 +73,12 @@ function Workspace(props) {
           workspace.setters.setSplit(50);
           workspace.setters.setOutputSplit(68);
           setExplorerOpen(true);
+          workspace.setters.setConsoleOpen(true);
         }}
         explorerOpen={explorerOpen}
         onToggleExplorer={() => setExplorerOpen((value) => !value)}
+        consoleOpen={workspace.state.consoleOpen}
+        onToggleConsole={workspace.handlers.toggleConsole}
         onRuntimeIssue={setRuntimeIssue}
         onFormat={formatActive}
         onReset={reset}
@@ -94,7 +97,8 @@ function Workspace(props) {
           aria-live="polite"
         >
           <span aria-hidden="true">⚠</span>
-          Code execution is temporarily disabled. You can still edit and copy your code.
+          Code execution is temporarily disabled. You can still edit and copy
+          your code.
         </div>
       )}
 
@@ -133,7 +137,8 @@ function Workspace(props) {
               Reset starter code?
             </h2>
             <p className="mt-2 text-xs font-medium leading-relaxed opacity-75">
-              Your current edits will be discarded and reverted back to the initial starter template.
+              Your current edits will be discarded and reverted back to the
+              initial starter template.
             </p>
             <div className="mt-6 flex justify-end gap-2">
               <button

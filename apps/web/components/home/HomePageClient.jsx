@@ -18,7 +18,7 @@ import {
   Layers,
   MessageSquareText,
   Code2,
-  ArrowRight,
+  HelpCircle,
 } from "lucide-react";
 
 export default function HomePageClient({ courses = [] }) {
@@ -42,9 +42,8 @@ export default function HomePageClient({ courses = [] }) {
       <Header />
 
       <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 pt-24 sm:pt-28 flex flex-col gap-8 sm:gap-12 min-w-0">
-        
         {/* Serene Editorial Hero Section */}
-        <section className="relative overflow-hidden rounded-3xl sm:rounded-[2.5rem] bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white p-6 sm:p-12 shadow-xl shadow-blue-500/10 border border-blue-500/20 min-w-0">
+        <section className="relative overflow-hidden rounded-3xl sm:rounded-[2.5rem] bg-linear-to-br from-blue-600 via-blue-700 to-indigo-800 text-white p-6 sm:p-12 shadow-xl shadow-blue-500/10 border border-blue-500/20 min-w-0">
           <div className="absolute -right-16 -bottom-16 w-80 h-80 rounded-full bg-white/10 blur-3xl pointer-events-none" />
           <div className="absolute top-4 right-20 w-40 h-40 rounded-full bg-blue-400/20 blur-2xl pointer-events-none" />
 
@@ -131,7 +130,7 @@ export default function HomePageClient({ courses = [] }) {
           </div>
         </section>
 
-        {/* 4 Feature Bento Cards (Airy & Minimalist) */}
+        {/* 4 Feature Bento Cards */}
         <section
           aria-labelledby="explore-learning"
           className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-4 min-w-0"
@@ -354,6 +353,30 @@ export default function HomePageClient({ courses = [] }) {
 
         {/* Swipeable Mobile Revision Deck */}
         <RevisionFlashcards selectedTech={selectedTech} />
+
+        {/* Practice Quiz Callout Banner */}
+        <section className="flex flex-col sm:flex-row items-center justify-between p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] bg-linear-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border border-blue-500/15 shadow-xs overflow-hidden min-w-0 gap-4">
+          <div className="flex items-center gap-3.5 min-w-0 w-full sm:w-auto">
+            <div className="p-3 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/30 shrink-0">
+              <HelpCircle className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-extrabold text-sm sm:text-base text-foreground truncate">
+                Ready to test your knowledge?
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+                Take quick 5-minute interactive quizzes on React, Next.js & Express
+              </p>
+            </div>
+          </div>
+
+          <Link
+            href="/quiz"
+            className="w-full sm:w-auto h-11 px-6 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold text-center inline-flex items-center justify-center transition-all shadow-md shadow-blue-500/25 active:scale-95 shrink-0"
+          >
+            Start Quiz Mode
+          </Link>
+        </section>
       </main>
 
       <Footer />

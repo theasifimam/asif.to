@@ -8,6 +8,7 @@ import UserInvitation from "../models/UserInvitation.js";
 import { roleRank } from "../utils/permissions.js";
 import { writeAudit } from "../utils/audit.js";
 import { sendUserInvitationEmail } from "../services/email.service.js";
+import { logActivity } from "../services/activity.service.js";
 
 const pageOptions = (query, defaultLimit = 20) => {
   const page = Math.max(1, Number.parseInt(query.page, 10) || 1);
@@ -205,6 +206,7 @@ export const moderateUser = async (req, res) => {
       reason: target.statusReason,
       expiresAt: target.suspensionExpiresAt,
     });
+    await logActivity({ actor: req.user, action: `user.${status}`, entityType: "user", entityId: target._id, entityTitle: target.fullName, description: status === "active" ? "reactivated" : `${status}`, severity: status === "active" ? "important" : "critical", targetUserId: target._id, before: { status: previous }, after: { status }, url: `/users/${target._id}` });
     res.json({
       success: true,
       message: `Account marked ${status}.`,
@@ -252,6 +254,7 @@ export const changeManagedRole = async (req, res) => {
       previousRole: previous,
       role: target.role,
     });
+    await logActivity({ actor: req.user, action: "user.role_changed", entityType: "user", entityId: target._id, entityTitle: target.fullName, description: "changed role for", severity: "critical", targetUserId: target._id, before: { role: previous }, after: { role: target.role }, url: `/users/${target._id}` });
     res.json({
       success: true,
       message: `Role changed to ${target.role}.`,
@@ -295,6 +298,7 @@ export const softDeleteUser = async (req, res) => {
   target.sessionsRevokedAt = new Date();
   await target.save({ validateBeforeSave: false });
   await writeAudit(req, "user.soft_deleted", target._id, { reason });
+  await logActivity({ actor: req.user, action: "user.deactivated", entityType: "user", entityId: target._id, entityTitle: target.fullName, description: "deactivated", severity: "critical", targetUserId: target._id, after: { status: "deactivated" }, url: `/users/${target._id}` });
   res.json({
     success: true,
     message: "Account deactivated. Published content was preserved.",
@@ -421,6 +425,7 @@ export const createInvitation = async (req, res) => {
     email,
     role,
   });
+  await logActivity({ actor: req.user, action: "invitation.sent", entityType: "invitation", entityId: invitation._id, entityTitle: role, description: `invited a new ${role}`, severity: "important", metadata: { role }, url: "/users/invitations" });
   res.status(201).json({
     success: true,
     message: delivered

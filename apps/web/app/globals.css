@@ -255,6 +255,8 @@ pre.hljs code,
   border: none !important;
   box-shadow: none !important;
   display: block !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
 }
 
 .topic-markdown .wmde-markdown a {

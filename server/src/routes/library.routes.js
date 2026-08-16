@@ -1,0 +1,13 @@
+import { Router } from "express";
+import { protect } from "../middlewares/auth.middleware.js";
+import { getMyLibrary, createEntry, updateEntry, deleteEntry, createBookmark, updateBookmark, deleteBookmark, createCollection, updateCollection, deleteCollection, getPublicEntry, getPublicProfileEntries, getPublicIndex } from "../controllers/library.controller.js";
+const router = Router();
+router.get("/public-index", getPublicIndex);
+router.get("/public/:username/:slug", getPublicEntry);
+router.get("/public/:username", getPublicProfileEntries);
+router.use(protect);
+router.get("/me", getMyLibrary);
+router.post("/entries", createEntry); router.patch("/entries/:id", updateEntry); router.delete("/entries/:id", deleteEntry);
+router.post("/bookmarks", createBookmark); router.patch("/bookmarks/:id", updateBookmark); router.delete("/bookmarks/:id", deleteBookmark);
+router.post("/collections", createCollection); router.patch("/collections/:id", updateCollection); router.delete("/collections/:id", deleteCollection);
+export default router;

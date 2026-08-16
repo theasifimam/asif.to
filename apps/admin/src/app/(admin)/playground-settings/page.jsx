@@ -200,6 +200,18 @@ export default function PlaygroundSettingsPage() {
                     }
                   />
                 </label>
+                <div className="md:col-span-4 mt-1">
+                  <label className="flex flex-col gap-2 text-xs font-semibold cursor-pointer w-full">
+                    <span className="text-zinc-500 dark:text-zinc-400">Initial Code Override</span>
+                    <textarea
+                      className="w-full rounded-xl border border-zinc-200 bg-white p-3 text-xs text-zinc-900 placeholder:text-zinc-400 outline-none focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500/10 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500 font-mono"
+                      rows="3"
+                      value={item.initialCode || ""}
+                      onChange={(e) => patch("initialCode", e.target.value)}
+                      placeholder={`Leave blank to use default template for ${title(id)}`}
+                    />
+                  </label>
+                </div>
               </div>
             );
           })}

@@ -23,32 +23,33 @@ export function AdminPageHeader({
   description,
   back,
   actions,
+  className,
 }) {
   return (
-    <header className="flex min-w-0 flex-col justify-between gap-5 md:flex-row md:items-end">
-      <div className="min-w-0 flex-1">
+    <header className={cn("flex min-w-0 flex-col gap-4", className)}>
+      <div className="min-w-0 w-full">
         {back}
         {eyebrow && (
           <p
             className={cn(
               "text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400",
-              back && "mt-4",
+              back && "mt-3.5",
             )}
           >
             {eyebrow}
           </p>
         )}
-        <h1 className="mt-1.5 wrap-break-word font-outfit text-3xl font-black tracking-[-0.035em] text-zinc-950 dark:text-white sm:text-4xl">
+        <h1 className="mt-1.5 wrap-break-word font-outfit text-2xl font-black tracking-[-0.035em] text-zinc-950 dark:text-white sm:text-3xl lg:text-4xl">
           {title}
         </h1>
         {description && (
-          <p className="mt-2 max-w-2xl text-xs sm:text-sm font-medium leading-relaxed text-zinc-500 dark:text-zinc-400">
+          <p className="mt-2 max-w-3xl text-xs sm:text-sm font-medium leading-relaxed text-zinc-500 dark:text-zinc-400">
             {description}
           </p>
         )}
       </div>
       {actions && (
-        <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2.5 shrink-0">
+        <div className="flex flex-wrap items-stretch sm:items-center justify-start sm:justify-end gap-2.5 w-full *:grow sm:*:grow-0">
           {actions}
         </div>
       )}

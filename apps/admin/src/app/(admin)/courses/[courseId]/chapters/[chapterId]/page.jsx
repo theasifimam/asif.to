@@ -27,6 +27,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { chaptersApi, coursesApi } from "@/lib/api";
 import AdminFormShell, { AdminFormLoading, formSectionClass } from "@/components/forms/AdminFormShell";
+import DiscussButton from "@/components/messaging/DiscussButton";
 
 const initialForm = {
   title: "",
@@ -215,6 +216,7 @@ export default function ChapterFormPage() {
       }
       actions={
         <>
+          {!isNew && <DiscussButton entityType="chapter" entityId={chapterId} />}
           {!isNew && form.status === "published" && publicUrl && (
             <Button variant="outline" asChild className="flex-1 sm:flex-initial">
               <a href={publicUrl} target="_blank" rel="noreferrer">

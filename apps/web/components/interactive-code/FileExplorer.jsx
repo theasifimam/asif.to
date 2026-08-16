@@ -60,6 +60,47 @@ function FileExplorer({ isDark = true, onFileSelect }) {
     setPathValue("");
     setError("");
   };
+  const handleDuplicate = (path) => {
+    const parts = path.split(".");
+    const ext = parts.length > 1 ? `.${parts.pop()}` : "";
+    const base = parts.join(".");
+    let newPath = `${base}-copy${ext}`;
+    let counter = 1;
+    while (sandpack.files[newPath]) {
+      newPath = `${base}-copy-${counter}${ext}`;
+      counter++;
+    }
+    sandpack.addFile(newPath, sandpack.files[path]?.code || "", false);
+    requestAnimationFrame(() => sandpack.setActiveFile(newPath));
+    onFileSelect?.();
+  };
+  const handleCopyPath = (path) => {
+    navigator.clipboard.writeText(path);
+  };
+  const handleSetEntryPoint = (path) => {
+    // Basic implementation: set as active file, which many environments use as the focus.
+    // For advanced runtimes, this could be synced to a global context.
+    sandpack.setActiveFile(path);
+    onFileSelect?.();
+  };
+  const handleMove = (sourcePath, targetFolder) => {
+    if (!sourcePath || !targetFolder) return;
+    if (targetFolder !== "/" && sourcePath.startsWith(`${targetFolder}/`)) return;
+    const name = sourcePath.split("/").filter(Boolean).pop();
+    const newPath = `${targetFolder === "/" ? "" : targetFolder}/${name}`;
+    if (sourcePath === newPath) return;
+    if (sandpack.files[newPath]) {
+      setError(`Cannot move: A file named ${name} already exists in that folder.`);
+      return;
+    }
+    const sourceCode = sandpack.files[sourcePath]?.code || "";
+    sandpack.addFile(newPath, sourceCode, false);
+    sandpack.deleteFile(sourcePath, false);
+    if (sandpack.activeFile === sourcePath) {
+      requestAnimationFrame(() => sandpack.setActiveFile(newPath));
+      onFileSelect?.();
+    }
+  };
   const savePath = () => {
     const nextPath = `/${pathValue.trim().replace(/^\/+/, "")}`;
     if (nextPath === "/" || nextPath.endsWith("/"))
@@ -247,7 +288,15 @@ function FileExplorer({ isDark = true, onFileSelect }) {
           )}
         </div>
       )}
-      <div className="min-h-0 flex-1 overflow-y-auto p-1.5 space-y-0.5">
+      <div 
+        className="min-h-0 flex-1 overflow-y-auto p-1.5 space-y-0.5"
+        onDragOver={(e) => { e.preventDefault(); }}
+        onDrop={(e) => {
+          e.preventDefault();
+          const source = e.dataTransfer.getData("text/plain");
+          if (source) handleMove(source, "/");
+        }}
+      >
         {entries.map((entry) => {
           const depth = entry.path.split("/").filter(Boolean).length - 1;
           const name = entry.path.split("/").filter(Boolean).pop();
@@ -262,6 +311,13 @@ function FileExplorer({ isDark = true, onFileSelect }) {
                   isDark ? "hover:bg-zinc-800/70" : "hover:bg-zinc-100"
                 }`}
                 style={{ paddingLeft: `${depth * 12 + 4}px` }}
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const source = e.dataTransfer.getData("text/plain");
+                  if (source) handleMove(source, entry.path);
+                }}
               >
                 <button
                   type="button"
@@ -307,6 +363,25 @@ function FileExplorer({ isDark = true, onFileSelect }) {
                   </button>
                   <button
                     type="button"
+                    onClick={() => {
+                      setEditMode({ type: "folder" });
+                      setPathValue(`${entry.path}/`);
+                      setError("");
+                      setExpandedFolders(
+                        (current) => new Set([...current, entry.path]),
+                      );
+                    }}
+                    className={`rounded p-1 transition cursor-pointer ${
+                      isDark
+                        ? "text-zinc-400 hover:bg-zinc-700 hover:text-white"
+                        : "text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900"
+                    }`}
+                    title={`Create folder in ${entry.path}`}
+                  >
+                    <FolderPlus className="h-3 w-3" />
+                  </button>
+                  <button
+                    type="button"
                     onClick={() =>
                       setDeleteTarget({ type: "folder", path: entry.path })
                     }
@@ -321,8 +396,10 @@ function FileExplorer({ isDark = true, onFileSelect }) {
           }
           const isActive = sandpack.activeFile === entry.path;
           return (
-            <div
+              <div
               key={entry.path}
+              draggable
+              onDragStart={(e) => { e.dataTransfer.setData("text/plain", entry.path); }}
               className={`group flex items-center gap-1 pr-1 rounded-lg transition-colors ${
                 isActive
                   ? isDark
@@ -356,30 +433,74 @@ function FileExplorer({ isDark = true, onFileSelect }) {
                 </span>
               </button>
               <div className="hidden shrink-0 items-center group-hover:flex group-focus-within:flex">
-                <button
-                  type="button"
-                  onClick={() => beginRename(entry.path)}
-                  className={`rounded p-1 transition cursor-pointer ${
-                    isDark
-                      ? "text-zinc-400 hover:bg-zinc-700 hover:text-white"
-                      : "text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900"
-                  }`}
-                  title={`Rename ${entry.path}`}
-                >
-                  <Pencil className="h-3 w-3" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    files.length === 1
-                      ? setError("A project must keep at least one file.")
-                      : setDeleteTarget({ type: "file", path: entry.path })
-                  }
-                  className="rounded p-1 text-zinc-400 hover:bg-red-500/20 hover:text-red-500 cursor-pointer"
-                  title={`Delete ${entry.path}`}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className={`rounded p-1 transition cursor-pointer ${
+                        isDark
+                          ? "text-zinc-400 hover:bg-zinc-700 hover:text-white"
+                          : "text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900"
+                      }`}
+                      title={`Options for ${entry.path}`}
+                    >
+                      <MoreHorizontal className="h-3.5 w-3.5" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className={`w-48 p-1 shadow-2xl backdrop-blur-md rounded-xl ${
+                      isDark
+                        ? "!bg-[#18181b] !border-zinc-800 !text-zinc-100 shadow-black/80"
+                        : "!bg-white !border-zinc-200 !text-zinc-900 shadow-zinc-400/40"
+                    }`}
+                  >
+                    <DropdownMenuItem
+                      onClick={() => handleSetEntryPoint(entry.path)}
+                      className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold transition ${
+                        isDark ? "hover:!bg-zinc-800 focus:!bg-zinc-800" : "hover:!bg-zinc-100 focus:!bg-zinc-100"
+                      }`}
+                    >
+                      <Play className="h-3.5 w-3.5" /> Set as Main / Run
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className={isDark ? "!bg-zinc-800" : "!bg-zinc-200"} />
+                    <DropdownMenuItem
+                      onClick={() => beginRename(entry.path)}
+                      className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold transition ${
+                        isDark ? "hover:!bg-zinc-800 focus:!bg-zinc-800" : "hover:!bg-zinc-100 focus:!bg-zinc-100"
+                      }`}
+                    >
+                      <Pencil className="h-3.5 w-3.5" /> Rename
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleDuplicate(entry.path)}
+                      className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold transition ${
+                        isDark ? "hover:!bg-zinc-800 focus:!bg-zinc-800" : "hover:!bg-zinc-100 focus:!bg-zinc-100"
+                      }`}
+                    >
+                      <Copy className="h-3.5 w-3.5" /> Duplicate
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleCopyPath(entry.path)}
+                      className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold transition ${
+                        isDark ? "hover:!bg-zinc-800 focus:!bg-zinc-800" : "hover:!bg-zinc-100 focus:!bg-zinc-100"
+                      }`}
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" /> Copy Path
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className={isDark ? "!bg-zinc-800" : "!bg-zinc-200"} />
+                    <DropdownMenuItem
+                      onClick={() =>
+                        files.length === 1
+                          ? setError("A project must keep at least one file.")
+                          : setDeleteTarget({ type: "file", path: entry.path })
+                      }
+                      className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold text-red-500 hover:!bg-red-500/10 focus:!bg-red-500/10 focus:!text-red-500 transition"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           );

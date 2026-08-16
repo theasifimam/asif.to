@@ -7,6 +7,7 @@ import {
   normalizePermissions,
   PERMISSION_CATALOG,
 } from "../utils/permissions.js";
+import { logActivity } from "../services/activity.service.js";
 
 const editableRoles = ["reader", "author", "editor", "admin"];
 
@@ -53,6 +54,7 @@ export const updatePermissionMatrix = async (req, res) => {
       ip: req.ip,
       userAgent: req.get("user-agent")?.slice(0, 500),
     });
+    await logActivity({ actor: req.user, action: "role_permissions.updated", entityType: "role_permission", entityId: req.user._id, entityTitle: "role permission matrix", description: "changed the", severity: "critical", after: { roles: editableRoles }, url: "/users/roles" });
     res.json({ success: true, message: "Role permissions updated.", data: { roles: await getRolePermissions() } });
   } catch (error) {
     console.error("[RBAC] Unable to update permissions:", error.message);

@@ -172,6 +172,19 @@ export default async function sitemap() {
     }
   }
 
+  // Public library entries only. Private and unlisted knowledge is never requested here.
+  const publicLibrary = await fetchApi("/library/public-index");
+  if (Array.isArray(publicLibrary)) {
+    for (const entry of publicLibrary) {
+      if (!entry.username || !entry.slug) continue;
+      const url = `${siteUrl}/library/${entry.username}/${entry.slug}`;
+      if (!existingUrls.has(url)) {
+        existingUrls.add(url);
+        dynamicEntries.push({ url, lastModified: entry.updatedAt ? new Date(entry.updatedAt) : now, changeFrequency: "monthly", priority: 0.6 });
+      }
+    }
+  }
+
   const { TECHNOLOGIES } = await import("@/lib/playground/config");
   const { PRACTICE_PROBLEMS } = await import("@/lib/playground/problems");
   const practiceEntries = [

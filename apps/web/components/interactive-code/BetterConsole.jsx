@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { PanelRightClose, Trash2 } from "lucide-react";
 import { useSandpackConsole } from "@codesandbox/sandpack-react";
 
 function printable(value) {
@@ -12,7 +12,7 @@ function printable(value) {
   }
 }
 
-export default function BetterConsole({ standalone = false }) {
+export default function BetterConsole({ standalone = false, onCollapse }) {
   const { logs, reset } = useSandpackConsole({
     resetOnPreviewRestart: true,
     showSyntaxError: true,
@@ -24,15 +24,28 @@ export default function BetterConsole({ standalone = false }) {
     >
       <header className="flex h-10 w-full shrink-0 items-center justify-between border-b border-zinc-800 px-3">
         <h3 className="text-xs font-black uppercase tracking-wide">Console</h3>
-        <button
-          type="button"
-          onClick={reset}
-          className="rounded p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-white"
-          aria-label="Clear console"
-          title="Clear console"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={reset}
+            className="rounded p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-white cursor-pointer"
+            aria-label="Clear console"
+            title="Clear console"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+          {onCollapse && (
+            <button
+              type="button"
+              onClick={onCollapse}
+              className="rounded p-1.5 text-zinc-400 hover:bg-zinc-800 hover:text-white cursor-pointer"
+              aria-label="Collapse console"
+              title="Collapse console"
+            >
+              <PanelRightClose className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
       </header>
       <div
         className="min-h-0 w-full flex-1 overflow-auto p-3 font-mono text-xs"

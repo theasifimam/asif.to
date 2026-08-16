@@ -1,4 +1,5 @@
 import express from "express";
+import { createServer } from "http";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import multer from "multer";
@@ -22,6 +23,11 @@ import analyticsRoutes from "./routes/analytics.routes.js";
 import searchRoutes from "./routes/search.routes.js";
 import seoSettingRoutes from "./routes/seoSetting.routes.js";
 import playgroundSettingRoutes from "./routes/playgroundSetting.routes.js";
+import libraryRoutes from "./routes/library.routes.js";
+import activityRoutes from "./routes/activity.routes.js";
+import messagingRoutes from "./routes/messaging.routes.js";
+import { initializeMessagingSocket } from "./realtime/messaging.socket.js";
+import { ensureMessagingBootstrap } from "./services/messagingBootstrap.service.js";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -36,22 +42,23 @@ dotenv.config({
 });
 
 const app = express();
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://192.168.1.11:3000",
+  "http://192.168.1.11:3001",
+  "https://asif.to",
+  "https://www.asif.to",
+  "https://admin.asif.to",
+  "https://api.asif.to",
+  process.env.ADMIN_URL || "http://localhost:3001",
+  process.env.WEB_URL || "http://localhost:3000",
+];
 
 // ─── Middleware ────────────────────────────────────────────────────────────
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "http://192.168.1.11:3000",
-      "http://192.168.1.11:3001",
-      "https://asif.to",
-      "https://www.asif.to",
-      "https://admin.asif.to",
-      "https://api.asif.to",
-      process.env.ADMIN_URL || "http://localhost:3001",
-      process.env.WEB_URL || "http://localhost:3000",
-    ],
+    origin: allowedOrigins,
     credentials: true,
   }),
 );
@@ -93,15 +100,21 @@ app.use("/api/v1/analytics", analyticsRoutes);
 app.use("/api/v1/search", searchRoutes);
 app.use("/api/v1/seo-settings", seoSettingRoutes);
 app.use("/api/v1/playground-settings", playgroundSettingRoutes);
+app.use("/api/v1/library", libraryRoutes);
+app.use("/api/v1/activity", activityRoutes);
+app.use("/api/v1/messaging", messagingRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((error, _req, res, next) => {
   if (error instanceof multer.MulterError) {
     const isTooLarge = error.code === "LIMIT_FILE_SIZE";
+    const isMessageAttachment = error.field === "files";
     return res.status(isTooLarge ? 413 : 400).json({
       success: false,
       code: error.code,
-      message: isTooLarge
+      message: isTooLarge && isMessageAttachment
+        ? "Message attachments can be up to 10 MB each."
+        : isTooLarge
         ? "The selected image is too large. Avatars support up to 15 MB and article images up to 25 MB before compression."
         : "The image upload could not be completed.",
     });
@@ -116,6 +129,9 @@ app.use((error, _req, res, next) => {
           : "The image could not be processed. Try another JPG, PNG, WebP, or GIF file.",
     });
   }
+  if (["INVALID_ATTACHMENT_TYPE", "INVALID_ATTACHMENT_CONTENT"].includes(error.code)) {
+    return res.status(400).json({ success: false, code: error.code, message: error.message || "The attachment is not allowed." });
+  }
   return next(error);
 });
 
@@ -129,8 +145,11 @@ app.use((req, res) => {
 const startServer = async () => {
   try {
     await connectDB();
+    await ensureMessagingBootstrap();
     const PORT = parseInt(process.env.PORT || "5000", 10);
-    app.listen(PORT, () => {
+    const httpServer = createServer(app);
+    initializeMessagingSocket(httpServer, allowedOrigins);
+    httpServer.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
   } catch (error) {
