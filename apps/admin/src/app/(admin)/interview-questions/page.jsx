@@ -225,28 +225,28 @@ export default function InterviewQuestionsPage() {
             {questions.map((item) => (
               <div
                 key={item._id}
-                className="group flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs transition-all hover:border-blue-500/50 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950"
+                className="group flex min-w-0 flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all hover:border-blue-500/50 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950"
               >
-                <div className="space-y-3">
+                <div className="min-w-0 space-y-3">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300 border border-orange-500/20">
+                    <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                      <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300 border border-orange-500/20 shrink-0">
                         {item.category?.name || "No Category"}
                       </span>
                       {item.course?.title && (
-                        <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                        <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 truncate max-w-full inline-block">
                           {item.course.title}
                         </span>
                       )}
-                      <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
+                      <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 shrink-0">
                         {item.difficulty}
                       </span>
                     </div>
                   </div>
 
-                  <div>
+                  <div className="min-w-0">
                     <h3
-                      className="font-bold text-zinc-900 dark:text-white line-clamp-3 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      className="font-bold text-zinc-900 dark:text-white line-clamp-3 wrap-break-word cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                       onClick={() => setPreview(item)}
                     >
                       {item.question}

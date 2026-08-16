@@ -122,6 +122,19 @@ export default function BottomNav() {
           <span className="text-xs font-bold tracking-tight">Home</span>
         </Link>
 
+        <Link
+          href="/library"
+          onClick={() => setIsMenuOpen(false)}
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full transition-all duration-300 ${
+            pathname.startsWith("/library") && !isMenuOpen
+              ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 scale-105"
+              : "text-zinc-500 dark:text-zinc-400 hover:text-foreground active:scale-95"
+          }`}
+        >
+          <BookOpen className="w-4 h-4" />
+          <span className="text-xs font-bold tracking-tight">Library</span>
+        </Link>
+
         {/* Profile Tab */}
         <Link
           href={profilePath || "/"}

@@ -10,6 +10,8 @@ import {
   Minimize2,
   PanelLeftClose,
   PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
   Play,
   RotateCcw,
   ShieldCheck,
@@ -60,10 +62,10 @@ function BrowserRuntimeWorkspace({
   const [status, setStatus] = useState("idle");
   const [statusText, setStatusText] = useState("");
   const [progress, setProgress] = useState(null);
-  const [saveStatus, setSaveStatus] = useState("Saved");
   const [javaMounted, setJavaMounted] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [explorerOpen, setExplorerOpen] = useState(true);
+  const [consoleOpen, setConsoleOpen] = useState(true);
   const workspaceRef = useRef(null);
   const workerRef = useRef(null);
   const javaRef = useRef(null);
@@ -77,26 +79,12 @@ function BrowserRuntimeWorkspace({
     config.file,
   );
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const saved = localStorage.getItem(key);
-      if (saved != null) sandpack.updateFile(config.file, saved);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [config.file, key, sandpack]);
-  useEffect(() => {
-    clearTimeout(saveRef.current);
-    saveRef.current = setTimeout(() => {
-      localStorage.setItem(key, source);
-      setSaveStatus("Saved");
-    }, 600);
-    return () => clearTimeout(saveRef.current);
-  }, [key, source]);
+
 
   const finish = useCallback((message) => {
     if (message.type === "ready") {
       javaReadyRef.current = true;
-      if (pendingJavaRef.current && javaRef.current?.contentWindow)
+      if (pendingJavaRef.current != null && javaRef.current?.contentWindow)
         javaRef.current.contentWindow.postMessage(
           { type: "run", code: pendingJavaRef.current },
           "*",
@@ -150,6 +138,7 @@ function BrowserRuntimeWorkspace({
 
   const run = useCallback(() => {
     if (!executionEnabled) return;
+    setConsoleOpen(true);
     clearTimeout(watchdogRef.current);
     setOutput("");
     setError("");
@@ -177,13 +166,23 @@ function BrowserRuntimeWorkspace({
         setJavaMounted(true);
       } else if (javaReadyRef.current && javaRef.current?.contentWindow) {
         javaRef.current.contentWindow.postMessage(
-          { type: "run", code: source },
+          { type: "run", code: source, files: sandpack.files, entry: activeFile },
           "*",
         );
       }
       return;
     }
-    ensureWorker().postMessage({ type: "run", language, code: source });
+    const payload = { 
+      type: "run", 
+      language, 
+      code: source,
+      files: sandpack.files,
+      entry: activeFile
+    };
+    if (["c", "cpp"].includes(language)) {
+      payload.input = window.prompt("Program input (optional):") || "";
+    }
+    ensureWorker().postMessage(payload);
   }, [
     config.label,
     config.loading,
@@ -192,14 +191,13 @@ function BrowserRuntimeWorkspace({
     javaMounted,
     language,
     source,
+    sandpack.files,
+    activeFile
   ]);
 
   useEffect(() => {
     const onMessage = (event) => {
-      if (
-        event.source === javaRef.current?.contentWindow &&
-        event.data?.source === "asif-java-runtime"
-      )
+      if (event.data?.source === "asif-java-runtime")
         finish(event.data);
     };
     window.addEventListener("message", onMessage);
@@ -238,15 +236,10 @@ function BrowserRuntimeWorkspace({
         event.preventDefault();
         run();
       }
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
-        event.preventDefault();
-        localStorage.setItem(key, source);
-        setSaveStatus("Saved");
-      }
     };
     window.addEventListener("keydown", shortcut);
     return () => window.removeEventListener("keydown", shortcut);
-  }, [key, run, source]);
+  }, [run]);
 
   const runtimeOutput = (
     <section
@@ -379,12 +372,6 @@ function BrowserRuntimeWorkspace({
           )}
         </div>
         <div className="flex items-center gap-2">
-          <span
-            className="hidden text-[11px] text-zinc-500 sm:inline"
-            aria-live="polite"
-          >
-            {saveStatus}
-          </span>
           <button
             type="button"
             onClick={toggleFullscreen}
@@ -398,6 +385,19 @@ function BrowserRuntimeWorkspace({
               <Minimize2 className="h-4 w-4" />
             ) : (
               <Maximize2 className="h-4 w-4" />
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => setConsoleOpen((v) => !v)}
+            className="rounded-full bg-zinc-800 p-2 text-zinc-300 hover:bg-zinc-700 cursor-pointer"
+            aria-label={consoleOpen ? "Collapse output" : "Open output"}
+            title={consoleOpen ? "Collapse output" : "Open output"}
+          >
+            {consoleOpen ? (
+              <PanelRightClose className="h-4 w-4" />
+            ) : (
+              <PanelRightOpen className="h-4 w-4" />
             )}
           </button>
           <button
@@ -429,7 +429,7 @@ function BrowserRuntimeWorkspace({
           </button>
         </div>
       </header>
-      <div className="grid h-[calc(100%-84px)] min-h-0 grid-rows-2 lg:grid-cols-2 lg:grid-rows-1">
+      <div className={`grid h-[calc(100%-84px)] min-h-0 ${consoleOpen ? "grid-rows-2 lg:grid-cols-2 lg:grid-rows-1" : "grid-cols-1"}`}>
         <div
           className={`relative min-h-0 border-b border-zinc-800 lg:border-b-0 lg:border-r ${explorerOpen ? "lg:grid lg:grid-cols-[190px_minmax(0,1fr)]" : ""}`}
         >
@@ -441,43 +441,54 @@ function BrowserRuntimeWorkspace({
               </div>
               <div className="flex items-center gap-2 bg-[#37373d] px-4 py-2 font-mono text-[11px] text-zinc-200">
                 <FileCode2 className="h-3.5 w-3.5 text-blue-400" />
-                {config.file.slice(1)}
+                {activeFile.slice(1)}
               </div>
             </aside>
           )}
           <div className="relative min-h-0">
             <div className="flex h-9 items-center justify-between border-b border-zinc-800 bg-zinc-900 px-3 text-[11px] font-bold text-zinc-400">
-              <span>{config.file.slice(1)}</span>
+              <span>{activeFile.slice(1)}</span>
               <span className="hidden truncate pl-3 sm:block">
                 {config.note}
               </span>
             </div>
             <SandpackCodeEditor
-              showTabs
+              showTabs={false}
               showLineNumbers
               wrapContent
-              closableTabs={false}
               style={{ height: "calc(100% - 36px)", fontSize: 14 }}
             />
           </div>
         </div>
-        <div className="flex min-h-0 flex-col">
+        <div className={`${consoleOpen ? "flex" : "hidden"} min-h-0 flex-col`}>
           <div className="flex h-9 shrink-0 items-center justify-between border-b border-zinc-800 bg-zinc-900 px-3">
             <strong className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-zinc-400">
               <Terminal className="h-3.5 w-3.5" />
               Output
             </strong>
-            <button
-              type="button"
-              onClick={() => {
-                setOutput("");
-                setError("");
-              }}
-              className="rounded p-1 text-zinc-500 hover:text-white"
-              aria-label="Clear output"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setOutput("");
+                  setError("");
+                }}
+                className="rounded p-1 text-zinc-500 hover:text-white cursor-pointer"
+                aria-label="Clear output"
+                title="Clear output"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setConsoleOpen(false)}
+                className="rounded p-1 text-zinc-500 hover:text-white cursor-pointer"
+                aria-label="Collapse output"
+                title="Collapse output"
+              >
+                <PanelRightClose className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
           <div
             className="relative min-h-0 flex-1 overflow-auto p-4"
@@ -569,7 +580,7 @@ export default function BrowserRuntimeEditor(props) {
       key={`${props.language}-${config.file}`}
       template="vanilla"
       files={{
-        [config.file]: { code: starter, active: true },
+        [config.file]: { code: starter, active: true, readOnly: false },
         "/index.js": { code: "", hidden: true },
         "/index.html": { code: "", hidden: true },
         "/styles.css": { code: "", hidden: true },

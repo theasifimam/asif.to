@@ -1,0 +1,27 @@
+import { Router } from "express";
+import { protect } from "../middlewares/auth.middleware.js";
+import { requirePermission } from "../utils/permissions.js";
+import { conversations, createDirect, createDiscussion, createMessage, downloadAttachment, members, messageContext, messages, pin, pins, reaction, readConversation, removeMessage, requireConversationPost, search, teamMembers, unread, updateMessage, uploadAttachments } from "../controllers/messaging.controller.js";
+import { uploadMessageAttachments } from "../middlewares/upload.middleware.js";
+
+const router = Router();
+router.use(protect, requirePermission("messages.view"));
+router.get("/conversations", conversations);
+router.post("/direct", requirePermission("messages.send"), createDirect);
+router.get("/team", teamMembers);
+router.get("/unread", unread);
+router.get("/search", search);
+router.post("/discussions", requirePermission("messages.send"), createDiscussion);
+router.get("/attachments/:attachmentId", downloadAttachment);
+router.get("/messages/:messageId/context", messageContext);
+router.patch("/messages/:messageId", requirePermission("messages.send"), updateMessage);
+router.delete("/messages/:messageId", removeMessage);
+router.post("/messages/:messageId/reaction", requirePermission("messages.send"), reaction);
+router.post("/messages/:messageId/pin", pin);
+router.get("/conversations/:id/members", members);
+router.get("/conversations/:id/pins", pins);
+router.post("/conversations/:id/attachments", requirePermission("messages.attach"), requireConversationPost, uploadMessageAttachments.array("files", 4), uploadAttachments);
+router.get("/conversations/:id/messages", messages);
+router.post("/conversations/:id/messages", requirePermission("messages.send"), createMessage);
+router.patch("/conversations/:id/read", readConversation);
+export default router;

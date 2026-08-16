@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ArticleCard from "@/components/articles/ArticleCard";
@@ -13,6 +14,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { clearCredentials } from "@/lib/store/authSlice";
 import {
   useGetProfileQuery,
+  useGetPublicProfileQuery,
   useSignoutMutation,
   useGetMySavedItemsQuery,
   useUpdateAttemptVisibilityMutation,
@@ -45,9 +47,13 @@ import {
 import { toast } from "sonner";
 
 export default function UserProfileClient({ username }) {
-  const usernameParam = (username || "").replace(/^@+/, "");
+  const cleanParam = decodeURIComponent(username || "")
+    .replace(/^@+/, "")
+    .trim()
+    .toLowerCase();
 
   const dispatch = useAppDispatch();
+  const { data: session, status: sessionStatus } = useSession();
   const {
     user: storeUser,
     isAuthenticated,
@@ -62,11 +68,73 @@ export default function UserProfileClient({ username }) {
 
   const [signout, { isLoading: isSigningOut }] = useSignoutMutation();
 
-  const { data: profileRes, refetch: refetchProfile } = useGetProfileQuery(
-    undefined,
-    { skip: !isAuthenticated },
+  const {
+    data: profileRes,
+    isLoading: profileLoading,
+    refetch: refetchProfile,
+  } = useGetProfileQuery(undefined, { skip: !isAuthenticated });
+
+  const activeUser = profileRes?.data?.user || storeUser || session?.user;
+
+  const activeUsername = (
+    activeUser?.username ||
+    storeUser?.username ||
+    session?.user?.username ||
+    ""
+  )
+    .trim()
+    .toLowerCase();
+  const activeUserId = String(
+    activeUser?._id ||
+      activeUser?.id ||
+      storeUser?._id ||
+      storeUser?.id ||
+      session?.user?.id ||
+      "",
   );
-  const user = profileRes?.data?.user || storeUser;
+  const activeEmail = (
+    activeUser?.email ||
+    storeUser?.email ||
+    session?.user?.email ||
+    ""
+  )
+    .trim()
+    .toLowerCase();
+
+  // Robust case-insensitive comparison across username, ID, and email
+  const isOwnProfile = Boolean(
+    (isAuthenticated || session?.user) &&
+      cleanParam &&
+      (activeUsername === cleanParam ||
+        activeUserId === cleanParam ||
+        activeEmail === cleanParam ||
+        (session?.user?.name &&
+          session.user.name.toLowerCase().replace(/\s+/g, "") === cleanParam)),
+  );
+
+  // If viewing someone else, attempt to fetch their public profile
+  const { data: publicProfileRes, isLoading: publicProfileLoading } =
+    useGetPublicProfileQuery(cleanParam, {
+      skip: isOwnProfile || !cleanParam,
+    });
+
+  const publicUser = publicProfileRes?.data?.user;
+  const user = isOwnProfile ? activeUser : publicUser;
+
+  const isAuthChecking =
+    sessionStatus === "loading" || (!isInitialized && !session?.user);
+  const isProfileLoading =
+    (isAuthenticated && profileLoading && !activeUser) ||
+    (!isOwnProfile && publicProfileLoading);
+  const isPageLoading = isAuthChecking || isProfileLoading;
+
+  const showRestrictedView = !isPageLoading && !isOwnProfile && !publicUser;
+
+  useEffect(() => {
+    if (!isOwnProfile && activeTab === "saved") {
+      setActiveTab("courses");
+    }
+  }, [isOwnProfile, activeTab]);
   const { data: savedItemsRes, isLoading: savedItemsLoading } =
     useGetMySavedItemsQuery(undefined, { skip: !isAuthenticated });
   const savedItems = savedItemsRes?.data?.savedItems || [];
@@ -93,14 +161,6 @@ export default function UserProfileClient({ username }) {
     setIsAuthOpen(true);
   };
 
-  // --- Access Control Logic ---
-  // Determine if the logged-in user is viewing their own profile
-  const isOwnProfile =
-    isAuthenticated && user && user.username === usernameParam;
-
-  // If auth is initialized and the user is not authenticated or the username does not match,
-  // show a "restricted" state instead of the profile data.
-  const showRestrictedView = isInitialized && !isOwnProfile;
 
   const completedCourses = user?.completedCourses || [];
   const certificates = user?.certificates || [];
@@ -150,20 +210,26 @@ export default function UserProfileClient({ username }) {
     }
   };
 
-  const tabs = [
-    { key: "saved", label: "Saved", icon: Bookmark },
+  const allTabs = [
+    { key: "saved", label: "Saved", icon: Bookmark, ownOnly: true },
     { key: "courses", label: "Completed", icon: CheckCircle2 },
     { key: "certificates", label: "Certificates", icon: Award },
     { key: "quiz", label: "Quiz & Revision", icon: BookOpen },
-    { key: "articles", label: "My Articles", icon: Newspaper },
+    {
+      key: "articles",
+      label: isOwnProfile ? "My Articles" : "Articles",
+      icon: Newspaper,
+    },
   ];
+
+  const tabs = isOwnProfile ? allTabs : allTabs.filter((t) => !t.ownOnly);
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground transition-colors duration-300 pb-24 sm:pb-12">
       <Header />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 pt-20 sm:pt-24 flex flex-col gap-6">
-        {!isInitialized ? (
+        {isPageLoading ? (
           /* Loading State */
           <div className="p-8 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-md flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
@@ -185,7 +251,7 @@ export default function UserProfileClient({ username }) {
             </h1>
             <p className="text-xs sm:text-sm text-zinc-500 max-w-md leading-relaxed">
               {isAuthenticated
-                ? `The profile for @${usernameParam} is not accessible. You can only view your own profile.`
+                ? `The profile for @${cleanParam} is not accessible or set to private.`
                 : "Track your course progress, manage saved syntax cheatsheets, flashcard revision decks, and personalized learning preferences."}
             </p>
 
@@ -210,7 +276,7 @@ export default function UserProfileClient({ username }) {
             )}
           </div>
         ) : (
-          /* Own Profile View */
+          /* Profile View */
           <>
             {/* User Profile Hero Card */}
             <section className="p-6 sm:p-9 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-md flex flex-col gap-6 relative overflow-hidden">
@@ -259,9 +325,11 @@ export default function UserProfileClient({ username }) {
                     </span>
                   </div>
 
-                  <p className="text-xs sm:text-sm text-zinc-500 font-medium">
-                    {user.email}
-                  </p>
+                  {isOwnProfile && user.email && (
+                    <p className="text-xs sm:text-sm text-zinc-500 font-medium">
+                      {user.email}
+                    </p>
+                  )}
 
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs font-semibold text-zinc-400 pt-1">
                     <span className="flex items-center gap-1.5">
@@ -287,24 +355,26 @@ export default function UserProfileClient({ username }) {
                   )}
                 </div>
 
-                {/* Profile Action Buttons */}
-                <div className="flex items-center gap-2 self-stretch sm:self-start justify-center">
-                  <Link
-                    href={`/@${user.username}/settings`}
-                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-foreground text-xs font-bold transition-all active:scale-95 shadow-sm"
-                  >
-                    <Edit3 className="w-4 h-4" />
-                    <span>Edit Profile</span>
-                  </Link>
+                {/* Profile Action Buttons (Own Profile Only) */}
+                {isOwnProfile && (
+                  <div className="flex items-center gap-2 self-stretch sm:self-start justify-center">
+                    <Link
+                      href={`/@${user.username}/settings`}
+                      className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-foreground text-xs font-bold transition-all active:scale-95 shadow-sm"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                      <span>Edit Profile</span>
+                    </Link>
 
-                  <button
-                    onClick={() => setIsLogoutModalOpen(true)}
-                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 text-xs font-bold transition-all active:scale-95 shadow-sm"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Sign Out</span>
-                  </button>
-                </div>
+                    <button
+                      onClick={() => setIsLogoutModalOpen(true)}
+                      className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 text-xs font-bold transition-all active:scale-95 shadow-sm"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </section>
 

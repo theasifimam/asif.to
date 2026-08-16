@@ -1,244 +1,671 @@
 "use client";
 
-import React, { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { MessageCircle } from "lucide-react";
+import { messagingApi } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { useMessaging } from "@/contexts/MessagingContext";
 import {
-  MessageSquare,
-  Search,
-  RefreshCw,
-  ChevronLeft,
-  ChevronRight,
-  Mail,
-  CheckCircle,
-  Archive,
-  Clock,
-} from "lucide-react";
-import { toast } from "sonner";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input, Button } from "@/components/ui";
-import {
-  useGetContactMessagesQuery,
-  useUpdateMessageStatusMutation,
-} from "@/redux/services/contactApi";
+  ChatHeader,
+  ConversationSidebar,
+  MessageBubble,
+  MessageInput,
+  PinnedMessagesBar,
+  encodeContentCards,
+  idOf,
+} from "@/components/messaging";
 
 export default function MessagesPage() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState("all");
+  const { user } = useAuth();
+  const { socket, status, unread, refreshUnread } = useMessaging();
 
-  // RTK Query hooks
-  const {
-    data: response,
-    isLoading: loading,
-    refetch,
-  } = useGetContactMessagesQuery({
-    page: currentPage,
-    limit: 10,
-    ...(statusFilter !== "all" && { status: statusFilter }),
-  });
+  const [conversations, setConversations] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const selectedRef = useRef(null);
 
-  const [updateStatus] = useUpdateMessageStatusMutation();
+  const [messages, setMessages] = useState([]);
+  const [pins, setPins] = useState([]);
+  const [members, setMembers] = useState([]);
+  const [team, setTeam] = useState([]);
 
-  const messages = response?.data || [];
-  const pagination = response?.pagination || {
-    page: 1,
-    limit: 10,
-    total: 0,
-    pages: 1,
+  const [loading, setLoading] = useState(true);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const [cursor, setCursor] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
+
+  const [search, setSearch] = useState("");
+  const [messageSearch, setMessageSearch] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+
+  const [content, setContent] = useState("");
+  const [replyTo, setReplyTo] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [attachments, setAttachments] = useState([]);
+  const [attachedContent, setAttachedContent] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState("");
+
+  const listRef = useRef(null);
+  const initializedFromUrl = useRef(false);
+
+  const loadSidebar = useCallback(async (term) => {
+    setLoading(true);
+    const [conversationResult, teamResult] = await Promise.all([
+      messagingApi.conversations(term ? { search: term } : {}),
+      messagingApi.team(term ? { search: term } : {}),
+    ]);
+    if (conversationResult.success) {
+      setConversations(conversationResult.data.data.conversations);
+    }
+    if (teamResult.success) {
+      setTeam(teamResult.data.data.users);
+    }
+    if (!conversationResult.success || !teamResult.success) {
+      setError("Messaging is temporarily unavailable.");
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => loadSidebar(search), search ? 250 : 0);
+    return () => clearTimeout(timer);
+  }, [search, loadSidebar]);
+
+  useEffect(() => {
+    if (status === "connected") loadSidebar(search);
+  }, [status, loadSidebar, search]);
+
+  useEffect(() => {
+    selectedRef.current = selected;
+  }, [selected]);
+
+  const loadPins = useCallback(async (conversationId) => {
+    const result = await messagingApi.pins(conversationId);
+    if (result.success) setPins(result.data.data.pins);
+  }, []);
+
+  const openConversation = useCallback(
+    async (conversation, targetMessageId = null) => {
+      if (!conversation?._id) return;
+      if (selectedRef.current?._id && socket) {
+        socket.emit("conversation:leave", {
+          conversationId: selectedRef.current._id,
+        });
+      }
+      setSelected(conversation);
+      selectedRef.current = conversation;
+      setLoadingMessages(true);
+      setError("");
+      window.history.replaceState(
+        null,
+        "",
+        `/messages?conversation=${conversation._id}`,
+      );
+
+      const [result, memberResult] = await Promise.all([
+        targetMessageId
+          ? messagingApi.context(targetMessageId)
+          : messagingApi.messages(conversation._id, { limit: 30 }),
+        messagingApi.members(conversation._id),
+      ]);
+
+      if (result.success) {
+        setMessages(result.data.data.messages);
+        setCursor(result.data.data.nextCursor || null);
+        setHasMore(Boolean(result.data.data.hasMore));
+        if (memberResult.success) setMembers(memberResult.data.data.users);
+        loadPins(conversation._id);
+        requestAnimationFrame(() => {
+          const target =
+            targetMessageId &&
+            document.getElementById(`message-${targetMessageId}`);
+          if (target) {
+            target.scrollIntoView({ block: "center" });
+          } else if (listRef.current) {
+            listRef.current.scrollTop = listRef.current.scrollHeight;
+          }
+        });
+        socket?.emit(
+          "conversation:join",
+          { conversationId: conversation._id },
+          () => refreshUnread(),
+        );
+        await messagingApi.markRead(conversation._id);
+        setConversations((items) =>
+          items.map((item) =>
+            idOf(item) === idOf(conversation)
+              ? { ...item, unreadCount: 0 }
+              : item,
+          ),
+        );
+        refreshUnread();
+      } else {
+        setError("Messages could not be loaded.");
+      }
+      setLoadingMessages(false);
+    },
+    [socket, refreshUnread, loadPins],
+  );
+
+  useEffect(() => {
+    if (initializedFromUrl.current || !conversations.length) return;
+    initializedFromUrl.current = true;
+    const requested = new URLSearchParams(window.location.search).get(
+      "conversation",
+    );
+    const conversation = conversations.find((item) => idOf(item) === requested);
+    if (conversation) openConversation(conversation);
+  }, [conversations, openConversation]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onMessage = (message) => {
+      if (idOf(message.conversationId) === idOf(selectedRef.current)) {
+        setMessages((items) => {
+          const index = items.findIndex(
+            (item) =>
+              idOf(item) === idOf(message) ||
+              (message.clientId && item.clientId === message.clientId),
+          );
+          if (index >= 0) {
+            return items.map((item, itemIndex) =>
+              itemIndex === index ? message : item,
+            );
+          }
+          return [...items, message];
+        });
+        messagingApi.markRead(message.conversationId).then(refreshUnread);
+        requestAnimationFrame(() => {
+          if (listRef.current) {
+            listRef.current.scrollTop = listRef.current.scrollHeight;
+          }
+        });
+      }
+      loadSidebar(search);
+    };
+
+    const onConversation = (updated) => {
+      setConversations((items) => {
+        const index = items.findIndex(
+          (item) => idOf(item) === idOf(updated.conversation),
+        );
+        if (index === -1) return [updated.conversation, ...items];
+        return items.map((item) =>
+          idOf(item) === idOf(updated.conversation)
+            ? updated.conversation
+            : item,
+        );
+      });
+      if (idOf(updated.conversation) === idOf(selectedRef.current)) {
+        setSelected(updated.conversation);
+      }
+      refreshUnread();
+    };
+
+    const replaceMessage = (message) =>
+      setMessages((items) =>
+        items.map((item) => (idOf(item) === idOf(message) ? message : item)),
+      );
+
+    const onReaction = ({ messageId, reactions }) =>
+      setMessages((items) =>
+        items.map((item) =>
+          idOf(item) === String(messageId) ? { ...item, reactions } : item,
+        ),
+      );
+
+    const onPin = () =>
+      selectedRef.current?._id && loadPins(selectedRef.current._id);
+
+    socket.on("new_message", onMessage);
+    socket.on("conversation_updated", onConversation);
+    socket.on("message_updated", replaceMessage);
+    socket.on("message_reaction_updated", onReaction);
+    socket.on("message_pinned", onPin);
+    socket.on("message_unpinned", onPin);
+
+    return () => {
+      socket.off("new_message", onMessage);
+      socket.off("conversation_updated", onConversation);
+      socket.off("message_updated", replaceMessage);
+      socket.off("message_reaction_updated", onReaction);
+      socket.off("message_pinned", onPin);
+      socket.off("message_unpinned", onPin);
+      if (selectedRef.current?._id) {
+        socket.emit("conversation:leave", {
+          conversationId: selectedRef.current._id,
+        });
+      }
+    };
+  }, [socket, loadSidebar, refreshUnread, search, loadPins]);
+
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (messageSearch.trim().length < 2) return setSearchResults([]);
+      const result = await messagingApi.search({ q: messageSearch.trim() });
+      if (result.success) setSearchResults(result.data.data.results);
+      else setError("Message search is unavailable.");
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [messageSearch]);
+
+  const startDirect = async (member) => {
+    const result = await messagingApi.startDirect(member._id);
+    if (!result.success) {
+      return setError(result.error || "Unable to start this conversation.");
+    }
+    await loadSidebar("");
+    setSearch("");
+    openConversation(result.data.data.conversation);
   };
 
-  const handleUpdateStatus = async (id, status) => {
-    try {
-      await updateStatus({ id, status }).unwrap();
-      toast.success(`Message marked as ${status}`);
-    } catch (err) {
-      toast.error(err.data?.message || "Failed to update status");
+  const loadOlder = async () => {
+    if (!selected || !hasMore || loadingOlder || !cursor) return;
+    setLoadingOlder(true);
+    const previousHeight = listRef.current?.scrollHeight || 0;
+    const result = await messagingApi.messages(selected._id, {
+      limit: 30,
+      before: cursor,
+    });
+    if (result.success) {
+      const older = result.data.data.messages;
+      setMessages((items) => [
+        ...older.filter(
+          (message) => !items.some((item) => idOf(item) === idOf(message)),
+        ),
+        ...items,
+      ]);
+      setCursor(result.data.data.nextCursor);
+      setHasMore(result.data.data.hasMore);
+      requestAnimationFrame(() => {
+        if (listRef.current) {
+          listRef.current.scrollTop =
+            listRef.current.scrollHeight - previousHeight;
+        }
+      });
+    }
+    setLoadingOlder(false);
+  };
+
+  const deliver = async (text, clientId, options) => {
+    if (socket?.connected) {
+      return new Promise((resolve) =>
+        socket
+          .timeout(10_000)
+          .emit(
+            "message:send",
+            {
+              conversationId: selected._id,
+              content: text,
+              clientId,
+              ...options,
+            },
+            (timeoutError, response) =>
+              resolve(
+                timeoutError
+                  ? { success: false, message: "Delivery timed out." }
+                  : response,
+              ),
+          ),
+      );
+    }
+    const result = await messagingApi.send(
+      selected._id,
+      text,
+      clientId,
+      options,
+    );
+    return result.success
+      ? { success: true, ...result.data.data }
+      : { success: false, message: result.error };
+  };
+
+  const send = async (retryMessage) => {
+    const text = (retryMessage ? retryMessage.content : content).trim();
+    const sendContent = retryMessage?.attachedContent || attachedContent;
+    if (
+      (!text && !attachments.length && !sendContent?.length) ||
+      text.length > 4000 ||
+      !selected
+    ) {
+      return;
+    }
+
+    if (editing && !retryMessage) {
+      const result = await messagingApi.edit(editing._id, text);
+      if (result.success) {
+        setMessages((items) =>
+          items.map((item) =>
+            idOf(item) === idOf(editing) ? result.data.data.message : item,
+          ),
+        );
+        setEditing(null);
+        setContent("");
+      } else {
+        setError(result.error || "Unable to edit message.");
+      }
+      return;
+    }
+
+    const clientId =
+      retryMessage?.clientId ||
+      `${user._id}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const sendAttachments = retryMessage?.attachments || attachments;
+    const fullContent = encodeContentCards(text, sendContent);
+    const options = {
+      replyToMessageId: retryMessage?.replyToMessageId?._id || replyTo?._id,
+      attachmentIds: sendAttachments.map(
+        (item) => item.attachmentId || item._id,
+      ),
+      attachedContent: sendContent,
+    };
+
+    if (!retryMessage) {
+      setContent("");
+      setReplyTo(null);
+      setAttachments([]);
+      setAttachedContent([]);
+      setMessages((items) => [
+        ...items,
+        {
+          _id: `pending-${clientId}`,
+          clientId,
+          conversationId: selected._id,
+          senderId: user,
+          content: fullContent,
+          replyToMessageId: replyTo,
+          attachments: sendAttachments,
+          attachedContent: sendContent,
+          createdAt: new Date().toISOString(),
+          pending: true,
+        },
+      ]);
+    } else {
+      setMessages((items) =>
+        items.map((item) =>
+          item.clientId === clientId
+            ? { ...item, failed: false, pending: true }
+            : item,
+        ),
+      );
+    }
+
+    requestAnimationFrame(() => {
+      if (listRef.current) {
+        listRef.current.scrollTop = listRef.current.scrollHeight;
+      }
+    });
+
+    const result = await deliver(fullContent, clientId, options);
+    if (result.success && result.message) {
+      setMessages((items) =>
+        items.map((item) =>
+          item.clientId === clientId ? result.message : item,
+        ),
+      );
+      loadSidebar(search);
+    } else {
+      setMessages((items) =>
+        items.map((item) =>
+          item.clientId === clientId
+            ? { ...item, pending: false, failed: true }
+            : item,
+        ),
+      );
+      setError(result.message || "Message failed to send.");
     }
   };
 
+  const upload = async (files) => {
+    if (!files?.length || !selected) return;
+    setUploadProgress(1);
+    setError("");
+    const result = await messagingApi.upload(
+      selected._id,
+      [...files].slice(0, 4 - attachments.length),
+      setUploadProgress,
+    );
+    if (result.success) {
+      setAttachments((items) =>
+        [...items, ...result.data.data.attachments].slice(0, 4),
+      );
+    } else {
+      setError(result.error || "Attachment upload failed.");
+    }
+    setUploadProgress(0);
+  };
+
+  const removeMessage = async (message) => {
+    if (
+      !window.confirm(
+        "Delete this message? Replies will retain a deleted-message reference.",
+      )
+    ) {
+      return;
+    }
+    const result = await messagingApi.delete(message._id);
+    if (result.success) {
+      setMessages((items) =>
+        items.map((item) =>
+          idOf(item) === idOf(message) ? result.data.data.message : item,
+        ),
+      );
+    } else {
+      setError(result.error || "Unable to delete message.");
+    }
+  };
+
+  const react = async (message, emoji) => {
+    const result = await messagingApi.react(message._id, emoji);
+    if (result.success) {
+      setMessages((items) =>
+        items.map((item) =>
+          idOf(item) === idOf(message)
+            ? { ...item, reactions: result.data.data.reactions }
+            : item,
+        ),
+      );
+    } else {
+      setError(result.error);
+    }
+  };
+
+  const togglePin = async (message) => {
+    const result = await messagingApi.pin(message._id);
+    if (result.success) loadPins(selected._id);
+    else setError(result.error || "Pin permission denied.");
+  };
+
+  const currentUserId = user?._id || user?.id;
+  const canPost =
+    selected &&
+    (selected.type === "direct" ||
+      selected.postRoles?.includes(user.role) ||
+      selected.allowedMemberIds?.some(
+        (id) => idOf(id) === String(currentUserId),
+      ));
+
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-8 p-4 font-sans text-zinc-800 dark:text-zinc-300 sm:p-6 md:p-8 lg:p-10">
-      {/* Header */}
-      <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-blue-200/80 bg-blue-50/90 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-blue-700 dark:border-blue-900/60 dark:bg-blue-500/10 dark:text-blue-300">
-            <MessageSquare className="h-3.5 w-3.5" />
-            <span>Inbound Inquiries</span>
-          </div>
-          <h1 className="font-outfit text-3xl sm:text-4xl font-black tracking-tight text-zinc-950 dark:text-white">
-            Messages & Inquiries
-          </h1>
-          <p className="mt-1.5 text-xs sm:text-sm font-medium text-zinc-500 dark:text-zinc-400">
-            View and manage contact form submissions from users and visitors.
-          </p>
-        </div>
+    <div className="flex h-full w-full min-h-0 overflow-hidden bg-white dark:bg-[#121215]">
+      {/* Conversations Sidebar */}
+      <ConversationSidebar
+        selected={selected}
+        conversations={conversations}
+        team={team}
+        unread={unread}
+        search={search}
+        setSearch={setSearch}
+        messageSearch={messageSearch}
+        setMessageSearch={setMessageSearch}
+        searchResults={searchResults}
+        loading={loading}
+        currentUserId={currentUserId}
+        onOpenConversation={openConversation}
+        onStartDirect={startDirect}
+      />
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => refetch()}
-            className="h-10 w-10 rounded-full border-zinc-200/80 dark:border-zinc-800"
-            title="Refresh messages"
-          >
-            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-          </Button>
-        </div>
-      </section>
-
-      {/* Filters */}
-      <section className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 sm:p-4 rounded-3xl border border-zinc-200/80 bg-white/90 dark:border-zinc-800/80 dark:bg-[#121215]/90 shadow-xs">
-        <div className="flex flex-col sm:flex-row gap-2.5 flex-1">
-          <Select
-            value={statusFilter}
-            onValueChange={(val) => {
-              setStatusFilter(val);
-              setCurrentPage(1);
-            }}
-          >
-            <SelectTrigger className="w-full sm:w-44 h-10 rounded-full border border-zinc-200/80 bg-zinc-50/80 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b]">
-              <SelectValue placeholder="All Status" />
-            </SelectTrigger>
-            <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="unread">Unread</SelectItem>
-              <SelectItem value="read">Read</SelectItem>
-              <SelectItem value="archived">Archived</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <span className="text-xs font-semibold text-zinc-400 px-3">
-          Total messages: <strong className="text-zinc-950 dark:text-white font-bold">{pagination.total}</strong>
-        </span>
-      </section>
-
-      {/* Messages List */}
-      <section className="flex flex-col gap-4">
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <RefreshCw className="w-6 h-6 animate-spin text-blue-600" />
-          </div>
-        ) : messages.length === 0 ? (
-          <div className="admin-surface rounded-3xl p-12 text-center flex flex-col items-center">
-            <MessageSquare className="w-10 h-10 text-zinc-300 dark:text-zinc-700 mb-3" />
-            <h3 className="text-base font-bold text-zinc-900 dark:text-white">
-              No messages found
-            </h3>
-            <p className="text-xs text-zinc-400 mt-1">
-              No contact form submissions match the current filters.
+      {/* Chat Main Area */}
+      <main
+        className={`${selected ? "flex" : "hidden md:flex"} min-w-0 flex-1 flex-col bg-white dark:bg-[#121215]`}
+      >
+        {!selected ? (
+          <div className="flex flex-1 flex-col items-center justify-center p-8 text-center bg-zinc-50/50 dark:bg-zinc-950/30">
+            <div className="mb-4 rounded-2xl bg-blue-50 p-4 text-blue-600 dark:bg-blue-500/10">
+              <MessageCircle size={30} />
+            </div>
+            <h2 className="font-black text-zinc-950 dark:text-white text-lg">
+              Choose a conversation
+            </h2>
+            <p className="mt-1 max-w-sm text-xs leading-5 text-zinc-500">
+              Send a direct message or coordinate in a focused team channel.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
-            {messages.map((msg) => (
-              <div
-                key={msg._id}
-                className={`admin-surface rounded-3xl p-6 transition-all duration-200 ${
-                  msg.status === "unread"
-                    ? "border-blue-500/50 shadow-xs"
-                    : ""
-                }`}
-              >
-                <div className="flex flex-col md:flex-row justify-between gap-4">
-                  <div className="flex-1 space-y-3 min-w-0">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          msg.status === "unread"
-                            ? "bg-blue-600"
-                            : msg.status === "read"
-                              ? "bg-emerald-500"
-                              : "bg-zinc-400"
-                        }`}
-                      />
-                      <h3 className="font-bold text-base text-zinc-950 dark:text-white">
-                        {msg.subject}
-                      </h3>
-                      <span
-                        className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
-                          msg.status === "unread"
-                            ? "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
-                            : msg.status === "read"
-                              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
-                              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500"
-                        }`}
-                      >
-                        {msg.status}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4 text-xs font-semibold text-zinc-400 flex-wrap">
-                      <span className="flex items-center gap-1.5">
-                        <Mail size={13} /> {msg.name} ({msg.email})
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Clock size={13} />{" "}
-                        {new Date(msg.createdAt).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="bg-zinc-50/80 dark:bg-[#18181b]/80 p-4 rounded-2xl text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap border border-zinc-200/50 dark:border-zinc-800/50">
-                      {msg.message}
-                    </div>
-                  </div>
+          <>
+            {/* Header */}
+            <ChatHeader
+              selected={selected}
+              currentUserId={currentUserId}
+              status={status}
+              onBack={() => {
+                socket?.emit("conversation:leave", {
+                  conversationId: selected._id,
+                });
+                setSelected(null);
+                window.history.replaceState(null, "", "/messages");
+              }}
+            />
 
-                  <div className="flex md:flex-col items-center justify-end md:justify-start gap-2 shrink-0">
-                    {msg.status !== "read" && msg.status !== "archived" && (
-                      <Button
-                        variant="outline"
-                        onClick={() => handleUpdateStatus(msg._id, "read")}
-                        className="h-9 rounded-full px-4 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 border-emerald-200/80 dark:border-emerald-500/20"
-                      >
-                        <CheckCircle size={14} className="mr-1.5" /> Mark Read
-                      </Button>
-                    )}
-                    {msg.status !== "archived" && (
-                      <Button
-                        variant="outline"
-                        onClick={() => handleUpdateStatus(msg._id, "archived")}
-                        className="h-9 rounded-full px-4 text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border-zinc-200/80 dark:border-zinc-800"
-                      >
-                        <Archive size={14} className="mr-1.5" /> Archive
-                      </Button>
-                    )}
-                  </div>
+            {/* Pinned Messages Bar */}
+            <PinnedMessagesBar
+              pins={pins}
+              selected={selected}
+              onOpenConversation={openConversation}
+            />
+
+            {/* Message List */}
+            <div
+              ref={listRef}
+              onScroll={(event) => {
+                if (event.currentTarget.scrollTop < 40) loadOlder();
+              }}
+              className="min-h-0 flex-1 overflow-y-auto bg-zinc-50/60 px-4 py-5 dark:bg-zinc-950/40 sm:px-6"
+            >
+              {loadingMessages ? (
+                <div className="flex min-h-40 items-center justify-center text-center text-xs text-zinc-500">
+                  Loading messages…
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+              ) : (
+                <>
+                  {loadingOlder && (
+                    <p className="pb-3 text-center text-[10px] text-zinc-500">
+                      Loading older messages…
+                    </p>
+                  )}
+                  {!messages.length && (
+                    <div className="flex min-h-40 items-center justify-center text-center text-xs text-zinc-500">
+                      No messages yet. Start the conversation.
+                    </div>
+                  )}
+                  <div className="flex flex-col">
+                    {messages.map((message, index) => {
+                      const prev = messages[index - 1];
+                      const next = messages[index + 1];
+                      const isMine =
+                        idOf(message.senderId) === String(currentUserId);
 
-      {/* Pagination */}
-      {pagination.pages > 1 && (
-        <section className="flex items-center justify-between px-6 py-4 admin-surface rounded-full">
-          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-            Page {pagination.page} of {pagination.pages}
-          </span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              disabled={pagination.page <= 1}
-              onClick={() => setCurrentPage(pagination.page - 1)}
-              className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
-            >
-              <ChevronLeft size={14} />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              disabled={pagination.page >= pagination.pages}
-              onClick={() => setCurrentPage(pagination.page + 1)}
-              className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
-            >
-              <ChevronRight size={14} />
-            </Button>
-          </div>
-        </section>
-      )}
+                      const isSameSenderAsPrev = Boolean(
+                        prev &&
+                        idOf(prev.senderId) === idOf(message.senderId) &&
+                        !prev.deletedAt &&
+                        !message.deletedAt &&
+                        Math.abs(
+                          new Date(message.createdAt) -
+                            new Date(prev.createdAt),
+                        ) <
+                          5 * 60 * 1000,
+                      );
+
+                      const isSameSenderAsNext = Boolean(
+                        next &&
+                        idOf(next.senderId) === idOf(message.senderId) &&
+                        !next.deletedAt &&
+                        !message.deletedAt &&
+                        Math.abs(
+                          new Date(next.createdAt) -
+                            new Date(message.createdAt),
+                        ) <
+                          5 * 60 * 1000,
+                      );
+
+                      const isFirst =
+                        !isSameSenderAsPrev && isSameSenderAsNext;
+                      const isMiddle =
+                        isSameSenderAsPrev && isSameSenderAsNext;
+                      const isLast =
+                        isSameSenderAsPrev && !isSameSenderAsNext;
+                      const isSingle =
+                        !isSameSenderAsPrev && !isSameSenderAsNext;
+
+                      return (
+                        <MessageBubble
+                          key={message._id || message.clientId}
+                          message={message}
+                          mine={isMine}
+                          isFirst={isFirst}
+                          isMiddle={isMiddle}
+                          isLast={isLast}
+                          isSingle={isSingle}
+                          isSameSenderAsPrev={isSameSenderAsPrev}
+                          isSameSenderAsNext={isSameSenderAsNext}
+                          conversation={selected}
+                          currentUserId={currentUserId}
+                          onRetry={() => send(message)}
+                          onReply={() => {
+                            setReplyTo(message);
+                            setEditing(null);
+                          }}
+                          onEdit={() => {
+                            setEditing(message);
+                            setReplyTo(null);
+                            setContent(message.content);
+                          }}
+                          onDelete={() => removeMessage(message)}
+                          onReact={(emoji) => react(message, emoji)}
+                          onPin={() => togglePin(message)}
+                        />
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Message Composer */}
+            <MessageInput
+              content={content}
+              setContent={setContent}
+              attachments={attachments}
+              setAttachments={setAttachments}
+              attachedContent={attachedContent}
+              setAttachedContent={setAttachedContent}
+              replyTo={replyTo}
+              setReplyTo={setReplyTo}
+              editing={editing}
+              setEditing={setEditing}
+              uploadProgress={uploadProgress}
+              canPost={canPost}
+              members={members}
+              error={error}
+              setError={setError}
+              onSend={send}
+              onUpload={upload}
+            />
+          </>
+        )}
+      </main>
     </div>
   );
 }

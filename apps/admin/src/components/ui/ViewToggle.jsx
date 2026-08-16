@@ -1,46 +1,49 @@
 "use client";
 
 import { LayoutGrid, List } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function ViewToggle({
   view = "table",
   onViewChange,
-  className = "flex-1",
+  className = "",
 }) {
   return (
     <div
-      className={
-        "inline-flex items-center rounded-2xl bg-zinc-100 p-1 dark:bg-zinc-900 shrink-0 " +
-        className
-      }
+      className={cn(
+        "inline-flex h-10 sm:h-11 items-center rounded-2xl border border-zinc-200/80 bg-zinc-100 p-1 dark:border-zinc-800/80 dark:bg-zinc-900",
+        className,
+      )}
     >
       <button
         type="button"
         onClick={() => onViewChange("table")}
-        className={`flex items-center gap-1.5 h-11 rounded-xl px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+        className={cn(
+          "flex h-full flex-1 sm:flex-initial items-center justify-center gap-1.5 rounded-xl px-3 sm:px-3.5 text-xs font-bold transition-all cursor-pointer",
           view === "table" || view === "list"
             ? "bg-white text-zinc-900 shadow-xs dark:bg-zinc-800 dark:text-white"
-            : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
-        }`}
+            : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white",
+        )}
         title="List View"
         aria-label="List View"
       >
-        <List size={15} />
-        <span className="hidden sm:inline">List</span>
+        <List size={14} />
+        <span>List</span>
       </button>
       <button
         type="button"
         onClick={() => onViewChange("card")}
-        className={`flex items-center gap-1.5 rounded-xl h-11 px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+        className={cn(
+          "flex h-full flex-1 sm:flex-initial items-center justify-center gap-1.5 rounded-xl px-3 sm:px-3.5 text-xs font-bold transition-all cursor-pointer",
           view === "card" || view === "grid"
             ? "bg-white text-zinc-900 shadow-xs dark:bg-zinc-800 dark:text-white"
-            : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
-        }`}
+            : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white",
+        )}
         title="Card View"
         aria-label="Card View"
       >
-        <LayoutGrid size={15} />
-        <span className="hidden sm:inline">Cards</span>
+        <LayoutGrid size={14} />
+        <span>Cards</span>
       </button>
     </div>
   );

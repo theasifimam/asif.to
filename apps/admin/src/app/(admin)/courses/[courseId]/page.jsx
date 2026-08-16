@@ -31,6 +31,7 @@ import {
 import { chaptersApi, coursesApi } from "@/lib/api";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { AdminPage, AdminPageHeader } from "@/components/admin";
+import DiscussButton from "@/components/messaging/DiscussButton";
 
 const initialPagination = { page: 1, pages: 1, total: 0, limit: 20 };
 
@@ -192,9 +193,10 @@ export default function CourseChaptersPage() {
         }
         actions={
           <>
+            {course && <DiscussButton entityType="course" entityId={courseId} />}
             <ViewToggle view={viewMode} onViewChange={setViewMode} />
             {course?.status === "published" && (
-              <Button variant="outline" asChild className="flex-1 sm:flex-initial">
+              <Button variant="outline" asChild>
                 <a
                   href={`https://asif.to/courses/${course.slug}`}
                   target="_blank"
@@ -205,13 +207,13 @@ export default function CourseChaptersPage() {
                 </a>
               </Button>
             )}
-            <Button variant="outline" asChild className="flex-1 sm:flex-initial">
+            <Button variant="outline" asChild>
               <Link href={`/courses/${courseId}/edit`}>
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit course
               </Link>
             </Button>
-            <Button asChild className="w-full sm:w-auto">
+            <Button asChild>
               <Link href={`/courses/${courseId}/chapters/new`}>
                 <Plus className="mr-2 h-4 w-4" />
                 New chapter

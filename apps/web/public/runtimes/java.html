@@ -22,11 +22,28 @@ window.addEventListener("message", async (event) => {
   try {
     await initialize(); send({ type: "status", message: "Compiling Java..." });
     const code = String(event.data.code || "");
-    const className = code.match(/public\s+class\s+([A-Za-z_$][\w$]*)/)?.[1] || "Main";
-    cheerpOSAddStringFile(`/str/${className}.java`, code);
+    let mainClassName = code.match(/public\s+class\s+([A-Za-z_$][\w$]*)/)?.[1] || "Main";
+    if (event.data.entry && event.data.files?.[event.data.entry]?.code) {
+      mainClassName = event.data.files[event.data.entry].code.match(/public\s+class\s+([A-Za-z_$][\w$]*)/)?.[1] || "Main";
+    }
+
     const classPath = "/app/runtimes/tools.jar:/files/";
-    const compileCode = await cheerpjRunMain("com.sun.tools.javac.Main", classPath, `/str/${className}.java`, "-d", "/files/", "-Xlint");
-    if (compileCode === 0) { send({ type: "status", message: "Running Java..." }); await cheerpjRunMain(className, classPath); }
+    const javacArgs = ["-d", "/files/", "-Xlint"];
+
+    if (event.data.files) {
+      for (const [path, fileObj] of Object.entries(event.data.files)) {
+        if (!fileObj.code || !path.endsWith(".java")) continue;
+        const name = path.split("/").pop();
+        cheerpOSAddStringFile(`/str/${name}`, fileObj.code);
+        javacArgs.push(`/str/${name}`);
+      }
+    } else {
+      cheerpOSAddStringFile(`/str/${mainClassName}.java`, code);
+      javacArgs.push(`/str/${mainClassName}.java`);
+    }
+
+    const compileCode = await cheerpjRunMain("com.sun.tools.javac.Main", classPath, ...javacArgs);
+    if (compileCode === 0) { send({ type: "status", message: "Running Java..." }); await cheerpjRunMain(mainClassName, classPath); }
     const text = consoleNode.innerText || captured.join("\n");
     send({ type: "result", stdout: compileCode === 0 ? text : "", stderr: compileCode === 0 ? "" : text || `javac exited with code ${compileCode}.` });
   } catch (error) { send({ type: "error", error: error?.message || String(error) }); }

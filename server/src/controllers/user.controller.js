@@ -8,6 +8,7 @@ import QuizQuestion from "../models/Question.js";
 import { writeAudit } from "../utils/audit.js";
 import mongoose from "mongoose";
 import { roleRank } from "../utils/permissions.js";
+import { logActivity } from "../services/activity.service.js";
 
 // ─── Admin: List all users ──────────────────────────────────────────────────
 // GET /api/v1/users?page=1&limit=10&search=&role=&status=
@@ -83,9 +84,12 @@ export const getUsers = async (req, res) => {
 // GET /api/v1/users/public/:username
 export const getPublicProfile = async (req, res) => {
   try {
-    const { username } = req.params;
+    const rawUsername = String(req.params.username || "")
+      .trim()
+      .toLowerCase()
+      .replace(/^@+/, "");
     const user = await User.findOne({
-      username,
+      username: rawUsername,
       deletedAt: null,
       status: "active",
       "settings.profileVisibility": { $ne: "private" },
@@ -171,6 +175,7 @@ export const createUser = async (req, res) => {
     });
 
     const { password: _, ...userData } = user.toObject();
+    await logActivity({ actor: req.user, action: "user.created", entityType: "user", entityId: user._id, entityTitle: user.fullName, description: "created a user account for", severity: "important", targetUserId: user._id, after: { role: user.role, status: user.status }, url: `/users/${user._id}` });
 
     res.status(201).json({
       success: true,

@@ -449,6 +449,49 @@ export const playgroundSettingsApi = {
   publish: () => apiPost("/playground-settings/publish"),
 };
 
+export const activityApi = {
+  list: (params = {}) => apiGet(`/activity?${new URLSearchParams(params)}`),
+  notifications: (params = {}) => apiGet(`/activity/notifications?${new URLSearchParams(params)}`),
+  markRead: (id) => apiPatch(`/activity/notifications/${id}/read`),
+  markAllRead: () => apiPatch("/activity/notifications/read-all"),
+};
+
+export const messagingApi = {
+  conversations: (params = {}) => apiGet(`/messaging/conversations?${new URLSearchParams(params)}`),
+  team: (params = {}) => apiGet(`/messaging/team?${new URLSearchParams(params)}`),
+  startDirect: (userId) => apiPost("/messaging/direct", { userId }),
+  messages: (conversationId, params = {}) => apiGet(`/messaging/conversations/${conversationId}/messages?${new URLSearchParams(params)}`),
+  send: (conversationId, content, clientId, options = {}) => apiPost(`/messaging/conversations/${conversationId}/messages`, { content, clientId, ...options }),
+  markRead: (conversationId) => apiPatch(`/messaging/conversations/${conversationId}/read`),
+  unread: () => apiGet("/messaging/unread"),
+  discussion: (entityType, entityId) => apiPost("/messaging/discussions", { entityType, entityId }),
+  members: (conversationId, search = "") => apiGet(`/messaging/conversations/${conversationId}/members?${new URLSearchParams(search ? { search } : {})}`),
+  edit: (messageId, content) => apiPatch(`/messaging/messages/${messageId}`, { content }),
+  delete: (messageId) => apiDelete(`/messaging/messages/${messageId}`),
+  react: (messageId, emoji) => apiPost(`/messaging/messages/${messageId}/reaction`, { emoji }),
+  pin: (messageId) => apiPost(`/messaging/messages/${messageId}/pin`),
+  pins: (conversationId) => apiGet(`/messaging/conversations/${conversationId}/pins`),
+  search: (params) => apiGet(`/messaging/search?${new URLSearchParams(params)}`),
+  context: (messageId) => apiGet(`/messaging/messages/${messageId}/context`),
+  upload: (conversationId, files, onProgress) => new Promise((resolve) => {
+    const request = new XMLHttpRequest();
+    request.open("POST", buildUrl(`/messaging/conversations/${conversationId}/attachments`));
+    const token = getAuthHeaders().Authorization;
+    if (token) request.setRequestHeader("Authorization", token);
+    request.setRequestHeader("ngrok-skip-browser-warning", "true");
+    request.withCredentials = true;
+    request.upload.onprogress = (event) => event.lengthComputable && onProgress?.(Math.round((event.loaded / event.total) * 100));
+    request.onload = () => { try { const data = JSON.parse(request.responseText); resolve(request.status >= 200 && request.status < 300 ? { success: true, data } : { success: false, error: data.message || "Upload failed" }); } catch { resolve({ success: false, error: "Upload failed" }); } };
+    request.onerror = () => resolve({ success: false, error: "Upload failed" });
+    const form = new FormData(); files.forEach((file) => form.append("files", file)); request.send(form);
+  }),
+  attachmentBlob: async (attachmentId) => {
+    const response = await fetch(buildUrl(`/messaging/attachments/${attachmentId}`), { headers: { ...getAuthHeaders(), "ngrok-skip-browser-warning": "true" }, credentials: "include" });
+    if (!response.ok) throw new Error("Attachment unavailable");
+    return response.blob();
+  },
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPE DEFINITIONS (Placeholder types for API responses)
 // ═══════════════════════════════════════════════════════════════════════════

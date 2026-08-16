@@ -25,8 +25,11 @@ export function useWorkspace({
   const [split, setSplit] = useState(50);
   const [outputSplit, setOutputSplit] = useState(68);
   const [fontSize, setFontSize] = useState(14);
-  const [fullscreen, setFullscreen] = useState(false);
+  const [nativeFullscreen, setNativeFullscreen] = useState(false);
+  const [isFloatingModal, setIsFloatingModal] = useState(false);
+  const fullscreen = nativeFullscreen || isFloatingModal;
   const [explorerOpen, setExplorerOpen] = useState(true);
+  const [consoleOpen, setConsoleOpen] = useState(true);
   const [resizeAxis, setResizeAxis] = useState(null);
   const [runtimeIssue, setRuntimeIssue] = useState("");
   const [saveStatus, setSaveStatus] = useState("Saved");
@@ -258,8 +261,15 @@ export function useWorkspace({
     .pop();
 
   useEffect(() => {
+    setIsFloatingModal(
+      !!workspaceRef.current?.closest('[aria-label="Code playground"]'),
+    );
     const handleFullscreen = () =>
-      setFullscreen(document.fullscreenElement === workspaceRef.current);
+      setNativeFullscreen(
+        !!document.fullscreenElement &&
+          document.fullscreenElement.contains(workspaceRef.current),
+      );
+    handleFullscreen();
     document.addEventListener("fullscreenchange", handleFullscreen);
     return () =>
       document.removeEventListener("fullscreenchange", handleFullscreen);
@@ -270,6 +280,9 @@ export function useWorkspace({
       if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
         event.preventDefault();
         if (!executionEnabled) return;
+        if (consoleFirst) {
+          setConsoleOpen(true);
+        }
         if (runtimeAdapter) runtimeAdapter.run();
         else executeCurrentFiles(sandpack);
         setPanel(consoleFirst ? "console" : "preview");
@@ -293,8 +306,13 @@ export function useWorkspace({
   }, [consoleFirst, executionEnabled, formatActive, runtimeAdapter, sandpack]);
 
   const toggleFullscreen = async () => {
-    if (document.fullscreenElement) await document.exitFullscreen();
-    else await workspaceRef.current?.requestFullscreen();
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    } else if (isFloatingModal) {
+      window.dispatchEvent(new CustomEvent("close-floating-playground"));
+    } else {
+      await workspaceRef.current?.requestFullscreen();
+    }
   };
 
   const startResize = (axis, event) => {
@@ -356,13 +374,23 @@ export function useWorkspace({
       return;
     resizeRef.current = null;
     if (resizeFrameRef.current) cancelAnimationFrame(resizeFrameRef.current);
-    resizeFrameRef.current = null;
-    if (drag.target?.hasPointerCapture?.(drag.pointerId))
-      drag.target.releasePointerCapture(drag.pointerId);
     setResizeAxis(null);
     document.body.style.cursor = "";
     document.body.style.userSelect = "";
   };
+
+  // const formatActive = async () => {
+  //   const active = sandpack.activeFile;
+  //   const source = sandpack.files[active]?.code;
+  //   if (!source) return;
+  //   setFormatting(true);
+  //   try {
+  //     const formatted = await formatSource(active, source);
+  //     if (formatted !== source) sandpack.updateFile(active, formatted);
+  //   } finally {
+  //     setFormatting(false);
+  //   }
+  // };
 
   useEffect(
     () => () => {
@@ -382,6 +410,7 @@ export function useWorkspace({
       fontSize,
       fullscreen,
       explorerOpen,
+      consoleOpen,
       resizeAxis,
       runtimeIssue,
       saveStatus,
@@ -401,8 +430,9 @@ export function useWorkspace({
       setSplit,
       setOutputSplit,
       setFontSize,
-      setFullscreen,
+      setFullscreen: setNativeFullscreen,
       setExplorerOpen,
+      setConsoleOpen,
       setResizeAxis,
       setRuntimeIssue,
       setSaveStatus,
@@ -427,6 +457,7 @@ export function useWorkspace({
       runTests,
       runCustom,
       toggleFullscreen,
+      toggleConsole: () => setConsoleOpen((v) => !v),
       startResize,
       moveResize,
       stopResize,

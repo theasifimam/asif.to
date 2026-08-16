@@ -1,5 +1,6 @@
 import PlaygroundSetting from "../models/PlaygroundSetting.js";
 import AuditLog from "../models/AuditLog.js";
+import { logActivity } from "../services/activity.service.js";
 
 const REGISTRY = ["javascript", "typescript", "html", "css", "web", "react", "react-typescript", "nextjs", "python", "c", "cpp", "java"];
 const defaults = () => ({
@@ -37,6 +38,7 @@ export async function savePlaygroundSetting(req, res) {
   delete data._id; delete data.createdAt; delete data.updatedAt; delete data.version; delete data.__v;
   const item = await PlaygroundSetting.findOneAndUpdate({ key: data.key }, { $set: data, $inc: { version: 1 } }, { upsert: true, new: true, runValidators: true });
   await AuditLog.create({ actor: req.user._id, action: `playground_settings_${data.status === "published" ? "published" : "saved"}`, metadata: { version: item.version } });
+  await logActivity({ actor: req.user, action: `playground_settings.${data.status === "published" ? "published" : "saved"}`, entityType: "playground_setting", entityId: item._id, entityTitle: "Code Playground settings", description: data.status === "published" ? "published system settings" : "updated system settings", severity: "critical", after: { version: item.version }, url: "/playground-settings" });
   res.json({ success: true, data: plain(item) });
 }
 
@@ -45,5 +47,6 @@ export async function publishPlaygroundSetting(req, res) {
   const next = plain(draft); delete next._id; delete next.createdAt; delete next.updatedAt; delete next.version; delete next.__v;
   const item = await PlaygroundSetting.findOneAndUpdate({ key: "default" }, { $set: { ...next, key: "default", status: "published", updatedBy: req.user._id }, $inc: { version: 1 } }, { new: true, upsert: true, runValidators: true });
   await AuditLog.create({ actor: req.user._id, action: "playground_settings_published", metadata: { version: item.version } });
+  await logActivity({ actor: req.user, action: "playground_settings.published", entityType: "playground_setting", entityId: item._id, entityTitle: "Code Playground settings", description: "published system settings", severity: "critical", after: { version: item.version }, url: "/playground-settings" });
   res.json({ success: true, data: plain(item) });
 }

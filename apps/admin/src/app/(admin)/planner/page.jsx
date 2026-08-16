@@ -26,8 +26,14 @@ import {
   Settings2,
   X,
 } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { coursesApi, kanbanApi } from "@/lib/api";
 import PlannerCard from "./PlannerCard";
 import PlannerColumn from "./PlannerColumn";
@@ -501,19 +507,19 @@ export default function PlannerPage() {
                 <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[.2em] text-blue-600">
                   Workspace planner
                 </p>
-                <div className="flex items-center gap-1 min-w-0">
-                  <select
-                    value={boardId}
-                    onChange={(e) => setBoardId(e.target.value)}
-                    className="max-w-[140px] xs:max-w-48 bg-transparent text-base sm:text-xl font-black outline-none md:max-w-none truncate"
-                  >
-                    {boards.map((item) => (
-                      <option key={item._id} value={item._id}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown size={14} className="text-zinc-400 shrink-0" />
+                <div className="flex items-center min-w-0">
+                  <Select value={boardId} onValueChange={setBoardId}>
+                    <SelectTrigger className="h-auto p-0 border-0 bg-transparent text-base sm:text-xl font-black shadow-none focus-visible:ring-0 [&_svg]:size-4 hover:opacity-80">
+                      <SelectValue placeholder="Select board" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {boards.map((item) => (
+                        <SelectItem key={item._id} value={item._id} className="font-bold">
+                          {item.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
@@ -772,29 +778,34 @@ export default function PlannerPage() {
                 ],
               ],
             ].map(([key, all, options]) => (
-              <select
-                key={key}
-                value={filters[key]}
-                onChange={(e) =>
-                  setFilters((current) => ({
-                    ...current,
-                    [key]: e.target.value,
-                  }))
-                }
-                className="h-9 w-full xs:w-auto flex-1 min-w-30 rounded-xl border border-zinc-200 bg-white px-2.5 text-xs font-semibold dark:border-zinc-700 dark:bg-zinc-950"
-              >
-                <option value={key === "sort" ? "position" : "all"}>
-                  {all}
-                </option>
-                {options.map((option) => (
-                  <option
-                    key={option.value || option}
-                    value={option.value || option}
-                  >
-                    {option.label || option}
-                  </option>
-                ))}
-              </select>
+              <div key={key} className="w-full xs:w-auto flex-1 min-w-30">
+                <Select
+                  value={filters[key]}
+                  onValueChange={(val) =>
+                    setFilters((current) => ({
+                      ...current,
+                      [key]: val,
+                    }))
+                  }
+                >
+                  <SelectTrigger size="sm" className="h-9 w-full rounded-xl border border-zinc-200 bg-white px-2.5 text-xs font-semibold dark:border-zinc-700 dark:bg-zinc-950">
+                    <SelectValue placeholder={all} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={key === "sort" ? "position" : "all"}>
+                      {all}
+                    </SelectItem>
+                    {options.map((option) => (
+                      <SelectItem
+                        key={option.value || option}
+                        value={option.value || option}
+                      >
+                        {option.label || option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             ))}
             <button
               onClick={clearFilters}

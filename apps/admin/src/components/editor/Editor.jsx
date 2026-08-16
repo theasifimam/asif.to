@@ -4,8 +4,6 @@ import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
 import { memo, useEffect, useRef, useState } from "react";
 
-import { Maximize2, Minimize2 } from "lucide-react";
-
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), {
   ssr: false,
   loading: () => (
@@ -18,7 +16,6 @@ const Editor = memo(function Editor({ value, onChange, placeholder }) {
   const [draft, setDraft] = useState(value || "");
   const latestValue = useRef(value || "");
   const timer = useRef(null);
-  const [fullscreen, setFullscreen] = useState(false);
 
   useEffect(() => {
     const next = value || "";
@@ -40,28 +37,13 @@ const Editor = memo(function Editor({ value, onChange, placeholder }) {
 
   return (
     <div
-      className={`md-editor-wrapper ${fullscreen ? "fullscreen" : ""}`}
+      className={`md-editor-wrapper`}
       data-color-mode={theme === "dark" ? "dark" : "light"}
     >
       <div className="flex justify-between items-center mb-2 px-1">
         <span className="text-[10px] font-black text-zinc-500 uppercase tracking-wider">
           Markdown Editor
         </span>
-        <button
-          type="button"
-          onClick={() => setFullscreen(!fullscreen)}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-bold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-300 dark:hover:bg-zinc-900 transition-colors cursor-pointer select-none"
-        >
-          {fullscreen ? (
-            <>
-              <Minimize2 size={13} /> Exit fullscreen
-            </>
-          ) : (
-            <>
-              <Maximize2 size={13} /> Go fullscreen
-            </>
-          )}
-        </button>
       </div>
 
       <MDEditor
@@ -70,7 +52,7 @@ const Editor = memo(function Editor({ value, onChange, placeholder }) {
         // Live preview parses the complete Markdown document on every keypress.
         // Keep typing responsive in the editing surface.
         preview="edit"
-        height={fullscreen ? "100%" : 500}
+        height={500}
         className="w-full font-inter"
         textareaProps={{
           placeholder: placeholder || "START WRITING...",

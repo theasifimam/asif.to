@@ -3,6 +3,7 @@ import Article from "../models/Article.js";
 import fs from "fs";
 
 import { slugify } from "../utils/slugify.js";
+import { logActivity } from "../services/activity.service.js";
 
 /**
  * List all articles with optional filters and pagination
@@ -11,7 +12,9 @@ export const getArticles = async (req, res) => {
   try {
     const { limit = 10, page = 1, topic, author, status, search, type = "article" } = req.query;
 
-    const filter = {};
+    // The legacy article API is public. Personal library entries are served only
+    // through the library routes, which enforce ownership and visibility.
+    const filter = { isUserGenerated: { $ne: true } };
     if (type === "article") filter.type = { $in: ["article", null] };
     else if (type !== "all") filter.type = type;
     if (topic) filter.topic = topic;
@@ -80,6 +83,11 @@ export const getArticleById = async (req, res) => {
       return;
     }
 
+    if (article.isUserGenerated && article.visibility !== "public") {
+      res.status(404).json({ success: false, message: "Article not found." });
+      return;
+    }
+
     // Increment read count only for published articles
     if (article.status === "published") {
       article.readCount = (article.readCount || 0) + 1;
@@ -105,6 +113,11 @@ export const getArticleBySlug = async (req, res) => {
     populate("topic", "name");
 
     if (!article) {
+      res.status(404).json({ success: false, message: "Article not found." });
+      return;
+    }
+
+    if (article.isUserGenerated && article.visibility !== "public") {
       res.status(404).json({ success: false, message: "Article not found." });
       return;
     }
@@ -167,6 +180,8 @@ export const createArticle = async (req, res) => {
       readCount: 0,
       views: []
     });
+
+    await logActivity({ actor: req.user, action: "article.created", entityType: "article", entityId: newArticle._id, entityTitle: newArticle.title, description: "created", severity: "info", url: `/articles/edit/${newArticle._id}` });
 
     res.status(201).json({ success: true, data: newArticle });
   } catch (error) {
@@ -233,6 +248,17 @@ export const updateArticle = async (req, res) => {
       { new: true, runValidators: true }
     ).populate("author", "fullName name email avatar").populate("topic", "name");
 
+    const seoChanged = ["seoTitle", "seoDescription", "keywords", "canonicalUrl"].some((key) => updateData[key] !== undefined);
+    const statusChanged = updateData.status && updateData.status !== article.status;
+    const changedFields = Object.keys(updateData).filter((key) => !["updatedAt", "content"].includes(key));
+    await logActivity({
+      actor: req.user, action: seoChanged ? "article.seo_updated" : statusChanged ? `article.${updateData.status}` : "article.updated",
+      entityType: "article", entityId: article._id, entityTitle: updatedArticle.title,
+      description: seoChanged ? "changed SEO metadata for" : statusChanged ? `${updateData.status === "published" ? "published" : "unpublished"}` : "updated",
+      severity: seoChanged || statusChanged ? "important" : "info", targetUserId: article.author,
+      before: { status: article.status, title: article.title }, after: { status: updatedArticle.status, changedFields }, url: `/articles/edit/${article._id}`,
+    });
+
     res.status(200).json({ success: true, data: updatedArticle });
   } catch (error) {
     console.error("[ARTICLES] updateArticle error:", error);
@@ -262,6 +288,7 @@ export const publishArticle = async (req, res) => {
     article.status = "published";
     article.updatedAt = new Date();
     await article.save();
+    await logActivity({ actor: req.user, action: "article.published", entityType: "article", entityId: article._id, entityTitle: article.title, description: "published", severity: "important", targetUserId: article.author, before: { status: "draft" }, after: { status: "published" }, url: `/articles/edit/${article._id}` });
 
     res.status(200).json({ success: true, data: article, message: "Article published successfully." });
   } catch (error) {
@@ -290,6 +317,7 @@ export const deleteArticle = async (req, res) => {
     }
 
     await Article.findByIdAndDelete(id);
+    await logActivity({ actor: req.user, action: "article.deleted", entityType: "article", entityId: article._id, entityTitle: article.title, description: "permanently deleted", severity: "critical", targetUserId: article.author, url: "/articles/published" });
 
     res.status(200).json({ success: true, message: "Article deleted successfully." });
   } catch (error) {

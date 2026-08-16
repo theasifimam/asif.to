@@ -3,7 +3,7 @@ import { Schema, Document, model } from "mongoose";
 const articleSchema = new Schema({
   type: {
     type: String,
-    enum: ["article", "cheatsheet"],
+    enum: ["article", "cheatsheet", "note", "code_snippet", "debug_fix", "command", "setup_guide", "interview_note", "template", "mini_article", "tip"],
     default: "article",
     index: true,
   },
@@ -24,6 +24,13 @@ const articleSchema = new Schema({
   seoDescription: { type: String, default: "" },
   keywords: { type: [String], default: [] },
   canonicalUrl: { type: String, default: "" },
+  ogTitle: { type: String, default: "" },
+  ogDescription: { type: String, default: "" },
+  tags: { type: [String], default: [] },
+  visibility: { type: String, enum: ["private", "public", "unlisted"], default: "public", index: true },
+  isUserGenerated: { type: Boolean, default: false, index: true },
+  collectionId: { type: Schema.Types.ObjectId, ref: "LibraryCollection", default: null },
+  isPinned: { type: Boolean, default: false },
   author: {
     type: Schema.Types.ObjectId,
     ref: "User",
@@ -67,5 +74,7 @@ const articleSchema = new Schema({
     default: Date.now,
   },
 });
+
+articleSchema.index({ author: 1, isUserGenerated: 1, visibility: 1, updatedAt: -1 });
 
 export default model("Article", articleSchema);

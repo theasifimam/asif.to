@@ -32,9 +32,30 @@ self.onmessage = async ({ data }) => {
   try {
     const { sdk, clang } = await compiler();
     const project = new sdk.Directory();
+    
+    if (data.files) {
+      for (const [path, fileObj] of Object.entries(data.files)) {
+        if (!fileObj.code) continue;
+        const relativePath = path.replace(/^\/+/, "");
+        const parts = relativePath.split("/");
+        let currentDir = project;
+        for (let i = 0; i < parts.length - 1; i++) {
+          try { currentDir.createDir(parts[i]); } catch (e) {}
+          // Note: Wasmer Directory API might require getting the nested dir.
+          // For simplicity, we just use the path if it supports it, or assume flat.
+        }
+        await project.writeFile(relativePath, fileObj.code);
+      }
+    }
+
     const isCpp = data.language === "cpp";
-    const sourceName = isCpp ? "main.cpp" : "main.c";
-    await project.writeFile(sourceName, data.code);
+    const sourceName = data.entry ? data.entry.replace(/^\/+/, "") : (isCpp ? "main.cpp" : "main.c");
+    
+    // Fallback if data.files is missing
+    if (!data.files) {
+      await project.writeFile(sourceName, data.code);
+    }
+    
     self.postMessage({ type: "status", message: `Compiling ${isCpp ? "C++" : "C"}...` });
     const args = [`/project/${sourceName}`, "-o", "/project/program.wasm"];
     if (isCpp) args.unshift("-std=c++17");

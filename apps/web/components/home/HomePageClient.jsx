@@ -44,7 +44,7 @@ export default function HomePageClient({ courses = [] }) {
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-3 sm:px-6 pt-20 sm:pt-24 flex flex-col gap-5 sm:gap-6 min-w-0">
         {/* Modern High-Impact Hero Banner */}
-        <section className="relative overflow-hidden rounded-3xl sm:rounded-[2.5rem] bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white p-5 sm:p-8 shadow-xl shadow-blue-500/15 min-w-0">
+        <section className="relative overflow-hidden rounded-3xl sm:rounded-[2.5rem] bg-linear-to-br from-blue-600 via-indigo-600 to-purple-700 text-white p-5 sm:p-8 shadow-xl shadow-blue-500/15 min-w-0">
           <div className="absolute -right-8 -bottom-8 w-56 h-56 rounded-full bg-white/10 blur-2xl pointer-events-none" />
           <div className="absolute top-2 right-12 w-28 h-28 rounded-full bg-blue-400/20 blur-xl pointer-events-none" />
 
@@ -77,11 +77,17 @@ export default function HomePageClient({ courses = [] }) {
                 placeholder="Search courses, hooks, syntax, MongoDB queries..."
                 readOnly
                 aria-label="Open global search"
-                onFocus={() => window.dispatchEvent(new CustomEvent("asif:open-search"))}
-                onClick={() => window.dispatchEvent(new CustomEvent("asif:open-search"))}
+                onFocus={() =>
+                  window.dispatchEvent(new CustomEvent("asif:open-search"))
+                }
+                onClick={() =>
+                  window.dispatchEvent(new CustomEvent("asif:open-search"))
+                }
                 className="w-full h-12 pl-11 pr-12 rounded-full bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs sm:text-sm shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-400/30 font-semibold"
               />
-              <kbd className="absolute right-4 top-1/2 -translate-y-1/2 hidden rounded bg-zinc-100 px-2 py-1 text-[10px] font-bold text-zinc-500 dark:bg-zinc-800 sm:block">⌘K</kbd>
+              <kbd className="absolute right-4 top-1/2 -translate-y-1/2 hidden rounded bg-zinc-100 px-2 py-1 text-[10px] font-bold text-zinc-500 dark:bg-zinc-800 sm:block">
+                ⌘K
+              </kbd>
             </div>
 
             {/* Quick Action Navigation Pills */}
@@ -174,7 +180,7 @@ export default function HomePageClient({ courses = [] }) {
             <Link
               key={label}
               href={href}
-              className="group flex flex-col justify-between p-3.5 sm:p-4 rounded-3xl border border-zinc-200/70 bg-white shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 min-h-[105px] sm:min-h-[115px]"
+              className="group flex flex-col justify-between p-3.5 sm:p-4 rounded-3xl border border-zinc-200/70 bg-white shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 min-h-26.25 sm:min-h-28.75"
             >
               <span
                 className={`flex h-9 w-9 items-center justify-center rounded-2xl ${color}`}
@@ -315,7 +321,7 @@ export default function HomePageClient({ courses = [] }) {
         {/* Interview Prep Course Cards */}
         <section
           id="interview-prep"
-          className="scroll-mt-24 rounded-3xl sm:rounded-[2.5rem] bg-gradient-to-br from-orange-500/10 via-rose-500/10 to-amber-500/10 p-4 sm:p-7 shadow-xs border border-orange-500/15 overflow-hidden min-w-0"
+          className="scroll-mt-24 rounded-3xl sm:rounded-[2.5rem] bg-linear-to-br from-orange-500/10 via-rose-500/10 to-amber-500/10 p-4 sm:p-7 shadow-xs border border-orange-500/15 overflow-hidden min-w-0"
         >
           <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between mb-4">
             <div>
@@ -339,7 +345,7 @@ export default function HomePageClient({ courses = [] }) {
               <Link
                 key={course._id || course.id}
                 href={`/${course.slug}/interview-questions`}
-                className="group flex items-center justify-between gap-3 rounded-2xl sm:rounded-3xl bg-white/90 dark:bg-zinc-900/90 p-3.5 sm:p-4 transition-all hover:bg-white hover:shadow-md dark:hover:bg-zinc-900 shadow-xs min-h-[64px] min-w-0 overflow-hidden border border-zinc-200/50 dark:border-zinc-800/50"
+                className="group flex items-center justify-between gap-3 rounded-2xl sm:rounded-3xl bg-white/90 dark:bg-zinc-900/90 p-3.5 sm:p-4 transition-all hover:bg-white hover:shadow-md dark:hover:bg-zinc-900 shadow-xs min-h-16 min-w-0 overflow-hidden border border-zinc-200/50 dark:border-zinc-800/50"
               >
                 <div className="min-w-0 flex-1">
                   <span className="block truncate text-xs sm:text-sm font-black text-foreground group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
@@ -359,7 +365,7 @@ export default function HomePageClient({ courses = [] }) {
         <RevisionFlashcards selectedTech={selectedTech} />
 
         {/* Practice Quiz Callout Banner */}
-        <section className="flex flex-col sm:flex-row items-center justify-between p-5 sm:p-7 rounded-3xl sm:rounded-[2.5rem] bg-gradient-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border border-blue-500/15 shadow-xs overflow-hidden min-w-0 gap-4">
+        <section className="flex flex-col sm:flex-row items-center justify-between p-5 sm:p-7 rounded-3xl sm:rounded-[2.5rem] bg-linear-to-r from-blue-600/10 via-indigo-600/10 to-purple-600/10 border border-blue-500/15 shadow-xs overflow-hidden min-w-0 gap-4">
           <div className="flex items-center gap-3.5 min-w-0 w-full sm:w-auto">
             <div className="p-3 rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/30 shrink-0">
               <HelpCircle className="w-5 h-5" />

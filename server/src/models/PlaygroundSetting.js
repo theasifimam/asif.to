@@ -8,6 +8,7 @@ const languageSchema = new Schema({
   order: { type: Number, default: 0 },
   beta: { type: Boolean, default: false },
   unavailableMessage: { type: String, trim: true, maxlength: 300 },
+  initialCode: { type: String, default: "" },
 }, { _id: false });
 
 const playgroundSettingSchema = new Schema({

@@ -9,7 +9,6 @@ import {
   BookOpen,
   Users,
   Hash,
-  Bell,
   LogOut,
   Info,
   GraduationCap,
@@ -21,6 +20,7 @@ import {
   ChartNoAxesCombined,
   SearchCheck,
   Code2,
+  ScrollText,
 } from "lucide-react";
 import AdminGlobalSearch from "@/components/search/AdminGlobalSearch";
 import { useAuth } from "@/contexts/AuthContext";
@@ -45,6 +45,10 @@ import {
   MobileBottomNavbar,
   HeaderAccount,
 } from "@/components/navigation";
+import NotificationCenter from "@/components/navigation/NotificationCenter";
+import MessageHeaderButton from "@/components/navigation/MessageHeaderButton";
+import { MessagingProvider } from "@/contexts/MessagingContext";
+import { FloatingChatDock } from "@/components/messaging";
 
 const NAV_ITEMS = [
   {
@@ -62,6 +66,13 @@ const NAV_ITEMS = [
         icon: KanbanSquare,
         permission: "planner.view",
         description: "Kanban boards & tasks",
+      },
+      {
+        name: "Activity",
+        href: "/activity",
+        icon: ScrollText,
+        permission: "users.view",
+        description: "Platform change history",
       },
       {
         name: "Analytics",
@@ -145,8 +156,8 @@ const NAV_ITEMS = [
         name: "Messages",
         href: "/messages",
         icon: MessageSquare,
-        permission: "users.edit",
-        description: "User inbox & inquiries",
+        permission: "messages.view",
+        description: "Direct & team conversations",
       },
     ],
   },
@@ -203,21 +214,62 @@ export default function AdminLayout({ children }) {
   }, [user, loading, pathname, router]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScroll = mainRef.current
-        ? mainRef.current.scrollTop
-        : window.scrollY || document.documentElement.scrollTop || 0;
-      const delta = currentScroll - lastScrollY.current;
+    setIsNavVisible(true);
+    lastScrollY.current = 0;
+  }, [pathname]);
 
-      if (currentScroll <= 15) {
-        setIsNavVisible(true);
-      } else if (delta > 6) {
-        setIsNavVisible(false);
-      } else if (delta < -6) {
-        setIsNavVisible(true);
+  useEffect(() => {
+    let ticking = false;
+
+    const handleScroll = (event) => {
+      const target = event?.target;
+
+      // Ignore scroll events originating from inside dialogs, modals, floating docks, or the menu island
+      if (
+        target &&
+        target !== document &&
+        target !== window &&
+        target !== mainRef.current
+      ) {
+        if (
+          target.closest?.(
+            "[data-scroll-ignore], [role='dialog'], nav, .scrollbar-none, aside, header, [id*='dock'], [id*='island']",
+          ) ||
+          (mainRef.current && !mainRef.current.contains(target))
+        ) {
+          return;
+        }
       }
 
-      lastScrollY.current = currentScroll;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          let currentScroll = 0;
+
+          if (mainRef.current && mainRef.current.scrollTop > 0) {
+            currentScroll = mainRef.current.scrollTop;
+          } else {
+            currentScroll =
+              window.scrollY || document.documentElement.scrollTop || 0;
+          }
+
+          const delta = currentScroll - lastScrollY.current;
+
+          // When at top of page, always show header & navbar
+          if (currentScroll <= 20) {
+            setIsNavVisible(true);
+          } else if (delta > 8) {
+            // Scrolling down on page -> Hide both top header and bottom tab bar
+            setIsNavVisible(false);
+          } else if (delta < -8) {
+            // Scrolling up on page -> Reveal both top header and bottom tab bar
+            setIsNavVisible(true);
+          }
+
+          lastScrollY.current = Math.max(0, currentScroll);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
     const mainEl = mainRef.current;
@@ -225,6 +277,7 @@ export default function AdminLayout({ children }) {
       mainEl.addEventListener("scroll", handleScroll, { passive: true });
     }
     window.addEventListener("scroll", handleScroll, { passive: true });
+
     return () => {
       if (mainEl) mainEl.removeEventListener("scroll", handleScroll);
       window.removeEventListener("scroll", handleScroll);
@@ -259,8 +312,10 @@ export default function AdminLayout({ children }) {
   })).filter((group) => group.items.length > 0);
   const requiredPermission = permissionForPath(pathname);
   const canViewPage = hasPermission(user, requiredPermission);
+  const isMessagesRoute = pathname?.startsWith("/messages");
 
   return (
+    <MessagingProvider>
     <div className="flex h-dvh w-full max-w-full overflow-hidden bg-white font-sans text-zinc-900 transition-colors duration-300 dark:bg-[#09090b] dark:text-zinc-200">
       {/* Desktop Sidebar */}
       <Sidebar
@@ -274,17 +329,15 @@ export default function AdminLayout({ children }) {
       />
 
       {/* Main Panel */}
-      <div
-        className={`relative flex min-w-0 flex-1 flex-col overflow-hidden transition-all duration-300 ease-in-out ${
-          isNavVisible ? "pb-16 lg:pb-0" : "pb-0 lg:pb-0"
-        }`}
-      >
-        {/* Global Minimal Header - Transparent & Seamless */}
+      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
+        {/* Global Minimal Header - Absolute over content for zero layout shift during scroll */}
         <header
-          className={`z-40 flex h-16 shrink-0 items-center justify-between bg-white/20 backdrop-blur-md dark:bg-zinc-900/30 dark:backdrop-blur-md px-4 transition-all duration-200 ease-out sm:px-6 md:px-8 lg:px-10 ${
+          className={`absolute top-0 left-0 right-0 z-40 flex h-16 shrink-0 items-center justify-between bg-white/85 backdrop-blur-xl dark:bg-[#09090b]/85 dark:backdrop-blur-xl px-4 transition-all duration-300 ease-out sm:px-6 md:px-8 lg:px-10 ${
+            isMessagesRoute ? "hidden lg:flex" : ""
+          } ${
             isNavVisible
               ? "translate-y-0 opacity-100"
-              : "-translate-y-full opacity-0 pointer-events-none -mb-16"
+              : "-translate-y-full opacity-0 pointer-events-none"
           }`}
         >
           <div className="flex items-center gap-2 md:gap-6">
@@ -304,18 +357,44 @@ export default function AdminLayout({ children }) {
               </span>
             </Link>
 
-            <AdminGlobalSearch />
+            <div className="hidden sm:block">
+              <AdminGlobalSearch />
+            </div>
           </div>
 
-          <div className="flex min-w-0 items-center gap-2 sm:gap-3 md:gap-2">
-            <div className="hidden items-center h-10 gap-2 rounded-full border border-zinc-200/80 bg-zinc-50/80 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition-colors dark:border-zinc-800/80 dark:bg-zinc-900/60 sm:flex">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
+            <div className="hidden items-center h-10 gap-2 rounded-full border border-zinc-200/80 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition-colors dark:border-zinc-800/80 sm:flex">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span className="hidden sm:inline">Active</span>
             </div>
-            <button className="relative hidden h-9 w-9 items-center justify-center rounded-full border border-zinc-200/80 text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800/80 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white xs:flex md:h-10 md:w-10">
-              <Bell size={17} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-blue-600 rounded-full border-2 border-white dark:border-[#121215]"></span>
-            </button>
+
+            {/* Utility Icon Actions - Hidden on smaller devices */}
+            <div className="hidden sm:block">
+              <MessageHeaderButton />
+            </div>
+            <div className="hidden sm:block">
+              <NotificationCenter />
+            </div>
+
+            {/* Subtle Divider */}
+            {hasPermission(user, "articles.create") &&
+              pathname !== "/articles/new" &&
+              !pathname.startsWith("/articles/edit/") && (
+                <div className="hidden h-5 w-px bg-zinc-200 dark:bg-zinc-800 lg:block mx-0.5" />
+              )}
+
+            {/* Primary Action Button - Visible on desktop */}
+            {hasPermission(user, "articles.create") &&
+              pathname !== "/articles/new" &&
+              !pathname.startsWith("/articles/edit/") && (
+                <Link
+                  href="/articles/new"
+                  className="hidden lg:inline-flex items-center gap-2 h-10 px-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-outfit text-xs font-bold shadow-xs transition-all hover:shadow-md hover:shadow-blue-600/20 active:scale-95 shrink-0"
+                >
+                  <FileEdit size={14} />
+                  <span>Write article</span>
+                </Link>
+              )}
 
             <HeaderAccount
               user={user}
@@ -325,10 +404,12 @@ export default function AdminLayout({ children }) {
           </div>
         </header>
 
-        {/* Content Viewport */}
+        {/* Content Viewport with constant top and bottom padding */}
         <main
           ref={mainRef}
-          className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain bg-[#f3f4f6] dark:bg-[#09090b]"
+          className={`min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain bg-[#f3f4f6] dark:bg-[#09090b] ${
+            !isMessagesRoute ? "pt-16 pb-24 lg:pb-8" : "pt-0 pb-0"
+          }`}
         >
           {canViewPage ? (
             children
@@ -337,29 +418,15 @@ export default function AdminLayout({ children }) {
           )}
         </main>
 
-        {hasPermission(user, "articles.create") &&
-          pathname !== "/articles/new" &&
-          !pathname.startsWith("/articles/edit/") && (
-            <Link
-              href="/articles/new"
-              aria-label="Write a new article"
-              className={`fixed right-4 lg:right-8 z-40 inline-flex h-12 w-12 items-center justify-center gap-2 rounded-full bg-blue-600 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 active:translate-y-0 sm:h-13 sm:w-auto sm:px-6 ${
-                isNavVisible
-                  ? "bottom-20 lg:bottom-8 translate-y-0"
-                  : "bottom-4 lg:bottom-8 translate-y-0"
-              }`}
-            >
-              <FileEdit className="h-4.5 w-4.5" />
-              <span className="hidden sm:inline">Write article</span>
-            </Link>
-          )}
+        {/* Floating LinkedIn/Instagram-style Docked Messaging Drawer */}
+        <FloatingChatDock isNavVisible={isNavVisible} />
       </div>
 
       {/* Mobile Bottom Navbar */}
       <MobileBottomNavbar
         navItems={visibleNavItems}
         user={user}
-        isVisible={isNavVisible}
+        isVisible={isNavVisible && !isMessagesRoute}
       />
 
       {/* Logout Confirmation Dialog */}
@@ -398,5 +465,6 @@ export default function AdminLayout({ children }) {
         </DialogContent>
       </Dialog>
     </div>
+    </MessagingProvider>
   );
 }

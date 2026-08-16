@@ -24,7 +24,6 @@ export default function FreePlayground({ fillViewport = false }) {
         Editable code and output workspace
       </h2>
       <InteractiveCode
-        key={language}
         language={language}
         languageOptions={languageOptions}
         onLanguageChange={setLanguage}

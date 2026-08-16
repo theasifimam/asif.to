@@ -26,7 +26,7 @@ async function loadRuntime() {
   return runtimeWorker;
 }
 
-function execute(worker, code, input) {
+function execute(worker, code, input, options = {}) {
   return new Promise((resolve, reject) => {
     const id = ++requestId;
     let stdout = "";
@@ -45,7 +45,7 @@ function execute(worker, code, input) {
     };
     worker.addEventListener("message", onMessage);
     worker.addEventListener("error", onError);
-    worker.postMessage([id, "run", code, input, {}]);
+    worker.postMessage([id, "run", code, input, options]);
   });
 }
 
@@ -54,7 +54,15 @@ self.onmessage = async ({ data }) => {
   try {
     const worker = await loadRuntime();
     self.postMessage({ type: "status", message: "Running C++..." });
-    const { stdout, exitCode } = await execute(worker, String(data.code || ""), String(data.input || ""));
+    let includes = {};
+    if (data.files) {
+      for (const [path, fileObj] of Object.entries(data.files)) {
+        if (!fileObj.code) continue;
+        let name = path.split("/").pop();
+        includes[name] = fileObj.code;
+      }
+    }
+    const { stdout, exitCode } = await execute(worker, String(data.code || ""), String(data.input || ""), { includes });
     self.postMessage({ type: "result", stdout, stderr: exitCode ? `Program exited with code ${exitCode}.` : "" });
   } catch (error) {
     self.postMessage({ type: "error", error: error?.message || String(error) });

@@ -169,12 +169,12 @@ export default function TopicsPage() {
         actions={
           <>
             <ViewToggle view={viewMode} onViewChange={setViewMode} />
-            <Link href="/categories">
-              <Button variant="outline">
+            <Button variant="outline" asChild>
+              <Link href="/categories">
                 <Filter className="mr-2 h-4 w-4" /> Categories
-              </Button>
-            </Link>
-            <Button asChild className="w-full sm:w-auto">
+              </Link>
+            </Button>
+            <Button asChild>
               <Link href="/topics/new">
                 <Plus className="mr-2 h-4 w-4" /> New topic
               </Link>
