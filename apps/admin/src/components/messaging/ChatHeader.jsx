@@ -2,19 +2,32 @@
 
 import { ArrowLeft, Hash, Link2, RefreshCw, UserRound } from "lucide-react";
 import { avatarUrl, conversationName, otherMember } from "./messaging-utils";
+import { useMessaging } from "@/contexts/MessagingContext";
 
-function HeaderAvatar({ user }) {
+function HeaderAvatar({ user, online = false }) {
   const source = avatarUrl(user?.avatar);
-  return source ? (
-    <img
-      src={source}
-      alt=""
-      className="h-10 w-10 shrink-0 rounded-xl object-cover"
-    />
-  ) : (
-    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-200 text-xs font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
-      {user?.fullName?.[0] || <UserRound size={16} />}
-    </span>
+  return (
+    <div className="relative shrink-0">
+      {source ? (
+        <img
+          src={source}
+          alt=""
+          className="h-10 w-10 shrink-0 rounded-xl object-cover"
+        />
+      ) : (
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-200 text-xs font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+          {user?.fullName?.[0] || <UserRound size={16} />}
+        </span>
+      )}
+      {online && (
+        <span
+          className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-white bg-emerald-500 dark:border-zinc-950"
+          title="Online"
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -22,11 +35,28 @@ export default function ChatHeader({
   selected,
   currentUserId,
   status,
+  typingUsers = [],
   onBack,
 }) {
+  const { isOnline } = useMessaging();
   if (!selected) return null;
 
   const other = otherMember(selected, currentUserId);
+  const isDirect = selected.type === "direct";
+  const userOnline = isDirect && isOnline(other?._id);
+
+  const activeTypers = Array.isArray(typingUsers)
+    ? typingUsers.filter((u) => String(u?._id) !== String(currentUserId))
+    : [];
+
+  const typingLabel =
+    activeTypers.length === 1
+      ? isDirect
+        ? "typing…"
+        : `${activeTypers[0]?.fullName?.split(" ")[0] || "Someone"} is typing…`
+      : activeTypers.length > 1
+        ? `${activeTypers.length} people are typing…`
+        : null;
 
   return (
     <header className="flex min-h-18 shrink-0 items-center gap-3 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800 sm:px-6">
@@ -38,8 +68,8 @@ export default function ChatHeader({
         <ArrowLeft size={18} />
       </button>
 
-      {selected.type === "direct" ? (
-        <HeaderAvatar user={other} />
+      {isDirect ? (
+        <HeaderAvatar user={other} online={userOnline} />
       ) : (
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10">
           {selected.type === "discussion" ? (
@@ -56,15 +86,31 @@ export default function ChatHeader({
             ? selected.entityTitle
             : conversationName(selected, currentUserId)}
         </h2>
-        <p className="truncate text-[10px] text-zinc-500">
-          {selected.type === "direct" ? (
-            <span className="capitalize">
-              {other?.role?.replace("_", " ")}
+        <div className="truncate text-[10px]">
+          {typingLabel ? (
+            <span className="flex items-center gap-1.5 font-bold text-blue-600 dark:text-blue-400 animate-pulse">
+              <span className="flex gap-0.5 items-center">
+                <span className="h-1 w-1 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "0ms" }} />
+                <span className="h-1 w-1 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "150ms" }} />
+                <span className="h-1 w-1 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: "300ms" }} />
+              </span>
+              {typingLabel}
             </span>
+          ) : isDirect ? (
+            userOnline ? (
+              <span className="flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Online
+              </span>
+            ) : (
+              <span className="text-zinc-500 dark:text-zinc-400 capitalize">
+                {other?.role ? `${other.role.replace("_", " ")} · Offline` : "Offline"}
+              </span>
+            )
           ) : (
-            selected.description
+            <span className="text-zinc-500 dark:text-zinc-400">{selected.description}</span>
           )}
-        </p>
+        </div>
       </div>
 
       {selected.entityUrl && (
@@ -84,3 +130,4 @@ export default function ChatHeader({
     </header>
   );
 }
+

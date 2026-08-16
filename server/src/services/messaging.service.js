@@ -234,8 +234,17 @@ export async function sendMessage(user, conversationId, rawContent, clientId, op
 async function emitMessageEvents(conversation, message, recipientIds, senderId) {
   const io = getMessagingSocketServer();
   if (!io) return;
-  io.to(`conversation:${conversation._id}`).emit("new_message", message);
+
+  const convRoom = `conversation:${conversation._id}`;
   const participantIds = [...new Set([...recipientIds, String(senderId)])];
+
+  // Target both conversation room and individual recipient user rooms to ensure reliable delivery
+  let broadcaster = io.to(convRoom);
+  participantIds.forEach((userId) => {
+    broadcaster = broadcaster.to(`user:${userId}`);
+  });
+  broadcaster.emit("new_message", message);
+
   await Promise.all(participantIds.map(async (userId) => {
     const state = await getUnreadSummary(userId);
     io.to(`user:${userId}`).emit("conversation_updated", {

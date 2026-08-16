@@ -102,7 +102,7 @@ export default function BottomNav() {
     <>
       {/* Floating Bottom Tab Bar for Mobile - Always visible & elevated above backdrop */}
       <nav
-        className={`fixed left-1/2 -translate-x-1/2 z-110 md:hidden bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl px-3 py-1.5 rounded-full shadow-2xl border border-zinc-200/80 dark:border-zinc-800/80 flex items-center gap-1.5 sm:gap-2 transition-[bottom,opacity] duration-300 ease-in-out ${
+        className={`fixed left-1/2 -translate-x-1/2 z-110 md:hidden max-w-[calc(100vw-1.5rem)] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl p-1.5 rounded-full shadow-2xl border border-zinc-200/80 dark:border-zinc-800/80 flex items-center justify-center gap-1 transition-[bottom,opacity] duration-300 ease-in-out ${
           isNavVisible
             ? "bottom-4 opacity-100"
             : "-bottom-20 opacity-0 pointer-events-none"
@@ -112,27 +112,38 @@ export default function BottomNav() {
         <Link
           href="/"
           onClick={() => setIsMenuOpen(false)}
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full transition-all duration-300 ${
+          aria-label="Home"
+          className={`flex items-center gap-1.5 rounded-full transition-all duration-300 ${
             isHomeActive && !isMenuOpen
-              ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 scale-105"
-              : "text-zinc-500 dark:text-zinc-400 hover:text-foreground active:scale-95"
+              ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 px-3.5 py-2 scale-105"
+              : "p-2.5 text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800/60 active:scale-95"
           }`}
         >
-          <Home className="w-4 h-4" />
-          <span className="text-xs font-bold tracking-tight">Home</span>
+          <Home className="w-4 h-4 shrink-0" />
+          {isHomeActive && !isMenuOpen && (
+            <span className="text-xs font-bold tracking-tight whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
+              Home
+            </span>
+          )}
         </Link>
 
+        {/* Library Tab */}
         <Link
           href="/library"
           onClick={() => setIsMenuOpen(false)}
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full transition-all duration-300 ${
+          aria-label="Library"
+          className={`flex items-center gap-1.5 rounded-full transition-all duration-300 ${
             pathname.startsWith("/library") && !isMenuOpen
-              ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 scale-105"
-              : "text-zinc-500 dark:text-zinc-400 hover:text-foreground active:scale-95"
+              ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 px-3.5 py-2 scale-105"
+              : "p-2.5 text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800/60 active:scale-95"
           }`}
         >
-          <BookOpen className="w-4 h-4" />
-          <span className="text-xs font-bold tracking-tight">Library</span>
+          <BookOpen className="w-4 h-4 shrink-0" />
+          {pathname.startsWith("/library") && !isMenuOpen && (
+            <span className="text-xs font-bold tracking-tight whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
+              Library
+            </span>
+          )}
         </Link>
 
         {/* Profile Tab */}
@@ -147,14 +158,15 @@ export default function BottomNav() {
               setIsMenuOpen(false);
             }
           }}
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full transition-all duration-300 ${
+          aria-label="Profile"
+          className={`flex items-center gap-1.5 rounded-full transition-all duration-300 ${
             isProfileActive && !isMenuOpen
-              ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 scale-105"
-              : "text-zinc-500 dark:text-zinc-400 hover:text-foreground active:scale-95"
+              ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 px-3.5 py-2 scale-105"
+              : "p-2.5 text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800/60 active:scale-95"
           }`}
         >
           {!isInitialized ? (
-            <div className="w-4 h-4 rounded-full bg-zinc-300 dark:bg-zinc-700 animate-pulse" />
+            <div className="w-4 h-4 rounded-full bg-zinc-300 dark:bg-zinc-700 animate-pulse shrink-0" />
           ) : isAuthenticated && user ? (
             <div className="relative w-4 h-4 rounded-full overflow-hidden shrink-0 border border-white/40">
               {user.avatar && !user.avatar.includes("ui-avatars.com") ? (
@@ -172,31 +184,39 @@ export default function BottomNav() {
               )}
             </div>
           ) : (
-            <User className="w-4 h-4" />
+            <User className="w-4 h-4 shrink-0" />
           )}
-          <span className="text-xs font-bold tracking-tight">Profile</span>
+          {isProfileActive && !isMenuOpen && (
+            <span className="text-xs font-bold tracking-tight whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
+              Profile
+            </span>
+          )}
         </Link>
 
         {/* Divider */}
-        <div className="w-px h-5 bg-zinc-200 dark:bg-zinc-800 mx-0.5" />
+        <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-800 mx-0.5 shrink-0" />
 
         {/* Menu Expansion Tab Button */}
         <button
           type="button"
           onClick={() => setIsMenuOpen((prev) => !prev)}
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full transition-all duration-300 cursor-pointer ${
-            isMenuOpen
-              ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-md scale-105"
-              : "text-zinc-500 dark:text-zinc-400 hover:text-foreground active:scale-95"
-          }`}
           aria-label="Toggle navigation menu"
+          className={`flex items-center gap-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+            isMenuOpen
+              ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-md px-3.5 py-2 scale-105"
+              : "p-2.5 text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800/60 active:scale-95"
+          }`}
         >
           {isMenuOpen ? (
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 shrink-0" />
           ) : (
-            <Menu className="w-4 h-4" />
+            <Menu className="w-4 h-4 shrink-0" />
           )}
-          <span className="text-xs font-bold tracking-tight">Menu</span>
+          {isMenuOpen && (
+            <span className="text-xs font-bold tracking-tight whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
+              Close
+            </span>
+          )}
         </button>
       </nav>
 

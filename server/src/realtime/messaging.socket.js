@@ -5,7 +5,14 @@ import Conversation from "../models/Conversation.js";
 import { getPermissionsForRole } from "../utils/permissions.js";
 import { canAccessConversation, canUseMessaging } from "../services/messagingAccess.service.js";
 import { accessibleConversationFilter, markConversationRead, sendMessage } from "../services/messaging.service.js";
-import { clearActiveConversation, setActiveConversation, setMessagingSocketServer } from "../services/messagingRealtime.service.js";
+import {
+  clearActiveConversation,
+  getOnlineUserIds,
+  setActiveConversation,
+  setMessagingSocketServer,
+  userConnected,
+  userDisconnected,
+} from "../services/messagingRealtime.service.js";
 
 const cookieToken = (header = "") => header.split(";").map((part) => part.trim().split("=")).find(([key]) => key === "token")?.[1];
 
@@ -30,9 +37,23 @@ export function initializeMessagingSocket(httpServer, origins) {
 
   io.on("connection", async (socket) => {
     const user = socket.user;
-    socket.join(`user:${user._id}`);
+    const userId = String(user._id);
+    socket.join(`user:${userId}`);
+
+    const isFirstConnection = userConnected(userId, socket.id);
+    if (isFirstConnection) {
+      io.emit("presence:update", { userId, status: "online" });
+    }
+
+    // Send the current list of online user IDs to the connected client
+    socket.emit("presence:list", getOnlineUserIds());
+
     const allowed = await Conversation.find(accessibleConversationFilter(user)).select("_id").lean();
     allowed.forEach((conversation) => socket.join(`conversation:${conversation._id}`));
+
+    socket.on("presence:get", (acknowledge = () => {}) => {
+      acknowledge({ success: true, onlineUsers: getOnlineUserIds() });
+    });
 
     socket.on("conversation:join", async ({ conversationId } = {}, acknowledge = () => {}) => {
       try {
@@ -46,18 +67,54 @@ export function initializeMessagingSocket(httpServer, origins) {
     });
 
     socket.on("conversation:leave", ({ conversationId } = {}) => {
-      if (conversationId) socket.leave(`conversation:${conversationId}`);
+      if (conversationId) {
+        socket.to(`conversation:${conversationId}`).emit("typing:stop", {
+          conversationId: String(conversationId),
+          userId,
+        });
+      }
       clearActiveConversation(socket.id);
+    });
+
+    socket.on("typing:start", ({ conversationId } = {}) => {
+      if (!conversationId) return;
+      socket.to(`conversation:${conversationId}`).emit("typing:start", {
+        conversationId: String(conversationId),
+        user: {
+          _id: userId,
+          fullName: user.fullName,
+          username: user.username,
+          avatar: user.avatar,
+        },
+      });
+    });
+
+    socket.on("typing:stop", ({ conversationId } = {}) => {
+      if (!conversationId) return;
+      socket.to(`conversation:${conversationId}`).emit("typing:stop", {
+        conversationId: String(conversationId),
+        userId,
+      });
     });
 
     socket.on("message:send", async ({ conversationId, content, clientId, replyToMessageId, attachmentIds } = {}, acknowledge = () => {}) => {
       try {
         const result = await sendMessage(user, conversationId, content, clientId, { replyToMessageId, attachmentIds });
+        socket.to(`conversation:${conversationId}`).emit("typing:stop", {
+          conversationId: String(conversationId),
+          userId,
+        });
         acknowledge({ success: true, ...result });
       } catch (error) { acknowledge({ success: false, message: error.status ? error.message : "Message could not be sent." }); }
     });
 
-    socket.on("disconnect", () => clearActiveConversation(socket.id));
+    socket.on("disconnect", () => {
+      const { isOffline } = userDisconnected(socket.id);
+      if (isOffline) {
+        io.emit("presence:update", { userId, status: "offline" });
+      }
+    });
   });
   return io;
 }
+

@@ -56,7 +56,19 @@ export default function MessageBubble({
   compact = false,
 }) {
   const [actions, setActions] = useState(false);
+  const [placement, setPlacement] = useState("top");
   const actionsRef = useRef(null);
+
+  const handleToggleActions = (e) => {
+    e.stopPropagation();
+    if (!actions) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setPlacement(rect.top < 260 ? "bottom" : "top");
+      setActions(true);
+    } else {
+      setActions(false);
+    }
+  };
 
   // Dismiss actions menu on click outside or Escape
   useEffect(() => {
@@ -298,10 +310,7 @@ export default function MessageBubble({
           {!message.pending && !message.deletedAt && (
             <div ref={actionsRef} className="contents">
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActions(!actions);
-                }}
+                onClick={handleToggleActions}
                 className={`absolute top-1/2 -translate-y-1/2 z-10 hidden rounded-full border border-zinc-200 bg-white p-1 text-zinc-500 shadow-xs transition hover:bg-zinc-100 group-hover:block dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 ${
                   mine ? "-left-8" : "-right-8"
                 }`}
@@ -309,13 +318,17 @@ export default function MessageBubble({
                 <MoreHorizontal size={13} />
               </button>
 
-              {/* Actions Popover Menu - Positioned cleanly above bubble without screen overflow */}
+              {/* Actions Popover Menu - Positioned intelligently above/below bubble to prevent overflow */}
               {actions && (
                 <div
                   className={`absolute z-30 flex w-44 sm:w-48 flex-col rounded-2xl border border-zinc-200/90 bg-white/95 backdrop-blur-md p-1.5 text-xs font-bold shadow-2xl dark:border-zinc-800/90 dark:bg-[#18181c]/95 max-w-[calc(100vw-2.5rem)] animate-in fade-in zoom-in-95 duration-100 ${
-                    mine
-                      ? "right-0 bottom-full mb-2 origin-bottom-right"
-                      : "left-0 bottom-full mb-2 origin-bottom-left"
+                    placement === "bottom"
+                      ? mine
+                        ? "right-0 top-full mt-2 origin-top-right"
+                        : "left-0 top-full mt-2 origin-top-left"
+                      : mine
+                        ? "right-0 bottom-full mb-2 origin-bottom-right"
+                        : "left-0 bottom-full mb-2 origin-bottom-left"
                   }`}
                 >
                   <div className="flex justify-between gap-1 px-1.5 py-1">

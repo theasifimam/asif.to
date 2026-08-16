@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { io } from "socket.io-client";
 import { toast } from "sonner";
 import { X } from "lucide-react";
@@ -17,8 +25,11 @@ const imageUrl = (avatar) => {
 };
 
 const socketOrigin = () => {
-  try { return new URL(process.env.NEXT_PUBLIC_API_URL).origin; }
-  catch { return undefined; }
+  try {
+    return new URL(process.env.NEXT_PUBLIC_API_URL).origin;
+  } catch {
+    return undefined;
+  }
 };
 
 export function MessagingProvider({ children }) {
@@ -26,11 +37,25 @@ export function MessagingProvider({ children }) {
   const [socket, setSocket] = useState(null);
   const [status, setStatus] = useState("connecting");
   const [unread, setUnread] = useState({ totalUnread: 0, conversations: {} });
-  const currentUserId = String(user?._id || user?.id || "");
+  const [onlineUserIds, setOnlineUserIds] = useState([]);
+  const userRef = useRef(user);
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
+
   const refreshUnread = useCallback(async () => {
     const result = await messagingApi.unread();
     if (result.success) setUnread(result.data.data);
   }, []);
+
+  const isOnline = useCallback(
+    (userId) => {
+      if (!userId) return false;
+      const id = String(userId?._id || userId?.id || userId);
+      return onlineUserIds.includes(id);
+    },
+    [onlineUserIds],
+  );
 
   useEffect(() => {
     const token = getAuthToken();
@@ -43,28 +68,61 @@ export function MessagingProvider({ children }) {
       reconnectionDelayMax: 5000,
       transports: ["websocket", "polling"],
     });
-    connection.on("connect", () => { setSocket(connection); setStatus("connected"); refreshUnread(); });
+    connection.on("connect", () => {
+      setSocket(connection);
+      setStatus("connected");
+      refreshUnread();
+    });
     connection.on("disconnect", () => setStatus("reconnecting"));
     connection.io.on("reconnect_attempt", () => setStatus("reconnecting"));
     connection.on("connect_error", () => setStatus("reconnecting"));
     connection.on("unread_updated", setUnread);
-    connection.on("notification_updated", () => window.dispatchEvent(new Event("notifications:refresh")));
+    connection.on("presence:list", (ids) => {
+      if (Array.isArray(ids)) setOnlineUserIds(ids.map(String));
+    });
+    connection.on("presence:update", ({ userId, status: userStatus }) => {
+      if (!userId) return;
+      const targetId = String(userId);
+      setOnlineUserIds((prev) =>
+        userStatus === "online"
+          ? Array.from(new Set([...prev, targetId]))
+          : prev.filter((id) => id !== targetId),
+      );
+    });
+    connection.on("notification_updated", () =>
+      window.dispatchEvent(new Event("notifications:refresh")),
+    );
     connection.on("new_message", (message) => {
+      const myId = String(userRef.current?._id || userRef.current?.id || "");
       const sender = message?.senderId;
       const senderId = String(sender?._id || sender || "");
       const conversationId = String(message?.conversationId || "");
-      
-      // Check if user is currently on the chat / messages screen
-      const isChatScreen =
-        typeof window !== "undefined" &&
-        window.location.pathname.startsWith("/messages");
 
-      // Show toast notification only when user is outside of the chat screen and message is not from self
-      if (!message?._id || senderId === currentUserId || isChatScreen) return;
+      // Do not notify self-sent messages
+      if (!message?._id || (myId && senderId === myId)) return;
+
+      // Check if user is actively viewing this specific conversation
+      let isViewingThisConversation = false;
+      if (typeof window !== "undefined") {
+        const isMessagesRoute =
+          window.location.pathname.startsWith("/messages");
+        const activeConvInUrl = new URLSearchParams(window.location.search).get(
+          "conversation",
+        );
+        if (isMessagesRoute && activeConvInUrl === conversationId) {
+          isViewingThisConversation = true;
+        }
+      }
+
+      // If user is already actively viewing this chat, do not display toast
+      if (isViewingThisConversation) return;
 
       const senderName = sender?.fullName || sender?.username || "Team member";
       const avatarSrc = imageUrl(sender?.avatar);
-      const preview = (message.content || (message.attachments?.length ? "Sent an attachment" : "New message"))
+      const preview = (
+        message.content ||
+        (message.attachments?.length ? "Sent an attachment" : "New message")
+      )
         .replace(/\s+/g, " ")
         .trim()
         .slice(0, 160);
@@ -76,13 +134,17 @@ export function MessagingProvider({ children }) {
             tabIndex={0}
             onClick={() => {
               toast.dismiss(toastId);
-              window.location.assign(`/messages?conversation=${conversationId}`);
+              window.location.assign(
+                `/messages?conversation=${conversationId}`,
+              );
             }}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
                 toast.dismiss(toastId);
-                window.location.assign(`/messages?conversation=${conversationId}`);
+                window.location.assign(
+                  `/messages?conversation=${conversationId}`,
+                );
               }
             }}
             className="admin-rich-toast flex w-full max-w-sm items-start gap-3 rounded-2xl border border-zinc-200/90 bg-white p-3.5 text-left shadow-xl shadow-zinc-950/10 transition-transform hover:-translate-y-0.5 dark:border-zinc-800 dark:bg-[#121215] dark:shadow-black/40 cursor-pointer select-none"
@@ -141,18 +203,41 @@ export function MessagingProvider({ children }) {
             </button>
           </div>
         ),
-        { id: `message-${message._id}`, duration: 6000 },
+        {
+          id: `msg-${message._id || Date.now()}-${Math.random().toString(36).slice(2)}`,
+          duration: 6000,
+          unstyled: true,
+        },
       );
     });
-    return () => { connection.disconnect(); setSocket(null); };
-  }, [refreshUnread, currentUserId]);
+    return () => {
+      connection.disconnect();
+      setSocket(null);
+    };
+  }, [refreshUnread]);
 
-  const value = useMemo(() => ({ socket, status, unread, setUnread, refreshUnread }), [socket, status, unread, refreshUnread]);
-  return <MessagingContext.Provider value={value}>{children}</MessagingContext.Provider>;
+  const value = useMemo(
+    () => ({
+      socket,
+      status,
+      unread,
+      setUnread,
+      refreshUnread,
+      onlineUserIds,
+      isOnline,
+    }),
+    [socket, status, unread, refreshUnread, onlineUserIds, isOnline],
+  );
+  return (
+    <MessagingContext.Provider value={value}>
+      {children}
+    </MessagingContext.Provider>
+  );
 }
 
 export const useMessaging = () => {
   const value = useContext(MessagingContext);
-  if (!value) throw new Error("useMessaging must be used inside MessagingProvider");
+  if (!value)
+    throw new Error("useMessaging must be used inside MessagingProvider");
   return value;
 };

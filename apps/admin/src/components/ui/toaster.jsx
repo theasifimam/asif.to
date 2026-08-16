@@ -19,6 +19,7 @@ export function AdminToaster() {
       position="top-right"
       richColors={false}
       expand={true}
+      visibleToasts={6}
       closeButton={false}
       duration={4000}
       className="admin-toaster font-sans"

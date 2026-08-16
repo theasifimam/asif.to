@@ -77,7 +77,7 @@ export default function ContentAttachModal({ open, onClose, onSelect }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
       <div
         ref={modalRef}
-        className="flex h-[520px] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-[#121215]"
+        className="flex h-130 w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-[#121215]"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-zinc-100 p-4 dark:border-zinc-800">

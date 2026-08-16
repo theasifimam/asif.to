@@ -49,7 +49,7 @@ export function AdminPageHeader({
         )}
       </div>
       {actions && (
-        <div className="flex flex-wrap items-stretch sm:items-center justify-start sm:justify-end gap-2.5 w-full [&>*]:grow sm:[&>*]:grow-0">
+        <div className="flex flex-wrap items-stretch sm:items-center justify-start sm:justify-end gap-2.5 w-full *:grow sm:*:grow-0">
           {actions}
         </div>
       )}

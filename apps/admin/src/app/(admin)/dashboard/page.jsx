@@ -27,6 +27,64 @@ const ICON_MAP = {
   GraduationCap,
 };
 
+const STAT_THEMES = {
+  // Course Reads / Engagement -> Light Sky Blue / Deep Navy Tint
+  BookOpen: {
+    bg: "bg-sky-50/75 dark:bg-[#0c1524]",
+    border: "border-sky-200/70 dark:border-sky-900/40",
+    borderHover: "hover:border-sky-300 dark:hover:border-sky-600/60",
+    glow: "from-sky-400/20 via-sky-400/5 to-transparent",
+    iconContainer:
+      "bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300 border border-sky-200/80 dark:border-sky-500/30",
+    trendBadge:
+      "bg-sky-100/90 text-sky-800 dark:bg-sky-500/15 dark:text-sky-200 border border-sky-200/80 dark:border-sky-500/30",
+  },
+  // Active Courses / Curriculum -> Light Mint Emerald / Deep Forest Tint
+  GraduationCap: {
+    bg: "bg-emerald-50/75 dark:bg-[#0a1a14]",
+    border: "border-emerald-200/70 dark:border-emerald-900/40",
+    borderHover: "hover:border-emerald-300 dark:hover:border-emerald-600/60",
+    glow: "from-emerald-400/20 via-emerald-400/5 to-transparent",
+    iconContainer:
+      "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-500/30",
+    trendBadge:
+      "bg-emerald-100/90 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-200 border border-emerald-200/80 dark:border-emerald-500/30",
+  },
+  // Avg Completion Rate / Performance -> Light Warm Amber / Deep Amber Tint
+  TrendingUp: {
+    bg: "bg-amber-50/75 dark:bg-[#1a1308]",
+    border: "border-amber-200/70 dark:border-amber-900/40",
+    borderHover: "hover:border-amber-300 dark:hover:border-amber-600/60",
+    glow: "from-amber-400/20 via-amber-400/5 to-transparent",
+    iconContainer:
+      "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300 border border-amber-200/80 dark:border-amber-500/30",
+    trendBadge:
+      "bg-amber-100/90 text-amber-800 dark:bg-amber-500/15 dark:text-amber-200 border border-amber-200/80 dark:border-amber-500/30",
+  },
+  // Enrolled Learners / Community -> Light Soft Purple / Deep Violet Tint
+  Users: {
+    bg: "bg-purple-50/75 dark:bg-[#140d22]",
+    border: "border-purple-200/70 dark:border-purple-900/40",
+    borderHover: "hover:border-purple-300 dark:hover:border-purple-600/60",
+    glow: "from-purple-400/20 via-purple-400/5 to-transparent",
+    iconContainer:
+      "bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300 border border-purple-200/80 dark:border-purple-500/30",
+    trendBadge:
+      "bg-purple-100/90 text-purple-800 dark:bg-purple-500/15 dark:text-purple-200 border border-purple-200/80 dark:border-purple-500/30",
+  },
+};
+
+const DEFAULT_STAT_THEME = {
+  bg: "bg-sky-50/75 dark:bg-[#0c1524]",
+  border: "border-sky-200/70 dark:border-sky-900/40",
+  borderHover: "hover:border-sky-300 dark:hover:border-sky-600/60",
+  glow: "from-sky-400/20 via-sky-400/5 to-transparent",
+  iconContainer:
+    "bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300 border border-sky-200/80 dark:border-sky-500/30",
+  trendBadge:
+    "bg-sky-100/90 text-sky-800 dark:bg-sky-500/15 dark:text-sky-200 border border-sky-200/80 dark:border-sky-500/30",
+};
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const {
@@ -107,10 +165,21 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6 sm:gap-8 p-4 font-sans text-zinc-800 dark:text-zinc-300 sm:p-6 md:p-8 lg:p-10">
-      {/* High-Impact Hero Banner - Calm Floating Canvas */}
-      <section className="admin-surface flex flex-col items-start justify-between gap-6 overflow-hidden p-6 sm:p-8 md:flex-row md:items-center rounded-[28px] sm:rounded-[36px]">
-        <div className="max-w-2xl">
-          <div className="mb-3.5 inline-flex items-center gap-2 rounded-full border border-blue-200/80 bg-blue-50/90 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-blue-700 dark:border-blue-900/60 dark:bg-blue-500/10 dark:text-blue-300">
+      {/* High-Impact Hero Banner - Rich Modern Gradient Canvas */}
+      <section className="relative flex flex-col items-start justify-between gap-6 overflow-hidden p-6 sm:p-8 md:flex-row md:items-center rounded-[28px] sm:rounded-[36px] border border-zinc-200/90 bg-linear-to-br from-white via-blue-50/30 to-indigo-50/40 shadow-xl shadow-blue-500/3 dark:border-white/8 dark:bg-linear-to-br dark:from-[#111319] dark:via-[#131622] dark:to-[#0f1118] dark:shadow-2xl dark:shadow-black/60">
+        {/* Subtle dot matrix texture overlay */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(59,130,246,0.06)_1px,transparent_1px)] dark:bg-[radial-gradient(rgba(255,255,255,0.035)_1px,transparent_1px)] bg-size-[16px_16px] opacity-70" />
+
+        {/* Ambient Top-Right & Bottom-Left Lighting Meshes */}
+        <div className="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-linear-to-br from-blue-500/15 via-indigo-500/10 to-transparent blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-linear-to-tr from-sky-500/10 to-transparent blur-3xl" />
+
+        <div className="relative z-10 max-w-2xl">
+          <div className="mb-3.5 inline-flex items-center gap-2 rounded-full border border-blue-200/80 bg-blue-50/90 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300 shadow-xs backdrop-blur-xs">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+            </span>
             <GraduationCap className="h-3.5 w-3.5" />
             <span>Platform Overview</span>
           </div>
@@ -124,17 +193,17 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="flex w-full flex-wrap items-center gap-2.5 md:w-auto">
+        <div className="relative z-10 flex w-full flex-wrap items-center gap-2.5 md:w-auto">
           <Link
             href="/courses"
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-blue-600 px-5 py-3 text-xs font-bold text-white shadow-sm shadow-blue-600/20 transition-all duration-200 hover:bg-blue-700 active:scale-[.985] md:flex-initial"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 px-5 py-3 text-xs font-bold text-white shadow-md shadow-blue-600/25 transition-all duration-200 hover:-translate-y-0.5 active:scale-[.985] md:flex-initial cursor-pointer"
           >
             <BookOpen className="w-4 h-4" />
             <span>Manage Courses</span>
           </Link>
           <Link
             href="/quiz"
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-zinc-200/80 bg-white px-5 py-3 text-xs font-bold text-zinc-700 transition-all duration-200 hover:bg-zinc-50 hover:border-zinc-300 active:scale-[.985] dark:border-zinc-800 dark:bg-[#18181b] dark:text-zinc-200 dark:hover:bg-zinc-800 md:flex-initial"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-zinc-200/80 bg-white/90 px-5 py-3 text-xs font-bold text-zinc-700 shadow-xs backdrop-blur-md transition-all duration-200 hover:bg-zinc-50 hover:border-zinc-300 hover:-translate-y-0.5 active:scale-[.985] dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/9 dark:hover:border-white/20 md:flex-initial cursor-pointer"
           >
             <BrainCircuit className="w-4 h-4" />
             <span>Quiz Builder</span>
@@ -146,23 +215,38 @@ export default function DashboardPage() {
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {visibleStats.map((stat, i) => {
           const StatIcon = ICON_MAP[stat.icon] || BookOpen;
+          const theme = STAT_THEMES[stat.icon] || DEFAULT_STAT_THEME;
+
           return (
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.06 }}
               key={stat.label}
+              className="relative group"
             >
-              <div className="admin-surface flex min-h-42 flex-col justify-between p-6 rounded-[28px] sm:rounded-4xl transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700">
-                <div className="flex items-center justify-between gap-2 mb-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+              <div
+                className={`relative flex min-h-42 flex-col justify-between overflow-hidden p-6 rounded-[28px] sm:rounded-4xl border shadow-xs transition-all duration-300 ${theme.bg} ${theme.border} ${theme.borderHover} hover:shadow-xl hover:-translate-y-0.5`}
+              >
+                {/* Ultra-minimal ambient corner glow */}
+                <div
+                  className={`pointer-events-none absolute -top-12 -right-12 h-32 w-32 rounded-full bg-linear-to-br ${theme.glow} blur-2xl transition-opacity duration-300 group-hover:opacity-100 opacity-60`}
+                />
+
+                <div className="relative z-10 flex items-center justify-between gap-2 mb-3">
+                  <div
+                    className={`flex h-10 w-10 items-center justify-center rounded-2xl shadow-xs transition-transform duration-200 group-hover:scale-105 ${theme.iconContainer}`}
+                  >
                     <StatIcon className="w-5 h-5" />
                   </div>
-                  <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300 border border-blue-200/50 dark:border-blue-500/20">
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${theme.trendBadge}`}
+                  >
                     {stat.trend}
                   </span>
                 </div>
-                <div className="flex flex-col gap-0.5">
+
+                <div className="relative z-10 flex flex-col gap-0.5">
                   <span className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.18em]">
                     {stat.label}
                   </span>

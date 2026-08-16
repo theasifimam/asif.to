@@ -16,18 +16,32 @@ function Section({ title, children }) {
   );
 }
 
-function SidebarAvatar({ user }) {
+import { useMessaging } from "@/contexts/MessagingContext";
+
+function SidebarAvatar({ user, online = false }) {
   const source = avatarUrl(user?.avatar);
-  return source ? (
-    <img
-      src={source}
-      alt=""
-      className="h-10 w-10 shrink-0 rounded-xl object-cover"
-    />
-  ) : (
-    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-200 text-xs font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
-      {user?.fullName?.[0] || <UserRound size={16} />}
-    </span>
+  return (
+    <div className="relative shrink-0">
+      {source ? (
+        <img
+          src={source}
+          alt=""
+          className="h-10 w-10 shrink-0 rounded-xl object-cover"
+        />
+      ) : (
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-200 text-xs font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+          {user?.fullName?.[0] || <UserRound size={16} />}
+        </span>
+      )}
+      {online && (
+        <span
+          className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full border-2 border-white bg-emerald-500 dark:border-zinc-950"
+          title="Online"
+        >
+          <span className="h-1 w-1 rounded-full bg-white" />
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -43,9 +57,11 @@ export default function ConversationSidebar({
   searchResults = [],
   loading,
   currentUserId,
+  typingByConversation = {},
   onOpenConversation,
   onStartDirect,
 }) {
+  const { isOnline } = useMessaging();
   const direct = conversations.filter((item) => item?.type === "direct");
   const channels = conversations.filter((item) => item?.type === "channel");
   const discussions = conversations.filter(
@@ -158,6 +174,8 @@ export default function ConversationSidebar({
                       key={conversation._id}
                       conversation={conversation}
                       userId={currentUserId}
+                      isSelected={Boolean(selected?._id && idOf(selected) === idOf(conversation._id))}
+                      isTyping={Boolean(typingByConversation[conversation._id])}
                       onClick={() => onOpenConversation(conversation)}
                     />
                   ))}
@@ -169,6 +187,8 @@ export default function ConversationSidebar({
                       key={conversation._id}
                       conversation={conversation}
                       userId={currentUserId}
+                      isSelected={Boolean(selected?._id && idOf(selected) === idOf(conversation._id))}
+                      isTyping={Boolean(typingByConversation[conversation._id])}
                       onClick={() => onOpenConversation(conversation)}
                     />
                   ))}
@@ -180,6 +200,8 @@ export default function ConversationSidebar({
                       key={conversation._id}
                       conversation={conversation}
                       userId={currentUserId}
+                      isSelected={Boolean(selected?._id && idOf(selected) === idOf(conversation._id))}
+                      isTyping={Boolean(typingByConversation[conversation._id])}
                       onClick={() => onOpenConversation(conversation)}
                     />
                   ))}
@@ -193,7 +215,7 @@ export default function ConversationSidebar({
                         onClick={() => onStartDirect(member)}
                         className="flex w-full items-center gap-3 rounded-xl p-3 text-left transition hover:bg-zinc-100 dark:hover:bg-zinc-900 cursor-pointer"
                       >
-                        <SidebarAvatar user={member} />
+                        <SidebarAvatar user={member} online={isOnline(member._id)} />
                         <div className="min-w-0">
                           <p className="truncate text-xs font-bold dark:text-white">
                             {member.fullName}

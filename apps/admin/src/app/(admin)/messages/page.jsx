@@ -11,9 +11,25 @@ import {
   MessageBubble,
   MessageInput,
   PinnedMessagesBar,
+  avatarUrl,
   encodeContentCards,
   idOf,
 } from "@/components/messaging";
+
+function TypingAvatar({ user }) {
+  const source = avatarUrl(user?.avatar);
+  return source ? (
+    <img
+      src={source}
+      alt=""
+      className="h-7 w-7 rounded-full object-cover shadow-xs border border-zinc-200/80 dark:border-zinc-800/80"
+    />
+  ) : (
+    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-200 text-[10px] font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 shadow-xs">
+      {user?.fullName?.[0] || "•"}
+    </span>
+  );
+}
 
 export default function MessagesPage() {
   const { user } = useAuth();
@@ -27,6 +43,12 @@ export default function MessagesPage() {
   const [pins, setPins] = useState([]);
   const [members, setMembers] = useState([]);
   const [team, setTeam] = useState([]);
+
+  const [typingUsers, setTypingUsers] = useState({}); // userId -> user
+  const [typingByConversation, setTypingByConversation] = useState({}); // conversationId -> boolean
+  const typingTimeoutsRef = useRef({});
+  const myTypingTimeoutRef = useRef(null);
+  const isCurrentlyTypingRef = useRef(false);
 
   const [loading, setLoading] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -95,6 +117,7 @@ export default function MessagesPage() {
       }
       setSelected(conversation);
       selectedRef.current = conversation;
+      setTypingUsers({});
       setLoadingMessages(true);
       setError("");
       window.history.replaceState(
@@ -219,12 +242,77 @@ export default function MessagesPage() {
     const onPin = () =>
       selectedRef.current?._id && loadPins(selectedRef.current._id);
 
+    const onTypingStart = ({ conversationId, user: typingUser }) => {
+      if (!conversationId || !typingUser?._id) return;
+      const typerId = String(typingUser._id);
+      if (typerId === String(user?._id || user?.id)) return;
+
+      const convId = String(conversationId);
+      setTypingByConversation((prev) => ({ ...prev, [convId]: true }));
+
+      if (convId === idOf(selectedRef.current)) {
+        if (typingTimeoutsRef.current[typerId]) {
+          clearTimeout(typingTimeoutsRef.current[typerId]);
+        }
+
+        setTypingUsers((prev) => ({ ...prev, [typerId]: typingUser }));
+
+        typingTimeoutsRef.current[typerId] = setTimeout(() => {
+          setTypingUsers((prev) => {
+            const next = { ...prev };
+            delete next[typerId];
+            return next;
+          });
+          delete typingTimeoutsRef.current[typerId];
+        }, 4000);
+
+        requestAnimationFrame(() => {
+          if (listRef.current) {
+            const isNearBottom =
+              listRef.current.scrollHeight -
+                listRef.current.scrollTop -
+                listRef.current.clientHeight <
+              150;
+            if (isNearBottom) {
+              listRef.current.scrollTop = listRef.current.scrollHeight;
+            }
+          }
+        });
+      }
+    };
+
+    const onTypingStop = ({ conversationId, userId: typerId }) => {
+      if (!conversationId || !typerId) return;
+      const uId = String(typerId);
+      const convId = String(conversationId);
+
+      setTypingByConversation((prev) => {
+        const next = { ...prev };
+        delete next[convId];
+        return next;
+      });
+
+      if (convId === idOf(selectedRef.current)) {
+        if (typingTimeoutsRef.current[uId]) {
+          clearTimeout(typingTimeoutsRef.current[uId]);
+          delete typingTimeoutsRef.current[uId];
+        }
+        setTypingUsers((prev) => {
+          const next = { ...prev };
+          delete next[uId];
+          return next;
+        });
+      }
+    };
+
     socket.on("new_message", onMessage);
     socket.on("conversation_updated", onConversation);
     socket.on("message_updated", replaceMessage);
     socket.on("message_reaction_updated", onReaction);
     socket.on("message_pinned", onPin);
     socket.on("message_unpinned", onPin);
+    socket.on("typing:start", onTypingStart);
+    socket.on("typing:stop", onTypingStop);
 
     return () => {
       socket.off("new_message", onMessage);
@@ -233,13 +321,15 @@ export default function MessagesPage() {
       socket.off("message_reaction_updated", onReaction);
       socket.off("message_pinned", onPin);
       socket.off("message_unpinned", onPin);
+      socket.off("typing:start", onTypingStart);
+      socket.off("typing:stop", onTypingStop);
       if (selectedRef.current?._id) {
         socket.emit("conversation:leave", {
           conversationId: selectedRef.current._id,
         });
       }
     };
-  }, [socket, loadSidebar, refreshUnread, search, loadPins]);
+  }, [socket, loadSidebar, refreshUnread, search, loadPins, user]);
 
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -289,6 +379,44 @@ export default function MessagesPage() {
     setLoadingOlder(false);
   };
 
+  const handleTyping = useCallback(
+    (isTyping) => {
+      if (!socket?.connected || !selectedRef.current?._id) return;
+      const conversationId = selectedRef.current._id;
+
+      if (!isTyping) {
+        if (isCurrentlyTypingRef.current) {
+          socket.emit("typing:stop", { conversationId });
+          isCurrentlyTypingRef.current = false;
+        }
+        if (myTypingTimeoutRef.current) {
+          clearTimeout(myTypingTimeoutRef.current);
+          myTypingTimeoutRef.current = null;
+        }
+        return;
+      }
+
+      if (!isCurrentlyTypingRef.current) {
+        socket.emit("typing:start", { conversationId });
+        isCurrentlyTypingRef.current = true;
+      }
+
+      if (myTypingTimeoutRef.current) {
+        clearTimeout(myTypingTimeoutRef.current);
+      }
+
+      myTypingTimeoutRef.current = setTimeout(() => {
+        if (socket?.connected && selectedRef.current?._id) {
+          socket.emit("typing:stop", {
+            conversationId: selectedRef.current._id,
+          });
+        }
+        isCurrentlyTypingRef.current = false;
+      }, 3000);
+    },
+    [socket],
+  );
+
   const deliver = async (text, clientId, options) => {
     if (socket?.connected) {
       return new Promise((resolve) =>
@@ -333,6 +461,8 @@ export default function MessagesPage() {
       return;
     }
 
+    handleTyping(false);
+
     if (editing && !retryMessage) {
       const result = await messagingApi.edit(editing._id, text);
       if (result.success) {
@@ -363,50 +493,33 @@ export default function MessagesPage() {
     };
 
     if (!retryMessage) {
+      const optimisticMessage = {
+        _id: clientId,
+        clientId,
+        conversationId: selected._id,
+        senderId: user,
+        content: fullContent,
+        attachments: sendAttachments,
+        attachedContent: sendContent,
+        replyToMessageId: replyTo,
+        reactions: [],
+        createdAt: new Date().toISOString(),
+        pending: true,
+      };
+      setMessages((items) => [...items, optimisticMessage]);
       setContent("");
-      setReplyTo(null);
       setAttachments([]);
       setAttachedContent([]);
-      setMessages((items) => [
-        ...items,
-        {
-          _id: `pending-${clientId}`,
-          clientId,
-          conversationId: selected._id,
-          senderId: user,
-          content: fullContent,
-          replyToMessageId: replyTo,
-          attachments: sendAttachments,
-          attachedContent: sendContent,
-          createdAt: new Date().toISOString(),
-          pending: true,
-        },
-      ]);
-    } else {
-      setMessages((items) =>
-        items.map((item) =>
-          item.clientId === clientId
-            ? { ...item, failed: false, pending: true }
-            : item,
-        ),
-      );
+      setReplyTo(null);
+      requestAnimationFrame(() => {
+        if (listRef.current) {
+          listRef.current.scrollTop = listRef.current.scrollHeight;
+        }
+      });
     }
 
-    requestAnimationFrame(() => {
-      if (listRef.current) {
-        listRef.current.scrollTop = listRef.current.scrollHeight;
-      }
-    });
-
     const result = await deliver(fullContent, clientId, options);
-    if (result.success && result.message) {
-      setMessages((items) =>
-        items.map((item) =>
-          item.clientId === clientId ? result.message : item,
-        ),
-      );
-      loadSidebar(search);
-    } else {
+    if (!result.success) {
       setMessages((items) =>
         items.map((item) =>
           item.clientId === clientId
@@ -414,42 +527,48 @@ export default function MessagesPage() {
             : item,
         ),
       );
-      setError(result.message || "Message failed to send.");
+      setError(result.message || "Message delivery failed.");
+      return;
     }
+
+    setMessages((items) =>
+      items.map((item) =>
+        item.clientId === clientId ? result.message : item,
+      ),
+    );
   };
 
   const upload = async (files) => {
-    if (!files?.length || !selected) return;
-    setUploadProgress(1);
-    setError("");
+    if (!files?.length || !selected?._id) return;
+    const array = Array.from(files);
+    setUploadProgress(10);
     const result = await messagingApi.upload(
       selected._id,
-      [...files].slice(0, 4 - attachments.length),
-      setUploadProgress,
+      array,
+      (progress) => setUploadProgress(progress),
     );
-    if (result.success) {
-      setAttachments((items) =>
-        [...items, ...result.data.data.attachments].slice(0, 4),
-      );
-    } else {
-      setError(result.error || "Attachment upload failed.");
-    }
     setUploadProgress(0);
+    if (result.success) {
+      setAttachments((prev) => [...prev, ...result.data.data.attachments]);
+    } else {
+      setError(result.error || "Upload failed.");
+    }
   };
 
   const removeMessage = async (message) => {
-    if (
-      !window.confirm(
-        "Delete this message? Replies will retain a deleted-message reference.",
-      )
-    ) {
-      return;
-    }
     const result = await messagingApi.delete(message._id);
     if (result.success) {
       setMessages((items) =>
         items.map((item) =>
-          idOf(item) === idOf(message) ? result.data.data.message : item,
+          idOf(item) === idOf(message)
+            ? {
+                ...item,
+                deletedAt: new Date().toISOString(),
+                content: "This message was deleted.",
+                attachments: [],
+                attachedContent: [],
+              }
+            : item,
         ),
       );
     } else {
@@ -473,22 +592,23 @@ export default function MessagesPage() {
   };
 
   const togglePin = async (message) => {
-    const result = await messagingApi.pin(message._id);
-    if (result.success) loadPins(selected._id);
-    else setError(result.error || "Pin permission denied.");
+    const result = message.pin
+      ? await messagingApi.unpin(message._id)
+      : await messagingApi.pin(message._id);
+    if (result.success) {
+      loadPins(selected._id);
+    } else {
+      setError(result.error || "Unable to update pin.");
+    }
   };
 
   const currentUserId = user?._id || user?.id;
   const canPost =
-    selected &&
-    (selected.type === "direct" ||
-      selected.postRoles?.includes(user.role) ||
-      selected.allowedMemberIds?.some(
-        (id) => idOf(id) === String(currentUserId),
-      ));
+    selected?.type !== "channel" ||
+    ["founder", "admin", "super_admin", "maintainer"].includes(user?.role);
 
   return (
-    <div className="flex h-full w-full min-h-0 overflow-hidden bg-white dark:bg-[#121215]">
+    <div className="flex h-screen w-full overflow-hidden bg-white dark:bg-[#0c0c0e]">
       {/* Conversations Sidebar */}
       <ConversationSidebar
         selected={selected}
@@ -502,13 +622,14 @@ export default function MessagesPage() {
         searchResults={searchResults}
         loading={loading}
         currentUserId={currentUserId}
+        typingByConversation={typingByConversation}
         onOpenConversation={openConversation}
         onStartDirect={startDirect}
       />
 
       {/* Chat Main Area */}
       <main
-        className={`${selected ? "flex" : "hidden md:flex"} min-w-0 flex-1 flex-col bg-white dark:bg-[#121215]`}
+        className={`${selected ? "flex" : "hidden md:flex"} min-w-0 flex-1 flex-col bg-white dark:bg-[#0c0c0e]`}
       >
         {!selected ? (
           <div className="flex flex-1 flex-col items-center justify-center p-8 text-center bg-zinc-50/50 dark:bg-zinc-950/30">
@@ -529,6 +650,7 @@ export default function MessagesPage() {
               selected={selected}
               currentUserId={currentUserId}
               status={status}
+              typingUsers={Object.values(typingUsers)}
               onBack={() => {
                 socket?.emit("conversation:leave", {
                   conversationId: selected._id,
@@ -638,6 +760,43 @@ export default function MessagesPage() {
                         />
                       );
                     })}
+
+                    {/* Live Typing Indicator Bubble in Stream */}
+                    {Object.values(typingUsers).length > 0 && (
+                      <div className="flex flex-col gap-1.5 pt-1.5 pb-0.5">
+                        {Object.values(typingUsers).map((typer) => (
+                          <div
+                            key={typer._id}
+                            className="flex items-end gap-1.5 animate-in fade-in slide-in-from-bottom-2 duration-150"
+                          >
+                            <div className="w-7 sm:w-8 shrink-0 flex items-end justify-center mb-0.5">
+                              <TypingAvatar user={typer} />
+                            </div>
+                            <div className="flex items-center gap-2 rounded-2xl rounded-bl-xs border border-zinc-200/80 bg-white dark:border-zinc-800 dark:bg-[#18181c] px-3.5 py-2 shadow-xs">
+                              <span className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300">
+                                {selected?.type !== "direct"
+                                  ? `${typer.fullName?.split(" ")[0] || "Someone"}`
+                                  : "typing"}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <span
+                                  className="h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-bounce"
+                                  style={{ animationDelay: "0ms" }}
+                                />
+                                <span
+                                  className="h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-bounce"
+                                  style={{ animationDelay: "150ms" }}
+                                />
+                                <span
+                                  className="h-1.5 w-1.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-bounce"
+                                  style={{ animationDelay: "300ms" }}
+                                />
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </>
               )}
@@ -662,6 +821,7 @@ export default function MessagesPage() {
               setError={setError}
               onSend={send}
               onUpload={upload}
+              onTyping={handleTyping}
             />
           </>
         )}

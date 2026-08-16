@@ -469,14 +469,6 @@ pre.hljs code,
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-/* Eliminate double-borders when custom rich toast card is rendered inside Sonner */
-[data-sonner-toast]:has(.admin-rich-toast) {
-  padding: 0 !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
 /* Ensure Sonner's icon container does not constrain custom badge sizes or cause overlap */
 [data-sonner-toast] [data-icon] {
   position: static !important;
@@ -505,6 +497,22 @@ pre.hljs code,
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   color: #f4f4f5 !important;
   box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 8px 16px -6px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Eliminate double-borders when custom rich toast card is rendered inside Sonner (Light & Dark) */
+[data-sonner-toast]:has(.admin-rich-toast),
+.dark [data-sonner-toast]:has(.admin-rich-toast),
+[data-sonner-toast][data-custom="true"],
+.dark [data-sonner-toast][data-custom="true"],
+[data-sonner-toast][data-styled="false"],
+.dark [data-sonner-toast][data-styled="false"] {
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-width: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
 }
 
 /* Titles and Descriptions */

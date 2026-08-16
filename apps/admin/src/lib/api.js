@@ -474,6 +474,7 @@ export const messagingApi = {
   search: (params) => apiGet(`/messaging/search?${new URLSearchParams(params)}`),
   context: (messageId) => apiGet(`/messaging/messages/${messageId}/context`),
   upload: (conversationId, files, onProgress) => new Promise((resolve) => {
+    const fileList = Array.isArray(files) ? files : Array.from(files || []);
     const request = new XMLHttpRequest();
     request.open("POST", buildUrl(`/messaging/conversations/${conversationId}/attachments`));
     const token = getAuthHeaders().Authorization;
@@ -483,7 +484,9 @@ export const messagingApi = {
     request.upload.onprogress = (event) => event.lengthComputable && onProgress?.(Math.round((event.loaded / event.total) * 100));
     request.onload = () => { try { const data = JSON.parse(request.responseText); resolve(request.status >= 200 && request.status < 300 ? { success: true, data } : { success: false, error: data.message || "Upload failed" }); } catch { resolve({ success: false, error: "Upload failed" }); } };
     request.onerror = () => resolve({ success: false, error: "Upload failed" });
-    const form = new FormData(); files.forEach((file) => form.append("files", file)); request.send(form);
+    const form = new FormData();
+    fileList.forEach((file) => form.append("files", file));
+    request.send(form);
   }),
   attachmentBlob: async (attachmentId) => {
     const response = await fetch(buildUrl(`/messaging/attachments/${attachmentId}`), { headers: { ...getAuthHeaders(), "ngrok-skip-browser-warning": "true" }, credentials: "include" });

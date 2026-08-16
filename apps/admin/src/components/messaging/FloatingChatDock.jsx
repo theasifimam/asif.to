@@ -24,16 +24,28 @@ import {
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
 
-function DockAvatar({ user, className = "h-8 w-8 rounded-xl" }) {
+function DockAvatar({ user, className = "h-8 w-8 rounded-xl", online = false }) {
   const source = avatarUrl(user?.avatar);
-  return source ? (
-    <img src={source} alt="" className={`${className} shrink-0 object-cover`} />
-  ) : (
-    <span
-      className={`flex ${className} shrink-0 items-center justify-center bg-zinc-200 text-xs font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300`}
-    >
-      {user?.fullName?.[0] || <UserRound size={14} />}
-    </span>
+  return (
+    <div className="relative shrink-0">
+      {source ? (
+        <img src={source} alt="" className={`${className} shrink-0 object-cover`} />
+      ) : (
+        <span
+          className={`flex ${className} shrink-0 items-center justify-center bg-zinc-200 text-xs font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300`}
+        >
+          {user?.fullName?.[0] || <UserRound size={14} />}
+        </span>
+      )}
+      {online && (
+        <span
+          className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5 items-center justify-center rounded-full border-2 border-white bg-emerald-500 dark:border-zinc-950"
+          title="Online"
+        >
+          <span className="h-0.5 w-0.5 rounded-full bg-white" />
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -41,7 +53,7 @@ export default function FloatingChatDock({ isNavVisible = true }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
-  const { socket, unread, refreshUnread } = useMessaging();
+  const { socket, unread, refreshUnread, isOnline } = useMessaging();
 
   const [isOpen, setIsOpen] = useState(false);
   const [conversations, setConversations] = useState([]);
@@ -49,6 +61,11 @@ export default function FloatingChatDock({ isNavVisible = true }) {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+
+  const [typingUsers, setTypingUsers] = useState({});
+  const typingTimeoutsRef = useRef({});
+  const myTypingTimeoutRef = useRef(null);
+  const isCurrentlyTypingRef = useRef(false);
 
   const [content, setContent] = useState("");
   const [replyTo, setReplyTo] = useState(null);
@@ -63,7 +80,9 @@ export default function FloatingChatDock({ isNavVisible = true }) {
 
   const loadConversations = useCallback(async (term = "") => {
     setLoading(true);
-    const result = await messagingApi.conversations(term ? { search: term } : {});
+    const result = await messagingApi.conversations(
+      term ? { search: term } : {},
+    );
     if (result.success) {
       setConversations(result.data.data.conversations);
     }
@@ -80,12 +99,16 @@ export default function FloatingChatDock({ isNavVisible = true }) {
     async (conversation) => {
       if (!conversation?._id) return;
       setSelected(conversation);
+      setTypingUsers({});
       setLoading(true);
-      const result = await messagingApi.messages(conversation._id, { limit: 30 });
+      const result = await messagingApi.messages(conversation._id, {
+        limit: 30,
+      });
       if (result.success) {
         setMessages(result.data.data.messages);
         requestAnimationFrame(() => {
-          if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
+          if (listRef.current)
+            listRef.current.scrollTop = listRef.current.scrollHeight;
         });
         socket?.emit("conversation:join", { conversationId: conversation._id });
         await messagingApi.markRead(conversation._id);
@@ -94,6 +117,42 @@ export default function FloatingChatDock({ isNavVisible = true }) {
       setLoading(false);
     },
     [socket, refreshUnread],
+  );
+
+  const handleTyping = useCallback(
+    (isTyping) => {
+      if (!socket?.connected || !selected?._id) return;
+      const conversationId = selected._id;
+
+      if (!isTyping) {
+        if (isCurrentlyTypingRef.current) {
+          socket.emit("typing:stop", { conversationId });
+          isCurrentlyTypingRef.current = false;
+        }
+        if (myTypingTimeoutRef.current) {
+          clearTimeout(myTypingTimeoutRef.current);
+          myTypingTimeoutRef.current = null;
+        }
+        return;
+      }
+
+      if (!isCurrentlyTypingRef.current) {
+        socket.emit("typing:start", { conversationId });
+        isCurrentlyTypingRef.current = true;
+      }
+
+      if (myTypingTimeoutRef.current) {
+        clearTimeout(myTypingTimeoutRef.current);
+      }
+
+      myTypingTimeoutRef.current = setTimeout(() => {
+        if (socket?.connected && selected?._id) {
+          socket.emit("typing:stop", { conversationId: selected._id });
+        }
+        isCurrentlyTypingRef.current = false;
+      }, 3000);
+    },
+    [socket, selected],
   );
 
   useEffect(() => {
@@ -116,20 +175,72 @@ export default function FloatingChatDock({ isNavVisible = true }) {
         });
         messagingApi.markRead(message.conversationId).then(refreshUnread);
         requestAnimationFrame(() => {
-          if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
+          if (listRef.current)
+            listRef.current.scrollTop = listRef.current.scrollHeight;
+        });
+      }
+    };
+
+    const onTypingStart = ({ conversationId, user: typingUser }) => {
+      if (!conversationId || !typingUser?._id) return;
+      const typerId = String(typingUser._id);
+      if (typerId === String(user?._id || user?.id)) return;
+
+      if (String(conversationId) === idOf(selected._id)) {
+        if (typingTimeoutsRef.current[typerId]) {
+          clearTimeout(typingTimeoutsRef.current[typerId]);
+        }
+
+        setTypingUsers((prev) => ({ ...prev, [typerId]: typingUser }));
+
+        typingTimeoutsRef.current[typerId] = setTimeout(() => {
+          setTypingUsers((prev) => {
+            const next = { ...prev };
+            delete next[typerId];
+            return next;
+          });
+          delete typingTimeoutsRef.current[typerId];
+        }, 4000);
+
+        requestAnimationFrame(() => {
+          if (listRef.current) {
+            listRef.current.scrollTop = listRef.current.scrollHeight;
+          }
+        });
+      }
+    };
+
+    const onTypingStop = ({ conversationId, userId: typerId }) => {
+      if (!conversationId || !typerId) return;
+      const uId = String(typerId);
+      if (String(conversationId) === idOf(selected._id)) {
+        if (typingTimeoutsRef.current[uId]) {
+          clearTimeout(typingTimeoutsRef.current[uId]);
+          delete typingTimeoutsRef.current[uId];
+        }
+        setTypingUsers((prev) => {
+          const next = { ...prev };
+          delete next[uId];
+          return next;
         });
       }
     };
 
     socket.on("new_message", onMessage);
+    socket.on("typing:start", onTypingStart);
+    socket.on("typing:stop", onTypingStop);
+
     return () => {
       socket.off("new_message", onMessage);
+      socket.off("typing:start", onTypingStart);
+      socket.off("typing:stop", onTypingStop);
     };
-  }, [socket, selected, refreshUnread]);
+  }, [socket, selected, refreshUnread, user]);
 
   const send = async () => {
     const text = content.trim();
-    if ((!text && !attachments.length && !attachedContent.length) || !selected) return;
+    if ((!text && !attachments.length && !attachedContent.length) || !selected)
+      return;
 
     const clientId = `${user?._id}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const sendAttachments = attachments;
@@ -137,7 +248,9 @@ export default function FloatingChatDock({ isNavVisible = true }) {
     const fullContent = encodeContentCards(text, sendContent);
     const options = {
       replyToMessageId: replyTo?._id,
-      attachmentIds: sendAttachments.map((item) => item.attachmentId || item._id),
+      attachmentIds: sendAttachments.map(
+        (item) => item.attachmentId || item._id,
+      ),
       attachedContent: sendContent,
     };
 
@@ -162,7 +275,8 @@ export default function FloatingChatDock({ isNavVisible = true }) {
     ]);
 
     requestAnimationFrame(() => {
-      if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
+      if (listRef.current)
+        listRef.current.scrollTop = listRef.current.scrollHeight;
     });
 
     if (socket?.connected) {
@@ -177,6 +291,23 @@ export default function FloatingChatDock({ isNavVisible = true }) {
     }
   };
 
+  const upload = async (files) => {
+    if (!files?.length || !selected?._id) return;
+    const array = Array.from(files);
+    setUploadProgress(10);
+    const result = await messagingApi.upload(
+      selected._id,
+      array,
+      (progress) => setUploadProgress(progress),
+    );
+    setUploadProgress(0);
+    if (result.success) {
+      setAttachments((prev) => [...prev, ...result.data.data.attachments]);
+    } else {
+      setError(result.error || "Upload failed.");
+    }
+  };
+
   // Do not render floating dock on the main full-screen /messages page
   if (pathname?.startsWith("/messages")) {
     return null;
@@ -186,7 +317,9 @@ export default function FloatingChatDock({ isNavVisible = true }) {
   const bottomOffset = isNavVisible ? "bottom-20 lg:bottom-4" : "bottom-4";
 
   return (
-    <div className={`hidden sm:block fixed right-4 z-40 transition-all duration-300 ${bottomOffset}`}>
+    <div
+      className={`hidden sm:block fixed right-4 z-40 transition-all duration-300 ${bottomOffset}`}
+    >
       {!isOpen ? (
         /* Collapsed Floating Pill */
         <button
@@ -213,7 +346,7 @@ export default function FloatingChatDock({ isNavVisible = true }) {
         </button>
       ) : (
         /* Expanded LinkedIn/Instagram-style Chat Dock Window */
-        <div className="flex h-[470px] sm:h-[500px] w-[320px] sm:w-[360px] flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-[#121215] dark:shadow-black/70 animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex h-117.5 sm:h-125 w-[320px] sm:w-90 flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-[#121215] dark:shadow-black/70 animate-in fade-in zoom-in-95 duration-150">
           {/* Dock Header */}
           <div className="flex h-12 sm:h-13 shrink-0 items-center justify-between border-b border-zinc-200/80 px-3 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-900/60 backdrop-blur-md">
             <div className="flex min-w-0 items-center gap-2">
@@ -225,13 +358,30 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                   >
                     ‹ Back
                   </button>
-                  <DockAvatar user={other} className="h-6 w-6 rounded-full" />
+                  <DockAvatar
+                    user={other}
+                    className="h-6 w-6 rounded-full"
+                    online={selected.type === "direct" && isOnline(other?._id)}
+                  />
                   <div className="min-w-0">
                     <p className="truncate text-xs font-bold text-zinc-900 dark:text-zinc-100">
                       {selected.type === "discussion"
                         ? selected.entityTitle
                         : conversationName(selected, currentUserId)}
                     </p>
+                    {Object.values(typingUsers).length > 0 ? (
+                      <p className="truncate text-[9.5px] font-bold text-blue-600 dark:text-blue-400 animate-pulse">
+                        typing…
+                      </p>
+                    ) : selected.type === "direct" ? (
+                      <p className="truncate text-[9.5px] text-zinc-400">
+                        {isOnline(other?._id) ? (
+                          <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Online</span>
+                        ) : (
+                          "Offline"
+                        )}
+                      </p>
+                    ) : null}
                   </div>
                 </>
               ) : (
@@ -293,31 +443,57 @@ export default function FloatingChatDock({ isNavVisible = true }) {
 
                 <div className="min-h-0 flex-1 overflow-y-auto p-1.5 space-y-0.5">
                   {loading ? (
-                    <div className="p-6 text-center text-xs text-zinc-400">Loading...</div>
+                    <div className="p-6 text-center text-xs text-zinc-400">
+                      Loading...
+                    </div>
                   ) : conversations.length > 0 ? (
                     conversations.map((conv) => {
                       const member = otherMember(conv, currentUserId);
+                      const hasUnread = (conv.unreadCount || 0) > 0;
                       return (
                         <button
                           key={conv._id}
                           onClick={() => openConversation(conv)}
-                          className="flex w-full items-center gap-2 rounded-xl p-2 text-left transition hover:bg-zinc-100 dark:hover:bg-zinc-900 cursor-pointer"
+                          className={`group relative flex w-full items-center gap-2 rounded-xl p-2 text-left border transition-all duration-150 cursor-pointer ${
+                            hasUnread
+                              ? "bg-blue-50/80 dark:bg-blue-950/25 border-blue-200/70 dark:border-blue-900/40 hover:bg-blue-100/70 dark:hover:bg-blue-900/35 shadow-xs"
+                              : "bg-transparent border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                          }`}
                         >
-                          <DockAvatar user={member} className="h-7 w-7 rounded-xl" />
+                          {hasUnread && (
+                            <span className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-blue-600 dark:bg-blue-500 shadow-xs" />
+                          )}
+                          <DockAvatar
+                            user={member}
+                            className="h-7 w-7 rounded-xl"
+                            online={conv.type === "direct" && isOnline(member?._id)}
+                          />
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between">
-                              <p className="truncate text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                              <p
+                                className={`truncate text-xs ${
+                                  hasUnread
+                                    ? "font-black text-zinc-950 dark:text-white"
+                                    : "font-bold text-zinc-900 dark:text-zinc-100"
+                                }`}
+                              >
                                 {conv.type === "discussion"
                                   ? conv.entityTitle
                                   : conversationName(conv, currentUserId)}
                               </p>
-                              {conv.unreadCount > 0 && (
-                                <span className="rounded-full bg-emerald-600 px-1.5 text-[8.5px] font-black text-white">
+                              {hasUnread && (
+                                <span className="rounded-full bg-blue-600 dark:bg-blue-500 px-1.5 text-[8.5px] font-black text-white shadow-xs">
                                   {conv.unreadCount}
                                 </span>
                               )}
                             </div>
-                            <p className="truncate text-[10px] text-zinc-400">
+                            <p
+                              className={`truncate text-[10px] ${
+                                hasUnread
+                                  ? "font-semibold text-zinc-800 dark:text-zinc-200"
+                                  : "text-zinc-400"
+                              }`}
+                            >
                               {conv.lastMessageText || "Start a conversation"}
                             </p>
                           </div>
@@ -341,13 +517,14 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                   {messages.map((message, index) => {
                     const prev = messages[index - 1];
                     const next = messages[index + 1];
-                    const isMine = idOf(message.senderId) === String(currentUserId);
+                    const isMine =
+                      idOf(message.senderId) === String(currentUserId);
 
                     const isSameSenderAsPrev = Boolean(
-                      prev && idOf(prev.senderId) === idOf(message.senderId)
+                      prev && idOf(prev.senderId) === idOf(message.senderId),
                     );
                     const isSameSenderAsNext = Boolean(
-                      next && idOf(next.senderId) === idOf(message.senderId)
+                      next && idOf(next.senderId) === idOf(message.senderId),
                     );
 
                     return (
@@ -373,6 +550,37 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                       />
                     );
                   })}
+
+                  {/* Live Mini Typing Indicator */}
+                  {Object.values(typingUsers).length > 0 && (
+                    <div className="flex flex-col gap-1 py-1">
+                      {Object.values(typingUsers).map((typer) => (
+                        <div
+                          key={typer._id}
+                          className="flex items-center gap-1.5 animate-in fade-in"
+                        >
+                          <DockAvatar user={typer} className="h-5 w-5 rounded-full" />
+                          <div className="flex items-center gap-1.5 rounded-xl bg-zinc-200/80 px-2.5 py-1 text-[10px] font-bold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                            <span>typing</span>
+                            <span className="flex items-center gap-0.5">
+                              <span
+                                className="h-1 w-1 rounded-full bg-blue-500 animate-bounce"
+                                style={{ animationDelay: "0ms" }}
+                              />
+                              <span
+                                className="h-1 w-1 rounded-full bg-blue-500 animate-bounce"
+                                style={{ animationDelay: "150ms" }}
+                              />
+                              <span
+                                className="h-1 w-1 rounded-full bg-blue-500 animate-bounce"
+                                style={{ animationDelay: "300ms" }}
+                              />
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <MessageInput
@@ -392,7 +600,8 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                   error={error}
                   setError={setError}
                   onSend={send}
-                  onUpload={() => {}}
+                  onUpload={upload}
+                  onTyping={handleTyping}
                   compact={true}
                 />
               </div>

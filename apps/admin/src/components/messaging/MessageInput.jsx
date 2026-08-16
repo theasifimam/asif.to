@@ -49,6 +49,7 @@ export default function MessageInput({
   setError,
   onSend,
   onUpload,
+  onTyping,
   compact = false,
 }) {
   const [showAttachMenu, setShowAttachMenu] = useState(false);
@@ -263,10 +264,15 @@ export default function MessageInput({
 
           <textarea
             value={content}
-            onChange={(event) => setContent(event.target.value.slice(0, 4000))}
+            onChange={(event) => {
+              const text = event.target.value.slice(0, 4000);
+              setContent(text);
+              if (onTyping) onTyping(text.trim().length > 0);
+            }}
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();
+                if (onTyping) onTyping(false);
                 onSend();
               }
             }}
