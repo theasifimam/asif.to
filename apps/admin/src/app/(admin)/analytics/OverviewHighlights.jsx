@@ -2,10 +2,22 @@
 import { useEffect, useState } from "react";
 import { analyticsApi } from "@/lib/api";
 import MetricCard from "./MetricCard";
+
 const n = (v) => Math.round(Number(v) || 0).toLocaleString();
+
 export default function OverviewHighlights({ range, search }) {
-  const [ga4,setGa4] = useState(null); const [platform,setPlatform] = useState(null);
-  useEffect(() => { Promise.all([analyticsApi.ga4(range),analyticsApi.platform()]).then(([a,b]) => { if(a.success)setGa4(a.data.data); if(b.success)setPlatform(b.data.data); }); }, [range]);
+  const [ga4, setGa4] = useState(null);
+  const [platform, setPlatform] = useState(null);
+
+  useEffect(() => {
+    Promise.all([analyticsApi.ga4(range), analyticsApi.platform()]).then(
+      ([a, b]) => {
+        if (a.success) setGa4(a.data.data);
+        if (b.success) setPlatform(b.data.data);
+      },
+    );
+  }, [range]);
+
   return (
     <section>
       <div className="mb-4">
@@ -17,12 +29,42 @@ export default function OverviewHighlights({ range, search }) {
         </p>
       </div>
       <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <MetricCard label="Active Users" value={n(ga4?.summary?.activeUsers)} source="GA4" />
-        <MetricCard label="Sessions" value={n(ga4?.summary?.sessions)} source="GA4" />
-        <MetricCard label="Page Views" value={n(ga4?.summary?.screenPageViews)} source="GA4" />
-        <MetricCard label="Search Clicks" value={n(search?.clicks?.value)} source="GSC" />
-        <MetricCard label="Impressions" value={n(search?.impressions?.value)} source="GSC" />
-        <MetricCard label="Published Content" value={n(platform?.counts?.publishedContent)} source="Platform" />
+        <MetricCard
+          label="Active Users"
+          value={n(ga4?.summary?.activeUsers)}
+          source="GA4"
+          tone="sky"
+        />
+        <MetricCard
+          label="Sessions"
+          value={n(ga4?.summary?.sessions)}
+          source="GA4"
+          tone="indigo"
+        />
+        <MetricCard
+          label="Page Views"
+          value={n(ga4?.summary?.screenPageViews)}
+          source="GA4"
+          tone="emerald"
+        />
+        <MetricCard
+          label="Search Clicks"
+          value={n(search?.clicks?.value)}
+          source="GSC"
+          tone="amber"
+        />
+        <MetricCard
+          label="Impressions"
+          value={n(search?.impressions?.value)}
+          source="GSC"
+          tone="purple"
+        />
+        <MetricCard
+          label="Published Content"
+          value={n(platform?.counts?.publishedContent)}
+          source="Platform"
+          tone="rose"
+        />
       </div>
     </section>
   );
