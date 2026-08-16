@@ -19,6 +19,7 @@ import {
   Server,
   Database,
   Sparkles,
+  Plus,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { clearCredentials } from "@/lib/store/authSlice";
@@ -147,10 +148,19 @@ export default function Header() {
         }`}
       >
         <div
-          className={`${containerMaxWidth} mx-auto bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl rounded-full px-3 sm:px-4 md:px-6 h-14 md:h-16 flex items-center justify-between shadow-sm shadow-black/5 dark:shadow-black/30 transition-all duration-300`}
+          className={`${containerMaxWidth} mx-auto bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl rounded-full px-3 sm:px-4 md:px-6 h-14 md:h-16 flex items-center justify-between border border-zinc-200/80 dark:border-zinc-800/80 transition-all duration-300`}
         >
-          {/* Brand Logo */}
+          {/* Brand Logo & Circular Menu Trigger */}
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsMenuOpen(true)}
+              className="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-700/80 flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+              title="Open Navigation Menu"
+              aria-label="Open menu"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+
             <div className="flex items-center gap-2">
               {isArticlePage && (
                 <Link
@@ -325,6 +335,14 @@ export default function Header() {
 
           {/* User Profile & Actions (Theme toggle visible on mobile, profile on desktop) */}
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => router.push("/run")}
+              className="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-700/80 flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+              title="Open Playground Workspace"
+              aria-label="New Playground"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
             <ThemeToggle />
             <GlobalSearch />
             <div className="hidden md:flex items-center gap-2">
