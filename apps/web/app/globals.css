@@ -9,71 +9,67 @@
   --color-primary-foreground: var(--m3-on-primary);
   --color-accent: var(--accent);
 
-  /* Map blue classes to the dynamic Sage Green variables */
   --color-blue-50: var(--m3-surface-low);
   --color-blue-100: var(--m3-primary-container);
   --color-blue-400: var(--accent);
   --color-blue-500: var(--m3-primary);
-  --color-blue-600: var(--m3-primary);
-  --color-blue-700: var(--accent);
-  --color-blue-900: var(--m3-on-primary-container);
-  --color-blue-950: var(--m3-on-primary-container);
+  --color-blue-600: #2563eb;
+  --color-blue-700: #1d4ed8;
 }
 
 :root {
-  --site-bg: #eff6ff; /* blue-50 */
-  --site-fg: #172554; /* blue-950 */
-  --accent: #2563eb; /* blue-600 */
-  --card-bg: #ffffff; /* white */
+  --site-bg: #f8fafc; /* soft neutral slate-50 canvas */
+  --site-fg: #0f172a; /* slate-900 */
+  --accent: #2563eb; /* primary brand blue-600 */
+  --card-bg: #ffffff; /* white card surface */
   --radius-xl: 2rem;
   --radius-lg: 1.25rem;
   --font-outfit: "Outfit", sans-serif;
   --font-inter: "Inter", sans-serif;
 
-  /* Material 3 Blue Dynamic Palette (Primary set to blue-600) */
-  --m3-primary: #2563eb; /* blue-600 */
-  --m3-on-primary: #ffffff; /* white */
-  --m3-primary-container: #dbeafe; /* blue-100 */
-  --m3-on-primary-container: #1e3a8a; /* blue-900 */
-  --m3-surface: #eff6ff; /* blue-50 */
-  --m3-surface-card: #ffffff; /* white */
-  --m3-surface-low: #f8fafc; /* slate-50 */
-  --m3-surface-high: #dbeafe; /* blue-100 */
-  --m3-border: #bfdbfe; /* blue-200 */
+  /* Material 3 & UI Variables */
+  --m3-primary: #2563eb;
+  --m3-on-primary: #ffffff;
+  --m3-primary-container: #eff6ff;
+  --m3-on-primary-container: #1e40af;
+  --m3-surface: #f8fafc;
+  --m3-surface-card: #ffffff;
+  --m3-surface-low: #f1f5f9;
+  --m3-surface-high: #e2e8f0;
+  --m3-border: #e2e8f0;
 
-  --background: #eff6ff; /* blue-50 */
-  --foreground: #172554; /* blue-950 */
-  --card: #ffffff; /* white */
-  --card-foreground: #172554; /* blue-950 */
-  --border: #bfdbfe; /* blue-200 */
-  --input: #bfdbfe; /* blue-200 */
-  --ring: #2563eb; /* blue-600 */
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #2563eb;
 }
 
 .dark {
-  --site-bg: #090d16; /* deep navy surface */
-  --site-fg: #eff6ff; /* blue-50 */
-  --accent: #3b82f6; /* blue-500 */
-  --card-bg: #0f172a; /* slate-900 */
+  --site-bg: #0b0f19; /* deep modern serene canvas */
+  --site-fg: #f8fafc;
+  --accent: #3b82f6;
+  --card-bg: #0f172a;
 
-  /* Material 3 Dark Blue Palette (Primary preserved as blue-600 for contrast) */
-  --m3-primary: #2563eb; /* blue-600 */
-  --m3-on-primary: #ffffff; /* white */
-  --m3-primary-container: #1e3a8a; /* blue-900 */
-  --m3-on-primary-container: #dbeafe; /* blue-100 */
-  --m3-surface: #090d16;
+  --m3-primary: #2563eb;
+  --m3-on-primary: #ffffff;
+  --m3-primary-container: #1e3a8a;
+  --m3-on-primary-container: #dbeafe;
+  --m3-surface: #0b0f19;
   --m3-surface-card: #0f172a;
-  --m3-surface-low: #172554; /* blue-950 */
-  --m3-surface-high: #1e3a8a; /* blue-900 */
-  --m3-border: #1e3a8a; /* blue-900 */
+  --m3-surface-low: #1e293b;
+  --m3-surface-high: #334155;
+  --m3-border: #1e293b;
 
-  --background: #090d16;
-  --foreground: #eff6ff; /* blue-50 */
+  --background: #0b0f19;
+  --foreground: #f8fafc;
   --card: #0f172a;
-  --card-foreground: #eff6ff; /* blue-50 */
-  --border: #1e3a8a; /* blue-900 */
-  --input: #1e3a8a; /* blue-900 */
-  --ring: #2563eb; /* blue-600 */
+  --card-foreground: #f8fafc;
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #2563eb;
 }
 
 body {
@@ -94,20 +90,15 @@ body {
   transform: scale(0.97);
 }
 
-/* Material 3 Clean Squircle Tile */
+/* Clean Squircle Tile without noisy shadows */
 .android-tile {
   border-radius: 2rem;
   transition:
     transform 0.25s cubic-bezier(0.2, 0, 0, 1),
-    box-shadow 0.25s ease,
     border-color 0.25s ease;
 }
 .android-tile:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px -8px rgba(37, 99, 235, 0.08);
-}
-.dark .android-tile:hover {
-  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.5);
 }
 
 /* Hide scrollbar on mobile devices for a cleaner app-like feel */
@@ -135,7 +126,7 @@ body {
 }
 
 ::selection {
-  background: #18181b;
+  background: #2563eb;
   color: #ffffff;
 }
 
@@ -153,8 +144,13 @@ body {
 /* Maintain distinct link colors */
 .ql-editor a,
 .prose a {
-  color: #3b82f6 !important;
+  color: #2563eb !important;
   text-decoration: underline;
+}
+
+.dark .ql-editor a,
+.dark .prose a {
+  color: #60a5fa !important;
 }
 
 .ql-align-center {
@@ -188,23 +184,23 @@ body {
 
 /* ─── Code Snippets & Markdown Code Blocks ─── */
 pre.ql-syntax {
-  background-color: #1a1b26 !important;
-  color: #a9b1d6;
+  background-color: #0d1117 !important;
+  color: #f8fafc;
   border-radius: 1.5rem !important;
   padding: 1.25rem 1.5rem !important;
   font-family: "JetBrains Mono", "Fira Code", monospace !important;
   font-size: 0.95rem !important;
   line-height: 1.7 !important;
   margin: 2rem 0 !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
   white-space: pre-wrap !important;
   word-break: break-word !important;
+  box-shadow: none !important;
 }
 
 .dark pre.ql-syntax {
-  background-color: #0b0e14 !important;
-  border-color: rgba(255, 255, 255, 0.03) !important;
+  background-color: #0d1117 !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
 }
 
 /* Fallback & Markdown Code Block Snippet Formatting */
@@ -216,7 +212,7 @@ pre.hljs,
 .w-md-editor-preview pre {
   background-color: #f8fafc !important;
   color: #0f172a !important;
-  padding: 1rem 1.25rem !important;
+  padding: 1.15rem 1.35rem !important;
   border-radius: 1.25rem !important;
   white-space: pre-wrap !important;
   word-break: break-word !important;
@@ -227,7 +223,7 @@ pre.hljs,
   font-size: 0.9rem !important;
   line-height: 1.7 !important;
   border: 1px solid #e2e8f0 !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+  box-shadow: none !important;
 }
 
 .dark .prose pre,
@@ -236,20 +232,23 @@ pre.hljs,
 .dark .wmde-markdown pre,
 .dark .topic-markdown pre,
 .dark .w-md-editor-preview pre {
-  background-color: #0b0e14 !important;
-  color: #e2e8f0 !important;
+  background-color: #0d1117 !important;
+  color: #f8fafc !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+  box-shadow: none !important;
 }
 
 /* Eliminate inner double padding on code elements inside pre containers */
+.hljs,
+code.hljs,
+code[class*="language-"],
 .wmde-markdown pre code,
 .wmde-markdown code.hljs,
 .topic-markdown pre code,
 .prose pre code,
 .ql-editor pre code,
 pre.hljs code,
-.w-md-editor-preview pre code {
+.w-md-editor-preview code {
   padding: 0 !important;
   margin: 0 !important;
   background: transparent !important;
@@ -271,32 +270,33 @@ pre.hljs code,
 }
 
 .topic-markdown .wmde-markdown blockquote {
-  background: #f4f4f5;
-  border-left: 4px solid #3b82f6;
+  background: #f1f5f9;
+  border-left: 4px solid #2563eb;
   border-radius: 0 0.75rem 0.75rem 0;
-  color: #52525b;
+  color: #334155;
   margin: 1.75rem 0;
   padding: 1rem 1.25rem;
 }
 
 .dark .topic-markdown .wmde-markdown blockquote {
-  background: #18181b;
-  color: #a1a1aa;
+  background: #0f172a;
+  color: #94a3b8;
 }
 
 .topic-markdown .wmde-markdown :not(pre) > code {
-  background: #f4f4f5;
-  border: 1px solid #e4e4e7;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
   border-radius: 0.375rem;
-  color: #be123c;
+  color: #2563eb;
   font-size: 0.875em;
   padding: 0.15rem 0.35rem;
+  font-weight: 600;
 }
 
 .dark .topic-markdown .wmde-markdown :not(pre) > code {
-  background: #27272a;
-  border-color: #3f3f46;
-  color: #fda4af;
+  background: #1e293b;
+  border-color: #334155;
+  color: #60a5fa;
 }
 
 .topic-markdown .wmde-markdown table {
@@ -306,34 +306,34 @@ pre.hljs code,
 }
 
 .topic-markdown .wmde-markdown th {
-  background: #f4f4f5;
-  color: #27272a;
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 .topic-markdown .wmde-markdown td,
 .topic-markdown .wmde-markdown th {
-  border-color: #e4e4e7;
+  border-color: #e2e8f0;
   padding: 0.75rem;
 }
 
 .dark .topic-markdown .wmde-markdown th {
-  background: #27272a;
-  color: #f4f4f5;
+  background: #1e293b;
+  color: #f8fafc;
 }
 
 .dark .topic-markdown .wmde-markdown td,
 .dark .topic-markdown .wmde-markdown th {
-  border-color: #3f3f46;
+  border-color: #334155;
 }
 
 .topic-markdown .wmde-markdown hr {
-  background: #e4e4e7;
+  background: #e2e8f0;
   height: 1px;
   margin: 2rem 0;
 }
 
 .dark .topic-markdown .wmde-markdown hr {
-  background: #3f3f46;
+  background: #1e293b;
 }
 
 /* ─── Premium Sonner Toast Redesign ─── */
@@ -341,94 +341,17 @@ pre.hljs code,
   font-family: var(--font-inter), sans-serif !important;
   border-radius: var(--radius-lg, 1.25rem) !important;
   background: var(--card-bg) !important;
-  border: 1px solid var(--border, #bfdbfe) !important;
-  color: var(--foreground, #172554) !important;
-  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.05), 0 8px 10px -6px rgba(37, 99, 235, 0.05) !important;
+  border: 1px solid var(--border, #e2e8f0) !important;
+  color: var(--foreground, #0f172a) !important;
   backdrop-filter: blur(16px) !important;
   padding: 14px 18px !important;
   transition: all 0.2s ease !important;
+  box-shadow: none !important;
 }
 
-/* Light / Dark Mode Overrides */
 .dark [data-sonner-toast] {
-  background: rgba(15, 23, 42, 0.85) !important;
+  background: rgba(15, 23, 42, 0.95) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
-  color: #eff6ff !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3) !important;
+  color: #f8fafc !important;
+  box-shadow: none !important;
 }
-
-/* Success Toast */
-[data-sonner-toast][data-type="success"] {
-  border-color: rgba(16, 185, 129, 0.3) !important;
-  background: rgba(240, 253, 250, 0.95) !important;
-}
-[data-sonner-toast][data-type="success"] [data-icon] {
-  color: #10b981 !important;
-}
-.dark [data-sonner-toast][data-type="success"] {
-  background: rgba(20, 184, 166, 0.1) !important;
-  border-color: rgba(20, 184, 166, 0.2) !important;
-}
-
-/* Error Toast */
-[data-sonner-toast][data-type="error"] {
-  border-color: rgba(239, 68, 68, 0.3) !important;
-  background: rgba(254, 242, 242, 0.95) !important;
-}
-[data-sonner-toast][data-type="error"] [data-icon] {
-  color: #ef4444 !important;
-}
-.dark [data-sonner-toast][data-type="error"] {
-  background: rgba(239, 68, 68, 0.1) !important;
-  border-color: rgba(239, 68, 68, 0.2) !important;
-}
-
-/* Info Toast */
-[data-sonner-toast][data-type="info"] {
-  border-color: rgba(59, 130, 246, 0.3) !important;
-  background: rgba(239, 246, 255, 0.95) !important;
-}
-[data-sonner-toast][data-type="info"] [data-icon] {
-  color: #3b82f6 !important;
-}
-.dark [data-sonner-toast][data-type="info"] {
-  background: rgba(59, 130, 246, 0.1) !important;
-  border-color: rgba(59, 130, 246, 0.2) !important;
-}
-
-/* Warning Toast */
-[data-sonner-toast][data-type="warning"] {
-  border-color: rgba(245, 158, 11, 0.3) !important;
-  background: rgba(254, 253, 242, 0.95) !important;
-}
-[data-sonner-toast][data-type="warning"] [data-icon] {
-  color: #f59e0b !important;
-}
-.dark [data-sonner-toast][data-type="warning"] {
-  background: rgba(245, 158, 11, 0.1) !important;
-  border-color: rgba(245, 158, 11, 0.2) !important;
-}
-
-/* Loading Toast */
-[data-sonner-toast][data-type="loading"] {
-  border-color: var(--border, #bfdbfe) !important;
-  background: var(--card-bg) !important;
-}
-
-/* Titles and Descriptions */
-[data-sonner-toast] [data-title] {
-  font-family: var(--font-outfit), sans-serif !important;
-  font-weight: 700 !important;
-  font-size: 0.9rem !important;
-  letter-spacing: -0.010em !important;
-  color: inherit !important;
-}
-
-[data-sonner-toast] [data-description] {
-  font-family: var(--font-inter), sans-serif !important;
-  font-size: 0.775rem !important;
-  font-weight: 500 !important;
-  color: inherit !important;
-  opacity: 0.8 !important;
-}
-

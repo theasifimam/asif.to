@@ -119,7 +119,7 @@ export default function SearchDialog({
         {/* Floating Pill Capsule Search Input Island */}
         <div
           role="search"
-          className="flex items-center gap-3 w-full rounded-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl px-4.5 py-3 sm:py-3.5 shadow-2xl shadow-black/20 border border-zinc-200/80 dark:border-zinc-700/80 ring-1 ring-black/5 dark:ring-white/10 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/40 transition-all"
+          className="flex items-center gap-3 w-full rounded-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl px-4.5 py-3 sm:py-3.5 border border-zinc-200/80 dark:border-zinc-700/80 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/40 transition-all"
         >
           <Search
             className="h-5 w-5 text-zinc-400 dark:text-zinc-400 shrink-0 ml-0.5"

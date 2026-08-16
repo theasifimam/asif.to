@@ -85,15 +85,15 @@ export default function CheatsheetsClient({ initialCourses = [], initialCheatshe
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-24 sm:px-6">
-      <section className="overflow-hidden rounded-4xl border border-blue-500/15 bg-linear-to-br from-blue-600 to-indigo-700 p-7 text-white shadow-2xl shadow-blue-600/15 sm:p-12">
-        <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-black uppercase tracking-wider">
-          <Sparkles className="h-4 w-4" /> Reference guides
+      <section className="overflow-hidden rounded-3xl sm:rounded-[2.5rem] border border-blue-500/20 bg-linear-to-br from-blue-600 via-blue-700 to-indigo-800 p-7 text-white shadow-xl shadow-blue-500/10 sm:p-12">
+        <span className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-md px-3.5 py-1.5 text-xs font-black uppercase tracking-wider border border-white/20">
+          <Sparkles className="h-4 w-4 text-amber-300" /> Reference Guides
         </span>
         <h1 className="mt-5 max-w-3xl text-3xl font-black tracking-tight sm:text-5xl">
-          Coding cheatsheets built for fast reading and live practice.
+          Coding Cheatsheets & Syntax References
         </h1>
-        <p className="mt-4 max-w-2xl text-sm font-medium leading-6 text-blue-100 sm:text-base">
-          Each cheatsheet is a focused article with searchable explanations and code blocks you can open directly in the interactive editor.
+        <p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-blue-100/90 sm:text-base">
+          Focused syntax reference guides with searchable explanations and code blocks you can open directly in the interactive editor.
         </p>
       </section>
 
@@ -104,16 +104,16 @@ export default function CheatsheetsClient({ initialCourses = [], initialCheatshe
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search titles, concepts, or code..."
-            className="w-full rounded-2xl border border-zinc-200 bg-white py-4 pl-11 pr-4 text-sm font-semibold shadow-sm outline-none focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-900"
+            className="w-full rounded-full border border-zinc-200/80 bg-white py-3.5 pl-11 pr-4 text-sm font-semibold shadow-xs outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-zinc-800/80 dark:bg-zinc-900"
           />
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
           <button
             onClick={() => setSelectedTech("")}
-            className={`rounded-full px-4 py-2 text-xs font-bold ${
+            className={`rounded-full px-4 py-2 text-xs font-bold transition-all ${
               !selectedTech
-                ? "bg-blue-600 text-white"
-                : "bg-white text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300"
+                ? "bg-blue-600 text-white shadow-xs"
+                : "bg-white text-zinc-600 border border-zinc-200/80 dark:border-zinc-800/80 dark:bg-zinc-900 dark:text-zinc-300"
             }`}
           >
             All
@@ -122,10 +122,10 @@ export default function CheatsheetsClient({ initialCourses = [], initialCheatshe
             <button
               key={tech.id}
               onClick={() => setSelectedTech(tech.id)}
-              className={`rounded-full px-4 py-2 text-xs font-bold whitespace-nowrap ${
+              className={`rounded-full px-4 py-2 text-xs font-bold whitespace-nowrap transition-all ${
                 selectedTech === tech.id
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300"
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "bg-white text-zinc-600 border border-zinc-200/80 dark:border-zinc-800/80 dark:bg-zinc-900 dark:text-zinc-300"
               }`}
             >
               {tech.name}

@@ -16,7 +16,7 @@ export default function StandaloneCodeSnippets({
         <Code className="w-4 h-4 text-blue-500" />
         Interactive Code Examples ({standaloneSnippets.length})
       </h3>
-      <div className="space-y-4 px-4 md:px-0">
+      <div className="space-y-4 w-full">
         {standaloneSnippets.map((sn, index) => (
           <CodeSnippetViewer
             key={index}

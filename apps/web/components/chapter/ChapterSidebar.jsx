@@ -17,10 +17,10 @@ export default function ChapterSidebar({
   return (
     <aside className="hidden lg:block lg:col-span-4 xl:col-span-3 z-30">
       <div style={{ position: "sticky", top: "20px" }}>
-        <div className="h-[calc(100vh-7.5rem)] flex flex-col gap-3 p-4 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60">
+        <div className="h-[calc(100vh-7.5rem)] flex flex-col gap-3 p-4 rounded-3xl sm:rounded-[2.5rem] bg-white dark:bg-zinc-900 shadow-xs border border-zinc-200/80 dark:border-zinc-800/80">
           <div className="flex items-center justify-between px-2 pt-1 shrink-0">
             <h2 className="text-xs font-extrabold uppercase tracking-widest text-zinc-400 flex items-center gap-1.5">
-              <BookOpen className="w-4 h-4 text-blue-500" />
+              <BookOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               Chapters ({allChapters.length})
             </h2>
             <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
@@ -36,7 +36,7 @@ export default function ChapterSidebar({
               placeholder="Filter chapters..."
               value={sidebarSearch}
               onChange={(e) => setSidebarSearch(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-xs text-foreground placeholder:text-zinc-400 border-0 outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full pl-8 pr-3 py-2 rounded-full bg-zinc-100 dark:bg-zinc-800 text-xs text-foreground placeholder:text-zinc-400 border border-zinc-200/60 dark:border-zinc-700/60 outline-none focus:ring-2 focus:ring-blue-500/30"
             />
           </div>
 

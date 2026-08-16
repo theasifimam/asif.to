@@ -95,7 +95,7 @@ export default function CourseClient({ initialData }) {
         activeCourseSlug={activeCourseSlug}
       />
 
-      <main className="flex-1 w-full max-w-4xl mx-auto px-2 sm:px-6 pt-38 sm:pt-46 flex flex-col gap-6">
+      <main className="flex-1 w-full max-w-4xl mx-auto px-2 sm:px-6 pt-40 sm:pt-26 flex flex-col gap-6">
         {/* Back Button */}
         <div>
           <Link

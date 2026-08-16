@@ -18,9 +18,9 @@ export default function ChapterDocumentCard({
 }) {
   return (
     <div
-      className={`flex flex-col gap-4 py-2 sm:gap-6 sm:py-10 transition-all ${
+      className={`flex flex-col gap-4 p-5 sm:p-8 sm:gap-6 rounded-3xl sm:rounded-[2.5rem] bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs transition-all ${
         isFocusMode
-          ? "sm:py-12"
+          ? "sm:py-10"
           : ""
       }`}
     >

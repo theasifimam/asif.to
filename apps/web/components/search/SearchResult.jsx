@@ -71,10 +71,10 @@ export default function SearchResult({ item, query, selected, onSelect, id }) {
       role="option"
       aria-selected={selected}
       onMouseEnter={onSelect}
-      className={`block rounded-4xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl p-3.5 outline-none shadow-md shadow-black/5 dark:shadow-black/20 border border-zinc-200/80 dark:border-zinc-800/80 ring-1 ring-black/5 dark:ring-white/10 transition-all duration-150 ${
+      className={`block rounded-3xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl p-3.5 outline-none border border-zinc-200/80 dark:border-zinc-800/80 transition-all duration-150 ${
         selected
-          ? "ring-2 ring-blue-500 border-blue-500/80 shadow-xl shadow-blue-500/10 scale-[1.01] -translate-y-0.5"
-          : "hover:border-blue-500/50 hover:shadow-lg hover:scale-[1.005]"
+          ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/20"
+          : "hover:border-blue-500/50"
       }`}
     >
       <div className="flex items-start gap-3">
