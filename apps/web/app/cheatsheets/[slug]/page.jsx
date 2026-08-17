@@ -1,5 +1,5 @@
 import CheatsheetReader from "@/components/courses/CheatsheetReader";
-import { getCheatsheet } from "@/lib/publicContent";
+import { getCheatsheet, getRelatedContent } from "@/lib/publicContent";
 import { absoluteUrl } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import JsonLd from "@/components/seo/JsonLd";
