@@ -1,5 +1,5 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL;
-export const API_BASE_URL = API_URL.split('/api/v1')[0].replace(/\/$/, '');
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+export const API_BASE_URL = API_URL ? API_URL.split('/api/v1')[0].replace(/\/$/, '') : "";
 
 export const getImageUrl = (path) => {
   if (!path) return "https://images.unsplash.com/photo-1504711432869-efd597cdd042?q=80&w=2070&auto=format&fit=crop";
