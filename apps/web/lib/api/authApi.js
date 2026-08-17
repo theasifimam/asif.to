@@ -127,17 +127,17 @@ export const authApi = createApi({
       invalidatesTags: ["Auth"],
     }),
     deactivateAccount: builder.mutation({
-      query: (confirmation) => ({
+      query: (data) => ({
         url: "/users/me/deactivate",
         method: "POST",
-        data: { confirmation },
+        data: typeof data === "string" ? { confirmation: data } : data,
       }),
     }),
     deleteAccount: builder.mutation({
-      query: (confirmation) => ({
+      query: (data) => ({
         url: "/users/me/account",
         method: "DELETE",
-        data: { confirmation },
+        data: typeof data === "string" ? { confirmation: data } : data,
       }),
     }),
 

@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
+import { verifyAndConsumeOtp } from "./otp.controller.js";
 
 import Article from "../models/Article.js";
 import Course from "../models/Course.js";
@@ -570,6 +571,42 @@ export const deactivateMyAccount = async (req, res) => {
         message: "Enter your username exactly to deactivate your account.",
       });
     }
+
+    // 1. Enforce OTP verification
+    const otp = String(req.body.otp || "").trim();
+    if (!otp) {
+      return res.status(400).json({
+        success: false,
+        message: "A 6-digit email verification code is required to deactivate your account.",
+      });
+    }
+    const otpResult = verifyAndConsumeOtp(req.user.email, otp);
+    if (!otpResult.success) {
+      return res.status(400).json({
+        success: false,
+        message: otpResult.message || "Invalid or expired verification code.",
+      });
+    }
+
+    // 2. Enforce Password verification if account has a password
+    const fullUser = await User.findById(req.user._id).select("+password");
+    if (fullUser?.password) {
+      const password = String(req.body.password || "").trim();
+      if (!password) {
+        return res.status(400).json({
+          success: false,
+          message: "Your current account password is required.",
+        });
+      }
+      const isMatch = await bcrypt.compare(password, fullUser.password);
+      if (!isMatch) {
+        return res.status(400).json({
+          success: false,
+          message: "Incorrect account password.",
+        });
+      }
+    }
+
     if (req.user.role === "super_admin") {
       const remaining = await User.countDocuments({
         _id: { $ne: req.user._id },
@@ -621,6 +658,42 @@ export const deleteMyAccount = async (req, res) => {
         message: `Enter ${expected} exactly to confirm deletion.`,
       });
     }
+
+    // 1. Enforce OTP verification
+    const otp = String(req.body.otp || "").trim();
+    if (!otp) {
+      return res.status(400).json({
+        success: false,
+        message: "A 6-digit email verification code is required to delete your account.",
+      });
+    }
+    const otpResult = verifyAndConsumeOtp(req.user.email, otp);
+    if (!otpResult.success) {
+      return res.status(400).json({
+        success: false,
+        message: otpResult.message || "Invalid or expired verification code.",
+      });
+    }
+
+    // 2. Enforce Password verification if account has a password
+    const fullUser = await User.findById(req.user._id).select("+password");
+    if (fullUser?.password) {
+      const password = String(req.body.password || "").trim();
+      if (!password) {
+        return res.status(400).json({
+          success: false,
+          message: "Your current account password is required.",
+        });
+      }
+      const isMatch = await bcrypt.compare(password, fullUser.password);
+      if (!isMatch) {
+        return res.status(400).json({
+          success: false,
+          message: "Incorrect account password.",
+        });
+      }
+    }
+
     if (req.user.role === "super_admin") {
       const remaining = await User.countDocuments({
         _id: { $ne: req.user._id },

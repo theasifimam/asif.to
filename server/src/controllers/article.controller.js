@@ -4,6 +4,7 @@ import fs from "fs";
 
 import { slugify } from "../utils/slugify.js";
 import { logActivity } from "../services/activity.service.js";
+import { formatCanonicalUrl } from "../utils/canonical.js";
 
 /**
  * List all articles with optional filters and pagination
@@ -166,8 +167,12 @@ export const createArticle = async (req, res) => {
       slug = `${slug}-${Date.now()}`;
     }
 
+    const finalType = type === "cheatsheet" ? "cheatsheet" : "article";
+    const basePath = finalType === "cheatsheet" ? "/cheatsheets" : "/articles";
+    const finalCanonicalUrl = formatCanonicalUrl(basePath, canonicalUrl, slug);
+
     const newArticle = await Article.create({
-      type: type === "cheatsheet" ? "cheatsheet" : "article",
+      type: finalType,
       title,
       slug,
       content,
@@ -175,7 +180,7 @@ export const createArticle = async (req, res) => {
       topic: Array.isArray(topic) ? topic : [topic],
       image: imageUrl,
       status: articleStatus,
-      seoTitle: seoTitle || "", seoDescription: seoDescription || "", keywords: keywords || [], canonicalUrl: canonicalUrl || "",
+      seoTitle: seoTitle || "", seoDescription: seoDescription || "", keywords: keywords || [], canonicalUrl: finalCanonicalUrl,
       techId: techId || "", order: Number(order) || 0,
       readCount: 0,
       views: []
@@ -228,8 +233,19 @@ export const updateArticle = async (req, res) => {
     if (seoTitle !== undefined) updateData.seoTitle = seoTitle;
     if (seoDescription !== undefined) updateData.seoDescription = seoDescription;
     if (keywords !== undefined) updateData.keywords = Array.isArray(keywords) ? keywords : String(keywords).split(",").map((item) => item.trim()).filter(Boolean);
-    if (canonicalUrl !== undefined) updateData.canonicalUrl = canonicalUrl;
     if (type && ["article", "cheatsheet"].includes(type)) updateData.type = type;
+
+    if (canonicalUrl !== undefined || title !== undefined || type !== undefined) {
+      const activeType = updateData.type || article.type || "article";
+      const targetSlug = updateData.slug || article.slug;
+      const basePath = activeType === "cheatsheet" ? "/cheatsheets" : "/articles";
+      updateData.canonicalUrl = formatCanonicalUrl(
+        basePath,
+        canonicalUrl !== undefined ? canonicalUrl : article.canonicalUrl,
+        targetSlug,
+      );
+    }
+
     if (techId !== undefined) updateData.techId = techId;
     if (order !== undefined) updateData.order = Number(order) || 0;
 

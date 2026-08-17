@@ -8,3 +8,5 @@ export {
   AdminPagination,
   AdminSearch,
 } from "./admin-page";
+export { CanonicalUrlInput } from "./CanonicalUrlInput";
+

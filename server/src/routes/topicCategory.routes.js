@@ -5,6 +5,7 @@ import {
   createTopicCategory,
   updateTopicCategory,
   deleteTopicCategory,
+  reorderTopicCategories,
   listPublicInterviewCategories,
   getPublicInterviewCategory,
 } from "../controllers/courseTopic.controller.js";
@@ -17,7 +18,9 @@ const canManage = [protect, requirePermission("topics.manage")];
 
 router.get("/public", listPublicInterviewCategories);
 router.get("/public/:categorySlug", getPublicInterviewCategory);
+router.get("/public/:courseSlug/:categorySlug", getPublicInterviewCategory);
 router.get("/", ...canView, getTopicCategories);
+router.patch("/reorder", ...canManage, reorderTopicCategories);
 router.get("/:id", ...canView, getTopicCategory);
 router.post("/", ...canManage, createTopicCategory);
 router.patch("/:id", ...canManage, updateTopicCategory);

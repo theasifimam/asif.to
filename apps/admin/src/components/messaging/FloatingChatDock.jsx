@@ -24,12 +24,20 @@ import {
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
 
-function DockAvatar({ user, className = "h-8 w-8 rounded-xl", online = false }) {
+function DockAvatar({
+  user,
+  className = "h-8 w-8 rounded-xl",
+  online = false,
+}) {
   const source = avatarUrl(user?.avatar);
   return (
     <div className="relative shrink-0">
       {source ? (
-        <img src={source} alt="" className={`${className} shrink-0 object-cover`} />
+        <img
+          src={source}
+          alt=""
+          className={`${className} shrink-0 object-cover`}
+        />
       ) : (
         <span
           className={`flex ${className} shrink-0 items-center justify-center bg-zinc-200 text-xs font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300`}
@@ -295,10 +303,8 @@ export default function FloatingChatDock({ isNavVisible = true }) {
     if (!files?.length || !selected?._id) return;
     const array = Array.from(files);
     setUploadProgress(10);
-    const result = await messagingApi.upload(
-      selected._id,
-      array,
-      (progress) => setUploadProgress(progress),
+    const result = await messagingApi.upload(selected._id, array, (progress) =>
+      setUploadProgress(progress),
     );
     setUploadProgress(0);
     if (result.success) {
@@ -376,7 +382,9 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                     ) : selected.type === "direct" ? (
                       <p className="truncate text-[9.5px] text-zinc-400">
                         {isOnline(other?._id) ? (
-                          <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Online</span>
+                          <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+                            Online
+                          </span>
                         ) : (
                           "Offline"
                         )}
@@ -466,7 +474,9 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                           <DockAvatar
                             user={member}
                             className="h-7 w-7 rounded-xl"
-                            online={conv.type === "direct" && isOnline(member?._id)}
+                            online={
+                              conv.type === "direct" && isOnline(member?._id)
+                            }
                           />
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between">
@@ -559,9 +569,11 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                           key={typer._id}
                           className="flex items-center gap-1.5 animate-in fade-in"
                         >
-                          <DockAvatar user={typer} className="h-5 w-5 rounded-full" />
+                          <DockAvatar
+                            user={typer}
+                            className="h-5 w-5 rounded-full"
+                          />
                           <div className="flex items-center gap-1.5 rounded-xl bg-zinc-200/80 px-2.5 py-1 text-[10px] font-bold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
-                            <span>typing</span>
                             <span className="flex items-center gap-0.5">
                               <span
                                 className="h-1 w-1 rounded-full bg-blue-500 animate-bounce"

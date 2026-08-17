@@ -24,6 +24,7 @@ export function AdminPageHeader({
   back,
   actions,
   className,
+  stickyActions = true,
 }) {
   return (
     <header className={cn("flex min-w-0 flex-col gap-4", className)}>
@@ -49,7 +50,13 @@ export function AdminPageHeader({
         )}
       </div>
       {actions && (
-        <div className="flex flex-wrap items-stretch sm:items-center justify-start sm:justify-end gap-2.5 w-full *:grow sm:*:grow-0">
+        <div
+          className={cn(
+            "flex flex-wrap items-stretch sm:items-center justify-start sm:justify-end gap-2.5 w-full *:grow sm:*:grow-0",
+            stickyActions &&
+              "sticky top-16 z-30 py-2.5 -my-1.5 bg-[#f3f4f6]/90 dark:bg-[#09090b]/90 backdrop-blur-xl transition-all border-b border-zinc-200/50 dark:border-zinc-800/50",
+          )}
+        >
           {actions}
         </div>
       )}

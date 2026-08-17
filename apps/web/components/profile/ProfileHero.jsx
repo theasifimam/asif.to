@@ -4,6 +4,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { getImageUrl } from "@/lib/config";
+import { getUserMasteryTier } from "@/lib/masteryTier";
 import {
   Link2,
   MapPin,
@@ -17,6 +18,8 @@ export default function ProfileHero({
   isOwnProfile,
   onOpenLogout,
 }) {
+  const masteryTier = getUserMasteryTier(user);
+
   return (
     <section className="p-6 sm:p-9 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-md flex flex-col gap-6 relative overflow-hidden border border-zinc-100 dark:border-zinc-800">
       {/* Subtle gradient blob */}
@@ -51,8 +54,8 @@ export default function ProfileHero({
             <h1 className="text-2xl sm:text-4xl font-black text-foreground tracking-tight">
               {user?.fullName}
             </h1>
-            <span className="px-3 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold text-xs">
-              {user?.role === "admin" ? "Admin Lead" : "Pro Developer"}
+            <span className={`px-3 py-0.5 rounded-full font-bold text-xs transition-colors ${masteryTier.badgeColor}`}>
+              {masteryTier.badgeText}
             </span>
           </div>
 
@@ -98,18 +101,18 @@ export default function ProfileHero({
         {isOwnProfile && (
           <div className="flex items-center gap-2 self-stretch sm:self-start justify-center">
             <Link
-              href={`/@${user?.username}/settings`}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-foreground text-xs font-bold transition-all active:scale-95 shadow-sm"
+              href={`/@${user?.username || ""}/settings`}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-xs font-bold transition-colors"
             >
-              <Edit3 className="w-4 h-4" />
+              <Edit3 className="w-3.5 h-3.5" />
               <span>Edit Profile</span>
             </Link>
-
             <button
+              type="button"
               onClick={onOpenLogout}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 text-xs font-bold transition-all active:scale-95 shadow-sm cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold transition-colors"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-3.5 h-3.5" />
               <span>Sign Out</span>
             </button>
           </div>

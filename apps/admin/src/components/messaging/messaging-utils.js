@@ -30,17 +30,17 @@ export const otherMember = (conversation, userId) =>
 
 export const getBubbleRadius = (mine, isFirst, isMiddle, isLast, isSingle) => {
   if (mine) {
-    if (isSingle) return "rounded-2xl rounded-br-[5px]";
-    if (isFirst) return "rounded-2xl rounded-br-[4px]";
-    if (isMiddle) return "rounded-l-2xl rounded-r-[4px]";
-    if (isLast) return "rounded-2xl rounded-tr-[4px]";
+    if (isSingle) return "rounded-lg rounded-br-[5px]";
+    if (isFirst) return "rounded-lg rounded-br-[4px]";
+    if (isMiddle) return "rounded-l-lg rounded-r-[4px]";
+    if (isLast) return "rounded-lg rounded-tr-[4px]";
   } else {
-    if (isSingle) return "rounded-2xl rounded-bl-[5px]";
-    if (isFirst) return "rounded-2xl rounded-bl-[4px]";
-    if (isMiddle) return "rounded-r-2xl rounded-l-[4px]";
-    if (isLast) return "rounded-2xl rounded-tl-[4px]";
+    if (isSingle) return "rounded-lg rounded-bl-[5px]";
+    if (isFirst) return "rounded-lg rounded-bl-[4px]";
+    if (isMiddle) return "rounded-r-lg rounded-l-[4px]";
+    if (isLast) return "rounded-lg rounded-tl-[4px]";
   }
-  return "rounded-2xl";
+  return "rounded-lg";
 };
 
 export const encodeContentCards = (text = "", contentCards = []) => {
@@ -69,4 +69,3 @@ export const parseContentCards = (rawContent = "") => {
   const cleanText = rawContent.replace(cardRegex, "").trim();
   return { text: cleanText, cards };
 };
-

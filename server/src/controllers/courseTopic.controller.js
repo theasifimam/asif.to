@@ -3,6 +3,7 @@ import Course from "../models/Course.js";
 import CourseTopic from "../models/CourseTopic.js";
 import TopicCategory from "../models/TopicCategory.js";
 import InterviewQuestion from "../models/Question.js";
+import { formatCanonicalUrl } from "../utils/canonical.js";
 
 function slugify(value = "") {
   return value
@@ -252,12 +253,21 @@ export const createCourseTopic = async (req, res) => {
             course._id,
           )
         : [];
+    const targetSlug = slugify(req.body.slug || req.body.title);
+    const basePath = `/${course.slug}/${category.slug}`;
+    const canonicalUrl = formatCanonicalUrl(
+      basePath,
+      req.body.canonicalUrl,
+      targetSlug,
+    );
+
     const topic = await CourseTopic.create({
       ...req.body,
       type,
       course: course._id,
       category: category._id,
-      slug: slugify(req.body.slug || req.body.title),
+      slug: targetSlug,
+      canonicalUrl,
       keywords: parseKeywords(req.body.keywords),
       relatedTopics,
       interviewQuestions,
@@ -310,7 +320,6 @@ export const updateCourseTopic = async (req, res) => {
       "content",
       "seoTitle",
       "seoDescription",
-      "canonicalUrl",
       "order",
     ];
     if (req.body.type !== undefined)
@@ -321,6 +330,23 @@ export const updateCourseTopic = async (req, res) => {
       topic.slug = slugify(req.body.slug || req.body.title);
     topic.course = course._id;
     topic.category = category._id;
+
+    if (
+      req.body.canonicalUrl !== undefined ||
+      req.body.slug !== undefined ||
+      req.body.title !== undefined ||
+      req.body.category !== undefined ||
+      req.body.course !== undefined
+    ) {
+      const targetSlug = topic.slug;
+      const basePath = `/${course.slug}/${category.slug}`;
+      topic.canonicalUrl = formatCanonicalUrl(
+        basePath,
+        req.body.canonicalUrl !== undefined ? req.body.canonicalUrl : topic.canonicalUrl,
+        targetSlug,
+      );
+    }
+
     if (req.body.keywords !== undefined)
       topic.keywords = parseKeywords(req.body.keywords);
     if (req.body.relatedTopics !== undefined) {
@@ -638,10 +664,21 @@ export const createTopicCategory = async (req, res) => {
           .status(404)
           .json({ success: false, message: "Course not found." });
     }
+    const targetSlug = slugify(req.body.slug || req.body.name);
+    const basePath = courseObj
+      ? `/${courseObj.slug}/interview-questions`
+      : "/interview-questions";
+    const canonicalUrl = formatCanonicalUrl(
+      basePath,
+      req.body.canonicalUrl,
+      targetSlug,
+    );
+
     const category = await TopicCategory.create({
       ...req.body,
       course: courseObj ? courseObj._id : null,
-      slug: slugify(req.body.slug || req.body.name),
+      slug: targetSlug,
+      canonicalUrl,
       status: req.body.status || "published",
     });
     res.status(201).json({ success: true, data: category });
@@ -684,7 +721,6 @@ export const updateTopicCategory = async (req, res) => {
       "seoTitle",
       "seoDescription",
       "keywords",
-      "canonicalUrl",
       "ogTitle",
       "ogDescription",
       "ogImage",
@@ -700,6 +736,27 @@ export const updateTopicCategory = async (req, res) => {
     if (req.body.name !== undefined || req.body.slug !== undefined) {
       category.slug = slugify(req.body.slug || req.body.name);
     }
+
+    if (
+      req.body.canonicalUrl !== undefined ||
+      req.body.slug !== undefined ||
+      req.body.name !== undefined ||
+      req.body.course !== undefined
+    ) {
+      const courseObj = category.course
+        ? await Course.findById(category.course).select("slug").lean()
+        : null;
+      const targetSlug = category.slug;
+      const basePath = courseObj
+        ? `/${courseObj.slug}/interview-questions`
+        : "/interview-questions";
+      category.canonicalUrl = formatCanonicalUrl(
+        basePath,
+        req.body.canonicalUrl !== undefined ? req.body.canonicalUrl : category.canonicalUrl,
+        targetSlug,
+      );
+    }
+
     await category.save();
     res.json({ success: true, data: category });
   } catch (error) {
@@ -733,9 +790,66 @@ export const deleteTopicCategory = async (req, res) => {
   }
 };
 
+export const reorderTopicCategories = async (req, res) => {
+  try {
+    const { items } = req.body;
+    if (!Array.isArray(items)) {
+      return res.status(400).json({
+        success: false,
+        message: "An array of categories with id and order is required.",
+      });
+    }
+
+    const bulkOps = items
+      .map((item, index) => {
+        const id = typeof item === "string" ? item : item._id || item.id;
+        if (!isValidId(id)) return null;
+        const orderNum = Number.isFinite(Number(item.order))
+          ? Number(item.order)
+          : index;
+        return {
+          updateOne: {
+            filter: { _id: id },
+            update: { $set: { order: orderNum } },
+          },
+        };
+      })
+      .filter(Boolean);
+
+    if (bulkOps.length) {
+      await TopicCategory.bulkWrite(bulkOps);
+    }
+
+    res.json({
+      success: true,
+      message: "Categories reordered successfully.",
+    });
+  } catch (error) {
+    console.error("[TOPIC CATEGORIES] reorder error:", error);
+    res.status(500).json({ success: false, message: "Unable to reorder categories." });
+  }
+};
+
 export const listPublicInterviewCategories = async (req, res) => {
   try {
-    const categories = await TopicCategory.find({ status: "published" })
+    const { course: courseQuery } = req.query;
+    const { courseSlug } = req.params;
+    const targetCourse = courseSlug || courseQuery;
+
+    let catFilter = { status: { $ne: "draft" } };
+    if (targetCourse && targetCourse !== "all") {
+      const courseObj = await Course.findOne({
+        slug: targetCourse,
+        status: { $ne: "draft" },
+      })
+        .select("_id")
+        .lean();
+      if (courseObj) {
+        catFilter.course = courseObj._id;
+      }
+    }
+
+    const categories = await TopicCategory.find(catFilter)
       .sort({ order: 1, name: 1 })
       .populate("course", "title slug")
       .lean();
@@ -745,6 +859,7 @@ export const listPublicInterviewCategories = async (req, res) => {
       const questionCount = await InterviewQuestion.countDocuments({
         type: "interview",
         category: cat._id,
+        status: { $ne: "draft" },
       });
       if (questionCount > 0) {
         result.push({ ...cat, questionCount });
@@ -759,15 +874,49 @@ export const listPublicInterviewCategories = async (req, res) => {
 
 export const getPublicInterviewCategory = async (req, res) => {
   try {
-    const { categorySlug } = req.params;
-    const { page = 1, limit = 15 } = req.query;
+    const { courseSlug, categorySlug } = req.params;
+    const { page = 1, limit = 15, course: courseQuery } = req.query;
 
-    const category = await TopicCategory.findOne({
-      slug: categorySlug,
-      status: "published",
-    })
+    let targetCategorySlug = categorySlug;
+    let targetCourseSlug = courseSlug || courseQuery;
+
+    // Handle single param /public/:categorySlug
+    if (!targetCategorySlug && courseSlug) {
+      targetCategorySlug = courseSlug;
+      targetCourseSlug = courseQuery || null;
+    }
+
+    let courseObj = null;
+    if (targetCourseSlug) {
+      courseObj = await Course.findOne({
+        slug: targetCourseSlug,
+        status: { $ne: "draft" },
+      })
+        .select("_id title slug")
+        .lean();
+    }
+
+    const catFilter = {
+      slug: targetCategorySlug,
+      status: { $ne: "draft" },
+    };
+    if (courseObj) {
+      catFilter.course = courseObj._id;
+    }
+
+    let category = await TopicCategory.findOne(catFilter)
       .populate("course", "title slug")
       .lean();
+
+    // Fallback: if scoped category not found, search by slug alone
+    if (!category && courseObj) {
+      category = await TopicCategory.findOne({
+        slug: targetCategorySlug,
+        status: { $ne: "draft" },
+      })
+        .populate("course", "title slug")
+        .lean();
+    }
 
     if (!category) {
       return res
@@ -775,19 +924,27 @@ export const getPublicInterviewCategory = async (req, res) => {
         .json({ success: false, message: "Category not found." });
     }
 
-    const filter = { type: "interview", category: category._id };
+    const filter = {
+      type: "interview",
+      category: category._id,
+      status: { $ne: "draft" },
+    };
+    if (category.course) {
+      const courseId = category.course._id || category.course;
+      filter.$or = [{ course: courseId }, { course: { $exists: false } }, { course: null }];
+    }
     const pageNumber = Math.max(Number(page) || 1, 1);
     const pageSize = Math.min(Math.max(Number(limit) || 15, 1), 100);
 
     const [questions, total, questionIndex] = await Promise.all([
       InterviewQuestion.find(filter)
-        .sort({ updatedAt: -1, question: 1 })
+        .sort({ order: 1, createdAt: 1 })
         .skip((pageNumber - 1) * pageSize)
         .limit(pageSize)
         .lean(),
       InterviewQuestion.countDocuments(filter),
       InterviewQuestion.find(filter)
-        .sort({ updatedAt: -1, question: 1 })
+        .sort({ order: 1, createdAt: 1 })
         .select("question slug")
         .lean(),
     ]);

@@ -3,12 +3,26 @@
 import { useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
+const isLocalhost = () => {
+  if (typeof window === "undefined") return true;
+  const hostname = window.location.hostname;
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "[::1]" ||
+    hostname.endsWith(".local")
+  );
+};
+
 export default function GoogleAnalyticsPageView() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isInitialPage = useRef(true);
 
   useEffect(() => {
+    // Skip tracking on localhost and development environments
+    if (isLocalhost()) return;
+
     // The initial page view is sent by gtag('config'). Only send views for
     // subsequent App Router navigations here.
     if (isInitialPage.current) {

@@ -75,7 +75,13 @@ export default function MessageInput({
 
   const handleSelectContent = (item) => {
     setAttachedContent((prev = []) => {
-      if (prev.some((p) => (p.id || p._id || p.adminUrl) === (item.id || item._id || item.adminUrl))) {
+      if (
+        prev.some(
+          (p) =>
+            (p.id || p._id || p.adminUrl) ===
+            (item.id || item._id || item.adminUrl),
+        )
+      ) {
         return prev;
       }
       return [...prev, item];
@@ -136,7 +142,11 @@ export default function MessageInput({
         <div className="mb-2 flex flex-wrap gap-2 max-h-40 overflow-y-auto">
           {attachedContent.map((item, idx) => (
             <div key={idx} className="relative group">
-              <ContentMessageCard item={item} onRemove={() => removeContent(idx)} compact={compact} />
+              <ContentMessageCard
+                item={item}
+                onRemove={() => removeContent(idx)}
+                compact={compact}
+              />
               <button
                 type="button"
                 onClick={() => removeContent(idx)}
@@ -193,7 +203,7 @@ export default function MessageInput({
               type="button"
               onClick={() => setShowAttachMenu(!showAttachMenu)}
               className={`flex ${
-                compact ? "h-9 w-9" : "h-10 w-10 sm:h-11 sm:w-11"
+                compact ? "h-11 w-11 py-2.5" : "h-10 w-10 sm:h-11 sm:w-11"
               } shrink-0 items-center justify-center rounded-full border border-zinc-200 text-zinc-500 transition hover:border-blue-500 hover:text-blue-600 dark:border-zinc-800 dark:hover:border-blue-400 dark:hover:text-blue-400 cursor-pointer`}
               title="Attach file or content"
             >
@@ -233,7 +243,9 @@ export default function MessageInput({
                     <LayoutGrid size={14} />
                   </span>
                   <div>
-                    <span className="block text-xs font-bold">Admin Content</span>
+                    <span className="block text-xs font-bold">
+                      Admin Content
+                    </span>
                     <span className="block text-[9px] font-normal text-zinc-400">
                       Article, Course, Quiz…
                     </span>
@@ -311,11 +323,13 @@ export default function MessageInput({
           <button
             onClick={() => onSend()}
             disabled={
-              (!content.trim() && !attachments.length && !attachedContent?.length) ||
+              (!content.trim() &&
+                !attachments.length &&
+                !attachedContent?.length) ||
               uploadProgress > 0
             }
             className={`flex ${
-              compact ? "h-9 w-9" : "h-10 w-10 sm:h-11 sm:w-11"
+              compact ? "h-11 w-11 py-2.5" : "h-10 w-10 sm:h-11 sm:w-11"
             } shrink-0 items-center justify-center rounded-full bg-blue-600 text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer`}
           >
             <Send size={15} />

@@ -277,6 +277,7 @@ export default function UserProfileClient({ username }) {
 
             {/* Quick Stats Grid */}
             <ProfileStats
+              user={user}
               streak={user?.streak || 0}
               libraryCount={libraryEntries.length + libraryBookmarks.length || 0}
               completedCoursesCount={completedCourses.length || 0}

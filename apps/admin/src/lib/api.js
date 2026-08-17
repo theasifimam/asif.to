@@ -297,6 +297,7 @@ export const interviewQuestionsApi = {
   create: (data) => apiPost("/interview-questions", data),
   update: (id, data) => apiPatch(`/interview-questions/${id}`, data),
   delete: (id) => apiDelete(`/interview-questions/${id}`),
+  reorder: (items) => apiPatch("/interview-questions/reorder", { items }),
 };
 
 /** Course and standalone topic categories. */
@@ -315,6 +316,7 @@ export const topicCategoriesApi = {
   create: (data) => apiPost("/topic-categories", data),
   update: (id, data) => apiPatch(`/topic-categories/${id}`, data),
   delete: (id) => apiDelete(`/topic-categories/${id}`),
+  reorder: (items) => apiPatch("/topic-categories/reorder", { items }),
 };
 
 /**

@@ -1,5 +1,6 @@
 import Article from "../models/Article.js";
 import { slugify } from "../utils/slugify.js";
+import { formatCanonicalUrl } from "../utils/canonical.js";
 
 const populateArticle = (query) =>
   query
@@ -49,6 +50,7 @@ export const createCheatsheet = async (req, res) => {
       return res.status(400).json({ success: false, message: "Technology, title, and content are required." });
     let slug = slugify(title);
     if (await Article.exists({ slug })) slug = `${slug}-${Date.now()}`;
+    const finalCanonicalUrl = formatCanonicalUrl("/cheatsheets", canonicalUrl, slug);
     const cheatsheet = await Article.create({
       type: "cheatsheet", techId, title, slug, content,
       author: req.user._id, topic: [], image: "",
@@ -56,7 +58,7 @@ export const createCheatsheet = async (req, res) => {
       order: Number(order) || 0, seoTitle: seoTitle || "",
       seoDescription: seoDescription || "",
       keywords: Array.isArray(keywords) ? keywords : [],
-      canonicalUrl: canonicalUrl || "",
+      canonicalUrl: finalCanonicalUrl,
     });
     res.status(201).json({ success: true, data: cheatsheet });
   } catch (error) {
@@ -74,6 +76,20 @@ export const updateCheatsheet = async (req, res) => {
     if (updates.title && !updates.slug) updates.slug = slugify(updates.title);
     if (updates.slug && await Article.exists({ slug: updates.slug, _id: { $ne: req.params.id } }))
       updates.slug = `${updates.slug}-${Date.now()}`;
+    
+    const existingSheet = await Article.findOne({ _id: req.params.id, type: "cheatsheet" }).select("slug canonicalUrl").lean();
+    if (!existingSheet)
+      return res.status(404).json({ success: false, message: "Cheatsheet not found." });
+
+    if (updates.canonicalUrl !== undefined || updates.slug !== undefined) {
+      const targetSlug = updates.slug || existingSheet.slug;
+      updates.canonicalUrl = formatCanonicalUrl(
+        "/cheatsheets",
+        updates.canonicalUrl !== undefined ? updates.canonicalUrl : existingSheet.canonicalUrl,
+        targetSlug,
+      );
+    }
+
     const cheatsheet = await Article.findOneAndUpdate(
       { _id: req.params.id, type: "cheatsheet" }, updates,
       { new: true, runValidators: true },

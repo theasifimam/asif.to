@@ -7,6 +7,7 @@ import {
   createInterviewQuestion,
   updateInterviewQuestion,
   deleteInterviewQuestion,
+  reorderInterviewQuestions,
 } from "../controllers/interviewQuestion.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
 import { requirePermission } from "../utils/permissions.js";
@@ -18,6 +19,7 @@ const canManage = [protect, requirePermission("interview_questions.manage")];
 router.get("/public/:courseSlug", listPublicInterviewQuestions);
 router.get("/public/:courseSlug/:questionSlug", getPublicInterviewQuestion);
 router.get("/", ...canView, listInterviewQuestions);
+router.patch("/reorder", ...canManage, reorderInterviewQuestions);
 router.get("/:id", ...canView, getInterviewQuestion);
 router.post("/", ...canManage, createInterviewQuestion);
 router.patch("/:id", ...canManage, updateInterviewQuestion);

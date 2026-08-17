@@ -28,6 +28,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { chaptersApi, coursesApi } from "@/lib/api";
 import AdminFormShell, { AdminFormLoading, formSectionClass } from "@/components/forms/AdminFormShell";
 import DiscussButton from "@/components/messaging/DiscussButton";
+import { CanonicalUrlInput } from "@/components/admin";
 
 const initialForm = {
   title: "",
@@ -364,17 +365,12 @@ export default function ChapterFormPage() {
                 placeholder="react hooks, useState, frontend"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="chapter-canonical">Canonical URL</Label>
-              <Input
-                id="chapter-canonical"
-                type="url"
-                value={form.canonicalUrl}
-                maxLength={500}
-                onChange={(event) => update("canonicalUrl", event.target.value)}
-                placeholder={publicUrl || "https://asif.to/course/chapter"}
-              />
-            </div>
+            <CanonicalUrlInput
+              basePrefix={course?.slug ? `https://asif.to/${course.slug}` : "https://asif.to"}
+              value={form.canonicalUrl}
+              onChange={(value) => update("canonicalUrl", value)}
+              placeholder={form.slug || slugify(form.title)}
+            />
           </section>
         </main>
 

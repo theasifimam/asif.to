@@ -97,11 +97,16 @@ export default function RootLayout({ children, modal }) {
                       />
                       <Script id="google-analytics" strategy="afterInteractive">
                         {`
+                      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.endsWith('.local')) {
+                        window['ga-disable-${gaMeasurementId}'] = true;
+                      }
                       window.dataLayer = window.dataLayer || [];
                       function gtag(){dataLayer.push(arguments);}
                       window.gtag = gtag;
                       gtag('js', new Date());
-                      gtag('config', '${gaMeasurementId}');
+                      if (!window['ga-disable-${gaMeasurementId}']) {
+                        gtag('config', '${gaMeasurementId}');
+                      }
                     `}
                       </Script>
                       <Suspense fallback={null}>

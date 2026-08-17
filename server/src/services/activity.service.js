@@ -2,6 +2,7 @@ import ActivityLog from "../models/ActivityLog.js";
 import Notification from "../models/Notification.js";
 import User from "../models/User.js";
 import { roleRank } from "../utils/permissions.js";
+import { getMessagingSocketServer } from "./messagingRealtime.service.js";
 
 const ACTIVE_STAFF_ROLES = ["author", "editor", "admin", "super_admin"];
 
@@ -33,7 +34,7 @@ export async function logActivity({ actor, action, entityType, entityId, entityT
 
     const recipientIds = await getRecipients({ actor, targetUserId });
     if (recipientIds.length) {
-      await Notification.insertMany(recipientIds.map((recipientId) => ({
+      const notifications = recipientIds.map((recipientId) => ({
         recipientId,
         activityId: activity._id,
         title: notificationTitle || `${actorName(actor)} ${description}`,
@@ -41,7 +42,24 @@ export async function logActivity({ actor, action, entityType, entityId, entityT
         type: entityType,
         severity,
         url,
-      })), { ordered: false });
+      }));
+      await Notification.insertMany(notifications, { ordered: false });
+
+      // Emit real-time notification via Socket
+      const io = getMessagingSocketServer();
+      if (io) {
+        recipientIds.forEach((recipientId) => {
+          io.to(`user:${recipientId}`).emit("notification_updated", {
+            type: entityType || "activity",
+            severity,
+            title: notificationTitle || `${actorName(actor)} ${description}`,
+            message: entityTitle ? `${description} “${entityTitle}”` : description,
+            url,
+            actorName: actorName(actor),
+            createdAt: new Date().toISOString(),
+          });
+        });
+      }
     }
     return activity;
   } catch (error) {

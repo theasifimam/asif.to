@@ -26,10 +26,26 @@ const difficultyStyles = {
 };
 
 export async function buildCategoryInterviewGuideMetadata(
-  categorySlug,
+  courseSlugOrCategorySlug,
+  categorySlugOrPage,
   requestedPage = 1,
 ) {
-  const data = await getPublicInterviewCategory(categorySlug, requestedPage);
+  let courseSlug = null;
+  let categorySlug = courseSlugOrCategorySlug;
+  let page = requestedPage;
+
+  if (
+    categorySlugOrPage &&
+    typeof categorySlugOrPage === "string" &&
+    isNaN(Number(categorySlugOrPage))
+  ) {
+    courseSlug = courseSlugOrCategorySlug;
+    categorySlug = categorySlugOrPage;
+  } else if (categorySlugOrPage) {
+    page = Number(categorySlugOrPage) || 1;
+  }
+
+  const data = await getPublicInterviewCategory(courseSlug, categorySlug, page);
   if (!data?.category) {
     return {
       title: "Interview Questions Not Found",
@@ -38,14 +54,18 @@ export async function buildCategoryInterviewGuideMetadata(
   }
 
   const { category, pagination } = data;
-  const page = Math.max(Number(requestedPage) || 1, 1);
+  const targetCourseSlug = category.course?.slug || courseSlug;
+  const pageNum = Math.max(Number(page) || 1, 1);
   const categoryName = category.name;
-  const title = `${category.seoTitle || `${categoryName} Interview Questions and Answers`}${page > 1 ? ` - Page ${page}` : ""}`;
+  const courseTitle = category.course?.title ? ` - ${category.course.title}` : "";
+  const title = `${category.seoTitle || `${categoryName} Interview Questions and Answers${courseTitle}`}${pageNum > 1 ? ` - Page ${pageNum}` : ""}`;
   const description =
     category.seoDescription ||
     category.description ||
     `Prepare for ${categoryName} interviews with ${pagination?.total || "detailed"} questions, clear answers, code examples, and follow-up prompts.`;
-  const path = `/interview-questions/${encodeURIComponent(category.slug || categorySlug)}${page > 1 ? `?page=${page}` : ""}`;
+  const path = targetCourseSlug
+    ? `/${encodeURIComponent(targetCourseSlug)}/interview-questions/${encodeURIComponent(category.slug || categorySlug)}${pageNum > 1 ? `?page=${pageNum}` : ""}`
+    : `/interview-questions/${encodeURIComponent(category.slug || categorySlug)}${pageNum > 1 ? `?page=${pageNum}` : ""}`;
   const canonical = absoluteUrl(
     category.canonicalUrl || "",
     path,
@@ -88,11 +108,12 @@ export async function buildCategoryInterviewGuideMetadata(
 }
 
 export default async function CategoryInterviewGuide({
+  courseSlug: passedCourseSlug,
   categorySlug,
   requestedPage = 1,
 }) {
   const page = Math.max(Number(requestedPage) || 1, 1);
-  const data = await getPublicInterviewCategory(categorySlug, page);
+  const data = await getPublicInterviewCategory(passedCourseSlug, categorySlug, page);
   const category = data?.category;
   const questions = data?.questions || [];
   const questionIndex = data?.questionIndex || [];
@@ -103,8 +124,12 @@ export default async function CategoryInterviewGuide({
     limit: 15,
   };
 
+  const course = category?.course;
+  const courseSlug = course?.slug || passedCourseSlug;
   const canonicalSlug = category?.slug || categorySlug;
-  const basePath = `/interview-questions/${encodeURIComponent(canonicalSlug)}`;
+  const basePath = courseSlug
+    ? `/${encodeURIComponent(courseSlug)}/interview-questions/${encodeURIComponent(canonicalSlug)}`
+    : `/interview-questions/${encodeURIComponent(canonicalSlug)}`;
   const firstNumber = (pagination.page - 1) * pagination.limit + 1;
 
   const indexedQuestions = new Map(
@@ -155,18 +180,41 @@ export default async function CategoryInterviewGuide({
                 name: "Home",
                 item: getSiteUrl(),
               },
-              {
-                "@type": "ListItem",
-                position: 2,
-                name: "Interview Questions",
-                item: absoluteUrl("", "/interview-questions"),
-              },
-              {
-                "@type": "ListItem",
-                position: 3,
-                name: category.name,
-                item: absoluteUrl("", basePath),
-              },
+              ...(course
+                ? [
+                    {
+                      "@type": "ListItem",
+                      position: 2,
+                      name: course.title,
+                      item: absoluteUrl("", `/courses/${encodeURIComponent(course.slug)}`),
+                    },
+                    {
+                      "@type": "ListItem",
+                      position: 3,
+                      name: "Interview Questions",
+                      item: absoluteUrl("", `/${encodeURIComponent(course.slug)}/interview-questions`),
+                    },
+                    {
+                      "@type": "ListItem",
+                      position: 4,
+                      name: category.name,
+                      item: absoluteUrl("", basePath),
+                    },
+                  ]
+                : [
+                    {
+                      "@type": "ListItem",
+                      position: 2,
+                      name: "Interview Questions",
+                      item: absoluteUrl("", "/interview-questions"),
+                    },
+                    {
+                      "@type": "ListItem",
+                      position: 3,
+                      name: category.name,
+                      item: absoluteUrl("", basePath),
+                    },
+                  ]),
             ],
           },
         ],
@@ -185,17 +233,17 @@ export default async function CategoryInterviewGuide({
       <main className="mx-auto min-w-0 w-full max-w-7xl px-0 pb-20 pt-24 sm:px-6 lg:px-8">
         <div className="mx-4 flex flex-wrap items-center justify-between gap-3 text-sm sm:mx-0">
           <Link
-            href="/interview-questions"
+            href={courseSlug ? `/${encodeURIComponent(courseSlug)}/interview-questions` : "/interview-questions"}
             className="inline-flex items-center gap-2 font-semibold text-blue-600 hover:underline dark:text-blue-400"
           >
-            <ArrowLeft className="h-4 w-4" /> All Interview Categories
+            <ArrowLeft className="h-4 w-4" /> {course ? `All ${course.title} Questions` : "All Interview Categories"}
           </Link>
-          {category?.course && (
+          {course && (
             <Link
-              href={`/courses/${encodeURIComponent(category.course.slug)}`}
-              className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100 dark:bg-blue-950/50 dark:text-blue-300 dark:hover:bg-blue-900/50"
+              href={`/courses/${encodeURIComponent(course.slug)}`}
+              className="inline-flex items-center gap-1.5 font-semibold text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
             >
-              <BookOpen className="h-3.5 w-3.5" /> Full Course: {category.course.title}
+              <BookOpen className="h-4 w-4 text-blue-500" /> Course Syllabus
             </Link>
           )}
         </div>

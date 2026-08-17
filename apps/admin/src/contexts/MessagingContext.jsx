@@ -11,7 +11,7 @@ import {
 } from "react";
 import { io } from "socket.io-client";
 import { toast } from "sonner";
-import { X } from "lucide-react";
+import { X, AlertCircle } from "lucide-react";
 import { getAuthToken } from "@/lib/auth";
 import { messagingApi } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -89,9 +89,63 @@ export function MessagingProvider({ children }) {
           : prev.filter((id) => id !== targetId),
       );
     });
-    connection.on("notification_updated", () =>
-      window.dispatchEvent(new Event("notifications:refresh")),
-    );
+    connection.on("notification_updated", (payload) => {
+      window.dispatchEvent(new Event("notifications:refresh"));
+
+      if (payload && (payload.title || payload.message)) {
+        const isHighPriority =
+          payload.severity === "important" ||
+          payload.severity === "critical" ||
+          payload.severity === "warning";
+
+        if (isHighPriority) {
+          toast.custom(
+            (t) => (
+              <div
+                onClick={() => {
+                  if (payload.url) {
+                    window.location.href = payload.url;
+                  }
+                  toast.dismiss(t);
+                }}
+                className="flex items-start gap-3.5 p-4 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 shadow-2xl hover:border-blue-500/60 transition-all cursor-pointer max-w-sm w-full"
+              >
+                <div
+                  className={`p-2.5 rounded-2xl shrink-0 ${
+                    payload.severity === "critical"
+                      ? "bg-red-500/15 text-red-600 dark:text-red-400"
+                      : "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                  }`}
+                >
+                  <AlertCircle size={20} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span
+                      className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                        payload.severity === "critical"
+                          ? "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300"
+                          : "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+                      }`}
+                    >
+                      {payload.severity || "Important"}
+                    </span>
+                    <span className="text-[10px] text-zinc-400">just now</span>
+                  </div>
+                  <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 mt-1 truncate">
+                    {payload.title || "Important Activity Alert"}
+                  </p>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-2 leading-relaxed">
+                    {payload.message}
+                  </p>
+                </div>
+              </div>
+            ),
+            { duration: 7000 },
+          );
+        }
+      }
+    });
     connection.on("new_message", (message) => {
       const myId = String(userRef.current?._id || userRef.current?.id || "");
       const sender = message?.senderId;

@@ -23,6 +23,7 @@ import AdminFormShell, {
 } from "@/components/forms/AdminFormShell";
 import DiscussButton from "@/components/messaging/DiscussButton";
 import FollowUpQuestionPicker from "@/components/editor/FollowUpQuestionPicker";
+import { CanonicalUrlInput } from "@/components/admin";
 
 const initialForm = {
   category: "",
@@ -252,31 +253,28 @@ export default function InterviewQuestionForm({
           </section>
           <aside className="space-y-5 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-4 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
             <div className="space-y-2">
-              <Label className="font-bold">Interview Category (Primary)</Label>
-              <Select
-                value={form.category}
-                onValueChange={(value) => update("category", value)}
-              >
-                <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900">
-                  <SelectValue placeholder="Select category (e.g. Next.js)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat._id} value={cat._id}>
-                      {cat.name} ({cat.slug})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-zinc-500">
-                Primary interview category landing page taxonomy.
-              </p>
-            </div>
-            <div className="space-y-2">
               <Label>Course (Optional)</Label>
               <Select
                 value={form.course || "none"}
-                onValueChange={(value) => update("course", value)}
+                onValueChange={(value) => {
+                  const selectedCourseId = value === "none" ? "" : value;
+                  setForm((current) => {
+                    const currentCat = categories.find(
+                      (c) => c._id === current.category,
+                    );
+                    const catCourseId =
+                      currentCat?.course?._id || currentCat?.course;
+                    const keepCategory =
+                      !selectedCourseId ||
+                      !catCourseId ||
+                      String(catCourseId) === String(selectedCourseId);
+                    return {
+                      ...current,
+                      course: selectedCourseId,
+                      category: keepCategory ? current.category : "",
+                    };
+                  });
+                }}
               >
                 <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900">
                   <SelectValue placeholder="Optional course link" />
@@ -290,6 +288,57 @@ export default function InterviewQuestionForm({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="font-bold">Interview Category (Primary)</Label>
+              <Select
+                value={form.category}
+                onValueChange={(categoryId) => {
+                  const selectedCat = categories.find(
+                    (c) => c._id === categoryId,
+                  );
+                  setForm((current) => ({
+                    ...current,
+                    category: categoryId,
+                    course:
+                      selectedCat?.course?._id ||
+                      selectedCat?.course ||
+                      current.course,
+                  }));
+                }}
+              >
+                <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900">
+                  <SelectValue placeholder="Select category (e.g. Fundamentals)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(form.course && form.course !== "none"
+                    ? categories.filter((c) => {
+                        const catCourseId = c.course?._id || c.course;
+                        return (
+                          !catCourseId ||
+                          String(catCourseId) === String(form.course)
+                        );
+                      })
+                    : categories
+                  ).map((cat) => {
+                    const courseTitle =
+                      cat.course?.title ||
+                      courses.find((c) => String(c._id) === String(cat.course))
+                        ?.title;
+                    return (
+                      <SelectItem key={cat._id} value={cat._id}>
+                        {cat.name}{" "}
+                        <span className="text-zinc-400">
+                          ({courseTitle || cat.slug})
+                        </span>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-zinc-500">
+                Primary interview category landing page taxonomy.
+              </p>
             </div>
             <div className="space-y-2">
               <Label>Difficulty</Label>
@@ -339,12 +388,65 @@ export default function InterviewQuestionForm({
               onChange={(value) => update("followUps", value)}
               excludeId={questionId}
             />
-            <div className="border-t border-zinc-200 pt-5 dark:border-zinc-800"><h3 className="text-sm font-black">Search metadata</h3><p className="mt-1 text-xs text-zinc-500">Empty fields use the question and answer as fallbacks.</p></div>
-            <div className="space-y-2"><Label>SEO title ({form.seoTitle.length}/70)</Label><Input maxLength={70} value={form.seoTitle} onChange={(event) => update("seoTitle", event.target.value)} /></div>
-            <div className="space-y-2"><Label>SEO description ({form.seoDescription.length}/170)</Label><Textarea maxLength={170} rows={3} value={form.seoDescription} onChange={(event) => update("seoDescription", event.target.value)} /></div>
-            <div className="space-y-2"><Label>SEO keywords</Label><Input value={form.keywords} onChange={(event) => update("keywords", event.target.value)} placeholder="react, useEffect, interview" /></div>
-            <div className="space-y-2"><Label>Canonical URL</Label><Input value={form.canonicalUrl} onChange={(event) => update("canonicalUrl", event.target.value)} /></div>
-            <div className="space-y-2"><Label>Open Graph image URL</Label><Input value={form.ogImage} onChange={(event) => update("ogImage", event.target.value)} /></div>
+            <div className="border-t border-zinc-200 pt-5 dark:border-zinc-800">
+              <h3 className="text-sm font-black">Search metadata</h3>
+              <p className="mt-1 text-xs text-zinc-500">
+                Empty fields automatically use the question and answer as fallbacks.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>SEO title ({form.seoTitle.length}/70)</Label>
+              <Input
+                maxLength={70}
+                value={form.seoTitle}
+                onChange={(event) => update("seoTitle", event.target.value)}
+                placeholder="Custom title for search results"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>SEO description ({form.seoDescription.length}/170)</Label>
+              <Textarea
+                maxLength={170}
+                rows={3}
+                value={form.seoDescription}
+                onChange={(event) => update("seoDescription", event.target.value)}
+                placeholder="Brief summary for search engine snippets"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>SEO keywords</Label>
+              <Input
+                value={form.keywords}
+                onChange={(event) => update("keywords", event.target.value)}
+                placeholder="react, useEffect, interview"
+              />
+            </div>
+            <CanonicalUrlInput
+              basePrefix={(() => {
+                const selectedCourse = courses.find((c) => String(c._id) === String(form.course));
+                const selectedCategory = categories.find((c) => String(c._id) === String(form.category));
+                const cSlug = selectedCourse?.slug || selectedCategory?.course?.slug || "";
+                const catSlug = selectedCategory?.slug || "";
+                return cSlug && catSlug
+                  ? `https://asif.to/${cSlug}/interview-questions/${catSlug}`
+                  : catSlug
+                  ? `https://asif.to/interview-questions/${catSlug}`
+                  : cSlug
+                  ? `https://asif.to/${cSlug}/interview-questions`
+                  : "https://asif.to/interview-questions";
+              })()}
+              value={form.canonicalUrl}
+              onChange={(value) => update("canonicalUrl", value)}
+              placeholder={form.slug || slugify(form.question || "")}
+            />
+            <div className="space-y-2">
+              <Label>Open Graph image URL</Label>
+              <Input
+                value={form.ogImage}
+                onChange={(event) => update("ogImage", event.target.value)}
+                placeholder="https://asif.to/og/..."
+              />
+            </div>
           </aside>
         </div>
       )}

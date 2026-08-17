@@ -3,9 +3,10 @@
 import React from "react";
 import { ArrowUpDown, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getFullCountryName } from "@/lib/countryNames";
 
-const COUNTRY_NAMES = { ind: "India", usa: "United States", gbr: "United Kingdom", can: "Canada", aus: "Australia", deu: "Germany", fra: "France", are: "United Arab Emirates", sgp: "Singapore", nld: "Netherlands", bra: "Brazil", jpn: "Japan" };
-const displayKey = (type, key) => type === "countries" ? COUNTRY_NAMES[String(key).toLowerCase()] || String(key).toUpperCase() : key;
+const displayKey = (type, key) =>
+  type === "countries" ? getFullCountryName(key) : key;
 
 export default function ReportTable({
   title,
@@ -29,7 +30,7 @@ export default function ReportTable({
 
   return (
     <section className="admin-surface w-full overflow-hidden rounded-3xl">
-      <header className="flex flex-col gap-3 border-b border-zinc-100 dark:border-zinc-800/80 p-5 dark:border-zinc-800 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+      <header className="flex flex-col gap-3 border-b border-zinc-100 dark:border-zinc-800/80 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <h2 className="text-base sm:text-lg font-black font-outfit tracking-tight text-zinc-950 dark:text-white">
           {title}
         </h2>
@@ -45,7 +46,7 @@ export default function ReportTable({
       </header>
 
       <div className="overflow-x-auto">
-        <table className="admin-table w-full min-w-[680px] text-left text-sm">
+        <table className="admin-table w-full min-w-170 text-left text-sm">
           <thead className="border-b border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/60 dark:bg-zinc-900/30 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">
             <tr>
               <th className="px-6 py-4">{type}</th>

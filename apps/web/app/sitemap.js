@@ -159,7 +159,9 @@ export default async function sitemap() {
   if (Array.isArray(interviewCategories)) {
     for (const cat of interviewCategories) {
       if (!cat.slug || cat.noindex) continue;
-      const catUrl = `${siteUrl}/interview-questions/${cat.slug}`;
+      const catUrl = cat.course?.slug
+        ? `${siteUrl}/${cat.course.slug}/interview-questions/${cat.slug}`
+        : `${siteUrl}/interview-questions/${cat.slug}`;
       if (!existingUrls.has(catUrl)) {
         existingUrls.add(catUrl);
         dynamicEntries.push({

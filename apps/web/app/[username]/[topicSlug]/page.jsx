@@ -2,10 +2,10 @@ import ChapterClient from "@/components/courses/ChapterClient";
 import CourseTopicPage, {
   buildTopicMetadata,
 } from "@/components/courses/CourseTopicPage";
-import { getChapterData, getPublicTopic } from "@/lib/publicContent";
+import { getChapterData, getPublicTopic, getPublicInterviewCategories } from "@/lib/publicContent";
 import { absoluteUrl, assetUrl, getSiteUrl, jsonLd } from "@/lib/seo";
 import { authorIdentity, buildPersonSchema } from "@/lib/authorIdentity";
-import { notFound, permanentRedirect } from "next/navigation";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
 
 export const revalidate = 60;
 
@@ -134,10 +134,23 @@ function chapterStructuredData(data, courseSlug, chapterSlug) {
 
 export async function generateMetadata({ params, searchParams }) {
   const { username: courseSlug, topicSlug } = await params;
+  if (topicSlug === "quiz") {
+    permanentRedirect(`/quiz?course=${encodeURIComponent(courseSlug)}`);
+  }
+  if (topicSlug === "practice") {
+    permanentRedirect(`/practice/${encodeURIComponent(courseSlug)}`);
+  }
+  if (topicSlug === "exam") {
+    permanentRedirect(`/courses/${encodeURIComponent(courseSlug)}/final-exam`);
+  }
   if (topicSlug === "interview-questions") {
-    // 301 Redirect to category interview landing page
-    const targetSlug = courseSlug.replace(/-complete-course.*$/, "").replace(/-course$/, "");
-    permanentRedirect(`/interview-questions/${targetSlug}`);
+    const categories = await getPublicInterviewCategories(courseSlug);
+    if (categories?.length) {
+      permanentRedirect(
+        `/${encodeURIComponent(courseSlug)}/interview-questions/${encodeURIComponent(categories[0].slug)}`,
+      );
+    }
+    permanentRedirect("/interview-questions");
   }
   const topic = await getPublicTopic(courseSlug, [topicSlug]);
   if (topic) return buildTopicMetadata(courseSlug, [topicSlug]);
@@ -155,9 +168,23 @@ export async function generateMetadata({ params, searchParams }) {
 
 export default async function PublicTopicPage({ params, searchParams }) {
   const { username: courseSlug, topicSlug } = await params;
+  if (topicSlug === "quiz") {
+    permanentRedirect(`/quiz?course=${encodeURIComponent(courseSlug)}`);
+  }
+  if (topicSlug === "practice") {
+    permanentRedirect(`/practice/${encodeURIComponent(courseSlug)}`);
+  }
+  if (topicSlug === "exam") {
+    permanentRedirect(`/courses/${encodeURIComponent(courseSlug)}/final-exam`);
+  }
   if (topicSlug === "interview-questions") {
-    const targetSlug = courseSlug.replace(/-complete-course.*$/, "").replace(/-course$/, "");
-    permanentRedirect(`/interview-questions/${targetSlug}`);
+    const categories = await getPublicInterviewCategories(courseSlug);
+    if (categories?.length) {
+      permanentRedirect(
+        `/${encodeURIComponent(courseSlug)}/interview-questions/${encodeURIComponent(categories[0].slug)}`,
+      );
+    }
+    permanentRedirect("/interview-questions");
   }
   const topic = await getPublicTopic(courseSlug, [topicSlug]);
 

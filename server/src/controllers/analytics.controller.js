@@ -658,6 +658,22 @@ export const trackEvent = async (req, res) => {
     } = req.body || {};
     if (!path || !visitorId || !sessionId || !String(path).startsWith("/"))
       return res.status(204).end();
+
+    // Ignore localhost and development origin tracking
+    const host = String(req.headers["host"] || "");
+    const origin = String(req.headers["origin"] || "");
+    const referer = String(req.headers["referer"] || req.body?.referrer || "");
+    if (
+      host.includes("localhost") ||
+      host.includes("127.0.0.1") ||
+      origin.includes("localhost") ||
+      origin.includes("127.0.0.1") ||
+      referer.includes("localhost") ||
+      referer.includes("127.0.0.1") ||
+      process.env.NODE_ENV === "development"
+    ) {
+      return res.status(204).end();
+    }
     const date = utcDay(new Date());
     const secret = process.env.ANALYTICS_HASH_SECRET || process.env.JWT_SECRET;
     const hash = (value) =>

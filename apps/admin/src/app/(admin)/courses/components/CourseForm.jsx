@@ -29,6 +29,7 @@ import AdminFormShell, {
   AdminFormLoading,
   formSectionClass,
 } from "@/components/forms/AdminFormShell";
+import { CanonicalUrlInput } from "@/components/admin";
 
 const initialForm = {
   title: "",
@@ -43,7 +44,11 @@ const initialForm = {
   seoDescription: "",
   keywords: "",
   canonicalUrl: "",
-  interviewSeoTitle: "", interviewSeoDescription: "", interviewKeywords: "", interviewCanonicalUrl: "", interviewOgImage: "",
+  interviewSeoTitle: "",
+  interviewSeoDescription: "",
+  interviewKeywords: "",
+  interviewCanonicalUrl: "",
+  interviewOgImage: "",
   order: 0,
   status: "draft",
   examEnabled: false,
@@ -180,6 +185,55 @@ export default function CourseForm({ courseId = null }) {
     setPublishOpen(false);
   };
 
+    learningOutcomes: form.learningOutcomes
+      .split("\n")
+      .map((item) => item.trim())
+      .filter(Boolean),
+    examSettings: Object.fromEntries(
+      Object.entries(form.examSettings).map(([key, value]) => [
+        key,
+        Number(value),
+      ]),
+    ),
+  });
+
+  const persist = async (status) => {
+    if (!form.title.trim() || !form.subtitle.trim() || !form.techId.trim()) {
+      toast.error("Title, subtitle, and technology ID are required");
+      return null;
+    }
+    if (!form.slug.trim()) {
+      toast.error("A URL slug is required");
+      return null;
+    }
+
+    setSaving(true);
+    const response = courseId
+      ? await coursesApi.update(courseId, payload(status))
+      : await coursesApi.create(payload(status));
+
+    if (!response.success) {
+      toast.error(response.error || "Unable to save course");
+      setSaving(false);
+      return null;
+    }
+
+    const savedCourse = response.data?.data;
+    setForm((current) => ({ ...current, status }));
+    toast.success(status === "published" ? "Course published" : "Course saved");
+    setSaving(false);
+
+    if (!courseId && savedCourse?._id) {
+      window.location.assign(`/courses/${savedCourse._id}/edit`);
+    }
+    return savedCourse;
+  };
+
+  const publish = async () => {
+    await persist("published");
+    setPublishOpen(false);
+  };
+
   if (loading) {
     return <AdminFormLoading />;
   }
@@ -229,51 +283,6 @@ export default function CourseForm({ courseId = null }) {
         </>
       }
     >
-      <div className="hidden">
-        <div className="flex items-start gap-3">
-          <Button variant="outline" size="icon" asChild title="Back to courses">
-            <Link href="/courses">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {courseId ? "Edit course" : "Create course"}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Course details, publishing controls, exam settings, and search
-              metadata.
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {courseId && publicUrl && (
-            <Button variant="outline" asChild>
-              <a href={publicUrl} target="_blank" rel="noreferrer">
-                <ExternalLink className="h-4 w-4" />
-                View
-              </a>
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            disabled={saving}
-            onClick={() => persist("draft")}
-          >
-            {saving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            Save draft
-          </Button>
-          <Button disabled={saving} onClick={() => setPublishOpen(true)}>
-            <Send className="h-4 w-4" />
-            Publish
-          </Button>
-        </div>
-      </div>
-
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <main className="space-y-6">
           <section className={formSectionClass}>
@@ -423,19 +432,43 @@ export default function CourseForm({ courseId = null }) {
               />
               <p className="text-xs text-muted-foreground">Comma-separated.</p>
             </div>
+            <CanonicalUrlInput
+              basePrefix="https://asif.to/courses"
+              value={form.canonicalUrl}
+              onChange={(value) => update("canonicalUrl", value)}
+              placeholder={form.slug || slugify(form.title)}
+            />
+          </section>
+
+          <section className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+            <div>
+              <h2 className="text-base font-semibold">Interview guide metadata</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Controls the course interview-question landing page.</p>
+            </div>
             <div className="space-y-2">
-              <Label htmlFor="course-canonical">Canonical URL</Label>
-              <Input
-                id="course-canonical"
-                type="url"
-                value={form.canonicalUrl}
-                maxLength={500}
-                onChange={(event) => update("canonicalUrl", event.target.value)}
-                placeholder={publicUrl || "https://asif.to/courses/course-slug"}
-              />
+              <Label>SEO title ({form.interviewSeoTitle.length}/70)</Label>
+              <Input maxLength={70} value={form.interviewSeoTitle} onChange={(e) => update("interviewSeoTitle", e.target.value)}/>
+            </div>
+            <div className="space-y-2">
+              <Label>SEO description ({form.interviewSeoDescription.length}/170)</Label>
+              <Textarea maxLength={170} rows={3} value={form.interviewSeoDescription} onChange={(e) => update("interviewSeoDescription", e.target.value)}/>
+            </div>
+            <div className="space-y-2">
+              <Label>Keywords</Label>
+              <Input value={form.interviewKeywords} onChange={(e) => update("interviewKeywords", e.target.value)}/>
+            </div>
+            <CanonicalUrlInput
+              basePrefix={form.slug ? `https://asif.to/${form.slug}/interview-questions` : "https://asif.to/interview-questions"}
+              value={form.interviewCanonicalUrl}
+              onChange={(value) => update("interviewCanonicalUrl", value)}
+              placeholder=""
+              label="Interview Canonical URL"
+            />
+            <div className="space-y-2">
+              <Label>Open Graph image URL</Label>
+              <Input value={form.interviewOgImage} onChange={(e) => update("interviewOgImage", e.target.value)}/>
             </div>
           </section>
-          <section className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950"><div><h2 className="text-base font-semibold">Interview guide metadata</h2><p className="mt-1 text-sm text-muted-foreground">Controls the course interview-question landing page.</p></div><div className="space-y-2"><Label>SEO title ({form.interviewSeoTitle.length}/70)</Label><Input maxLength={70} value={form.interviewSeoTitle} onChange={(e) => update("interviewSeoTitle", e.target.value)}/></div><div className="space-y-2"><Label>SEO description ({form.interviewSeoDescription.length}/170)</Label><Textarea maxLength={170} rows={3} value={form.interviewSeoDescription} onChange={(e) => update("interviewSeoDescription", e.target.value)}/></div><div className="space-y-2"><Label>Keywords</Label><Input value={form.interviewKeywords} onChange={(e) => update("interviewKeywords", e.target.value)}/></div><div className="space-y-2"><Label>Canonical URL</Label><Input value={form.interviewCanonicalUrl} onChange={(e) => update("interviewCanonicalUrl", e.target.value)}/></div><div className="space-y-2"><Label>Open Graph image URL</Label><Input value={form.interviewOgImage} onChange={(e) => update("interviewOgImage", e.target.value)}/></div></section>
         </main>
 
         <aside className="space-y-6">

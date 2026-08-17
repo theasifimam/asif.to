@@ -12,7 +12,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { AdminPage, AdminPageHeader } from "@/components/admin";
+import { AdminPage, AdminPageHeader, CanonicalUrlInput } from "@/components/admin";
 import { formSectionClass } from "@/components/forms/AdminFormShell";
 import Editor from "@/components/editor/Editor";
 import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
@@ -156,8 +156,14 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
     }
   };
 
+  const selectedCourse = courses.find(
+    (c) => String(c._id) === String(form.course),
+  );
+  const selectedCourseSlug = selectedCourse?.slug;
   const liveUrl = form.slug
-    ? `https://asif.to/interview-questions/${form.slug}`
+    ? selectedCourseSlug
+      ? `https://asif.to/${selectedCourseSlug}/interview-questions/${form.slug}`
+      : `https://asif.to/interview-questions/${form.slug}`
     : "";
 
   if (loading) {
@@ -474,20 +480,22 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
                 />
               </div>
 
-              <div className="space-y-2 sm:col-span-2">
-                <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                  Canonical URL
-                </Label>
-                <Input
+              <div className="sm:col-span-2">
+                <CanonicalUrlInput
+                  basePrefix={(() => {
+                    const selectedCourse = courses.find((c) => String(c._id) === String(form.course));
+                    return selectedCourse?.slug
+                      ? `https://asif.to/${selectedCourse.slug}/interview-questions`
+                      : "https://asif.to/interview-questions";
+                  })()}
                   value={form.canonicalUrl}
-                  onChange={(event) =>
+                  onChange={(value) =>
                     setForm((current) => ({
                       ...current,
-                      canonicalUrl: event.target.value,
+                      canonicalUrl: value,
                     }))
                   }
-                  placeholder="https://asif.to/interview-questions/..."
-                  className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60 font-mono text-xs"
+                  placeholder={form.slug || slugify(form.name)}
                 />
               </div>
 

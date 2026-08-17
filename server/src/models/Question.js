@@ -34,8 +34,10 @@ const questionSchema = new Schema({
 
   difficulty: { type: String, enum: ["easy", "medium", "hard"], default: "medium" },
   status: { type: String, enum: ["draft", "published"], default: "published" },
+  order: { type: Number, default: 0, index: true },
 }, { timestamps: true, collection: "questions" });
 
+questionSchema.index({ type: 1, category: 1, order: 1 });
 questionSchema.index({ type: 1, category: 1, status: 1 });
 questionSchema.index({ type: 1, courses: 1, status: 1 });
 questionSchema.index({ type: 1, course: 1, difficulty: 1, questionType: 1 });

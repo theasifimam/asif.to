@@ -34,6 +34,9 @@ import {
   topicCategoriesApi,
   topicsApi,
 } from "@/lib/api";
+import AdminFormShell, { AdminFormLoading, formSectionClass } from "@/components/forms/AdminFormShell";
+import DiscussButton from "@/components/messaging/DiscussButton";
+import { CanonicalUrlInput } from "@/components/admin";
 
 const initialForm = {
   type: "article",
@@ -524,14 +527,22 @@ export default function TopicForm({ topicId = null }) {
                 placeholder="react, hooks, state"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Canonical URL</Label>
-              <Input
-                value={form.canonicalUrl}
-                onChange={(event) => update("canonicalUrl", event.target.value)}
-                placeholder="https://asif.to/react/use-state"
-              />
-            </div>
+            <CanonicalUrlInput
+              basePrefix={(() => {
+                const selectedCourse = courses.find((c) => String(c._id) === String(form.course));
+                const selectedCategory = categories.find((c) => String(c._id) === String(form.category));
+                const courseSlug = selectedCourse?.slug || "";
+                const categorySlug = selectedCategory?.slug || "";
+                return courseSlug && categorySlug
+                  ? `https://asif.to/${courseSlug}/${categorySlug}`
+                  : courseSlug
+                  ? `https://asif.to/${courseSlug}`
+                  : "https://asif.to";
+              })()}
+              value={form.canonicalUrl}
+              onChange={(value) => update("canonicalUrl", value)}
+              placeholder={form.slug || slugify(form.title)}
+            />
           </div>
         </section>
 

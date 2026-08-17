@@ -1,6 +1,7 @@
 import Course from "../models/Course.js";
 import Chapter from "../models/Chapter.js";
 import { logActivity } from "../services/activity.service.js";
+import { formatCanonicalUrl } from "../utils/canonical.js";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -367,6 +368,9 @@ export const createCourse = async (req, res) => {
       counter++;
     }
 
+    const finalCanonicalUrl = formatCanonicalUrl("/courses", canonicalUrl, slug);
+    const finalInterviewCanonicalUrl = formatCanonicalUrl(`/${slug}/interview-questions`, interviewCanonicalUrl, "");
+
     const course = await Course.create({
       slug,
       title,
@@ -379,11 +383,11 @@ export const createCourse = async (req, res) => {
       seoTitle: seoTitle || "",
       seoDescription: seoDescription || "",
       keywords: normalizeKeywords(keywords),
-      canonicalUrl: canonicalUrl || "",
+      canonicalUrl: finalCanonicalUrl,
       interviewSeoTitle: interviewSeoTitle || "",
       interviewSeoDescription: interviewSeoDescription || "",
       interviewKeywords: normalizeKeywords(interviewKeywords),
-      interviewCanonicalUrl: interviewCanonicalUrl || "",
+      interviewCanonicalUrl: finalInterviewCanonicalUrl,
       interviewOgImage: interviewOgImage || "",
       order: order ?? 0,
       status: status || "published",
@@ -445,6 +449,13 @@ export const updateCourse = async (req, res) => {
     }
     if (req.body.interviewKeywords !== undefined) updates.interviewKeywords = normalizeKeywords(req.body.interviewKeywords);
 
+    const currentCourse = await Course.findById(id).lean();
+    if (!currentCourse) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found." });
+    }
+
     if (req.body.slug !== undefined) {
       const formattedSlug = slugify(req.body.slug);
       if (!formattedSlug) {
@@ -465,9 +476,27 @@ export const updateCourse = async (req, res) => {
       updates.slug = formattedSlug;
     }
 
+    if (updates.canonicalUrl !== undefined || updates.slug !== undefined) {
+      const targetSlug = updates.slug || currentCourse.slug;
+      updates.canonicalUrl = formatCanonicalUrl(
+        "/courses",
+        updates.canonicalUrl !== undefined ? updates.canonicalUrl : currentCourse.canonicalUrl,
+        targetSlug,
+      );
+    }
+
+    if (updates.interviewCanonicalUrl !== undefined || updates.slug !== undefined) {
+      const targetSlug = updates.slug || currentCourse.slug;
+      updates.interviewCanonicalUrl = formatCanonicalUrl(
+        `/${targetSlug}/interview-questions`,
+        updates.interviewCanonicalUrl !== undefined ? updates.interviewCanonicalUrl : currentCourse.interviewCanonicalUrl,
+        "",
+      );
+    }
+
     updates.updatedAt = new Date();
 
-    const previous = await Course.findById(id).lean();
+    const previous = currentCourse;
     const course = await Course.findByIdAndUpdate(id, updates, {
       new: true,
       runValidators: true,
@@ -630,6 +659,12 @@ export const createChapter = async (req, res) => {
       chapterOrder = lastChapter ? lastChapter.order + 1 : 0;
     }
 
+    const finalCanonicalUrl = formatCanonicalUrl(
+      `/${course.slug}`,
+      canonicalUrl,
+      slug,
+    );
+
     const chapter = await Chapter.create({
       course: courseId,
       slug,
@@ -643,7 +678,7 @@ export const createChapter = async (req, res) => {
       seoTitle: seoTitle || "",
       seoDescription: seoDescription || "",
       keywords: normalizeKeywords(keywords),
-      canonicalUrl: canonicalUrl || "",
+      canonicalUrl: finalCanonicalUrl,
       order: chapterOrder,
       status: status || "published",
     });
@@ -690,7 +725,7 @@ export const updateChapter = async (req, res) => {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
     });
 
-    const currentChapter = await Chapter.findById(id).select("course title status").lean();
+    const currentChapter = await Chapter.findById(id).select("course title status canonicalUrl slug").lean();
     if (!currentChapter) {
       return res
         .status(404)
@@ -721,6 +756,16 @@ export const updateChapter = async (req, res) => {
         });
       }
       updates.slug = formattedSlug;
+    }
+
+    if (updates.canonicalUrl !== undefined || updates.slug !== undefined) {
+      const parentCourse = await Course.findById(currentChapter.course).select("slug").lean();
+      const targetSlug = updates.slug || currentChapter.slug;
+      updates.canonicalUrl = formatCanonicalUrl(
+        `/${parentCourse?.slug || ""}`,
+        updates.canonicalUrl !== undefined ? updates.canonicalUrl : currentChapter.canonicalUrl,
+        targetSlug,
+      );
     }
 
     const chapter = await Chapter.findByIdAndUpdate(id, updates, {

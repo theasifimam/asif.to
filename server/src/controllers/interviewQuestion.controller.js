@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import InterviewQuestion from "../models/Question.js";
 import CourseTopic from "../models/CourseTopic.js";
-import "../models/TopicCategory.js";
+import TopicCategory from "../models/TopicCategory.js";
 import Course from "../models/Course.js";
 import Chapter from "../models/Chapter.js";
 import Article from "../models/Article.js";
@@ -289,7 +289,7 @@ export const listInterviewQuestions = async (req, res) => {
     const pageSize = Math.min(Math.max(Number(limit) || 20, 1), 100);
     const [questions, total] = await Promise.all([
       populateQuestion(InterviewQuestion.find(filter))
-        .sort({ updatedAt: -1, question: 1 })
+        .sort({ order: 1, createdAt: 1 })
         .skip((pageNumber - 1) * pageSize)
         .limit(pageSize)
         .lean(),
@@ -326,6 +326,70 @@ export const getInterviewQuestion = async (req, res) => {
   }
 };
 
+export async function computeCanonicalUrl(
+  courseIdOrObj,
+  categoryIdOrObj,
+  customSuffixOrUrl,
+  questionSlug,
+) {
+  let courseSlug = "";
+  let categorySlug = "";
+
+  if (courseIdOrObj) {
+    if (typeof courseIdOrObj === "object" && courseIdOrObj.slug) {
+      courseSlug = courseIdOrObj.slug;
+    } else if (mongoose.Types.ObjectId.isValid(courseIdOrObj)) {
+      const c = await Course.findById(courseIdOrObj).select("slug").lean();
+      courseSlug = c?.slug || "";
+    }
+  }
+
+  if (categoryIdOrObj) {
+    if (typeof categoryIdOrObj === "object" && categoryIdOrObj.slug) {
+      categorySlug = categoryIdOrObj.slug;
+    } else if (mongoose.Types.ObjectId.isValid(categoryIdOrObj)) {
+      const cat = await TopicCategory.findById(categoryIdOrObj)
+        .select("slug course")
+        .populate("course", "slug")
+        .lean();
+      categorySlug = cat?.slug || "";
+      if (!courseSlug && cat?.course?.slug) {
+        courseSlug = cat.course.slug;
+      }
+    }
+  }
+
+  let basePath = "";
+  if (courseSlug && categorySlug) {
+    basePath = `/${courseSlug}/interview-questions/${categorySlug}`;
+  } else if (categorySlug) {
+    basePath = `/interview-questions/${categorySlug}`;
+  } else if (courseSlug) {
+    basePath = `/${courseSlug}/interview-questions`;
+  } else {
+    basePath = `/interview-questions`;
+  }
+
+  const raw = String(customSuffixOrUrl || "").trim();
+  if (raw && /^https?:\/\//i.test(raw)) {
+    return raw;
+  }
+
+  let cleanSuffix = raw.replace(/^\/+/, "").replace(/\/+$/, "");
+  const normalizedBasePath = basePath.replace(/^\/+/, "");
+  if (cleanSuffix.startsWith(normalizedBasePath)) {
+    cleanSuffix = cleanSuffix
+      .slice(normalizedBasePath.length)
+      .replace(/^\/+/, "");
+  }
+
+  const finalSlug = cleanSuffix || questionSlug || "";
+  const siteBase = "https://asif.to";
+  return finalSlug
+    ? `${siteBase}${basePath}/${finalSlug}`
+    : `${siteBase}${basePath}`;
+}
+
 export const createInterviewQuestion = async (req, res) => {
   try {
     let course = null;
@@ -333,6 +397,13 @@ export const createInterviewQuestion = async (req, res) => {
       course = await resolveCourse(req.body.course || req.body.courseId);
     }
     const categoryId = req.body.category || req.body.categoryId;
+    const finalSlug = slugify(req.body.slug || req.body.question);
+    const canonicalUrl = await computeCanonicalUrl(
+      course ? course._id : null,
+      categoryId,
+      req.body.canonicalUrl,
+      finalSlug,
+    );
 
     const question = await InterviewQuestion.create({
       type: "interview",
@@ -343,14 +414,14 @@ export const createInterviewQuestion = async (req, res) => {
       difficulty: req.body.difficulty || "medium",
       questionType: req.body.questionType || "conceptual",
       tags: parseList(req.body.tags).map((tag) => tag.toLowerCase()),
-      slug: slugify(req.body.slug || req.body.question),
+      slug: finalSlug,
       codeExample: req.body.codeExample || "",
       expectedOutput: req.body.expectedOutput || "",
       followUps: parseList(req.body.followUps),
       seoTitle: req.body.seoTitle || "",
       seoDescription: req.body.seoDescription || "",
       keywords: parseList(req.body.keywords),
-      canonicalUrl: req.body.canonicalUrl || "",
+      canonicalUrl,
       ogImage: req.body.ogImage || "",
     });
 
@@ -401,7 +472,6 @@ export const updateInterviewQuestion = async (req, res) => {
       "expectedOutput",
       "seoTitle",
       "seoDescription",
-      "canonicalUrl",
       "ogImage",
     ];
     for (const key of allowed)
@@ -413,6 +483,21 @@ export const updateInterviewQuestion = async (req, res) => {
       question.followUps = parseList(req.body.followUps);
     if (req.body.question !== undefined || req.body.slug !== undefined)
       question.slug = slugify(req.body.slug || req.body.question);
+
+    if (
+      req.body.canonicalUrl !== undefined ||
+      req.body.slug !== undefined ||
+      req.body.category !== undefined ||
+      req.body.course !== undefined
+    ) {
+      question.canonicalUrl = await computeCanonicalUrl(
+        question.course,
+        question.category,
+        req.body.canonicalUrl !== undefined ? req.body.canonicalUrl : question.canonicalUrl,
+        question.slug,
+      );
+    }
+
     await question.save();
     res.json({
       success: true,
@@ -446,5 +531,48 @@ export const deleteInterviewQuestion = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const reorderInterviewQuestions = async (req, res) => {
+  try {
+    const { items } = req.body;
+    if (!Array.isArray(items)) {
+      return res.status(400).json({
+        success: false,
+        message: "An array of questions with id and order is required.",
+      });
+    }
+
+    const bulkOps = items
+      .map((item, index) => {
+        const id = typeof item === "string" ? item : item._id || item.id;
+        if (!id || !mongoose.Types.ObjectId.isValid(id)) return null;
+        const orderNum = Number.isFinite(Number(item.order))
+          ? Number(item.order)
+          : index;
+        return {
+          updateOne: {
+            filter: { _id: id, type: "interview" },
+            update: { $set: { order: orderNum } },
+          },
+        };
+      })
+      .filter(Boolean);
+
+    if (bulkOps.length) {
+      await InterviewQuestion.bulkWrite(bulkOps);
+    }
+
+    res.json({
+      success: true,
+      message: "Interview questions reordered successfully.",
+    });
+  } catch (error) {
+    console.error("[INTERVIEW QUESTIONS] reorder error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Unable to reorder interview questions.",
+    });
   }
 };

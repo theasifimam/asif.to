@@ -9,6 +9,7 @@ import AdminFormShell, { formAsideClass, formSectionClass } from "@/components/f
 import { Button, Input, Label, Textarea } from "@/components/ui";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cheatsheetsApi } from "@/lib/api";
+import { CanonicalUrlInput } from "@/components/admin";
 
 export const TECH_IDS = ["reactjs", "nextjs", "nodejs", "expressjs", "mongodb", "tailwindcss", "javascript", "typescript", "html", "css"];
 
@@ -82,7 +83,12 @@ export default function CheatsheetForm({ cheatsheetId }) {
             <div className="space-y-2"><Label>SEO title</Label><Input value={form.seoTitle} onChange={(event) => update("seoTitle", event.target.value)} maxLength={70} /></div>
             <div className="space-y-2"><Label>SEO description</Label><Textarea rows={3} value={form.seoDescription} onChange={(event) => update("seoDescription", event.target.value)} maxLength={170} /></div>
             <div className="space-y-2"><Label>Keywords</Label><Input value={form.keywords} onChange={(event) => update("keywords", event.target.value)} placeholder="react, hooks, state" /></div>
-            <div className="space-y-2"><Label>Canonical URL</Label><Input value={form.canonicalUrl} onChange={(event) => update("canonicalUrl", event.target.value)} placeholder="https://asif.to/cheatsheets/react-hooks" /></div>
+            <CanonicalUrlInput
+              basePrefix="https://asif.to/cheatsheets"
+              value={form.canonicalUrl}
+              onChange={(value) => update("canonicalUrl", value)}
+              placeholder={form.slug || (form.title ? form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") : "")}
+            />
           </div>
         </section>
         <aside className={`${formAsideClass} self-start lg:sticky lg:top-24`}>

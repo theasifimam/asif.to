@@ -12,6 +12,7 @@ import AdminFormShell, {
   formSectionClass,
 } from "@/components/forms/AdminFormShell";
 import DiscussButton from "@/components/messaging/DiscussButton";
+import { CanonicalUrlInput } from "@/components/admin";
 import { articlesApi, articleTopicsApi } from "@/lib/api";
 import { Button, Input, Label, Textarea } from "@/components/ui";
 import {
@@ -301,15 +302,12 @@ export default function ArticleForm({ articleId = null }) {
                 className="rounded-2xl border-0 bg-zinc-100 shadow-none dark:bg-zinc-900"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Canonical URL</Label>
-              <Input
-                value={form.canonicalUrl}
-                onChange={(event) => update("canonicalUrl", event.target.value)}
-                placeholder="https://asif.to/articles/example"
-                className="rounded-2xl border-0 bg-zinc-100 shadow-none dark:bg-zinc-900"
-              />
-            </div>
+            <CanonicalUrlInput
+              basePrefix={form.type === "cheatsheet" ? "https://asif.to/cheatsheets" : "https://asif.to/articles"}
+              value={form.canonicalUrl}
+              onChange={(value) => update("canonicalUrl", value)}
+              placeholder={form.slug || (form.title ? form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") : "")}
+            />
           </div>
         </aside>
       </div>

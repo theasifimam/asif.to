@@ -56,7 +56,8 @@ function BrowserRuntimeWorkspace({
 }) {
   const config = BROWSER_RUNTIME_CONFIG[language];
   const { sandpack } = useSandpack();
-  const source = sandpack.files[config.file]?.code || "";
+  const activeFile = sandpack.activeFile || config.file;
+  const source = sandpack.files[activeFile]?.code || sandpack.files[config.file]?.code || "";
   const [output, setOutput] = useState("");
   const [error, setError] = useState("");
   const [status, setStatus] = useState("idle");

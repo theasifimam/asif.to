@@ -70,7 +70,11 @@ export default async function InterviewQuestionsIndexPage() {
             {categories.map((category) => (
               <Link
                 key={category._id}
-                href={`/interview-questions/${category.slug}`}
+                href={
+                  category.course?.slug
+                    ? `/${category.course.slug}/interview-questions/${category.slug}`
+                    : `/interview-questions/${category.slug}`
+                }
                 className="group flex flex-col justify-between rounded-3xl border border-zinc-200 bg-white p-6 shadow-xs transition-all hover:border-orange-500/50 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
               >
                 <div>

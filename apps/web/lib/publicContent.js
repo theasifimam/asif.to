@@ -64,15 +64,34 @@ export async function getPublicInterviewQuestion(courseSlug, questionSlug) {
   return getPublicInterviewQuestionCached(courseSlug, questionSlug);
 }
 
-export const getPublicInterviewCategories = cache(() =>
-  fetchPublicData("/topic-categories/public", "interview categories"),
-);
+export const getPublicInterviewCategories = cache((courseSlug) => {
+  const query = courseSlug ? `?course=${encodeURIComponent(courseSlug)}` : "";
+  return fetchPublicData(`/topic-categories/public${query}`, "interview categories");
+});
 
-export const getPublicInterviewCategory = cache((categorySlug, page = 1) =>
-  fetchPublicData(
-    `/topic-categories/public/${encodeURIComponent(categorySlug)}?page=${encodeURIComponent(page)}&limit=15`,
-    "interview category",
-  ),
+export const getPublicInterviewCategory = cache(
+  (courseSlugOrCategorySlug, categorySlugOrPage, requestedPage = 1) => {
+    let courseSlug = null;
+    let categorySlug = courseSlugOrCategorySlug;
+    let page = requestedPage;
+
+    if (
+      categorySlugOrPage &&
+      typeof categorySlugOrPage === "string" &&
+      isNaN(Number(categorySlugOrPage))
+    ) {
+      courseSlug = courseSlugOrCategorySlug;
+      categorySlug = categorySlugOrPage;
+    } else if (categorySlugOrPage) {
+      page = Number(categorySlugOrPage) || 1;
+    }
+
+    const path = courseSlug
+      ? `/topic-categories/public/${encodeURIComponent(courseSlug)}/${encodeURIComponent(categorySlug)}?page=${encodeURIComponent(page)}&limit=15`
+      : `/topic-categories/public/${encodeURIComponent(categorySlug)}?page=${encodeURIComponent(page)}&limit=15`;
+
+    return fetchPublicData(path, "interview category");
+  },
 );
 
 export const getCheatsheets = cache(() =>
