@@ -22,6 +22,7 @@ export async function generateMetadata({ params }) {
   if (!article) {
     return {
       title: "Article Not Found | asif.to",
+      robots: { index: false, follow: false },
     };
   }
 
@@ -34,6 +35,17 @@ export async function generateMetadata({ params }) {
     title: `${article.title} | asif.to`,
     description: description,
     alternates: { canonical },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
     openGraph: {
       title: article.title,
       description: description,

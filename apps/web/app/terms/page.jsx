@@ -7,6 +7,17 @@ export const metadata = {
   title: "Terms of Service",
   description: "The terms governing access to and use of asif.to.",
   alternates: { canonical: "/terms" },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function TermsPage() {

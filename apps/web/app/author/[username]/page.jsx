@@ -22,6 +22,17 @@ export async function generateMetadata({ params }) {
     title: "Asif — Full-Stack JavaScript Developer and Author",
     description: authorIdentity.shortBio,
     alternates: { canonical: authorIdentity.url },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
     openGraph: { title: "Asif — Author and Developer behind asif.to", description: authorIdentity.shortBio, url: authorIdentity.url, type: "profile" },
   };
   const user = await getAuthor(username);
@@ -29,6 +40,7 @@ export async function generateMetadata({ params }) {
   if (!user) {
     return {
       title: "Author Not Found | asif.to",
+      robots: { index: false, follow: false },
     };
   }
 
@@ -38,6 +50,18 @@ export async function generateMetadata({ params }) {
   return {
     title: `${user.fullName} | Author at asif.to`,
     description: description,
+    alternates: { canonical: absoluteUrl("", `/author/${user.username}`) },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
     openGraph: {
       title: `${user.fullName} | asif.to`,
       description: description,

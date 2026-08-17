@@ -7,6 +7,17 @@ export const metadata = {
   title: "Privacy Policy",
   description: "How asif.to collects, uses, shares, retains, and protects personal data.",
   alternates: { canonical: "/privacy" },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function PrivacyPage() {

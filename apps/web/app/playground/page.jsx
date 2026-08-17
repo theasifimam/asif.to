@@ -9,6 +9,17 @@ export const metadata = {
   description:
     "Write and run JavaScript, TypeScript, HTML, CSS, and React code in a secure browser coding playground.",
   alternates: { canonical: "/run" },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function PlaygroundPage() {

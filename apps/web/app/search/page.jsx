@@ -3,7 +3,22 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SearchPageClient from "@/components/search/SearchPageClient";
 
-export const metadata = { title: "Search", description: "Search all asif.to courses, tutorials, interview questions, cheatsheets, and coding practice." };
+export const metadata = {
+  title: "Search",
+  description:
+    "Search all asif.to courses, tutorials, interview questions, cheatsheets, and coding practice.",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+};
 
 export default function SearchPage() {
   return (

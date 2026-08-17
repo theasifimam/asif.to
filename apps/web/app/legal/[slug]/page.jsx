@@ -184,13 +184,26 @@ const LEGAL_FALLBACKS = {
   },
 };
 
-// Comprehensive source-controlled policies. CMS content can still override
-// these fallbacks when an intentionally published legal page exists.
 LEGAL_FALLBACKS["privacy-policy"].content = <PrivacyPolicy />;
 LEGAL_FALLBACKS["privacy-policy"].subtitle = "Effective and Last Updated: August 15, 2026";
 LEGAL_FALLBACKS["terms-conditions"].content = <TermsOfService />;
 LEGAL_FALLBACKS["terms-conditions"].title = "Terms of Service";
 LEGAL_FALLBACKS["terms-conditions"].subtitle = "Effective and Last Updated: August 15, 2026";
+LEGAL_FALLBACKS["cookies"] = LEGAL_FALLBACKS["cookie-usage"];
+LEGAL_FALLBACKS["privacy"] = LEGAL_FALLBACKS["privacy-policy"];
+LEGAL_FALLBACKS["terms"] = LEGAL_FALLBACKS["terms-conditions"];
+LEGAL_FALLBACKS["disclaimer"] = {
+  title: "Disclaimer",
+  subtitle: "Effective and Last Updated: August 15, 2026",
+  icon: ShieldCheck,
+  content: (
+    <div className="space-y-6 text-sm sm:text-base text-zinc-600 dark:text-zinc-300 font-medium leading-relaxed">
+      <p>
+        The tutorials, code examples, interactive playgrounds, and learning resources provided on <strong>asif.to</strong> are published for educational and informational purposes. While every effort is made to test code and align with modern framework specifications, materials are provided without warranties of any kind.
+      </p>
+    </div>
+  ),
+};
 
 export default function LegalPage() {
   const params = useParams();

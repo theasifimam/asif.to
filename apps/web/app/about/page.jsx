@@ -8,6 +8,17 @@ export const metadata = {
   title: "About asif.to — Practical Full-Stack JavaScript Learning",
   description: "Learn why asif.to exists, who creates and maintains it, and how its programming tutorials are researched, tested, written, reviewed, and updated.",
   alternates: { canonical: absoluteUrl("", "/about") },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 const principles = [

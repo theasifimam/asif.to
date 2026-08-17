@@ -2,14 +2,12 @@ import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
-  Code2,
-  MessageSquareText,
   Tag,
 } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SaveButton from "@/components/articles/SaveButton";
-import InterviewAnswer from "./InterviewAnswer";
+import ArticleAnswerSection from "./ArticleAnswerSection";
 import {
   getPublicInterviewQuestion,
   getPublicInterviewQuestions,
@@ -47,7 +45,17 @@ export async function buildInterviewQuestionMetadata(courseSlug, questionSlug) {
       `${data.course.title} interview questions`,
     ],
     alternates: { canonical },
-    robots: { index: true, follow: true },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
     openGraph: {
       title,
       description,
@@ -151,23 +159,10 @@ export default async function InterviewQuestionArticle({
               ))}
             </div>
           </header>
-          <div className="py-5 text-justify sm:py-9">
-            <div className="mb-5 flex items-center gap-2 text-sm font-black uppercase tracking-wide text-orange-600">
-              <MessageSquareText className="h-5 w-5" /> Detailed interview
-              answer
-            </div>
-            <InterviewAnswer content={question.answer} />
-            {question.codeExample && (
-              <section className="mt-8">
-                <h2 className="flex items-center gap-2 text-xl font-black">
-                  <Code2 className="h-5 w-5 text-blue-500" /> Code example
-                </h2>
-                <pre className="mt-3 overflow-x-auto rounded-2xl bg-zinc-950 p-4 text-sm leading-6 text-zinc-100">
-                  <code>{question.codeExample}</code>
-                </pre>
-              </section>
-            )}
-          </div>
+          <ArticleAnswerSection
+            answer={question.answer}
+            codeExample={question.codeExample}
+          />
         </article>
         <nav className="mt-6 grid gap-3 sm:grid-cols-2">
           {previous ? (

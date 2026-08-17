@@ -4,26 +4,17 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
-  Code2,
   HelpCircle,
   List,
-  MessageSquareText,
   Sparkles,
-  Tag,
 } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { getPublicInterviewCategory } from "@/lib/publicContent";
 import { absoluteUrl, getSiteUrl, jsonLd } from "@/lib/seo";
 import InterviewAnswer from "./InterviewAnswer";
-import SaveButton from "@/components/articles/SaveButton";
+import InterviewQuestionList from "./InterviewQuestionList";
 import MobileQuestionIndex from "./MobileQuestionIndex";
-
-const difficultyStyles = {
-  easy: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300",
-  medium: "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300",
-  hard: "bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300",
-};
 
 export async function buildCategoryInterviewGuideMetadata(
   courseSlugOrCategorySlug,
@@ -87,6 +78,13 @@ export async function buildCategoryInterviewGuideMetadata(
     robots: {
       index: !category.noindex,
       follow: !category.nofollow,
+      googleBot: {
+        index: !category.noindex,
+        follow: !category.nofollow,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
     openGraph: {
       title: category.ogTitle || title,
@@ -230,8 +228,8 @@ export default async function CategoryInterviewGuide({
           dangerouslySetInnerHTML={{ __html: jsonLd(structuredData) }}
         />
       )}
-      <main className="mx-auto min-w-0 w-full max-w-7xl px-0 pb-20 pt-24 sm:px-6 lg:px-8">
-        <div className="mx-4 flex flex-wrap items-center justify-between gap-3 text-sm sm:mx-0">
+      <main className="mx-auto min-w-0 w-full max-w-7xl px-4 pb-20 pt-20 sm:px-6 sm:pt-24 lg:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
           <Link
             href={courseSlug ? `/${encodeURIComponent(courseSlug)}/interview-questions` : "/interview-questions"}
             className="inline-flex items-center gap-2 font-semibold text-blue-600 hover:underline dark:text-blue-400"
@@ -249,26 +247,26 @@ export default async function CategoryInterviewGuide({
         </div>
 
         {/* Purpose-Built Hero Section */}
-        <header className="mx-3 mt-5 min-w-0 max-w-full overflow-hidden rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:mx-0 sm:rounded-4xl sm:p-9">
+        <header className="mt-5 min-w-0 max-w-full overflow-hidden rounded-3xl border border-zinc-200 bg-white p-5 shadow-xs dark:border-zinc-800 dark:bg-zinc-900 sm:rounded-4xl sm:p-9">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-600 dark:text-orange-400">
             Interview Preparation Guide
           </p>
-          <h1 className="mt-3 max-w-4xl break-words text-3xl font-black tracking-tight sm:text-5xl">
+          <h1 className="mt-3 max-w-4xl break-words text-2xl font-black tracking-tight sm:text-4xl lg:text-5xl">
             {categoryTitle}
           </h1>
-          <p className="mt-4 max-w-3xl text-base leading-7 text-zinc-600 dark:text-zinc-300">
+          <p className="mt-4 max-w-3xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-300 sm:text-base sm:leading-7">
             {category?.description ||
               `Master ${category?.name || "technical"} interviews with comprehensive questions, clear explanations, code examples, and follow-up discussion points.`}
           </p>
-          <div className="mt-6 flex flex-wrap gap-3 text-sm">
-            <span className="rounded-full bg-zinc-100 px-4 py-2 font-semibold dark:bg-zinc-800">
+          <div className="mt-6 flex flex-wrap gap-2.5 text-xs sm:text-sm">
+            <span className="rounded-full bg-zinc-100 px-3.5 py-1.5 font-semibold dark:bg-zinc-800">
               {pagination.total} questions
             </span>
-            <span className="rounded-full bg-orange-50 px-4 py-2 font-semibold text-orange-700 dark:bg-orange-500/10 dark:text-orange-300">
+            <span className="rounded-full bg-orange-50 px-3.5 py-1.5 font-semibold text-orange-700 dark:bg-orange-500/10 dark:text-orange-300">
               Easy to advanced
             </span>
-            <span className="rounded-full bg-blue-50 px-4 py-2 font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
-              Answers always visible
+            <span className="rounded-full bg-blue-50 px-3.5 py-1.5 font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
+              Collapsible answers & code
             </span>
           </div>
         </header>
@@ -286,7 +284,7 @@ export default async function CategoryInterviewGuide({
         )}
 
         {!category || questions.length === 0 ? (
-          <div className="mx-3 mt-8 rounded-4xl border border-zinc-200 bg-white p-12 text-center text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 sm:mx-0">
+          <div className="mt-8 rounded-4xl border border-zinc-200 bg-white p-12 text-center text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900">
             <HelpCircle className="mx-auto mb-3 h-10 w-10 text-zinc-400" />
             Interview questions for this category are coming soon.
           </div>
@@ -299,115 +297,17 @@ export default async function CategoryInterviewGuide({
               }))}
               firstNumber={firstNumber}
             />
-            <div className="mt-5 grid w-full min-w-0 max-w-full items-start gap-8 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_300px]">
+            <div className="mt-6 grid w-full min-w-0 max-w-full items-start gap-8 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_300px]">
               <section
-                className="w-full min-w-0 max-w-full space-y-0 sm:space-y-5"
+                className="w-full min-w-0 max-w-full space-y-6"
                 aria-label="Interview questions and answers"
               >
-                {questions.map((item, index) => {
-                  const number = firstNumber + index;
-                  return (
-                    <article
-                      id={`question-${number}`}
-                      key={item._id}
-                      className="w-full min-w-0 max-w-full scroll-mt-36 overflow-hidden border-b border-zinc-200 bg-transparent py-8 text-justify dark:border-zinc-800 sm:scroll-mt-24 sm:py-8"
-                    >
-                      <div className="flex items-start gap-3 sm:gap-4">
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-sm font-black text-white sm:h-10 sm:w-10 sm:rounded-2xl">
-                          {number}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span
-                              className={`rounded-full px-2.5 py-1 text-[11px] font-bold capitalize ${difficultyStyles[item.difficulty] || difficultyStyles.medium}`}
-                            >
-                              {item.difficulty}
-                            </span>
-                            <span className="text-xs font-semibold capitalize text-zinc-400">
-                              {item.questionType}
-                            </span>
-                          </div>
-                          <h2 className="mt-3 text-lg font-black leading-snug tracking-tight sm:text-2xl">
-                            {item.question}
-                          </h2>
-                          <div className="mt-3">
-                            <SaveButton
-                              itemId={item._id}
-                              itemType="interview_question"
-                              label="Save"
-                              size="sm"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="mt-6 min-w-0 max-w-full border-l-4 border-orange-400 pl-3 sm:ml-14 sm:pl-6">
-                        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wide text-orange-700 dark:text-orange-300 sm:text-sm">
-                          <MessageSquareText className="h-4 w-4 shrink-0" />{" "}
-                          Interview-ready answer
-                        </div>
-                        <div className="mt-3 min-w-0 max-w-full">
-                          <InterviewAnswer content={item.answer} />
-                        </div>
-                        {item.codeExample && (
-                          <div className="mt-5 min-w-0 max-w-full">
-                            <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-zinc-500">
-                              <Code2 className="h-4 w-4" /> Code example
-                            </p>
-                            <pre className="max-w-full whitespace-pre-wrap break-all rounded-2xl bg-zinc-950 p-3 text-xs leading-5 text-zinc-100 sm:overflow-x-auto sm:whitespace-pre sm:break-normal sm:p-4 sm:text-sm sm:leading-6">
-                              <code>{item.codeExample}</code>
-                            </pre>
-                            {item.expectedOutput && (
-                              <pre className="mt-2 max-w-full whitespace-pre-wrap break-all rounded-2xl bg-zinc-100 p-3 text-xs text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 sm:overflow-x-auto sm:whitespace-pre sm:break-normal sm:p-4 sm:text-sm">
-                                <code>{item.expectedOutput}</code>
-                              </pre>
-                            )}
-                          </div>
-                        )}
-                        {(item.followUps || []).length > 0 && (
-                          <div className="mt-5 rounded-2xl bg-blue-50 p-4 dark:bg-blue-500/10">
-                            <p className="text-xs font-black uppercase tracking-wide text-blue-700 dark:text-blue-300">
-                              Likely follow-up questions
-                            </p>
-                            <ul className="mt-2 space-y-2 text-sm leading-6">
-                              {item.followUps.map((followUp) => {
-                                const href = followUpHref(followUp);
-                                return (
-                                  <li key={followUp}>
-                                    {href ? (
-                                      <Link
-                                        href={href}
-                                        className="group flex items-start gap-2 font-semibold text-blue-700 hover:underline dark:text-blue-300"
-                                      >
-                                        <span aria-hidden="true">→</span>
-                                        <span>{followUp}</span>
-                                      </Link>
-                                    ) : (
-                                      <span className="text-zinc-700 dark:text-zinc-300">
-                                        {followUp}
-                                      </span>
-                                    )}
-                                  </li>
-                                );
-                              })}
-                            </ul>
-                          </div>
-                        )}
-                        {(item.tags || []).length > 0 && (
-                          <div className="mt-5 flex flex-wrap gap-2">
-                            {item.tags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-[11px] font-semibold text-zinc-500 dark:bg-zinc-800"
-                              >
-                                <Tag className="h-3 w-3" /> {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </article>
-                  );
-                })}
+                <InterviewQuestionList
+                  questions={questions}
+                  firstNumber={firstNumber}
+                  basePath={basePath}
+                  indexedQuestionsMap={Object.fromEntries(indexedQuestions)}
+                />
                 <Pagination pagination={pagination} basePath={basePath} />
               </section>
               <aside className="hidden lg:sticky lg:top-24 lg:block">

@@ -3,17 +3,27 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin/
+Disallow: /dashboard
+Disallow: /account
+Disallow: /auth/
 Disallow: /forgot-password
 Disallow: /bookmarks
 Disallow: /certificates
+Disallow: /@
+Disallow: /courses/*/final-exam
 
 User-agent: Googlebot
 Allow: /
 Disallow: /api/
 Disallow: /admin/
+Disallow: /dashboard
+Disallow: /account
+Disallow: /auth/
 Disallow: /forgot-password
 Disallow: /bookmarks
 Disallow: /certificates
+Disallow: /@
+Disallow: /courses/*/final-exam
 
 Sitemap: https://asif.to/sitemap.xml
 Host: https://asif.to

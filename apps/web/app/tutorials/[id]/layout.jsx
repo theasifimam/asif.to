@@ -12,6 +12,17 @@ export async function generateMetadata({ params }) {
     description: tutorial.summary,
     authors: [{ name: authorIdentity.name, url: authorIdentity.url }],
     alternates: { canonical },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
     openGraph: {
       title: tutorial.title,
       description: tutorial.summary,

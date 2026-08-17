@@ -12,7 +12,17 @@ export function mergePageMetadata(fallback, setting, path) {
     description,
     keywords: setting?.keywords || fallback.keywords || [],
     alternates: { canonical },
-    robots: { index: !setting?.noIndex, follow: !setting?.noIndex },
+    robots: {
+      index: !setting?.noIndex,
+      follow: !setting?.noIndex,
+      googleBot: {
+        index: !setting?.noIndex,
+        follow: !setting?.noIndex,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
     openGraph: {
       title,
       description,
