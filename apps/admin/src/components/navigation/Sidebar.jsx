@@ -37,7 +37,7 @@ export default function Sidebar({
       </button>
 
       {/* Main Floating Squircle Card Container */}
-      <div className="h-full w-full flex flex-col border border-zinc-200/80 bg-white transition-colors duration-300 dark:border-zinc-800/80 dark:bg-[#121215] overflow-hidden">
+      <div className="h-full w-full flex flex-col transition-colors duration-300 border border-zinc-200/80 bg-white  dark:border-zinc-800/80 dark:bg-[#121215] overflow-hidden">
         {/* Sidebar Header / Logo */}
         <div
           className={`flex items-center justify-between gap-2 p-5 sm:p-6 pb-4 sm:pb-5 ${

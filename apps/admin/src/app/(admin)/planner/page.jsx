@@ -494,8 +494,8 @@ export default function PlannerPage() {
       </div>
     );
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
-      <div className="shrink-0 border-b border-zinc-200 bg-white p-2.5 sm:p-4 dark:border-zinc-800 dark:bg-zinc-950 md:px-7">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-zinc-100 dark:bg-zinc-950">
+      <div className="shrink-0 border-b border-zinc-200 bg-zinc-100 p-2.5 sm:p-4 dark:border-zinc-800 dark:bg-zinc-950 md:px-7">
         <div className="flex flex-col gap-2 sm:gap-3.5 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex items-center justify-between gap-2 min-w-0">
             <div className="flex min-w-0 items-center gap-2.5">
@@ -514,7 +514,11 @@ export default function PlannerPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {boards.map((item) => (
-                        <SelectItem key={item._id} value={item._id} className="font-bold">
+                        <SelectItem
+                          key={item._id}
+                          value={item._id}
+                          className="font-bold"
+                        >
                           {item.name}
                         </SelectItem>
                       ))}
@@ -585,7 +589,7 @@ export default function PlannerPage() {
           <div className="flex flex-wrap items-center gap-2">
             <form
               onSubmit={submitQuick}
-              className="flex min-w-full sm:min-w-60 flex-1 items-center rounded-2xl bg-zinc-100 px-3 dark:bg-zinc-900 xl:w-80"
+              className="flex min-w-full sm:min-w-60 flex-1 items-center rounded-2xl bg-white px-3 dark:bg-zinc-900 xl:w-80 border border-zinc-200 dark:border-zinc-800"
             >
               <Plus size={16} className="text-blue-600 shrink-0" />
               <input
@@ -593,7 +597,7 @@ export default function PlannerPage() {
                 value={quickTitle}
                 onChange={(e) => setQuickTitle(e.target.value)}
                 placeholder="Quick add card… (N)"
-                className="h-9 sm:h-11 min-w-0 flex-1 bg-transparent px-2 text-xs sm:text-sm outline-none"
+                className="h-9 sm:h-11 min-w-0 flex-1 px-2 text-xs sm:text-sm outline-none"
               />
               <button className="text-[10px] font-bold text-zinc-400 shrink-0">
                 ENTER
@@ -679,7 +683,7 @@ export default function PlannerPage() {
         </div>
 
         <div className="mt-2 sm:mt-3.5 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-          <div className="hidden sm:flex items-center overflow-x-auto gap-1 rounded-2xl bg-zinc-100 p-1 dark:bg-zinc-900 scrollbar-none sm:grid sm:grid-cols-5">
+          <div className="hidden items-center overflow-x-auto gap-1 rounded-2xl bg-zinc-100 p-1 dark:bg-zinc-900 scrollbar-none sm:grid sm:grid-cols-5">
             {[
               ["Total", stats.total],
               ["Planned", stats.planned],
@@ -788,7 +792,10 @@ export default function PlannerPage() {
                     }))
                   }
                 >
-                  <SelectTrigger size="sm" className="h-9 w-full rounded-xl border border-zinc-200 bg-white px-2.5 text-xs font-semibold dark:border-zinc-700 dark:bg-zinc-950">
+                  <SelectTrigger
+                    size="sm"
+                    className="h-9 w-full rounded-xl border border-zinc-200 bg-white px-2.5 text-xs font-semibold dark:border-zinc-700 dark:bg-zinc-950"
+                  >
                     <SelectValue placeholder={all} />
                   </SelectTrigger>
                   <SelectContent>
@@ -864,12 +871,12 @@ export default function PlannerPage() {
           })}
         </div>
 
-        <main className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden p-3.5 sm:p-4 md:p-6 scrollbar-thin">
+        <main className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden p-3.5 sm:p-4 md:p-6 scrollbar-none">
           <SortableContext
             items={columns.map((column) => `column:${column._id}`)}
             strategy={horizontalListSortingStrategy}
           >
-            <div className="flex h-full w-full min-w-full md:w-auto md:min-w-max gap-3.5 sm:gap-4 snap-x snap-mandatory">
+            <div className="flex h-full w-full min-w-full md:w-auto md:min-w-max gap-3.5 sm:gap-4 snap-x snap-mandatory ">
               {columns.map((column) => (
                 <PlannerColumn
                   key={column._id}

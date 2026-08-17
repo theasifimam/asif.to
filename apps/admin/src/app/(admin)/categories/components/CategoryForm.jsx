@@ -45,6 +45,8 @@ const initialForm = {
   ogImage: "",
   noindex: false,
   nofollow: false,
+  featuredChapters: [],
+  relatedCourses: [],
 };
 
 function slugify(value) {
@@ -62,32 +64,49 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
     course: initialCourse || "none",
   });
   const [courses, setCourses] = useState([]);
+  const [courseChapters, setCourseChapters] = useState([]);
   const [slugEdited, setSlugEdited] = useState(false);
   const [loading, setLoading] = useState(Boolean(categoryId));
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("general"); // "general" | "content" | "seo"
+  const [activeTab, setActiveTab] = useState("general"); // "general" | "content" | "seo" | "related"
 
   useEffect(() => {
     Promise.all([
       coursesApi.listAll(),
       categoryId ? topicCategoriesApi.get(categoryId) : Promise.resolve(null),
     ]).then(([courseResponse, catResponse]) => {
-      setCourses(courseResponse.data?.data || []);
+      const allCoursesList = courseResponse.data?.data || [];
+      setCourses(allCoursesList);
       if (catResponse?.success) {
         const cat = catResponse.data?.data;
+        const activeCourseId = cat.course?._id || cat.course || "none";
         setForm({
           ...initialForm,
           ...cat,
-          course: cat.course?._id || cat.course || "none",
+          course: activeCourseId,
           keywords: Array.isArray(cat.keywords)
             ? cat.keywords.join(", ")
             : cat.keywords || "",
           noindex: Boolean(cat.noindex),
           nofollow: Boolean(cat.nofollow),
+          featuredChapters: (cat.featuredChapters || []).map((ch) =>
+            typeof ch === "object" ? ch._id : ch,
+          ),
+          relatedCourses: (cat.relatedCourses || []).map((c) =>
+            typeof c === "object" ? c._id : c,
+          ),
         });
         setSlugEdited(true);
+
+        if (activeCourseId && activeCourseId !== "none") {
+          coursesApi.getById(activeCourseId).then((cRes) => {
+            if (cRes.success) {
+              setCourseChapters(cRes.data?.data?.chapters || []);
+            }
+          });
+        }
       }
       setLoading(false);
     });
@@ -255,6 +274,17 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
           }`}
         >
           SEO & Social
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("related")}
+          className={`flex-1 rounded-xl py-2 transition-all cursor-pointer ${
+            activeTab === "related"
+              ? "bg-white text-zinc-900 shadow-xs dark:bg-zinc-800 dark:text-white"
+              : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+          }`}
+        >
+          Related Content
         </button>
       </div>
 
@@ -548,6 +578,92 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
                     setForm((current) => ({ ...current, nofollow: checked }))
                   }
                 />
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* TAB 4: RELATED CONTENT */}
+        {activeTab === "related" && (
+          <section className="space-y-6 rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-800/80 dark:bg-zinc-950">
+            <div>
+              <h2 className="text-base font-black tracking-tight text-zinc-900 dark:text-white">
+                Related Content & Cross-Promotion
+              </h2>
+              <p className="mt-1 text-xs text-zinc-500">
+                Choose featured course lessons or other courses to show alongside these interview questions.
+              </p>
+            </div>
+
+            {/* Featured Chapters */}
+            <div className="space-y-2">
+              <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                Featured / Popular Chapters (Shown in sidebar for this guide)
+              </Label>
+              {courseChapters.length > 0 ? (
+                <div className="max-h-56 overflow-y-auto space-y-1 rounded-2xl border border-zinc-200/80 bg-zinc-50/60 p-3 dark:border-zinc-800/80 dark:bg-zinc-900/40">
+                  {courseChapters.map((ch, idx) => {
+                    const isSelected = (form.featuredChapters || []).includes(ch._id);
+                    return (
+                      <label
+                        key={ch._id}
+                        className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-200/60 dark:text-zinc-300 dark:hover:bg-zinc-800 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            const next = e.target.checked
+                              ? [...(form.featuredChapters || []), ch._id]
+                              : (form.featuredChapters || []).filter((id) => id !== ch._id);
+                            setForm((current) => ({ ...current, featuredChapters: next }));
+                          }}
+                          className="h-4 w-4 rounded border-zinc-300 text-orange-500 focus:ring-orange-400"
+                        />
+                        <span>
+                          {ch.order ?? idx + 1}. {ch.title}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="rounded-2xl border border-dashed border-zinc-200 p-4 text-xs text-zinc-400 dark:border-zinc-800">
+                  Select a Course in General Information to attach specific lessons from that course.
+                </p>
+              )}
+            </div>
+
+            {/* Related Courses */}
+            <div className="space-y-2">
+              <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                Related Courses
+              </Label>
+              <div className="max-h-48 overflow-y-auto space-y-1 rounded-2xl border border-zinc-200/80 bg-zinc-50/60 p-3 dark:border-zinc-800/80 dark:bg-zinc-900/40">
+                {courses
+                  .filter((c) => c._id !== form.course)
+                  .map((c) => {
+                    const isSelected = (form.relatedCourses || []).includes(c._id);
+                    return (
+                      <label
+                        key={c._id}
+                        className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-200/60 dark:text-zinc-300 dark:hover:bg-zinc-800 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            const next = e.target.checked
+                              ? [...(form.relatedCourses || []), c._id]
+                              : (form.relatedCourses || []).filter((id) => id !== c._id);
+                            setForm((current) => ({ ...current, relatedCourses: next }));
+                          }}
+                          className="h-4 w-4 rounded border-zinc-300 text-orange-500 focus:ring-orange-400"
+                        />
+                        <span>{c.title}</span>
+                      </label>
+                    );
+                  })}
               </div>
             </div>
           </section>

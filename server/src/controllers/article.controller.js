@@ -141,7 +141,7 @@ export const getArticleBySlug = async (req, res) => {
  */
 export const createArticle = async (req, res) => {
   try {
-    const { title, content, topic, status, seoTitle, seoDescription, keywords, canonicalUrl, type = "article", techId, order } = req.body;
+    const { title, content, topic, status, seoTitle, seoDescription, keywords, canonicalUrl, type = "article", techId, order, relatedCourses, relatedChapters, relatedQuestions } = req.body;
 
     if (!title || !content || !topic) {
       // Delete uploaded file if validation fails
@@ -182,6 +182,9 @@ export const createArticle = async (req, res) => {
       status: articleStatus,
       seoTitle: seoTitle || "", seoDescription: seoDescription || "", keywords: keywords || [], canonicalUrl: finalCanonicalUrl,
       techId: techId || "", order: Number(order) || 0,
+      relatedCourses: Array.isArray(relatedCourses) ? relatedCourses : [],
+      relatedChapters: Array.isArray(relatedChapters) ? relatedChapters : [],
+      relatedQuestions: Array.isArray(relatedQuestions) ? relatedQuestions : [],
       readCount: 0,
       views: []
     });
@@ -202,7 +205,7 @@ export const createArticle = async (req, res) => {
 export const updateArticle = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, topic, status, seoTitle, seoDescription, keywords, canonicalUrl, type, techId, order } = req.body;
+    const { title, content, topic, status, seoTitle, seoDescription, keywords, canonicalUrl, type, techId, order, relatedCourses, relatedChapters, relatedQuestions } = req.body;
 
     const article = await Article.findById(id);
     if (!article) {
@@ -234,6 +237,9 @@ export const updateArticle = async (req, res) => {
     if (seoDescription !== undefined) updateData.seoDescription = seoDescription;
     if (keywords !== undefined) updateData.keywords = Array.isArray(keywords) ? keywords : String(keywords).split(",").map((item) => item.trim()).filter(Boolean);
     if (type && ["article", "cheatsheet"].includes(type)) updateData.type = type;
+    if (relatedCourses !== undefined) updateData.relatedCourses = Array.isArray(relatedCourses) ? relatedCourses : [];
+    if (relatedChapters !== undefined) updateData.relatedChapters = Array.isArray(relatedChapters) ? relatedChapters : [];
+    if (relatedQuestions !== undefined) updateData.relatedQuestions = Array.isArray(relatedQuestions) ? relatedQuestions : [];
 
     if (canonicalUrl !== undefined || title !== undefined || type !== undefined) {
       const activeType = updateData.type || article.type || "article";

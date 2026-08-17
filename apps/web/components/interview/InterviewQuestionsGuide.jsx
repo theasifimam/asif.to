@@ -10,11 +10,13 @@ import {
 } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { getPublicInterviewCategory } from "@/lib/publicContent";
+import { getPublicInterviewCategory, getRelatedContent } from "@/lib/publicContent";
 import { absoluteUrl, getSiteUrl, jsonLd } from "@/lib/seo";
 import InterviewAnswer from "./InterviewAnswer";
 import InterviewQuestionList from "./InterviewQuestionList";
 import MobileQuestionIndex from "./MobileQuestionIndex";
+import RelatedContentSidebar from "@/components/related/RelatedContentSidebar";
+import RelatedContentBottom from "@/components/related/RelatedContentBottom";
 
 export async function buildCategoryInterviewGuideMetadata(
   courseSlugOrCategorySlug,
@@ -129,6 +131,12 @@ export default async function CategoryInterviewGuide({
     ? `/${encodeURIComponent(courseSlug)}/interview-questions/${encodeURIComponent(canonicalSlug)}`
     : `/interview-questions/${encodeURIComponent(canonicalSlug)}`;
   const firstNumber = (pagination.page - 1) * pagination.limit + 1;
+
+  const relatedData = await getRelatedContent({
+    type: "category",
+    categorySlug: canonicalSlug,
+    courseSlug: courseSlug,
+  });
 
   const indexedQuestions = new Map(
     questionIndex.map((item, index) => [
@@ -297,7 +305,7 @@ export default async function CategoryInterviewGuide({
               }))}
               firstNumber={firstNumber}
             />
-            <div className="mt-6 grid w-full min-w-0 max-w-full items-start gap-8 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_300px]">
+            <div className="mt-6 grid w-full min-w-0 max-w-full items-start gap-8 lg:mt-8 lg:grid-cols-[minmax(0,1fr)_320px]">
               <section
                 className="w-full min-w-0 max-w-full space-y-6"
                 aria-label="Interview questions and answers"
@@ -309,28 +317,29 @@ export default async function CategoryInterviewGuide({
                   indexedQuestionsMap={Object.fromEntries(indexedQuestions)}
                 />
                 <Pagination pagination={pagination} basePath={basePath} />
+                <RelatedContentBottom relatedData={relatedData} />
               </section>
-              <aside className="hidden lg:sticky lg:top-24 lg:block">
+              <div className="hidden lg:sticky lg:top-24 lg:block lg:space-y-6">
                 <nav
                   aria-label="Questions on this page"
-                  className="rounded-4xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+                  className="rounded-3xl border border-zinc-200/90 bg-white p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900"
                 >
-                  <div className="flex items-center gap-2 border-b border-zinc-100 px-2 pb-3 text-sm font-black dark:border-zinc-800">
+                  <div className="flex items-center gap-2 border-b border-zinc-100 px-2 pb-3 text-xs font-black uppercase tracking-wider text-foreground dark:border-zinc-800">
                     <List className="h-4 w-4 text-orange-500" /> Questions on this page
                   </div>
-                  <ol className="mt-2 max-h-[calc(100vh-12rem)] space-y-1 overflow-y-auto pr-1">
+                  <ol className="mt-2 max-h-[30vh] space-y-1 overflow-y-auto pr-1">
                     {questions.map((item, index) => {
                       const number = firstNumber + index;
                       return (
                         <li key={item._id}>
                           <a
                             href={`#question-${number}`}
-                            className="flex gap-3 rounded-xl px-2 py-2.5 text-sm leading-5 text-zinc-600 transition-colors hover:bg-orange-50 hover:text-orange-800 dark:text-zinc-300 dark:hover:bg-orange-500/10 dark:hover:text-orange-200"
+                            className="flex gap-2.5 rounded-xl px-2 py-2 text-xs leading-5 text-zinc-600 transition-colors hover:bg-orange-50 hover:text-orange-800 dark:text-zinc-300 dark:hover:bg-orange-500/10 dark:hover:text-orange-200"
                           >
                             <span className="font-black text-orange-500">
                               {number}
                             </span>
-                            <span className="line-clamp-2">
+                            <span className="line-clamp-1">
                               {item.question}
                             </span>
                           </a>
@@ -339,7 +348,8 @@ export default async function CategoryInterviewGuide({
                     })}
                   </ol>
                 </nav>
-              </aside>
+                <RelatedContentSidebar relatedData={relatedData} />
+              </div>
             </div>
           </>
         )}

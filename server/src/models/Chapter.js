@@ -94,6 +94,8 @@ const chapterSchema = new Schema(
       default: 0,
       index: true,
     },
+    relatedQuestions: [{ type: Schema.Types.ObjectId, ref: "Question" }],
+    relatedArticles: [{ type: Schema.Types.ObjectId, ref: "Article" }],
   },
   {
     timestamps: true,

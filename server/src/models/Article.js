@@ -65,6 +65,9 @@ const articleSchema = new Schema({
   },
   techId: { type: String, default: "", trim: true, index: true },
   order: { type: Number, default: 0 },
+  relatedCourses: [{ type: Schema.Types.ObjectId, ref: "Course" }],
+  relatedChapters: [{ type: Schema.Types.ObjectId, ref: "Chapter" }],
+  relatedQuestions: [{ type: Schema.Types.ObjectId, ref: "Question" }],
   createdAt: {
     type: Date,
     default: Date.now,

@@ -13,7 +13,7 @@ import AdminFormShell, {
 } from "@/components/forms/AdminFormShell";
 import DiscussButton from "@/components/messaging/DiscussButton";
 import { CanonicalUrlInput } from "@/components/admin";
-import { articlesApi, articleTopicsApi } from "@/lib/api";
+import { articlesApi, articleTopicsApi, coursesApi } from "@/lib/api";
 import { Button, Input, Label, Textarea } from "@/components/ui";
 import {
   Select,
@@ -29,6 +29,7 @@ export default function ArticleForm({ articleId = null }) {
   const [loading, setLoading] = useState(Boolean(articleId));
   const [saving, setSaving] = useState(false);
   const [topics, setTopics] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [form, setForm] = useState({
     title: "",
     content: "",
@@ -39,6 +40,7 @@ export default function ArticleForm({ articleId = null }) {
     seoDescription: "",
     keywords: "",
     canonicalUrl: "",
+    relatedCourses: [],
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
@@ -47,11 +49,13 @@ export default function ArticleForm({ articleId = null }) {
     let active = true;
     Promise.all([
       articleTopicsApi.list(),
+      coursesApi.listAll(),
       articleId ? articlesApi.get(articleId) : Promise.resolve(null),
-    ]).then(([topicResponse, articleResponse]) => {
+    ]).then(([topicResponse, courseResponse, articleResponse]) => {
       if (!active) return;
       const topicData = topicResponse?.data?.data ?? topicResponse?.data ?? [];
       setTopics(Array.isArray(topicData) ? topicData : []);
+      setCourses(courseResponse?.data?.data || []);
       if (articleResponse?.success) {
         const article = articleResponse.data?.data || articleResponse.data;
         setForm({
@@ -64,6 +68,9 @@ export default function ArticleForm({ articleId = null }) {
           seoDescription: article.seoDescription || "",
           keywords: (article.keywords || []).join(", "),
           canonicalUrl: article.canonicalUrl || "",
+          relatedCourses: (article.relatedCourses || []).map((c) =>
+            typeof c === "object" ? c._id : c,
+          ),
         });
         setImagePreview(
           article.image?.startsWith("http")
@@ -113,6 +120,7 @@ export default function ArticleForm({ articleId = null }) {
     data.append("keywords", form.keywords);
     data.append("canonicalUrl", form.canonicalUrl);
     form.topics.forEach((topic) => data.append("topic", topic));
+    (form.relatedCourses || []).forEach((c) => data.append("relatedCourses", c));
     if (imageFile) data.append("image", imageFile);
     const response = articleId
       ? await articlesApi.update(articleId, data)
@@ -206,6 +214,40 @@ export default function ArticleForm({ articleId = null }) {
                   {topic.name}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Related Courses Picker */}
+          <div className={formSectionClass}>
+            <h2 className="font-semibold text-zinc-900 dark:text-white">
+              Related Courses & Cross-Promotion
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Select courses related to this article to display recommendations on the public page.
+            </p>
+            <div className="max-h-48 overflow-y-auto space-y-1 rounded-2xl border border-zinc-200/60 bg-zinc-50 p-3 dark:border-zinc-800/60 dark:bg-zinc-900/50">
+              {courses.map((c) => {
+                const isSelected = (form.relatedCourses || []).includes(c._id);
+                return (
+                  <label
+                    key={c._id}
+                    className="flex items-center gap-2.5 rounded-xl px-2 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-200/60 dark:text-zinc-300 dark:hover:bg-zinc-800 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={(e) => {
+                        const next = e.target.checked
+                          ? [...(form.relatedCourses || []), c._id]
+                          : (form.relatedCourses || []).filter((id) => id !== c._id);
+                        update("relatedCourses", next);
+                      }}
+                      className="h-4 w-4 rounded border-zinc-300 text-blue-500 focus:ring-blue-400"
+                    />
+                    <span>{c.title}</span>
+                  </label>
+                );
+              })}
             </div>
           </div>
         </section>

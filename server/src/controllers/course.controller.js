@@ -345,6 +345,9 @@ export const createCourse = async (req, res) => {
       interviewKeywords,
       interviewCanonicalUrl,
       interviewOgImage,
+      relatedCourses,
+      relatedArticles,
+      popularChapterIds,
     } = req.body;
 
     if (!title || !subtitle || !techId) {
@@ -393,6 +396,9 @@ export const createCourse = async (req, res) => {
       status: status || "published",
       examEnabled: Boolean(examEnabled),
       examSettings: examSettings || undefined,
+      relatedCourses: Array.isArray(relatedCourses) ? relatedCourses : [],
+      relatedArticles: Array.isArray(relatedArticles) ? relatedArticles : [],
+      popularChapterIds: Array.isArray(popularChapterIds) ? popularChapterIds : [],
     });
     await logActivity({ actor: req.user, action: "course.created", entityType: "course", entityId: course._id, entityTitle: course.title, description: "created", severity: "info", url: `/courses/${course._id}` });
 
@@ -438,6 +444,9 @@ export const updateCourse = async (req, res) => {
       "slug",
       "examEnabled",
       "examSettings",
+      "relatedCourses",
+      "relatedArticles",
+      "popularChapterIds",
     ];
     const updates = {};
     allowed.forEach((key) => {

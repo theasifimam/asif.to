@@ -91,6 +91,9 @@ const courseSchema = new Schema(
       passingPercentage: { type: Number, default: 70, min: 1, max: 100 },
       cooldownHours: { type: Number, default: 24, min: 0, max: 720 },
     },
+    relatedCourses: [{ type: Schema.Types.ObjectId, ref: "Course" }],
+    relatedArticles: [{ type: Schema.Types.ObjectId, ref: "Article" }],
+    popularChapterIds: [{ type: Schema.Types.ObjectId, ref: "Chapter" }],
     // Populated chapters are fetched via Chapter.find({ course: id })
   },
   {

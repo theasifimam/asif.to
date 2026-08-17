@@ -52,6 +52,8 @@ const initialForm = {
   order: 0,
   status: "draft",
   examEnabled: false,
+  relatedCourses: [],
+  popularChapterIds: [],
   examSettings: {
     questionCount: 20,
     durationMinutes: 30,
@@ -81,6 +83,16 @@ export default function CourseForm({ courseId = null }) {
   const [loading, setLoading] = useState(Boolean(courseId));
   const [saving, setSaving] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
+  const [allCourses, setAllCourses] = useState([]);
+  const [courseChapters, setCourseChapters] = useState([]);
+
+  useEffect(() => {
+    coursesApi.getAll({ limit: 100 }).then((res) => {
+      if (res.success) {
+        setAllCourses(res.data?.data || []);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (!courseId) return;
@@ -95,6 +107,7 @@ export default function CourseForm({ courseId = null }) {
       }
 
       const course = response.data?.data;
+      setCourseChapters(course?.chapters || []);
       setForm({
         ...initialForm,
         ...course,
@@ -102,6 +115,12 @@ export default function CourseForm({ courseId = null }) {
         interviewKeywords: (course.interviewKeywords || []).join(", "),
         learningOutcomes: (course.learningOutcomes || []).join("\n"),
         examEnabled: Boolean(course.examEnabled),
+        relatedCourses: (course.relatedCourses || []).map((c) =>
+          typeof c === "object" ? c._id : c,
+        ),
+        popularChapterIds: (course.popularChapterIds || []).map((ch) =>
+          typeof ch === "object" ? ch._id : ch,
+        ),
         examSettings: {
           ...initialForm.examSettings,
           ...(course.examSettings || {}),
@@ -135,60 +154,16 @@ export default function CourseForm({ courseId = null }) {
       .split(",")
       .map((item) => item.trim())
       .filter(Boolean),
-    interviewKeywords: form.interviewKeywords.split(",").map((item) => item.trim()).filter(Boolean),
+    interviewKeywords: form.interviewKeywords
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean),
     learningOutcomes: form.learningOutcomes
       .split("\n")
       .map((item) => item.trim())
       .filter(Boolean),
-    examSettings: Object.fromEntries(
-      Object.entries(form.examSettings).map(([key, value]) => [
-        key,
-        Number(value),
-      ]),
-    ),
-  });
-
-  const persist = async (status) => {
-    if (!form.title.trim() || !form.subtitle.trim() || !form.techId.trim()) {
-      toast.error("Title, subtitle, and technology ID are required");
-      return null;
-    }
-    if (!form.slug.trim()) {
-      toast.error("A URL slug is required");
-      return null;
-    }
-
-    setSaving(true);
-    const response = courseId
-      ? await coursesApi.update(courseId, payload(status))
-      : await coursesApi.create(payload(status));
-
-    if (!response.success) {
-      toast.error(response.error || "Unable to save course");
-      setSaving(false);
-      return null;
-    }
-
-    const savedCourse = response.data?.data;
-    setForm((current) => ({ ...current, status }));
-    toast.success(status === "published" ? "Course published" : "Course saved");
-    setSaving(false);
-
-    if (!courseId && savedCourse?._id) {
-      window.location.assign(`/courses/${savedCourse._id}/edit`);
-    }
-    return savedCourse;
-  };
-
-  const publish = async () => {
-    await persist("published");
-    setPublishOpen(false);
-  };
-
-    learningOutcomes: form.learningOutcomes
-      .split("\n")
-      .map((item) => item.trim())
-      .filter(Boolean),
+    relatedCourses: Array.isArray(form.relatedCourses) ? form.relatedCourses : [],
+    popularChapterIds: Array.isArray(form.popularChapterIds) ? form.popularChapterIds : [],
     examSettings: Object.fromEntries(
       Object.entries(form.examSettings).map(([key, value]) => [
         key,
@@ -468,6 +443,84 @@ export default function CourseForm({ courseId = null }) {
               <Label>Open Graph image URL</Label>
               <Input value={form.interviewOgImage} onChange={(e) => update("interviewOgImage", e.target.value)}/>
             </div>
+          </section>
+
+          <section className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+            <div>
+              <h2 className="text-base font-semibold text-zinc-900 dark:text-white">
+                Related Content & Recommendations
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Explicitly select related courses and featured chapters. If unselected, smart defaults are used automatically.
+              </p>
+            </div>
+
+            {/* Related Courses Multi-Select / Checkbox list */}
+            <div className="space-y-2">
+              <Label>Related Courses (shown on Course Overview & Sidebars)</Label>
+              <div className="max-h-48 overflow-y-auto space-y-1 rounded-2xl border border-zinc-200/60 bg-zinc-50 p-3 dark:border-zinc-800/60 dark:bg-zinc-900/50">
+                {allCourses
+                  .filter((c) => c._id !== courseId)
+                  .map((c) => {
+                    const isSelected = (form.relatedCourses || []).includes(c._id);
+                    return (
+                      <label
+                        key={c._id}
+                        className="flex items-center gap-2.5 rounded-xl px-2 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-200/60 dark:text-zinc-300 dark:hover:bg-zinc-800 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            const next = e.target.checked
+                              ? [...(form.relatedCourses || []), c._id]
+                              : (form.relatedCourses || []).filter((id) => id !== c._id);
+                            update("relatedCourses", next);
+                          }}
+                          className="h-4 w-4 rounded border-zinc-300 text-orange-500 focus:ring-orange-400"
+                        />
+                        <span>{c.title}</span>
+                      </label>
+                    );
+                  })}
+                {allCourses.length <= 1 && (
+                  <p className="text-xs text-muted-foreground">No other courses available.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Featured Chapters */}
+            {courseChapters.length > 0 && (
+              <div className="space-y-2">
+                <Label>Popular / Featured Chapters (Highlighted in recommendations)</Label>
+                <div className="max-h-48 overflow-y-auto space-y-1 rounded-2xl border border-zinc-200/60 bg-zinc-50 p-3 dark:border-zinc-800/60 dark:bg-zinc-900/50">
+                  {courseChapters.map((ch, idx) => {
+                    const isSelected = (form.popularChapterIds || []).includes(ch._id);
+                    return (
+                      <label
+                        key={ch._id}
+                        className="flex items-center gap-2.5 rounded-xl px-2 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-200/60 dark:text-zinc-300 dark:hover:bg-zinc-800 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            const next = e.target.checked
+                              ? [...(form.popularChapterIds || []), ch._id]
+                              : (form.popularChapterIds || []).filter((id) => id !== ch._id);
+                            update("popularChapterIds", next);
+                          }}
+                          className="h-4 w-4 rounded border-zinc-300 text-orange-500 focus:ring-orange-400"
+                        />
+                        <span>
+                          {ch.order ?? idx + 1}. {ch.title}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </section>
         </main>
 

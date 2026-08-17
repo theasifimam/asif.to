@@ -316,155 +316,155 @@ export default function AdminLayout({ children }) {
 
   return (
     <MessagingProvider>
-    <div className="flex h-dvh w-full max-w-full overflow-hidden bg-white font-sans text-zinc-900 transition-colors duration-300 dark:bg-[#09090b] dark:text-zinc-200">
-      {/* Desktop Sidebar */}
-      <Sidebar
-        isCollapsed={isCollapsed}
-        setIsCollapsed={setIsCollapsed}
-        pathname={pathname}
-        user={user}
-        avatarUrl={avatarUrl}
-        navItems={visibleNavItems}
-        setIsLogoutDialogOpen={setIsLogoutDialogOpen}
-      />
+      <div className="flex h-dvh w-full max-w-full overflow-hidden bg-white font-sans text-zinc-900 transition-colors duration-300 dark:bg-[#09090b] dark:text-zinc-200">
+        {/* Desktop Sidebar */}
+        <Sidebar
+          isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
+          pathname={pathname}
+          user={user}
+          avatarUrl={avatarUrl}
+          navItems={visibleNavItems}
+          setIsLogoutDialogOpen={setIsLogoutDialogOpen}
+        />
 
-      {/* Main Panel */}
-      <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* Global Minimal Header - Absolute over content for zero layout shift during scroll */}
-        <header
-          className={`absolute top-0 left-0 right-0 z-40 flex h-16 shrink-0 items-center justify-between bg-white/85 backdrop-blur-xl dark:bg-[#09090b]/85 dark:backdrop-blur-xl px-4 transition-all duration-300 ease-out sm:px-6 md:px-8 lg:px-10 ${
-            isMessagesRoute ? "hidden lg:flex" : ""
-          } ${
-            isNavVisible
-              ? "translate-y-0 opacity-100"
-              : "-translate-y-full opacity-0 pointer-events-none"
-          }`}
-        >
-          <div className="flex items-center gap-2 md:gap-6">
-            {/* Logo in top header for mobile since sidebar is hidden */}
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 lg:hidden"
-            >
-              <img
-                src="/logo.png"
-                alt="asif.to logo"
-                className="w-7 h-7 rounded-xl object-contain shadow-xs shrink-0"
+        {/* Main Panel */}
+        <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
+          {/* Global Minimal Header - Absolute over content for zero layout shift during scroll */}
+          <header
+            className={`absolute top-0 left-0 right-0 z-40 flex h-16 shrink-0 items-center justify-between bg-zinc-100 backdrop-blur-xl dark:bg-[#09090b]/85 dark:backdrop-blur-xl px-4 transition-all duration-300 ease-out sm:px-6 md:px-8 lg:px-10 ${
+              isMessagesRoute ? "hidden lg:flex" : ""
+            } ${
+              isNavVisible
+                ? "translate-y-0 opacity-100"
+                : "-translate-y-full opacity-0 pointer-events-none"
+            }`}
+          >
+            <div className="flex items-center gap-2 md:gap-6">
+              {/* Logo in top header for mobile since sidebar is hidden */}
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 lg:hidden"
+              >
+                <img
+                  src="/logo.png"
+                  alt="asif.to logo"
+                  className="w-7 h-7 rounded-xl object-contain shadow-xs shrink-0"
+                />
+                <span className="font-outfit font-black text-sm tracking-tight text-zinc-950 dark:text-white leading-none">
+                  asif
+                  <span className="text-blue-600 dark:text-blue-400">.to</span>
+                </span>
+              </Link>
+
+              <div className="hidden sm:block">
+                <AdminGlobalSearch />
+              </div>
+            </div>
+
+            <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
+              <div className="hidden items-center h-10 gap-2 rounded-full border border-zinc-200/80 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition-colors dark:border-zinc-800/80 sm:flex">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="hidden sm:inline">Active</span>
+              </div>
+
+              {/* Utility Icon Actions - Hidden on smaller devices */}
+              <div className="hidden sm:block">
+                <MessageHeaderButton />
+              </div>
+              <div className="hidden sm:block">
+                <NotificationCenter />
+              </div>
+
+              {/* Subtle Divider */}
+              {hasPermission(user, "articles.create") &&
+                pathname !== "/articles/new" &&
+                !pathname.startsWith("/articles/edit/") && (
+                  <div className="hidden h-5 w-px bg-zinc-200 dark:bg-zinc-800 lg:block mx-0.5" />
+                )}
+
+              {/* Primary Action Button - Visible on desktop */}
+              {hasPermission(user, "articles.create") &&
+                pathname !== "/articles/new" &&
+                !pathname.startsWith("/articles/edit/") && (
+                  <Link
+                    href="/articles/new"
+                    className="hidden lg:inline-flex items-center gap-2 h-10 px-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-outfit text-xs font-bold shadow-xs transition-all hover:shadow-md hover:shadow-blue-600/20 active:scale-95 shrink-0"
+                  >
+                    <FileEdit size={14} />
+                    <span>Write article</span>
+                  </Link>
+                )}
+
+              <HeaderAccount
+                user={user}
+                avatarUrl={avatarUrl}
+                setIsLogoutDialogOpen={setIsLogoutDialogOpen}
               />
-              <span className="font-outfit font-black text-sm tracking-tight text-zinc-950 dark:text-white leading-none">
-                asif
-                <span className="text-blue-600 dark:text-blue-400">.to</span>
-              </span>
-            </Link>
-
-            <div className="hidden sm:block">
-              <AdminGlobalSearch />
             </div>
-          </div>
+          </header>
 
-          <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
-            <div className="hidden items-center h-10 gap-2 rounded-full border border-zinc-200/80 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition-colors dark:border-zinc-800/80 sm:flex">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="hidden sm:inline">Active</span>
-            </div>
+          {/* Content Viewport with constant top and bottom padding */}
+          <main
+            ref={mainRef}
+            className={`min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain bg-[#f3f4f6] dark:bg-[#09090b] ${
+              !isMessagesRoute ? "pt-16 pb-24 lg:pb-8" : "pt-0 pb-0"
+            }`}
+          >
+            {canViewPage ? (
+              children
+            ) : (
+              <AccessDenied permission={requiredPermission} />
+            )}
+          </main>
 
-            {/* Utility Icon Actions - Hidden on smaller devices */}
-            <div className="hidden sm:block">
-              <MessageHeaderButton />
-            </div>
-            <div className="hidden sm:block">
-              <NotificationCenter />
-            </div>
+          {/* Floating LinkedIn/Instagram-style Docked Messaging Drawer */}
+          <FloatingChatDock isNavVisible={isNavVisible} />
+        </div>
 
-            {/* Subtle Divider */}
-            {hasPermission(user, "articles.create") &&
-              pathname !== "/articles/new" &&
-              !pathname.startsWith("/articles/edit/") && (
-                <div className="hidden h-5 w-px bg-zinc-200 dark:bg-zinc-800 lg:block mx-0.5" />
-              )}
+        {/* Mobile Bottom Navbar */}
+        <MobileBottomNavbar
+          navItems={visibleNavItems}
+          user={user}
+          isVisible={isNavVisible && !isMessagesRoute}
+        />
 
-            {/* Primary Action Button - Visible on desktop */}
-            {hasPermission(user, "articles.create") &&
-              pathname !== "/articles/new" &&
-              !pathname.startsWith("/articles/edit/") && (
-                <Link
-                  href="/articles/new"
-                  className="hidden lg:inline-flex items-center gap-2 h-10 px-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-outfit text-xs font-bold shadow-xs transition-all hover:shadow-md hover:shadow-blue-600/20 active:scale-95 shrink-0"
-                >
-                  <FileEdit size={14} />
-                  <span>Write article</span>
-                </Link>
-              )}
-
-            <HeaderAccount
-              user={user}
-              avatarUrl={avatarUrl}
-              setIsLogoutDialogOpen={setIsLogoutDialogOpen}
-            />
-          </div>
-        </header>
-
-        {/* Content Viewport with constant top and bottom padding */}
-        <main
-          ref={mainRef}
-          className={`min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain bg-[#f3f4f6] dark:bg-[#09090b] ${
-            !isMessagesRoute ? "pt-16 pb-24 lg:pb-8" : "pt-0 pb-0"
-          }`}
-        >
-          {canViewPage ? (
-            children
-          ) : (
-            <AccessDenied permission={requiredPermission} />
-          )}
-        </main>
-
-        {/* Floating LinkedIn/Instagram-style Docked Messaging Drawer */}
-        <FloatingChatDock isNavVisible={isNavVisible} />
+        {/* Logout Confirmation Dialog */}
+        <Dialog open={isLogoutDialogOpen} onOpenChange={setIsLogoutDialogOpen}>
+          <DialogContent className="max-w-100 border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#121215] p-8 rounded-[28px] sm:rounded-4xl gap-7 shadow-2xl">
+            <DialogHeader className="gap-4 items-center sm:items-start text-center sm:text-left">
+              <div className="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center text-rose-600 dark:text-rose-400 mb-1">
+                <LogOut size={26} />
+              </div>
+              <DialogTitle className="text-2xl font-black font-outfit uppercase tracking-tight text-zinc-950 dark:text-white leading-none">
+                Log Out?
+              </DialogTitle>
+              <DialogDescription className="text-zinc-500 dark:text-zinc-400 text-xs font-medium leading-relaxed">
+                Are you sure you want to log out of asif.to Admin Panel?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex flex-col sm:flex-row gap-2.5 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+              <Button
+                variant="outline"
+                onClick={() => setIsLogoutDialogOpen(false)}
+                className="flex-1 rounded-full text-xs font-bold text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white transition-all h-11 border-zinc-200/80 dark:border-zinc-800"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  setIsLogoutDialogOpen(false);
+                  logout();
+                }}
+                className="flex-1 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all h-11 shadow-sm shadow-rose-600/20"
+              >
+                Log Out
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-
-      {/* Mobile Bottom Navbar */}
-      <MobileBottomNavbar
-        navItems={visibleNavItems}
-        user={user}
-        isVisible={isNavVisible && !isMessagesRoute}
-      />
-
-      {/* Logout Confirmation Dialog */}
-      <Dialog open={isLogoutDialogOpen} onOpenChange={setIsLogoutDialogOpen}>
-        <DialogContent className="max-w-100 border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#121215] p-8 rounded-[28px] sm:rounded-4xl gap-7 shadow-2xl">
-          <DialogHeader className="gap-4 items-center sm:items-start text-center sm:text-left">
-            <div className="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center text-rose-600 dark:text-rose-400 mb-1">
-              <LogOut size={26} />
-            </div>
-            <DialogTitle className="text-2xl font-black font-outfit uppercase tracking-tight text-zinc-950 dark:text-white leading-none">
-              Log Out?
-            </DialogTitle>
-            <DialogDescription className="text-zinc-500 dark:text-zinc-400 text-xs font-medium leading-relaxed">
-              Are you sure you want to log out of asif.to Admin Panel?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex flex-col sm:flex-row gap-2.5 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-            <Button
-              variant="outline"
-              onClick={() => setIsLogoutDialogOpen(false)}
-              className="flex-1 rounded-full text-xs font-bold text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white transition-all h-11 border-zinc-200/80 dark:border-zinc-800"
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                setIsLogoutDialogOpen(false);
-                logout();
-              }}
-              className="flex-1 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all h-11 shadow-sm shadow-rose-600/20"
-            >
-              Log Out
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
     </MessagingProvider>
   );
 }

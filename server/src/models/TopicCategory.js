@@ -110,6 +110,9 @@ const topicCategorySchema = new Schema(
       type: Boolean,
       default: false,
     },
+    featuredChapters: [{ type: Schema.Types.ObjectId, ref: "Chapter" }],
+    relatedCheatsheets: [{ type: Schema.Types.ObjectId, ref: "Article" }],
+    relatedCourses: [{ type: Schema.Types.ObjectId, ref: "Course" }],
   },
   { timestamps: true },
 );

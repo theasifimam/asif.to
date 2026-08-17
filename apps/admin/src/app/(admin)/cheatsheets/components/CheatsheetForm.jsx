@@ -8,7 +8,7 @@ import Editor from "@/components/editor/Editor";
 import AdminFormShell, { formAsideClass, formSectionClass } from "@/components/forms/AdminFormShell";
 import { Button, Input, Label, Textarea } from "@/components/ui";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { cheatsheetsApi } from "@/lib/api";
+import { coursesApi, cheatsheetsApi } from "@/lib/api";
 import { CanonicalUrlInput } from "@/components/admin";
 
 export const TECH_IDS = ["reactjs", "nextjs", "nodejs", "expressjs", "mongodb", "tailwindcss", "javascript", "typescript", "html", "css"];
@@ -16,19 +16,33 @@ export const TECH_IDS = ["reactjs", "nextjs", "nodejs", "expressjs", "mongodb", 
 const initialForm = {
   techId: "", title: "", slug: "", content: "", order: 0,
   status: "draft", seoTitle: "", seoDescription: "", keywords: "", canonicalUrl: "",
+  relatedCourses: [],
 };
 
 export default function CheatsheetForm({ cheatsheetId }) {
   const [form, setForm] = useState(initialForm);
+  const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(Boolean(cheatsheetId));
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    coursesApi.listAll().then((res) => {
+      setCourses(res.data?.data || []);
+    });
+
     if (!cheatsheetId) return;
     cheatsheetsApi.list({ status: "all" }).then((response) => {
       const item = (response.data?.data || []).find((entry) => entry._id === cheatsheetId);
-      if (item) setForm({ ...initialForm, ...item, keywords: (item.keywords || []).join(", ") });
-      else toast.error("Cheatsheet not found");
+      if (item) {
+        setForm({
+          ...initialForm,
+          ...item,
+          keywords: (item.keywords || []).join(", "),
+          relatedCourses: (item.relatedCourses || []).map((c) =>
+            typeof c === "object" ? c._id : c,
+          ),
+        });
+      } else toast.error("Cheatsheet not found");
       setLoading(false);
     });
   }, [cheatsheetId]);
@@ -89,6 +103,33 @@ export default function CheatsheetForm({ cheatsheetId }) {
               onChange={(value) => update("canonicalUrl", value)}
               placeholder={form.slug || (form.title ? form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") : "")}
             />
+          </div>
+
+          {/* Related Courses Picker */}
+          <div className={formSectionClass}>
+            <h2 className="font-semibold text-zinc-900 dark:text-white">Related Courses & Recommendations</h2>
+            <p className="text-xs text-muted-foreground">Select courses to promote in the sidebar and bottom panel of this cheatsheet.</p>
+            <div className="max-h-48 overflow-y-auto space-y-1 rounded-2xl border border-zinc-200/60 bg-zinc-50 p-3 dark:border-zinc-800/60 dark:bg-zinc-900/50">
+              {courses.map((c) => {
+                const isSelected = (form.relatedCourses || []).includes(c._id);
+                return (
+                  <label key={c._id} className="flex items-center gap-2.5 rounded-xl px-2 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-200/60 dark:text-zinc-300 dark:hover:bg-zinc-800 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={(e) => {
+                        const next = e.target.checked
+                          ? [...(form.relatedCourses || []), c._id]
+                          : (form.relatedCourses || []).filter((id) => id !== c._id);
+                        update("relatedCourses", next);
+                      }}
+                      className="h-4 w-4 rounded border-zinc-300 text-blue-500 focus:ring-blue-400"
+                    />
+                    <span>{c.title}</span>
+                  </label>
+                );
+              })}
+            </div>
           </div>
         </section>
         <aside className={`${formAsideClass} self-start lg:sticky lg:top-24`}>

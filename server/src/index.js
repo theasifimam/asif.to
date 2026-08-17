@@ -26,6 +26,7 @@ import playgroundSettingRoutes from "./routes/playgroundSetting.routes.js";
 import libraryRoutes from "./routes/library.routes.js";
 import activityRoutes from "./routes/activity.routes.js";
 import messagingRoutes from "./routes/messaging.routes.js";
+import relatedContentRoutes from "./routes/relatedContent.routes.js";
 import { initializeMessagingSocket } from "./realtime/messaging.socket.js";
 import { ensureMessagingBootstrap } from "./services/messagingBootstrap.service.js";
 import dotenv from "dotenv";
@@ -103,6 +104,7 @@ app.use("/api/v1/playground-settings", playgroundSettingRoutes);
 app.use("/api/v1/library", libraryRoutes);
 app.use("/api/v1/activity", activityRoutes);
 app.use("/api/v1/messaging", messagingRoutes);
+app.use("/api/v1/related-content", relatedContentRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((error, _req, res, next) => {

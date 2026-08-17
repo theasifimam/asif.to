@@ -59,6 +59,13 @@ export default async function CheatsheetPage({ params }) {
     cheatsheet.canonicalUrl,
     `/cheatsheets/${slug}`,
   );
+
+  const relatedData = await getRelatedContent({
+    type: "cheatsheet",
+    slug,
+    techId: cheatsheet.techId,
+  });
+
   return (
     <>
       <JsonLd
@@ -73,7 +80,11 @@ export default async function CheatsheetPage({ params }) {
           dateModified: cheatsheet.updatedAt || cheatsheet.createdAt,
         }}
       />
-      <CheatsheetReader slug={slug} initialData={cheatsheet} />
+      <CheatsheetReader
+        slug={slug}
+        initialData={cheatsheet}
+        relatedData={relatedData}
+      />
     </>
   );
 }

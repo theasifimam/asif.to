@@ -729,6 +729,9 @@ export const updateTopicCategory = async (req, res) => {
       "twitterImage",
       "noindex",
       "nofollow",
+      "featuredChapters",
+      "relatedCheatsheets",
+      "relatedCourses",
     ];
     for (const key of allowed) {
       if (req.body[key] !== undefined) category[key] = req.body[key];

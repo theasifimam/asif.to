@@ -64,7 +64,7 @@ export default function PlannerColumn({
     <section
       ref={setRef}
       style={style}
-      className={`flex h-full w-[85vw] max-w-[300px] xs:w-[320px] shrink-0 snap-center md:w-[300px] flex-col rounded-3xl border border-zinc-200/70 bg-zinc-100/75 p-2 dark:border-zinc-800 dark:bg-zinc-900/60 ${className || ""}`}
+      className={`flex h-full w-[85vw] max-w-75 xs:w-[320px] shrink-0 snap-center md:w-75 flex-col rounded-3xl border border-zinc-200/70 bg-zinc-50 p-2 dark:border-zinc-800 dark:bg-zinc-900/60  ${className || ""}`}
     >
       <header className="group flex items-center gap-2 px-2 py-2.5">
         <button

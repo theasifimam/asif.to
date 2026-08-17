@@ -109,3 +109,19 @@ export const getCourses = cache(() =>
 export const getSeoSetting = cache((path) =>
   fetchPublicData(`/seo-settings/public?path=${encodeURIComponent(path)}`, "SEO setting"),
 );
+
+export const getRelatedContent = cache(
+  ({ type, slug, courseSlug, techId, categorySlug } = {}) => {
+    const params = new URLSearchParams();
+    if (type) params.set("type", type);
+    if (slug) params.set("slug", slug);
+    if (courseSlug) params.set("courseSlug", courseSlug);
+    if (techId) params.set("techId", techId);
+    if (categorySlug) params.set("categorySlug", categorySlug);
+
+    return fetchPublicData(
+      `/related-content/public?${params.toString()}`,
+      "related recommendations",
+    );
+  },
+);
