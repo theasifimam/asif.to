@@ -9,10 +9,8 @@ import CategoryInterviewGuide, {
 } from "@/components/interview/InterviewQuestionsGuide";
 import { getPublicInterviewCategory } from "@/lib/publicContent";
 
-export const revalidate = 60;
-export function generateStaticParams() {
-  return [];
-}
+export const dynamic = "force-dynamic";
+
 
 export async function generateMetadata({ params, searchParams }) {
   const { username: courseSlug, topicSlug, nestedSlug } = await params;

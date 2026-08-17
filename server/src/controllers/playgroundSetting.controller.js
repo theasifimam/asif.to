@@ -36,7 +36,7 @@ export async function savePlaygroundSetting(req, res) {
   data.languages = Object.fromEntries(REGISTRY.map((id, order) => [id, { ...defaults().languages[id], ...(body.languages?.[id] || current?.languages?.get?.(id) || {}), order }]));
   data.runtimes = Object.fromEntries(Object.keys(defaults().runtimes).map((id) => [id, body.runtimes?.[id] !== undefined ? Boolean(body.runtimes[id]) : (current?.runtimes?.get?.(id) ?? true)]));
   delete data._id; delete data.createdAt; delete data.updatedAt; delete data.version; delete data.__v;
-  const item = await PlaygroundSetting.findOneAndUpdate({ key: data.key }, { $set: data, $inc: { version: 1 } }, { upsert: true, new: true, runValidators: true });
+  const item = await PlaygroundSetting.findOneAndUpdate({ key: data.key }, { $set: data, $inc: { version: 1 } }, { upsert: true, returnDocument: 'after', runValidators: true });
   await AuditLog.create({ actor: req.user._id, action: `playground_settings_${data.status === "published" ? "published" : "saved"}`, metadata: { version: item.version } });
   await logActivity({ actor: req.user, action: `playground_settings.${data.status === "published" ? "published" : "saved"}`, entityType: "playground_setting", entityId: item._id, entityTitle: "Code Playground settings", description: data.status === "published" ? "published system settings" : "updated system settings", severity: "critical", after: { version: item.version }, url: "/playground-settings" });
   res.json({ success: true, data: plain(item) });
@@ -45,7 +45,7 @@ export async function savePlaygroundSetting(req, res) {
 export async function publishPlaygroundSetting(req, res) {
   const draft = await PlaygroundSetting.findOne({ key: "default-draft" }).lean();
   const next = plain(draft); delete next._id; delete next.createdAt; delete next.updatedAt; delete next.version; delete next.__v;
-  const item = await PlaygroundSetting.findOneAndUpdate({ key: "default" }, { $set: { ...next, key: "default", status: "published", updatedBy: req.user._id }, $inc: { version: 1 } }, { new: true, upsert: true, runValidators: true });
+  const item = await PlaygroundSetting.findOneAndUpdate({ key: "default" }, { $set: { ...next, key: "default", status: "published", updatedBy: req.user._id }, $inc: { version: 1 } }, { returnDocument: 'after', upsert: true, runValidators: true });
   await AuditLog.create({ actor: req.user._id, action: "playground_settings_published", metadata: { version: item.version } });
   await logActivity({ actor: req.user, action: "playground_settings.published", entityType: "playground_setting", entityId: item._id, entityTitle: "Code Playground settings", description: "published system settings", severity: "critical", after: { version: item.version }, url: "/playground-settings" });
   res.json({ success: true, data: plain(item) });

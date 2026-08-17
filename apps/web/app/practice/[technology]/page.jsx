@@ -11,10 +11,8 @@ import { getSeoSetting } from "@/lib/publicContent";
 import { mergePageMetadata } from "@/lib/pageMetadata";
 import { absoluteUrl } from "@/lib/seo";
 
-export const revalidate = 60;
-export function generateStaticParams() {
-  return Object.keys(TECHNOLOGIES).map((technology) => ({ technology }));
-}
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }) {
   const { technology } = await params;
   if (!isTechnology(technology)) return {};

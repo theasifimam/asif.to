@@ -71,7 +71,7 @@ export const updateMessageStatus = async (req, res) => {
     const message = await ContactMessage.findByIdAndUpdate(
       id,
       { status },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (!message) {

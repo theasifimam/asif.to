@@ -46,7 +46,7 @@ export async function getOrCreateContentDiscussion(user, entityType, entityId) {
   const existing = await Conversation.findOne({ entityKey });
   if (existing) return { conversation: existing.toObject(), created: false };
   let conversation;
-  try { conversation = await Conversation.findOneAndUpdate({ entityKey }, { $setOnInsert: data }, { upsert: true, new: true, setDefaultsOnInsert: true }); }
+  try { conversation = await Conversation.findOneAndUpdate({ entityKey }, { $setOnInsert: data }, { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }); }
   catch (error) { if (error.code !== 11000) throw error; conversation = await Conversation.findOne({ entityKey }); }
   return { conversation: conversation.toObject(), created: true };
 }

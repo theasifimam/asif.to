@@ -186,7 +186,7 @@ export const submitCourseExam = async (req, res) => {
         total,
       };
     }
-    const user = await User.findByIdAndUpdate(req.user._id, update, { new: true }).select("quizAttempts certificates");
+    const user = await User.findByIdAndUpdate(req.user._id, update, { returnDocument: 'after' }).select("quizAttempts certificates");
     const savedAttempt = user.quizAttempts[user.quizAttempts.length - 1];
     res.status(201).json({ success: true, data: { attempt: savedAttempt, certificate: passed ? user.certificates.find((item) => item.verificationId === certificateId) : null } });
   } catch (error) {
@@ -221,7 +221,7 @@ export const submitPracticeQuiz = async (req, res) => {
       passed: score / total >= 0.7,
       visibility: "private",
     };
-    const user = await User.findByIdAndUpdate(req.user._id, { $push: { quizAttempts: attempt } }, { new: true }).select("quizAttempts");
+    const user = await User.findByIdAndUpdate(req.user._id, { $push: { quizAttempts: attempt } }, { returnDocument: 'after' }).select("quizAttempts");
     res.status(201).json({ success: true, data: { attempt: user.quizAttempts[user.quizAttempts.length - 1] } });
   } catch (error) {
     console.error("[QUIZ] submitPracticeQuiz error:", error);

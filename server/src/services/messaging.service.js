@@ -113,7 +113,7 @@ export async function getOrCreateDirectConversation(user, targetUserId) {
     conversation = await Conversation.findOneAndUpdate(
       { directKey },
       { $setOnInsert: { type: "direct", directKey, members: memberIds, lastMessageAt: new Date(0) } },
-      { upsert: true, new: true, setDefaultsOnInsert: true },
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true },
     );
   } catch (error) {
     if (error.code !== 11000) throw error;

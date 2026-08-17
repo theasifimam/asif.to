@@ -76,7 +76,7 @@ export const updateTopic = async (req, res) => {
     const updatedTopic = await Topic.findByIdAndUpdate(
       id,
       { name, description, isParent, parent, updatedAt: new Date() },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (!updatedTopic) {

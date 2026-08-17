@@ -253,7 +253,7 @@ export const updateUser = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { $set: updateData },
-      { new: true, runValidators: true },
+      { returnDocument: 'after', runValidators: true },
     ).select("-password");
 
     if (!user) {
@@ -292,7 +292,7 @@ export const updateUserRole = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { role },
-      { new: true },
+      { returnDocument: 'after' },
     ).select("-password");
 
     if (!user) {
@@ -329,7 +329,7 @@ export const updateUserStatus = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { status },
-      { new: true },
+      { returnDocument: 'after' },
     ).select("-password");
 
     if (!user) {
@@ -374,7 +374,7 @@ export const resetUserPassword = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { password: hashedPassword, sessionsRevokedAt: new Date() },
-      { new: true },
+      { returnDocument: 'after' },
     ).select("-password");
 
     if (!user) {
@@ -451,7 +451,7 @@ export const updateAttemptVisibility = async (req, res) => {
     const user = await User.findOneAndUpdate(
       { _id: req.user._id, "quizAttempts._id": req.params.attemptId },
       { $set: { "quizAttempts.$.visibility": visibility } },
-      { new: true },
+      { returnDocument: 'after' },
     ).select("quizAttempts");
     if (!user)
       return res
@@ -543,7 +543,7 @@ export const updateMyProfile = async (req, res) => {
           ...(mNumber !== undefined && { mNumber }),
         },
       },
-      { new: true, runValidators: true },
+      { returnDocument: 'after', runValidators: true },
     ).select("-password");
 
     if (!updatedUser) {

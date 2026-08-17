@@ -42,7 +42,7 @@ export const listNotifications = async (req, res) => {
 };
 
 export const markNotificationRead = async (req, res) => {
-  const result = await Notification.findOneAndUpdate({ _id: req.params.id, recipientId: req.user._id }, { isRead: true, readAt: new Date() }, { new: true });
+  const result = await Notification.findOneAndUpdate({ _id: req.params.id, recipientId: req.user._id }, { isRead: true, readAt: new Date() }, { returnDocument: 'after' });
   if (!result) return res.status(404).json({ success: false, message: "Notification not found." });
   res.json({ success: true, data: result });
 };

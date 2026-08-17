@@ -42,7 +42,7 @@ export const updatePermissionMatrix = async (req, res) => {
         RolePermission.findOneAndUpdate(
           { role },
           { permissions: normalizePermissions(submitted[role]), updatedBy: req.user._id },
-          { upsert: true, new: true, setDefaultsOnInsert: true },
+          { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true },
         ),
       ),
     );

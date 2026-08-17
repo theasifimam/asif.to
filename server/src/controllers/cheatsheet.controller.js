@@ -92,7 +92,7 @@ export const updateCheatsheet = async (req, res) => {
 
     const cheatsheet = await Article.findOneAndUpdate(
       { _id: req.params.id, type: "cheatsheet" }, updates,
-      { new: true, runValidators: true },
+      { returnDocument: 'after', runValidators: true },
     );
     if (!cheatsheet)
       return res.status(404).json({ success: false, message: "Cheatsheet not found." });

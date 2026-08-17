@@ -443,7 +443,7 @@ export const cancelInvitation = async (req, res) => {
   const invitation = await UserInvitation.findOneAndUpdate(
     { _id: req.params.id, status: "pending" },
     { status: "cancelled", cancelledAt: new Date() },
-    { new: true },
+    { returnDocument: 'after' },
   );
   if (!invitation)
     return res

@@ -267,7 +267,7 @@ export const updateArticle = async (req, res) => {
     const updatedArticle = await Article.findByIdAndUpdate(
       id,
       updateData,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).populate("author", "fullName name email avatar").populate("topic", "name");
 
     const seoChanged = ["seoTitle", "seoDescription", "keywords", "canonicalUrl"].some((key) => updateData[key] !== undefined);

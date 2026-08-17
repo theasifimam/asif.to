@@ -507,7 +507,7 @@ export const updateCourse = async (req, res) => {
 
     const previous = currentCourse;
     const course = await Course.findByIdAndUpdate(id, updates, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
 
@@ -778,7 +778,7 @@ export const updateChapter = async (req, res) => {
     }
 
     const chapter = await Chapter.findByIdAndUpdate(id, updates, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true,
     });
 
@@ -840,7 +840,7 @@ export const reorderChapters = async (req, res) => {
     }
 
     const ops = orders.map(({ id, order }) =>
-      Chapter.findByIdAndUpdate(id, { order }, { new: true }),
+      Chapter.findByIdAndUpdate(id, { order }, { returnDocument: 'after' }),
     );
     await Promise.all(ops);
 

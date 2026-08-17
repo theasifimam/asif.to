@@ -65,7 +65,7 @@ export const updateBoard = async (req, res) => {
   try {
     const allowed = ["name", "description", "color", "order", "archived"];
     const updates = Object.fromEntries(allowed.filter((key) => req.body[key] !== undefined).map((key) => [key, req.body[key]]));
-    const board = await KanbanBoard.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
+    const board = await KanbanBoard.findByIdAndUpdate(req.params.id, updates, { returnDocument: 'after', runValidators: true });
     if (!board) return res.status(404).json({ success: false, message: "Board not found" });
     res.json({ success: true, data: board });
   } catch (error) { sendError(res, error, "Unable to update board"); }
@@ -93,7 +93,7 @@ export const updateColumn = async (req, res) => {
   try {
     const allowed = ["name", "color", "order", "archived"];
     const updates = Object.fromEntries(allowed.filter((key) => req.body[key] !== undefined).map((key) => [key, req.body[key]]));
-    const column = await KanbanColumn.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
+    const column = await KanbanColumn.findByIdAndUpdate(req.params.id, updates, { returnDocument: 'after', runValidators: true });
     if (!column) return res.status(404).json({ success: false, message: "Column not found" });
     res.json({ success: true, data: column });
   } catch (error) { sendError(res, error, "Unable to update column"); }
@@ -149,7 +149,7 @@ export const updateCard = async (req, res) => {
     const updates = Object.fromEntries(allowed.filter((key) => req.body[key] !== undefined).map((key) => [key, req.body[key]]));
     updates.updatedBy = req.user._id;
     const detail = req.body.activityDetail || "Card details updated";
-    const card = await KanbanCard.findByIdAndUpdate(req.params.id, { $set: updates, $push: { activity: { $each: [{ action: "updated", detail, user: req.user._id, at: new Date() }], $slice: -30 } } }, { new: true, runValidators: true })
+    const card = await KanbanCard.findByIdAndUpdate(req.params.id, { $set: updates, $push: { activity: { $each: [{ action: "updated", detail, user: req.user._id, at: new Date() }], $slice: -30 } } }, { returnDocument: 'after', runValidators: true })
       .populate("labels", "name color").populate("parentCourse", "title slug");
     if (!card) return res.status(404).json({ success: false, message: "Card not found" });
     res.json({ success: true, data: card });
