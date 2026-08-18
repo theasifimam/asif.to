@@ -92,7 +92,7 @@ function chapterStructuredData(data, courseSlug, chapterSlug) {
     "@graph": [
       buildPersonSchema(),
       {
-        "@type": "LearningResource",
+        "@type": ["Article", "LearningResource"],
         "@id": `${canonical}#lesson`,
         name: chapter.title,
         headline: chapter.seoTitle || chapter.title,

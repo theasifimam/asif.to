@@ -10,7 +10,10 @@ import {
 } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { getPublicInterviewCategory, getRelatedContent } from "@/lib/publicContent";
+import {
+  getPublicInterviewCategory,
+  getRelatedContent,
+} from "@/lib/publicContent";
 import { absoluteUrl, getSiteUrl, jsonLd } from "@/lib/seo";
 import InterviewAnswer from "./InterviewAnswer";
 import InterviewQuestionList from "./InterviewQuestionList";
@@ -50,7 +53,9 @@ export async function buildCategoryInterviewGuideMetadata(
   const targetCourseSlug = category.course?.slug || courseSlug;
   const pageNum = Math.max(Number(page) || 1, 1);
   const categoryName = category.name;
-  const courseTitle = category.course?.title ? ` - ${category.course.title}` : "";
+  const courseTitle = category.course?.title
+    ? ` - ${category.course.title}`
+    : "";
   const title = `${category.seoTitle || `${categoryName} Interview Questions and Answers${courseTitle}`}${pageNum > 1 ? ` - Page ${pageNum}` : ""}`;
   const description =
     category.seoDescription ||
@@ -59,10 +64,7 @@ export async function buildCategoryInterviewGuideMetadata(
   const path = targetCourseSlug
     ? `/${encodeURIComponent(targetCourseSlug)}/interview-questions/${encodeURIComponent(category.slug || categorySlug)}${pageNum > 1 ? `?page=${pageNum}` : ""}`
     : `/interview-questions/${encodeURIComponent(category.slug || categorySlug)}${pageNum > 1 ? `?page=${pageNum}` : ""}`;
-  const canonical = absoluteUrl(
-    category.canonicalUrl || "",
-    path,
-  );
+  const canonical = absoluteUrl(category.canonicalUrl || "", path);
 
   return {
     title,
@@ -113,7 +115,11 @@ export default async function CategoryInterviewGuide({
   requestedPage = 1,
 }) {
   const page = Math.max(Number(requestedPage) || 1, 1);
-  const data = await getPublicInterviewCategory(passedCourseSlug, categorySlug, page);
+  const data = await getPublicInterviewCategory(
+    passedCourseSlug,
+    categorySlug,
+    page,
+  );
   const category = data?.category;
   const questions = data?.questions || [];
   const questionIndex = data?.questionIndex || [];
@@ -156,7 +162,9 @@ export default async function CategoryInterviewGuide({
     return `${basePath}${pageQuery}#question-${target.number}`;
   };
 
-  const categoryTitle = category?.seoTitle || `${category?.name || categorySlug} Interview Questions and Answers`;
+  const categoryTitle =
+    category?.seoTitle ||
+    `${category?.name || categorySlug} Interview Questions and Answers`;
 
   const structuredData = category
     ? {
@@ -192,13 +200,19 @@ export default async function CategoryInterviewGuide({
                       "@type": "ListItem",
                       position: 2,
                       name: course.title,
-                      item: absoluteUrl("", `/courses/${encodeURIComponent(course.slug)}`),
+                      item: absoluteUrl(
+                        "",
+                        `/courses/${encodeURIComponent(course.slug)}`,
+                      ),
                     },
                     {
                       "@type": "ListItem",
                       position: 3,
                       name: "Interview Questions",
-                      item: absoluteUrl("", `/${encodeURIComponent(course.slug)}/interview-questions`),
+                      item: absoluteUrl(
+                        "",
+                        `/${encodeURIComponent(course.slug)}/interview-questions`,
+                      ),
                     },
                     {
                       "@type": "ListItem",
@@ -239,10 +253,17 @@ export default async function CategoryInterviewGuide({
       <main className="mx-auto min-w-0 w-full max-w-7xl px-4 pb-20 pt-20 sm:px-6 sm:pt-24 lg:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
           <Link
-            href={courseSlug ? `/${encodeURIComponent(courseSlug)}/interview-questions` : "/interview-questions"}
+            href={
+              courseSlug
+                ? `/${encodeURIComponent(courseSlug)}/interview-questions`
+                : "/interview-questions"
+            }
             className="inline-flex items-center gap-2 font-semibold text-blue-600 hover:underline dark:text-blue-400"
           >
-            <ArrowLeft className="h-4 w-4" /> {course ? `All ${course.title} Questions` : "All Interview Categories"}
+            <ArrowLeft className="h-4 w-4" />{" "}
+            {course
+              ? `All ${course.title} Questions`
+              : "All Interview Categories"}
           </Link>
           {course && (
             <Link
@@ -259,7 +280,7 @@ export default async function CategoryInterviewGuide({
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-600 dark:text-orange-400">
             Interview Preparation Guide
           </p>
-          <h1 className="mt-3 max-w-4xl break-words text-2xl font-black tracking-tight sm:text-4xl lg:text-5xl">
+          <h1 className="mt-3 max-w-4xl wrap-break-word text-2xl font-black tracking-tight sm:text-4xl lg:text-5xl">
             {categoryTitle}
           </h1>
           <p className="mt-4 max-w-3xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-300 sm:text-base sm:leading-7">
@@ -325,7 +346,8 @@ export default async function CategoryInterviewGuide({
                   className="rounded-3xl border border-zinc-200/90 bg-white p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900"
                 >
                   <div className="flex items-center gap-2 border-b border-zinc-100 px-2 pb-3 text-xs font-black uppercase tracking-wider text-foreground dark:border-zinc-800">
-                    <List className="h-4 w-4 text-orange-500" /> Questions on this page
+                    <List className="h-4 w-4 text-orange-500" /> Questions on
+                    this page
                   </div>
                   <ol className="mt-2 max-h-[30vh] space-y-1 overflow-y-auto pr-1">
                     {questions.map((item, index) => {

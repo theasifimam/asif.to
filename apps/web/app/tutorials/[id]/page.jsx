@@ -178,6 +178,12 @@ export default function TutorialDetailPage() {
           </ul>
         </section>
 
+        <AuthorIdentityCard
+          author={tutorial.author}
+          publishedAt={tutorial.createdAt}
+          updatedAt={tutorial.updatedAt}
+        />
+
         {/* Next Tutorial Link */}
         <div className="flex items-center justify-between p-5 rounded-4xl bg-white dark:bg-zinc-900/90 shadow-sm">
           <div>

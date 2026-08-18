@@ -24,6 +24,7 @@ import {
 import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { TECH_IDS } from "./components/CheatsheetForm";
 import { ViewToggle } from "@/components/ui/ViewToggle";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
 
 const PAGE_SIZE = 20;
 
@@ -33,7 +34,9 @@ export default function CheatsheetsPage() {
   const [search, setSearch] = useState("");
   const [tech, setTech] = useState("all");
   const [status, setStatus] = useState("all");
-  const [viewMode, setViewMode] = useState("table");
+  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "table" });
+  const viewMode = urlFilters.view || "table";
+  const setViewMode = (v) => setUrlFilters((current) => ({ ...current, view: v }));
   const [page, setPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);

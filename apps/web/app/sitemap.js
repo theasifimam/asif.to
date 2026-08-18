@@ -47,6 +47,11 @@ const STATIC_ROUTES = [
     changeFrequency: "monthly",
   },
   {
+    path: "/faq",
+    priority: 0.7,
+    changeFrequency: "weekly",
+  },
+  {
     path: "/author/asif",
     priority: 0.7,
     changeFrequency: "monthly",

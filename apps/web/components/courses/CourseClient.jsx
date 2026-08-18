@@ -242,6 +242,7 @@ export default function CourseClient({ initialData }) {
         </section>
 
         <AuthorIdentityCard
+          author={course.author}
           publishedAt={course.createdAt}
           updatedAt={course.updatedAt}
           compact

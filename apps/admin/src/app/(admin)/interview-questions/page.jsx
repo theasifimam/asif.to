@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -42,15 +43,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { coursesApi, interviewQuestionsApi, topicCategoriesApi } from "@/lib/api";
+import {
+  coursesApi,
+  interviewQuestionsApi,
+  topicCategoriesApi,
+} from "@/lib/api";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { AdminPage, AdminPageHeader } from "@/components/admin";
+import { listingReturnTo, useUrlFilters } from "@/hooks/useUrlFilters";
 
 export default function InterviewQuestionsPage() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const returnTo = listingReturnTo(pathname, searchParams);
   const [questions, setQuestions] = useState([]);
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useUrlFilters({
     category: "all",
     course: "all",
     search: "",
@@ -58,8 +67,12 @@ export default function InterviewQuestionsPage() {
     questionType: "all",
     tag: "",
     page: 1,
+    view: "table",
   });
-  const [viewMode, setViewMode] = useState("table");
+  const editHref = (id) =>
+    `/interview-questions/${id}/edit?returnTo=${encodeURIComponent(returnTo)}`;
+  const viewMode = filters.view || "table";
+  const setViewMode = (v) => setFilters((current) => ({ ...current, view: v }));
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
   const [loading, setLoading] = useState(true);
   const [preview, setPreview] = useState(null);
@@ -100,7 +113,8 @@ export default function InterviewQuestionsPage() {
     Promise.all([coursesApi.listAll(), topicCategoriesApi.list("all")]).then(
       ([courseResponse, categoryResponse]) => {
         if (courseResponse.success) setCourses(courseResponse.data?.data || []);
-        if (categoryResponse?.success) setCategories(categoryResponse.data?.data || []);
+        if (categoryResponse?.success)
+          setCategories(categoryResponse.data?.data || []);
       },
     );
   }, []);
@@ -195,6 +209,39 @@ export default function InterviewQuestionsPage() {
 
       <section className="grid gap-3 rounded-3xl border border-zinc-200/80 bg-white/90 p-3 sm:p-4 dark:border-zinc-800/80 dark:bg-[#121215]/90 md:grid-cols-2 xl:grid-cols-[220px_180px_minmax(180px,1fr)_150px_150px]">
         <Select
+          value={filters.course}
+          onValueChange={(value) => {
+            setFilters((current) => {
+              const currentCat = categories.find(
+                (c) => c._id === current.category,
+              );
+              const catCourseId = currentCat?.course?._id || currentCat?.course;
+              const keepCat =
+                value === "all" ||
+                !catCourseId ||
+                String(catCourseId) === String(value);
+              return {
+                ...current,
+                course: value,
+                category: keepCat ? current.category : "all",
+                page: 1,
+              };
+            });
+          }}
+        >
+          <SelectTrigger className="h-10 rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
+            <SelectItem value="all">All courses</SelectItem>
+            {courses.map((course) => (
+              <SelectItem key={course._id} value={course._id}>
+                {course.title}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
           value={filters.category}
           onValueChange={(value) => {
             if (value === "all") {
@@ -240,39 +287,6 @@ export default function InterviewQuestionsPage() {
                 </SelectItem>
               );
             })}
-          </SelectContent>
-        </Select>
-        <Select
-          value={filters.course}
-          onValueChange={(value) => {
-            setFilters((current) => {
-              const currentCat = categories.find(
-                (c) => c._id === current.category,
-              );
-              const catCourseId = currentCat?.course?._id || currentCat?.course;
-              const keepCat =
-                value === "all" ||
-                !catCourseId ||
-                String(catCourseId) === String(value);
-              return {
-                ...current,
-                course: value,
-                category: keepCat ? current.category : "all",
-                page: 1,
-              };
-            });
-          }}
-        >
-          <SelectTrigger className="h-10 rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
-            <SelectItem value="all">All courses</SelectItem>
-            {courses.map((course) => (
-              <SelectItem key={course._id} value={course._id}>
-                {course.title}
-              </SelectItem>
-            ))}
           </SelectContent>
         </Select>
         <div className="relative">
@@ -351,6 +365,7 @@ export default function InterviewQuestionsPage() {
                       item={item}
                       onPreview={setPreview}
                       onDelete={setDeleteTarget}
+                      editHref={editHref}
                     />
                   ))}
                 </div>
@@ -413,6 +428,7 @@ export default function InterviewQuestionsPage() {
                             item={item}
                             onPreview={setPreview}
                             onDelete={setDeleteTarget}
+                            editHref={editHref}
                           />
                         ))}
                       </tbody>
@@ -536,7 +552,7 @@ export default function InterviewQuestionsPage() {
   );
 }
 
-function SortableTableRow({ item, onPreview, onDelete }) {
+function SortableTableRow({ item, onPreview, onDelete, editHref }) {
   const {
     attributes,
     listeners,
@@ -581,9 +597,7 @@ function SortableTableRow({ item, onPreview, onDelete }) {
         >
           {item.question}
         </p>
-        <p className="mt-0.5 text-xs text-zinc-400 truncate">
-          #{item.slug}
-        </p>
+        <p className="mt-0.5 text-xs text-zinc-400 truncate">#{item.slug}</p>
       </td>
       <td className="px-6 py-4.5">
         <span className="rounded-full bg-orange-50 px-2.5 py-0.5 text-[10px] font-black uppercase text-orange-700 dark:bg-orange-950/40 dark:text-orange-300 border border-orange-500/20">
@@ -639,7 +653,7 @@ function SortableTableRow({ item, onPreview, onDelete }) {
           >
             <Eye className="h-4 w-4" />
           </Button>
-          <Link href={`/interview-questions/${item._id}/edit`}>
+          <Link href={editHref(item._id)}>
             <Button
               variant="ghost"
               size="icon"
@@ -664,7 +678,7 @@ function SortableTableRow({ item, onPreview, onDelete }) {
   );
 }
 
-function SortableCard({ item, onPreview, onDelete }) {
+function SortableCard({ item, onPreview, onDelete, editHref }) {
   const {
     attributes,
     listeners,
@@ -722,9 +736,7 @@ function SortableCard({ item, onPreview, onDelete }) {
           >
             {item.question}
           </h3>
-          <p className="mt-1 text-xs text-zinc-400 truncate">
-            #{item.slug}
-          </p>
+          <p className="mt-1 text-xs text-zinc-400 truncate">#{item.slug}</p>
         </div>
 
         {item.tags && item.tags.length > 0 && (
@@ -764,7 +776,7 @@ function SortableCard({ item, onPreview, onDelete }) {
           >
             <Eye className="h-4 w-4" />
           </Button>
-          <Link href={`/interview-questions/${item._id}/edit`}>
+          <Link href={editHref(item._id)}>
             <Button
               variant="ghost"
               size="icon"

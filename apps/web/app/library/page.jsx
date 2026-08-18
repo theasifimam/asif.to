@@ -25,6 +25,13 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const TYPES = [
   ["note", "Note"],
@@ -254,7 +261,7 @@ export default function LibraryPage() {
         </section>
 
         <section className="mt-6 grid gap-6 lg:grid-cols-[210px_1fr]">
-          <aside className="rounded-3xl bg-white p-5 shadow-sm dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800">
+          <aside className="rounded-4xl bg-white p-5 shadow-sm dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800">
             <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-zinc-400">
               <FolderPlus size={15} />
               <span>Collections</span>
@@ -272,8 +279,8 @@ export default function LibraryPage() {
             )}
           </aside>
           <div>
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row">
-              <label className="flex flex-1 items-center gap-2 rounded-2xl bg-white px-4 py-3 shadow-sm dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row ">
+              <label className="flex flex-1 items-center gap-2 rounded-full bg-white px-4 py-3 shadow-sm dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 ">
                 <Search size={16} className="text-zinc-400" />
                 <input
                   className="w-full bg-transparent text-sm outline-none"
@@ -282,18 +289,21 @@ export default function LibraryPage() {
                   placeholder="Search your library"
                 />
               </label>
-              <select
-                className="rounded-2xl bg-white px-4 py-3 text-sm dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800"
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-              >
-                <option value="all">All types</option>
-                {TYPES.map(([v, l]) => (
-                  <option key={v} value={v}>
-                    {l}
-                  </option>
-                ))}
-              </select>
+              <div className="w-full sm:w-48 shrink-0">
+                <Select value={filter} onValueChange={setFilter}>
+                  <SelectTrigger className="w-full rounded-full bg-white px-4 py-3 text-sm dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 font-semibold">
+                    <SelectValue placeholder="All types" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl">
+                    <SelectItem value="all">All types</SelectItem>
+                    {TYPES.map(([v, l]) => (
+                      <SelectItem key={v} value={v}>
+                        {l}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             {isLoading ? (
               <p className="p-10 text-center text-zinc-500">
@@ -307,7 +317,7 @@ export default function LibraryPage() {
                   <button
                     key={e._id}
                     onClick={() => startEntry(e.type, e)}
-                    className="rounded-3xl bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 cursor-pointer"
+                    className="rounded-4xl bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 cursor-pointer"
                   >
                     <div className="flex justify-between">
                       <span className="rounded-full bg-blue-50 dark:bg-blue-500/10 px-2 py-1 text-[10px] font-bold text-blue-700 dark:text-blue-300">
@@ -399,7 +409,7 @@ export default function LibraryPage() {
 }
 function Empty({ onCreate }) {
   return (
-    <div className="rounded-3xl bg-white p-12 text-center shadow-sm dark:bg-zinc-900">
+    <div className="rounded-4xl bg-white p-12 text-center shadow-sm dark:bg-zinc-900  border border-zinc-200/60 dark:border-zinc-800">
       <Code2 className="mx-auto text-blue-500" />
       <h2 className="mt-4 text-lg font-black">Start with one useful thing</h2>
       <p className="mt-2 text-sm text-zinc-500">
@@ -466,7 +476,7 @@ function Modal({
         )}
         <input
           required
-          className="field mt-3"
+          className="field mt-3 rounded-3xl"
           value={modal === "collection" ? form.name || "" : form.title || ""}
           onChange={(e) =>
             put(modal === "collection" ? "name" : "title", e.target.value)

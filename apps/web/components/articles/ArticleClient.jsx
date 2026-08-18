@@ -235,7 +235,11 @@ export default function ArticleClient({ slug, initialData }) {
           </div>
           </MarkdownCodePlayground>
 
-          <AuthorIdentityCard publishedAt={article.createdAt} updatedAt={article.updatedAt} avatar={article.author?.avatar} />
+          <AuthorIdentityCard
+            author={article.author}
+            publishedAt={article.createdAt}
+            updatedAt={article.updatedAt}
+          />
 
           {/* Share Section */}
           <div className="flex flex-col gap-6 py-8 border-y border-zinc-200/60 dark:border-zinc-800/60 my-6">

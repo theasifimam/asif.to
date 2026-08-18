@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Eye, Save } from "lucide-react";
 import { toast } from "sonner";
 import Editor from "@/components/editor/Editor";
@@ -16,7 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { coursesApi, interviewQuestionsApi, topicCategoriesApi } from "@/lib/api";
+import {
+  coursesApi,
+  interviewQuestionsApi,
+  topicCategoriesApi,
+} from "@/lib/api";
 import AdminFormShell, {
   AdminFormLoading,
   formSectionClass,
@@ -37,7 +42,11 @@ const initialForm = {
   codeExample: "",
   expectedOutput: "",
   followUps: "",
-  seoTitle: "", seoDescription: "", keywords: "", canonicalUrl: "", ogImage: "",
+  seoTitle: "",
+  seoDescription: "",
+  keywords: "",
+  canonicalUrl: "",
+  ogImage: "",
 };
 
 function slugify(value) {
@@ -52,6 +61,11 @@ export default function InterviewQuestionForm({
   questionId = null,
   initialCourse = "",
 }) {
+  const searchParams = useSearchParams();
+  const requestedReturnTo = searchParams.get("returnTo");
+  const returnTo = requestedReturnTo?.startsWith("/")
+    ? requestedReturnTo
+    : "/interview-questions";
   const [form, setForm] = useState({ ...initialForm, course: initialCourse });
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -71,7 +85,8 @@ export default function InterviewQuestionForm({
       if (courseResponse.success) setCourses(courseResponse.data?.data || []);
       else toast.error(courseResponse.error || "Unable to load courses");
 
-      if (categoryResponse?.success) setCategories(categoryResponse.data?.data || []);
+      if (categoryResponse?.success)
+        setCategories(categoryResponse.data?.data || []);
 
       if (questionResponse?.success) {
         const item = questionResponse.data?.data;
@@ -103,8 +118,14 @@ export default function InterviewQuestionForm({
     }));
 
   const save = async () => {
-    if ((!form.category && !form.course) || !form.question.trim() || !form.answer.trim())
-      return toast.error("Category (or course), question, and answer are required");
+    if (
+      (!form.category && !form.course) ||
+      !form.question.trim() ||
+      !form.answer.trim()
+    )
+      return toast.error(
+        "Category (or course), question, and answer are required",
+      );
     setSaving(true);
     const payload = {
       ...form,
@@ -117,7 +138,10 @@ export default function InterviewQuestionForm({
         .split("\n")
         .map((item) => item.trim())
         .filter(Boolean),
-      keywords: form.keywords.split(",").map((item) => item.trim()).filter(Boolean),
+      keywords: form.keywords
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
     };
     const response = questionId
       ? await interviewQuestionsApi.update(questionId, payload)
@@ -143,19 +167,24 @@ export default function InterviewQuestionForm({
       description="Maintain a reusable, interview-ready answer for this course."
       back={
         <Link
-          href="/interview-questions"
+          href={returnTo}
           className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" /> Back to questions
         </Link>
       }
       actions={
-        <div className="flex items-center gap-2 w-full xs:w-auto">
-          {questionId && <DiscussButton entityType="interview_question" entityId={questionId} />}
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          {questionId && (
+            <DiscussButton
+              entityType="interview_question"
+              entityId={questionId}
+            />
+          )}
           <Button
             variant="outline"
             onClick={() => setPreview((value) => !value)}
-            className="flex-1 xs:flex-initial"
+            className="flex-1 sm:flex-initial"
           >
             <Eye className="h-4 w-4" />
             {preview ? "Edit" : "Preview"}
@@ -163,7 +192,7 @@ export default function InterviewQuestionForm({
           <Button
             onClick={save}
             disabled={saving}
-            className="flex-1 xs:flex-initial"
+            className="flex-1 sm:flex-initial"
           >
             <Save className="h-4 w-4" />
             Save
@@ -391,7 +420,8 @@ export default function InterviewQuestionForm({
             <div className="border-t border-zinc-200 pt-5 dark:border-zinc-800">
               <h3 className="text-sm font-black">Search metadata</h3>
               <p className="mt-1 text-xs text-zinc-500">
-                Empty fields automatically use the question and answer as fallbacks.
+                Empty fields automatically use the question and answer as
+                fallbacks.
               </p>
             </div>
             <div className="space-y-2">
@@ -409,7 +439,9 @@ export default function InterviewQuestionForm({
                 maxLength={170}
                 rows={3}
                 value={form.seoDescription}
-                onChange={(event) => update("seoDescription", event.target.value)}
+                onChange={(event) =>
+                  update("seoDescription", event.target.value)
+                }
                 placeholder="Brief summary for search engine snippets"
               />
             </div>
@@ -423,17 +455,22 @@ export default function InterviewQuestionForm({
             </div>
             <CanonicalUrlInput
               basePrefix={(() => {
-                const selectedCourse = courses.find((c) => String(c._id) === String(form.course));
-                const selectedCategory = categories.find((c) => String(c._id) === String(form.category));
-                const cSlug = selectedCourse?.slug || selectedCategory?.course?.slug || "";
+                const selectedCourse = courses.find(
+                  (c) => String(c._id) === String(form.course),
+                );
+                const selectedCategory = categories.find(
+                  (c) => String(c._id) === String(form.category),
+                );
+                const cSlug =
+                  selectedCourse?.slug || selectedCategory?.course?.slug || "";
                 const catSlug = selectedCategory?.slug || "";
                 return cSlug && catSlug
                   ? `https://asif.to/${cSlug}/interview-questions/${catSlug}`
                   : catSlug
-                  ? `https://asif.to/interview-questions/${catSlug}`
-                  : cSlug
-                  ? `https://asif.to/${cSlug}/interview-questions`
-                  : "https://asif.to/interview-questions";
+                    ? `https://asif.to/interview-questions/${catSlug}`
+                    : cSlug
+                      ? `https://asif.to/${cSlug}/interview-questions`
+                      : "https://asif.to/interview-questions";
               })()}
               value={form.canonicalUrl}
               onChange={(value) => update("canonicalUrl", value)}

@@ -16,13 +16,16 @@ import {
 } from "@/components/ui/select";
 import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { ViewToggle } from "@/components/ui/ViewToggle";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
 
 export default function ArticlesPage() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
-  const [viewMode, setViewMode] = useState("table");
+  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "table" });
+  const viewMode = urlFilters.view || "table";
+  const setViewMode = (v) => setUrlFilters((current) => ({ ...current, view: v }));
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 

@@ -24,14 +24,17 @@ export default function ChapterShareSection({ chapter }) {
   };
 
   return (
-    <div className="p-4 sm:p-8 rounded-4xl sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 space-y-4">
-      <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2">
-        <Share2 className="w-4 h-4 text-blue-500" />
-        Share this Chapter
-      </h3>
-      <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-        Help others learn by sharing this lesson with your friends and network.
-      </p>
+    <div className="flex flex-col sm:flex-row justify-between items-center p-3 sm:p-8 rounded-4xl sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 space-y-2">
+      <div>
+        <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2">
+          <Share2 className="w-4 h-4 text-blue-500" />
+          Share this Chapter
+        </h3>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+          Help others learn by sharing this lesson with your friends and
+          network.
+        </p>
+      </div>
       <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
         <button
           onClick={() => {

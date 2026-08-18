@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowDown,
   ArrowLeft,
@@ -65,6 +66,9 @@ function slugify(value) {
 }
 
 export default function TopicForm({ topicId = null }) {
+  const searchParams = useSearchParams();
+  const requestedReturnTo = searchParams.get("returnTo");
+  const returnTo = requestedReturnTo?.startsWith("/") ? requestedReturnTo : "/topics";
   const [form, setForm] = useState(initialForm);
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -267,7 +271,7 @@ export default function TopicForm({ topicId = null }) {
       <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
           <Link
-            href="/topics"
+            href={returnTo}
             className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" /> Back to topics

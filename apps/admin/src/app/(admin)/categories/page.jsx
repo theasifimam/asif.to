@@ -41,6 +41,7 @@ import {
 } from "@/components/admin";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { Button } from "@/components/ui/button";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
 import {
   Dialog,
   DialogContent,
@@ -61,7 +62,9 @@ export default function CategoriesListPage() {
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState("table");
+  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "table" });
+  const viewMode = urlFilters.view || "table";
+  const setViewMode = (v) => setUrlFilters((current) => ({ ...current, view: v }));
   const [filterCourse, setFilterCourse] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [search, setSearch] = useState("");

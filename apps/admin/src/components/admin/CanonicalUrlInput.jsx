@@ -31,10 +31,10 @@ export function CanonicalUrlInput({
   const finalComputed = isFullExternalUrl
     ? value
     : effectiveSuffix
-    ? `${normalizedPrefix}${effectiveSuffix}`
-    : placeholder
-    ? `${normalizedPrefix}${placeholder.replace(/^\/+/, "")}`
-    : normalizedPrefix;
+      ? `${normalizedPrefix}${effectiveSuffix}`
+      : placeholder
+        ? `${normalizedPrefix}${placeholder.replace(/^\/+/, "")}`
+        : normalizedPrefix;
 
   const handleInputChange = (event) => {
     const nextVal = event.target.value;
@@ -53,14 +53,16 @@ export function CanonicalUrlInput({
       </div>
 
       <div className="flex rounded-2xl border border-zinc-200 bg-zinc-50/50 overflow-hidden dark:border-zinc-800 dark:bg-zinc-900/50 text-xs font-mono">
-        <span className="bg-zinc-100 dark:bg-zinc-800/80 px-3 py-2.5 text-zinc-500 select-none border-r border-zinc-200 dark:border-zinc-800 max-w-[190px] sm:max-w-xs truncate">
+        <span className="bg-zinc-100 dark:bg-zinc-800/80 px-3 py-2.5 text-zinc-500 select-none border-r border-zinc-200 dark:border-zinc-800 max-w-47.5 sm:max-w-xs truncate">
           {normalizedPrefix}
         </span>
         <input
           type="text"
           value={effectiveSuffix}
           onChange={handleInputChange}
-          placeholder={placeholder ? placeholder.replace(/^\/+/, "") : "slug-ending"}
+          placeholder={
+            placeholder ? placeholder.replace(/^\/+/, "") : "slug-ending"
+          }
           className="flex-1 bg-transparent px-3 py-2 text-xs font-mono text-zinc-900 dark:text-zinc-100 outline-none placeholder:text-zinc-400"
         />
       </div>

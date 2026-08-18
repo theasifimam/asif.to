@@ -29,6 +29,7 @@ import {
 import { coursesApi } from "@/lib/api";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { AdminPage, AdminPageHeader } from "@/components/admin";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
 
 const initialPagination = { page: 1, pages: 1, total: 0, limit: 20 };
 
@@ -47,7 +48,10 @@ export default function CoursesAdminPage() {
     page: 1,
     limit: 20,
   });
-  const [viewMode, setViewMode] = useState("table");
+  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "table" });
+  const viewMode = urlFilters.view || "table";
+  const setViewMode = (v) =>
+    setUrlFilters((current) => ({ ...current, view: v }));
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [pagination, setPagination] = useState(initialPagination);
   const [loading, setLoading] = useState(true);
@@ -348,7 +352,7 @@ export default function CoursesAdminPage() {
           </footer>
         </div>
       ) : (
-        <section className="admin-surface w-full overflow-hidden rounded-[28px] sm:rounded-[32px]">
+        <section className="admin-surface w-full overflow-hidden rounded-[28px] sm:rounded-4xl">
           <div className="overflow-x-auto">
             <table className="admin-table w-full min-w-190 text-left text-sm">
               <thead className="border-b border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/75 dark:bg-[#18181b]/60 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">

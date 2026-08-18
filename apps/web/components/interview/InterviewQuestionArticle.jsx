@@ -7,6 +7,7 @@ import {
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SaveButton from "@/components/articles/SaveButton";
+import AuthorIdentityCard from "@/components/authors/AuthorIdentityCard";
 import ArticleAnswerSection from "./ArticleAnswerSection";
 import RelatedContentSidebar from "@/components/related/RelatedContentSidebar";
 import RelatedContentBottom from "@/components/related/RelatedContentBottom";
@@ -178,6 +179,14 @@ export default async function InterviewQuestionArticle({
                 answer={question.answer}
                 codeExample={question.codeExample}
               />
+              <div className="mt-8">
+                <AuthorIdentityCard
+                  author={question.author || course?.author}
+                  publishedAt={question.createdAt}
+                  updatedAt={question.updatedAt}
+                  compact
+                />
+              </div>
             </article>
 
             <nav className="mt-6 grid gap-3 sm:grid-cols-2">

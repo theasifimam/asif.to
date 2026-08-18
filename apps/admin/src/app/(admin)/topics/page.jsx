@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   ArrowDown,
   ArrowUp,
@@ -33,6 +34,7 @@ import {
 } from "@/components/admin";
 import { coursesApi, topicsApi } from "@/lib/api";
 import { ViewToggle } from "@/components/ui/ViewToggle";
+import { listingReturnTo, useUrlFilters } from "@/hooks/useUrlFilters";
 
 const statusStyles = {
   published:
@@ -41,16 +43,22 @@ const statusStyles = {
 };
 
 export default function TopicsPage() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const returnTo = listingReturnTo(pathname, searchParams);
   const [topics, setTopics] = useState([]);
   const [courses, setCourses] = useState([]);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useUrlFilters({
     search: "",
     course: "all",
     type: "all",
     status: "all",
     page: 1,
+    view: "table",
   });
-  const [viewMode, setViewMode] = useState("table");
+  const editHref = (id) => `/topics/${id}/edit?returnTo=${encodeURIComponent(returnTo)}`;
+  const viewMode = filters.view || "table";
+  const setViewMode = (v) => setFilters((current) => ({ ...current, view: v }));
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
   const [loading, setLoading] = useState(true);
   const [reordering, setReordering] = useState(false);
@@ -298,7 +306,7 @@ export default function TopicsPage() {
 
                     <div>
                       <Link
-                        href={`/topics/${topic._id}/edit`}
+                        href={editHref(topic._id)}
                         className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-2"
                       >
                         {topic.title}
@@ -368,7 +376,7 @@ export default function TopicsPage() {
                           </Button>
                         </Link>
                       )}
-                      <Link href={`/topics/${topic._id}/edit`}>
+                      <Link href={editHref(topic._id)}>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -425,7 +433,7 @@ export default function TopicsPage() {
                     >
                       <td className="px-6 py-4.5">
                         <Link
-                          href={`/topics/${topic._id}/edit`}
+                          href={editHref(topic._id)}
                           className="font-bold font-outfit text-zinc-950 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-1"
                         >
                           {topic.title}
@@ -490,7 +498,7 @@ export default function TopicsPage() {
                       </td>
                       <td className="px-6 py-4.5">
                         <div className="flex justify-end gap-1">
-                          <Link href={`/topics/${topic._id}/edit`}>
+                          <Link href={editHref(topic._id)}>
                             <Button
                               variant="ghost"
                               size="icon"

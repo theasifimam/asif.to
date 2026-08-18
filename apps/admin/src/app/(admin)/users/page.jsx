@@ -29,6 +29,7 @@ import { UserOverview } from "./UserOverview";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasPermission } from "@/lib/permissions";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
 import { UserModuleShell } from "./UserModuleShell";
 
 const EditUserModal = dynamic(() =>
@@ -46,7 +47,9 @@ export default function UsersPage() {
   const [providerFilter, setProviderFilter] = useState("all");
   const [verifiedFilter, setVerifiedFilter] = useState("all");
   const [sort, setSort] = useState("newest");
-  const [viewMode, setViewMode] = useState("table");
+  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "table" });
+  const viewMode = urlFilters.view || "table";
+  const setViewMode = (v) => setUrlFilters((current) => ({ ...current, view: v }));
   const [editingUser, setEditingUser] = useState(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const { user: currentUser } = useAuth();

@@ -8,7 +8,6 @@ import Footer from "@/components/layout/Footer";
 import MobileChapterIndex from "@/components/courses/MobileChapterIndex";
 import ChapterHeader from "@/components/chapter/ChapterHeader";
 import ChapterSidebar from "@/components/chapter/ChapterSidebar";
-import ChapterDrawer from "@/components/chapter/ChapterDrawer";
 import ChapterQuickNav from "@/components/chapter/ChapterQuickNav";
 import ChapterShareSection from "@/components/chapter/ChapterShareSection";
 import ChapterDocumentCard from "@/components/chapter/ChapterDocumentCard";
@@ -30,7 +29,6 @@ export default function ChapterClient({
   const courseId = courseSlug || params?.courseId || params?.username;
   const chapterId = chapterSlug || params?.chapterId || params?.topicSlug;
 
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [sidebarSearch, setSidebarSearch] = useState("");
   const [fontSize, setFontSize] = useState("md"); // 'sm', 'md', 'lg'
@@ -203,29 +201,12 @@ export default function ChapterClient({
           course={course}
           tech={tech}
           progressPercentage={progressPercentage}
-          currentChapterIndex={currentChapterIndex}
-          allChapters={allChapters}
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
-          setIsDrawerOpen={setIsDrawerOpen}
         />
 
         {/* Layout Container */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 relative">
-          {/* Desktop Sticky & Collapsible Chapter Sidebar */}
-          {isSidebarOpen && (
-            <ChapterSidebar
-              courseId={activeCourseSlug}
-              chapter={chapter}
-              allChapters={allChapters}
-              currentChapterIndex={currentChapterIndex}
-              completedChapters={completedChapters}
-              sidebarSearch={sidebarSearch}
-              setSidebarSearch={setSidebarSearch}
-              activeItemRef={activeItemRef}
-            />
-          )}
-
           {/* Lesson Content Area */}
           <section
             className={`flex flex-col gap-3 transition-all duration-300 ${
@@ -264,6 +245,7 @@ export default function ChapterClient({
             {/* Try It Challenge */}
             <TryItChallenge challenge={chapter?.tryItChallenge} />
             <AuthorIdentityCard
+              author={chapter?.author || course?.author}
               publishedAt={chapter?.createdAt}
               updatedAt={chapter?.updatedAt}
               compact
@@ -279,19 +261,21 @@ export default function ChapterClient({
               variant="bottom"
             />
           </section>
+          {/* Desktop Sticky & Collapsible Chapter Sidebar */}
+          {isSidebarOpen && (
+            <ChapterSidebar
+              courseId={activeCourseSlug}
+              chapter={chapter}
+              allChapters={allChapters}
+              currentChapterIndex={currentChapterIndex}
+              completedChapters={completedChapters}
+              sidebarSearch={sidebarSearch}
+              setSidebarSearch={setSidebarSearch}
+              activeItemRef={activeItemRef}
+            />
+          )}
         </div>
       </main>
-
-      {/* Mobile Chapter Drawer */}
-      <ChapterDrawer
-        isDrawerOpen={isDrawerOpen}
-        setIsDrawerOpen={setIsDrawerOpen}
-        courseId={activeCourseSlug}
-        chapter={chapter}
-        allChapters={allChapters}
-        completedChapters={completedChapters}
-      />
-
       <Footer containerWidth="max-w-7xl" />
     </div>
   );

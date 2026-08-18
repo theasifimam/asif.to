@@ -32,9 +32,16 @@ export function buildCourseSchema(course, fallbackSlug) {
       ? { numberOfItems: course.chapters.length }
       : {}),
     mainEntityOfPage: url,
+    offers: {
+      "@type": "Offer",
+      category: "Free",
+      price: "0",
+      priceCurrency: "USD",
+    },
     hasCourseInstance: {
       "@type": "CourseInstance",
       courseMode: "online",
+      courseWorkload: "PT10H", // default estimate, could be dynamic later
     },
     datePublished: course.createdAt || undefined,
     dateModified: course.updatedAt || undefined,

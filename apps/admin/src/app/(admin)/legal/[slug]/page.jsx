@@ -66,12 +66,14 @@ export default function LegalPageEditor() {
               : data.keywords || "",
             canonicalUrl:
               data.canonicalUrl ||
-              `https://asif.to/legal/${slug}`,
+              (slug === "faq"
+                ? `https://asif.to/faq`
+                : `https://asif.to/legal/${slug}`),
           });
           setLastUpdated(data.lastUpdated || data.updatedAt || null);
         } else {
           // Initialize with friendly defaults
-          const defaultTitle = slug
+          const defaultTitle = slug === "faq" ? "Help & FAQ" : slug
             .split("-")
             .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(" ");
@@ -81,9 +83,15 @@ export default function LegalPageEditor() {
             content: "<p>Write page content here...</p>",
             status: "published",
             seoTitle: `${defaultTitle} | asif.to`,
-            seoDescription: `Official ${defaultTitle.toLowerCase()} document and policies for asif.to.`,
-            keywords: `asif.to, ${slug.replace(/-/g, ", ")}, policy, legal`,
-            canonicalUrl: `https://asif.to/legal/${slug}`,
+            seoDescription: slug === "faq"
+              ? "Frequently asked questions and support for asif.to."
+              : `Official ${defaultTitle.toLowerCase()} document and policies for asif.to.`,
+            keywords: slug === "faq"
+              ? "asif.to, faq, help, support, questions"
+              : `asif.to, ${slug.replace(/-/g, ", ")}, policy, legal`,
+            canonicalUrl: slug === "faq"
+              ? "https://asif.to/faq"
+              : `https://asif.to/legal/${slug}`,
           });
         }
       } catch (error) {
@@ -330,7 +338,7 @@ export default function LegalPageEditor() {
 
             <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <a
-                href={`https://asif.to/legal/${slug}`}
+                href={slug === "faq" ? `https://asif.to/faq` : `https://asif.to/legal/${slug}`}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"

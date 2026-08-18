@@ -14,6 +14,7 @@ import {
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import TopicMarkdown from "@/components/articles/TopicMarkdown";
+import AuthorIdentityCard from "@/components/authors/AuthorIdentityCard";
 import { getPublicTopic } from "@/lib/publicContent";
 import { absoluteUrl, getSiteUrl } from "@/lib/seo";
 
@@ -100,7 +101,7 @@ function structuredData(courseSlug, topic, questions) {
     });
   } else {
     graph.push({
-      "@type": "LearningResource",
+      "@type": ["Article", "LearningResource"],
       "@id": `${canonical}#topic`,
       name: topic.title,
       headline: topic.seoTitle || topic.title,
@@ -492,6 +493,14 @@ export default async function CourseTopicPage({ courseSlug, topicPath }) {
             {topic.type === "interview" && (
               <InterviewQuestions questions={questions} />
             )}
+            <div className="mt-8">
+              <AuthorIdentityCard
+                author={topic.author || topic.course?.author}
+                publishedAt={topic.createdAt}
+                updatedAt={topic.updatedAt}
+                compact
+              />
+            </div>
           </article>
 
           <aside className="hidden lg:block">

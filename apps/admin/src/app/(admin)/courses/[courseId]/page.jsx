@@ -31,6 +31,7 @@ import {
 import { chaptersApi, coursesApi } from "@/lib/api";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { AdminPage, AdminPageHeader } from "@/components/admin";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
 import DiscussButton from "@/components/messaging/DiscussButton";
 
 const initialPagination = { page: 1, pages: 1, total: 0, limit: 20 };
@@ -51,7 +52,9 @@ export default function CourseChaptersPage() {
     page: 1,
     limit: 20,
   });
-  const [viewMode, setViewMode] = useState("table");
+  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "table" });
+  const viewMode = urlFilters.view || "table";
+  const setViewMode = (v) => setUrlFilters((current) => ({ ...current, view: v }));
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [pagination, setPagination] = useState(initialPagination);
   const [loading, setLoading] = useState(true);

@@ -14,6 +14,7 @@ import ArticleCardView from "./components/ArticleCardView";
 import ArticleDeleteDialog from "./components/ArticleDeleteDialog";
 import { AdminPage } from "@/components/admin";
 import ArticleMetrics from "./components/ArticleMetrics";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
 
 export default function PublishedPage() {
   const [articles, setArticles] = useState([]);
@@ -28,7 +29,9 @@ export default function PublishedPage() {
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [togglingId, setTogglingId] = useState(null);
-  const [viewMode, setViewMode] = useState("list"); // 'list' | 'card'
+  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "list" });
+  const viewMode = urlFilters.view || "list";
+  const setViewMode = (v) => setUrlFilters((current) => ({ ...current, view: v }));
   const [statusFilter, setStatusFilter] = useState("all"); // 'all' | 'published' | 'draft'
   const [searchQuery, setSearchQuery] = useState("");
 

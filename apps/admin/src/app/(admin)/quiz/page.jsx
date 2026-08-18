@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   ChevronDown,
   Edit3,
@@ -29,6 +30,7 @@ import {
   AdminSearch,
 } from "@/components/admin";
 import { ViewToggle } from "@/components/ui/ViewToggle";
+import { listingReturnTo, useUrlFilters } from "@/hooks/useUrlFilters";
 
 const difficultyStyles = {
   easy: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300",
@@ -37,13 +39,20 @@ const difficultyStyles = {
 };
 
 export default function QuestionsPage() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const returnTo = listingReturnTo(pathname, searchParams);
   const [questions, setQuestions] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [courseId, setCourseId] = useState("all");
-  const [type, setType] = useState("all");
-  const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState("table");
+  const [filters, setFilters] = useUrlFilters({ courseId: "all", type: "all", search: "", view: "table" });
+  const { courseId, type, search } = filters;
+  const setCourseId = (value) => setFilters((current) => ({ ...current, courseId: value }));
+  const setType = (value) => setFilters((current) => ({ ...current, type: value }));
+  const setSearch = (value) => setFilters((current) => ({ ...current, search: value }));
+  const editHref = (id) => `/quiz/${id}/edit?returnTo=${encodeURIComponent(returnTo)}`;
+  const viewMode = filters.view || "table";
+  const setViewMode = (v) => setFilters((current) => ({ ...current, view: v }));
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -209,7 +218,7 @@ export default function QuestionsPage() {
 
                     <div className="min-w-0">
                       <Link
-                        href={`/quiz/${item._id}/edit`}
+                        href={editHref(item._id)}
                         className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-3 wrap-break-word"
                       >
                         {item.question}
@@ -232,7 +241,7 @@ export default function QuestionsPage() {
 
                   <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-3.5 dark:border-zinc-800/80">
                     <Link
-                      href={`/quiz/${item._id}/edit`}
+                      href={editHref(item._id)}
                       className="text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
                     >
                       Edit question &rarr;
@@ -292,7 +301,7 @@ export default function QuestionsPage() {
                     >
                       <td className="max-w-xl px-6 py-4.5">
                         <Link
-                          href={`/quiz/${item._id}/edit`}
+                          href={editHref(item._id)}
                           className="font-bold font-outfit text-zinc-950 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 transition-colors line-clamp-2"
                         >
                           {item.question}
@@ -326,7 +335,7 @@ export default function QuestionsPage() {
                       </td>
                       <td className="px-6 py-4.5">
                         <div className="flex justify-end gap-1">
-                          <Link href={`/quiz/${item._id}/edit`}>
+                          <Link href={editHref(item._id)}>
                             <Button
                               variant="ghost"
                               size="icon"

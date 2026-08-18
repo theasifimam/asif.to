@@ -14,6 +14,7 @@ import {
   DraftPublishDialog,
   DraftDeleteDialog,
 } from "./components/DraftDialogs";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
 
 export default function DraftsPage() {
   const [drafts, setDrafts] = useState([]);
@@ -23,7 +24,9 @@ export default function DraftsPage() {
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [togglingId, setTogglingId] = useState(null);
-  const [viewMode, setViewMode] = useState("card"); // 'card' | 'list'
+  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "card" });
+  const viewMode = urlFilters.view || "card";
+  const setViewMode = (v) => setUrlFilters((current) => ({ ...current, view: v }));
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return "";
