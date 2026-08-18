@@ -26,7 +26,6 @@ import { TECH_IDS } from "./components/CheatsheetForm";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
 
-const PAGE_SIZE = 20;
 
 export default function CheatsheetsPage() {
   const [items, setItems] = useState([]);
@@ -38,6 +37,7 @@ export default function CheatsheetsPage() {
   const viewMode = urlFilters.view || "table";
   const setViewMode = (v) => setUrlFilters((current) => ({ ...current, view: v }));
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -70,8 +70,8 @@ export default function CheatsheetsPage() {
     [items, search, tech, status],
   );
 
-  const pages = Math.max(Math.ceil(filtered.length / PAGE_SIZE), 1);
-  const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const pages = Math.max(Math.ceil(filtered.length / limit), 1);
+  const visible = filtered.slice((page - 1) * limit, page * limit);
 
   const updateFilter = (setter) => (value) => {
     setter(value);
@@ -236,8 +236,10 @@ export default function CheatsheetsPage() {
               page={page}
               pages={pages}
               total={filtered.length}
+              limit={limit}
               itemLabel="cheatsheets"
               onPageChange={setPage}
+              onLimitChange={(l) => { setLimit(l); setPage(1); }}
             />
           </div>
         ) : (
@@ -327,8 +329,10 @@ export default function CheatsheetsPage() {
               page={page}
               pages={pages}
               total={filtered.length}
+              limit={limit}
               itemLabel="cheatsheets"
               onPageChange={setPage}
+              onLimitChange={(l) => { setLimit(l); setPage(1); }}
             />
           </div>
         )}

@@ -37,7 +37,7 @@ export function useUrlFilters(defaults) {
     });
     const query = params.toString();
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
-  }, [filters, pathname, router, stableDefaults, searchParams]);
+  }, [filters, pathname, router, stableDefaults]);
 
   return [filters, setFilters];
 }

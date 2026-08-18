@@ -49,7 +49,7 @@ import {
   topicCategoriesApi,
 } from "@/lib/api";
 import { ViewToggle } from "@/components/ui/ViewToggle";
-import { AdminPage, AdminPageHeader } from "@/components/admin";
+import { AdminPage, AdminPageHeader, AdminPagination } from "@/components/admin";
 import { listingReturnTo, useUrlFilters } from "@/hooks/useUrlFilters";
 
 export default function InterviewQuestionsPage() {
@@ -74,6 +74,7 @@ export default function InterviewQuestionsPage() {
   const viewMode = filters.view || "table";
   const setViewMode = (v) => setFilters((current) => ({ ...current, view: v }));
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
+  const [limit, setLimit] = useState(20);
   const [loading, setLoading] = useState(true);
   const [preview, setPreview] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -98,7 +99,7 @@ export default function InterviewQuestionsPage() {
       course: filters.course === "all" ? "" : filters.course,
       difficulty: filters.difficulty === "all" ? "" : filters.difficulty,
       questionType: filters.questionType === "all" ? "" : filters.questionType,
-      limit: 20,
+      limit,
     });
     if (response.success) {
       setQuestions(response.data?.data || []);
@@ -130,6 +131,7 @@ export default function InterviewQuestionsPage() {
     filters.questionType,
     filters.tag,
     filters.page,
+    limit,
   ]);
 
   const handleDragEnd = async (event) => {
@@ -370,40 +372,15 @@ export default function InterviewQuestionsPage() {
                   ))}
                 </div>
 
-                <footer className="flex items-center justify-between rounded-3xl border border-zinc-200/60 bg-white px-5 py-4 text-sm text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
-                  <span>{pagination.total || 0} questions</span>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      disabled={pagination.page <= 1}
-                      onClick={() =>
-                        setFilters((current) => ({
-                          ...current,
-                          page: current.page - 1,
-                        }))
-                      }
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="min-w-20 text-center text-xs font-medium">
-                      {pagination.page || 1} / {pagination.pages || 1}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      disabled={pagination.page >= pagination.pages}
-                      onClick={() =>
-                        setFilters((current) => ({
-                          ...current,
-                          page: current.page + 1,
-                        }))
-                      }
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </footer>
+                <AdminPagination
+                  page={pagination.page || 1}
+                  pages={pagination.pages || 1}
+                  total={pagination.total || 0}
+                  limit={limit}
+                  itemLabel="questions"
+                  onPageChange={(p) => setFilters((c) => ({ ...c, page: p }))}
+                  onLimitChange={(l) => { setLimit(l); setFilters((c) => ({ ...c, page: 1 })); }}
+                />
               </div>
             ) : (
               <div className="space-y-6">
@@ -436,40 +413,15 @@ export default function InterviewQuestionsPage() {
                   </div>
                 </section>
 
-                <footer className="flex items-center justify-between rounded-3xl border border-zinc-200/60 bg-white px-5 py-4 text-sm text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
-                  <span>{pagination.total || 0} questions</span>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      disabled={pagination.page <= 1}
-                      onClick={() =>
-                        setFilters((current) => ({
-                          ...current,
-                          page: current.page - 1,
-                        }))
-                      }
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="min-w-20 text-center text-xs font-medium">
-                      {pagination.page || 1} / {pagination.pages || 1}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      disabled={pagination.page >= pagination.pages}
-                      onClick={() =>
-                        setFilters((current) => ({
-                          ...current,
-                          page: current.page + 1,
-                        }))
-                      }
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </footer>
+                <AdminPagination
+                  page={pagination.page || 1}
+                  pages={pagination.pages || 1}
+                  total={pagination.total || 0}
+                  limit={limit}
+                  itemLabel="questions"
+                  onPageChange={(p) => setFilters((c) => ({ ...c, page: p }))}
+                  onLimitChange={(l) => { setLimit(l); setFilters((c) => ({ ...c, page: 1 })); }}
+                />
               </div>
             )}
           </SortableContext>

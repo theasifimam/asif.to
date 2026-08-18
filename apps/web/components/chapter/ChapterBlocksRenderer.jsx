@@ -93,13 +93,22 @@ export default function ChapterBlocksRenderer({
           if (block.interactive) {
             return (
               <div key={idx} className="my-5 sm:my-8">
-                <InteractiveCode language={block.lang} code={block.code} title={block.title} />
+                <InteractiveCode
+                  language={block.lang}
+                  code={block.code}
+                  title={block.title}
+                />
               </div>
             );
           }
           return (
             <div key={idx} className="my-3 sm:my-6">
-              <CodeSnippetViewer code={block.code} language={block.lang} title={block.title} showPlay={block.showPlay} />
+              <CodeSnippetViewer
+                code={block.code}
+                language={block.lang}
+                title={block.title}
+                showPlay={block.showPlay}
+              />
             </div>
           );
         }
@@ -153,7 +162,10 @@ export default function ChapterBlocksRenderer({
                 const isOrdered = /^\d+\.\s/.test(li.trim());
                 const content = li.trim().replace(/^([-*]|\d+\.)\s+/, "");
                 return (
-                  <li key={i} className="flex gap-3 text-zinc-700 dark:text-zinc-300">
+                  <li
+                    key={i}
+                    className="flex gap-3 text-zinc-700 dark:text-zinc-300"
+                  >
                     <span className="text-blue-500 mt-1 shrink-0">
                       {isOrdered ? (
                         <span className="font-bold text-[10px] bg-blue-500/10 px-1.5 py-0.5 rounded text-blue-600 dark:text-blue-400">

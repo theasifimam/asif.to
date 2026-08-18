@@ -4,6 +4,7 @@ import { useState } from "react";
 import { KeyRound, MessageSquarePlus } from "lucide-react";
 import { toast } from "sonner";
 import { Button, Input } from "@/components/ui";
+import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import {
   useAddUserNoteMutation,
   useRevokeUserSessionsMutation,
@@ -16,6 +17,7 @@ export default function UserAdminHistory({
   isOwnProfile,
 }) {
   const [body, setBody] = useState("");
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [addNote, { isLoading }] = useAddUserNoteMutation();
   const [revokeSessions, { isLoading: revoking }] =
     useRevokeUserSessionsMutation();
@@ -89,16 +91,7 @@ export default function UserAdminHistory({
             variant="outline"
             size="sm"
             disabled={isOwnProfile || revoking}
-            onClick={async () => {
-              if (!confirm("Sign this user out from every active session?"))
-                return;
-              try {
-                await revokeSessions(userId).unwrap();
-                toast.success("Sessions revoked");
-              } catch (error) {
-                toast.error(error.data?.message || "Unable to revoke sessions");
-              }
-            }}
+            onClick={() => setIsLogoutConfirmOpen(true)}
           >
             <KeyRound className="mr-2 h-4 w-4" />
             Force logout
@@ -123,6 +116,24 @@ export default function UserAdminHistory({
           )}
         </div>
       </div>
+      <ConfirmDialog
+        isOpen={isLogoutConfirmOpen}
+        onClose={() => setIsLogoutConfirmOpen(false)}
+        onConfirm={async () => {
+          setIsLogoutConfirmOpen(false);
+          try {
+            await revokeSessions(userId).unwrap();
+            toast.success("Sessions revoked");
+          } catch (error) {
+            toast.error(error.data?.message || "Unable to revoke sessions");
+          }
+        }}
+        title="Force logout?"
+        description="Sign this user out from every active session?"
+        confirmText="Logout user"
+        variant="destructive"
+        loading={revoking}
+      />
     </section>
   );
 }

@@ -176,10 +176,7 @@ export default function ArticleClient({ slug, initialData }) {
 
           {/* Author & Action Row */}
           <div className="flex items-center justify-between pt-6 border-t border-zinc-200/60 dark:border-zinc-800/60 mt-2">
-            <Link
-              href="/author/asif"
-              className="flex items-center gap-3 group"
-            >
+            <Link href="/author/asif" className="flex items-center gap-3 group">
               <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-zinc-100 dark:bg-zinc-800 relative border border-zinc-200 dark:border-zinc-700">
                 <Image
                   src={
@@ -226,13 +223,13 @@ export default function ArticleClient({ slug, initialData }) {
         {/* Article Body Content */}
         <article className="w-full max-w-4xl px-6 flex flex-col gap-10">
           <MarkdownCodePlayground className="article-markdown-playground">
-          <div data-color-mode={theme === "dark" ? "dark" : "light"}>
-            <MarkdownPreview
-              source={article.content}
-              style={{ backgroundColor: "transparent", color: "inherit" }}
-            className="text-justify text-lg md:text-xl font-light leading-relaxed !bg-transparent !text-inherit wmde-markdown"
-            />
-          </div>
+            <div data-color-mode={theme === "dark" ? "dark" : "light"}>
+              <MarkdownPreview
+                source={article.content}
+                style={{ backgroundColor: "transparent", color: "inherit" }}
+                className="text-justify text-lg md:text-xl font-light leading-relaxed bg-transparent! text-inherit! wmde-markdown"
+              />
+            </div>
           </MarkdownCodePlayground>
 
           <AuthorIdentityCard

@@ -194,7 +194,7 @@ export default function ChapterClient({
         />
       )}
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-2 sm:px-6 pt-36 sm:pt-40 lg:pt-28 flex flex-col gap-3 sm:gap-6 pb-32 sm:pb-16">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 pt-36 sm:pt-40 lg:pt-28 flex flex-col gap-3 sm:gap-6 pb-32 sm:pb-16">
         {/* Standard Mode Top Header Bar */}
         <ChapterHeader
           courseId={activeCourseSlug}

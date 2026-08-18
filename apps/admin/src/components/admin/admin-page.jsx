@@ -2,6 +2,13 @@ import { ChevronLeft, ChevronRight, Loader2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function AdminPage({ children, className, size = "xl" }) {
   return (
@@ -163,47 +170,137 @@ export function AdminEmptyState({
   );
 }
 
+function getPageRange(currentPage, totalPages) {
+  const range = [];
+  const delta = 2;
+
+  for (let i = 1; i <= totalPages; i++) {
+    if (
+      i === 1 ||
+      i === totalPages ||
+      (i >= currentPage - delta && i <= currentPage + delta)
+    ) {
+      range.push(i);
+    }
+  }
+
+  const result = [];
+  let l;
+
+  for (let i of range) {
+    if (l) {
+      if (i - l === 2) {
+        result.push(l + 1);
+      } else if (i - l > 2) {
+        result.push("...");
+      }
+    }
+    result.push(i);
+    l = i;
+  }
+
+  return result;
+}
+
 export function AdminPagination({
   page = 1,
   pages = 1,
   total,
+  limit = 10,
+  onLimitChange,
   itemLabel = "items",
   onPageChange,
   className,
 }) {
   const safePages = Math.max(Number(pages) || 1, 1);
   const safePage = Math.min(Math.max(Number(page) || 1, 1), safePages);
+  const pageNumbers = getPageRange(safePage, safePages);
+
   return (
     <footer
       className={cn(
-        "flex flex-wrap items-center justify-between gap-3 border-t border-zinc-100 px-4 py-3.5 text-xs text-zinc-500 dark:border-zinc-800/80 sm:px-6",
+        "flex flex-wrap items-center justify-between gap-4 border-t border-zinc-100 px-4 py-3.5 text-xs text-zinc-500 dark:border-zinc-800/80 sm:px-6",
         className,
       )}
     >
-      <span className="font-semibold text-zinc-500 dark:text-zinc-400">
-        {typeof total === "number"
-          ? `${total} ${itemLabel}`
-          : `Page ${safePage} of ${safePages}`}
-      </span>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4.5 flex-wrap">
+        <span className="font-semibold text-zinc-500 dark:text-zinc-400">
+          {typeof total === "number"
+            ? `${total} ${itemLabel}`
+            : `Page ${safePage} of ${safePages}`}
+        </span>
+
+        {onLimitChange && (
+          <div className="flex items-center gap-2">
+            <span className="text-zinc-400 dark:text-zinc-500 font-medium">Rows per page:</span>
+            <Select
+              value={String(limit)}
+              onValueChange={(val) => onLimitChange(Number(val))}
+            >
+              <SelectTrigger className="h-8 w-16 text-xs font-semibold rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+                <SelectValue placeholder={String(limit)} />
+              </SelectTrigger>
+              <SelectContent>
+                {[5, 10, 20, 50, 100].map((size) => (
+                  <SelectItem key={size} value={String(size)}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center gap-1">
         <Button
           variant="outline"
           size="icon"
           aria-label="Previous page"
-          className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
+          className="h-8 w-8 rounded-xl border border-zinc-200/80 dark:border-zinc-800"
           disabled={safePage <= 1}
           onClick={() => onPageChange(safePage - 1)}
         >
           <ChevronLeft className="h-3.5 w-3.5" />
         </Button>
-        <span className="min-w-12 text-center text-xs font-bold tabular-nums text-zinc-700 dark:text-zinc-300">
-          {safePage} / {safePages}
-        </span>
+
+        <div className="flex items-center gap-1">
+          {pageNumbers.map((num, idx) => {
+            if (num === "...") {
+              return (
+                <span
+                  key={`ellipsis-${idx}`}
+                  className="flex h-8 w-8 items-center justify-center text-zinc-400 font-semibold"
+                >
+                  ...
+                </span>
+              );
+            }
+            const active = num === safePage;
+            return (
+              <Button
+                key={num}
+                variant={active ? "default" : "outline"}
+                size="sm"
+                onClick={() => onPageChange(num)}
+                className={cn(
+                  "h-8 w-8 rounded-xl text-xs font-bold transition-all",
+                  active
+                    ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                    : "border-zinc-200/80 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                )}
+              >
+                {num}
+              </Button>
+            );
+          })}
+        </div>
+
         <Button
           variant="outline"
           size="icon"
           aria-label="Next page"
-          className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
+          className="h-8 w-8 rounded-xl border border-zinc-200/80 dark:border-zinc-800"
           disabled={safePage >= safePages}
           onClick={() => onPageChange(safePage + 1)}
         >

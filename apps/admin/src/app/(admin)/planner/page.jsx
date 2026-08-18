@@ -34,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { coursesApi, kanbanApi } from "@/lib/api";
 import PlannerCard from "./PlannerCard";
 import PlannerColumn from "./PlannerColumn";
@@ -60,6 +61,41 @@ export default function PlannerPage() {
   const [labels, setLabels] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [confirmConfig, setConfirmConfig] = useState({
+    isOpen: false,
+    title: "",
+    description: "",
+    confirmText: "Confirm",
+    variant: "default",
+    onConfirm: () => {},
+  });
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
+  const closeConfirm = () => {
+    setConfirmConfig((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const showConfirm = ({ title, description, confirmText, variant, onConfirm }) => {
+    setConfirmConfig({
+      isOpen: true,
+      title,
+      description,
+      confirmText,
+      variant,
+      onConfirm: async () => {
+        setConfirmLoading(true);
+        try {
+          await onConfirm();
+          closeConfirm();
+        } catch (e) {
+          // Handled in callback
+        } finally {
+          setConfirmLoading(false);
+        }
+      },
+    });
+  };
+
   const [activeCard, setActiveCard] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
   const [quickTitle, setQuickTitle] = useState("");
@@ -246,19 +282,34 @@ export default function PlannerPage() {
   };
   const submitQuick = async (event) => {
     event.preventDefault();
-    if (!quickTitle.trim() || !columns[0]) return;
+    const title = quickTitle.trim();
+    if (!title || !columns[0]) return;
     const targetCol = columns.some((c) => c._id === activeColumnTab)
       ? activeColumnTab
       : columns[0]._id;
-    await createCard(targetCol, quickTitle.trim());
     setQuickTitle("");
+    await createCard(targetCol, title);
   };
-  const createFromTemplate = async (name) => {
+  const createFromType = async (type) => {
     if (!columns[0]) return;
     const targetCol = columns.some((c) => c._id === activeColumnTab)
       ? activeColumnTab
       : columns[0]._id;
-    const card = await createCard(targetCol, `New ${name}`, TEMPLATES[name]);
+
+    let templateData = {};
+    let title = "";
+    if (type === "SEO") {
+      templateData = TEMPLATES["SEO Task"] || {};
+      title = "New SEO Task";
+    } else if (type === "Development") {
+      templateData = TEMPLATES.Feature || {};
+      title = "New Development Task";
+    } else if (type === "Content") {
+      templateData = TEMPLATES.Article || {};
+      title = "New Content Task";
+    }
+
+    const card = await createCard(targetCol, title, templateData);
     if (card) setSelectedCard(card);
   };
 
@@ -307,14 +358,23 @@ export default function PlannerPage() {
       toast.success("Card duplicated");
     } else toast.error(response.error);
   };
-  const deleteCard = async (card) => {
-    if (!window.confirm(`Permanently delete “${card.title}”?`)) return;
-    const response = await kanbanApi.deleteCard(card._id);
-    if (response.success) {
-      setCards((current) => current.filter((item) => item._id !== card._id));
-      setSelectedCard(null);
-      toast.success("Card deleted");
-    } else toast.error(response.error);
+  const deleteCard = (card) => {
+    showConfirm({
+      title: "Delete task?",
+      description: `Permanently delete “${card.title}”? This action cannot be undone.`,
+      confirmText: "Delete",
+      variant: "destructive",
+      onConfirm: async () => {
+        const response = await kanbanApi.deleteCard(card._id);
+        if (response.success) {
+          setCards((current) => current.filter((item) => item._id !== card._id));
+          setSelectedCard(null);
+          toast.success("Card deleted");
+        } else {
+          toast.error(response.error || "Unable to delete task");
+        }
+      },
+    });
   };
   const createLabel = async (name) => {
     const response = await kanbanApi.createLabel(boardId, { name });
@@ -419,15 +479,24 @@ export default function PlannerPage() {
       );
     } else toast.error(response.error);
   };
-  const archiveBoard = async () => {
-    if (!window.confirm(`Archive “${board.name}”?`)) return;
-    const response = await kanbanApi.updateBoard(boardId, { archived: true });
-    if (response.success) {
-      const next = boards.filter((item) => item._id !== boardId);
-      setBoards(next);
-      setBoardId(next[0]?._id || "");
-      toast.success("Board archived");
-    }
+  const archiveBoard = () => {
+    showConfirm({
+      title: "Archive board?",
+      description: `Are you sure you want to archive “${board?.name}”?`,
+      confirmText: "Archive",
+      variant: "warning",
+      onConfirm: async () => {
+        const response = await kanbanApi.updateBoard(boardId, { archived: true });
+        if (response.success) {
+          const next = boards.filter((item) => item._id !== boardId);
+          setBoards(next);
+          setBoardId(next[0]?._id || "");
+          toast.success("Board archived");
+        } else {
+          toast.error(response.error || "Unable to archive board");
+        }
+      },
+    });
   };
   const addColumn = async () => {
     const name = window.prompt("Column name");
@@ -455,16 +524,21 @@ export default function PlannerPage() {
       );
     else toast.error(response.error);
   };
-  const archiveColumn = async (column) => {
-    if (
-      !window.confirm(
-        `Archive “${column.name}”? Its cards will move to the first available column.`,
-      )
-    )
-      return;
-    const response = await kanbanApi.archiveColumn(column._id);
-    if (response.success) loadBoard(boardId, true);
-    else toast.error(response.error);
+  const archiveColumn = (column) => {
+    showConfirm({
+      title: "Archive column?",
+      description: `Archive “${column.name}”? Its cards will move to the first available column.`,
+      confirmText: "Archive",
+      variant: "warning",
+      onConfirm: async () => {
+        const response = await kanbanApi.archiveColumn(column._id);
+        if (response.success) {
+          loadBoard(boardId, true);
+        } else {
+          toast.error(response.error || "Unable to archive column");
+        }
+      },
+    });
   };
   const unarchiveColumn = async (column) => {
     const response = await kanbanApi.updateColumn(column._id, {
@@ -495,18 +569,11 @@ export default function PlannerPage() {
     );
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-zinc-100 dark:bg-zinc-950">
-      <div className="shrink-0 border-b border-zinc-200 bg-zinc-100 p-2.5 sm:p-4 dark:border-zinc-800 dark:bg-zinc-950 md:px-7">
-        <div className="flex flex-col gap-2 sm:gap-3.5 xl:flex-row xl:items-center xl:justify-between">
+      <div className="shrink-0 border-b border-zinc-200 bg-zinc-100 py-1.5 px-4 dark:border-zinc-800 dark:bg-zinc-950 md:px-6">
+        <div className="flex flex-col gap-1.5 sm:gap-2.5 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex items-center justify-between gap-2 min-w-0">
-            <div className="flex min-w-0 items-center gap-2.5">
-              <div className="grid h-9 w-9 sm:h-11 sm:w-11 shrink-0 place-items-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-500/20">
-                <LayoutGrid size={18} className="sm:hidden" />
-                <LayoutGrid size={20} className="hidden sm:block" />
-              </div>
+            <div className="flex min-w-0 items-center gap-2">
               <div className="min-w-0 flex-1">
-                <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[.2em] text-blue-600">
-                  Workspace planner
-                </p>
                 <div className="flex items-center min-w-0">
                   <Select value={boardId} onValueChange={setBoardId}>
                     <SelectTrigger className="h-auto p-0 border-0 bg-transparent text-base sm:text-xl font-black shadow-none focus-visible:ring-0 [&_svg]:size-4 hover:opacity-80">
@@ -605,26 +672,17 @@ export default function PlannerPage() {
             </form>
 
             <div className="hidden md:flex items-center gap-2 flex-wrap">
-              <div className="group relative">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9 sm:h-10 text-xs"
-                >
-                  <Plus size={15} /> Template
-                </Button>
-                <div className="invisible absolute right-0 top-full mt-1.5 z-40 w-44 rounded-2xl border border-zinc-200 bg-white p-1 opacity-0 shadow-xl group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100 dark:border-zinc-800 dark:bg-zinc-950 before:absolute before:inset-x-0 before:-top-2 before:h-2 before:content-['']">
-                  {Object.keys(TEMPLATES).map((name) => (
-                    <button
-                      key={name}
-                      onClick={() => createFromTemplate(name)}
-                      className="w-full rounded-xl px-3 py-2 text-left text-xs font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-900"
-                    >
-                      {name}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <Select onValueChange={(value) => createFromType(value)}>
+                <SelectTrigger className="h-9 sm:h-10 w-40 text-xs rounded-xl border border-zinc-200 bg-white px-3 font-semibold dark:border-zinc-700 dark:bg-zinc-950">
+                  <Plus size={14} className="mr-1.5 inline-block text-blue-600 shrink-0" />
+                  <SelectValue placeholder="Add Task Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SEO">SEO</SelectItem>
+                  <SelectItem value="Development">Development</SelectItem>
+                  <SelectItem value="Content">Content</SelectItem>
+                </SelectContent>
+              </Select>
               <Button
                 variant="outline"
                 size="sm"
@@ -871,7 +929,7 @@ export default function PlannerPage() {
           })}
         </div>
 
-        <main className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden p-3.5 sm:p-4 md:p-6 scrollbar-none">
+        <main className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden p-2 sm:p-3 md:p-4 scrollbar-none">
           <SortableContext
             items={columns.map((column) => `column:${column._id}`)}
             strategy={horizontalListSortingStrategy}
@@ -914,6 +972,16 @@ export default function PlannerPage() {
           onCreateLabel={createLabel}
         />
       )}
+      <ConfirmDialog
+        isOpen={confirmConfig.isOpen}
+        onClose={closeConfirm}
+        onConfirm={confirmConfig.onConfirm}
+        loading={confirmLoading}
+        title={confirmConfig.title}
+        description={confirmConfig.description}
+        confirmText={confirmConfig.confirmText}
+        variant={confirmConfig.variant}
+      />
     </div>
   );
 }

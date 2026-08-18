@@ -201,7 +201,7 @@ export const createUser = async (req, res) => {
 // PATCH /api/v1/users/:id
 export const updateUser = async (req, res) => {
   try {
-    const target = await User.findById(req.params.id).select("role");
+    const target = await User.findById(req.params.id).select("role username");
     if (!target) {
       return res
         .status(404)
@@ -233,6 +233,14 @@ export const updateUser = async (req, res) => {
     } = req.body;
 
     const updateData = { ...safeFields };
+
+    if (
+      updateData.username &&
+      target.username &&
+      target.username.toLowerCase() === updateData.username.toLowerCase()
+    ) {
+      delete updateData.username;
+    }
 
     // Handle avatar upload if exists
     if (req.file) {

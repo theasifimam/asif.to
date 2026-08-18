@@ -10,7 +10,8 @@ import { useState } from "react";
 
 export default function UserActivityPage() {
   const [page, setPage] = useState(1);
-  const { data, isLoading } = useGetAuditLogsQuery({ page, limit: 25 });
+  const [limit, setLimit] = useState(25);
+  const { data, isLoading } = useGetAuditLogsQuery({ page, limit });
   const logs = data?.data?.logs || [];
   const pagination = data?.data?.pagination || {
     page: 1,
@@ -58,6 +59,11 @@ export default function UserActivityPage() {
           page={pagination.page}
           pages={pagination.totalPages}
           total={pagination.total}
+          limit={limit}
+          onLimitChange={(val) => {
+            setLimit(val);
+            setPage(1);
+          }}
           itemLabel="events"
           onPageChange={setPage}
         />

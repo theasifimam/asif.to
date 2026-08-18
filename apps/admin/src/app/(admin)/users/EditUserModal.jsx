@@ -99,7 +99,7 @@ export function EditUserModal({ isOpen, onClose, user, onUpdate, submitting }) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-h-[92vh] overflow-hidden rounded-3xl border-zinc-200 bg-white p-0 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950 sm:max-w-2xl">
-        <form onSubmit={submit} className="flex max-h-[92vh] flex-col">
+        <form onSubmit={submit} className="flex max-h-[85vh] flex-col">
           <div className="border-b border-zinc-100 px-6 py-6 dark:border-zinc-900 sm:px-8">
             <DialogHeader className="text-left">
               <DialogTitle className="text-xl font-black tracking-tight text-zinc-950 dark:text-white">
@@ -244,8 +244,13 @@ export function EditUserModal({ isOpen, onClose, user, onUpdate, submitting }) {
             </section>
           </div>
 
-          <DialogFooter className="flex-row border-t border-zinc-100 bg-zinc-50/70 px-6 py-4 dark:border-zinc-900 dark:bg-zinc-900/40 sm:px-8">
-            <Button type="button" variant="ghost" onClick={onClose}>
+          <DialogFooter className="flex-row border-t border-zinc-100 bg-zinc-50/70 sm:px-4 px-2 py-2 dark:border-zinc-900 dark:bg-zinc-900/40 rounded-full mb-2 lg:mb-0 mx-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="flex-1 md:flex-none"
+            >
               Cancel
             </Button>
             <Button
@@ -253,6 +258,7 @@ export function EditUserModal({ isOpen, onClose, user, onUpdate, submitting }) {
               disabled={
                 submitting || !form.fullName.trim() || !form.email.trim()
               }
+              className="flex-1 md:flex-none"
             >
               {submitting ? "Saving…" : "Save changes"}
             </Button>

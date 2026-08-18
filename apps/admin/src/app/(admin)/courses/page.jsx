@@ -8,6 +8,7 @@ import {
   ChevronRight,
   ExternalLink,
   FilePenLine,
+  FolderOpen,
   Layers,
   Loader2,
   Pencil,
@@ -28,7 +29,7 @@ import {
 } from "@/components/ui/select";
 import { coursesApi } from "@/lib/api";
 import { ViewToggle } from "@/components/ui/ViewToggle";
-import { AdminPage, AdminPageHeader } from "@/components/admin";
+import { AdminPage, AdminPageHeader, AdminPagination } from "@/components/admin";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
 
 const initialPagination = { page: 1, pages: 1, total: 0, limit: 20 };
@@ -259,6 +260,12 @@ export default function CoursesAdminPage() {
                     >
                       {course.title}
                     </Link>
+                    <Link
+                      href={`/courses/${course._id}/categories`}
+                      className="ml-2 text-xs font-bold text-green-600 hover:underline dark:text-green-400"
+                    >
+                      Categories
+                    </Link>
                     <p className="mt-1 text-xs text-zinc-400 truncate">
                       /courses/{course.slug}
                     </p>
@@ -320,36 +327,14 @@ export default function CoursesAdminPage() {
             ))}
           </div>
 
-          <footer className="flex items-center justify-between rounded-3xl border border-zinc-200/80 bg-white px-5 py-4 text-xs font-semibold text-zinc-500 dark:border-zinc-800/80 dark:bg-[#121215]">
-            <span>
-              {pagination.total} course{pagination.total === 1 ? "" : "s"}
-            </span>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
-                title="Previous page"
-                disabled={loading || pagination.page <= 1}
-                onClick={() => setFilter("page", pagination.page - 1)}
-              >
-                <ChevronLeft className="h-3.5 w-3.5" />
-              </Button>
-              <span className="min-w-20 text-center text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                Page {pagination.page} of {pagination.pages}
-              </span>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
-                title="Next page"
-                disabled={loading || pagination.page >= pagination.pages}
-                onClick={() => setFilter("page", pagination.page + 1)}
-              >
-                <ChevronRight className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </footer>
+          <AdminPagination
+            page={pagination.page}
+            pages={pagination.pages}
+            total={pagination.total}
+            limit={pagination.limit}
+            onPageChange={(p) => setFilter("page", p)}
+            onLimitChange={(l) => setFilter("limit", l)}
+          />
         </div>
       ) : (
         <section className="admin-surface w-full overflow-hidden rounded-[28px] sm:rounded-4xl">
@@ -441,6 +426,16 @@ export default function CoursesAdminPage() {
                             <FilePenLine className="h-4 w-4" />
                           </Button>
                         </Link>
+                        <Link href={`/courses/${course._id}/categories`}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-full text-zinc-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30"
+                            title="Manage categories"
+                          >
+                            <FolderOpen className="h-4 w-4" />
+                          </Button>
+                        </Link>
                         <Link href={`/courses/${course._id}/edit`}>
                           <Button
                             variant="ghost"
@@ -468,34 +463,15 @@ export default function CoursesAdminPage() {
             </table>
           </div>
 
-          <footer className="flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/70 px-6 py-4 text-xs font-semibold text-zinc-500">
-            <span>
-              {pagination.total} course{pagination.total === 1 ? "" : "s"}
-            </span>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
-                disabled={loading || pagination.page <= 1}
-                onClick={() => setFilter("page", pagination.page - 1)}
-              >
-                <ChevronLeft className="h-3.5 w-3.5" />
-              </Button>
-              <span className="min-w-16 text-center text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                {pagination.page} / {pagination.pages}
-              </span>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
-                disabled={loading || pagination.page >= pagination.pages}
-                onClick={() => setFilter("page", pagination.page + 1)}
-              >
-                <ChevronRight className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </footer>
+          <AdminPagination
+            page={pagination.page}
+            pages={pagination.pages}
+            total={pagination.total}
+            limit={filters.limit}
+            itemLabel="courses"
+            onPageChange={(p) => setFilter("page", p)}
+            onLimitChange={(l) => setFilter("limit", l)}
+          />
         </section>
       )}
 

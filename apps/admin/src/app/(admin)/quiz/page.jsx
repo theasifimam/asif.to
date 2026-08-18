@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
-  ChevronDown,
   Edit3,
   FilePlus2,
   Loader2,
@@ -42,28 +41,40 @@ export default function QuestionsPage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const returnTo = listingReturnTo(pathname, searchParams);
+
+  // Data state
   const [questions, setQuestions] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useUrlFilters({ courseId: "all", type: "all", search: "", view: "table" });
-  const { courseId, type, search } = filters;
-  const setCourseId = (value) => setFilters((current) => ({ ...current, courseId: value }));
-  const setType = (value) => setFilters((current) => ({ ...current, type: value }));
-  const setSearch = (value) => setFilters((current) => ({ ...current, search: value }));
-  const editHref = (id) => `/quiz/${id}/edit?returnTo=${encodeURIComponent(returnTo)}`;
-  const viewMode = filters.view || "table";
-  const setViewMode = (v) => setFilters((current) => ({ ...current, view: v }));
-  const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
+
+  // Delete state
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
+  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0, limit: 20 });
+
+  // URL-synced filters (course, type, search, view)
+  const [filters, setFilters] = useUrlFilters({ courseId: "all", type: "all", search: "", view: "table" });
+  const { courseId, type, search } = filters;
+
+  const setCourseId = (value) => setFilters((current) => ({ ...current, courseId: value }));
+  const setType    = (value) => setFilters((current) => ({ ...current, type: value }));
+  const setSearch  = (value) => setFilters((current) => ({ ...current, search: value }));
+  const setViewMode = (v)   => setFilters((current) => ({ ...current, view: v }));
+
+  const viewMode = filters.view || "table";
+  const editHref = (id) => `/quiz/${id}/edit?returnTo=${encodeURIComponent(returnTo)}`;
+
+  // Data fetching
   const load = useCallback(async () => {
     setLoading(true);
     const params = {
       type,
       page,
-      limit: 20,
+      limit,
       ...(courseId !== "all" && { courseId }),
     };
     const [response, courseResponse] = await Promise.all([
@@ -72,43 +83,40 @@ export default function QuestionsPage() {
     ]);
     if (response.success) {
       setQuestions(response.data?.data || []);
-      setPagination(
-        response.data?.pagination || { page: 1, pages: 1, total: 0 },
-      );
-    } else toast.error(response.error || "Unable to load questions");
-    if (courseResponse?.success)
-      setCourses(
-        courseResponse.data?.data?.data || courseResponse.data?.data || [],
-      );
+      setPagination(response.data?.pagination || { page: 1, pages: 1, total: 0, limit });
+    } else {
+      toast.error(response.error || "Unable to load questions");
+    }
+    if (courseResponse?.success) {
+      setCourses(courseResponse.data?.data?.data || courseResponse.data?.data || []);
+    }
     setLoading(false);
-  }, [courseId, courses.length, page, type]);
+  }, [courseId, courses.length, page, limit, type]);
 
   useEffect(() => {
     const timer = setTimeout(load, 0);
     return () => clearTimeout(timer);
   }, [load]);
 
+  // Client-side search filter on top of server results
   const visible = useMemo(() => {
     const query = search.trim().toLowerCase();
     return query
       ? questions.filter((item) =>
-          [
-            item.question,
-            item.answer,
-            item.explanation,
-            ...(item.options || []),
-          ]
+          [item.question, item.answer, item.explanation, ...(item.options || [])]
             .filter(Boolean)
             .some((value) => value.toLowerCase().includes(query)),
         )
       : questions;
   }, [questions, search]);
 
+  // Reset page when filter changes
   const filter = (setter) => (value) => {
     setter(value);
     setPage(1);
   };
 
+  // Delete handler
   const remove = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -117,15 +125,12 @@ export default function QuestionsPage() {
     ).delete(deleteTarget._id);
     if (response.success) {
       toast.success("Question deleted");
-      setQuestions((current) =>
-        current.filter((item) => item._id !== deleteTarget._id),
-      );
-      setPagination((prev) => ({
-        ...prev,
-        total: Math.max(0, prev.total - 1),
-      }));
+      setQuestions((current) => current.filter((item) => item._id !== deleteTarget._id));
+      setPagination((prev) => ({ ...prev, total: Math.max(0, prev.total - 1) }));
       setDeleteTarget(null);
-    } else toast.error(response.error || "Unable to delete question");
+    } else {
+      toast.error(response.error || "Unable to delete question");
+    }
     setDeleting(false);
   };
 
@@ -188,9 +193,7 @@ export default function QuestionsPage() {
         ) : visible.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
             <FilePlus2 className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
-            <p className="text-sm font-medium">
-              No questions match these filters.
-            </p>
+            <p className="text-sm font-medium">No questions match these filters.</p>
           </div>
         ) : viewMode === "card" ? (
           <div className="space-y-6">
@@ -248,7 +251,7 @@ export default function QuestionsPage() {
                     </Link>
 
                     <div className="flex items-center gap-1 shrink-0">
-                      <Link href={`/quiz/${item._id}/edit`}>
+                      <Link href={editHref(item._id)}>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -276,97 +279,101 @@ export default function QuestionsPage() {
               page={pagination.page}
               pages={pagination.pages}
               total={pagination.total}
+              limit={limit}
               itemLabel="questions"
               onPageChange={setPage}
+              onLimitChange={(l) => { setLimit(l); setPage(1); }}
             />
           </div>
         ) : (
-          <div className="admin-surface w-full rounded-[28px] sm:rounded-4xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="admin-table w-full min-w-220 text-left text-sm">
-                <thead className="border-b border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/75 dark:bg-[#18181b]/60 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">
-                  <tr>
-                    <th className="px-6 py-4.5">Question</th>
-                    <th className="px-6 py-4.5">Type</th>
-                    <th className="px-6 py-4.5">Course</th>
-                    <th className="px-6 py-4.5">Difficulty</th>
-                    <th className="px-6 py-4.5 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
-                  {visible.map((item) => (
-                    <tr
-                      key={item._id}
-                      className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
-                    >
-                      <td className="max-w-xl px-6 py-4.5">
-                        <Link
-                          href={editHref(item._id)}
-                          className="font-bold font-outfit text-zinc-950 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 transition-colors line-clamp-2"
-                        >
-                          {item.question}
-                        </Link>
-                        <p className="mt-0.5 line-clamp-1 text-xs text-zinc-400">
+          <div className="space-y-0">
+            <div className="admin-surface w-full rounded-[28px] sm:rounded-4xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="admin-table w-full min-w-220 text-left text-sm">
+                  <thead className="border-b border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/75 dark:bg-[#18181b]/60 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">
+                    <tr>
+                      <th className="px-6 py-4.5">Question</th>
+                      <th className="px-6 py-4.5">Type</th>
+                      <th className="px-6 py-4.5">Course</th>
+                      <th className="px-6 py-4.5">Difficulty</th>
+                      <th className="px-6 py-4.5 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
+                    {visible.map((item) => (
+                      <tr
+                        key={item._id}
+                        className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
+                      >
+                        <td className="max-w-xl px-6 py-4.5">
+                          <Link
+                            href={editHref(item._id)}
+                            className="font-bold font-outfit text-zinc-950 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 transition-colors line-clamp-2"
+                          >
+                            {item.question}
+                          </Link>
+                          <p className="mt-0.5 line-clamp-1 text-xs text-zinc-400">
+                            {item.type === "interview"
+                              ? item.answer
+                              : `Correct: ${item.options?.[item.correctIndex] || "—"}`}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4.5">
+                          <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-500/20">
+                            {item.type}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400">
                           {item.type === "interview"
-                            ? item.answer
-                            : `Correct: ${item.options?.[item.correctIndex] || "—"}`}
-                        </p>
-                      </td>
-                      <td className="px-6 py-4.5">
-                        <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-500/20">
-                          {item.type}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400">
-                        {item.type === "interview"
-                          ? item.course?.title || "—"
-                          : (item.courses || [])
-                              .map((course) => course.title)
-                              .join(", ") || "—"}
-                      </td>
-                      <td className="px-6 py-4.5">
-                        <span
-                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
-                            difficultyStyles[item.difficulty] || ""
-                          }`}
-                        >
-                          {item.difficulty}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4.5">
-                        <div className="flex justify-end gap-1">
-                          <Link href={editHref(item._id)}>
+                            ? item.course?.title || "—"
+                            : (item.courses || []).map((course) => course.title).join(", ") || "—"}
+                        </td>
+                        <td className="px-6 py-4.5">
+                          <span
+                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                              difficultyStyles[item.difficulty] || ""
+                            }`}
+                          >
+                            {item.difficulty}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4.5">
+                          <div className="flex justify-end gap-1">
+                            <Link href={editHref(item._id)}>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                title="Edit question"
+                              >
+                                <Edit3 className="h-4 w-4" />
+                              </Button>
+                            </Link>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                              title="Edit question"
+                              title="Delete question"
+                              onClick={() => setDeleteTarget(item)}
+                              className="h-8 w-8 rounded-full text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
                             >
-                              <Edit3 className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
-                          </Link>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title="Delete question"
-                            className="h-8 w-8 rounded-full text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                            onClick={() => setDeleteTarget(item)}
-                          >
-                            <Trash2 className="h-4 w-4 text-rose-500" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
             <AdminPagination
               page={pagination.page}
               pages={pagination.pages}
               total={pagination.total}
+              limit={limit}
               itemLabel="questions"
               onPageChange={setPage}
+              onLimitChange={(l) => { setLimit(l); setPage(1); }}
             />
           </div>
         )}

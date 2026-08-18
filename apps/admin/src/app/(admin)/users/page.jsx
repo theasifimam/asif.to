@@ -41,6 +41,7 @@ const AddUserModal = dynamic(() =>
 
 export default function UsersPage() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -60,7 +61,7 @@ export default function UsersPage() {
     refetch,
   } = useGetUsersQuery({
     page: currentPage,
-    limit: 10,
+    limit,
     ...(deferredSearch && { search: deferredSearch }),
     ...(roleFilter !== "all" && { role: roleFilter }),
     ...(statusFilter !== "all" && { status: statusFilter }),
@@ -246,6 +247,11 @@ export default function UsersPage() {
           page={pagination.page}
           pages={pagination.totalPages}
           total={pagination.total}
+          limit={limit}
+          onLimitChange={(val) => {
+            setLimit(val);
+            setCurrentPage(1);
+          }}
           itemLabel="users"
           onPageChange={setCurrentPage}
         />

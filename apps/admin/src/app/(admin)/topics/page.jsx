@@ -60,6 +60,7 @@ export default function TopicsPage() {
   const viewMode = filters.view || "table";
   const setViewMode = (v) => setFilters((current) => ({ ...current, view: v }));
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
+  const [limit, setLimit] = useState(20);
   const [loading, setLoading] = useState(true);
   const [reordering, setReordering] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -74,7 +75,7 @@ export default function TopicsPage() {
     setLoading(true);
     const topicParams = {
       page: filters.page,
-      limit: canReorder ? 100 : 20,
+      limit: canReorder ? 100 : limit,
     };
     if (filters.search.trim()) topicParams.search = filters.search.trim();
     if (filters.course !== "all") topicParams.course = filters.course;
@@ -404,10 +405,12 @@ export default function TopicsPage() {
               page={pagination.page}
               pages={pagination.pages}
               total={pagination.total || 0}
+              limit={limit}
               itemLabel="topics"
               onPageChange={(page) =>
                 setFilters((current) => ({ ...current, page }))
               }
+              onLimitChange={(l) => { setLimit(l); setFilters((c) => ({ ...c, page: 1 })); }}
             />
           </div>
         ) : (
@@ -553,10 +556,12 @@ export default function TopicsPage() {
               page={pagination.page}
               pages={pagination.pages}
               total={pagination.total || 0}
+              limit={limit}
               itemLabel="topics"
               onPageChange={(page) =>
                 setFilters((current) => ({ ...current, page }))
               }
+              onLimitChange={(l) => { setLimit(l); setFilters((c) => ({ ...c, page: 1 })); }}
             />
           </div>
         )}
