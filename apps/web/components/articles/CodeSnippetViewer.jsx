@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Copy, Code, Maximize2, Minimize2, Play } from "lucide-react";
 import CodePlaygroundModal from "@/components/interactive-code/CodePlaygroundModal";
 import hljs from "highlight.js";
-import "highlight.js/styles/atom-one-dark.css";
+import "highlight.js/styles/github.css";
 
 export default function CodeSnippetViewer({
   code = "",
@@ -64,13 +64,13 @@ export default function CodeSnippetViewer({
     <>
       <div
         ref={codeSnippetRef}
-        className="my-5 overflow-hidden rounded-2xl sm:rounded-3xl border border-zinc-200/70 bg-[#0d1117] text-zinc-100 shadow-xs dark:border-zinc-800/70 transition-all"
+        className="theme-code-snippet my-5 overflow-hidden rounded-2xl sm:rounded-3xl border border-zinc-200 bg-white text-zinc-900 shadow-xs transition-all dark:border-zinc-800 dark:bg-[#0d1117] dark:text-zinc-100"
       >
         {/* Header bar */}
-        <div className="flex items-center justify-between px-4 sm:px-5 py-3 bg-[#161b22] text-xs font-mono text-zinc-400 border-b border-zinc-800/60">
+        <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50 px-4 py-3 font-mono text-xs text-zinc-500 dark:border-zinc-800/60 dark:bg-[#161b22] dark:text-zinc-400 sm:px-5">
           <div className="flex items-center gap-2 min-w-0">
-            <Code className="w-4 h-4 text-blue-400 shrink-0" />
-            <span className="font-bold text-zinc-200 text-xs tracking-wide uppercase">
+            <Code className="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
+            <span className="text-xs font-bold uppercase tracking-wide text-zinc-700 dark:text-zinc-200">
               {title || language}
             </span>
           </div>
@@ -89,7 +89,7 @@ export default function CodeSnippetViewer({
             <button
               type="button"
               onClick={handleCopy}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-800 hover:bg-zinc-700 active:scale-95 transition-all text-zinc-300 hover:text-white font-semibold text-[11px] shrink-0 cursor-pointer border border-zinc-700/50"
+              className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-semibold text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-950 active:scale-95 dark:border-zinc-700/50 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white"
               title="Copy code to clipboard"
             >
               {copied ? (
@@ -107,7 +107,7 @@ export default function CodeSnippetViewer({
             <button
               type="button"
               onClick={toggleFullscreen}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-zinc-400 transition-all hover:bg-zinc-700 hover:text-white active:scale-95 cursor-pointer border border-zinc-700/50"
+              className="flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 transition-all hover:bg-zinc-100 hover:text-zinc-950 active:scale-95 dark:border-zinc-700/50 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-white"
               title={fullscreen ? "Exit fullscreen" : "Open code fullscreen"}
               aria-label={
                 fullscreen ? "Exit code fullscreen" : "Open code fullscreen"
@@ -123,7 +123,7 @@ export default function CodeSnippetViewer({
         </div>
 
         {/* Code Area with highlight.js & word wrapping */}
-        <div className="max-w-full overflow-auto bg-[#0d1117] p-4 sm:p-5 font-mono text-xs sm:text-sm leading-relaxed text-zinc-200 selection:bg-blue-500/30">
+        <div className="max-w-full overflow-auto bg-white p-4 font-mono text-xs leading-relaxed text-zinc-900 selection:bg-blue-200 dark:bg-[#0d1117] dark:text-zinc-200 dark:selection:bg-blue-500/30 sm:p-5 sm:text-sm">
           <pre className="m-0 p-0! max-w-full whitespace-pre-wrap wrap-break-word border-0! bg-transparent!">
             <code
               className={`hljs language-${language} block max-w-full whitespace-pre-wrap wrap-break-word bg-transparent! p-0! m-0!`}

@@ -103,25 +103,26 @@ export default function ConversationSidebar({
             </span>
           )}
         </div>
+        <div className="flex flex-row gap-2 mt-4">
+          <div className="relative w-full md:w-1/2">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-zinc-400" />
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Find people or conversations"
+              className="h-10 w-full rounded-xl border border-zinc-200 bg-zinc-50 pl-9 pr-3 text-xs outline-none focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-900"
+            />
+          </div>
 
-        <div className="relative mt-4">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-zinc-400" />
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Find people or conversations"
-            className="h-10 w-full rounded-xl border border-zinc-200 bg-zinc-50 pl-9 pr-3 text-xs outline-none focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-900"
-          />
-        </div>
-
-        <div className="relative mt-2">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-zinc-400" />
-          <input
-            value={messageSearch}
-            onChange={(event) => setMessageSearch(event.target.value)}
-            placeholder="Search message history"
-            className="h-10 w-full rounded-xl border border-zinc-200 bg-white pl-9 pr-3 text-xs outline-none focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-950"
-          />
+          <div className="relative w-full md:w-1/2">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-zinc-400" />
+            <input
+              value={messageSearch}
+              onChange={(event) => setMessageSearch(event.target.value)}
+              placeholder="Search message history"
+              className="h-10 w-full rounded-xl border border-zinc-200 bg-white pl-9 pr-3 text-xs outline-none focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-950"
+            />
+          </div>
         </div>
       </div>
 
@@ -174,7 +175,10 @@ export default function ConversationSidebar({
                       key={conversation._id}
                       conversation={conversation}
                       userId={currentUserId}
-                      isSelected={Boolean(selected?._id && idOf(selected) === idOf(conversation._id))}
+                      isSelected={Boolean(
+                        selected?._id &&
+                        idOf(selected) === idOf(conversation._id),
+                      )}
                       isTyping={Boolean(typingByConversation[conversation._id])}
                       onClick={() => onOpenConversation(conversation)}
                     />
@@ -187,7 +191,10 @@ export default function ConversationSidebar({
                       key={conversation._id}
                       conversation={conversation}
                       userId={currentUserId}
-                      isSelected={Boolean(selected?._id && idOf(selected) === idOf(conversation._id))}
+                      isSelected={Boolean(
+                        selected?._id &&
+                        idOf(selected) === idOf(conversation._id),
+                      )}
                       isTyping={Boolean(typingByConversation[conversation._id])}
                       onClick={() => onOpenConversation(conversation)}
                     />
@@ -200,7 +207,10 @@ export default function ConversationSidebar({
                       key={conversation._id}
                       conversation={conversation}
                       userId={currentUserId}
-                      isSelected={Boolean(selected?._id && idOf(selected) === idOf(conversation._id))}
+                      isSelected={Boolean(
+                        selected?._id &&
+                        idOf(selected) === idOf(conversation._id),
+                      )}
                       isTyping={Boolean(typingByConversation[conversation._id])}
                       onClick={() => onOpenConversation(conversation)}
                     />
@@ -215,7 +225,10 @@ export default function ConversationSidebar({
                         onClick={() => onStartDirect(member)}
                         className="flex w-full items-center gap-3 rounded-xl p-3 text-left transition hover:bg-zinc-100 dark:hover:bg-zinc-900 cursor-pointer"
                       >
-                        <SidebarAvatar user={member} online={isOnline(member._id)} />
+                        <SidebarAvatar
+                          user={member}
+                          online={isOnline(member._id)}
+                        />
                         <div className="min-w-0">
                           <p className="truncate text-xs font-bold dark:text-white">
                             {member.fullName}

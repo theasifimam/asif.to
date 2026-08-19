@@ -5,14 +5,40 @@ import { absoluteUrl, assetUrl, jsonLd } from "@/lib/seo";
 export const dynamic = "force-dynamic";
 
 async function getArticle(slugWithId) {
-  const id = slugWithId.substring(slugWithId.lastIndexOf("-") + 1);
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-  const res = await fetch(`${baseUrl}/articles/${id}`, {
-    next: { revalidate: 60 },
-  });
-  if (!res.ok) return null;
-  const body = await res.json();
-  return body.data;
+  if (!baseUrl || !slugWithId) return null;
+
+  const lastDash = slugWithId.lastIndexOf("-");
+  const possibleId = lastDash >= 0 ? slugWithId.slice(lastDash + 1) : "";
+  const looksLikeMongoId = /^[a-f0-9]{24}$/i.test(possibleId);
+
+  if (looksLikeMongoId) {
+    try {
+      const byId = await fetch(`${baseUrl}/articles/${possibleId}`, {
+        next: { revalidate: 60 },
+      });
+      if (byId.ok) {
+        const body = await byId.json();
+        if (body?.data) return body.data;
+      }
+    } catch {}
+  }
+
+  const slug = looksLikeMongoId
+    ? slugWithId.slice(0, lastDash)
+    : slugWithId;
+
+  try {
+    const bySlug = await fetch(
+      `${baseUrl}/articles/slug/${encodeURIComponent(slug)}`,
+      { next: { revalidate: 60 } },
+    );
+    if (!bySlug.ok) return null;
+    const body = await bySlug.json();
+    return body?.data || null;
+  } catch {
+    return null;
+  }
 }
 
 export async function generateMetadata({ params }) {

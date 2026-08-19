@@ -168,6 +168,12 @@ export default function PlannerPage() {
   useEffect(() => {
     if (boardId) loadBoard(boardId);
   }, [boardId, loadBoard]); // eslint-disable-line react-hooks/set-state-in-effect
+
+  useEffect(() => {
+    const refresh = () => boardId && loadBoard(boardId, true);
+    window.addEventListener("planner:task-created", refresh);
+    return () => window.removeEventListener("planner:task-created", refresh);
+  }, [boardId, loadBoard]);
   useEffect(() => {
     const keydown = (event) => {
       const typing = ["INPUT", "TEXTAREA", "SELECT"].includes(
@@ -561,6 +567,27 @@ export default function PlannerPage() {
       sort: "position",
     });
 
+  const toggleTodoDone = async (card) => {
+    const currentColumn = columns.find(
+      (column) => column._id === getColumnId(card),
+    );
+    const doneColumn = columns.find(isDoneColumn);
+    const openColumn = columns.find((column) => !isDoneColumn(column));
+    const targetColumn = isDoneColumn(currentColumn) ? openColumn : doneColumn;
+
+    if (!targetColumn) return;
+
+    const response = await kanbanApi.updateCard(card._id, {
+      column: targetColumn._id,
+    });
+
+    if (response.success) {
+      await loadBoard(boardId, true);
+    } else {
+      toast.error(response.error || "Unable to update task");
+    }
+  };
+
   if (loading && !board)
     return (
       <div className="flex h-full items-center justify-center">
@@ -881,6 +908,93 @@ export default function PlannerPage() {
           </div>
         )}
       </div>
+      {/* Small screens: simple Todo list; desktop Kanban remains unchanged. */}
+      <div className="min-h-0 flex-1 overflow-y-auto p-3 md:hidden">
+        <div className="mb-2 flex items-center justify-between px-1">
+          <div>
+            <h2 className="text-sm font-black">Tasks</h2>
+            <p className="text-[10px] text-zinc-500">
+              Check a task to move it to Done. Tap its title for details.
+            </p>
+          </div>
+          <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-zinc-500 shadow-xs dark:bg-zinc-900">
+            {visibleCards.length}
+          </span>
+        </div>
+
+        <div className="space-y-2">
+          {visibleCards.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-zinc-300 bg-white p-8 text-center text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900">
+              No tasks match the current filters.
+            </div>
+          ) : (
+            visibleCards.map((card) => {
+              const column = columns.find(
+                (item) => item._id === getColumnId(card),
+              );
+              const completed = isDoneColumn(column);
+
+              return (
+                <div
+                  key={card._id}
+                  className={`flex items-start gap-3 rounded-2xl border bg-white p-3 shadow-xs dark:bg-zinc-900 ${
+                    completed
+                      ? "border-emerald-200 opacity-65 dark:border-emerald-900"
+                      : "border-zinc-200 dark:border-zinc-800"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleTodoDone(card)}
+                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
+                      completed
+                        ? "border-emerald-500 bg-emerald-500 text-white"
+                        : "border-zinc-300 dark:border-zinc-600"
+                    }`}
+                    aria-label={completed ? "Mark task open" : "Mark task done"}
+                  >
+                    {completed && <span className="text-[10px] font-black">✓</span>}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCard(card)}
+                    className="min-w-0 flex-1 text-left"
+                  >
+                    <div
+                      className={`text-sm font-bold leading-5 ${
+                        completed ? "line-through text-zinc-400" : ""
+                      }`}
+                    >
+                      {card.title}
+                    </div>
+
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-bold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
+                        {card.type || "Task"}
+                      </span>
+
+                      {column?.name && (
+                        <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[9px] font-semibold text-zinc-500 dark:bg-zinc-800">
+                          {column.name}
+                        </span>
+                      )}
+
+                      {card.priority && card.priority !== "None" && (
+                        <span className="text-[9px] font-semibold text-zinc-400">
+                          {card.priority}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      <div className="hidden min-h-0 flex-1 md:flex">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -894,7 +1008,7 @@ export default function PlannerPage() {
         onDragEnd={dragEnd}
       >
         {/* Mobile Column Select Tab Bar */}
-        <div className="flex md:hidden border-b border-zinc-200 bg-white p-2.5 dark:border-zinc-800 dark:bg-zinc-950 overflow-x-auto gap-2 shrink-0 scrollbar-none">
+        <div className="hidden border-b border-zinc-200 bg-white p-2.5 dark:border-zinc-800 dark:bg-zinc-950 overflow-x-auto gap-2 shrink-0 scrollbar-none">
           {columns.map((col) => {
             const colCardsCount = visibleCards.filter(
               (card) => getColumnId(card) === col._id,
@@ -956,6 +1070,7 @@ export default function PlannerPage() {
           {activeCard ? <PlannerCard card={activeCard} overlay /> : null}
         </DragOverlay>
       </DndContext>
+      </div>
       {selectedCard && (
         <CardDetailDrawer
           key={selectedCard._id}

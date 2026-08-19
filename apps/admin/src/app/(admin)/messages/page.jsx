@@ -608,7 +608,7 @@ export default function MessagesPage() {
     ["founder", "admin", "super_admin", "maintainer"].includes(user?.role);
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-white dark:bg-[#0c0c0e]">
+    <div className="flex h-full min-h-0 w-full overflow-hidden bg-white dark:bg-[#0c0c0e]">
       {/* Conversations Sidebar */}
       <ConversationSidebar
         selected={selected}
@@ -629,7 +629,7 @@ export default function MessagesPage() {
 
       {/* Chat Main Area */}
       <main
-        className={`${selected ? "flex" : "hidden md:flex"} min-w-0 flex-1 flex-col bg-white dark:bg-[#0c0c0e]`}
+        className={`${selected ? "flex" : "hidden md:flex"} min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white dark:bg-[#0c0c0e]`}
       >
         {!selected ? (
           <div className="flex flex-1 flex-col items-center justify-center p-8 text-center bg-zinc-50/50 dark:bg-zinc-950/30">

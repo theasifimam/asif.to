@@ -48,6 +48,12 @@
   --border: #bfdbfe; /* blue-200 */
   --input: #bfdbfe; /* blue-200 */
   --ring: #2563eb; /* blue-600 */
+
+  --code-block-bg: #ffffff;
+  --code-block-fg: #172554;
+  --code-block-border: #dbeafe;
+  --code-inline-bg: #eff6ff;
+  --code-inline-fg: #1e40af;
 }
 
 .dark {
@@ -74,6 +80,12 @@
   --border: #1e3a8a; /* blue-900 */
   --input: #1e3a8a; /* blue-900 */
   --ring: #2563eb; /* blue-600 */
+
+  --code-block-bg: #0b0e14;
+  --code-block-fg: #e2e8f0;
+  --code-block-border: rgba(255, 255, 255, 0.08);
+  --code-inline-bg: #172554;
+  --code-inline-fg: #bfdbfe;
 }
 
 body {
@@ -188,16 +200,16 @@ body {
 
 /* ─── Code Snippets & Markdown Code Blocks ─── */
 pre.ql-syntax {
-  background-color: #1a1b26 !important;
-  color: #a9b1d6;
+  background-color: var(--code-block-bg) !important;
+  color: var(--code-block-fg) !important;
   border-radius: 1.5rem !important;
   padding: 1.25rem 1.5rem !important;
   font-family: "JetBrains Mono", "Fira Code", monospace !important;
   font-size: 0.95rem !important;
   line-height: 1.7 !important;
   margin: 2rem 0 !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--code-block-border) !important;
+  box-shadow: 0 8px 24px -16px rgba(15, 23, 42, 0.22);
   white-space: pre-wrap !important;
   word-break: break-word !important;
 }
@@ -214,8 +226,8 @@ pre.hljs,
 .wmde-markdown pre,
 .topic-markdown pre,
 .w-md-editor-preview pre {
-  background-color: #f8fafc !important;
-  color: #0f172a !important;
+  background-color: var(--code-block-bg) !important;
+  color: var(--code-block-fg) !important;
   padding: 1rem 1.25rem !important;
   border-radius: 1.25rem !important;
   white-space: pre-wrap !important;
@@ -226,7 +238,7 @@ pre.hljs,
   font-family: "JetBrains Mono", "Fira Code", monospace !important;
   font-size: 0.9rem !important;
   line-height: 1.7 !important;
-  border: 1px solid #e2e8f0 !important;
+  border: 1px solid var(--code-block-border) !important;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
 }
 
@@ -434,3 +446,136 @@ pre.hljs code,
   opacity: 0.8 !important;
 }
 
+
+
+/* Reading flow: code follows the active site theme everywhere. */
+.prose :not(pre) > code,
+.ql-editor :not(pre) > code,
+.wmde-markdown :not(pre) > code,
+.topic-markdown :not(pre) > code,
+.w-md-editor-preview :not(pre) > code {
+  background: var(--code-inline-bg) !important;
+  color: var(--code-inline-fg) !important;
+  border-color: var(--code-block-border) !important;
+}
+
+.prose pre,
+.ql-editor pre,
+pre.hljs,
+.wmde-markdown pre,
+.topic-markdown pre,
+.w-md-editor-preview pre,
+pre.ql-syntax {
+  background-color: var(--code-block-bg) !important;
+  color: var(--code-block-fg) !important;
+  border-color: var(--code-block-border) !important;
+}
+
+.prose pre code,
+.ql-editor pre code,
+.wmde-markdown pre code,
+.topic-markdown pre code,
+.w-md-editor-preview pre code {
+  background: transparent !important;
+}
+
+pre.ql-syntax,
+.prose pre,
+.ql-editor pre,
+.wmde-markdown pre,
+.topic-markdown pre,
+.w-md-editor-preview pre,
+pre.hljs {
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+
+/* Theme-aware highlight.js colors for dedicated CodeSnippetViewer.
+   Base theme: github.css for light mode. */
+.dark .theme-code-snippet .hljs {
+  color: #c9d1d9 !important;
+}
+
+.dark .theme-code-snippet .hljs-doctag,
+.dark .theme-code-snippet .hljs-keyword,
+.dark .theme-code-snippet .hljs-meta .hljs-keyword,
+.dark .theme-code-snippet .hljs-template-tag,
+.dark .theme-code-snippet .hljs-template-variable,
+.dark .theme-code-snippet .hljs-type,
+.dark .theme-code-snippet .hljs-variable.language_ {
+  color: #ff7b72 !important;
+}
+
+.dark .theme-code-snippet .hljs-title,
+.dark .theme-code-snippet .hljs-title.class_,
+.dark .theme-code-snippet .hljs-title.class_.inherited__,
+.dark .theme-code-snippet .hljs-title.function_ {
+  color: #d2a8ff !important;
+}
+
+.dark .theme-code-snippet .hljs-attr,
+.dark .theme-code-snippet .hljs-attribute,
+.dark .theme-code-snippet .hljs-literal,
+.dark .theme-code-snippet .hljs-meta,
+.dark .theme-code-snippet .hljs-number,
+.dark .theme-code-snippet .hljs-operator,
+.dark .theme-code-snippet .hljs-variable,
+.dark .theme-code-snippet .hljs-selector-attr,
+.dark .theme-code-snippet .hljs-selector-class,
+.dark .theme-code-snippet .hljs-selector-id {
+  color: #79c0ff !important;
+}
+
+.dark .theme-code-snippet .hljs-regexp,
+.dark .theme-code-snippet .hljs-string,
+.dark .theme-code-snippet .hljs-meta .hljs-string {
+  color: #a5d6ff !important;
+}
+
+.dark .theme-code-snippet .hljs-built_in,
+.dark .theme-code-snippet .hljs-symbol {
+  color: #ffa657 !important;
+}
+
+.dark .theme-code-snippet .hljs-comment,
+.dark .theme-code-snippet .hljs-code,
+.dark .theme-code-snippet .hljs-formula {
+  color: #8b949e !important;
+  font-style: italic;
+}
+
+.dark .theme-code-snippet .hljs-name,
+.dark .theme-code-snippet .hljs-quote,
+.dark .theme-code-snippet .hljs-selector-tag,
+.dark .theme-code-snippet .hljs-selector-pseudo {
+  color: #7ee787 !important;
+}
+
+.dark .theme-code-snippet .hljs-subst {
+  color: #c9d1d9 !important;
+}
+
+.dark .theme-code-snippet .hljs-section {
+  color: #1f6feb !important;
+  font-weight: 700;
+}
+
+.dark .theme-code-snippet .hljs-bullet {
+  color: #f2cc60 !important;
+}
+
+.dark .theme-code-snippet .hljs-emphasis {
+  color: #c9d1d9 !important;
+  font-style: italic;
+}
+
+.dark .theme-code-snippet .hljs-strong {
+  color: #c9d1d9 !important;
+  font-weight: 700;
+}
+
+.theme-code-snippet .hljs,
+.theme-code-snippet pre,
+.theme-code-snippet code {
+  background: transparent !important;
+}

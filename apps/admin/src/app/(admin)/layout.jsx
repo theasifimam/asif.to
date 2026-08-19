@@ -49,6 +49,7 @@ import {
 } from "@/components/navigation";
 import NotificationCenter from "@/components/navigation/NotificationCenter";
 import MessageHeaderButton from "@/components/navigation/MessageHeaderButton";
+import QuickPlannerAdd from "@/components/navigation/QuickPlannerAdd";
 import { MessagingProvider } from "@/contexts/MessagingContext";
 import { FloatingChatDock } from "@/components/messaging";
 
@@ -342,7 +343,7 @@ export default function AdminLayout({ children }) {
           {/* Global Minimal Header - Absolute over content for zero layout shift during scroll */}
           <header
             className={`absolute top-0 left-0 right-0 z-40 flex h-16 shrink-0 items-center justify-between bg-zinc-100 backdrop-blur-xl dark:bg-[#09090b]/85 dark:backdrop-blur-xl px-4 transition-all duration-300 ease-out sm:px-6 md:px-8 lg:px-10 ${
-              isMessagesRoute ? "hidden lg:flex" : ""
+              isMessagesRoute ? "hidden" : ""
             } ${
               isNavVisible
                 ? "translate-y-0 opacity-100"
@@ -376,6 +377,8 @@ export default function AdminLayout({ children }) {
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span className="hidden sm:inline">Active</span>
               </div>
+
+              {hasPermission(user, "planner.view") && <QuickPlannerAdd />}
 
               {/* Utility Icon Actions - Hidden on smaller devices */}
               <div className="hidden sm:block">
