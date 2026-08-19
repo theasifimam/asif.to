@@ -59,6 +59,8 @@ const postSettingsSchema = new Schema(
 const socialPostSchema = new Schema({
   name: { type: String, required: true, trim: true },
   category: { type: String, default: "", trim: true },
+  caption: { type: String, default: "", trim: true },
+  hashtags: { type: [String], default: [] },
   platform: {
     type: String,
     enum: ["instagram", "linkedin", "twitter", "facebook", "general"],

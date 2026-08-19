@@ -47,6 +47,7 @@ export default function SlideFrame({
         background: "#0a0a0f",
         color: "#f4f4f5",
         fontFamily: "'Inter', 'Outfit', sans-serif",
+        whiteSpace: "pre-line",
       }}
     >
       {/* Accent top bar */}

@@ -18,7 +18,7 @@ export const getSocialPosts = async (req, res) => {
     }
     const posts = await SocialPost.find(filter)
       .sort({ updatedAt: -1 })
-      .select("name category platform format status slides settings createdAt updatedAt")
+      .select("name category caption hashtags platform format status slides settings createdAt updatedAt")
       .lean();
     // Attach slide count and first slide template for listing display
     const data = posts.map((p) => ({
@@ -58,12 +58,15 @@ export const getSocialPostById = async (req, res) => {
  */
 export const createSocialPost = async (req, res) => {
   try {
-    const { name, category, platform, format, settings, slides } = req.body;
+    const { name, category, caption, hashtags, platform, format, settings, slides } =
+      req.body;
     if (!name)
       return res.status(400).json({ success: false, message: "Post name is required." });
     const post = await SocialPost.create({
       name,
       category: category || "",
+      caption: caption || "",
+      hashtags: Array.isArray(hashtags) ? hashtags : [],
       platform: platform || "instagram",
       format: format || "square-1080",
       settings: settings || {},
@@ -84,7 +87,7 @@ export const createSocialPost = async (req, res) => {
 export const updateSocialPost = async (req, res) => {
   try {
     const allowed = [
-      "name", "category", "platform", "format", "status", "settings", "slides",
+      "name", "category", "caption", "hashtags", "platform", "format", "status", "settings", "slides",
     ];
     const updates = { updatedAt: new Date() };
     allowed.forEach((key) => {

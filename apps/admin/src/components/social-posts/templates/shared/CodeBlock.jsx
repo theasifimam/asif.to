@@ -3,6 +3,75 @@
 import { useMemo } from "react";
 import hljs from "highlight.js";
 
+const HIGHLIGHT_STYLES = `
+.social-code-block .hljs-comment,
+.social-code-block .hljs-quote { color:#8b949e; font-style:italic; }
+
+.social-code-block .hljs-keyword,
+.social-code-block .hljs-selector-tag,
+.social-code-block .hljs-subst { color:#ff7b72; }
+
+.social-code-block .hljs-string,
+.social-code-block .hljs-doctag,
+.social-code-block .hljs-regexp,
+.social-code-block .hljs-template-variable { color:#a5d6ff; }
+
+.social-code-block .hljs-title,
+.social-code-block .hljs-title.function_,
+.social-code-block .hljs-section,
+.social-code-block .hljs-name { color:#d2a8ff; }
+
+.social-code-block .hljs-number,
+.social-code-block .hljs-literal,
+.social-code-block .hljs-symbol,
+.social-code-block .hljs-bullet { color:#79c0ff; }
+
+.social-code-block .hljs-built_in,
+.social-code-block .hljs-type,
+.social-code-block .hljs-class .hljs-title { color:#ffa657; }
+
+.social-code-block .hljs-variable,
+.social-code-block .hljs-params,
+.social-code-block .hljs-attr,
+.social-code-block .hljs-property { color:#ffa198; }
+
+.social-code-block .hljs-meta,
+.social-code-block .hljs-meta .hljs-keyword { color:#7ee787; }
+
+.social-code-block[data-code-theme="light"] .hljs-comment,
+.social-code-block[data-code-theme="light"] .hljs-quote { color:#6e7781; }
+
+.social-code-block[data-code-theme="light"] .hljs-keyword,
+.social-code-block[data-code-theme="light"] .hljs-selector-tag,
+.social-code-block[data-code-theme="light"] .hljs-subst { color:#cf222e; }
+
+.social-code-block[data-code-theme="light"] .hljs-string,
+.social-code-block[data-code-theme="light"] .hljs-doctag,
+.social-code-block[data-code-theme="light"] .hljs-regexp,
+.social-code-block[data-code-theme="light"] .hljs-template-variable { color:#0a3069; }
+
+.social-code-block[data-code-theme="light"] .hljs-title,
+.social-code-block[data-code-theme="light"] .hljs-title.function_,
+.social-code-block[data-code-theme="light"] .hljs-section,
+.social-code-block[data-code-theme="light"] .hljs-name { color:#8250df; }
+
+.social-code-block[data-code-theme="light"] .hljs-number,
+.social-code-block[data-code-theme="light"] .hljs-literal,
+.social-code-block[data-code-theme="light"] .hljs-symbol,
+.social-code-block[data-code-theme="light"] .hljs-bullet { color:#0550ae; }
+
+.social-code-block[data-code-theme="light"] .hljs-built_in,
+.social-code-block[data-code-theme="light"] .hljs-type,
+.social-code-block[data-code-theme="light"] .hljs-class .hljs-title,
+.social-code-block[data-code-theme="light"] .hljs-variable,
+.social-code-block[data-code-theme="light"] .hljs-params,
+.social-code-block[data-code-theme="light"] .hljs-attr,
+.social-code-block[data-code-theme="light"] .hljs-property { color:#953800; }
+
+.social-code-block[data-code-theme="light"] .hljs-meta,
+.social-code-block[data-code-theme="light"] .hljs-meta .hljs-keyword { color:#116329; }
+`;
+
 export default function CodeBlock({
   code = {},
   settings = {},
@@ -38,6 +107,8 @@ export default function CodeBlock({
 
   return (
     <div
+      className="social-code-block"
+      data-code-theme={isDark ? "dark" : "light"}
       style={{
         borderRadius: 22,
         overflow: "hidden",
@@ -139,6 +210,7 @@ export default function CodeBlock({
           );
         })}
       </div>
+      <style>{HIGHLIGHT_STYLES}</style>
     </div>
   );
 }

@@ -12,6 +12,8 @@ const uid = () =>
 export const EMPTY_POST = {
   name: "Untitled social post",
   category: "",
+  caption: "",
+  hashtags: [],
   platform: "instagram",
   format: "square-1080",
   status: "draft",

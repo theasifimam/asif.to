@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Redo2, Save, Undo2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { FileJson2, Redo2, Save, Undo2 } from "lucide-react";
 import { socialPostsApi } from "@/lib/api";
 import useSocialPost, { EMPTY_POST } from "./hooks/useSocialPost";
 import SlideEditor from "./SlideEditor";
@@ -13,6 +13,7 @@ import ExportControls from "./export/ExportControls";
 import TemplateRenderer from "./templates/TemplateRenderer";
 import { getFormat } from "./formats";
 import { Button } from "../ui";
+import JsonImportPanel from "./JsonImportPanel";
 
 export default function SocialPostStudio({
   initialPost = EMPTY_POST,
@@ -23,6 +24,7 @@ export default function SocialPostStudio({
   const [activeId, setActiveId] = useState(initialPost.slides?.[0]?.id);
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState(null);
+  const [showJsonImport, setShowJsonImport] = useState(false);
   const previewRef = useRef(null);
   const exportRefs = useRef([]);
 
@@ -60,6 +62,13 @@ export default function SocialPostStudio({
     } finally {
       setSaving(false);
     }
+  };
+
+  const importPost = (post) => {
+    editor.reset(post);
+    setActiveId(post.slides[0]?.id);
+    setSavedAt(null);
+    setShowJsonImport(false);
   };
 
   useEffect(() => {
@@ -115,8 +124,25 @@ export default function SocialPostStudio({
             <Save size={15} />
             {saving ? "Saving..." : "Save"}
           </Button>
+
+          {!postId && (
+            <Button
+              variant={showJsonImport ? "default" : "outline"}
+              onClick={() => setShowJsonImport((value) => !value)}
+            >
+              <FileJson2 size={15} />
+              Import JSON
+            </Button>
+          )}
         </div>
       </div>
+
+      {!postId && showJsonImport && (
+        <JsonImportPanel
+          onImport={importPost}
+          onCancel={() => setShowJsonImport(false)}
+        />
+      )}
 
       <SlideNavigator
         slides={editor.post.slides}

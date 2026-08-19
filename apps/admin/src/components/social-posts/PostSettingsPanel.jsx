@@ -37,6 +37,34 @@ export default function PostSettingsPanel({
         />
       </label>
 
+      <label className="block space-y-1.5">
+        <span className="text-xs font-semibold text-muted-foreground">
+          Post caption
+        </span>
+        <textarea
+          className={`${input} min-h-24 resize-y`}
+          placeholder="Caption to publish with the carousel"
+          value={post.caption || ""}
+          onChange={(e) => onPostChange({ caption: e.target.value })}
+        />
+      </label>
+
+      <label className="block space-y-1.5">
+        <span className="text-xs font-semibold text-muted-foreground">
+          Hashtags
+        </span>
+        <input
+          className={input}
+          placeholder="#ReactJS #JavaScript #WebDevelopment"
+          value={(post.hashtags || []).join(" ")}
+          onChange={(e) =>
+            onPostChange({
+              hashtags: e.target.value.split(/[\s,]+/).filter(Boolean),
+            })
+          }
+        />
+      </label>
+
       <div className="grid grid-cols-2 gap-3">
         <label className="space-y-1.5">
           <span className="text-xs font-semibold text-muted-foreground">
