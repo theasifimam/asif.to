@@ -22,7 +22,7 @@ export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({
     "question_bank.view", "question_bank.manage", "planner.view", "planner.manage",
     "analytics.view", "seo.view", "users.view", "users.create", "users.edit",
     "users.suspend", "users.delete", "authors.manage", "invitations.manage",
-    "playground.manage", "messages.view", "messages.send", "messages.channels.manage", "messages.attach", "messages.pin", "messages.moderate",
+    "playground.manage", "social_integrations.manage", "messages.view", "messages.send", "messages.channels.manage", "messages.attach", "messages.pin", "messages.moderate",
   ],
   super_admin: ["*"],
 });
@@ -64,6 +64,7 @@ const routeRules = [
   [/^\/quiz\/(?:new|[^/]+\/edit)(?:\/|$)/, "question_bank.manage"],
   [/^\/quiz(?:\/|$)/, "question_bank.view"],
   [/^\/social-posts(?:\/|$)/, "articles.create"],
+  [/^\/social-integrations(?:\/|$)/, "social_integrations.manage"],
   [/^\/planner(?:\/|$)/, "planner.view"],
 ];
 

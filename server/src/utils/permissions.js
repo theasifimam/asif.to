@@ -37,6 +37,7 @@ export const PERMISSION_CATALOG = Object.freeze([
   ["roles.manage", "Manage roles and permissions", "System"],
   ["settings.manage", "Manage system settings", "System"],
   ["playground.manage", "Manage interactive code playground", "System"],
+  ["social_integrations.manage", "Connect and manage social publishing accounts", "System"],
 ]);
 
 export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({

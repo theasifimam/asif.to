@@ -510,3 +510,11 @@ export const socialPostsApi = {
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPE DEFINITIONS (Placeholder types for API responses)
 // ═══════════════════════════════════════════════════════════════════════════
+
+/** Social publishing account integrations. */
+export const socialIntegrationsApi = {
+  list: () => apiGet("/social-integrations"),
+  connect: (platform) => apiGet(`/social-integrations/${platform}/connect`),
+  selectFacebookPage: (pageId) => apiPatch("/social-integrations/facebook/account", { pageId }),
+  disconnect: (platform) => apiDelete(`/social-integrations/${platform}`),
+};

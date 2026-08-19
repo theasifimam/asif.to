@@ -22,6 +22,7 @@ import {
   Code2,
   ScrollText,
   Image,
+  Share2,
 } from "lucide-react";
 import AdminGlobalSearch from "@/components/search/AdminGlobalSearch";
 import { useAuth } from "@/contexts/AuthContext";
@@ -128,6 +129,13 @@ const NAV_ITEMS = [
         icon: Image,
         permission: "articles.create",
         description: "Branded social images",
+      },
+      {
+        name: "Social Integrations",
+        href: "/social-integrations",
+        icon: Share2,
+        permission: "social_integrations.manage",
+        description: "Connect publishing accounts",
       },
     ],
   },
