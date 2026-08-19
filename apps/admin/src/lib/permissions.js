@@ -63,6 +63,7 @@ const routeRules = [
   [/^\/cheatsheets(?:\/|$)/, "cheatsheets.view"],
   [/^\/quiz\/(?:new|[^/]+\/edit)(?:\/|$)/, "question_bank.manage"],
   [/^\/quiz(?:\/|$)/, "question_bank.view"],
+  [/^\/social-posts(?:\/|$)/, "articles.create"],
   [/^\/planner(?:\/|$)/, "planner.view"],
 ];
 

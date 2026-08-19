@@ -1,5 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import { getCourse } from "@/lib/publicContent";
+import { getPublicUserProfile } from "@/lib/publicContent";
 import { TECH_STACKS, COURSES } from "@/lib/tutorialData";
 import UserProfileClient from "@/components/authors/UserProfileClient";
 
@@ -18,12 +19,15 @@ export async function generateMetadata({ params }) {
     return { title: "Redirecting...", robots: { index: false, follow: false } };
   }
 
-  const isProfile = rawSlug.startsWith("@");
+  // For @username URLs, redirect happens in the page component — metadata is irrelevant
+  if (rawSlug.startsWith("@")) {
+    return { title: "Redirecting...", robots: { index: false, follow: false } };
+  }
 
   return {
-    title: `@${cleanUsername} - Profile | asif.to`,
-    description: `View @${cleanUsername}'s learning progress and profile on asif.to.`,
-    ...(isProfile ? { robots: { index: false, follow: false } } : {}),
+    title: `${cleanUsername} - Profile | asif.to`,
+    description: `View ${cleanUsername}'s learning progress and profile on asif.to.`,
+    robots: { index: false, follow: false },
   };
 }
 
@@ -49,13 +53,13 @@ export default async function UserProfilePage({ params }) {
     notFound();
   }
 
-  // 4. Handle explicit user profiles prefixed with @ (e.g., /@username)
+  // 4. Backward compat: /@username → /username (permanent redirect)
   if (rawSlug.startsWith("@")) {
     const cleanUsername = rawSlug.replace(/^@+/, "");
-    return <UserProfileClient username={cleanUsername} />;
+    redirect(`/${encodeURIComponent(cleanUsername)}`);
   }
 
-  // 5. If not prefixed with @, check if it matches a course slug
+  // 5. Check if it matches a course slug → redirect to /courses/...
   const isStaticCourse =
     TECH_STACKS.some((t) => t.id?.toLowerCase() === rawSlug.toLowerCase()) ||
     COURSES.some(
@@ -74,6 +78,13 @@ export default async function UserProfilePage({ params }) {
     redirect(`/courses/${encodeURIComponent(dynamicCourse.slug || rawSlug)}`);
   }
 
-  // 6. If not a course or static file, redirect standard usernames to the canonical /@username format
-  redirect(`/@${encodeURIComponent(rawSlug)}`);
+  // 6. Check if a user exists with this username
+  const userProfile = await getPublicUserProfile(rawSlug);
+  if (userProfile?.user) {
+    return <UserProfileClient username={rawSlug} />;
+  }
+
+  // 7. No course and no user found — show 404
+  notFound();
 }
+

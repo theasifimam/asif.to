@@ -17,5 +17,5 @@ export default async function AccountPage() {
     redirect("/login?callbackUrl=/account");
   }
 
-  redirect(`/@${session.user.username}`);
+  redirect(`/${session.user.username}`);
 }

@@ -193,7 +193,7 @@ export default function ProfileSettingsPage() {
             : setOAuthCredentials({ user: res.data.user }),
         );
         toast.success("Profile updated successfully!");
-        router.push(`/@${username}`);
+        router.push(`/${username}`);
       }
     } catch (err) {
       toast.error(err?.data?.message || "Failed to update profile");
@@ -221,7 +221,7 @@ export default function ProfileSettingsPage() {
         {/* Top Header & Breadcrumb */}
         <div className="flex flex-col gap-3">
           <Link
-            href={`/@${username || ""}`}
+            href={`/${username || ""}`}
             className="flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-foreground transition-colors w-fit group"
           >
             <ChevronLeft
@@ -762,7 +762,7 @@ export default function ProfileSettingsPage() {
           {/* Sticky Actions Bar */}
           <div className="sticky bottom-4 z-20 flex items-center justify-between gap-3 p-4 rounded-3xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 shadow-xl mt-2">
             <Link
-              href={`/@${username || ""}`}
+              href={`/${username || ""}`}
               className="px-5 py-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-bold transition-all text-center"
             >
               Cancel

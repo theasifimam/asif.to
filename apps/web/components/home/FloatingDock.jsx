@@ -14,7 +14,7 @@ export default function FloatingDock() {
     { label: "Home", href: "/", icon: Home },
     { label: "Articles", href: "/articles", icon: Compass },
     { label: "Search", href: "/search", icon: Search },
-    { label: "Profile", href: user?.username ? `/@${user.username}` : "/", icon: User },
+    { label: "Profile", href: user?.username ? `/${user.username}` : "/", icon: User },
   ];
 
   return (

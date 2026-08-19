@@ -24,7 +24,7 @@ export default function ProfilePrivateView({
       </h1>
       <p className="text-xs sm:text-sm text-zinc-500 max-w-md leading-relaxed">
         {isAuthenticated
-          ? `The profile for @${cleanParam} is not accessible or set to private.`
+          ? `The profile for ${cleanParam} is not accessible or set to private.`
           : "Track your course progress, manage saved syntax cheatsheets, flashcard revision decks, and personalized learning preferences."}
       </p>
 

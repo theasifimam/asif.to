@@ -11,16 +11,22 @@ import Image from "next/image";
 
 export default function MobileNav() {
   const pathname = usePathname();
-  const { user, isAuthenticated, isInitialized } = useAppSelector((s) => s.auth);
+  const { user, isAuthenticated, isInitialized } = useAppSelector(
+    (s) => s.auth,
+  );
 
   const navItems = [
     { icon: Home, label: "Home", href: "/" },
     { icon: Search, label: "Search", href: "/search" },
-    { icon: User, label: "Profile", href: user?.username ? `/@${user.username}` : "/" },
+    {
+      icon: User,
+      label: "Profile",
+      href: user?.username ? `/${user.username}` : "/",
+    },
   ];
 
   return (
-    <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm bg-white/95 dark:bg-[#1a1c18]/95 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 px-6 py-2.5 z-[100] rounded-full shadow-lg transition-all duration-300">
+    <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm bg-white/95 dark:bg-[#1a1c18]/95 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 px-6 py-2.5 z-100 rounded-full shadow-lg transition-all duration-300">
       <div className="flex items-center justify-between relative">
         {navItems.map((item) => {
           const isActive = pathname === item.href;

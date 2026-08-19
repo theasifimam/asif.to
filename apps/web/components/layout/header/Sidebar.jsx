@@ -192,7 +192,7 @@ export default function Sidebar({
               ) : (
                 <div className="flex items-center justify-between p-2 rounded-2xl bg-white dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700/60">
                   <Link
-                    href={user?.username ? `/@${user.username}` : "/"}
+                    href={user?.username ? `/${user.username}` : "/"}
                     onClick={onClose}
                     className="flex items-center gap-2.5 overflow-hidden min-w-0"
                   >

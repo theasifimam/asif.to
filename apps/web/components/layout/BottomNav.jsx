@@ -79,7 +79,7 @@ export default function BottomNav() {
   const [authTab, setAuthTab] = useState("signin");
 
   const isHomeActive = pathname === "/";
-  const profilePath = user?.username ? `/@${user.username}` : null;
+  const profilePath = user?.username ? `/${user.username}` : null;
   const isProfileActive = profilePath
     ? pathname.startsWith(profilePath)
     : false;
@@ -407,7 +407,7 @@ export default function BottomNav() {
                   ) : (
                     <div className="flex-1 flex items-center justify-between p-2 rounded-full bg-zinc-50/80 dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800/80 min-w-0">
                       <Link
-                        href={user?.username ? `/@${user.username}` : "/"}
+                        href={user?.username ? `/${user.username}` : "/"}
                         onClick={() => setIsMenuOpen(false)}
                         className="flex items-center gap-2.5 overflow-hidden min-w-0"
                       >

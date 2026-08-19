@@ -24,5 +24,5 @@ export default async function AuthContinuePage({ searchParams }) {
       if (!response.ok) redirect("/login?error=AccessDenied");
     }
   }
-  redirect(`/@${session.user.username}`);
+  redirect(`/${session.user.username}`);
 }

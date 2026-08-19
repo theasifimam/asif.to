@@ -63,7 +63,7 @@ export default function ProfileHero({
           <div className="flex items-center gap-1.5">
             <Link2 className="w-3.5 h-3.5 text-zinc-400" />
             <span className="text-xs font-bold text-zinc-400">
-              asif.to/@{user?.username}
+              asif.to/{user?.username}
             </span>
           </div>
 
@@ -101,7 +101,7 @@ export default function ProfileHero({
         {isOwnProfile && (
           <div className="flex items-center gap-2 self-stretch sm:self-start justify-center">
             <Link
-              href={`/@${user?.username || ""}/settings`}
+              href={`/${user?.username || ""}/settings`}
               className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-xs font-bold transition-colors"
             >
               <Edit3 className="w-3.5 h-3.5" />

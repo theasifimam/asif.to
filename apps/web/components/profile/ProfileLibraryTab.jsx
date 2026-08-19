@@ -414,7 +414,7 @@ export default function ProfileLibraryTab({
                       <Link
                         href={
                           isPublic && entry.slug
-                            ? `/@${user?.username}/${entry.slug}`
+                            ? `/${user?.username}/${entry.slug}`
                             : `/library`
                         }
                         className="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline"
@@ -425,7 +425,7 @@ export default function ProfileLibraryTab({
                     </>
                   ) : (
                     <Link
-                      href={`/@${user?.username}/${entry.slug}`}
+                      href={`/${user?.username}/${entry.slug}`}
                       className="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline ml-auto"
                     >
                       <span>Read Note</span>

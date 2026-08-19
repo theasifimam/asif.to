@@ -208,7 +208,7 @@ export default function ArticleClient({ slug, initialData }) {
 
         {/* Cover Image Container */}
         <div className="w-full max-w-4xl px-6 mb-12">
-          <div className="relative aspect-[16/9] w-full rounded-2xl md:rounded-3xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 shadow-md">
+          <div className="relative aspect-video w-full rounded-2xl md:rounded-3xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 shadow-md">
             <Image
               src={getImageUrl(article.image)}
               alt={article.title}
@@ -277,7 +277,7 @@ export default function ArticleClient({ slug, initialData }) {
 
         {/* Related Articles */}
         {moreArticles?.data && (
-          <section className="w-full max-w-[1400px] mt-20 px-6 lg:px-12 border-t border-zinc-200/60 dark:border-zinc-800/60 pt-16">
+          <section className="w-full max-w-350 mt-20 px-6 lg:px-12 border-t border-zinc-200/60 dark:border-zinc-800/60 pt-16">
             <div className="flex items-center justify-between mb-10">
               <h2 className="text-2xl font-bold font-outfit text-zinc-900 dark:text-white">
                 Further Dispatches

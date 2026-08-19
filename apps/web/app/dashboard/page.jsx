@@ -17,5 +17,5 @@ export default async function DashboardPage() {
     redirect("/login?callbackUrl=/dashboard");
   }
 
-  redirect(`/@${session.user.username}`);
+  redirect(`/${session.user.username}`);
 }

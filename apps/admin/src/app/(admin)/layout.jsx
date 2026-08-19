@@ -21,6 +21,7 @@ import {
   SearchCheck,
   Code2,
   ScrollText,
+  Image,
 } from "lucide-react";
 import AdminGlobalSearch from "@/components/search/AdminGlobalSearch";
 import { useAuth } from "@/contexts/AuthContext";
@@ -120,6 +121,13 @@ const NAV_ITEMS = [
         icon: FolderTree,
         permission: "topics.view",
         description: "Taxonomy & hierarchy",
+      },
+      {
+        name: "Social Posts",
+        href: "/social-posts",
+        icon: Image,
+        permission: "articles.create",
+        description: "Branded social images",
       },
     ],
   },

@@ -342,7 +342,7 @@ export default function Header() {
                 <AuthUserMenu user={oauthSession.user} />
               ) : isAuthenticated && user ? (
                 <Link
-                  href={`/@${user.username}`}
+                  href={`/${user.username}`}
                   className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-bold text-foreground transition-all active:scale-95 shadow-sm"
                 >
                   <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[11px] flex items-center justify-center font-black shadow-sm">

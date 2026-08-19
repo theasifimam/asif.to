@@ -125,3 +125,10 @@ export const getRelatedContent = cache(
     );
   },
 );
+
+export const getPublicUserProfile = cache((username) =>
+  fetchPublicData(
+    `/users/public/${encodeURIComponent(username)}`,
+    "public user profile",
+  ),
+);

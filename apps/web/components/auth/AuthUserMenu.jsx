@@ -47,10 +47,10 @@ export default function AuthUserMenu({ user }) {
             <p className="truncate text-sm font-bold">{user.name}</p>
             <p className="truncate text-[11px] text-zinc-500">{user.email}</p>
           </div>
-          <MenuLink href={`/@${user.username}`} icon={UserRound}>
+          <MenuLink href={`/${user.username}`} icon={UserRound}>
             My Profile
           </MenuLink>
-          <MenuLink href={`/@${user.username}/settings`} icon={Settings}>
+          <MenuLink href={`/${user.username}/settings`} icon={Settings}>
             Profile Settings
           </MenuLink>
           <MenuLink href="/bookmarks" icon={Bookmark}>

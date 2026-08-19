@@ -497,6 +497,16 @@ export const messagingApi = {
   },
 };
 
+/** Social Post Studio */
+export const socialPostsApi = {
+  list: (params = {}) => apiGet(`/social-posts?${new URLSearchParams(params)}`),
+  get: (id) => apiGet(`/social-posts/${id}`),
+  create: (data) => apiPost("/social-posts", data),
+  update: (id, data) => apiPatch(`/social-posts/${id}`, data),
+  duplicate: (id) => apiPost(`/social-posts/${id}/duplicate`),
+  delete: (id) => apiDelete(`/social-posts/${id}`),
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPE DEFINITIONS (Placeholder types for API responses)
 // ═══════════════════════════════════════════════════════════════════════════
