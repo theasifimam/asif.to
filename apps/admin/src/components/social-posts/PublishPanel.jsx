@@ -1,15 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  AlertCircle, CalendarClock, CheckCircle2, ExternalLink, Facebook,
-  History, Instagram, Linkedin, Loader2, RefreshCw, RotateCcw,
-  Send, ShieldAlert, X
-} from "lucide-react";
+import { AlertCircle, CalendarClock, Check, CheckCircle2, ExternalLink, Facebook, History, Instagram, Linkedin, Loader2, RefreshCw, Send, Settings2, Unplug } from "lucide-react";
 import { socialIntegrationsApi, socialPostsApi } from "@/lib/api";
 import { renderNodesToFiles } from "./export/ExportEngine";
 
+const LOCK_MS = 30 * 24 * 60 * 60 * 1000;
 const META = {
   instagram: { label: "Instagram", icon: Instagram },
   facebook: { label: "Facebook", icon: Facebook },
@@ -18,308 +15,163 @@ const META = {
 
 function defaultCaption(post) {
   const caption = (post.caption || "").trim();
-  const tags = (post.hashtags || [])
-    .map((x) => String(x).trim()).filter(Boolean)
-    .map((x) => x.startsWith("#") ? x : `#${x}`);
+  const tags = (post.hashtags || []).map((x) => String(x).trim()).filter(Boolean).map((x) => x.startsWith("#") ? x : `#${x}`);
   const missing = tags.filter((tag) => !caption.toLowerCase().includes(tag.toLowerCase()));
   return [caption, missing.join(" ")].filter(Boolean).join("\n\n");
 }
 
-function tokenState(item) {
-  if (!item?.tokenExpiresAt) return { kind: "ok", label: "Connected" };
-  const expires = new Date(item.tokenExpiresAt);
-  if (Number.isNaN(expires.getTime())) return { kind: "ok", label: "Connected" };
-  const diff = expires.getTime() - Date.now();
-  const days = Math.ceil(diff / 86400000);
-  if (diff <= 0) return { kind: "expired", label: "Token expired" };
-  if (days <= 7) return { kind: "warning", label: `Expires in ${Math.max(1, days)}d` };
-  return { kind: "ok", label: "Connected" };
-}
-
-const fmt = (value) => value ? new Date(value).toLocaleString() : "";
+const fmt = (value, withTime = false) => value ? new Intl.DateTimeFormat(undefined, withTime ? { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" } : { month: "short", day: "numeric", year: "numeric" }).format(new Date(value)) : "";
 
 export default function PublishPanel({ postId, post, exportRefs }) {
   const [integrations, setIntegrations] = useState([]);
+  const [history, setHistory] = useState([]);
   const [selected, setSelected] = useState([]);
   const [caption, setCaption] = useState(() => defaultCaption(post));
   const [publishing, setPublishing] = useState(false);
-  const [busyId, setBusyId] = useState("");
+  const [busyPlatform, setBusyPlatform] = useState("");
   const [statusText, setStatusText] = useState("");
-  const [results, setResults] = useState([]);
-  const [history, setHistory] = useState([]);
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showSchedule, setShowSchedule] = useState(false);
   const [scheduledAt, setScheduledAt] = useState("");
 
   useEffect(() => setCaption(defaultCaption(post)), [post.caption, post.hashtags]);
 
-  async function loadIntegrations() {
-    const result = await socialIntegrationsApi.list();
-    const rows = Array.isArray(result?.data?.data) ? result.data.data : [];
-    setIntegrations(rows);
-    const usable = rows
-      .filter((x) => x.status === "connected" && tokenState(x).kind !== "expired")
-      .map((x) => x.platform);
-    setSelected((current) => current.length ? current.filter((x) => usable.includes(x)) : usable);
-  }
-
-  async function loadHistory() {
+  const loadState = useCallback(async () => {
     if (!postId) return;
-    const result = await socialPostsApi.publications(postId);
-    setHistory(Array.isArray(result?.data?.data) ? result.data.data : []);
-  }
+    const [a, b] = await Promise.all([socialIntegrationsApi.list(), socialPostsApi.publications(postId)]);
+    setIntegrations(Array.isArray(a?.data?.data) ? a.data.data : []);
+    setHistory(Array.isArray(b?.data?.data) ? b.data.data : []);
+  }, [postId]);
 
-  useEffect(() => { loadIntegrations(); loadHistory(); }, [postId]);
+  useEffect(() => { loadState(); }, [loadState]);
 
-  const byPlatform = useMemo(
-    () => Object.fromEntries(integrations.map((x) => [x.platform, x])),
-    [integrations],
-  );
+  const byPlatform = useMemo(() => Object.fromEntries(integrations.map((x) => [x.platform, x])), [integrations]);
+  const latest = useMemo(() => {
+    const out = {};
+    for (const row of history) if (!out[row.platform]) out[row.platform] = row;
+    return out;
+  }, [history]);
+  const latestSuccess = useMemo(() => {
+    const out = {};
+    for (const row of history) if (row.status === "published" && row.publishedAt && !out[row.platform]) out[row.platform] = row;
+    return out;
+  }, [history]);
 
-  function toggle(platform) {
-    const item = byPlatform[platform];
-    if (item?.status !== "connected" || tokenState(item).kind === "expired") return;
-    setSelected((current) =>
-      current.includes(platform)
-        ? current.filter((x) => x !== platform)
-        : [...current, platform],
-    );
-  }
+  const lockFor = (platform) => {
+    const row = latestSuccess[platform];
+    if (!row?.publishedAt) return null;
+    const next = new Date(row.publishedAt).getTime() + LOCK_MS;
+    return next > Date.now() ? { row, next: new Date(next) } : null;
+  };
 
-  async function renderAndUpload() {
+  const tokenState = (item) => {
+    if (!item?.tokenExpiresAt) return null;
+    const diff = new Date(item.tokenExpiresAt).getTime() - Date.now();
+    if (diff <= 0) return { expired: true, label: "Token expired" };
+    const days = Math.ceil(diff / 86400000);
+    return days <= 7 ? { expired: false, label: `Token expires in ${days}d` } : null;
+  };
+
+  async function uploadAssets() {
     setStatusText("Rendering slides...");
-    const nodes = exportRefs.current.filter(Boolean);
-    if (!nodes.length) throw new Error("No slides are available to publish.");
-
-    const files = await renderNodesToFiles(nodes, { name: post.name, type: "png" });
-    setStatusText("Uploading slide images...");
-
+    const files = await renderNodesToFiles(exportRefs.current.filter(Boolean), { name: post.name, type: "png" });
+    setStatusText("Uploading slides...");
     const upload = await socialPostsApi.uploadPublishingAssets(postId, files);
     if (!upload?.success) throw new Error(upload?.error || "Slide upload failed.");
-
     const assets = upload?.data?.data;
-    if (!Array.isArray(assets) || !assets.length) throw new Error("No publishing assets were returned.");
+    if (!Array.isArray(assets) || !assets.length) throw new Error("No publishing assets returned.");
     return assets;
   }
 
-  async function publishNow() {
-    if (!postId || publishing || !selected.length) return;
-    setPublishing(true); setResults([]);
+  async function publishPlatforms(platforms) {
+    if (!platforms.length || publishing) return;
+    setPublishing(true);
     try {
-      const assets = await renderAndUpload();
-      setStatusText(`Publishing to ${selected.length} platform${selected.length === 1 ? "" : "s"}...`);
-      const result = await socialPostsApi.publish(postId, { platforms: selected, assets, caption });
+      const assets = await uploadAssets();
+      setStatusText("Publishing...");
+      const result = await socialPostsApi.publish(postId, { platforms, assets, caption });
       if (!result?.success) throw new Error(result?.error || "Publishing failed.");
-      setResults(Array.isArray(result?.data?.data) ? result.data.data : []);
-      setStatusText("");
-      await loadHistory();
+      await loadState();
+      const failed = (result?.data?.data || []).filter((x) => x.status === "failed").map((x) => x.platform);
+      setSelected(failed);
+      setStatusText(failed.length ? "Some platforms failed. Retry only those platforms." : "Publishing completed.");
     } catch (error) {
       setStatusText(error.message || "Publishing failed.");
     } finally {
       setPublishing(false);
+      setBusyPlatform("");
     }
   }
 
-  async function schedule() {
-    if (!scheduledAt || !selected.length || publishing) return;
-    const when = new Date(scheduledAt);
-    if (Number.isNaN(when.getTime()) || when.getTime() <= Date.now()) {
-      setStatusText("Choose a future date and time."); return;
-    }
-
-    setPublishing(true);
-    try {
-      const assets = await renderAndUpload();
-      setStatusText("Scheduling publication...");
-      const result = await socialPostsApi.schedule(postId, {
-        platforms: selected, assets, caption, scheduledAt: when.toISOString(),
-      });
-      if (!result?.success) throw new Error(result?.error || "Scheduling failed.");
-      setScheduleOpen(false); setScheduledAt("");
-      setStatusText(`Scheduled for ${when.toLocaleString()}.`);
-      await loadHistory();
-    } catch (error) {
-      setStatusText(error.message || "Scheduling failed.");
-    } finally {
-      setPublishing(false);
-    }
+  async function retry(platform) {
+    setBusyPlatform(platform);
+    await publishPlatforms([platform]);
   }
 
-  async function retry(item) {
-    setBusyId(item._id);
-    try {
-      const result = await socialPostsApi.retryPublication(postId, item._id);
-      if (!result?.success) throw new Error(result?.error || "Retry failed.");
-      setStatusText(result?.data?.data?.status === "published"
-        ? `${META[item.platform]?.label} published successfully.`
-        : result?.data?.data?.error || "Retry failed.");
-      await loadHistory();
-    } catch (error) {
-      setStatusText(error.message || "Retry failed.");
-    } finally {
-      setBusyId("");
-    }
-  }
-
-  async function cancel(item) {
-    setBusyId(item._id);
-    try {
-      const result = await socialPostsApi.cancelPublication(postId, item._id);
-      if (!result?.success) throw new Error(result?.error || "Could not cancel schedule.");
-      setStatusText("Scheduled publication cancelled.");
-      await loadHistory();
-    } catch (error) {
-      setStatusText(error.message || "Could not cancel schedule.");
-    } finally {
-      setBusyId("");
-    }
-  }
-
-  if (!postId) {
-    return <div className="admin-surface p-4">
-      <div className="text-sm font-semibold">Publish to social media</div>
-      <p className="mt-1 text-xs text-muted-foreground">Save this post first to enable publishing and scheduling.</p>
-    </div>;
-  }
+  if (!postId) return <div className="admin-surface px-4 py-3 text-xs text-muted-foreground">Save this post first to enable publishing.</div>;
 
   return (
     <div className="admin-surface overflow-hidden">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-zinc-200/80 p-4 dark:border-zinc-800">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200/80 px-4 py-3 dark:border-zinc-800">
         <div>
-          <div className="flex items-center gap-2 font-bold"><Send size={16} />Publish</div>
-          <p className="mt-1 text-xs text-muted-foreground">Publish now, retry failures, or schedule this post.</p>
+          <div className="flex items-center gap-2 text-sm font-bold"><Send size={15}/>Publishing</div>
+          <div className="mt-0.5 text-[11px] text-muted-foreground">Post once, track every platform, and prevent accidental reposts for 30 days.</div>
         </div>
-        <div className="flex gap-2">
-          <button type="button" onClick={() => { setHistoryOpen(!historyOpen); loadHistory(); }}
-            className="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold">
-            <History size={14} />History
-          </button>
-          <button type="button" onClick={() => setScheduleOpen(!scheduleOpen)}
-            className="inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold">
-            <CalendarClock size={14} />Schedule
-          </button>
+        <div className="flex gap-1.5">
+          <Link href="/social-integrations" className="inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-semibold"><Settings2 size={13}/>Accounts</Link>
+          <button onClick={() => setShowHistory(!showHistory)} className="inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-semibold"><History size={13}/>History</button>
+          {socialPostsApi.schedule && <button onClick={() => setShowSchedule(!showSchedule)} className="inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-semibold"><CalendarClock size={13}/>Schedule</button>}
         </div>
       </div>
 
-      <div className="space-y-4 p-4">
-        <div className="grid gap-2 sm:grid-cols-3">
+      <div className="p-4">
+        <div className="grid gap-2 lg:grid-cols-3">
           {Object.entries(META).map(([platform, meta]) => {
             const item = byPlatform[platform];
             const connected = item?.status === "connected";
+            const lock = lockFor(platform);
+            const recent = latest[platform];
+            const failed = recent?.status === "failed" && !lock;
             const token = tokenState(item);
-            const usable = connected && token.kind !== "expired";
             const checked = selected.includes(platform);
             const Icon = meta.icon;
 
-            return <div key={platform}
-              className={`rounded-xl border p-3 ${checked ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-zinc-200 dark:border-zinc-800"}`}>
-              <button type="button" disabled={!usable || publishing} onClick={() => toggle(platform)}
-                className="w-full text-left disabled:cursor-not-allowed disabled:opacity-60">
-                <div className="flex items-center justify-between">
-                  <Icon size={17} />
-                  <span className={`h-4 w-4 rounded-full border ${checked ? "border-primary bg-primary" : "border-zinc-300 dark:border-zinc-700"}`} />
+            return (
+              <div key={platform} className={`rounded-xl border p-3 ${lock ? "border-emerald-200 bg-emerald-50/40 dark:border-emerald-900/60 dark:bg-emerald-950/10" : failed ? "border-rose-200 bg-rose-50/40 dark:border-rose-900/60 dark:bg-rose-950/10" : checked ? "border-primary bg-primary/5" : "border-zinc-200 dark:border-zinc-800"}`}>
+                <div className="flex items-start gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted"><Icon size={15}/></div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-1.5 text-sm font-semibold">
+                      {meta.label}
+                      <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${lock ? "bg-emerald-500/10 text-emerald-600" : failed ? "bg-rose-500/10 text-rose-600" : connected ? "bg-zinc-500/10 text-zinc-500" : "bg-amber-500/10 text-amber-600"}`}>{lock ? "Posted" : failed ? "Failed" : connected ? "Ready" : "Not connected"}</span>
+                    </div>
+                    <div className="mt-0.5 truncate text-[10px] text-muted-foreground">{item?.accountName || "No account connected"}</div>
+                  </div>
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-semibold">{meta.label}</span>
-                  <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
-                    token.kind === "expired" ? "bg-rose-500/10 text-rose-600" :
-                    token.kind === "warning" ? "bg-amber-500/10 text-amber-600" :
-                    connected ? "bg-emerald-500/10 text-emerald-600" : "bg-zinc-500/10 text-zinc-500"
-                  }`}>{connected ? token.label : "Not connected"}</span>
-                </div>
-                <div className="mt-1 truncate text-[11px] text-muted-foreground">
-                  {connected ? item.accountName || "Connected account" : "Connect this platform first"}
-                </div>
-              </button>
-              {(token.kind === "expired" || token.kind === "warning") &&
-                <Link href="/social-integrations" className="mt-2 inline-flex items-center gap-1 text-[10px] font-semibold text-primary">
-                  <RefreshCw size={11} />Reconnect
-                </Link>}
-            </div>;
-          })}
-        </div>
 
-        {integrations.some((x) => x.status === "connected" && tokenState(x).kind === "expired") &&
-          <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-xs">
-            <ShieldAlert size={15} className="mt-0.5 shrink-0 text-amber-600" />
-            <span>One or more social tokens have expired. Reconnect before publishing.</span>
-          </div>}
-
-        <div>
-          <div className="mb-1.5 text-xs font-semibold">Caption + hashtags</div>
-          <textarea value={caption} onChange={(e) => setCaption(e.target.value)} rows={5} disabled={publishing}
-            className="w-full resize-y rounded-xl border border-zinc-200 bg-background px-3 py-2.5 text-sm leading-6 dark:border-zinc-800" />
-        </div>
-
-        {scheduleOpen && <div className="rounded-xl border border-zinc-200 bg-muted/20 p-4 dark:border-zinc-800">
-          <div className="text-sm font-semibold">Schedule publication</div>
-          <p className="mt-1 text-xs text-muted-foreground">Rendered assets are stored now and published by the backend scheduler.</p>
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-            <input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)}
-              className="min-w-0 flex-1 rounded-xl border border-zinc-200 bg-background px-3 py-2.5 text-sm dark:border-zinc-800" />
-            <button type="button" onClick={schedule} disabled={publishing || !scheduledAt || !selected.length}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-2.5 text-xs font-bold text-white disabled:opacity-50 dark:bg-white dark:text-zinc-900">
-              {publishing ? <Loader2 size={14} className="animate-spin" /> : <CalendarClock size={14} />}Schedule
-            </button>
-          </div>
-        </div>}
-
-        {results.length > 0 && <div className="space-y-2">
-          {results.map((result) => {
-            const ok = result.status === "published";
-            return <div key={result.platform} className={`flex items-start justify-between gap-3 rounded-xl border p-3 text-xs ${ok ? "border-emerald-500/20 bg-emerald-500/5" : "border-rose-500/20 bg-rose-500/5"}`}>
-              <div className="flex items-start gap-2">
-                {ok ? <CheckCircle2 size={15} className="mt-0.5 text-emerald-600" /> : <AlertCircle size={15} className="mt-0.5 text-rose-600" />}
-                <div>
-                  <div className="font-semibold">{META[result.platform]?.label} · {ok ? "Published" : "Failed"}</div>
-                  {!ok && result.error && <div className="mt-1 text-muted-foreground">{result.error}</div>}
+                <div className="mt-3">
+                  {lock ? <div className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground"><div><div className="flex items-center gap-1 text-emerald-600"><CheckCircle2 size={11}/>Posted {fmt(lock.row.publishedAt, true)}</div><div className="mt-0.5">Repost after {fmt(lock.next)}</div></div>{lock.row.remotePostUrl && <a href={lock.row.remotePostUrl} target="_blank" rel="noreferrer" className="inline-flex h-7 items-center gap-1 rounded-lg border px-2 font-semibold">View <ExternalLink size={10}/></a>}</div>
+                  : failed ? <><div className="mb-2 line-clamp-2 text-[10px] text-rose-600">{recent.errorMessage || "Publishing failed."}</div><button onClick={() => retry(platform)} disabled={publishing} className="inline-flex h-7 w-full items-center justify-center gap-1.5 rounded-lg bg-rose-600 text-[10px] font-bold text-white disabled:opacity-50">{busyPlatform === platform ? <Loader2 size={11} className="animate-spin"/> : <RefreshCw size={11}/>}Retry {meta.label}</button></>
+                  : !connected ? <Link href="/social-integrations" className="inline-flex h-7 w-full items-center justify-center gap-1.5 rounded-lg border text-[10px] font-semibold"><Unplug size={11}/>Connect account</Link>
+                  : token?.expired ? <Link href="/social-integrations" className="inline-flex h-7 w-full items-center justify-center gap-1.5 rounded-lg bg-amber-500 text-[10px] font-bold text-white"><RefreshCw size={11}/>Reconnect</Link>
+                  : <button onClick={() => setSelected((s) => s.includes(platform) ? s.filter((x) => x !== platform) : [...s, platform])} disabled={publishing} className={`inline-flex h-7 w-full items-center justify-center gap-1.5 rounded-lg text-[10px] font-bold ${checked ? "bg-primary text-primary-foreground" : "border"}`}>{checked ? <Check size={11}/> : <Send size={11}/>} {checked ? "Selected" : `Post to ${meta.label}`}</button>}
+                  {token && !token.expired && !lock && <div className="mt-2 flex items-center gap-1 text-[9px] text-amber-600"><AlertCircle size={10}/>{token.label}</div>}
                 </div>
               </div>
-              {ok && result.remotePostUrl && <a href={result.remotePostUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-semibold text-primary">View <ExternalLink size={11} /></a>}
-            </div>;
+            );
           })}
-        </div>}
+        </div>
 
-        {historyOpen && <div className="rounded-xl border border-zinc-200 dark:border-zinc-800">
-          <div className="border-b px-3 py-2.5 text-xs font-bold">Publishing history</div>
-          {history.length === 0 ? <div className="p-4 text-xs text-muted-foreground">No publishing history yet.</div> :
-            <div className="divide-y">
-              {history.map((item) => {
-                const Icon = META[item.platform]?.icon || Send;
-                const busy = busyId === item._id;
-                return <div key={item._id} className="flex flex-wrap items-center justify-between gap-3 p-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted"><Icon size={14} /></div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold">{META[item.platform]?.label}</span>
-                        <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-bold">{item.status}</span>
-                      </div>
-                      <div className="mt-0.5 text-[10px] text-muted-foreground">
-                        {item.status === "scheduled" ? `Scheduled ${fmt(item.scheduledAt)}` :
-                          item.publishedAt ? `Published ${fmt(item.publishedAt)}` : fmt(item.createdAt)}
-                        {item.attempts ? ` · ${item.attempts} attempt${item.attempts === 1 ? "" : "s"}` : ""}
-                      </div>
-                      {item.status === "failed" && item.errorMessage && <div className="mt-1 max-w-xl text-[10px] text-rose-600">{item.errorMessage}</div>}
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    {item.remotePostUrl && <a href={item.remotePostUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-lg border px-2 py-1.5 text-[10px] font-semibold"><ExternalLink size={11} />View post</a>}
-                    {item.status === "failed" && <button type="button" disabled={busy} onClick={() => retry(item)} className="inline-flex items-center gap-1 rounded-lg border px-2 py-1.5 text-[10px] font-semibold">{busy ? <Loader2 size={11} className="animate-spin" /> : <RotateCcw size={11} />}Retry</button>}
-                    {item.status === "scheduled" && <button type="button" disabled={busy} onClick={() => cancel(item)} className="inline-flex items-center gap-1 rounded-lg border px-2 py-1.5 text-[10px] font-semibold text-rose-600">{busy ? <Loader2 size={11} className="animate-spin" /> : <X size={11} />}Cancel</button>}
-                  </div>
-                </div>;
-              })}
-            </div>}
-        </div>}
+        <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
+          <div><label className="mb-1.5 block text-[11px] font-semibold">Caption + hashtags</label><textarea value={caption} onChange={(e) => setCaption(e.target.value)} rows={4} disabled={publishing} className="w-full resize-y rounded-xl border border-zinc-200 bg-background px-3 py-2.5 text-xs leading-5 outline-none focus:ring-2 focus:ring-primary/20 dark:border-zinc-800"/></div>
+          <div className="flex flex-col justify-end gap-2"><div className="text-[10px] text-muted-foreground">{selected.length ? `${selected.length} platform${selected.length === 1 ? "" : "s"} selected` : "Select a ready platform above."}</div><button onClick={() => publishPlatforms(selected)} disabled={publishing || !selected.length} className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-xs font-bold text-primary-foreground disabled:opacity-45">{publishing ? <Loader2 size={14} className="animate-spin"/> : <Send size={14}/>}Publish selected</button></div>
+        </div>
 
-        {statusText && <div className="text-xs text-muted-foreground">{statusText}</div>}
+        {showSchedule && socialPostsApi.schedule && <div className="mt-3 flex flex-wrap items-end gap-2 rounded-xl border bg-muted/30 p-3"><div className="min-w-56 flex-1"><label className="mb-1 block text-[10px] font-semibold">Publish date & time</label><input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} className="h-9 w-full rounded-lg border bg-background px-3 text-xs"/></div><button disabled={!scheduledAt || !selected.length} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3 text-[11px] font-bold text-primary-foreground disabled:opacity-50">Schedule selected</button></div>}
 
-        <button type="button" onClick={publishNow} disabled={publishing || !selected.length}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground disabled:opacity-50">
-          {publishing ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-          {publishing ? "Publishing..." : `Publish now to ${selected.length} platform${selected.length === 1 ? "" : "s"}`}
-        </button>
+        {statusText && <div className="mt-3 rounded-lg bg-muted px-3 py-2 text-[11px] text-muted-foreground">{statusText}</div>}
+
+        {showHistory && <div className="mt-4 border-t pt-4"><div className="mb-2 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Publishing history</div>{history.length === 0 ? <div className="rounded-lg border border-dashed p-4 text-center text-xs text-muted-foreground">No publishing attempts yet.</div> : <div className="divide-y overflow-hidden rounded-xl border">{history.slice(0, 15).map((row) => { const meta = META[row.platform]; const Icon = meta?.icon || Send; return <div key={row._id} className="flex flex-wrap items-center gap-3 px-3 py-2.5"><Icon size={14}/><div className="min-w-0 flex-1"><div className="text-xs font-semibold">{meta?.label || row.platform} <span className="ml-1 text-[9px] text-muted-foreground">{row.status}</span></div><div className="text-[10px] text-muted-foreground">{fmt(row.publishedAt || row.scheduledAt || row.createdAt, true)}</div>{row.status === "failed" && row.errorMessage && <div className="mt-1 line-clamp-1 text-[10px] text-rose-600">{row.errorMessage}</div>}</div>{row.status === "failed" && <button onClick={() => retry(row.platform)} className="inline-flex h-7 items-center gap-1 rounded-lg border px-2 text-[10px] font-semibold"><RefreshCw size={10}/>Retry</button>}{row.remotePostUrl && <a href={row.remotePostUrl} target="_blank" rel="noreferrer" className="inline-flex h-7 items-center gap-1 rounded-lg border px-2 text-[10px] font-semibold">View <ExternalLink size={10}/></a>}</div>; })}</div>}</div>}
       </div>
     </div>
   );

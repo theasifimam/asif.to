@@ -11,7 +11,7 @@ export default function Definition({ slide, ...frame }) {
       {slide.eyebrow && (
         <div
           style={{
-            fontSize: 15,
+            fontSize: 21,
             fontWeight: 900,
             textTransform: "uppercase",
             letterSpacing: ".14em",
@@ -41,7 +41,7 @@ export default function Definition({ slide, ...frame }) {
       {slide.body && (
         <p
           style={{
-            fontSize: 28,
+            fontSize: 34,
             lineHeight: 1.52,
             color: "#b4b4bd",
             marginTop: 34,
@@ -55,7 +55,7 @@ export default function Definition({ slide, ...frame }) {
         <div
           style={{
             marginTop: 34,
-            fontSize: 24,
+            fontSize: 30,
             fontWeight: 850,
             color: "#fff",
             padding: "20px 24px",

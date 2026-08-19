@@ -16,7 +16,7 @@ function ComparisonSide({ data, accent }) {
     >
       <div
         style={{
-          fontSize: 22,
+          fontSize: 28,
           fontWeight: 900,
           color: accent,
           marginBottom: 20,
@@ -30,7 +30,7 @@ function ComparisonSide({ data, accent }) {
           <div
             key={index}
             style={{
-              fontSize: 20,
+              fontSize: 26,
               lineHeight: 1.45,
               color: "#d4d4d8",
               display: "flex",

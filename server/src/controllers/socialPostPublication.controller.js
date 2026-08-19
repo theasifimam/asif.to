@@ -9,6 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const uploadsRoot = path.resolve(__dirname, "../../uploads");
 const PLATFORMS = ["instagram", "facebook", "linkedin"];
+const REPOST_LOCK_MS = 30 * 24 * 60 * 60 * 1000;
 
 const publicUrl = (relative) =>
   `${(process.env.API_PUBLIC_URL || process.env.API_URL || "http://localhost:5000").replace(/\/$/, "")}/uploads/${relative.replace(/\\/g, "/")}`;
@@ -124,6 +125,12 @@ export async function publishSocialPost(req, res) {
 
     const results = [];
     for (const platform of platforms) {
+      const latestPublished = await SocialPublication.findOne({ socialPost: post._id, platform, status: "published", publishedAt: { $ne: null } }).sort({ publishedAt: -1 }).lean();
+      if (latestPublished?.publishedAt && Date.now() - new Date(latestPublished.publishedAt).getTime() < REPOST_LOCK_MS) {
+        const nextEligibleAt = new Date(new Date(latestPublished.publishedAt).getTime() + REPOST_LOCK_MS);
+        results.push({ platform, status: "locked", remotePostId: latestPublished.remotePostId || "", remotePostUrl: latestPublished.remotePostUrl || "", publishedAt: latestPublished.publishedAt, nextEligibleAt });
+        continue;
+      }
       const publication = await SocialPublication.create({
         socialPost: post._id,
         platform,

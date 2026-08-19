@@ -10,7 +10,7 @@ export default function Summary({ slide, ...frame }) {
     <SlideFrame {...frame}>
       <div
         style={{
-          fontSize: 15,
+          fontSize: 21,
           fontWeight: 900,
           textTransform: "uppercase",
           letterSpacing: ".14em",
@@ -39,7 +39,7 @@ export default function Summary({ slide, ...frame }) {
       {slide.body && (
         <p
           style={{
-            fontSize: 27,
+            fontSize: 33,
             lineHeight: 1.5,
             color: "#b4b4bd",
             marginTop: 32,
@@ -59,7 +59,7 @@ export default function Summary({ slide, ...frame }) {
             borderRadius: 16,
             background: accent,
             color: "#fff",
-            fontSize: 20,
+            fontSize: 26,
             fontWeight: 900,
           }}
         >
@@ -68,7 +68,7 @@ export default function Summary({ slide, ...frame }) {
       )}
 
       {slide.url && (
-        <div style={{ marginTop: 18, fontSize: 18, color: "#71717a" }}>
+        <div style={{ marginTop: 18, fontSize: 24, color: "#71717a" }}>
           {slide.url}
         </div>
       )}

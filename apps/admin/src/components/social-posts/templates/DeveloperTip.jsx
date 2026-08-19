@@ -12,7 +12,7 @@ export default function DeveloperTip({ slide, ...frame }) {
       {slide.eyebrow && (
         <div
           style={{
-            fontSize: 16,
+            fontSize: 22,
             fontWeight: 800,
             textTransform: "uppercase",
             letterSpacing: ".12em",
@@ -41,7 +41,7 @@ export default function DeveloperTip({ slide, ...frame }) {
       {slide.body && (
         <p
           style={{
-            fontSize: 27,
+            fontSize: 33,
             lineHeight: 1.5,
             color: "#b4b4bd",
             margin: "30px 0 0",
@@ -58,7 +58,7 @@ export default function DeveloperTip({ slide, ...frame }) {
             padding: "18px 22px",
             borderLeft: `4px solid ${accent}`,
             background: "rgba(255,255,255,.04)",
-            fontSize: 23,
+            fontSize: 29,
             fontWeight: 700,
           }}
         >

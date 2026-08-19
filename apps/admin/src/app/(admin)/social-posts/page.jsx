@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Copy, Image, Plus, Search, Trash2 } from "lucide-react";
 import { socialPostsApi } from "@/lib/api";
+import SocialMediaTabs from "@/components/social-posts/SocialMediaTabs";
 
 export default function SocialPostsPage() {
   const [posts, setPosts] = useState([]);
@@ -50,19 +51,19 @@ export default function SocialPostsPage() {
     <div className="space-y-6 p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Social Posts</h1>
+          <h1 className="text-2xl font-bold">Social Media</h1>
           <p className="text-sm text-muted-foreground">
-            Create branded images and carousel tutorials.
+            Create, manage and publish branded social content.
           </p>
         </div>
 
-        <Link
+        <div className="flex flex-wrap items-center gap-2"><SocialMediaTabs /><Link
           href="/social-posts/new"
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
         >
           <Plus size={16} />
           New post
-        </Link>
+        </Link></div>
       </div>
 
       <div className="relative max-w-md">

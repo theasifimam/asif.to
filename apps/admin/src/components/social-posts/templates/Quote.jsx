@@ -39,7 +39,7 @@ export default function Quote({ slide, ...frame }) {
         <div
           style={{
             marginTop: 36,
-            fontSize: 20,
+            fontSize: 26,
             color: "#a1a1aa",
             fontWeight: 700,
           }}

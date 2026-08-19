@@ -25,7 +25,7 @@ export default function TutorialStep({ slide, ...frame }) {
             display: "grid",
             placeItems: "center",
             background: accent,
-            fontSize: 22,
+            fontSize: 28,
             fontWeight: 900,
           }}
         >
@@ -34,7 +34,7 @@ export default function TutorialStep({ slide, ...frame }) {
 
         <span
           style={{
-            fontSize: 15,
+            fontSize: 21,
             fontWeight: 800,
             textTransform: "uppercase",
             letterSpacing: ".14em",
@@ -63,7 +63,7 @@ export default function TutorialStep({ slide, ...frame }) {
       {slide.body && (
         <p
           style={{
-            fontSize: 25,
+            fontSize: 31,
             lineHeight: 1.52,
             color: "#b4b4bd",
             margin: "28px 0 0",
@@ -76,7 +76,7 @@ export default function TutorialStep({ slide, ...frame }) {
       {slide.bulletPoints?.length > 0 && (
         <ul
           style={{
-            fontSize: 23,
+            fontSize: 29,
             lineHeight: 1.55,
             color: "#d4d4d8",
             paddingLeft: 28,

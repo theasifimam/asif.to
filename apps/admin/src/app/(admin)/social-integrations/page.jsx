@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Check, ExternalLink, Facebook, Instagram, Linkedin, Loader2, Plug, RefreshCw, ShieldCheck, Unplug } from "lucide-react";
 import { socialIntegrationsApi } from "@/lib/api";
+import SocialMediaTabs from "@/components/social-posts/SocialMediaTabs";
 
 const META = {
   instagram: { label: "Instagram", description: "Connect a professional Instagram account for image and carousel publishing.", icon: Instagram },
@@ -68,7 +69,7 @@ export default function SocialIntegrationsPage() {
   }
 
   return <div className="space-y-6 p-4 md:p-6">
-    <div><div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary"><Plug size={14}/>Publishing</div><h1 className="mt-2 text-2xl font-black">Social Integrations</h1><p className="mt-1 max-w-2xl text-sm text-muted-foreground">Connect each account once through OAuth. Social Post Studio can later publish using these approved connections.</p></div>
+    <div><div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary"><Plug size={14}/>Publishing</div><div className="mt-2 flex flex-wrap items-center justify-between gap-3"><h1 className="text-2xl font-black">Social Media</h1><SocialMediaTabs /></div><p className="mt-1 max-w-2xl text-sm text-muted-foreground">Manage the accounts used by Social Media publishing.</p></div>
     <div className="admin-surface flex items-start gap-3 p-4"><ShieldCheck size={19} className="mt-0.5 shrink-0 text-primary"/><div><div className="text-sm font-semibold">Secure server-side connections</div><p className="mt-1 text-xs leading-5 text-muted-foreground">OAuth tokens are encrypted before database storage and never returned to the admin browser.</p></div></div>
     {notice && <div className="admin-surface p-4 text-sm">{notice}</div>}
     {loading ? <div className="flex items-center gap-2 p-8 text-sm text-muted-foreground"><Loader2 size={16} className="animate-spin"/>Loading integrations...</div> : <div className="grid gap-4 xl:grid-cols-3">{Object.entries(META).map(([platform, meta]) => {

@@ -101,7 +101,7 @@ export default function CodeBlock({
 
   const lines = highlighted.split("\n");
   const rawCount = (content || "").split("\n").length;
-  const fontSize = rawCount > 22 ? 16 : rawCount > 14 ? 19 : 22;
+  const fontSize = rawCount > 22 ? 21 : rawCount > 14 ? 24 : 27;
   const isDark = settings.codeTheme !== "light";
   const accent = settings.accentColor || "#2563eb";
 
@@ -144,7 +144,7 @@ export default function CodeBlock({
 
         <span
           style={{
-            font: "700 12px ui-monospace, SFMono-Regular, Menlo, monospace",
+            font: "700 16px ui-monospace, SFMono-Regular, Menlo, monospace",
             color: isDark ? "#a1a1aa" : "#52525b",
           }}
         >
@@ -160,7 +160,7 @@ export default function CodeBlock({
           fontFamily:
             "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
           fontSize,
-          lineHeight: 1.6,
+          lineHeight: 1.55,
         }}
       >
         {lines.map((line, index) => {

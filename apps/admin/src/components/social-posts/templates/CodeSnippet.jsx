@@ -25,7 +25,7 @@ export default function CodeSnippet({ slide, ...frame }) {
       {slide.subtitle && (
         <p
           style={{
-            fontSize: 22,
+            fontSize: 28,
             color: "#a1a1aa",
             margin: "-12px 0 26px",
           }}

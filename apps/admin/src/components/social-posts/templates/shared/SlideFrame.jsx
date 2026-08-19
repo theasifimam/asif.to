@@ -90,7 +90,7 @@ export default function SlideFrame({
           {showCategory && category ? (
             <span
               style={{
-                fontSize: 14,
+                fontSize: 19,
                 fontWeight: 800,
                 textTransform: "uppercase",
                 letterSpacing: "0.14em",
@@ -106,7 +106,7 @@ export default function SlideFrame({
           {showSlideNumbers && totalSlides > 1 && (
             <span
               style={{
-                fontSize: 13,
+                fontSize: 18,
                 fontWeight: 700,
                 color: "rgba(255,255,255,0.35)",
                 fontFamily: "'Outfit', sans-serif",
@@ -141,7 +141,7 @@ export default function SlideFrame({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            padding: "0 52px 36px",
+            padding: "0 52px 40px",
             flexShrink: 0,
           }}
         >
@@ -151,7 +151,7 @@ export default function SlideFrame({
               style={{
                 fontFamily: "'Outfit', sans-serif",
                 fontWeight: 900,
-                fontSize: 16,
+                fontSize: 24,
                 letterSpacing: "-0.02em",
                 color: "#ffffff",
               }}
@@ -162,13 +162,13 @@ export default function SlideFrame({
           </div>
           <span
             style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: "rgba(255,255,255,0.3)",
+              fontSize: 19,
+              fontWeight: 700,
+              color: "rgba(255,255,255,0.58)",
               fontFamily: "'Inter', sans-serif",
             }}
           >
-            {footerText !== "asif.to" ? footerText : "@theasifto"}
+            {"@theasifto"}
           </span>
         </div>
       )}

@@ -24,7 +24,7 @@ export default function Minimal({ slide, ...frame }) {
       {slide.subtitle && (
         <p
           style={{
-            fontSize: 28,
+            fontSize: 34,
             lineHeight: 1.5,
             color: "#a1a1aa",
             marginTop: 34,

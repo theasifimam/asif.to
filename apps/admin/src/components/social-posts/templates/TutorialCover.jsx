@@ -16,7 +16,7 @@ export default function TutorialCover({ slide, ...frame }) {
           borderRadius: 999,
           background: `${accent}20`,
           color: accent,
-          fontSize: 14,
+          fontSize: 20,
           fontWeight: 900,
           letterSpacing: ".12em",
           textTransform: "uppercase",
@@ -44,7 +44,7 @@ export default function TutorialCover({ slide, ...frame }) {
       {slide.subtitle && (
         <p
           style={{
-            fontSize: 28,
+            fontSize: 34,
             lineHeight: 1.45,
             color: "#a1a1aa",
             marginTop: 32,
