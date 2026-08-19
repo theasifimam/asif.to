@@ -14,7 +14,7 @@ function slugify(value = "social-post") {
   );
 }
 
-function dataUrlToBlob(dataUrl) {
+export function dataUrlToBlob(dataUrl) {
   const [meta, data] = dataUrl.split(",");
   const mime = meta.match(/:(.*?);/)?.[1] || "image/png";
   const binary = atob(data);
@@ -78,4 +78,17 @@ export async function downloadAllNodes(nodes, {
 
   const archive = await zip.generateAsync({ type: "blob" });
   saveAs(archive, `${slugify(name)}-carousel.zip`);
+}
+
+
+export async function renderNodesToFiles(nodes, { type = "png", name = "social-post" } = {}) {
+  if (!nodes?.length) throw new Error("No slides available to render.");
+  const extension = type === "jpeg" ? "jpg" : "png";
+  const files = [];
+  for (let index = 0; index < nodes.length; index += 1) {
+    const dataUrl = await renderNode(nodes[index], type);
+    const blob = dataUrlToBlob(dataUrl);
+    files.push(new File([blob], `${slugify(name)}-${String(index + 1).padStart(2, "0")}.${extension}`, { type: blob.type || (type === "jpeg" ? "image/jpeg" : "image/png") }));
+  }
+  return files;
 }

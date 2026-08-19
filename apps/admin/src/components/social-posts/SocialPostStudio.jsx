@@ -10,6 +10,7 @@ import LivePreview from "./LivePreview";
 import PostSettingsPanel from "./PostSettingsPanel";
 import TemplateSelector from "./TemplateSelector";
 import ExportControls from "./export/ExportControls";
+import PublishPanel from "./PublishPanel";
 import TemplateRenderer from "./templates/TemplateRenderer";
 import { getFormat } from "./formats";
 import { Button } from "../ui";
@@ -154,6 +155,8 @@ export default function SocialPostStudio({
           </Button>
         </div>
       </div>
+
+      <PublishPanel postId={postId} post={editor.post} exportRefs={exportRefs} />
 
       <div className="admin-surface p-3">
         <div className="mb-2 px-1 text-xs font-semibold text-muted-foreground">

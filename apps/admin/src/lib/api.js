@@ -163,6 +163,17 @@ export async function apiDelete(endpoint) {
   }
 }
 
+export async function apiPostFormData(endpoint, formData) {
+  try {
+    const headers = { ...getAuthHeaders(), "ngrok-skip-browser-warning": "true" };
+    delete headers["Content-Type"];
+    const response = await fetch(buildUrl(endpoint), { method: "POST", headers, body: formData, credentials: "include" });
+    return handleResponse(response);
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : "Network error" };
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // ADMIN API ENDPOINTS (Placeholders)
 // ═══════════════════════════════════════════════════════════════════════════
@@ -504,6 +515,13 @@ export const socialPostsApi = {
   create: (data) => apiPost("/social-posts", data),
   update: (id, data) => apiPatch(`/social-posts/${id}`, data),
   duplicate: (id) => apiPost(`/social-posts/${id}/duplicate`),
+  uploadPublishingAssets: (id, files) => {
+    const form = new FormData();
+    Array.from(files || []).forEach((file) => form.append("files", file));
+    return apiPostFormData(`/social-posts/${id}/publishing-assets`, form);
+  },
+  publish: (id, data) => apiPost(`/social-posts/${id}/publish`, data),
+  publications: (id) => apiGet(`/social-posts/${id}/publications`),
   delete: (id) => apiDelete(`/social-posts/${id}`),
 };
 
