@@ -16,6 +16,16 @@ import {
   trackChapterView,
   getCourseAnalytics,
 } from "../controllers/course.controller.js";
+import {
+  approveCourseDeletion,
+  beginCourseDeletion,
+  blockDirectCourseDeletion,
+  getCourseDeletionImpact,
+  getCourseDeletionRequest,
+  rejectCourseDeletion,
+  sendCourseDeletionApproverOtp,
+  verifyCourseDeletionInitiatorOtp,
+} from "../controllers/courseDeletion.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
 import { requirePermission } from "../utils/permissions.js";
 
@@ -53,7 +63,58 @@ router.get(
 );
 router.post("/", protect, requirePermission("courses.manage"), createCourse);
 router.patch("/:id", protect, requirePermission("courses.manage"), updateCourse);
-router.delete("/:id", protect, requirePermission("courses.manage"), deleteCourse);
+
+router.get(
+  "/admin/:id/deletion-impact",
+  protect,
+  requirePermission("courses.manage"),
+  getCourseDeletionImpact,
+);
+router.post(
+  "/:id/deletion-requests",
+  protect,
+  requirePermission("courses.manage"),
+  beginCourseDeletion,
+);
+router.get(
+  "/deletion-requests/:requestId",
+  protect,
+  requirePermission("courses.manage"),
+  getCourseDeletionRequest,
+);
+router.post(
+  "/deletion-requests/:requestId/verify-initiator",
+  protect,
+  requirePermission("courses.manage"),
+  verifyCourseDeletionInitiatorOtp,
+);
+router.post(
+  "/deletion-requests/:requestId/approval-otp",
+  protect,
+  requirePermission("courses.manage"),
+  sendCourseDeletionApproverOtp,
+);
+router.post(
+  "/deletion-requests/:requestId/approve",
+  protect,
+  requirePermission("courses.manage"),
+  approveCourseDeletion,
+);
+router.post(
+  "/deletion-requests/:requestId/reject",
+  protect,
+  requirePermission("courses.manage"),
+  rejectCourseDeletion,
+);
+
+// Direct deletion is deliberately blocked. The final course row is deleted only
+// by approveCourseDeletion after two different admin accounts verify email OTPs.
+router.delete(
+  "/:id",
+  protect,
+  requirePermission("courses.manage"),
+  blockDirectCourseDeletion,
+);
 
 // ── Admin — Chapter CRUD ──────────────────────────────────────────────────────
 router.get(

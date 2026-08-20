@@ -279,3 +279,106 @@ export const sendContactEmail = async (name, email, subject, message) => {
     }),
   });
 };
+
+/**
+ * Security OTP used only by the protected two-admin course deletion workflow.
+ * The requester and approver receive different codes tied to their user IDs.
+ */
+export const sendCourseDeletionOtpEmail = async ({
+  to,
+  fullName,
+  otp,
+  courseTitle,
+  mode,
+}) => {
+  const from = process.env.EMAIL_FROM || "asif.to <noreply@asif.to>";
+  const isApprover = mode === "approver";
+  const safeName = escapeHtml(fullName || "administrator");
+  const safeCourse = escapeHtml(courseTitle || "course");
+  const safeOtp = escapeHtml(otp);
+
+  await getTransporter().sendMail({
+    from,
+    to,
+    subject: `${otp} - ${
+      isApprover ? "Approve" : "Confirm"
+    } deletion of ${courseTitle}`,
+    text: `Hi ${fullName || "administrator"},
+
+Your protected course deletion ${isApprover ? "approval" : "request"} code is ${otp}.
+
+Course: ${courseTitle}
+This code expires in 10 minutes.
+
+Do not forward or share this code. The requester and second approver must be different administrator accounts.
+
+asif.to`,
+    html: renderEmailLayout({
+      preheader: `${otp} is your protected course deletion code. It expires in 10 minutes.`,
+      eyebrow: isApprover
+        ? "Independent deletion approval"
+        : "Protected deletion request",
+      title: isApprover
+        ? `Review deletion of ${courseTitle}`
+        : `Confirm deletion request`,
+      intro: `Hi ${safeName}, this code authorizes a permanent destructive action for <strong>${safeCourse}</strong>. It is valid for 10 minutes.`,
+      content: `
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;background:#fee2e2;border:1px solid #fecaca;border-radius:16px;">
+          <tr>
+            <td align="center" style="padding:25px 18px 26px;">
+              <p style="margin:0 0 8px;font-family:Inter,'Segoe UI',Arial,sans-serif;font-size:10px;font-weight:800;line-height:16px;color:#991b1b;text-transform:uppercase;">Course deletion OTP</p>
+              <div class="otp-code" style="font-family:'Courier New',monospace;font-size:42px;font-weight:700;line-height:48px;letter-spacing:10px;color:#7f1d1d;white-space:nowrap;">${safeOtp}</div>
+            </td>
+          </tr>
+        </table>
+        ${renderNotice(
+          isApprover
+            ? "You are the independent second administrator. Review the selected cascade items in admin.asif.to before entering this code. Never approve a request you did not inspect."
+            : "This is only the first gate. Nothing is deleted after your OTP alone. A different admin/super admin must independently review the request and verify a separate OTP.",
+        )}
+        <p style="margin:0;font-family:Inter,'Segoe UI',Arial,sans-serif;font-size:12px;line-height:19px;color:#85887f;">Never share this OTP in chat, email, screenshots, or messages.</p>`,
+    }),
+  });
+};
+
+export const sendCourseDeletionApprovalRequestEmail = async ({
+  to,
+  fullName,
+  courseTitle,
+  requesterName,
+  requestId,
+}) => {
+  const from = process.env.EMAIL_FROM || "asif.to <noreply@asif.to>";
+  const adminUrl = (
+    process.env.ADMIN_URL ||
+    process.env.ADMIN_CLIENT_URL ||
+    "https://admin.asif.to"
+  ).replace(/\/$/, "");
+  const reviewUrl = `${adminUrl}/courses?deletionRequest=${requestId}`;
+
+  await getTransporter().sendMail({
+    from,
+    to,
+    subject: `Approval required: delete ${courseTitle}`,
+    text: `${requesterName} requested permanent deletion of ${courseTitle}.
+
+Review the exact cascade selections before approving:
+${reviewUrl}
+
+You must request and enter your own approval OTP. The requester cannot approve their own deletion.`,
+    html: renderEmailLayout({
+      preheader: `A protected deletion request for ${courseTitle} requires a second administrator.`,
+      eyebrow: "Critical admin approval",
+      title: `Deletion approval required`,
+      intro: `<strong>${escapeHtml(
+        requesterName,
+      )}</strong> requested permanent deletion of <strong>${escapeHtml(
+        courseTitle,
+      )}</strong>. A second administrator must independently inspect the cascade selections before anything is deleted.`,
+      content: `${renderButton("Review deletion request", reviewUrl)}${renderNotice(
+        "Opening the request does not delete anything. If you choose to approve, admin.asif.to sends a separate OTP to your own admin email. The requester cannot use or approve with that OTP.",
+      )}`,
+    }),
+  });
+};
+

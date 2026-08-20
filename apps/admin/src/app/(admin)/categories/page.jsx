@@ -37,6 +37,7 @@ import {
   AdminFilters,
   AdminPage,
   AdminPageHeader,
+  AdminPagination,
   AdminSearch,
 } from "@/components/admin";
 import { ViewToggle } from "@/components/ui/ViewToggle";
@@ -64,7 +65,8 @@ export default function CategoriesListPage() {
   const [loading, setLoading] = useState(true);
   const [urlFilters, setUrlFilters] = useUrlFilters({ view: "table" });
   const viewMode = urlFilters.view || "table";
-  const setViewMode = (v) => setUrlFilters((current) => ({ ...current, view: v }));
+  const setViewMode = (v) =>
+    setUrlFilters((current) => ({ ...current, view: v }));
   const [filterCourse, setFilterCourse] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [search, setSearch] = useState("");
@@ -72,6 +74,8 @@ export default function CategoriesListPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [isReordering, setIsReordering] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -113,12 +117,22 @@ export default function CategoriesListPage() {
         cat.slug?.toLowerCase().includes(search.toLowerCase()) ||
         cat.description?.toLowerCase().includes(search.toLowerCase());
 
-      const matchStatus =
-        filterStatus === "all" || cat.status === filterStatus;
+      const matchStatus = filterStatus === "all" || cat.status === filterStatus;
 
       return matchSearch && matchStatus;
     });
   }, [categories, search, filterStatus]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [search, filterStatus, filterCourse]);
+
+  const totalPages = Math.max(Math.ceil(filteredCategories.length / limit), 1);
+  const paginatedCategories = filteredCategories.slice(
+    (page - 1) * limit,
+    page * limit,
+  );
 
   const handleDragEnd = async (event) => {
     const { active, over } = event;
@@ -205,7 +219,9 @@ export default function CategoriesListPage() {
               <SelectValue placeholder="All Courses" />
             </SelectTrigger>
             <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
-              <SelectItem value="all">All Categories (Global & Course)</SelectItem>
+              <SelectItem value="all">
+                All Categories (Global & Course)
+              </SelectItem>
               {courses.map((item) => (
                 <SelectItem key={item._id} value={item._id}>
                   {item.title}
@@ -237,7 +253,9 @@ export default function CategoriesListPage() {
       ) : filteredCategories.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
           <FolderTree className="mx-auto mb-3 h-8 w-8 text-zinc-300 dark:text-zinc-700" />
-          <p className="text-sm font-medium">No categories match your filters.</p>
+          <p className="text-sm font-medium">
+            No categories match your filters.
+          </p>
           <Button asChild variant="outline" size="sm" className="mt-4">
             <Link href="/categories/new">
               <Plus className="mr-1.5 h-4 w-4" /> Create Category
@@ -246,27 +264,41 @@ export default function CategoriesListPage() {
         </div>
       ) : viewMode === "card" ? (
         /* Cards View with Drag & Drop */
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={filteredCategories.map((c) => c._id)}
-            strategy={verticalListSortingStrategy}
+        <>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredCategories.map((item) => (
-                <SortableCategoryCard
-                  key={item._id}
-                  item={item}
-                  onPreview={() => setPreview(item)}
-                  onDelete={() => setDeleteTarget(item)}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
+            <SortableContext
+              items={filteredCategories.map((c) => c._id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {paginatedCategories.map((item) => (
+                  <SortableCategoryCard
+                    key={item._id}
+                    item={item}
+                    onPreview={() => setPreview(item)}
+                    onDelete={() => setDeleteTarget(item)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+          <AdminPagination
+            page={page}
+            pages={totalPages}
+            total={filteredCategories.length}
+            limit={limit}
+            itemLabel="categories"
+            onPageChange={setPage}
+            onLimitChange={(l) => {
+              setLimit(l);
+              setPage(1);
+            }}
+          />
+        </>
       ) : (
         /* Table View with Drag & Drop */
         <section className="admin-surface w-full rounded-[28px] sm:rounded-4xl overflow-hidden shadow-xs">
@@ -289,10 +321,10 @@ export default function CategoriesListPage() {
                 </thead>
                 <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/80">
                   <SortableContext
-                    items={filteredCategories.map((c) => c._id)}
+                    items={paginatedCategories.map((c) => c._id)}
                     strategy={verticalListSortingStrategy}
                   >
-                    {filteredCategories.map((item) => (
+                    {paginatedCategories.map((item) => (
                       <SortableCategoryRow
                         key={item._id}
                         item={item}
@@ -305,6 +337,18 @@ export default function CategoriesListPage() {
               </table>
             </DndContext>
           </div>
+          <AdminPagination
+            page={page}
+            pages={totalPages}
+            total={filteredCategories.length}
+            limit={limit}
+            itemLabel="categories"
+            onPageChange={setPage}
+            onLimitChange={(l) => {
+              setLimit(l);
+              setPage(1);
+            }}
+          />
         </section>
       )}
 

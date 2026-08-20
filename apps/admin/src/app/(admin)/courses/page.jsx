@@ -17,7 +17,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,6 +30,9 @@ import { coursesApi } from "@/lib/api";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { AdminPage, AdminPageHeader, AdminPagination } from "@/components/admin";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
+import { useAuth } from "@/contexts/AuthContext";
+import CourseDeletionDialog from "./components/CourseDeletionDialog";
+import CourseDeletionApprovalDialog from "./components/CourseDeletionApprovalDialog";
 
 const initialPagination = { page: 1, pages: 1, total: 0, limit: 20 };
 
@@ -41,6 +43,8 @@ const statusStyles = {
 };
 
 export default function CoursesAdminPage() {
+  const { user } = useAuth();
+  const canDeleteCourse = ["admin", "super_admin"].includes(user?.role);
   const [courses, setCourses] = useState([]);
   const [filters, setFilters] = useState({
     search: "",
@@ -122,27 +126,7 @@ export default function CoursesAdminPage() {
     setUpdating(null);
   };
 
-  const remove = async () => {
-    if (!deleteCourse) return;
-    setUpdating(deleteCourse._id);
-    const response = await coursesApi.delete(deleteCourse._id);
-    if (response.success) {
-      toast.success("Course and its chapters deleted");
-      setCourses((current) =>
-        current.filter((item) => item._id !== deleteCourse._id),
-      );
-      setPagination((prev) => ({
-        ...prev,
-        total: Math.max(0, prev.total - 1),
-      }));
-      setDeleteCourse(null);
-    } else {
-      toast.error(response.error || "Unable to delete course");
-    }
-    setUpdating(null);
-  };
-
-  return (
+return (
     <AdminPage>
       <AdminPageHeader
         eyebrow="Content / Courses"
@@ -315,8 +299,8 @@ export default function CoursesAdminPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      title="Delete course"
-                      onClick={() => setDeleteCourse(course)}
+                      title={canDeleteCourse ? "Delete course" : "Only admin/super admin can delete courses"}
+                      onClick={() => canDeleteCourse && setDeleteCourse(course)}
                       className="h-8 w-8 rounded-full text-zinc-400 hover:text-rose-600"
                     >
                       <Trash2 className="h-4 w-4 text-rose-500" />
@@ -449,8 +433,8 @@ export default function CoursesAdminPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          title="Delete course"
-                          onClick={() => setDeleteCourse(course)}
+                          title={canDeleteCourse ? "Delete course" : "Only admin/super admin can delete courses"}
+                          onClick={() => canDeleteCourse && setDeleteCourse(course)}
                           className="h-8 w-8 rounded-full text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
                         >
                           <Trash2 className="h-4 w-4 text-rose-500" />
@@ -475,15 +459,20 @@ export default function CoursesAdminPage() {
         </section>
       )}
 
-      <ConfirmDialog
-        isOpen={Boolean(deleteCourse)}
+      <CourseDeletionDialog
+        course={deleteCourse}
+        open={Boolean(deleteCourse)}
         onClose={() => setDeleteCourse(null)}
-        onConfirm={remove}
-        title="Delete course"
-        description={`Delete ${deleteCourse?.title || "this course"} and all of its chapters? This cannot be undone.`}
-        confirmText="Delete"
-        variant="destructive"
-        loading={updating === deleteCourse?._id}
+        onDeleted={async () => {
+          setDeleteCourse(null);
+          await load();
+        }}
+      />
+
+      <CourseDeletionApprovalDialog
+        onDeleted={async () => {
+          await load();
+        }}
       />
     </AdminPage>
   );

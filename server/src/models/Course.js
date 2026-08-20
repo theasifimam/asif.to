@@ -115,30 +115,28 @@ courseSchema.index({ status: 1, order: 1 });
 courseSchema.index({ examEnabled: 1, status: 1 });
 courseSchema.index({ title: "text", subtitle: "text", keywords: "text" });
 
-// Cascade delete chapters when a course is deleted
-courseSchema.pre("findOneAndDelete", async function () {
-  const courseId = this.getQuery()["_id"];
-  if (courseId) {
-    await Promise.all([
-      model("Chapter").deleteMany({ course: courseId }),
-      model("CourseTopic").deleteMany({ course: courseId }),
-      model("TopicCategory").deleteMany({ course: courseId }),
-      model("Question").deleteMany({ $or: [{ course: courseId }, { courses: courseId }] }),
-    ]);
-  }
-});
+// Course deletion is intentionally blocked at the model layer.
+// The old middleware silently deleted categories and ALL linked Question records,
+// including questions shared with other courses. The protected deletion controller
+// now performs the reviewed cascade inside one transaction and uses the native
+// collection API for the final course row only after two separate OTP approvals.
+const blockUnprotectedCourseDeletion = function () {
+  throw new Error(
+    "Protected course deletion must use the two-admin deletion workflow.",
+  );
+};
 
+courseSchema.pre("findOneAndDelete", blockUnprotectedCourseDeletion);
 courseSchema.pre(
   "deleteOne",
   { document: true, query: false },
-  async function () {
-    await Promise.all([
-      model("Chapter").deleteMany({ course: this._id }),
-      model("CourseTopic").deleteMany({ course: this._id }),
-      model("TopicCategory").deleteMany({ course: this._id }),
-      model("Question").deleteMany({ $or: [{ course: this._id }, { courses: this._id }] }),
-    ]);
-  },
+  blockUnprotectedCourseDeletion,
 );
+courseSchema.pre(
+  "deleteOne",
+  { document: false, query: true },
+  blockUnprotectedCourseDeletion,
+);
+courseSchema.pre("deleteMany", blockUnprotectedCourseDeletion);
 
 export default model("Course", courseSchema);

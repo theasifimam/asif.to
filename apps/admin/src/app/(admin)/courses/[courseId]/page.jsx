@@ -8,8 +8,6 @@ import {
   ArrowLeft,
   ArrowUp,
   BookOpen,
-  ChevronLeft,
-  ChevronRight,
   ExternalLink,
   Loader2,
   Pencil,
@@ -30,7 +28,7 @@ import {
 } from "@/components/ui/select";
 import { chaptersApi, coursesApi } from "@/lib/api";
 import { ViewToggle } from "@/components/ui/ViewToggle";
-import { AdminPage, AdminPageHeader } from "@/components/admin";
+import { AdminPage, AdminPageHeader, AdminPagination } from "@/components/admin";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
 import DiscussButton from "@/components/messaging/DiscussButton";
 
@@ -369,36 +367,15 @@ export default function CourseChaptersPage() {
             ))}
           </div>
 
-          <footer className="flex items-center justify-between rounded-3xl border border-zinc-200/60 bg-white px-5 py-4 text-sm text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
-            <span>
-              {pagination.total} chapter{pagination.total === 1 ? "" : "s"}
-            </span>
-            {!orderingView && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  title="Previous page"
-                  disabled={loading || pagination.page <= 1}
-                  onClick={() => setFilter("page", pagination.page - 1)}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="min-w-24 text-center text-xs font-medium">
-                  Page {pagination.page} of {pagination.pages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  title="Next page"
-                  disabled={loading || pagination.page >= pagination.pages}
-                  onClick={() => setFilter("page", pagination.page + 1)}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </footer>
+          <AdminPagination
+            page={pagination.page}
+            pages={pagination.pages}
+            total={pagination.total}
+            limit={filters.limit}
+            itemLabel="chapters"
+            onPageChange={(p) => setFilter("page", p)}
+            onLimitChange={(l) => setFilter("limit", l)}
+          />
         </div>
       ) : (
         <section className="w-full bg-white dark:bg-zinc-900 rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs overflow-hidden">
@@ -542,38 +519,15 @@ export default function CourseChaptersPage() {
               </tbody>
             </table>
           </div>
-          <footer className="flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/70 px-6 py-3.5 text-xs text-zinc-400 font-medium">
-            <span>
-              {pagination.total} chapter{pagination.total === 1 ? "" : "s"}
-            </span>
-            {!orderingView && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 rounded-xl"
-                  title="Previous page"
-                  disabled={loading || pagination.page <= 1}
-                  onClick={() => setFilter("page", pagination.page - 1)}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="min-w-20 text-center text-xs font-bold text-zinc-600 dark:text-zinc-300">
-                  {pagination.page} / {pagination.pages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 rounded-xl"
-                  title="Next page"
-                  disabled={loading || pagination.page >= pagination.pages}
-                  onClick={() => setFilter("page", pagination.page + 1)}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </footer>
+          <AdminPagination
+            page={pagination.page}
+            pages={pagination.pages}
+            total={pagination.total}
+            limit={filters.limit}
+            itemLabel="chapters"
+            onPageChange={(p) => setFilter("page", p)}
+            onLimitChange={(l) => setFilter("limit", l)}
+          />
         </section>
       )}
 

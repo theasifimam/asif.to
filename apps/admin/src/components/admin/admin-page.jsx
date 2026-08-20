@@ -232,12 +232,14 @@ export function AdminPagination({
 
         {onLimitChange && (
           <div className="flex items-center gap-2">
-            <span className="text-zinc-400 dark:text-zinc-500 font-medium">Rows per page:</span>
+            <span className="text-zinc-400 dark:text-zinc-500 font-medium">
+              Rows per page:
+            </span>
             <Select
               value={String(limit)}
               onValueChange={(val) => onLimitChange(Number(val))}
             >
-              <SelectTrigger className="h-8 w-16 text-xs font-semibold rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+              <SelectTrigger className="h-8 w-20 text-xs font-semibold rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                 <SelectValue placeholder={String(limit)} />
               </SelectTrigger>
               <SelectContent>
@@ -287,7 +289,7 @@ export function AdminPagination({
                   "h-8 w-8 rounded-xl text-xs font-bold transition-all",
                   active
                     ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-                    : "border-zinc-200/80 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                    : "border-zinc-200/80 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900",
                 )}
               >
                 {num}

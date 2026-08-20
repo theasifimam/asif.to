@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { ArrowUpDown, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ArrowUpDown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AdminPagination } from "@/components/admin";
 import { getFullCountryName } from "@/lib/countryNames";
 
 const displayKey = (type, key) =>
@@ -109,34 +110,13 @@ export default function ReportTable({
         </table>
       </div>
 
-      <footer className="flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/70 px-6 py-3.5 text-xs text-zinc-400 font-medium">
-        <span>
-          {report?.pagination?.total || 0} rows · sorted by {sort} ({direction})
-        </span>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
-            disabled={page <= 1}
-            onClick={() => onPage(page - 1)}
-          >
-            <ChevronLeft className="h-3.5 w-3.5" />
-          </Button>
-          <span className="min-w-16 text-center text-xs font-bold text-zinc-700 dark:text-zinc-300">
-            {page} / {report?.pagination?.pages || 1}
-          </span>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8 rounded-full border-zinc-200/80 dark:border-zinc-800"
-            disabled={page >= (report?.pagination?.pages || 1)}
-            onClick={() => onPage(page + 1)}
-          >
-            <ChevronRight className="h-3.5 w-3.5" />
-          </Button>
-        </div>
-      </footer>
+      <AdminPagination
+        page={page}
+        pages={report?.pagination?.pages || 1}
+        total={report?.pagination?.total || 0}
+        itemLabel="rows"
+        onPageChange={onPage}
+      />
     </section>
   );
 }
