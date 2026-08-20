@@ -159,7 +159,7 @@ export default function ArticleForm({ articleId = null }) {
             onClick={() => persist("draft")}
             className="flex-2"
           >
-            <Save className="h-4 w-4" /> Save draft
+            <Save className="h-4 w-4" /> Draft
           </Button>
           <Button
             disabled={saving}

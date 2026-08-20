@@ -13,7 +13,7 @@ import {
   Clock,
 } from "lucide-react";
 import { ROLE_CONFIG, STATUS_CONFIG, initials, fmtDate } from "./types";
-import { Button } from "@/components/ui";
+import { Button, Skeleton } from "@/components/ui";
 
 const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL || "";
 
@@ -22,27 +22,114 @@ const getCustomAvatar = (avatar) => {
   return avatar.startsWith("http") ? avatar : `${STORAGE_URL}${avatar}`;
 };
 
+function UserCardSkeleton() {
+  return (
+    <div className="admin-surface flex flex-col justify-between p-5 min-h-[200px]">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0 w-full">
+            <Skeleton className="w-11 h-11 rounded-2xl shrink-0" />
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <Skeleton className="h-4.5 w-3/4 rounded-md" />
+              <Skeleton className="h-3 w-1/2 rounded-md" />
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Skeleton className="h-6 w-20 rounded-full" />
+          <Skeleton className="h-6 w-24 rounded-full" />
+        </div>
+      </div>
+      <div className="mt-5 border-t border-zinc-100 pt-4 dark:border-zinc-800/80 flex items-center justify-between">
+        <div className="space-y-1 w-1/2">
+          <Skeleton className="h-3 w-full rounded-md" />
+          <Skeleton className="h-3 w-3/4 rounded-md" />
+        </div>
+        <div className="grid grid-cols-2 gap-2 w-1/3">
+          <Skeleton className="h-8 rounded-xl" />
+          <Skeleton className="h-8 rounded-xl" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function UserMobileRowSkeleton() {
+  return (
+    <div className="p-4 sm:p-5 flex flex-col gap-3.5">
+      <div className="flex items-center gap-3 w-full">
+        <Skeleton className="w-10 h-10 rounded-2xl shrink-0" />
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <Skeleton className="h-4 w-3/4 rounded-md" />
+          <Skeleton className="h-3 w-1/2 rounded-md" />
+        </div>
+      </div>
+      <div className="flex items-center justify-between pt-1 flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-5 w-16 rounded-full" />
+          <Skeleton className="h-5 w-20 rounded-full" />
+        </div>
+        <div className="space-y-1 w-24">
+          <Skeleton className="h-3 w-full rounded-md" />
+          <Skeleton className="h-3 w-3/4 rounded-md" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+        <Skeleton className="h-8 rounded-xl" />
+        <Skeleton className="h-8 rounded-xl" />
+      </div>
+    </div>
+  );
+}
+
+function UserRowSkeleton() {
+  return (
+    <tr>
+      <td className="px-6 py-4">
+        <div className="flex items-center gap-3">
+          <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+          <div className="space-y-1.5 w-36">
+            <Skeleton className="h-4 w-full rounded-md" />
+            <Skeleton className="h-3 w-2/3 rounded-md" />
+          </div>
+        </div>
+      </td>
+      <td className="px-6 py-4">
+        <Skeleton className="h-5 w-16 rounded-full" />
+      </td>
+      <td className="px-6 py-4">
+        <Skeleton className="h-5 w-20 rounded-full" />
+      </td>
+      <td className="px-6 py-4">
+        <Skeleton className="h-4 w-12 rounded-md" />
+        <Skeleton className="mt-1 h-3 w-14 rounded-md" />
+      </td>
+      <td className="px-6 py-4">
+        <Skeleton className="h-4 w-20 rounded-md" />
+      </td>
+      <td className="px-6 py-4">
+        <Skeleton className="h-4 w-20 rounded-md" />
+      </td>
+      <td className="px-6 py-4 text-right">
+        <div className="flex justify-end">
+          <Skeleton className="h-8 w-16 rounded-xl" />
+        </div>
+      </td>
+    </tr>
+  );
+}
+
 function UserTableComponent({
   users,
   loading,
   viewMode = "table",
   onUpdate,
   canUpdate = false,
+  limit = 10,
 }) {
   const router = useRouter();
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-32 gap-4 bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80">
-        <Loader2 className="animate-spin text-zinc-500" size={24} />
-        <span className="text-[11px] font-black uppercase tracking-widest text-zinc-400">
-          Loading Users...
-        </span>
-      </div>
-    );
-  }
-
-  if (users.length === 0) {
+  if (!loading && users.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-4 bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80">
         <UsersIcon className="text-zinc-300 dark:text-zinc-800" size={48} />
@@ -56,10 +143,15 @@ function UserTableComponent({
   if (viewMode === "card") {
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {users.map((user, i) => {
-          const roleConf = ROLE_CONFIG[user.role] || ROLE_CONFIG.reader;
-          const RoleIcon = roleConf.icon;
-          const statusConf = STATUS_CONFIG[user.status] || STATUS_CONFIG.active;
+        {loading ? (
+          Array.from({ length: limit }).map((_, i) => (
+            <UserCardSkeleton key={i} />
+          ))
+        ) : (
+          users.map((user, i) => {
+            const roleConf = ROLE_CONFIG[user.role] || ROLE_CONFIG.reader;
+            const RoleIcon = roleConf.icon;
+            const statusConf = STATUS_CONFIG[user.status] || STATUS_CONFIG.active;
           return (
             <motion.div
               key={user._id}
@@ -159,7 +251,7 @@ function UserTableComponent({
               </div>
             </motion.div>
           );
-        })}
+        }))}
       </div>
     );
   }
@@ -168,10 +260,15 @@ function UserTableComponent({
     <div className="admin-surface w-full overflow-hidden">
       {/* Mobile View: Cards */}
       <div className="lg:hidden flex flex-col divide-y divide-zinc-100 dark:divide-zinc-800/70">
-        {users.map((user, i) => {
-          const roleConf = ROLE_CONFIG[user.role] || ROLE_CONFIG.reader;
-          const RoleIcon = roleConf.icon;
-          const statusConf = STATUS_CONFIG[user.status] || STATUS_CONFIG.active;
+        {loading ? (
+          Array.from({ length: limit }).map((_, i) => (
+            <UserMobileRowSkeleton key={i} />
+          ))
+        ) : (
+          users.map((user, i) => {
+            const roleConf = ROLE_CONFIG[user.role] || ROLE_CONFIG.reader;
+            const RoleIcon = roleConf.icon;
+            const statusConf = STATUS_CONFIG[user.status] || STATUS_CONFIG.active;
           return (
             <motion.div
               key={user._id}
@@ -262,7 +359,7 @@ function UserTableComponent({
               </div>
             </motion.div>
           );
-        })}
+        }))}
       </div>
 
       {/* Desktop View: Table */}
@@ -280,7 +377,12 @@ function UserTableComponent({
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
-            {users.map((user, i) => {
+            {loading ? (
+              Array.from({ length: limit }).map((_, i) => (
+                <UserRowSkeleton key={i} />
+              ))
+            ) : (
+              users.map((user, i) => {
               const roleConf = ROLE_CONFIG[user.role] || ROLE_CONFIG.reader;
               const RoleIcon = roleConf.icon;
               const statusConf =
@@ -390,7 +492,7 @@ function UserTableComponent({
                   </td>
                 </motion.tr>
               );
-            })}
+            }))}
           </tbody>
         </table>
       </div>

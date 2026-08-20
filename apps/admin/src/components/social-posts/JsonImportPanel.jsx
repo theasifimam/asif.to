@@ -218,18 +218,17 @@ export default function JsonImportPanel({ onImport }) {
   };
 
   return (
-    <div className="admin-surface overflow-hidden">
-      <div className="border-b border-zinc-200/80 p-5 dark:border-zinc-800 md:p-6">
+    <div className="admin-surface overflow-hidden rounded-3xl border border-zinc-200/80 dark:border-zinc-800">
+      <div className="border-b border-zinc-200/80 p-5 dark:border-zinc-800 md:p-6 bg-zinc-50/50 dark:bg-zinc-900/40">
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
             <Sparkles size={19} />
           </div>
 
           <div>
-            <h2 className="text-lg font-bold">Create with AI JSON</h2>
-            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-              Choose the kind of post you want, copy its sample structure to
-              ChatGPT, then paste the completed JSON back here.
+            <h2 className="text-base sm:text-lg font-bold font-outfit text-zinc-950 dark:text-white">Import AI JSON Object</h2>
+            <p className="mt-1 max-w-2xl text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 font-medium">
+              Choose a post format, copy the prompt structure to ChatGPT or your preferred AI, then paste the completed JSON object below.
             </p>
           </div>
         </div>

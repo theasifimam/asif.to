@@ -35,7 +35,10 @@ import {
   topicCategoriesApi,
   topicsApi,
 } from "@/lib/api";
-import AdminFormShell, { AdminFormLoading, formSectionClass } from "@/components/forms/AdminFormShell";
+import AdminFormShell, {
+  AdminFormLoading,
+  formSectionClass,
+} from "@/components/forms/AdminFormShell";
 import DiscussButton from "@/components/messaging/DiscussButton";
 import { CanonicalUrlInput } from "@/components/admin";
 
@@ -68,7 +71,9 @@ function slugify(value) {
 export default function TopicForm({ topicId = null }) {
   const searchParams = useSearchParams();
   const requestedReturnTo = searchParams.get("returnTo");
-  const returnTo = requestedReturnTo?.startsWith("/") ? requestedReturnTo : "/topics";
+  const returnTo = requestedReturnTo?.startsWith("/")
+    ? requestedReturnTo
+    : "/topics";
   const [form, setForm] = useState(initialForm);
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -285,11 +290,20 @@ export default function TopicForm({ topicId = null }) {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <Button variant="outline" onClick={save} disabled={saving} className="flex-1 sm:flex-initial">
-            <Save className="mr-2 h-4 w-4" /> Save draft
+          <Button
+            variant="outline"
+            onClick={save}
+            disabled={saving}
+            className="flex-1 sm:flex-initial"
+          >
+            <Save className="mr-2 h-4 w-4" /> Draft
           </Button>
           {form.status !== "published" && (
-            <Button onClick={() => setPublishOpen(true)} disabled={saving} className="w-full sm:w-auto">
+            <Button
+              onClick={() => setPublishOpen(true)}
+              disabled={saving}
+              className="w-full sm:w-auto"
+            >
               <Send className="mr-2 h-4 w-4" /> Publish
             </Button>
           )}
@@ -533,15 +547,19 @@ export default function TopicForm({ topicId = null }) {
             </div>
             <CanonicalUrlInput
               basePrefix={(() => {
-                const selectedCourse = courses.find((c) => String(c._id) === String(form.course));
-                const selectedCategory = categories.find((c) => String(c._id) === String(form.category));
+                const selectedCourse = courses.find(
+                  (c) => String(c._id) === String(form.course),
+                );
+                const selectedCategory = categories.find(
+                  (c) => String(c._id) === String(form.category),
+                );
                 const courseSlug = selectedCourse?.slug || "";
                 const categorySlug = selectedCategory?.slug || "";
                 return courseSlug && categorySlug
                   ? `https://asif.to/${courseSlug}/${categorySlug}`
                   : courseSlug
-                  ? `https://asif.to/${courseSlug}`
-                  : "https://asif.to";
+                    ? `https://asif.to/${courseSlug}`
+                    : "https://asif.to";
               })()}
               value={form.canonicalUrl}
               onChange={(value) => update("canonicalUrl", value)}

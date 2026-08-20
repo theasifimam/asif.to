@@ -35,6 +35,70 @@ import {
 import { coursesApi, topicsApi } from "@/lib/api";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { listingReturnTo, useUrlFilters } from "@/hooks/useUrlFilters";
+import { Skeleton } from "@/components/ui";
+
+function TopicCardSkeleton() {
+  return (
+    <div className="flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs dark:border-zinc-800/80 dark:bg-zinc-950 min-h-[180px]">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Skeleton className="h-6 w-8 rounded-lg" />
+            <Skeleton className="h-5 w-14 rounded-full" />
+            <Skeleton className="h-5 w-20 rounded-full" />
+          </div>
+          <Skeleton className="h-5 w-16 rounded-full" />
+        </div>
+        <div className="space-y-1.5">
+          <Skeleton className="h-5 w-3/4 rounded-md" />
+          <Skeleton className="h-3 w-1/3 rounded-md" />
+        </div>
+        <Skeleton className="h-4 w-36 rounded-md" />
+      </div>
+      <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-3.5 dark:border-zinc-800/80">
+        <Skeleton className="h-8 w-16 rounded-lg" />
+        <div className="flex items-center gap-1">
+          <Skeleton className="h-8 w-8 rounded-lg" />
+          <Skeleton className="h-8 w-8 rounded-lg" />
+          <Skeleton className="h-8 w-8 rounded-lg" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TopicRowSkeleton() {
+  return (
+    <tr>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-5 w-48 rounded-md" />
+        <Skeleton className="mt-1.5 h-3 w-32 rounded-md" />
+      </td>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-5 w-14 rounded-full" />
+      </td>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-5 w-20 rounded-full" />
+      </td>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-4 w-16 rounded-md" />
+      </td>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-5 w-16 rounded-full" />
+      </td>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-5 w-12 rounded-md" />
+      </td>
+      <td className="px-6 py-4.5">
+        <div className="flex justify-end gap-1">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+      </td>
+    </tr>
+  );
+}
 
 const statusStyles = {
   published:
@@ -263,155 +327,159 @@ export default function TopicsPage() {
       )}
 
       <AdminContent plain={viewMode === "card"}>
-        {loading ? (
-          <div className="flex h-64 items-center justify-center rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-          </div>
-        ) : topics.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
-            <FilePlus2 className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
-            <p className="text-sm font-medium">
-              No topics match these filters.
-            </p>
-          </div>
-        ) : viewMode === "card" ? (
+        {viewMode === "card" ? (
           <div className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {topics.map((topic, index) => (
-                <div
-                  key={topic._id}
-                  className="group flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs transition-all hover:border-blue-500/50 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800 text-[10px] font-black text-zinc-600 dark:text-zinc-400">
-                          #{topic.order}
-                        </span>
-                        <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
-                          {topic.type || "article"}
-                        </span>
-                        {topic.category?.name && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
-                            {topic.category.name}
+              {loading ? (
+                Array.from({ length: limit }).map((_, i) => (
+                  <TopicCardSkeleton key={i} />
+                ))
+              ) : topics.length === 0 ? (
+                <div className="col-span-full flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
+                  <FilePlus2 className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
+                  <p className="text-sm font-medium">
+                    No topics match these filters.
+                  </p>
+                </div>
+              ) : (
+                topics.map((topic, index) => (
+                  <div
+                    key={topic._id}
+                    className="group flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs transition-all hover:border-blue-500/50 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800 text-[10px] font-black text-zinc-600 dark:text-zinc-400">
+                            #{topic.order}
                           </span>
+                          <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                            {topic.type || "article"}
+                          </span>
+                          {topic.category?.name && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
+                              {topic.category.name}
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => toggleStatus(topic)}
+                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${statusStyles[topic.status]}`}
+                        >
+                          {topic.status}
+                        </button>
+                      </div>
+
+                      <div>
+                        <Link
+                          href={editHref(topic._id)}
+                          className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-2"
+                        >
+                          {topic.title}
+                        </Link>
+                        <p className="mt-1 text-xs text-zinc-400 truncate">
+                          /{topic.slug}
+                        </p>
+                      </div>
+
+                      {topic.course?.title && (
+                        <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                          Course: {topic.course.title}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-3.5 dark:border-zinc-800/80">
+                      <div className="flex items-center gap-1">
+                        {canReorder && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-lg"
+                              title="Move up"
+                              disabled={reordering || index === 0}
+                              onClick={() => moveTopic(index, -1)}
+                            >
+                              <ArrowUp className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-lg"
+                              title="Move down"
+                              disabled={reordering || index === topics.length - 1}
+                              onClick={() => moveTopic(index, 1)}
+                            >
+                              <ArrowDown className="h-4 w-4" />
+                            </Button>
+                          </>
                         )}
                       </div>
-                      <button
-                        onClick={() => toggleStatus(topic)}
-                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${statusStyles[topic.status]}`}
-                      >
-                        {topic.status}
-                      </button>
-                    </div>
 
-                    <div>
-                      <Link
-                        href={editHref(topic._id)}
-                        className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-2"
-                      >
-                        {topic.title}
-                      </Link>
-                      <p className="mt-1 text-xs text-zinc-400 truncate">
-                        /{topic.slug}
-                      </p>
-                    </div>
-
-                    {topic.course?.title && (
-                      <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-                        Course: {topic.course.title}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-3.5 dark:border-zinc-800/80">
-                    <div className="flex items-center gap-1">
-                      {canReorder && (
-                        <>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {topic.status === "published" && topic.course?.slug && (
+                          <Link
+                            href={`https://asif.to/${[
+                              topic.course.slug,
+                              topic.type === "interview"
+                                ? topic.category?.slug
+                                : null,
+                              topic.slug,
+                            ]
+                              .filter(Boolean)
+                              .map(encodeURIComponent)
+                              .join("/")}`}
+                            target="_blank"
+                          >
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-lg"
+                              title="Open public topic"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        )}
+                        <Link href={editHref(topic._id)}>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 rounded-lg"
-                            title="Move up"
-                            disabled={reordering || index === 0}
-                            onClick={() => moveTopic(index, -1)}
+                            title="Edit topic"
                           >
-                            <ArrowUp className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-lg"
-                            title="Move down"
-                            disabled={reordering || index === topics.length - 1}
-                            onClick={() => moveTopic(index, 1)}
-                          >
-                            <ArrowDown className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1 shrink-0">
-                      {topic.status === "published" && topic.course?.slug && (
-                        <Link
-                          href={`https://asif.to/${[
-                            topic.course.slug,
-                            topic.type === "interview"
-                              ? topic.category?.slug
-                              : null,
-                            topic.slug,
-                          ]
-                            .filter(Boolean)
-                            .map(encodeURIComponent)
-                            .join("/")}`}
-                          target="_blank"
-                        >
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-lg"
-                            title="Open public topic"
-                          >
-                            <ExternalLink className="h-4 w-4" />
+                            <Edit3 className="h-4 w-4" />
                           </Button>
                         </Link>
-                      )}
-                      <Link href={editHref(topic._id)}>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 rounded-lg"
-                          title="Edit topic"
+                          title="Delete topic"
+                          onClick={() => setDeleteTarget(topic)}
+                          className="h-8 w-8 rounded-lg text-zinc-400 hover:text-red-600"
                         >
-                          <Edit3 className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
-                      </Link>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="Delete topic"
-                        onClick={() => setDeleteTarget(topic)}
-                        className="h-8 w-8 rounded-lg text-zinc-400 hover:text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
-            <AdminPagination
-              page={pagination.page}
-              pages={pagination.pages}
-              total={pagination.total || 0}
-              limit={limit}
-              itemLabel="topics"
-              onPageChange={(page) =>
-                setFilters((current) => ({ ...current, page }))
-              }
-              onLimitChange={(l) => { setLimit(l); setFilters((c) => ({ ...c, page: 1 })); }}
-            />
+            {!loading && topics.length > 0 && (
+              <AdminPagination
+                page={pagination.page}
+                pages={pagination.pages}
+                total={pagination.total || 0}
+                limit={limit}
+                itemLabel="topics"
+                onPageChange={(page) =>
+                  setFilters((current) => ({ ...current, page }))
+                }
+                onLimitChange={(l) => { setLimit(l); setFilters((c) => ({ ...c, page: 1 })); }}
+              />
+            )}
           </div>
         ) : (
           <div className="admin-surface w-full rounded-[28px] sm:rounded-4xl overflow-hidden">
@@ -429,140 +497,157 @@ export default function TopicsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
-                  {topics.map((topic, index) => (
-                    <tr
-                      key={topic._id}
-                      className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
-                    >
-                      <td className="px-6 py-4.5">
-                        <Link
-                          href={editHref(topic._id)}
-                          className="font-bold font-outfit text-zinc-950 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-1"
-                        >
-                          {topic.title}
-                        </Link>
-                        <p className="mt-0.5 text-xs text-zinc-400 truncate">
-                          /{topic.slug}
-                        </p>
-                      </td>
-                      <td className="px-6 py-4.5">
-                        <span className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-2.5 py-0.5 text-[10px] font-black uppercase text-zinc-600 dark:text-zinc-300">
-                          {topic.type || "article"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4.5">
-                        <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-500/20">
-                          {topic.course?.title || "-"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-                        {topic.category?.name || "-"}
-                      </td>
-                      <td className="px-6 py-4.5">
-                        <button
-                          onClick={() => toggleStatus(topic)}
-                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider transition-all ${statusStyles[topic.status]}`}
-                        >
-                          {topic.status}
-                        </button>
-                      </td>
-                      <td className="px-6 py-4.5 text-zinc-600 dark:text-zinc-300">
-                        <div className="flex items-center gap-1">
-                          <span className="w-7 text-center font-black text-xs text-zinc-400">
-                            #{topic.order}
-                          </span>
-                          {canReorder && (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                                title="Move topic up"
-                                disabled={reordering || index === 0}
-                                onClick={() => moveTopic(index, -1)}
-                              >
-                                <ArrowUp className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                                title="Move topic down"
-                                disabled={
-                                  reordering || index === topics.length - 1
-                                }
-                                onClick={() => moveTopic(index, 1)}
-                              >
-                                <ArrowDown className="h-3.5 w-3.5" />
-                              </Button>
-                            </>
-                          )}
+                  {loading ? (
+                    Array.from({ length: limit }).map((_, i) => (
+                      <TopicRowSkeleton key={i} />
+                    ))
+                  ) : topics.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-10 text-center">
+                        <div className="flex flex-col items-center justify-center text-zinc-500">
+                          <FilePlus2 className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
+                          <p className="text-sm font-medium">No topics match these filters.</p>
                         </div>
                       </td>
-                      <td className="px-6 py-4.5">
-                        <div className="flex justify-end gap-1">
-                          <Link href={editHref(topic._id)}>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                              title="Edit topic"
-                            >
-                              <Edit3 className="h-4 w-4" />
-                            </Button>
+                    </tr>
+                  ) : (
+                    topics.map((topic, index) => (
+                      <tr
+                        key={topic._id}
+                        className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
+                      >
+                        <td className="px-6 py-4.5">
+                          <Link
+                            href={editHref(topic._id)}
+                            className="font-bold font-outfit text-zinc-950 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-1"
+                          >
+                            {topic.title}
                           </Link>
-                          {topic.status === "published" &&
-                            topic.course?.slug && (
-                              <Link
-                                href={`https://asif.to/${[
-                                  topic.course.slug,
-                                  topic.type === "interview"
-                                    ? topic.category?.slug
-                                    : null,
-                                  topic.slug,
-                                ]
-                                  .filter(Boolean)
-                                  .map(encodeURIComponent)
-                                  .join("/")}`}
-                                target="_blank"
-                              >
+                          <p className="mt-0.5 text-xs text-zinc-400 truncate">
+                            /{topic.slug}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4.5">
+                          <span className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-2.5 py-0.5 text-[10px] font-black uppercase text-zinc-600 dark:text-zinc-300">
+                            {topic.type || "article"}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4.5">
+                          <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-500/20">
+                            {topic.course?.title || "-"}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                          {topic.category?.name || "-"}
+                        </td>
+                        <td className="px-6 py-4.5">
+                          <button
+                            onClick={() => toggleStatus(topic)}
+                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider transition-all ${statusStyles[topic.status]}`}
+                          >
+                            {topic.status}
+                          </button>
+                        </td>
+                        <td className="px-6 py-4.5 text-zinc-600 dark:text-zinc-300">
+                          <div className="flex items-center gap-1">
+                            <span className="w-7 text-center font-black text-xs text-zinc-400">
+                              #{topic.order}
+                            </span>
+                            {canReorder && (
+                              <>
                                 <Button
                                   variant="ghost"
                                   size="icon"
                                   className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                                  title="Open public topic"
+                                  title="Move topic up"
+                                  disabled={reordering || index === 0}
+                                  onClick={() => moveTopic(index, -1)}
                                 >
-                                  <ExternalLink className="h-4 w-4" />
+                                  <ArrowUp className="h-3.5 w-3.5" />
                                 </Button>
-                              </Link>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                  title="Move topic down"
+                                  disabled={
+                                    reordering || index === topics.length - 1
+                                  }
+                                  onClick={() => moveTopic(index, 1)}
+                                >
+                                  <ArrowDown className="h-3.5 w-3.5" />
+                                </Button>
+                              </>
                             )}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title="Delete topic"
-                            onClick={() => setDeleteTarget(topic)}
-                            className="h-8 w-8 rounded-full text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                          >
-                            <Trash2 className="h-4 w-4 text-rose-500" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4.5">
+                          <div className="flex justify-end gap-1">
+                            <Link href={editHref(topic._id)}>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                title="Edit topic"
+                              >
+                                <Edit3 className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                            {topic.status === "published" &&
+                              topic.course?.slug && (
+                                <Link
+                                  href={`https://asif.to/${[
+                                    topic.course.slug,
+                                    topic.type === "interview"
+                                      ? topic.category?.slug
+                                      : null,
+                                    topic.slug,
+                                  ]
+                                    .filter(Boolean)
+                                    .map(encodeURIComponent)
+                                    .join("/")}`}
+                                  target="_blank"
+                                >
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                    title="Open public topic"
+                                  >
+                                    <ExternalLink className="h-4 w-4" />
+                                  </Button>
+                                </Link>
+                              )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="Delete topic"
+                              onClick={() => setDeleteTarget(topic)}
+                              className="h-8 w-8 rounded-full text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                            >
+                              <Trash2 className="h-4 w-4 text-rose-500" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
-            <AdminPagination
-              page={pagination.page}
-              pages={pagination.pages}
-              total={pagination.total || 0}
-              limit={limit}
-              itemLabel="topics"
-              onPageChange={(page) =>
-                setFilters((current) => ({ ...current, page }))
-              }
-              onLimitChange={(l) => { setLimit(l); setFilters((c) => ({ ...c, page: 1 })); }}
-            />
+            {!loading && topics.length > 0 && (
+              <AdminPagination
+                page={pagination.page}
+                pages={pagination.pages}
+                total={pagination.total || 0}
+                limit={limit}
+                itemLabel="topics"
+                onPageChange={(page) =>
+                  setFilters((current) => ({ ...current, page }))
+                }
+                onLimitChange={(l) => { setLimit(l); setFilters((c) => ({ ...c, page: 1 })); }}
+              />
+            )}
           </div>
         )}
       </AdminContent>

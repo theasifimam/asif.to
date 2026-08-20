@@ -1,0 +1,280 @@
+[
+  {
+    "courseSlug": "nextjs",
+    "categorySlug": "next-js-advanced-concepts",
+    "questions": [
+      {
+        "question": "How Does Advanced Streaming Work with Suspense in Next.js?",
+        "slug": "how-advanced-streaming-suspense-works-nextjs",
+        "answer": "Streaming in Next.js lets the server send parts of a route as they become ready instead of waiting for every data source to finish before sending anything.\n\nThe basic idea of streaming is simple, but the important advanced concept is **where you place Suspense boundaries**.\n\n### Without a Useful Suspense Boundary\n\nImagine a page needs three pieces of data:\n\n```text\nHeader          → instant\nProduct details → 100 ms\nRecommendations → 3 seconds\n```\n\nIf everything waits inside one component:\n\n```tsx\nexport default async function Page() {\n  const product = await getProduct();\n  const recommendations = await getRecommendations();\n\n  return (\n    <main>\n      <Header />\n      <Product product={product} />\n      <Recommendations items={recommendations} />\n    </main>\n  );\n}\n```\n\nthe slow recommendation request can delay more of the page than necessary.\n\n### Move Slow Work Behind Suspense\n\n```tsx\nimport { Suspense } from 'react';\n\nexport default async function Page() {\n  const product = await getProduct();\n\n  return (\n    <main>\n      <Header />\n      <Product product={product} />\n\n      <Suspense fallback={<RecommendationsSkeleton />}>\n        <Recommendations />\n      </Suspense>\n    </main>\n  );\n}\n```\n\nThen the flow becomes:\n\n```text\nHeader + Product\n      ↓ sent first\nSkeleton\n      ↓ shown temporarily\nRecommendations resolve\n      ↓ streamed later\nFinal UI replaces skeleton\n```\n\n### Suspense Boundaries Define Streaming Units\n\nThink of a Suspense boundary as saying:\n\n```text\nThis part may take longer.\nDo not make the surrounding page wait for it.\n```\n\n### Too Few Boundaries\n\nOne boundary around the entire page can make a small slow dependency delay too much UI.\n\n### Too Many Boundaries\n\nWrapping every tiny component independently can create excessive visual popping:\n\n```text\nHeading appears\nthen price\nthen image\nthen button\nthen badge\nthen another badge\n```\n\nThe user experience may feel unstable even though technically more streaming occurs.\n\n### Group Related UI\n\nOften the best strategy is to stream meaningful sections:\n\n```text\nProduct information\nReviews section\nRecommendations section\nAnalytics panel\n```\n\nrather than individual text nodes.\n\n### Parallel Dynamic Sections\n\nTwo independent Suspense sections can resolve independently:\n\n```tsx\n<Suspense fallback={<ReviewsSkeleton />}>\n  <Reviews />\n</Suspense>\n\n<Suspense fallback={<RecommendationsSkeleton />}>\n  <Recommendations />\n</Suspense>\n```\n\nConceptually:\n\n```text\nReviews ─────────→ ready at 800 ms\nRecommendations ─────────────────→ ready at 2 s\n```\n\nThe reviews do not have to wait for recommendations.\n\n### Interview-Ready Answer\n\nAdvanced Next.js streaming is mainly about designing Suspense boundaries around meaningful asynchronous sections. Components outside a slow boundary can render immediately, while the fallback is included in the initial output and the resolved content streams later. Good boundary placement prevents slow data from blocking unrelated UI without creating excessive loading-state fragmentation.",
+        "difficulty": "hard",
+        "questionType": "conceptual",
+        "tags": [
+          "nextjs",
+          "streaming",
+          "suspense",
+          "advanced-rendering",
+          "server-components"
+        ],
+        "seoTitle": "How Does Advanced Streaming Work in Next.js?",
+        "seoDescription": "Learn how advanced Next.js streaming uses Suspense boundaries to progressively render independent server components without blocking the entire page.",
+        "keywords": [
+          "nextjs advanced streaming",
+          "nextjs suspense streaming",
+          "nextjs server streaming",
+          "nextjs suspense boundaries"
+        ],
+        "order": 1,
+        "status": "published"
+      },
+      {
+        "question": "What Is the React Server Component Payload in Next.js?",
+        "slug": "what-is-react-server-component-payload-nextjs",
+        "answer": "Next.js does not send Server Components to the browser as ordinary React component JavaScript.\n\nInstead, React renders Server Components on the server and produces a special representation called the **React Server Component Payload**, often shortened to the **RSC Payload**.\n\n### Basic Architecture\n\n```text\nReact Server Components\n        ↓\nRendered on server\n        ↓\nRSC Payload\n        ↓\nSent to browser\n        ↓\nReact reconstructs component tree\n```\n\n### What Does the RSC Payload Contain?\n\nConceptually, it contains information such as:\n\n```text\nRendered Server Component result\nReferences to Client Components\nPlaceholders where Client Components belong\nProps passed from Server Components to Client Components\n```\n\nSuppose you have:\n\n```tsx\nexport default async function ArticlePage() {\n  const article = await getArticle();\n\n  return (\n    <article>\n      <h1>{article.title}</h1>\n      <LikeButton articleId={article.id} />\n    </article>\n  );\n}\n```\n\n`ArticlePage` is a Server Component while `LikeButton` is a Client Component.\n\nConceptually the RSC Payload communicates:\n\n```text\nRender article heading here\n\nClient Component placeholder here\n→ LikeButton module\n→ articleId = 123\n```\n\n### Server Component Source Code Is Not Needed in the Browser\n\nThe browser does not need the database-fetching implementation:\n\n```typescript\nawait db.article.findUnique(...)\n```\n\nto render the result.\n\nOnly the rendered result and information required to integrate Client Components need to cross the network boundary.\n\n### Why This Matters\n\nServer Components allow packages and logic that only run on the server to avoid becoming browser JavaScript.\n\nExamples include:\n\n```text\nDatabase queries\nMarkdown processing\nServer-only libraries\nPrivate service calls\nLarge data-transformation libraries\n```\n\n### RSC Payload Is Not the Same as HTML\n\nThey serve different purposes.\n\n```text\nHTML\n→ lets the browser display initial UI quickly\n\nRSC Payload\n→ tells React how the Server and Client Component trees fit together\n```\n\n### Interview-Ready Answer\n\nThe React Server Component Payload is the serialized representation of a rendered Server Component tree. It contains Server Component results, Client Component references and placeholders, and props crossing the server/client boundary. Next.js uses this payload so Server Components can remain on the server while React still reconstructs and updates the complete UI in the browser.",
+        "difficulty": "hard",
+        "questionType": "conceptual",
+        "tags": [
+          "nextjs",
+          "react-server-components",
+          "rsc-payload",
+          "architecture"
+        ],
+        "seoTitle": "What Is the React Server Component Payload in Next.js?",
+        "seoDescription": "Learn what the React Server Component Payload is, what it contains, and how Next.js combines Server and Client Components.",
+        "keywords": [
+          "nextjs rsc payload",
+          "react server component payload",
+          "nextjs server component architecture",
+          "nextjs rsc"
+        ],
+        "order": 2,
+        "status": "published"
+      },
+      {
+        "question": "How Do React Server Components Work During Initial Load and Client Navigation in Next.js?",
+        "slug": "react-server-components-initial-load-navigation-nextjs",
+        "answer": "React Server Components behave differently during the **initial page load** and later **client-side navigation**.\n\nUnderstanding this explains why an App Router application can provide server rendering while still feeling like a client-side application during navigation.\n\n### Initial Page Load\n\nOn the server, Next.js renders Server Components into the RSC Payload and also uses the Server and Client Component information to create HTML.\n\nConceptually:\n\n```text\nRequest /courses\n      ↓\nServer Components execute\n      ↓\nRSC Payload generated\n      ↓\nHTML generated\n      ↓\nBrowser receives HTML + RSC data\n```\n\n### Browser Displays HTML\n\nThe HTML allows users to see the page before all interactive JavaScript has finished loading.\n\n### React Uses the RSC Payload\n\nThe browser then uses the RSC Payload to reconcile the Server Component result with Client Component locations.\n\n### Client Components Hydrate\n\nClient-side JavaScript hydrates interactive components:\n\n```text\nServer-rendered button\n      ↓\nClient JavaScript loads\n      ↓\nonClick becomes active\n```\n\n### Subsequent Client Navigation\n\nSuppose the user moves from:\n\n```text\n/courses\n```\n\nto:\n\n```text\n/courses/nextjs\n```\n\nusing `<Link>`.\n\nNext.js can request or use a prefetched RSC Payload for the destination rather than performing a traditional full-page reload.\n\nConceptually:\n\n```text\n<Link> click\n     ↓\nRSC Payload for destination\n     ↓\nReact updates affected route tree\n     ↓\nShared layouts remain\n```\n\n### Why Navigation Feels Fast\n\nNext.js combines:\n\n```text\nPrefetching\nRSC Payloads\nPartial rendering\nClient-side transitions\nStreaming\n```\n\nto avoid downloading and rebuilding an entirely unrelated page for every navigation.\n\n### Shared Layouts Matter\n\nIf both routes use the same layout:\n\n```text\nDashboard layout\n├── /dashboard/articles\n└── /dashboard/users\n```\n\nnavigation can preserve the layout while changing the route content below it.\n\n### Interview-Ready Answer\n\nOn the first request, Next.js renders Server Components into an RSC Payload and generates HTML for immediate display. React then uses the payload to combine Server and Client Component trees and hydrates interactive Client Components. On later client-side navigations, Next.js can fetch or reuse prefetched RSC Payloads and update only the affected route tree rather than performing a traditional full-page reload.",
+        "difficulty": "hard",
+        "questionType": "conceptual",
+        "tags": [
+          "nextjs",
+          "rsc",
+          "client-navigation",
+          "hydration",
+          "server-components"
+        ],
+        "seoTitle": "How React Server Components Work in Next.js Navigation",
+        "seoDescription": "Learn how Next.js uses HTML, RSC Payloads, hydration, prefetching, and partial rendering during initial loads and client navigation.",
+        "keywords": [
+          "nextjs react server components architecture",
+          "nextjs rsc navigation",
+          "nextjs server components hydration",
+          "nextjs initial load navigation"
+        ],
+        "order": 3,
+        "status": "published"
+      },
+      {
+        "question": "What Are Parallel Routes in Next.js and When Should You Use Them?",
+        "slug": "what-are-parallel-routes-nextjs",
+        "answer": "Parallel Routes let one Next.js layout render multiple independently routed sections at the same time.\n\nThey are useful when a single screen contains several areas that can have their own navigation state.\n\n### Example Dashboard\n\nImagine:\n\n```text\nDashboard\n├── Team panel\n└── Analytics panel\n```\n\nBoth sections should appear together.\n\nCreate named slots with the `@folder` convention:\n\n```text\napp/dashboard/\n  layout.tsx\n\n  @team/\n    page.tsx\n\n  @analytics/\n    page.tsx\n```\n\n### Layout Receives Slots as Props\n\n```tsx\nexport default function DashboardLayout({\n  children,\n  team,\n  analytics\n}: {\n  children: React.ReactNode;\n  team: React.ReactNode;\n  analytics: React.ReactNode;\n}) {\n  return (\n    <main>\n      {children}\n\n      <section>{team}</section>\n      <section>{analytics}</section>\n    </main>\n  );\n}\n```\n\n### @folder Does Not Become Part of the URL\n\nThis is important.\n\n```text\n@analytics\n```\n\nis a **slot**, not a URL segment.\n\nTherefore you do not visit:\n\n```text\n/dashboard/@analytics\n```\n\njust because the directory is named `@analytics`.\n\n### children Is Also a Slot\n\nThe normal `children` prop is effectively the implicit/default slot.\n\nConceptually:\n\n```text\nchildren\n@team\n@analytics\n```\n\nare all sections that the layout can compose.\n\n### Independent Navigation\n\nA slot can contain nested pages and navigation while the rest of the layout preserves its current state.\n\nThis is useful for:\n\n```text\nDashboards\nSplit views\nSocial feeds\nComplex admin interfaces\nModals\nConditional sections\n```\n\n### Independent Loading and Error UI\n\nSlots can also have their own route-level behavior, allowing one section to load independently from another.\n\n### When Not to Use Parallel Routes\n\nA simple two-column layout does not automatically need Parallel Routes.\n\nIf both columns always belong to the same route and have no independent routing state, normal React components are simpler.\n\n### Interview-Ready Answer\n\nParallel Routes let a layout render multiple independently routed UI slots using the `@folder` convention. Slots are passed to the layout as props and do not add segments to the public URL. They are useful for dashboards, split views, modals, and other interfaces where multiple routed sections need to appear and navigate independently.",
+        "difficulty": "medium",
+        "questionType": "conceptual",
+        "tags": ["nextjs", "parallel-routes", "slots", "advanced-routing"],
+        "seoTitle": "What Are Parallel Routes in Next.js?",
+        "seoDescription": "Learn how Next.js Parallel Routes use @folder slots to build dashboards, split views, modals, and independently navigated UI sections.",
+        "keywords": [
+          "nextjs parallel routes",
+          "nextjs slots",
+          "nextjs @folder",
+          "nextjs advanced routing"
+        ],
+        "order": 4,
+        "status": "published"
+      },
+      {
+        "question": "How Do Soft Navigation, Hard Navigation, and default.js Work with Next.js Parallel Routes?",
+        "slug": "parallel-routes-soft-hard-navigation-default-js-nextjs",
+        "answer": "Parallel Routes have an important behavior difference between **client-side navigation** and a **full page load or refresh**.\n\nUnderstanding this is essential when building advanced dashboards and modal routes.\n\n### Example\n\nSuppose you have:\n\n```text\napp/dashboard/\n  @team/\n    page.tsx\n    settings/\n      page.tsx\n\n  @analytics/\n    page.tsx\n```\n\nOnly the `@team` slot has a `settings` page.\n\n### Soft Navigation\n\nDuring client-side navigation, Next.js remembers the active subpage for each slot.\n\nIf you navigate to the team settings page:\n\n```text\nTeam\n→ settings page\n\nAnalytics\n→ keeps previous active state\n```\n\nThis makes independent slot navigation possible.\n\n### Hard Navigation\n\nNow refresh the browser.\n\nNext.js receives only the current URL.\n\nIt cannot reconstruct an unmatched slot's previous client-side active state from browser memory.\n\nThat is where:\n\n```text\ndefault.tsx\n```\n\nis used.\n\n### Example default.tsx\n\n```tsx\nexport default function Default() {\n  return null;\n}\n```\n\nThis tells Next.js what to render when the slot has no route matching the current full-page URL.\n\n### Next.js 16 Requirement\n\nIn current Next.js 16, named Parallel Route slots require explicit `default.js`/`default.tsx` files.\n\nMissing required defaults can cause the production build to fail.\n\n### You Can Return a 404 Instead\n\n```tsx\nimport { notFound } from 'next/navigation';\n\nexport default function Default() {\n  notFound();\n}\n```\n\nUse this when rendering that slot without a matching route should be considered invalid.\n\n### Why Does This Difference Exist?\n\nDuring soft navigation:\n\n```text\nNext.js router remembers slot state\n```\n\nDuring hard navigation:\n\n```text\nServer only sees URL\n→ previous slot state is unavailable\n```\n\n### Interview-Ready Answer\n\nDuring soft navigation, Next.js tracks the active subpage of each Parallel Route slot and can preserve unmatched slot state. After a hard navigation or refresh, that client-side state is unavailable, so `default.js` provides a fallback for unmatched slots. In Next.js 16, named parallel slots require explicit default files.",
+        "difficulty": "hard",
+        "questionType": "conceptual",
+        "tags": [
+          "nextjs",
+          "parallel-routes",
+          "default-js",
+          "soft-navigation",
+          "hard-navigation"
+        ],
+        "seoTitle": "How Does default.js Work with Next.js Parallel Routes?",
+        "seoDescription": "Learn how soft and hard navigation affect Next.js Parallel Routes and why Next.js 16 requires default.js for named route slots.",
+        "keywords": [
+          "nextjs parallel routes default.js",
+          "nextjs default.tsx",
+          "parallel routes refresh nextjs",
+          "nextjs soft hard navigation"
+        ],
+        "order": 5,
+        "status": "published"
+      },
+      {
+        "question": "What Are Intercepting Routes in Next.js and How Do They Work?",
+        "slug": "what-are-intercepting-routes-nextjs",
+        "answer": "Intercepting Routes let Next.js display another route **inside the current layout context** during client-side navigation.\n\nA common example is opening a photo in a modal while keeping the gallery behind it.\n\n### Example\n\nA user is viewing:\n\n```text\n/feed\n```\n\nand clicks a photo whose real URL is:\n\n```text\n/photo/123\n```\n\nInstead of replacing the feed entirely, client-side navigation can render:\n\n```text\nFeed\n+\nPhoto modal\n```\n\nwhile the URL represents the photo route.\n\n### Direct Visit Is Different\n\nIf someone directly opens:\n\n```text\n/photo/123\n```\n\nor refreshes that URL, Next.js renders the normal full photo page rather than preserving the feed modal context.\n\nThis gives you both:\n\n```text\nContextual modal navigation\n+\nShareable standalone URL\n```\n\n### Interception Conventions\n\nNext.js provides route-segment matchers:\n\n```text\n(.)\n→ same level\n\n(..)\n→ one route segment above\n\n(..)(..)\n→ two route segments above\n\n(...)\n→ from the root app directory\n```\n\nExample:\n\n```text\n(..)photo\n```\n\ncan intercept a `photo` segment one route level above.\n\n### Route Segments, Not Filesystem Levels\n\nThis is important when Parallel Route slots are involved.\n\nA folder such as:\n\n```text\n@modal\n```\n\nis a slot and does not count as a URL route segment.\n\nTherefore interception matching is based on route segments, not simply how many folders you see in the filesystem.\n\n### Common Uses\n\n```text\nPhoto modal\nLogin modal\nShopping cart drawer\nQuick product view\nPreview panel\n```\n\n### Interview-Ready Answer\n\nIntercepting Routes let Next.js render another route inside the user's current layout context during client navigation while preserving the destination's real URL. Direct visits or refreshes still render the standalone destination page. Matchers such as `(.)`, `(..)`, and `(...)` describe route-segment relationships rather than raw filesystem folder depth.",
+        "difficulty": "medium",
+        "questionType": "conceptual",
+        "tags": ["nextjs", "intercepting-routes", "advanced-routing", "modals"],
+        "seoTitle": "What Are Intercepting Routes in Next.js?",
+        "seoDescription": "Learn how Next.js Intercepting Routes display pages inside the current layout for modals while preserving shareable URLs.",
+        "keywords": [
+          "nextjs intercepting routes",
+          "nextjs intercepted routes",
+          "nextjs modal routing",
+          "nextjs advanced routes"
+        ],
+        "order": 6,
+        "status": "published"
+      },
+      {
+        "question": "How Do You Build URL-Based Modals with Parallel and Intercepting Routes in Next.js?",
+        "slug": "url-based-modals-parallel-intercepting-routes-nextjs",
+        "answer": "One of the most useful advanced App Router patterns combines **Parallel Routes** and **Intercepting Routes** to create a modal that has a real shareable URL.\n\n### Desired Behavior\n\nFrom a photo gallery:\n\n```text\n/gallery\n```\n\nclicking photo 123 should show:\n\n```text\nGallery remains visible\n+\nPhoto 123 modal opens\n```\n\nwith a navigable URL for the photo.\n\nBut opening that photo URL directly should display:\n\n```text\nFull photo page\n```\n\nrather than the modal.\n\n### Normal Photo Route\n\n```text\napp/\n  photo/\n    [id]/\n      page.tsx\n```\n\nThis gives the standalone page.\n\n### Add a Modal Slot\n\nConceptually:\n\n```text\napp/\n  @modal/\n    default.tsx\n```\n\nThe layout receives the modal slot:\n\n```tsx\nexport default function RootLayout({\n  children,\n  modal\n}: {\n  children: React.ReactNode;\n  modal: React.ReactNode;\n}) {\n  return (\n    <html>\n      <body>\n        {children}\n        {modal}\n      </body>\n    </html>\n  );\n}\n```\n\n### Intercept the Photo Route\n\nInside the modal slot, create the appropriate interception route:\n\n```text\n@modal/\n  (.)photo/\n    [id]/\n      page.tsx\n```\n\nThe exact matcher depends on where the slot and destination route are positioned in the route tree.\n\n### Intercepted Page\n\n```tsx\nimport Modal from '@/components/Modal';\nimport Photo from '@/components/Photo';\n\nexport default async function PhotoModal({ params }) {\n  const { id } = await params;\n\n  return (\n    <Modal>\n      <Photo id={id} />\n    </Modal>\n  );\n}\n```\n\n### default.tsx\n\nThe slot should render nothing when no modal is active:\n\n```tsx\nexport default function Default() {\n  return null;\n}\n```\n\n### Closing the Modal\n\nA modal can integrate with browser navigation:\n\n```tsx\n'use client';\n\nimport { useRouter } from 'next/navigation';\n\nexport default function Modal({ children }) {\n  const router = useRouter();\n\n  return (\n    <div>\n      <button onClick={() => router.back()}>\n        Close\n      </button>\n\n      {children}\n    </div>\n  );\n}\n```\n\n### Why This Pattern Is Better Than a Local Boolean\n\nA normal state-only modal:\n\n```javascript\nconst [open, setOpen] = useState(false);\n```\n\ncannot naturally provide all of these together:\n\n```text\nShareable URL\nBrowser Back closes modal\nBrowser Forward reopens modal\nDirect URL renders full page\nPage context remains during soft navigation\n```\n\n### Interview-Ready Answer\n\nURL-based Next.js modals combine a Parallel Route slot with an Intercepting Route. Client-side navigation renders the destination inside the modal slot while preserving the surrounding page, whereas a direct visit or refresh renders the destination's normal full page. This provides deep linking and natural browser Back/Forward behavior.",
+        "difficulty": "hard",
+        "questionType": "coding",
+        "tags": [
+          "nextjs",
+          "parallel-routes",
+          "intercepting-routes",
+          "modals",
+          "deep-linking"
+        ],
+        "seoTitle": "How to Build URL-Based Modals in Next.js",
+        "seoDescription": "Learn how to combine Parallel and Intercepting Routes to build shareable Next.js modals with Back, Forward, refresh, and deep-link support.",
+        "keywords": [
+          "nextjs modal parallel routes",
+          "nextjs intercepting route modal",
+          "nextjs url modal",
+          "nextjs deep link modal"
+        ],
+        "order": 7,
+        "status": "published"
+      },
+      {
+        "question": "What Are Cache Components and Partial Prerendering in Next.js 16?",
+        "slug": "cache-components-partial-prerendering-nextjs-16",
+        "answer": "Next.js 16 introduces an advanced opt-in rendering model called **Cache Components**, which allows static, cached, and request-time content to exist inside the same route.\n\nEnable it with:\n\n```typescript\nimport type { NextConfig } from 'next';\n\nconst nextConfig: NextConfig = {\n  cacheComponents: true\n};\n\nexport default nextConfig;\n```\n\n### The Problem It Solves\n\nTraditional thinking often treats a route as either:\n\n```text\nStatic\nOR\nDynamic\n```\n\nBut many real pages contain both.\n\nExample product page:\n\n```text\nNavigation\n→ static\n\nProduct information\n→ cacheable\n\nUser cart\n→ request-specific\n\nRecommendations\n→ dynamic\n```\n\nCache Components lets these pieces use different rendering behavior inside one route.\n\n### Static Shell\n\nDuring prerendering, Next.js includes everything that can safely be prepared ahead of the request in a **static shell**.\n\nConceptually:\n\n```text\n┌─────────────────────────────┐\n│ Header          STATIC      │\n│ Product info    CACHED      │\n│                             │\n│ Cart            FALLBACK    │\n│ Recommendations FALLBACK    │\n└─────────────────────────────┘\n```\n\nThe shell can be sent immediately.\n\n### Dynamic Content Streams Later\n\n```tsx\n<Suspense fallback={<CartSkeleton />}>\n  <Cart />\n</Suspense>\n```\n\nThe fallback becomes part of the prerendered shell while the actual request-dependent content is produced when a user requests the page.\n\n### Cached Content Can Join the Shell\n\nIf dynamic data does not need to be fresh on every request:\n\n```tsx\nasync function ProductDetails() {\n  'use cache';\n\n  const product = await getProduct();\n  return <Product product={product} />;\n}\n```\n\nNext.js can reuse this result and potentially include it in prerendered output when its inputs are available.\n\n### Partial Prerendering\n\nThis combination is called Partial Prerendering:\n\n```text\nStatic shell immediately\n+\nCached content\n+\nDynamic sections streamed later\n```\n\nWith Cache Components enabled, Partial Prerendering is the natural rendering behavior produced by this composition model.\n\n### Explicit Dynamic Boundaries\n\nIf Next.js encounters uncached asynchronous/request-time work during prerendering, you must make the intent clear by either:\n\n```text\nCache it with use cache\n```\n\nor:\n\n```text\nPlace it behind Suspense\n```\n\nOtherwise development/build can report an uncached-data-outside-Suspense error.\n\n### Interview-Ready Answer\n\nCache Components is an opt-in Next.js 16 feature enabled with `cacheComponents: true`. It lets a single route combine a prerendered static shell, reusable cached components, and request-time components behind Suspense. This composition produces Partial Prerendering, where immediately available content is sent first and dynamic sections stream later.",
+        "difficulty": "hard",
+        "questionType": "conceptual",
+        "tags": [
+          "nextjs",
+          "cache-components",
+          "partial-prerendering",
+          "ppr",
+          "nextjs-16"
+        ],
+        "seoTitle": "Cache Components and Partial Prerendering in Next.js 16",
+        "seoDescription": "Learn how Next.js 16 Cache Components and Partial Prerendering combine static, cached, and dynamic content inside the same route.",
+        "keywords": [
+          "nextjs cache components",
+          "nextjs partial prerendering",
+          "nextjs ppr",
+          "nextjs 16 advanced rendering"
+        ],
+        "order": 8,
+        "status": "published"
+      },
+      {
+        "question": "How Does use cache Work at Function, Component, and File Level in Next.js?",
+        "slug": "use-cache-function-component-file-level-nextjs",
+        "answer": "With Cache Components enabled, the `'use cache'` directive tells Next.js that the result of an async function or component can be reused instead of recomputed for every request.\n\nIt can be applied at several scopes.\n\n### Function-Level Cache\n\n```typescript\nexport async function getCourses() {\n  'use cache';\n\n  return db.course.findMany({\n    where: {\n      published: true\n    }\n  });\n}\n```\n\nRepeated calls with the same inputs can reuse the cached result.\n\n### Component-Level Cache\n\n```tsx\nexport async function PopularCourses() {\n  'use cache';\n\n  const courses = await getPopularCourses();\n\n  return <CourseList courses={courses} />;\n}\n```\n\nNow the rendered component result can be cached.\n\n### File-Level Cache\n\n```typescript\n'use cache';\n\nexport async function getCourses() {\n  // ...\n}\n\nexport async function getCategories() {\n  // ...\n}\n```\n\nA file-level directive marks its async function exports as cacheable.\n\n### Inputs Become Part of the Cache Key\n\nSuppose:\n\n```typescript\nexport async function getArticle(slug: string) {\n  'use cache';\n\n  return db.article.findUnique({\n    where: { slug }\n  });\n}\n```\n\nThen conceptually:\n\n```text\ngetArticle('react-hooks')\n→ cache entry A\n\ngetArticle('nextjs-routing')\n→ cache entry B\n```\n\nArguments help Next.js distinguish cached results.\n\n### Closed-Over Values Also Matter\n\nValues captured from an outer scope can also contribute to the cached computation's identity.\n\n### Do Not Read Request APIs Directly in Normal use cache\n\nNormal cached scopes should not directly depend on request-specific APIs such as:\n\n```text\ncookies()\nheaders()\n```\n\nbecause shared cached results should not accidentally depend on one user's request context.\n\nInstead, read request data outside and pass the required value explicitly when appropriate.\n\n### Cache the Smallest Useful Unit\n\nInstead of caching an entire page merely because one expensive query is reusable:\n\n```text\nCache the expensive data/component\n```\n\nand leave truly request-specific content outside it.\n\n### Interview-Ready Answer\n\n`'use cache'` can be placed on an async function, component, or file to make its result reusable when Cache Components is enabled. Function arguments and relevant captured values participate in the cache identity. Prefer caching the smallest useful scope and keep normal request APIs such as cookies and headers outside shared cache scopes.",
+        "difficulty": "hard",
+        "questionType": "coding",
+        "tags": ["nextjs", "use-cache", "cache-components", "advanced-caching"],
+        "seoTitle": "How Does use cache Work in Next.js?",
+        "seoDescription": "Learn how the Next.js use cache directive works at function, component, and file level and how cache keys are created from inputs.",
+        "keywords": [
+          "nextjs use cache",
+          "use cache nextjs 16",
+          "nextjs cache component",
+          "nextjs function caching"
+        ],
+        "order": 9,
+        "status": "published"
+      },
+      {
+        "question": "How Do cacheLife, cacheTag, revalidateTag, and updateTag Work Together in Next.js?",
+        "slug": "cachelife-cachetag-revalidatetag-updatetag-nextjs",
+        "answer": "Advanced Next.js caching separates two important questions:\n\n```text\nHow long may this cached result live?\n\nHow can I invalidate it when data changes?\n```\n\nWith Cache Components, `cacheLife()` and `cacheTag()` help answer those questions inside a `'use cache'` scope.\n\n### cacheLife\n\n`cacheLife()` controls the lifetime profile of cached content.\n\n```typescript\nimport { cacheLife } from 'next/cache';\n\nexport async function getArticles() {\n  'use cache';\n\n  cacheLife('hours');\n\n  return db.article.findMany();\n}\n```\n\nConceptually:\n\n```text\nuse cache\n→ this result is reusable\n\ncacheLife\n→ how freshness/lifetime should behave\n```\n\n### cacheTag\n\nA cached result can be associated with a semantic tag:\n\n```typescript\nimport { cacheTag } from 'next/cache';\n\nexport async function getArticles() {\n  'use cache';\n\n  cacheTag('articles');\n\n  return db.article.findMany();\n}\n```\n\n### Why Tags Are Useful\n\nYou may have many pages that use article data:\n\n```text\nHomepage\nArticles listing\nAuthor page\nSearch page\n```\n\nInstead of manually tracking every URL, they can depend on a common semantic cache tag.\n\n### revalidateTag\n\nAfter content changes, `revalidateTag()` can mark tagged data for revalidation.\n\nIn current Next.js, the recommended stale-while-revalidate form provides a cache profile:\n\n```typescript\nrevalidateTag('articles', 'max');\n```\n\nConceptually:\n\n```text\nExisting cached value may be served\n      ↓\nFresh value retrieved in background\n      ↓\nCache updated\n```\n\n### updateTag\n\nInside Server Actions, `updateTag()` provides immediate expiration behavior useful for read-your-own-writes flows.\n\nExample:\n\n```typescript\n'use server';\n\nimport { updateTag } from 'next/cache';\n\nexport async function publishArticle(id: string) {\n  await db.article.update({\n    where: { id },\n    data: { status: 'published' }\n  });\n\n  updateTag('articles');\n}\n```\n\nThe user who just changed the data should not immediately see an old cached result.\n\n### Practical Model\n\n```text\n'use cache'\n→ cache this work\n\ncacheLife()\n→ define time behavior\n\ncacheTag()\n→ label related data\n\nrevalidateTag()\n→ SWR-style invalidation\n\nupdateTag()\n→ immediate invalidation from Server Action\n```\n\n### Do Not Add Tags Randomly\n\nUse semantic tags that represent actual data relationships:\n\n```text\narticles\narticle:123\nauthor:45\ncourse:nextjs\n```\n\n### Interview-Ready Answer\n\nIn Cache Components, `'use cache'` makes work cacheable, `cacheLife()` defines its lifetime, and `cacheTag()` associates semantic data tags with the cached result. `revalidateTag()` is appropriate for stale-while-revalidate invalidation, while `updateTag()` can immediately expire tagged data from Server Actions for read-your-own-writes behavior.",
+        "difficulty": "hard",
+        "questionType": "coding",
+        "tags": [
+          "nextjs",
+          "cacheLife",
+          "cacheTag",
+          "revalidateTag",
+          "updateTag"
+        ],
+        "seoTitle": "cacheLife vs cacheTag vs revalidateTag in Next.js",
+        "seoDescription": "Learn how use cache, cacheLife, cacheTag, revalidateTag, and updateTag work together in the Next.js 16 Cache Components model.",
+        "keywords": [
+          "nextjs cacheLife",
+          "nextjs cacheTag",
+          "nextjs revalidateTag",
+          "nextjs updateTag",
+          "nextjs advanced caching"
+        ],
+        "order": 10,
+        "status": "published"
+      },
+      {
+        "question": "How Do You Combine Request-Specific Data with Cached Components in Next.js?",
+        "slug": "request-specific-data-with-cached-components-nextjs",
+        "answer": "A difficult caching problem appears when part of a page depends on request-specific information such as cookies or headers, while another expensive operation could still be reused.\n\nThe key principle is:\n\n```text\nRead request-specific data outside the shared cache scope\n→ pass only the required value into cached work\n```\n\n### Problem\n\nSuppose a profile depends on a session cookie:\n\n```typescript\nconst session = (await cookies()).get('session');\n```\n\nYou should not casually place the request cookie access inside a normal shared `'use cache'` function.\n\n### Better Structure\n\n```tsx\nimport { cookies } from 'next/headers';\nimport { Suspense } from 'react';\n\nexport default function Page() {\n  return (\n    <Suspense fallback={<ProfileSkeleton />}>\n      <Profile />\n    </Suspense>\n  );\n}\n\nasync function Profile() {\n  const cookieStore = await cookies();\n  const sessionId = cookieStore.get('session')?.value;\n\n  if (!sessionId) {\n    return <p>Not signed in</p>;\n  }\n\n  return <CachedProfile sessionId={sessionId} />;\n}\n```\n\nCached component:\n\n```tsx\nasync function CachedProfile({\n  sessionId\n}: {\n  sessionId: string;\n}) {\n  'use cache';\n\n  const profile = await getProfile(sessionId);\n\n  return <ProfileView profile={profile} />;\n}\n```\n\n### Why This Works\n\nThe runtime request API stays outside the shared cache scope.\n\nThe derived value:\n\n```text\nsessionId\n```\n\nis passed explicitly as an input.\n\nThat input can become part of the cache identity.\n\n### Be Careful with Personal Data\n\nJust because something can technically be used as a cache key does not mean sensitive personalized output should always be stored in a broad shared cache.\n\nEvaluate:\n\n```text\nPrivacy\nCardinality\nCache lifetime\nInvalidation\nSecurity\nStorage cost\n```\n\nbefore caching personalized data.\n\n### Runtime Data Needs Suspense with Cache Components\n\nRequest APIs such as:\n\n```text\ncookies()\nheaders()\nsearchParams\n```\n\nrequire request-time work.\n\nWith Cache Components, such sections should be isolated behind appropriate Suspense boundaries when they cannot be part of the prerendered shell.\n\n### connection()\n\nIf a component needs to run specifically at request time but does not naturally use a request API, Next.js provides:\n\n```typescript\nimport { connection } from 'next/server';\n\nawait connection();\n```\n\nThis explicitly defers subsequent work until a real request exists.\n\n### Interview-Ready Answer\n\nWith Cache Components, keep request-specific APIs such as `cookies()` and `headers()` outside normal shared `'use cache'` scopes. Read the runtime value in a request-time component, pass only the required value into cached work when appropriate, and isolate request-time sections with Suspense. Use `connection()` when you need to intentionally defer work to request time without reading a request API.",
+        "difficulty": "hard",
+        "questionType": "coding",
+        "tags": [
+          "nextjs",
+          "cache-components",
+          "cookies",
+          "runtime-data",
+          "suspense"
+        ],
+        "seoTitle": "How to Cache Request-Specific Data in Next.js",
+        "seoDescription": "Learn how to combine cookies, headers, Suspense, request-time rendering, and cached components safely in Next.js 16.",
+        "keywords": [
+          "nextjs cache cookies",
+          "nextjs cached personalized data",
+          "nextjs cache components runtime data",
+          "nextjs connection suspense"
+        ],
+        "order": 11,
+        "status": "published"
+      },
+      {
+        "question": "What Are the Best Practices for Advanced Next.js Routing, Streaming, RSC, and Caching?",
+        "slug": "nextjs-advanced-concepts-best-practices",
+        "answer": "Advanced Next.js features are powerful, but they should solve real application problems rather than being added simply because they exist.\n\n### 1. Keep Server Components as the Default\n\nUse Server Components for server-side data access and rendering, then introduce focused Client Components for interaction.\n\nThis keeps the server/client network boundary intentional.\n\n### 2. Understand the RSC Payload\n\nRemember that the App Router does not simply send complete React JavaScript for every Server Component.\n\nConceptually:\n\n```text\nServer Components\n→ RSC Payload\n→ browser React tree\n```\n\nwhile Client Components receive their own browser JavaScript and hydrate where necessary.\n\n### 3. Place Suspense Around Meaningful Sections\n\nPrefer:\n\n```text\nReviews section\nRecommendations section\nAnalytics panel\n```\n\nover dozens of tiny independent fallbacks.\n\n### 4. Move Slow Data Close to the Boundary That Owns It\n\nDo not fetch a slow recommendation query at the top of the page if only the recommendation component needs it.\n\nMove the asynchronous work down so Suspense can isolate it.\n\n### 5. Use Parallel Routes Only for Independent Route State\n\nDo not use:\n\n```text\n@left\n@right\n```\n\nmerely to create a two-column CSS layout.\n\nUse Parallel Routes when sections genuinely need independent routing/navigation behavior.\n\n### 6. Always Design Parallel Route Defaults\n\nCurrent Next.js 16 named slots require explicit `default.tsx`/`default.js` files.\n\nDecide intentionally whether an unmatched slot should:\n\n```text\nrender null\nshow fallback UI\nreturn notFound()\n```\n\n### 7. Use Intercepting Routes for Context-Preserving Navigation\n\nThey are excellent for cases such as:\n\n```text\nPhoto modal\nLogin modal\nQuick preview\nShopping cart drawer\n```\n\nwhen the same destination also needs a standalone URL.\n\n### 8. Remember Interception Matchers Use Route Segments\n\nParallel-route `@slot` folders do not count as URL route segments when calculating `(.)` or `(..)` interception matchers.\n\n### 9. Use Cache Components Intentionally\n\nWith:\n\n```typescript\ncacheComponents: true\n```\n\nthink in terms of three kinds of content:\n\n```text\nPrerenderable static content\nReusable cached content\nRequest-time content\n```\n\nCompose them rather than forcing the entire route into one rendering strategy.\n\n### 10. Cache the Smallest Useful Scope\n\nInstead of caching an entire personalized dashboard, cache reusable expensive pieces where safe.\n\n### 11. Keep Request APIs Outside Shared Cache Scopes\n\nRead:\n\n```text\ncookies()\nheaders()\n```\n\noutside normal `'use cache'` scopes and pass derived values explicitly when appropriate.\n\n### 12. Use Semantic Cache Tags\n\nPrefer:\n\n```text\narticle:123\ncourse:nextjs\narticles\n```\n\nover arbitrary tags such as:\n\n```text\ncache1\nthing2\n```\n\n### 13. Choose Invalidation Based on UX\n\nUse stale-while-revalidate behavior when slightly stale data is acceptable.\n\nUse immediate invalidation when the user must immediately see their own mutation.\n\n### 14. Do Not Cache Sensitive Data Without a Model\n\nBefore caching personalized information, consider:\n\n```text\nWho can read it?\nHow is it keyed?\nHow long does it live?\nHow is it invalidated?\nCan users share cache entries incorrectly?\n```\n\n### 15. Test Soft and Hard Navigation\n\nAdvanced routing bugs often appear only after:\n\n```text\nBrowser refresh\nDirect URL entry\nBack button\nForward button\n```\n\nTest all of them, especially for Parallel and Intercepting Routes.\n\n### 16. Prefer Simpler Routing Until Complexity Is Needed\n\nA normal route plus a Client Component modal is easier to understand than Parallel + Intercepting Routes.\n\nUse advanced routing when requirements such as deep linking, independent route state, and browser navigation justify it.\n\n### Practical Mental Model\n\n```text\nReact Server Components\n→ server-side component architecture\n\nRSC Payload\n→ server/client transport representation\n\nSuspense + Streaming\n→ progressively deliver request-time work\n\nParallel Routes\n→ multiple independent route slots\n\nIntercepting Routes\n→ render another route in current context\n\nCache Components\n→ compose static + cached + dynamic content\n```\n\n### Interview-Ready Answer\n\nAdvanced Next.js architecture works best when each feature has a clear purpose: Server Components reduce client-side JavaScript, RSC Payloads connect server and client trees, Suspense boundaries control streaming, Parallel Routes model independent routed regions, Intercepting Routes preserve navigation context, and Cache Components combine static, cached, and request-time rendering. Use these features selectively rather than adding architectural complexity where normal routes and components are sufficient.",
+        "difficulty": "hard",
+        "questionType": "scenario",
+        "tags": [
+          "nextjs",
+          "advanced-concepts",
+          "rsc",
+          "streaming",
+          "parallel-routes",
+          "cache-components"
+        ],
+        "seoTitle": "Next.js Advanced Concepts and Best Practices",
+        "seoDescription": "Learn advanced Next.js best practices for React Server Components, streaming, Parallel Routes, Intercepting Routes, PPR, and caching.",
+        "keywords": [
+          "nextjs advanced concepts",
+          "nextjs advanced interview questions",
+          "nextjs advanced routing",
+          "nextjs rsc architecture",
+          "nextjs cache components"
+        ],
+        "order": 12,
+        "status": "published"
+      }
+    ]
+  }
+]

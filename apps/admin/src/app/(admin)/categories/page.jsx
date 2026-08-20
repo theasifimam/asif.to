@@ -43,7 +43,65 @@ import {
 } from "@/components/admin";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { listingReturnTo, useUrlFilters } from "@/hooks/useUrlFilters";
+
+function CategoryCardSkeleton() {
+  return (
+    <div className="admin-surface flex flex-col justify-between p-5 rounded-3xl min-h-[160px]">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-5 w-3/4 rounded-md" />
+          <Skeleton className="h-5 w-14 rounded-full" />
+        </div>
+        <div className="space-y-1.5">
+          <Skeleton className="h-3.5 w-1/2 rounded-md" />
+          <Skeleton className="h-4.5 w-full rounded-md" />
+        </div>
+      </div>
+      <div className="mt-5 border-t border-zinc-100 pt-4 dark:border-zinc-800/80 flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <Skeleton className="h-4 w-12 rounded-md" />
+        </div>
+        <div className="flex items-center gap-1">
+          <Skeleton className="h-8 w-8 rounded-lg" />
+          <Skeleton className="h-8 w-8 rounded-lg" />
+          <Skeleton className="h-8 w-8 rounded-lg" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CategoryRowSkeleton() {
+  return (
+    <tr>
+      <td className="py-3.5 pl-4 sm:pl-6 w-10">
+        <Skeleton className="h-4 w-4 rounded-md" />
+      </td>
+      <td className="py-3.5 px-4">
+        <Skeleton className="h-5 w-48 rounded-md" />
+        <Skeleton className="mt-1 h-3.5 w-32 rounded-md" />
+      </td>
+      <td className="py-3.5 px-4">
+        <Skeleton className="h-4 w-20 rounded-md" />
+      </td>
+      <td className="py-3.5 px-4">
+        <Skeleton className="h-5 w-16 rounded-full" />
+      </td>
+      <td className="py-3.5 px-4">
+        <Skeleton className="h-4 w-6 rounded-md" />
+      </td>
+      <td className="py-3.5 px-4 text-right sm:pr-6">
+        <div className="flex justify-end gap-1.5">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+      </td>
+    </tr>
+  );
+}
 import {
   Dialog,
   DialogContent,
@@ -240,60 +298,63 @@ export default function CategoriesListPage() {
       </AdminFilters>
 
       {/* Content Section */}
-      {loading ? (
-        <div className="flex h-64 items-center justify-center rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-        </div>
-      ) : filteredCategories.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
-          <FolderTree className="mx-auto mb-3 h-8 w-8 text-zinc-300 dark:text-zinc-700" />
-          <p className="text-sm font-medium">
-            No categories match your filters.
-          </p>
-          <Button asChild variant="outline" size="sm" className="mt-4">
-            <Link href={`/categories/new?returnTo=${encodeURIComponent(returnTo)}`}>
-              <Plus className="mr-1.5 h-4 w-4" /> Create Category
-            </Link>
-          </Button>
-        </div>
-      ) : viewMode === "card" ? (
-        /* Cards View with Drag & Drop */
-        <>
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={filteredCategories.map((c) => c._id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {paginatedCategories.map((item) => (
-                  <SortableCategoryCard
-                    key={item._id}
-                    item={item}
-                    onPreview={() => setPreview(item)}
-                    onDelete={() => setDeleteTarget(item)}
-                  />
-                ))}
+      {viewMode === "card" ? (
+        <div className="space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {loading ? (
+              Array.from({ length: limit }).map((_, i) => (
+                <CategoryCardSkeleton key={i} />
+              ))
+            ) : filteredCategories.length === 0 ? (
+              <div className="col-span-full flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
+                <FolderTree className="mx-auto mb-3 h-8 w-8 text-zinc-300 dark:text-zinc-700" />
+                <p className="text-sm font-medium">
+                  No categories match your filters.
+                </p>
+                <Button asChild variant="outline" size="sm" className="mt-4">
+                  <Link href={`/categories/new?returnTo=${encodeURIComponent(returnTo)}`}>
+                    <Plus className="mr-1.5 h-4 w-4" /> Create Category
+                  </Link>
+                </Button>
               </div>
-            </SortableContext>
-          </DndContext>
-          <AdminPagination
-            page={page}
-            pages={totalPages}
-            total={filteredCategories.length}
-            limit={limit}
-            itemLabel="categories"
-            onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
-            onLimitChange={(l) => {
-              setFilters((current) => ({ ...current, limit: l, page: 1 }));
-            }}
-          />
-        </>
+            ) : (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={filteredCategories.map((c) => c._id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {paginatedCategories.map((item) => (
+                    <SortableCategoryCard
+                      key={item._id}
+                      item={item}
+                      onPreview={() => setPreview(item)}
+                      onDelete={() => setDeleteTarget(item)}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
+            )}
+          </div>
+
+          {!loading && filteredCategories.length > 0 && (
+            <AdminPagination
+              page={page}
+              pages={totalPages}
+              total={filteredCategories.length}
+              limit={limit}
+              itemLabel="categories"
+              onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
+              onLimitChange={(l) => {
+                setFilters((current) => ({ ...current, limit: l, page: 1 }));
+              }}
+            />
+          )}
+        </div>
       ) : (
-        /* Table View with Drag & Drop */
         <section className="admin-surface w-full rounded-[28px] sm:rounded-4xl overflow-hidden shadow-xs">
           <div className="overflow-x-auto">
             <DndContext
@@ -313,34 +374,59 @@ export default function CategoriesListPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/80">
-                  <SortableContext
-                    items={paginatedCategories.map((c) => c._id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    {paginatedCategories.map((item) => (
-                      <SortableCategoryRow
-                        key={item._id}
-                        item={item}
-                        onPreview={() => setPreview(item)}
-                        onDelete={() => setDeleteTarget(item)}
-                      />
-                    ))}
-                  </SortableContext>
+                  {loading ? (
+                    Array.from({ length: limit }).map((_, i) => (
+                      <CategoryRowSkeleton key={i} />
+                    ))
+                  ) : filteredCategories.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-10 text-center">
+                        <div className="flex flex-col items-center justify-center text-zinc-500">
+                          <FolderTree className="mx-auto mb-3 h-8 w-8 text-zinc-300 dark:text-zinc-700" />
+                          <p className="text-sm font-medium">
+                            No categories match your filters.
+                          </p>
+                          <Button asChild variant="outline" size="sm" className="mt-4">
+                            <Link href={`/categories/new?returnTo=${encodeURIComponent(returnTo)}`}>
+                              <Plus className="mr-1.5 h-4 w-4" /> Create Category
+                            </Link>
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    <SortableContext
+                      items={paginatedCategories.map((c) => c._id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {paginatedCategories.map((item) => (
+                        <SortableCategoryRow
+                          key={item._id}
+                          item={item}
+                          onPreview={() => setPreview(item)}
+                          onDelete={() => setDeleteTarget(item)}
+                        />
+                      ))}
+                    </SortableContext>
+                  )}
                 </tbody>
               </table>
             </DndContext>
           </div>
-          <AdminPagination
-            page={page}
-            pages={totalPages}
-            total={filteredCategories.length}
-            limit={limit}
-            itemLabel="categories"
-            onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
-            onLimitChange={(l) => {
-              setFilters((current) => ({ ...current, limit: l, page: 1 }));
-            }}
-          />
+
+          {!loading && filteredCategories.length > 0 && (
+            <AdminPagination
+              page={page}
+              pages={totalPages}
+              total={filteredCategories.length}
+              limit={limit}
+              itemLabel="categories"
+              onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
+              onLimitChange={(l) => {
+                setFilters((current) => ({ ...current, limit: l, page: 1 }));
+              }}
+            />
+          )}
         </section>
       )}
 

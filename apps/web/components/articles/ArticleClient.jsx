@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import {
@@ -26,22 +26,10 @@ import hljs from "highlight.js";
 import "highlight.js/styles/atom-one-dark.css";
 import BookmarkButton from "./BookmarkButton";
 import ArticleCard from "./ArticleCard";
-import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
 import AuthorIdentityCard from "../authors/AuthorIdentityCard";
-import MarkdownCodePlayground from "@/components/interactive-code/MarkdownCodePlayground";
-
-const MarkdownPreview = dynamic(
-  () => import("@uiw/react-md-editor").then((mod) => mod.default.Markdown),
-  {
-    ssr: false,
-    loading: () => (
-      <p className="text-zinc-300 dark:text-zinc-800 italic font-light animate-pulse">
-        [ Loading Dispatch Data... ]
-      </p>
-    ),
-  },
-);
+import ChapterBlocksRenderer from "@/components/chapter/ChapterBlocksRenderer";
+import { parseContentBlocks } from "@/components/chapter/chapterUtils";
 
 const WhatsAppIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -56,6 +44,11 @@ export default function ArticleClient({ slug, initialData }) {
   const { data: moreArticles } = useGetArticlesQuery({ limit: 4 });
   const article = response?.data || initialData;
   const [copied, setCopied] = useState(false);
+
+  const parsedBlocks = useMemo(
+    () => parseContentBlocks(article?.content, article?.topic?.[0]?.name || "Article"),
+    [article?.content, article?.topic]
+  );
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   const shareTitle =
@@ -221,16 +214,12 @@ export default function ArticleClient({ slug, initialData }) {
         </div>
 
         {/* Article Body Content */}
-        <article className="w-full max-w-4xl px-6 flex flex-col gap-10">
-          <MarkdownCodePlayground className="article-markdown-playground">
-            <div data-color-mode={theme === "dark" ? "dark" : "light"}>
-              <MarkdownPreview
-                source={article.content}
-                style={{ backgroundColor: "transparent", color: "inherit" }}
-                className="text-justify text-lg md:text-xl font-light leading-relaxed bg-transparent! text-inherit! wmde-markdown"
-              />
-            </div>
-          </MarkdownCodePlayground>
+        <article className="w-full max-w-4xl px-6 flex flex-col gap-8">
+          <ChapterBlocksRenderer
+            chapter={article}
+            parsedBlocks={parsedBlocks}
+            fontBodyClass="text-base sm:text-lg md:text-xl font-medium"
+          />
 
           <AuthorIdentityCard
             author={article.author}

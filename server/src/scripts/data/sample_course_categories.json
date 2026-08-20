@@ -1,0 +1,128 @@
+[
+  {
+    "courseSlug": "nextjs",
+    "categories": [
+      {
+        "name": "Data Fetching and Caching",
+        "slug": "data-fetching-and-caching",
+        "description": "Core concepts, fetch cache options, request memoization, revalidation, and modern Cache Components in Next.js.",
+        "content": "Comprehensive guide and interview questions covering data fetching, server-side caching, revalidation strategies, and performance optimizations in the Next.js App Router.",
+        "order": 1,
+        "status": "published",
+        "seoTitle": "Next.js Data Fetching & Caching Interview Questions",
+        "seoDescription": "Master Next.js data fetching, caching, revalidation, and server components for frontend and full-stack technical interviews.",
+        "keywords": [
+          "nextjs data fetching",
+          "nextjs caching",
+          "nextjs fetch cache",
+          "revalidation nextjs",
+          "nextjs interview questions"
+        ]
+      },
+      {
+        "name": "Routing and Navigation",
+        "slug": "routing-and-navigation",
+        "description": "App Router layout hierarchy, dynamic routes, route groups, parallel routes, and intercepting routes.",
+        "content": "Deep dive into App Router architecture, file-system based routing conventions, layouts, templates, and nested routing mechanics.",
+        "order": 2,
+        "status": "published",
+        "seoTitle": "Next.js Routing and Navigation Interview Questions",
+        "seoDescription": "Learn App Router architecture, dynamic routes, parallel routes, and navigation patterns for Next.js interviews.",
+        "keywords": [
+          "nextjs routing",
+          "app router",
+          "dynamic routes nextjs",
+          "parallel routes",
+          "intercepting routes"
+        ]
+      },
+      {
+        "name": "Rendering Strategies & Server Components",
+        "slug": "rendering-strategies-and-server-components",
+        "description": "Server Components (RSC), Client Components, streaming with Suspense, and Partial Prerendering (PPR).",
+        "content": "Everything you need to know about React Server Components (RSC), hydration boundaries, streaming SSR, and static vs dynamic rendering in Next.js.",
+        "order": 3,
+        "status": "published",
+        "seoTitle": "Next.js Server Components & Rendering Strategies",
+        "seoDescription": "Understand React Server Components, hydration boundaries, Suspense streaming, and Partial Prerendering in Next.js.",
+        "keywords": [
+          "nextjs server components",
+          "rsc nextjs",
+          "client components",
+          "partial prerendering",
+          "streaming suspense"
+        ]
+      },
+      {
+        "name": "Server Actions & Mutations",
+        "slug": "server-actions-and-mutations",
+        "description": "Server Functions, form handling, optimistic UI updates, and secure mutations with useActionState.",
+        "content": "Explore Server Actions, progressive enhancement, handling pending states, input validation, and secure server-side mutations.",
+        "order": 4,
+        "status": "published",
+        "seoTitle": "Next.js Server Actions and Form Mutations",
+        "seoDescription": "Master Next.js Server Actions, useActionState, optimistic updates, and secure database mutations.",
+        "keywords": [
+          "nextjs server actions",
+          "server functions",
+          "useActionState",
+          "form mutations nextjs"
+        ]
+      }
+    ]
+  },
+  {
+    "courseSlug": "react",
+    "categories": [
+      {
+        "name": "Core Concepts & Virtual DOM",
+        "slug": "core-concepts-and-virtual-dom",
+        "description": "JSX compilation, React Fiber architecture, reconciliation diffing algorithm, and component lifecycles.",
+        "content": "Foundational React topics including Virtual DOM, component trees, pure components, and reconciliation mechanics.",
+        "order": 1,
+        "status": "published",
+        "seoTitle": "React Core Concepts & Virtual DOM Interview Questions",
+        "seoDescription": "Understand React Fiber, Virtual DOM reconciliation, JSX compilation, and component lifecycles.",
+        "keywords": [
+          "react core concepts",
+          "virtual dom",
+          "react fiber",
+          "reconciliation"
+        ]
+      },
+      {
+        "name": "React Hooks",
+        "slug": "react-hooks",
+        "description": "Built-in hooks (useState, useEffect, useMemo, useCallback, useRef) and custom hooks architecture.",
+        "content": "Comprehensive interview preparation on React Hooks rules, closure traps in useEffect, performance memoization, and custom reusable hook design.",
+        "order": 2,
+        "status": "published",
+        "seoTitle": "React Hooks Interview Questions & Practical Patterns",
+        "seoDescription": "Master built-in and custom React hooks, dependency arrays, memoization, and performance optimizations.",
+        "keywords": [
+          "react hooks",
+          "useEffect",
+          "useMemo",
+          "useCallback",
+          "custom hooks"
+        ]
+      },
+      {
+        "name": "State Management",
+        "slug": "state-management",
+        "description": "Context API, external stores, Zustand, Redux Toolkit, and server state libraries.",
+        "content": "Comparing local component state, Context API re-render behaviors, global atomic/slice state managers, and server-cache solutions.",
+        "order": 3,
+        "status": "published",
+        "seoTitle": "React State Management Interview Questions",
+        "seoDescription": "Compare Context API, Zustand, Redux Toolkit, and server state management in React applications.",
+        "keywords": [
+          "react state management",
+          "context api",
+          "zustand",
+          "redux toolkit"
+        ]
+      }
+    ]
+  }
+]

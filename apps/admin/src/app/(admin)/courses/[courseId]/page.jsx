@@ -19,6 +19,60 @@ import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function ChapterCardSkeleton() {
+  return (
+    <div className="admin-surface group flex flex-col justify-between p-5 rounded-3xl min-h-[160px]">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-5 w-10 rounded-md" />
+          <Skeleton className="h-5 w-14 rounded-full" />
+        </div>
+        <div className="space-y-1.5">
+          <Skeleton className="h-5 w-3/4 rounded-md" />
+          <Skeleton className="h-3.5 w-1/2 rounded-md" />
+        </div>
+      </div>
+      <div className="mt-5 border-t border-zinc-100 pt-4 dark:border-zinc-800/80 flex items-center justify-between">
+        <Skeleton className="h-4 w-16 rounded-md" />
+        <div className="flex items-center gap-1">
+          <Skeleton className="h-8 w-8 rounded-lg" />
+          <Skeleton className="h-8 w-8 rounded-lg" />
+          <Skeleton className="h-8 w-8 rounded-lg" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChapterRowSkeleton() {
+  return (
+    <tr>
+      <td className="px-6 py-4 font-black text-xs">
+        <Skeleton className="h-4 w-6 rounded-md" />
+      </td>
+      <td className="px-6 py-4">
+        <Skeleton className="h-5 w-48 rounded-md" />
+        <Skeleton className="mt-1 h-3.5 w-32 rounded-md" />
+      </td>
+      <td className="px-6 py-4">
+        <Skeleton className="h-4 w-14 rounded-md" />
+      </td>
+      <td className="px-6 py-4">
+        <Skeleton className="h-5 w-16 rounded-full" />
+      </td>
+      <td className="px-6 py-4 text-right">
+        <div className="flex justify-end gap-1">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+      </td>
+    </tr>
+  );
+}
 import {
   Select,
   SelectContent,
@@ -251,131 +305,149 @@ export default function CourseChaptersPage() {
           </SelectContent>
         </Select>
       </section>
-
-      {loading ? (
-        <div className="flex h-64 items-center justify-center rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-        </div>
-      ) : chapters.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
-          <BookOpen className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
-          <p className="text-sm font-medium">No chapters match these filters.</p>
-        </div>
-      ) : viewMode === "card" ? (
+      {viewMode === "card" ? (
         <div className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {chapters.map((chapter, index) => (
-              <div
-                key={chapter._id}
-                className="group flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs transition-all hover:border-blue-500/50 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-blue-500/10 text-xs font-black text-blue-600 dark:text-blue-400">
-                      #{chapter.order}
-                    </span>
-                    <button
-                      onClick={() => toggleStatus(chapter)}
-                      disabled={updating === chapter._id}
-                      className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
-                        updating === chapter._id
-                          ? "bg-zinc-100 text-zinc-400"
-                          : statusStyles[chapter.status]
-                      }`}
-                      title="Toggle status"
-                    >
-                      {updating === chapter._id ? (
-                        <Loader2 className="inline h-2.5 w-2.5 animate-spin" />
-                      ) : (
-                        chapter.status
-                      )}
-                    </button>
-                  </div>
+            {loading ? (
+              Array.from({ length: filters.limit || 20 }).map((_, i) => (
+                <ChapterCardSkeleton key={i} />
+              ))
+            ) : chapters.length === 0 ? (
+              <div className="col-span-full flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
+                <BookOpen className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
+                <p className="text-sm font-medium">No chapters match these filters.</p>
+              </div>
+            ) : (
+              chapters.map((chapter, index) => (
+                <div
+                  key={chapter._id}
+                  className="group flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs transition-all hover:border-blue-500/50 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-blue-500/10 text-xs font-black text-blue-600 dark:text-blue-400">
+                        #{chapter.order}
+                      </span>
+                      <button
+                        onClick={() => toggleStatus(chapter)}
+                        disabled={updating === chapter._id}
+                        className={`rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider transition-all ${
+                          updating === chapter._id
+                            ? "bg-zinc-100 text-zinc-400"
+                            : statusStyles[chapter.status]
+                        }`}
+                        title="Toggle status"
+                      >
+                        {updating === chapter._id ? (
+                          <Loader2 className="inline h-2.5 w-2.5 animate-spin" />
+                        ) : (
+                          chapter.status
+                        )}
+                      </button>
+                    </div>
 
-                  <div>
                     <Link
                       href={`/courses/${courseId}/chapters/${chapter._id}`}
-                      className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-2"
+                      className="block"
                     >
-                      {chapter.title}
+                      <h3 className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-1">
+                        {chapter.title}
+                      </h3>
+                      <p className="mt-1 text-xs text-zinc-400 truncate">
+                        /{chapter.slug}
+                      </p>
                     </Link>
-                    <p className="mt-1 text-xs text-zinc-400 truncate">
-                      /{chapter.slug}
-                    </p>
                   </div>
 
-                  {chapter.summary && (
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">
-                      {chapter.summary}
-                    </p>
-                  )}
-                </div>
+                  <div className="mt-5 border-t border-zinc-100 pt-4 dark:border-zinc-800/80 flex items-center justify-between">
+                    <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                      {chapter.viewCount || 0} views
+                    </span>
 
-                <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-3.5 dark:border-zinc-800/80">
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 rounded-lg"
-                      title="Move up"
-                      disabled={!orderingView || Boolean(filters.search.trim()) || index === 0}
-                      onClick={() => moveChapter(index, -1)}
-                    >
-                      <ArrowUp className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 rounded-lg"
-                      title="Move down"
-                      disabled={!orderingView || Boolean(filters.search.trim()) || index === chapters.length - 1}
-                      onClick={() => moveChapter(index, 1)}
-                    >
-                      <ArrowDown className="h-4 w-4" />
-                    </Button>
-                  </div>
-
-                  <div className="flex items-center gap-1 shrink-0">
-                    {course?.status === "published" && chapter.status === "published" && (
-                      <a
-                        href={`https://asif.to/${course.slug}/${chapter.slug}`}
-                        target="_blank"
-                        rel="noreferrer"
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        title={
+                          orderingView && !filters.search.trim()
+                            ? "Move chapter up"
+                            : "Clear filters to reorder chapters"
+                        }
+                        disabled={
+                          !orderingView ||
+                          Boolean(filters.search.trim()) ||
+                          index === 0 ||
+                          updating === chapter._id
+                        }
+                        onClick={() => moveChapter(index, -1)}
                       >
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" title="View chapter">
-                          <ExternalLink className="h-4 w-4" />
-                        </Button>
-                      </a>
-                    )}
-                    <Link href={`/courses/${courseId}/chapters/${chapter._id}`}>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" title="Edit chapter">
-                        <Pencil className="h-4 w-4" />
+                        <ArrowUp className="h-4 w-4" />
                       </Button>
-                    </Link>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      title="Delete chapter"
-                      onClick={() => setDeleteChapter(chapter)}
-                      className="h-8 w-8 rounded-lg text-zinc-400 hover:text-red-600"
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        title={
+                          orderingView && !filters.search.trim()
+                            ? "Move chapter down"
+                            : "Clear filters to reorder chapters"
+                        }
+                        disabled={
+                          !orderingView ||
+                          Boolean(filters.search.trim()) ||
+                          index === chapters.length - 1 ||
+                          updating === chapter._id
+                        }
+                        onClick={() => moveChapter(index, 1)}
+                      >
+                        <ArrowDown className="h-4 w-4" />
+                      </Button>
+                      {course?.status === "published" &&
+                        chapter.status === "published" && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            asChild
+                            title="View public chapter"
+                          >
+                            <a
+                              href={`https://asif.to/${course.slug}/${chapter.slug}`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </Button>
+                        )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Delete chapter"
+                        className="h-8 w-8 rounded-lg text-zinc-400 hover:text-red-600"
+                        onClick={() => setDeleteChapter(chapter)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
-          <AdminPagination
-            page={pagination.page}
-            pages={pagination.pages}
-            total={pagination.total}
-            limit={filters.limit}
-            itemLabel="chapters"
-            onPageChange={(p) => setFilter("page", p)}
-            onLimitChange={(l) => setFilter("limit", l)}
-          />
+          {!loading && chapters.length > 0 && (
+            <AdminPagination
+              page={pagination.page}
+              pages={pagination.pages}
+              total={pagination.total}
+              limit={filters.limit}
+              itemLabel="chapters"
+              onPageChange={(p) => setFilter("page", p)}
+              onLimitChange={(l) => setFilter("limit", l)}
+            />
+          )}
         </div>
       ) : (
         <section className="w-full bg-white dark:bg-zinc-900 rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs overflow-hidden">
@@ -391,143 +463,160 @@ export default function CourseChaptersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
-                {chapters.map((chapter, index) => (
-                  <tr
-                    key={chapter._id}
-                    className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
-                  >
-                    <td className="px-6 py-4 font-black text-xs text-zinc-400">
-                      #{chapter.order}
+                {loading ? (
+                  Array.from({ length: filters.limit || 20 }).map((_, i) => (
+                    <ChapterRowSkeleton key={i} />
+                  ))
+                ) : chapters.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-10 text-center">
+                      <div className="flex flex-col items-center justify-center text-zinc-500">
+                        <BookOpen className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
+                        <p className="text-sm font-medium">No chapters match these filters.</p>
+                      </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <Link
-                        href={`/courses/${courseId}/chapters/${chapter._id}`}
-                        className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-1"
-                      >
-                        {chapter.title}
-                      </Link>
-                      <p className="mt-0.5 text-xs text-zinc-400 truncate">
-                        /{chapter.slug}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
-                        {chapter.viewCount || 0} views
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <button
-                        onClick={() => toggleStatus(chapter)}
-                        disabled={updating === chapter._id}
-                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
-                          updating === chapter._id
-                            ? "bg-zinc-100 text-zinc-400"
-                            : statusStyles[chapter.status]
-                        }`}
-                        title="Toggle publishing status"
-                      >
-                        {updating === chapter._id ? (
-                          <Loader2 className="mx-auto h-3 w-3 animate-spin" />
-                        ) : (
-                          chapter.status
-                        )}
-                      </button>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                          title={
-                            orderingView && !filters.search.trim()
-                              ? "Move chapter up"
-                              : "Clear filters to reorder chapters"
-                          }
-                          disabled={
-                            !orderingView ||
-                            Boolean(filters.search.trim()) ||
-                            index === 0 ||
-                            updating === chapter._id
-                          }
-                          onClick={() => moveChapter(index, -1)}
-                        >
-                          <ArrowUp className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                          title={
-                            orderingView && !filters.search.trim()
-                              ? "Move chapter down"
-                              : "Clear filters to reorder chapters"
-                          }
-                          disabled={
-                            !orderingView ||
-                            Boolean(filters.search.trim()) ||
-                            index === chapters.length - 1 ||
-                            updating === chapter._id
-                          }
-                          onClick={() => moveChapter(index, 1)}
-                        >
-                          <ArrowDown className="h-4 w-4" />
-                        </Button>
-                        {course?.status === "published" &&
-                          chapter.status === "published" && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                              asChild
-                              title="View public chapter"
-                            >
-                              <a
-                                href={`https://asif.to/${course.slug}/${chapter.slug}`}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                <ExternalLink className="h-4 w-4" />
-                              </a>
-                            </Button>
-                          )}
+                  </tr>
+                ) : (
+                  chapters.map((chapter, index) => (
+                    <tr
+                      key={chapter._id}
+                      className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
+                    >
+                      <td className="px-6 py-4 font-black text-xs text-zinc-400">
+                        #{chapter.order}
+                      </td>
+                      <td className="px-6 py-4">
                         <Link
                           href={`/courses/${courseId}/chapters/${chapter._id}`}
+                          className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-1"
                         >
+                          {chapter.title}
+                        </Link>
+                        <p className="mt-0.5 text-xs text-zinc-400 truncate">
+                          /{chapter.slug}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                          {chapter.viewCount || 0} views
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => toggleStatus(chapter)}
+                          disabled={updating === chapter._id}
+                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                            updating === chapter._id
+                              ? "bg-zinc-100 text-zinc-400"
+                              : statusStyles[chapter.status]
+                          }`}
+                          title="Toggle publishing status"
+                        >
+                          {updating === chapter._id ? (
+                            <Loader2 className="mx-auto h-3 w-3 animate-spin" />
+                          ) : (
+                            chapter.status
+                          )}
+                        </button>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-end gap-1">
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                            title="Edit chapter"
+                            title={
+                              orderingView && !filters.search.trim()
+                                ? "Move chapter up"
+                                : "Clear filters to reorder chapters"
+                            }
+                            disabled={
+                              !orderingView ||
+                              Boolean(filters.search.trim()) ||
+                              index === 0 ||
+                              updating === chapter._id
+                            }
+                            onClick={() => moveChapter(index, -1)}
                           >
-                            <Pencil className="h-4 w-4" />
+                            <ArrowUp className="h-4 w-4" />
                           </Button>
-                        </Link>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Delete chapter"
-                          className="h-8 w-8 rounded-xl text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
-                          onClick={() => setDeleteChapter(chapter)}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            title={
+                              orderingView && !filters.search.trim()
+                                ? "Move chapter down"
+                                : "Clear filters to reorder chapters"
+                            }
+                            disabled={
+                              !orderingView ||
+                              Boolean(filters.search.trim()) ||
+                              index === chapters.length - 1 ||
+                              updating === chapter._id
+                            }
+                            onClick={() => moveChapter(index, 1)}
+                          >
+                            <ArrowDown className="h-4 w-4" />
+                          </Button>
+                          {course?.status === "published" &&
+                            chapter.status === "published" && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                asChild
+                                title="View public chapter"
+                              >
+                                <a
+                                  href={`https://asif.to/${course.slug}/${chapter.slug}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  <ExternalLink className="h-4 w-4" />
+                                </a>
+                              </Button>
+                            )}
+                          <Link
+                            href={`/courses/${courseId}/chapters/${chapter._id}`}
+                          >
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                              title="Edit chapter"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Delete chapter"
+                            className="h-8 w-8 rounded-xl text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
+                            onClick={() => setDeleteChapter(chapter)}
+                          >
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
-          <AdminPagination
-            page={pagination.page}
-            pages={pagination.pages}
-            total={pagination.total}
-            limit={filters.limit}
-            itemLabel="chapters"
-            onPageChange={(p) => setFilter("page", p)}
-            onLimitChange={(l) => setFilter("limit", l)}
-          />
+          {!loading && chapters.length > 0 && (
+            <AdminPagination
+              page={pagination.page}
+              pages={pagination.pages}
+              total={pagination.total}
+              limit={filters.limit}
+              itemLabel="chapters"
+              onPageChange={(p) => setFilter("page", p)}
+              onLimitChange={(l) => setFilter("limit", l)}
+            />
+          )}
         </section>
       )}
 

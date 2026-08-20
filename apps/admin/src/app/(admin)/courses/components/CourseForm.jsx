@@ -81,7 +81,9 @@ function slugify(value = "") {
 export default function CourseForm({ courseId = null }) {
   const searchParams = useSearchParams();
   const requestedReturnTo = searchParams.get("returnTo");
-  const returnTo = requestedReturnTo?.startsWith("/") ? requestedReturnTo : "/courses";
+  const returnTo = requestedReturnTo?.startsWith("/")
+    ? requestedReturnTo
+    : "/courses";
   const [form, setForm] = useState(initialForm);
   const [slugEdited, setSlugEdited] = useState(false);
   const [loading, setLoading] = useState(Boolean(courseId));
@@ -91,7 +93,7 @@ export default function CourseForm({ courseId = null }) {
   const [courseChapters, setCourseChapters] = useState([]);
 
   useEffect(() => {
-    coursesApi.getAll({ limit: 100 }).then((res) => {
+    coursesApi.listAll({ limit: 100 }).then((res) => {
       if (res.success) {
         setAllCourses(res.data?.data || []);
       }
@@ -166,8 +168,12 @@ export default function CourseForm({ courseId = null }) {
       .split("\n")
       .map((item) => item.trim())
       .filter(Boolean),
-    relatedCourses: Array.isArray(form.relatedCourses) ? form.relatedCourses : [],
-    popularChapterIds: Array.isArray(form.popularChapterIds) ? form.popularChapterIds : [],
+    relatedCourses: Array.isArray(form.relatedCourses)
+      ? form.relatedCourses
+      : [],
+    popularChapterIds: Array.isArray(form.popularChapterIds)
+      ? form.popularChapterIds
+      : [],
     examSettings: Object.fromEntries(
       Object.entries(form.examSettings).map(([key, value]) => [
         key,
@@ -235,7 +241,11 @@ export default function CourseForm({ courseId = null }) {
       actions={
         <>
           {courseId && publicUrl && (
-            <Button variant="outline" asChild className="flex-1 sm:flex-initial">
+            <Button
+              variant="outline"
+              asChild
+              className="flex-1 sm:flex-initial"
+            >
               <a href={publicUrl} target="_blank" rel="noreferrer">
                 <ExternalLink className="mr-2 h-4 w-4" />
                 View
@@ -249,7 +259,7 @@ export default function CourseForm({ courseId = null }) {
             className="flex-1 sm:flex-initial"
           >
             <Save className="mr-2 h-4 w-4" />
-            Save draft
+            Draft
           </Button>
           <Button
             disabled={saving}
@@ -421,23 +431,47 @@ export default function CourseForm({ courseId = null }) {
 
           <section className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
             <div>
-              <h2 className="text-base font-semibold">Interview guide metadata</h2>
-              <p className="mt-1 text-sm text-muted-foreground">Controls the course interview-question landing page.</p>
+              <h2 className="text-base font-semibold">
+                Interview guide metadata
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Controls the course interview-question landing page.
+              </p>
             </div>
             <div className="space-y-2">
               <Label>SEO title ({form.interviewSeoTitle.length}/70)</Label>
-              <Input maxLength={70} value={form.interviewSeoTitle} onChange={(e) => update("interviewSeoTitle", e.target.value)}/>
+              <Input
+                maxLength={70}
+                value={form.interviewSeoTitle}
+                onChange={(e) => update("interviewSeoTitle", e.target.value)}
+              />
             </div>
             <div className="space-y-2">
-              <Label>SEO description ({form.interviewSeoDescription.length}/170)</Label>
-              <Textarea maxLength={170} rows={3} value={form.interviewSeoDescription} onChange={(e) => update("interviewSeoDescription", e.target.value)}/>
+              <Label>
+                SEO description ({form.interviewSeoDescription.length}/170)
+              </Label>
+              <Textarea
+                maxLength={170}
+                rows={3}
+                value={form.interviewSeoDescription}
+                onChange={(e) =>
+                  update("interviewSeoDescription", e.target.value)
+                }
+              />
             </div>
             <div className="space-y-2">
               <Label>Keywords</Label>
-              <Input value={form.interviewKeywords} onChange={(e) => update("interviewKeywords", e.target.value)}/>
+              <Input
+                value={form.interviewKeywords}
+                onChange={(e) => update("interviewKeywords", e.target.value)}
+              />
             </div>
             <CanonicalUrlInput
-              basePrefix={form.slug ? `https://asif.to/${form.slug}/interview-questions` : "https://asif.to/interview-questions"}
+              basePrefix={
+                form.slug
+                  ? `https://asif.to/${form.slug}/interview-questions`
+                  : "https://asif.to/interview-questions"
+              }
               value={form.interviewCanonicalUrl}
               onChange={(value) => update("interviewCanonicalUrl", value)}
               placeholder=""
@@ -445,7 +479,10 @@ export default function CourseForm({ courseId = null }) {
             />
             <div className="space-y-2">
               <Label>Open Graph image URL</Label>
-              <Input value={form.interviewOgImage} onChange={(e) => update("interviewOgImage", e.target.value)}/>
+              <Input
+                value={form.interviewOgImage}
+                onChange={(e) => update("interviewOgImage", e.target.value)}
+              />
             </div>
           </section>
 
@@ -455,18 +492,23 @@ export default function CourseForm({ courseId = null }) {
                 Related Content & Recommendations
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Explicitly select related courses and featured chapters. If unselected, smart defaults are used automatically.
+                Explicitly select related courses and featured chapters. If
+                unselected, smart defaults are used automatically.
               </p>
             </div>
 
             {/* Related Courses Multi-Select / Checkbox list */}
             <div className="space-y-2">
-              <Label>Related Courses (shown on Course Overview & Sidebars)</Label>
+              <Label>
+                Related Courses (shown on Course Overview & Sidebars)
+              </Label>
               <div className="max-h-48 overflow-y-auto space-y-1 rounded-2xl border border-zinc-200/60 bg-zinc-50 p-3 dark:border-zinc-800/60 dark:bg-zinc-900/50">
                 {allCourses
                   .filter((c) => c._id !== courseId)
                   .map((c) => {
-                    const isSelected = (form.relatedCourses || []).includes(c._id);
+                    const isSelected = (form.relatedCourses || []).includes(
+                      c._id,
+                    );
                     return (
                       <label
                         key={c._id}
@@ -478,7 +520,9 @@ export default function CourseForm({ courseId = null }) {
                           onChange={(e) => {
                             const next = e.target.checked
                               ? [...(form.relatedCourses || []), c._id]
-                              : (form.relatedCourses || []).filter((id) => id !== c._id);
+                              : (form.relatedCourses || []).filter(
+                                  (id) => id !== c._id,
+                                );
                             update("relatedCourses", next);
                           }}
                           className="h-4 w-4 rounded border-zinc-300 text-orange-500 focus:ring-orange-400"
@@ -488,7 +532,9 @@ export default function CourseForm({ courseId = null }) {
                     );
                   })}
                 {allCourses.length <= 1 && (
-                  <p className="text-xs text-muted-foreground">No other courses available.</p>
+                  <p className="text-xs text-muted-foreground">
+                    No other courses available.
+                  </p>
                 )}
               </div>
             </div>
@@ -496,10 +542,14 @@ export default function CourseForm({ courseId = null }) {
             {/* Featured Chapters */}
             {courseChapters.length > 0 && (
               <div className="space-y-2">
-                <Label>Popular / Featured Chapters (Highlighted in recommendations)</Label>
+                <Label>
+                  Popular / Featured Chapters (Highlighted in recommendations)
+                </Label>
                 <div className="max-h-48 overflow-y-auto space-y-1 rounded-2xl border border-zinc-200/60 bg-zinc-50 p-3 dark:border-zinc-800/60 dark:bg-zinc-900/50">
                   {courseChapters.map((ch, idx) => {
-                    const isSelected = (form.popularChapterIds || []).includes(ch._id);
+                    const isSelected = (form.popularChapterIds || []).includes(
+                      ch._id,
+                    );
                     return (
                       <label
                         key={ch._id}
@@ -511,7 +561,9 @@ export default function CourseForm({ courseId = null }) {
                           onChange={(e) => {
                             const next = e.target.checked
                               ? [...(form.popularChapterIds || []), ch._id]
-                              : (form.popularChapterIds || []).filter((id) => id !== ch._id);
+                              : (form.popularChapterIds || []).filter(
+                                  (id) => id !== ch._id,
+                                );
                             update("popularChapterIds", next);
                           }}
                           className="h-4 w-4 rounded border-zinc-300 text-orange-500 focus:ring-orange-400"
@@ -530,7 +582,9 @@ export default function CourseForm({ courseId = null }) {
 
         <aside className="space-y-6">
           <div className="space-y-4 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
-            <h2 className="font-semibold text-zinc-900 dark:text-white text-sm">Placement</h2>
+            <h2 className="font-semibold text-zinc-900 dark:text-white text-sm">
+              Placement
+            </h2>
             <div className="space-y-2">
               <Label>Status</Label>
               <Select
@@ -579,7 +633,9 @@ export default function CourseForm({ courseId = null }) {
           <div className="space-y-4 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h2 className="font-semibold text-zinc-900 dark:text-white text-sm">Final exam</h2>
+                <h2 className="font-semibold text-zinc-900 dark:text-white text-sm">
+                  Final exam
+                </h2>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Enable assessment after the course.
                 </p>

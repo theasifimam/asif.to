@@ -27,7 +27,31 @@ import {
 } from "@/components/admin";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
+
+function CourseCategoryRowSkeleton() {
+  return (
+    <tr>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-5 w-48 rounded-md" />
+      </td>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-4 w-32 rounded-md" />
+      </td>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-5 w-16 rounded-full" />
+      </td>
+      <td className="px-6 py-4.5 text-right">
+        <div className="flex justify-end gap-3.5">
+          <Skeleton className="h-4 w-16 rounded-md" />
+          <Skeleton className="h-4 w-10 rounded-md" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+      </td>
+    </tr>
+  );
+}
 import { topicCategoriesApi, coursesApi } from "@/lib/api";
 import { useState, useEffect, useMemo } from "react";
 
@@ -157,11 +181,7 @@ export default function CourseCategoriesPage() {
         />
       </AdminFilters>
 
-      {loading ? (
-        <div className="flex h-64 items-center justify-center rounded-3xl border border-zinc-200/80 bg-white dark:border-zinc-800/80 dark:bg-[#121215]">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-        </div>
-      ) : (
+      {loading || filtered.length > 0 ? (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -181,50 +201,60 @@ export default function CourseCategoriesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
-                {filtered.map((cat) => (
-                  <tr
-                    key={cat._id}
-                    className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
-                  >
-                    <td className="px-6 py-4.5">
-                      <Link
-                        href={`/courses/${courseId}/categories/${cat._id}/interview-questions`}
-                        className="font-semibold text-zinc-950 hover:text-blue-600 hover:underline dark:text-zinc-100 dark:hover:text-blue-400"
-                      >
-                        {cat.name}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4.5">{cat.slug}</td>
-                    <td className="px-6 py-4.5">{cat.status}</td>
-                    <td className="px-6 py-4.5 text-right">
-                      <Link
-                        href={`/courses/${courseId}/categories/${cat._id}/interview-questions`}
-                        className="mr-3 text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
-                      >
-                        Questions
-                      </Link>
-                      <Link
-                        href={`/categories/${cat._id}/edit?course=${courseId}`}
-                        className="mr-2 text-xs font-bold text-green-600 hover:underline dark:text-green-400"
-                      >
-                        Edit
-                      </Link>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="Delete category"
-                        onClick={() => setDeleteTarget(cat)}
-                        className="h-8 w-8 rounded-full text-zinc-400 hover:text-rose-600"
-                      >
-                        <Trash2 className="h-4 w-4 text-rose-500" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
+                {loading ? (
+                  Array.from({ length: limit }).map((_, i) => (
+                    <CourseCategoryRowSkeleton key={i} />
+                  ))
+                ) : (
+                  filtered.map((cat) => (
+                    <tr
+                      key={cat._id}
+                      className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
+                    >
+                      <td className="px-6 py-4.5">
+                        <Link
+                          href={`/courses/${courseId}/categories/${cat._id}/interview-questions`}
+                          className="font-semibold text-zinc-950 hover:text-blue-600 hover:underline dark:text-zinc-100 dark:hover:text-blue-400"
+                        >
+                          {cat.name}
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4.5">{cat.slug}</td>
+                      <td className="px-6 py-4.5">{cat.status}</td>
+                      <td className="px-6 py-4.5 text-right">
+                        <Link
+                          href={`/courses/${courseId}/categories/${cat._id}/interview-questions`}
+                          className="mr-3 text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
+                        >
+                          Questions
+                        </Link>
+                        <Link
+                          href={`/categories/${cat._id}/edit?course=${courseId}`}
+                          className="mr-2 text-xs font-bold text-green-600 hover:underline dark:text-green-400"
+                        >
+                          Edit
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Delete category"
+                          onClick={() => setDeleteTarget(cat)}
+                          className="h-8 w-8 rounded-full text-zinc-400 hover:text-rose-600"
+                        >
+                          <Trash2 className="h-4 w-4 text-rose-500" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </SortableContext>
         </DndContext>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-16 rounded-3xl border border-zinc-200/80 bg-white text-zinc-500 dark:border-zinc-800/80 dark:bg-[#121215]">
+          <p className="text-sm font-medium">No categories match these filters.</p>
+        </div>
       )}
 
       <ConfirmDialog

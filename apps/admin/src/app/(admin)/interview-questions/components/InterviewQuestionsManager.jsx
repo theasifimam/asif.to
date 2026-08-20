@@ -36,6 +36,70 @@ import { CSS } from "@dnd-kit/utilities";
 import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function InterviewQuestionCardSkeleton() {
+  return (
+    <div className="group flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs dark:border-zinc-800/80 dark:bg-zinc-950 min-h-[160px]">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Skeleton className="h-5 w-14 rounded-full" />
+            <Skeleton className="h-5 w-16 rounded-full" />
+          </div>
+          <Skeleton className="h-4 w-10 rounded-md" />
+        </div>
+        <div className="space-y-1.5">
+          <Skeleton className="h-5 w-3/4 rounded-md" />
+          <Skeleton className="h-3.5 w-1/3 rounded-md" />
+        </div>
+      </div>
+      <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-3.5 dark:border-zinc-800/80">
+        <div className="flex items-center gap-1">
+          <Skeleton className="h-8 w-8 rounded-lg" />
+          <Skeleton className="h-8 w-8 rounded-lg" />
+        </div>
+        <div className="flex items-center gap-1">
+          <Skeleton className="h-8 w-8 rounded-lg" />
+          <Skeleton className="h-8 w-8 rounded-lg" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function InterviewQuestionRowSkeleton() {
+  return (
+    <tr>
+      <td className="py-4.5 pl-4 sm:pl-6 w-10">
+        <Skeleton className="h-4 w-4 rounded-md" />
+      </td>
+      <td className="px-4 py-4.5">
+        <Skeleton className="h-5 w-48 rounded-md" />
+        <Skeleton className="mt-1.5 h-3 w-32 rounded-md" />
+      </td>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-4 w-20 rounded-md" />
+      </td>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-4 w-20 rounded-md" />
+      </td>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-5 w-14 rounded-full" />
+      </td>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-5 w-16 rounded-full" />
+      </td>
+      <td className="px-6 py-4.5">
+        <div className="flex justify-end gap-1">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+      </td>
+    </tr>
+  );
+}
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -398,17 +462,7 @@ export default function InterviewQuestionsManager({
         />
       </section>
 
-      {loading ? (
-        <div className="flex h-64 items-center justify-center rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-        </div>
-      ) : questions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
-          <p className="text-sm font-medium">
-            No questions match these filters.
-          </p>
-        </div>
-      ) : (
+      {loading || questions.length > 0 ? (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -421,29 +475,37 @@ export default function InterviewQuestionsManager({
             {viewMode === "card" ? (
               <div className="space-y-6">
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {questions.map((item) => (
-                    <SortableCard
-                      key={item._id}
-                      item={item}
-                      onPreview={setPreview}
-                      onDelete={setDeleteTarget}
-                      editHref={editHref}
-                    />
-                  ))}
+                  {loading ? (
+                    Array.from({ length: limit }).map((_, i) => (
+                      <InterviewQuestionCardSkeleton key={i} />
+                    ))
+                  ) : (
+                    questions.map((item) => (
+                      <SortableCard
+                        key={item._id}
+                        item={item}
+                        onPreview={setPreview}
+                        onDelete={setDeleteTarget}
+                        editHref={editHref}
+                      />
+                    ))
+                  )}
                 </div>
 
-                <AdminPagination
-                  page={pagination.page || 1}
-                  pages={pagination.pages || 1}
-                  total={pagination.total || 0}
-                  limit={limit}
-                  itemLabel="questions"
-                  onPageChange={(p) => setFilters((c) => ({ ...c, page: p }))}
-                  onLimitChange={(l) => {
-                    setLimit(l);
-                    setFilters((c) => ({ ...c, page: 1 }));
-                  }}
-                />
+                {!loading && (
+                  <AdminPagination
+                    page={pagination.page || 1}
+                    pages={pagination.pages || 1}
+                    total={pagination.total || 0}
+                    limit={limit}
+                    itemLabel="questions"
+                    onPageChange={(p) => setFilters((c) => ({ ...c, page: p }))}
+                    onLimitChange={(l) => {
+                      setLimit(l);
+                      setFilters((c) => ({ ...c, page: 1 }));
+                    }}
+                  />
+                )}
               </div>
             ) : (
               <div className="space-y-6">
@@ -462,36 +524,50 @@ export default function InterviewQuestionsManager({
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
-                        {questions.map((item) => (
-                          <SortableTableRow
-                            key={item._id}
-                            item={item}
-                            onPreview={setPreview}
-                            onDelete={setDeleteTarget}
-                            editHref={editHref}
-                          />
-                        ))}
+                        {loading ? (
+                          Array.from({ length: limit }).map((_, i) => (
+                            <InterviewQuestionRowSkeleton key={i} />
+                          ))
+                        ) : (
+                          questions.map((item) => (
+                            <SortableTableRow
+                              key={item._id}
+                              item={item}
+                              onPreview={setPreview}
+                              onDelete={setDeleteTarget}
+                              editHref={editHref}
+                            />
+                          ))
+                        )}
                       </tbody>
                     </table>
                   </div>
                 </section>
 
-                <AdminPagination
-                  page={pagination.page || 1}
-                  pages={pagination.pages || 1}
-                  total={pagination.total || 0}
-                  limit={limit}
-                  itemLabel="questions"
-                  onPageChange={(p) => setFilters((c) => ({ ...c, page: p }))}
-                  onLimitChange={(l) => {
-                    setLimit(l);
-                    setFilters((c) => ({ ...c, page: 1 }));
-                  }}
-                />
+                {!loading && (
+                  <AdminPagination
+                    page={pagination.page || 1}
+                    pages={pagination.pages || 1}
+                    total={pagination.total || 0}
+                    limit={limit}
+                    itemLabel="questions"
+                    onPageChange={(p) => setFilters((c) => ({ ...c, page: p }))}
+                    onLimitChange={(l) => {
+                      setLimit(l);
+                      setFilters((c) => ({ ...c, page: 1 }));
+                    }}
+                  />
+                )}
               </div>
             )}
           </SortableContext>
         </DndContext>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
+          <p className="text-sm font-medium">
+            No questions match these filters.
+          </p>
+        </div>
       )}
 
       {/* Preview Modal */}

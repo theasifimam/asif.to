@@ -4,8 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   ChevronDown,
+  ChevronLeft,
   ChevronUp,
-  ExternalLink,
+  Maximize2,
   MessageSquare,
   Search,
   UserRound,
@@ -26,7 +27,7 @@ import MessageInput from "./MessageInput";
 
 function DockAvatar({
   user,
-  className = "h-8 w-8 rounded-xl",
+  className = "h-8 w-8 rounded-full",
   online = false,
 }) {
   const source = avatarUrl(user?.avatar);
@@ -352,35 +353,36 @@ export default function FloatingChatDock({ isNavVisible = true }) {
         </button>
       ) : (
         /* Expanded LinkedIn/Instagram-style Chat Dock Window */
-        <div className="flex h-117.5 sm:h-125 w-[320px] sm:w-90 flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-[#121215] dark:shadow-black/70 animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex h-125 sm:h-140 w-85 sm:w-96 flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-[#121215] dark:shadow-black/70 animate-in fade-in zoom-in-95 duration-150">
           {/* Dock Header */}
-          <div className="flex h-12 sm:h-13 shrink-0 items-center justify-between border-b border-zinc-200/80 px-3 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-900/60 backdrop-blur-md">
-            <div className="flex min-w-0 items-center gap-2">
+          <div className="flex h-14 sm:h-15 shrink-0 items-center justify-between border-b border-zinc-200/80 px-4 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-900/60 backdrop-blur-md">
+            <div className="flex min-w-0 items-center gap-2.5">
               {selected ? (
                 <>
                   <button
                     onClick={() => setSelected(null)}
-                    className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                    className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-zinc-200/60 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+                    title="Go back"
                   >
-                    ‹ Back
+                    <ChevronLeft size={20} />
                   </button>
                   <DockAvatar
                     user={other}
-                    className="h-6 w-6 rounded-full"
+                    className="h-8 w-8 rounded-full"
                     online={selected.type === "direct" && isOnline(other?._id)}
                   />
                   <div className="min-w-0">
-                    <p className="truncate text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                    <p className="truncate text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100">
                       {selected.type === "discussion"
                         ? selected.entityTitle
                         : conversationName(selected, currentUserId)}
                     </p>
                     {Object.values(typingUsers).length > 0 ? (
-                      <p className="truncate text-[9.5px] font-bold text-blue-600 dark:text-blue-400 animate-pulse">
+                      <p className="truncate text-[10px] font-bold text-blue-600 dark:text-blue-400 animate-pulse">
                         typing…
                       </p>
                     ) : selected.type === "direct" ? (
-                      <p className="truncate text-[9.5px] text-zinc-400">
+                      <p className="truncate text-[10px] text-zinc-400">
                         {isOnline(other?._id) ? (
                           <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
                             Online
@@ -393,15 +395,15 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                   </div>
                 </>
               ) : (
-                <div className="flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-500/10">
-                    <MessageSquare size={13} />
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-500/10">
+                    <MessageSquare size={14} />
                   </span>
-                  <h3 className="font-outfit text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                  <h3 className="font-outfit text-sm font-black tracking-tight text-zinc-950 dark:text-white">
                     Messages
                   </h3>
                   {unread.totalUnread > 0 && (
-                    <span className="rounded-full bg-emerald-600 px-1.5 py-0.2 text-[9px] font-black text-white">
+                    <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-black text-white">
                       {unread.totalUnread}
                     </span>
                   )}
@@ -409,7 +411,7 @@ export default function FloatingChatDock({ isNavVisible = true }) {
               )}
             </div>
 
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-1">
               {selected && (
                 <button
                   onClick={() => {
@@ -417,17 +419,17 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                     router.push(`/messages?conversation=${selected._id}`);
                   }}
                   title="Open full page"
-                  className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-200/60 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 cursor-pointer"
+                  className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-zinc-200/60 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors cursor-pointer"
                 >
-                  <ExternalLink size={13} />
+                  <Maximize2 size={14} />
                 </button>
               )}
               <button
                 onClick={() => setIsOpen(false)}
                 title="Minimize"
-                className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-200/60 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 cursor-pointer"
+                className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-zinc-200/60 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors cursor-pointer"
               >
-                <ChevronDown size={14} />
+                <ChevronDown size={16} />
               </button>
             </div>
           </div>
@@ -437,19 +439,19 @@ export default function FloatingChatDock({ isNavVisible = true }) {
             {!selected ? (
               /* Conversation Picker List */
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="p-2 border-b border-zinc-100 dark:border-zinc-800/80">
+                <div className="p-3 border-b border-zinc-100 dark:border-zinc-800/80">
                   <div className="relative">
-                    <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-zinc-400" />
+                    <Search className="absolute left-3.5 top-3 h-4 w-4 text-zinc-400" />
                     <input
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       placeholder="Search messages..."
-                      className="h-7.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 pl-8 pr-2 text-[11px] outline-none focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-900"
+                      className="h-10 w-full rounded-full border border-zinc-200 bg-zinc-50 pl-10 pr-4 text-xs font-medium outline-none focus:border-blue-500 focus:bg-white dark:border-zinc-800 dark:bg-zinc-900 transition-all"
                     />
                   </div>
                 </div>
 
-                <div className="min-h-0 flex-1 overflow-y-auto p-1.5 space-y-0.5">
+                <div className="min-h-0 flex-1 overflow-y-auto p-2.5 space-y-1">
                   {loading ? (
                     <div className="p-6 text-center text-xs text-zinc-400">
                       Loading...
@@ -458,22 +460,14 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                     conversations.map((conv) => {
                       const member = otherMember(conv, currentUserId);
                       const hasUnread = (conv.unreadCount || 0) > 0;
-                      return (
-                        <button
+                      return (                        <button
                           key={conv._id}
                           onClick={() => openConversation(conv)}
-                          className={`group relative flex w-full items-center gap-2 rounded-xl p-2 text-left border transition-all duration-150 cursor-pointer ${
-                            hasUnread
-                              ? "bg-blue-50/80 dark:bg-blue-950/25 border-blue-200/70 dark:border-blue-900/40 hover:bg-blue-100/70 dark:hover:bg-blue-900/35 shadow-xs"
-                              : "bg-transparent border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-900"
-                          }`}
+                          className="group relative flex w-full items-center gap-3 rounded-xl p-2.5 text-left border border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all duration-150 cursor-pointer"
                         >
-                          {hasUnread && (
-                            <span className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-blue-600 dark:bg-blue-500 shadow-xs" />
-                          )}
                           <DockAvatar
                             user={member}
-                            className="h-7 w-7 rounded-xl"
+                            className="h-9 w-9 rounded-full"
                             online={
                               conv.type === "direct" && isOnline(member?._id)
                             }
@@ -481,27 +475,29 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between">
                               <p
-                                className={`truncate text-xs ${
+                                className={`truncate text-sm ${
                                   hasUnread
-                                    ? "font-black text-zinc-950 dark:text-white"
-                                    : "font-bold text-zinc-900 dark:text-zinc-100"
+                                    ? "font-extrabold text-zinc-950 dark:text-white"
+                                    : "font-semibold text-zinc-800 dark:text-zinc-200"
                                 }`}
                               >
                                 {conv.type === "discussion"
                                   ? conv.entityTitle
                                   : conversationName(conv, currentUserId)}
                               </p>
-                              {hasUnread && (
-                                <span className="rounded-full bg-blue-600 dark:bg-blue-500 px-1.5 text-[8.5px] font-black text-white shadow-xs">
-                                  {conv.unreadCount}
-                                </span>
-                              )}
+                              <div className="flex items-center gap-1.5 pl-2 shrink-0">
+                                {hasUnread && (
+                                  <span className="rounded-full bg-blue-600 px-1.5 py-0.5 text-[9px] font-black text-white shadow-xs">
+                                    {conv.unreadCount}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                             <p
-                              className={`truncate text-[10px] ${
+                              className={`truncate text-xs mt-0.5 ${
                                 hasUnread
-                                  ? "font-semibold text-zinc-800 dark:text-zinc-200"
-                                  : "text-zinc-400"
+                                  ? "font-bold text-zinc-800 dark:text-zinc-200"
+                                  : "text-zinc-400 dark:text-zinc-500 font-medium"
                               }`}
                             >
                               {conv.lastMessageText || "Start a conversation"}

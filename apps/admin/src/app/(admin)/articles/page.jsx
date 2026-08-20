@@ -7,7 +7,63 @@ import { Edit3, FileText, Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { articlesApi } from "@/lib/api";
 import AdminFormShell from "@/components/forms/AdminFormShell";
-import { Button } from "@/components/ui";
+import { Button, Skeleton } from "@/components/ui";
+
+function ArticleCardSkeleton() {
+  return (
+    <div className="admin-surface flex flex-col justify-between p-5 min-h-[160px]">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-5 w-16 rounded-full" />
+          <Skeleton className="h-4 w-12 rounded-md" />
+        </div>
+        <div className="space-y-1.5">
+          <Skeleton className="h-5 w-3/4 rounded-md" />
+          <Skeleton className="h-3.5 w-1/2 rounded-md" />
+        </div>
+      </div>
+      <div className="mt-5 border-t border-zinc-100 pt-4 dark:border-zinc-800/80 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-6 w-6 rounded-full shrink-0" />
+          <Skeleton className="h-4 w-20 rounded-md" />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Skeleton className="h-8 w-8 rounded-lg" />
+          <Skeleton className="h-8 w-8 rounded-lg" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ArticleRowSkeleton() {
+  return (
+    <tr>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-5 w-48 rounded-md" />
+        <Skeleton className="mt-1 h-3.5 w-32 rounded-md" />
+      </td>
+      <td className="px-6 py-4.5">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-6 w-6 rounded-full shrink-0" />
+          <Skeleton className="h-4 w-20 rounded-md" />
+        </div>
+      </td>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-5 w-16 rounded-full" />
+      </td>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-4 w-10 rounded-md" />
+      </td>
+      <td className="px-6 py-4.5">
+        <div className="flex justify-end gap-1.5">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+      </td>
+    </tr>
+  );
+}
 import {
   Select,
   SelectContent,
@@ -124,89 +180,93 @@ export default function ArticlesPage() {
       </AdminFilters>
 
       <AdminContent plain={viewMode === "card"}>
-        {loading ? (
-          <div className="flex h-64 items-center justify-center rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-          </div>
-        ) : articles.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
-            <FileText className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
-            <p className="text-sm font-medium">No articles match these filters.</p>
-          </div>
-        ) : viewMode === "card" ? (
+        {viewMode === "card" ? (
           <div className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {articles.map((article) => (
-                <div
-                  key={article._id}
-                  className="admin-surface group flex flex-col justify-between p-5 transition-colors hover:border-zinc-300 dark:hover:border-zinc-700"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <span
-                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
-                          article.status === "published"
-                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
-                            : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
-                        }`}
-                      >
-                        {article.status}
-                      </span>
-                      <span className="text-[11px] font-bold text-zinc-400">
-                        {article.readCount || 0} reads
-                      </span>
-                    </div>
-
-                    <div>
-                      <Link
-                        href={`/articles/edit/${article._id}`}
-                        className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-2"
-                      >
-                        {article.title}
-                      </Link>
-                      <p className="mt-1 text-xs text-zinc-400 truncate">/{article.slug}</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-3.5 dark:border-zinc-800/80">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 text-[10px] font-black">
-                        {article.author?.fullName?.charAt(0) || "A"}
-                      </div>
-                      <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 truncate">
-                        {article.author?.fullName || "Anonymous"}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1 shrink-0">
-                      <Link href={`/articles/edit/${article._id}`}>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" title="Edit article">
-                          <Edit3 className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setDeleteTarget(article)}
-                        className="h-8 w-8 rounded-lg text-zinc-400 hover:text-red-600"
-                        title="Delete article"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
+              {loading ? (
+                Array.from({ length: limit }).map((_, i) => (
+                  <ArticleCardSkeleton key={i} />
+                ))
+              ) : articles.length === 0 ? (
+                <div className="col-span-full flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
+                  <FileText className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
+                  <p className="text-sm font-medium">No articles match these filters.</p>
                 </div>
-              ))}
+              ) : (
+                articles.map((article) => (
+                  <div
+                    key={article._id}
+                    className="admin-surface group flex flex-col justify-between p-5 transition-colors hover:border-zinc-300 dark:hover:border-zinc-700"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                            article.status === "published"
+                              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
+                              : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
+                          }`}
+                        >
+                          {article.status}
+                        </span>
+                        <span className="text-[11px] font-bold text-zinc-400">
+                          {article.readCount || 0} reads
+                        </span>
+                      </div>
+
+                      <div>
+                        <Link
+                          href={`/articles/edit/${article._id}`}
+                          className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-2"
+                        >
+                          {article.title}
+                        </Link>
+                        <p className="mt-1 text-xs text-zinc-400 truncate">/{article.slug}</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-3.5 dark:border-zinc-800/80">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 text-[10px] font-black">
+                          {article.author?.fullName?.charAt(0) || "A"}
+                        </div>
+                        <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 truncate">
+                          {article.author?.fullName || "Anonymous"}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Link href={`/articles/edit/${article._id}`}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" title="Edit article">
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setDeleteTarget(article)}
+                          className="h-8 w-8 rounded-lg text-zinc-400 hover:text-red-600"
+                          title="Delete article"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
-            <AdminPagination
-              page={pagination.page}
-              pages={pagination.pages}
-              total={pagination.total}
-              limit={limit}
-              itemLabel="articles"
-              onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
-              onLimitChange={(limit) => setFilters((current) => ({ ...current, limit, page: 1 }))}
-            />
+            {!loading && articles.length > 0 && (
+              <AdminPagination
+                page={pagination.page}
+                pages={pagination.pages}
+                total={pagination.total}
+                limit={limit}
+                itemLabel="articles"
+                onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
+                onLimitChange={(limit) => setFilters((current) => ({ ...current, limit, page: 1 }))}
+              />
+            )}
           </div>
         ) : (
           <div className="space-y-0">
@@ -223,84 +283,101 @@ export default function ArticlesPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
-                    {articles.map((article) => (
-                      <tr
-                        key={article._id}
-                        className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
-                      >
-                        <td className="px-6 py-4.5">
-                          <Link
-                            href={`/articles/edit/${article._id}`}
-                            className="font-bold font-outfit text-zinc-950 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 transition-colors line-clamp-1"
-                          >
-                            {article.title}
-                          </Link>
-                          <p className="mt-0.5 text-xs text-zinc-400 truncate">/{article.slug}</p>
-                        </td>
-                        <td className="px-6 py-4.5">
-                          <div className="flex items-center gap-2">
-                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 text-[10px] font-black">
-                              {article.author?.fullName?.charAt(0) || "A"}
-                            </div>
-                            <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 truncate">
-                              {article.author?.fullName || "Anonymous"}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4.5">
-                          <span
-                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
-                              article.status === "published"
-                                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-500/20"
-                                : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-500/20"
-                            }`}
-                          >
-                            {article.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4.5">
-                          <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
-                            {article.readCount || 0} reads
-                          </span>
-                        </td>
-                        <td className="px-6 py-4.5">
-                          <div className="flex justify-end gap-1">
-                            <Link href={`/articles/edit/${article._id}`}>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                                title="Edit article"
-                              >
-                                <Edit3 className="h-4 w-4" />
-                              </Button>
-                            </Link>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => setDeleteTarget(article)}
-                              className="h-8 w-8 rounded-full text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                              title="Delete article"
-                            >
-                              <Trash2 className="h-4 w-4 text-rose-500" />
-                            </Button>
+                    {loading ? (
+                      Array.from({ length: limit }).map((_, i) => (
+                        <ArticleRowSkeleton key={i} />
+                      ))
+                    ) : articles.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-10 text-center">
+                          <div className="flex flex-col items-center justify-center text-zinc-500">
+                            <FileText className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
+                            <p className="text-sm font-medium">No articles match these filters.</p>
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      articles.map((article) => (
+                        <tr
+                          key={article._id}
+                          className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
+                        >
+                          <td className="px-6 py-4.5">
+                            <Link
+                              href={`/articles/edit/${article._id}`}
+                              className="font-bold font-outfit text-zinc-950 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 transition-colors line-clamp-1"
+                            >
+                              {article.title}
+                            </Link>
+                            <p className="mt-0.5 text-xs text-zinc-400 truncate">/{article.slug}</p>
+                          </td>
+                          <td className="px-6 py-4.5">
+                            <div className="flex items-center gap-2">
+                              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 text-[10px] font-black">
+                                {article.author?.fullName?.charAt(0) || "A"}
+                              </div>
+                              <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 truncate">
+                                {article.author?.fullName || "Anonymous"}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4.5">
+                            <span
+                              className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                                article.status === "published"
+                                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-500/20"
+                                  : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-500/20"
+                              }`}
+                            >
+                              {article.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4.5">
+                            <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                              {article.readCount || 0} reads
+                            </span>
+                          </td>
+                          <td className="px-6 py-4.5">
+                            <div className="flex justify-end gap-1">
+                              <Link href={`/articles/edit/${article._id}`}>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                  title="Edit article"
+                                >
+                                  <Edit3 className="h-4 w-4" />
+                                </Button>
+                              </Link>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setDeleteTarget(article)}
+                                className="h-8 w-8 rounded-full text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                                title="Delete article"
+                              >
+                                <Trash2 className="h-4 w-4 text-rose-500" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
-            <AdminPagination
-              page={pagination.page}
-              pages={pagination.pages}
-              total={pagination.total}
-              limit={limit}
-              itemLabel="articles"
-              onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
-              onLimitChange={(limit) => setFilters((current) => ({ ...current, limit, page: 1 }))}
-            />
+            {!loading && articles.length > 0 && (
+              <AdminPagination
+                page={pagination.page}
+                pages={pagination.pages}
+                total={pagination.total}
+                limit={limit}
+                itemLabel="articles"
+                onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
+                onLimitChange={(limit) => setFilters((current) => ({ ...current, limit, page: 1 }))}
+              />
+            )}
           </div>
         )}
       </AdminContent>

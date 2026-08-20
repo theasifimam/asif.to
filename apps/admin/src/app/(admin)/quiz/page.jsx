@@ -12,7 +12,57 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { coursesApi, interviewQuestionsApi, quizApi } from "@/lib/api";
-import { Button } from "@/components/ui";
+import { Button, Skeleton } from "@/components/ui";
+
+function QuizCardSkeleton() {
+  return (
+    <div className="group flex min-w-0 flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-4 sm:p-5 shadow-xs dark:border-zinc-800/80 dark:bg-zinc-950 min-h-[160px]">
+      <div className="min-w-0 space-y-3">
+        <div className="flex items-center gap-1.5">
+          <Skeleton className="h-5 w-14 rounded-full" />
+          <Skeleton className="h-5 w-16 rounded-full" />
+        </div>
+        <div className="space-y-1.5">
+          <Skeleton className="h-5 w-3/4 rounded-md" />
+          <Skeleton className="h-3.5 w-1/3 rounded-md" />
+        </div>
+      </div>
+      <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-3.5 dark:border-zinc-800/80">
+        <Skeleton className="h-4 w-24 rounded-md" />
+        <div className="flex items-center gap-1">
+          <Skeleton className="h-8 w-8 rounded-lg" />
+          <Skeleton className="h-8 w-8 rounded-lg" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function QuizRowSkeleton() {
+  return (
+    <tr>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-5 w-48 rounded-md" />
+        <Skeleton className="mt-1 h-3 w-32 rounded-md" />
+      </td>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-5 w-14 rounded-full" />
+      </td>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-5 w-16 rounded-full" />
+      </td>
+      <td className="px-6 py-4.5">
+        <Skeleton className="h-4 w-12 rounded-md" />
+      </td>
+      <td className="px-6 py-4.5">
+        <div className="flex justify-end gap-1">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+      </td>
+    </tr>
+  );
+}
 import {
   Select,
   SelectContent,
@@ -186,104 +236,113 @@ export default function QuestionsPage() {
       </AdminFilters>
 
       <AdminContent plain={viewMode === "card"}>
-        {loading ? (
-          <div className="flex h-64 items-center justify-center rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-          </div>
-        ) : visible.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
-            <FilePlus2 className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
-            <p className="text-sm font-medium">No questions match these filters.</p>
-          </div>
-        ) : viewMode === "card" ? (
+        {viewMode === "card" ? (
           <div className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {visible.map((item) => (
-                <div
-                  key={item._id}
-                  className="group flex min-w-0 flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all hover:border-blue-500/50 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950"
-                >
-                  <div className="min-w-0 space-y-3">
-                    <div className="flex items-center justify-between gap-2 flex-wrap min-w-0">
-                      <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                        <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 shrink-0">
-                          {item.type}
-                        </span>
-                        <span
-                          className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shrink-0 ${
-                            difficultyStyles[item.difficulty] || ""
-                          }`}
-                        >
-                          {item.difficulty}
-                        </span>
+              {loading ? (
+                Array.from({ length: limit }).map((_, i) => (
+                  <QuizCardSkeleton key={i} />
+                ))
+              ) : visible.length === 0 ? (
+                <div className="col-span-full flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
+                  <FilePlus2 className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
+                  <p className="text-sm font-medium">No questions match these filters.</p>
+                </div>
+              ) : (
+                visible.map((item) => (
+                  <div
+                    key={item._id}
+                    className="group flex min-w-0 flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all hover:border-blue-500/50 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950"
+                  >
+                    <div className="min-w-0 space-y-3">
+                      <div className="flex items-center justify-between gap-2 flex-wrap min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                          <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 shrink-0">
+                            {item.type}
+                          </span>
+                          <span
+                            className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shrink-0 ${
+                              difficultyStyles[item.difficulty] || ""
+                            }`}
+                          >
+                            {item.difficulty}
+                          </span>
+                        </div>
                       </div>
+
+                      <div className="min-w-0">
+                        <Link
+                          href={editHref(item._id)}
+                          className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-2"
+                        >
+                          {item.question}
+                        </Link>
+                        <p className="mt-1 text-xs text-zinc-400 line-clamp-2">
+                          {item.type === "interview"
+                            ? item.answer
+                            : `Correct: ${item.options?.[item.correctIndex] || "—"}`}
+                        </p>
+                      </div>
+
+                      {item.type === "interview" && item.course?.title ? (
+                        <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                          Course: {item.course.title}
+                        </p>
+                      ) : (
+                        item.courses &&
+                        item.courses.length > 0 && (
+                          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 truncate">
+                            Courses: {item.courses.map((c) => c.title).join(", ")}
+                          </p>
+                        )
+                      )}
                     </div>
 
-                    <div className="min-w-0">
+                    <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-3.5 dark:border-zinc-800/80">
                       <Link
                         href={editHref(item._id)}
-                        className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-3 wrap-break-word"
+                        className="text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
                       >
-                        {item.question}
+                        Edit question &rarr;
                       </Link>
-                      <p className="mt-2 line-clamp-2 text-xs text-zinc-400 wrap-break-word">
-                        {item.type === "interview"
-                          ? item.answer
-                          : `Correct: ${item.options?.[item.correctIndex] || "—"}`}
-                      </p>
-                    </div>
 
-                    {(item.courses?.length > 0 || item.course?.title) && (
-                      <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 truncate max-w-full">
-                        {item.type === "interview"
-                          ? item.course?.title
-                          : item.courses?.map((c) => c.title).join(", ")}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="mt-5 flex items-center justify-between border-t border-zinc-100 pt-3.5 dark:border-zinc-800/80">
-                    <Link
-                      href={editHref(item._id)}
-                      className="text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
-                    >
-                      Edit question &rarr;
-                    </Link>
-
-                    <div className="flex items-center gap-1 shrink-0">
-                      <Link href={editHref(item._id)}>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Link href={editHref(item._id)}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-lg"
+                            title="Edit question"
+                          >
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
+                        </Link>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 rounded-lg"
-                          title="Edit question"
+                          title="Delete question"
+                          onClick={() => setDeleteTarget(item)}
+                          className="h-8 w-8 rounded-lg text-zinc-400 hover:text-red-600"
                         >
-                          <Edit3 className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
-                      </Link>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="Delete question"
-                        onClick={() => setDeleteTarget(item)}
-                        className="h-8 w-8 rounded-lg text-zinc-400 hover:text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
-            <AdminPagination
-              page={pagination.page}
-              pages={pagination.pages}
-              total={pagination.total}
-              limit={limit}
-              itemLabel="questions"
-              onPageChange={setPage}
-              onLimitChange={(l) => { setLimit(l); setPage(1); }}
-            />
+            {!loading && visible.length > 0 && (
+              <AdminPagination
+                page={pagination.page}
+                pages={pagination.pages}
+                total={pagination.total}
+                limit={limit}
+                itemLabel="questions"
+                onPageChange={setPage}
+                onLimitChange={(l) => { setLimit(l); setPage(1); }}
+              />
+            )}
           </div>
         ) : (
           <div className="space-y-0">
@@ -300,81 +359,98 @@ export default function QuestionsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
-                    {visible.map((item) => (
-                      <tr
-                        key={item._id}
-                        className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
-                      >
-                        <td className="max-w-xl px-6 py-4.5">
-                          <Link
-                            href={editHref(item._id)}
-                            className="font-bold font-outfit text-zinc-950 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 transition-colors line-clamp-2"
-                          >
-                            {item.question}
-                          </Link>
-                          <p className="mt-0.5 line-clamp-1 text-xs text-zinc-400">
-                            {item.type === "interview"
-                              ? item.answer
-                              : `Correct: ${item.options?.[item.correctIndex] || "—"}`}
-                          </p>
-                        </td>
-                        <td className="px-6 py-4.5">
-                          <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-500/20">
-                            {item.type}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400">
-                          {item.type === "interview"
-                            ? item.course?.title || "—"
-                            : (item.courses || []).map((course) => course.title).join(", ") || "—"}
-                        </td>
-                        <td className="px-6 py-4.5">
-                          <span
-                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
-                              difficultyStyles[item.difficulty] || ""
-                            }`}
-                          >
-                            {item.difficulty}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4.5">
-                          <div className="flex justify-end gap-1">
-                            <Link href={editHref(item._id)}>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                                title="Edit question"
-                              >
-                                <Edit3 className="h-4 w-4" />
-                              </Button>
-                            </Link>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              title="Delete question"
-                              onClick={() => setDeleteTarget(item)}
-                              className="h-8 w-8 rounded-full text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                    {loading ? (
+                      Array.from({ length: limit }).map((_, i) => (
+                        <QuizRowSkeleton key={i} />
+                      ))
+                    ) : visible.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-10 text-center">
+                          <div className="flex flex-col items-center justify-center text-zinc-500">
+                            <FilePlus2 className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
+                            <p className="text-sm font-medium">No questions match these filters.</p>
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      visible.map((item) => (
+                        <tr
+                          key={item._id}
+                          className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
+                        >
+                          <td className="max-w-xl px-6 py-4.5">
+                            <Link
+                              href={editHref(item._id)}
+                              className="font-bold font-outfit text-zinc-950 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 transition-colors line-clamp-2"
+                            >
+                              {item.question}
+                            </Link>
+                            <p className="mt-0.5 line-clamp-1 text-xs text-zinc-400">
+                              {item.type === "interview"
+                                ? item.answer
+                                : `Correct: ${item.options?.[item.correctIndex] || "—"}`}
+                            </p>
+                          </td>
+                          <td className="px-6 py-4.5">
+                            <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-500/20">
+                              {item.type}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400">
+                            {item.type === "interview"
+                              ? item.course?.title || "—"
+                              : (item.courses || []).map((course) => course.title).join(", ") || "—"}
+                          </td>
+                          <td className="px-6 py-4.5">
+                            <span
+                              className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                                difficultyStyles[item.difficulty] || ""
+                              }`}
+                            >
+                              {item.difficulty}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4.5">
+                            <div className="flex justify-end gap-1">
+                              <Link href={editHref(item._id)}>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                  title="Edit question"
+                                >
+                                  <Edit3 className="h-4 w-4" />
+                                </Button>
+                              </Link>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                title="Delete question"
+                                onClick={() => setDeleteTarget(item)}
+                                className="h-8 w-8 rounded-full text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
-            <AdminPagination
-              page={pagination.page}
-              pages={pagination.pages}
-              total={pagination.total}
-              limit={limit}
-              itemLabel="questions"
-              onPageChange={setPage}
-              onLimitChange={(l) => { setLimit(l); setPage(1); }}
-            />
+            {!loading && visible.length > 0 && (
+              <AdminPagination
+                page={pagination.page}
+                pages={pagination.pages}
+                total={pagination.total}
+                limit={limit}
+                itemLabel="questions"
+                onPageChange={setPage}
+                onLimitChange={(l) => { setLimit(l); setPage(1); }}
+              />
+            )}
           </div>
         )}
       </AdminContent>

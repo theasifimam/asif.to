@@ -242,6 +242,7 @@ export default function UsersPage() {
           viewMode={viewMode}
           onUpdate={setEditingUser}
           canUpdate={hasPermission(currentUser, "users.edit")}
+          limit={limit}
         />
         <AdminPagination
           page={pagination.page}

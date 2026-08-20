@@ -26,7 +26,10 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { chaptersApi, coursesApi } from "@/lib/api";
-import AdminFormShell, { AdminFormLoading, formSectionClass } from "@/components/forms/AdminFormShell";
+import AdminFormShell, {
+  AdminFormLoading,
+  formSectionClass,
+} from "@/components/forms/AdminFormShell";
 import DiscussButton from "@/components/messaging/DiscussButton";
 import { CanonicalUrlInput } from "@/components/admin";
 
@@ -217,9 +220,15 @@ export default function ChapterFormPage() {
       }
       actions={
         <>
-          {!isNew && <DiscussButton entityType="chapter" entityId={chapterId} />}
+          {!isNew && (
+            <DiscussButton entityType="chapter" entityId={chapterId} />
+          )}
           {!isNew && form.status === "published" && publicUrl && (
-            <Button variant="outline" asChild className="flex-1 sm:flex-initial">
+            <Button
+              variant="outline"
+              asChild
+              className="flex-1 sm:flex-initial"
+            >
               <a href={publicUrl} target="_blank" rel="noreferrer">
                 <ExternalLink className="mr-2 h-4 w-4" />
                 View
@@ -233,7 +242,7 @@ export default function ChapterFormPage() {
             className="flex-1 sm:flex-initial"
           >
             <Save className="mr-2 h-4 w-4" />
-            Save draft
+            Draft
           </Button>
           <Button
             disabled={saving}
@@ -300,7 +309,19 @@ export default function ChapterFormPage() {
                 placeholder="Write the chapter tutorial and code examples."
               />
               <p className="text-xs leading-5 text-muted-foreground">
-                Code blocks are read-only by default. Add <code className="rounded bg-zinc-100 px-1.5 py-0.5 dark:bg-zinc-900">play</code> after the language to show the Play button, for example <code className="rounded bg-zinc-100 px-1.5 py-0.5 dark:bg-zinc-900">```javascript play</code>. Use <code className="rounded bg-zinc-100 px-1.5 py-0.5 dark:bg-zinc-900">interactive</code> to embed the full editor.
+                Code blocks are read-only by default. Add{" "}
+                <code className="rounded bg-zinc-100 px-1.5 py-0.5 dark:bg-zinc-900">
+                  play
+                </code>{" "}
+                after the language to show the Play button, for example{" "}
+                <code className="rounded bg-zinc-100 px-1.5 py-0.5 dark:bg-zinc-900">
+                  ```javascript play
+                </code>
+                . Use{" "}
+                <code className="rounded bg-zinc-100 px-1.5 py-0.5 dark:bg-zinc-900">
+                  interactive
+                </code>{" "}
+                to embed the full editor.
               </p>
             </div>
             <div className="space-y-2">
@@ -366,7 +387,11 @@ export default function ChapterFormPage() {
               />
             </div>
             <CanonicalUrlInput
-              basePrefix={course?.slug ? `https://asif.to/${course.slug}` : "https://asif.to"}
+              basePrefix={
+                course?.slug
+                  ? `https://asif.to/${course.slug}`
+                  : "https://asif.to"
+              }
               value={form.canonicalUrl}
               onChange={(value) => update("canonicalUrl", value)}
               placeholder={form.slug || slugify(form.title)}
@@ -376,7 +401,9 @@ export default function ChapterFormPage() {
 
         <aside className="space-y-6">
           <div className="space-y-4 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
-            <h2 className="font-semibold text-zinc-900 dark:text-white text-sm">Placement</h2>
+            <h2 className="font-semibold text-zinc-900 dark:text-white text-sm">
+              Placement
+            </h2>
             <div className="space-y-2">
               <Label>Status</Label>
               <Select

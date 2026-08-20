@@ -29,7 +29,7 @@ const title = (id) =>
     "react-typescript": "React + TypeScript",
     nextjs: "Next.js",
     web: "HTML + CSS + JavaScript",
-  }[id] || id[0].toUpperCase() + id.slice(1));
+  })[id] || id[0].toUpperCase() + id.slice(1);
 
 export default function PlaygroundSettingsPage() {
   const [form, setForm] = useState();
@@ -51,14 +51,17 @@ export default function PlaygroundSettingsPage() {
         ? status === "draft"
           ? "Draft saved."
           : "Published."
-        : r.error
+        : r.error,
     );
     if (r.success) setForm(r.data?.data);
   };
 
   const publish = async () => {
     setBusy(true);
-    const saved = await playgroundSettingsApi.save({ ...form, status: "draft" });
+    const saved = await playgroundSettingsApi.save({
+      ...form,
+      status: "draft",
+    });
     if (!saved.success) {
       setBusy(false);
       setNotice(saved.error);
@@ -97,7 +100,7 @@ export default function PlaygroundSettingsPage() {
             onClick={() => save("draft")}
             className="flex-1 sm:flex-initial inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-3.5 py-1.5 text-xs font-bold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-[#121215] dark:text-zinc-300 dark:hover:bg-zinc-900 transition-colors cursor-pointer disabled:opacity-50"
           >
-            <Save size={14} /> Save draft
+            <Save size={14} /> Draft
           </button>
           <button
             disabled={busy}
@@ -202,7 +205,9 @@ export default function PlaygroundSettingsPage() {
                 </label>
                 <div className="md:col-span-4 mt-1">
                   <label className="flex flex-col gap-2 text-xs font-semibold cursor-pointer w-full">
-                    <span className="text-zinc-500 dark:text-zinc-400">Initial Code Override</span>
+                    <span className="text-zinc-500 dark:text-zinc-400">
+                      Initial Code Override
+                    </span>
                     <textarea
                       className="w-full rounded-xl border border-zinc-200 bg-white p-3 text-xs text-zinc-900 placeholder:text-zinc-400 outline-none focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500/10 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500 font-mono"
                       rows="3"

@@ -151,9 +151,19 @@ export function renderInlineFormatting(text) {
   if (!text) return null;
 
   const formattedText = text
-    // 1. Escape literal HTML tags to prevent them from being parsed as DOM elements
+    // 1. Escape literal HTML tags to prevent arbitrary HTML execution
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
+    // 2. Restore allowed inline HTML tags (links, bold, italic, code, mark, br)
+    .replace(/&lt;a\s+href=&quot;(.*?)&quot;(.*?)&gt;(.*?)&lt;\/a&gt;/gi, '<a href="$1"$2 class="text-blue-600 dark:text-blue-400 underline font-bold hover:text-blue-700">$3</a>')
+    .replace(/&lt;a\s+href='(.*?)'(.*?)&gt;(.*?)&lt;\/a&gt;/gi, '<a href="$1"$2 class="text-blue-600 dark:text-blue-400 underline font-bold hover:text-blue-700">$3</a>')
+    .replace(/&lt;a\s+href=([^\s&]+)(.*?)&gt;(.*?)&lt;\/a&gt;/gi, '<a href="$1"$2 class="text-blue-600 dark:text-blue-400 underline font-bold hover:text-blue-700">$3</a>')
+    .replace(/&lt;strong&gt;(.*?)&lt;\/strong&gt;/gi, '<strong>$1</strong>')
+    .replace(/&lt;b&gt;(.*?)&lt;\/b&gt;/gi, '<strong>$1</strong>')
+    .replace(/&lt;em&gt;(.*?)&lt;\/em&gt;/gi, '<em>$1</em>')
+    .replace(/&lt;i&gt;(.*?)&lt;\/i&gt;/gi, '<em>$1</em>')
+    .replace(/&lt;br\s*\/?&gt;/gi, '<br/>')
+    .replace(/&lt;code(?:\s+class=&quot;[^&quot;]*&quot;)?&gt;(.*?)&lt;\/code&gt;/gi, '<code class="bg-zinc-200/80 dark:bg-zinc-800 text-blue-600 dark:text-blue-400 font-mono text-xs px-1.5 py-0.5 rounded-md wrap-break-word max-w-full">$1</code>')
     // Replace Markdown highlight ==text==
     .replace(
       /==(.*?)==/g,
