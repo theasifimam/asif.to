@@ -220,7 +220,7 @@ export default function InterviewQuestionsManager({
       )}&category=${encodeURIComponent(
         lockedCategoryId,
       )}&returnTo=${encodeURIComponent(returnTo)}`
-    : "/interview-questions/new";
+    : `/interview-questions/new?returnTo=${encodeURIComponent(returnTo)}`;
 
   return (
     <AdminPage>

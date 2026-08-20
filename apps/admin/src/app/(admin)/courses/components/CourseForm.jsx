@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   BookOpen,
@@ -78,6 +79,9 @@ function slugify(value = "") {
 }
 
 export default function CourseForm({ courseId = null }) {
+  const searchParams = useSearchParams();
+  const requestedReturnTo = searchParams.get("returnTo");
+  const returnTo = requestedReturnTo?.startsWith("/") ? requestedReturnTo : "/courses";
   const [form, setForm] = useState(initialForm);
   const [slugEdited, setSlugEdited] = useState(false);
   const [loading, setLoading] = useState(Boolean(courseId));
@@ -199,7 +203,7 @@ export default function CourseForm({ courseId = null }) {
     setSaving(false);
 
     if (!courseId && savedCourse?._id) {
-      window.location.assign(`/courses/${savedCourse._id}/edit`);
+      window.location.assign(returnTo);
     }
     return savedCourse;
   };
@@ -222,7 +226,7 @@ export default function CourseForm({ courseId = null }) {
       description="Course details, publishing controls, exam settings, and search metadata."
       back={
         <Link
-          href="/courses"
+          href={returnTo}
           className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" /> Back to courses

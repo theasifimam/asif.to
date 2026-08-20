@@ -143,7 +143,7 @@ export default function QuestionsPage() {
         <>
           <ViewToggle view={viewMode} onViewChange={setViewMode} />
           <Button asChild>
-            <Link href="/quiz/new">
+            <Link href={`/quiz/new?returnTo=${encodeURIComponent(returnTo)}`}>
               <Plus className="mr-2 h-4 w-4" /> New question
             </Link>
           </Button>

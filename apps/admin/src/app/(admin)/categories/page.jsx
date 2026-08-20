@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   BookOpen,
   Edit3,
@@ -42,7 +43,7 @@ import {
 } from "@/components/admin";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { Button } from "@/components/ui/button";
-import { useUrlFilters } from "@/hooks/useUrlFilters";
+import { listingReturnTo, useUrlFilters } from "@/hooks/useUrlFilters";
 import {
   Dialog,
   DialogContent,
@@ -60,22 +61,20 @@ import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { coursesApi, topicCategoriesApi } from "@/lib/api";
 
 export default function CategoriesListPage() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const returnTo = listingReturnTo(pathname, searchParams);
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "table" });
-  const viewMode = urlFilters.view || "table";
-  const setViewMode = (v) =>
-    setUrlFilters((current) => ({ ...current, view: v }));
-  const [filterCourse, setFilterCourse] = useState("all");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useUrlFilters({ search: "", filterCourse: "all", filterStatus: "all", page: 1, limit: 20, view: "table" });
+  const { search, filterCourse, filterStatus, page, limit } = filters;
+  const viewMode = filters.view || "table";
+  const setViewMode = (view) => setFilters((current) => ({ ...current, view }));
   const [preview, setPreview] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [isReordering, setIsReordering] = useState(false);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -122,11 +121,6 @@ export default function CategoriesListPage() {
       return matchSearch && matchStatus;
     });
   }, [categories, search, filterStatus]);
-
-  // Reset page when filters change
-  useEffect(() => {
-    setPage(1);
-  }, [search, filterStatus, filterCourse]);
 
   const totalPages = Math.max(Math.ceil(filteredCategories.length / limit), 1);
   const paginatedCategories = filteredCategories.slice(
@@ -197,7 +191,7 @@ export default function CategoriesListPage() {
           <>
             <ViewToggle view={viewMode} onViewChange={setViewMode} />
             <Button asChild className="shadow-lg shadow-blue-500/20">
-              <Link href="/categories/new">
+              <Link href={`/categories/new?returnTo=${encodeURIComponent(returnTo)}`}>
                 <Plus className="mr-1.5 h-4 w-4" /> New category
               </Link>
             </Button>
@@ -209,12 +203,12 @@ export default function CategoriesListPage() {
       <AdminFilters>
         <AdminSearch
           value={search}
-          onChange={setSearch}
+          onChange={(search) => setFilters((current) => ({ ...current, search, page: 1 }))}
           placeholder="Search categories by name, slug, or description..."
         />
 
         <div className="w-full sm:w-56">
-          <Select value={filterCourse} onValueChange={setFilterCourse}>
+          <Select value={filterCourse} onValueChange={(filterCourse) => setFilters((current) => ({ ...current, filterCourse, page: 1 }))}>
             <SelectTrigger className="h-10 rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b]">
               <SelectValue placeholder="All Courses" />
             </SelectTrigger>
@@ -232,7 +226,7 @@ export default function CategoriesListPage() {
         </div>
 
         <div className="w-full sm:w-40">
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <Select value={filterStatus} onValueChange={(filterStatus) => setFilters((current) => ({ ...current, filterStatus, page: 1 }))}>
             <SelectTrigger className="h-10 rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b]">
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
@@ -257,7 +251,7 @@ export default function CategoriesListPage() {
             No categories match your filters.
           </p>
           <Button asChild variant="outline" size="sm" className="mt-4">
-            <Link href="/categories/new">
+            <Link href={`/categories/new?returnTo=${encodeURIComponent(returnTo)}`}>
               <Plus className="mr-1.5 h-4 w-4" /> Create Category
             </Link>
           </Button>
@@ -292,10 +286,9 @@ export default function CategoriesListPage() {
             total={filteredCategories.length}
             limit={limit}
             itemLabel="categories"
-            onPageChange={setPage}
+            onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
             onLimitChange={(l) => {
-              setLimit(l);
-              setPage(1);
+              setFilters((current) => ({ ...current, limit: l, page: 1 }));
             }}
           />
         </>
@@ -343,10 +336,9 @@ export default function CategoriesListPage() {
             total={filteredCategories.length}
             limit={limit}
             itemLabel="categories"
-            onPageChange={setPage}
+            onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
             onLimitChange={(l) => {
-              setLimit(l);
-              setPage(1);
+              setFilters((current) => ({ ...current, limit: l, page: 1 }));
             }}
           />
         </section>

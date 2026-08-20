@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Edit3, FileText, Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { articlesApi } from "@/lib/api";
@@ -16,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { ViewToggle } from "@/components/ui/ViewToggle";
-import { useUrlFilters } from "@/hooks/useUrlFilters";
+import { listingReturnTo, useUrlFilters } from "@/hooks/useUrlFilters";
 import {
   AdminContent,
   AdminFilters,
@@ -25,17 +26,17 @@ import {
 } from "@/components/admin";
 
 export default function ArticlesPage() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const returnTo = listingReturnTo(pathname, searchParams);
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0, limit: 20 });
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
-  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useUrlFilters({ search: "", status: "all", page: 1, limit: 20, view: "table" });
+  const { search, status, page, limit } = filters;
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [status, setStatus] = useState("all");
-  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "table" });
-  const viewMode = urlFilters.view || "table";
-  const setViewMode = (v) => setUrlFilters((current) => ({ ...current, view: v }));
+  const viewMode = filters.view || "table";
+  const setViewMode = (view) => setFilters((current) => ({ ...current, view }));
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -68,8 +69,8 @@ export default function ArticlesPage() {
   }, [load]);
 
   // Reset page on filter/search change
-  const setStatusFilter = (val) => { setStatus(val); setPage(1); };
-  const setSearchFilter = (val) => { setSearch(val); setPage(1); };
+  const setStatusFilter = (status) => setFilters((current) => ({ ...current, status, page: 1 }));
+  const setSearchFilter = (search) => setFilters((current) => ({ ...current, search, page: 1 }));
 
   const remove = async () => {
     if (!deleteTarget) return;
@@ -95,7 +96,7 @@ export default function ArticlesPage() {
         <>
           <ViewToggle view={viewMode} onViewChange={setViewMode} />
           <Button size="sm" className="shadow-lg shadow-blue-500/20" asChild>
-            <Link href="/articles/new">
+            <Link href={`/articles/new?returnTo=${encodeURIComponent(returnTo)}`}>
               <Plus className="mr-1.5 h-4 w-4" /> New article
             </Link>
           </Button>
@@ -203,8 +204,8 @@ export default function ArticlesPage() {
               total={pagination.total}
               limit={limit}
               itemLabel="articles"
-              onPageChange={setPage}
-              onLimitChange={(l) => { setLimit(l); setPage(1); }}
+              onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
+              onLimitChange={(limit) => setFilters((current) => ({ ...current, limit, page: 1 }))}
             />
           </div>
         ) : (
@@ -297,8 +298,8 @@ export default function ArticlesPage() {
               total={pagination.total}
               limit={limit}
               itemLabel="articles"
-              onPageChange={setPage}
-              onLimitChange={(l) => { setLimit(l); setPage(1); }}
+              onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
+              onLimitChange={(limit) => setFilters((current) => ({ ...current, limit, page: 1 }))}
             />
           </div>
         )}

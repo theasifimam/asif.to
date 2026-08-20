@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   ExternalLink,
@@ -12,7 +12,11 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { AdminPage, AdminPageHeader, CanonicalUrlInput } from "@/components/admin";
+import {
+  AdminPage,
+  AdminPageHeader,
+  CanonicalUrlInput,
+} from "@/components/admin";
 import { formSectionClass } from "@/components/forms/AdminFormShell";
 import Editor from "@/components/editor/Editor";
 import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
@@ -57,8 +61,14 @@ function slugify(value) {
     .replace(/(^-|-$)/g, "");
 }
 
-export default function CategoryForm({ categoryId = null, initialCourse = "" }) {
+export default function CategoryForm({
+  categoryId = null,
+  initialCourse = "",
+}) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const requestedReturnTo = searchParams.get("returnTo");
+  const returnTo = requestedReturnTo?.startsWith("/") ? requestedReturnTo : "/categories";
   const [form, setForm] = useState({
     ...initialForm,
     course: initialCourse || "none",
@@ -137,12 +147,13 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
     const payload = {
       ...form,
       course: form.course === "none" ? null : form.course,
-      keywords: typeof form.keywords === "string"
-        ? form.keywords
-            .split(",")
-            .map((item) => item.trim())
-            .filter(Boolean)
-        : form.keywords,
+      keywords:
+        typeof form.keywords === "string"
+          ? form.keywords
+              .split(",")
+              .map((item) => item.trim())
+              .filter(Boolean)
+          : form.keywords,
     };
 
     const response = categoryId
@@ -151,9 +162,11 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
 
     if (response.success) {
       toast.success(
-        categoryId ? "Category updated successfully" : "Category created successfully",
+        categoryId
+          ? "Category updated successfully"
+          : "Category created successfully",
       );
-      router.push("/categories");
+      router.push(returnTo);
       router.refresh();
     } else {
       toast.error(response.error || "Unable to save category");
@@ -167,7 +180,7 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
     const response = await topicCategoriesApi.delete(categoryId);
     if (response.success) {
       toast.success("Category deleted");
-      router.push("/categories");
+      router.push(returnTo);
       router.refresh();
     } else {
       toast.error(response.error || "Unable to delete category");
@@ -199,11 +212,15 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
     <AdminPage size="lg">
       <AdminPageHeader
         eyebrow="Taxonomy Manager"
-        title={categoryId ? `Edit "${form.name || "Category"}"` : "Create New Category"}
+        title={
+          categoryId
+            ? `Edit "${form.name || "Category"}"`
+            : "Create New Category"
+        }
         description="Configure category taxonomy, rich landing intro guides, and search engine metadata."
         back={
           <Link
-            href="/categories"
+            href={returnTo}
             className="inline-flex items-center text-xs font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
           >
             <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back to Categories
@@ -212,7 +229,11 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
         actions={
           <div className="flex items-center gap-2.5">
             {liveUrl && (
-              <Button variant="outline" asChild className="hidden sm:inline-flex">
+              <Button
+                variant="outline"
+                asChild
+                className="hidden sm:inline-flex"
+              >
                 <a href={liveUrl} target="_blank" rel="noreferrer">
                   <ExternalLink className="mr-2 h-4 w-4" /> View Landing
                 </a>
@@ -228,7 +249,11 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
                 <Trash2 className="mr-2 h-4 w-4" /> Delete
               </Button>
             )}
-            <Button onClick={save} disabled={saving} className="shadow-lg shadow-blue-500/20">
+            <Button
+              onClick={save}
+              disabled={saving}
+              className="shadow-lg shadow-blue-500/20"
+            >
               {saving ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
@@ -429,7 +454,8 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
                 Landing Page Rich Guide
               </h2>
               <p className="text-xs text-zinc-500">
-                Write comprehensive introduction notes, cheat-sheets, or study guide content displayed on this category's landing page.
+                Write comprehensive introduction notes, cheat-sheets, or study
+                guide content displayed on this category's landing page.
               </p>
             </div>
 
@@ -513,7 +539,9 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
               <div className="sm:col-span-2">
                 <CanonicalUrlInput
                   basePrefix={(() => {
-                    const selectedCourse = courses.find((c) => String(c._id) === String(form.course));
+                    const selectedCourse = courses.find(
+                      (c) => String(c._id) === String(form.course),
+                    );
                     return selectedCourse?.slug
                       ? `https://asif.to/${selectedCourse.slug}/interview-questions`
                       : "https://asif.to/interview-questions";
@@ -591,7 +619,8 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
                 Related Content & Cross-Promotion
               </h2>
               <p className="mt-1 text-xs text-zinc-500">
-                Choose featured course lessons or other courses to show alongside these interview questions.
+                Choose featured course lessons or other courses to show
+                alongside these interview questions.
               </p>
             </div>
 
@@ -603,7 +632,9 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
               {courseChapters.length > 0 ? (
                 <div className="max-h-56 overflow-y-auto space-y-1 rounded-2xl border border-zinc-200/80 bg-zinc-50/60 p-3 dark:border-zinc-800/80 dark:bg-zinc-900/40">
                   {courseChapters.map((ch, idx) => {
-                    const isSelected = (form.featuredChapters || []).includes(ch._id);
+                    const isSelected = (form.featuredChapters || []).includes(
+                      ch._id,
+                    );
                     return (
                       <label
                         key={ch._id}
@@ -615,8 +646,13 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
                           onChange={(e) => {
                             const next = e.target.checked
                               ? [...(form.featuredChapters || []), ch._id]
-                              : (form.featuredChapters || []).filter((id) => id !== ch._id);
-                            setForm((current) => ({ ...current, featuredChapters: next }));
+                              : (form.featuredChapters || []).filter(
+                                  (id) => id !== ch._id,
+                                );
+                            setForm((current) => ({
+                              ...current,
+                              featuredChapters: next,
+                            }));
                           }}
                           className="h-4 w-4 rounded border-zinc-300 text-orange-500 focus:ring-orange-400"
                         />
@@ -629,7 +665,8 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
                 </div>
               ) : (
                 <p className="rounded-2xl border border-dashed border-zinc-200 p-4 text-xs text-zinc-400 dark:border-zinc-800">
-                  Select a Course in General Information to attach specific lessons from that course.
+                  Select a Course in General Information to attach specific
+                  lessons from that course.
                 </p>
               )}
             </div>
@@ -643,7 +680,9 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
                 {courses
                   .filter((c) => c._id !== form.course)
                   .map((c) => {
-                    const isSelected = (form.relatedCourses || []).includes(c._id);
+                    const isSelected = (form.relatedCourses || []).includes(
+                      c._id,
+                    );
                     return (
                       <label
                         key={c._id}
@@ -655,8 +694,13 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
                           onChange={(e) => {
                             const next = e.target.checked
                               ? [...(form.relatedCourses || []), c._id]
-                              : (form.relatedCourses || []).filter((id) => id !== c._id);
-                            setForm((current) => ({ ...current, relatedCourses: next }));
+                              : (form.relatedCourses || []).filter(
+                                  (id) => id !== c._id,
+                                );
+                            setForm((current) => ({
+                              ...current,
+                              relatedCourses: next,
+                            }));
                           }}
                           className="h-4 w-4 rounded border-zinc-300 text-orange-500 focus:ring-orange-400"
                         />
@@ -679,7 +723,11 @@ export default function CategoryForm({ categoryId = null, initialCourse = "" }) 
             Cancel
           </Button>
 
-          <Button type="submit" disabled={saving} className="shadow-lg shadow-blue-500/20">
+          <Button
+            type="submit"
+            disabled={saving}
+            className="shadow-lg shadow-blue-500/20"
+          >
             {saving ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (

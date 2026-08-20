@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ImagePlus, Save, Send, X } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Editor from "@/components/editor/Editor";
 import AdminFormShell, {
   AdminFormLoading,
@@ -25,6 +26,9 @@ import {
 
 export default function ArticleForm({ articleId = null }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const requestedReturnTo = searchParams.get("returnTo");
+  const returnTo = requestedReturnTo?.startsWith("/") ? requestedReturnTo : "/articles";
   const fileRef = useRef(null);
   const [loading, setLoading] = useState(Boolean(articleId));
   const [saving, setSaving] = useState(false);
@@ -127,7 +131,7 @@ export default function ArticleForm({ articleId = null }) {
       : await articlesApi.create(data);
     if (response.success) {
       toast.success(articleId ? "Article updated" : "Article created");
-      router.push("/articles");
+      router.push(returnTo);
     } else toast.error(response.error || "Unable to save article");
     setSaving(false);
   };
@@ -140,7 +144,7 @@ export default function ArticleForm({ articleId = null }) {
       description="Create a structured article with topics, publishing status, media, and complete SEO metadata."
       back={
         <Link
-          href="/articles"
+          href={returnTo}
           className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" /> Back to articles

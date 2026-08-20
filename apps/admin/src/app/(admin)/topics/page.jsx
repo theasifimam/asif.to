@@ -184,7 +184,7 @@ export default function TopicsPage() {
               </Link>
             </Button>
             <Button asChild>
-              <Link href="/topics/new">
+              <Link href={`/topics/new?returnTo=${encodeURIComponent(returnTo)}`}>
                 <Plus className="mr-2 h-4 w-4" /> New topic
               </Link>
             </Button>

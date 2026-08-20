@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   BookOpen,
   ChevronLeft,
@@ -29,7 +30,7 @@ import {
 import { coursesApi } from "@/lib/api";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { AdminPage, AdminPageHeader, AdminPagination } from "@/components/admin";
-import { useUrlFilters } from "@/hooks/useUrlFilters";
+import { listingReturnTo, useUrlFilters } from "@/hooks/useUrlFilters";
 import { useAuth } from "@/contexts/AuthContext";
 import CourseDeletionDialog from "./components/CourseDeletionDialog";
 import CourseDeletionApprovalDialog from "./components/CourseDeletionApprovalDialog";
@@ -43,20 +44,22 @@ const statusStyles = {
 };
 
 export default function CoursesAdminPage() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const returnTo = listingReturnTo(pathname, searchParams);
   const { user } = useAuth();
   const canDeleteCourse = ["admin", "super_admin"].includes(user?.role);
   const [courses, setCourses] = useState([]);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useUrlFilters({
     search: "",
     status: "all",
     level: "all",
     page: 1,
     limit: 20,
+    view: "table",
   });
-  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "table" });
-  const viewMode = urlFilters.view || "table";
-  const setViewMode = (v) =>
-    setUrlFilters((current) => ({ ...current, view: v }));
+  const viewMode = filters.view || "table";
+  const setViewMode = (view) => setFilters((current) => ({ ...current, view }));
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [pagination, setPagination] = useState(initialPagination);
   const [loading, setLoading] = useState(true);
@@ -136,7 +139,7 @@ return (
           <>
             <ViewToggle view={viewMode} onViewChange={setViewMode} />
             <Button asChild className="flex-1 sm:flex-initial">
-              <Link href="/courses/new">
+              <Link href={`/courses/new?returnTo=${encodeURIComponent(returnTo)}`}>
                 <Plus className="mr-2 h-4 w-4" /> New course
               </Link>
             </Button>
