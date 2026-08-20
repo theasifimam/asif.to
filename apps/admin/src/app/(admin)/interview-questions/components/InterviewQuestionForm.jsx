@@ -60,13 +60,24 @@ function slugify(value) {
 export default function InterviewQuestionForm({
   questionId = null,
   initialCourse = "",
+  initialCategory = "",
+  lockTaxonomy = false,
 }) {
   const searchParams = useSearchParams();
   const requestedReturnTo = searchParams.get("returnTo");
   const returnTo = requestedReturnTo?.startsWith("/")
     ? requestedReturnTo
     : "/interview-questions";
-  const [form, setForm] = useState({ ...initialForm, course: initialCourse });
+  const taxonomyLocked =
+    lockTaxonomy ||
+    /^\/courses\/[^/]+\/categories\/[^/]+\/interview-questions(?:\?|$)/.test(
+      returnTo,
+    );
+  const [form, setForm] = useState({
+    ...initialForm,
+    course: initialCourse,
+    category: initialCategory,
+  });
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [slugEdited, setSlugEdited] = useState(false);
@@ -105,7 +116,7 @@ export default function InterviewQuestionForm({
       }
       setLoading(false);
     });
-  }, [questionId]);
+  }, [questionId, initialCourse, initialCategory]);
 
   const update = (key, value) =>
     setForm((current) => ({ ...current, [key]: value }));
@@ -148,10 +159,15 @@ export default function InterviewQuestionForm({
       : await interviewQuestionsApi.create(payload);
     if (response.success) {
       toast.success(questionId ? "Question saved" : "Question created");
-      if (!questionId)
-        window.location.assign(
-          `/interview-questions/${response.data?.data?._id}/edit`,
-        );
+      if (!questionId) {
+        const createdId = response.data?.data?._id;
+        const editBase = `/interview-questions/${createdId}/edit`;
+        const editUrl =
+          returnTo !== "/interview-questions"
+            ? `${editBase}?returnTo=${encodeURIComponent(returnTo)}`
+            : editBase;
+        window.location.assign(editUrl);
+      }
     } else toast.error(response.error || "Unable to save question");
     setSaving(false);
   };
@@ -285,6 +301,7 @@ export default function InterviewQuestionForm({
               <Label>Course (Optional)</Label>
               <Select
                 value={form.course || "none"}
+                disabled={taxonomyLocked}
                 onValueChange={(value) => {
                   const selectedCourseId = value === "none" ? "" : value;
                   setForm((current) => {
@@ -322,6 +339,7 @@ export default function InterviewQuestionForm({
               <Label className="font-bold">Interview Category (Primary)</Label>
               <Select
                 value={form.category}
+                disabled={taxonomyLocked}
                 onValueChange={(categoryId) => {
                   const selectedCat = categories.find(
                     (c) => c._id === categoryId,

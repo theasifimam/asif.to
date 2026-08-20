@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Sparkles, Lightbulb } from "lucide-react";
 import CodeSnippetViewer from "@/components/articles/CodeSnippetViewer";
 import InteractiveCode from "@/components/interactive-code";

@@ -186,10 +186,23 @@ export default function CourseCategoriesPage() {
                     key={cat._id}
                     className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
                   >
-                    <td className="px-6 py-4.5">{cat.name}</td>
+                    <td className="px-6 py-4.5">
+                      <Link
+                        href={`/courses/${courseId}/categories/${cat._id}/interview-questions`}
+                        className="font-semibold text-zinc-950 hover:text-blue-600 hover:underline dark:text-zinc-100 dark:hover:text-blue-400"
+                      >
+                        {cat.name}
+                      </Link>
+                    </td>
                     <td className="px-6 py-4.5">{cat.slug}</td>
                     <td className="px-6 py-4.5">{cat.status}</td>
                     <td className="px-6 py-4.5 text-right">
+                      <Link
+                        href={`/courses/${courseId}/categories/${cat._id}/interview-questions`}
+                        className="mr-3 text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
+                      >
+                        Questions
+                      </Link>
                       <Link
                         href={`/categories/${cat._id}/edit?course=${courseId}`}
                         className="mr-2 text-xs font-bold text-green-600 hover:underline dark:text-green-400"

@@ -57,6 +57,7 @@ const routeRules = [
   [/^\/categories(?:\/|$)/, "topics.view"],
   [/^\/interview-questions\/(?:new|[^/]+\/edit)(?:\/|$)/, "interview_questions.manage"],
   [/^\/interview-questions(?:\/|$)/, "interview_questions.view"],
+  [/^\/courses\/[^/]+\/categories\/[^/]+\/interview-questions(?:\/|$)/, "interview_questions.view"],
   [/^\/courses\/(?:new|[^/]+\/edit)(?:\/|$)/, "courses.manage"],
   [/^\/courses(?:\/|$)/, "courses.view"],
   [/^\/cheatsheets\/(?:new|[^/]+\/edit)(?:\/|$)/, "cheatsheets.manage"],

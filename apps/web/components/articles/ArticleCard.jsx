@@ -16,7 +16,7 @@ export default function ArticleCard({ article, variant = "horizontal" }) {
       <motion.div
         whileHover={{ y: -6, scale: 1.01 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
-        className="relative group rounded-[2.25rem] overflow-hidden min-h-[290px] xs:min-h-[340px] md:min-h-[380px] flex flex-col justify-end p-5 xs:p-6 md:p-8 border border-[#e1e7d4] dark:border-[#2d3624] shadow-md hover:shadow-2xl hover:shadow-[#b6c173]/10 dark:hover:shadow-black/50 transition-all duration-300 cursor-pointer col-span-1 md:col-span-2"
+        className="relative group rounded-[2.25rem] overflow-hidden min-h-72.5 xs:min-h-[340px] md:min-h-95 flex flex-col justify-end p-5 xs:p-6 md:p-8 border border-[#e1e7d4] dark:border-[#2d3624] shadow-md hover:shadow-2xl hover:shadow-[#b6c173]/10 dark:hover:shadow-black/50 transition-all duration-300 cursor-pointer col-span-1 md:col-span-2"
       >
         {/* Cover Image with Zoom Effect */}
         <div className="absolute inset-0 z-0 bg-[#1b2111]">
@@ -28,8 +28,8 @@ export default function ArticleCard({ article, variant = "horizontal" }) {
             unoptimized
           />
           {/* Gradient Shades */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-transparent z-10" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent z-10" />
+          <div className="absolute inset-0 bg-linear-to-t from-black via-black/45 to-transparent z-10" />
+          <div className="absolute inset-0 bg-linear-to-r from-black/40 via-transparent to-transparent z-10" />
         </div>
 
         {/* Floating Category Badge */}
