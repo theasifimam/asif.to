@@ -89,21 +89,23 @@ export default function SaveButton({
       onClick={handleToggle}
       disabled={isToggling}
       title={isSaved ? "Remove from saved" : "Save to library"}
-      className={`inline-flex items-center gap-1.5 rounded-full font-bold transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed
+      className={`group inline-flex items-center gap-2 rounded-full font-bold transition-all duration-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed
         ${
           isSaved
-            ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 hover:bg-blue-700"
-            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-foreground"
+            ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 hover:bg-blue-700 hover:-translate-y-0.5"
+            : "bg-zinc-100/90 dark:bg-zinc-800/70 backdrop-blur-md border border-zinc-200/80 dark:border-zinc-700/70 text-zinc-800 dark:text-zinc-200 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-200/80 dark:hover:bg-zinc-700/90 hover:border-blue-500/50 dark:hover:border-blue-500/50 hover:-translate-y-0.5 shadow-xs"
         }
         ${btnSize} ${className}`}
     >
-      {isToggling ? (
-        <Loader2 className={`${iconSize} animate-spin shrink-0`} />
-      ) : isSaved ? (
-        <BookmarkCheck className={`${iconSize} shrink-0`} />
-      ) : (
-        <Bookmark className={`${iconSize} shrink-0`} />
-      )}
+      <div className={`rounded-full flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform ${isSaved ? "bg-white/20 text-white" : "bg-blue-500/10 text-blue-600 dark:text-blue-400 p-1"}`}>
+        {isToggling ? (
+          <Loader2 className={`${iconSize} animate-spin`} />
+        ) : isSaved ? (
+          <BookmarkCheck className={`${iconSize}`} />
+        ) : (
+          <Bookmark className={`${iconSize}`} />
+        )}
+      </div>
       {label !== undefined && (
         <span>{isSaved ? "Saved" : label || "Save"}</span>
       )}

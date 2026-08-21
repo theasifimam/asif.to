@@ -88,14 +88,14 @@ export default function CourseClient({ initialData }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground transition-colors duration-300 sm:pb-24">
+    <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground transition-colors duration-300 pb-28 sm:pb-24">
       <Header />
       <MobileChapterIndex
         chapters={course.chapters}
         activeCourseSlug={activeCourseSlug}
       />
 
-      <main className="flex-1 w-full max-w-4xl mx-auto px-2 sm:px-6 pt-38 sm:pt-46 flex flex-col gap-6">
+      <main className="flex-1 w-full max-w-4xl mx-auto px-3.5 sm:px-6 pt-36 sm:pt-44 flex flex-col gap-6">
         {/* Back Button */}
         <div>
           <Link
@@ -108,8 +108,18 @@ export default function CourseClient({ initialData }) {
         </div>
 
         {/* Course Hero Banner */}
-        <section className="p-4 sm:p-9 rounded-2xl sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-md flex flex-col gap-5">
-          <div className="flex items-center justify-between gap-2 text-xs">
+        <section className="relative p-5 sm:p-9 rounded-2xl sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-md flex flex-col gap-5">
+          {/* Floating Intentional Top-Right Bookmark Button */}
+          <div className="absolute -top-3 right-4 sm:right-9 z-20">
+            <SaveButton
+              itemId={course._id}
+              itemType="course"
+              label="Save Course"
+              className="px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs border border-zinc-200/80 dark:border-zinc-700/80 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md shadow-md hover:shadow-lg"
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 text-xs pr-28 sm:pr-36">
             <span
               className={`font-bold px-3 py-1 rounded-full ${tech?.badgeBg || "bg-blue-500/10 text-blue-600"}`}
             >
@@ -127,7 +137,8 @@ export default function CourseClient({ initialData }) {
             </div>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-black text-foreground tracking-tight leading-tight">
+          {/* Heading */}
+          <h1 className="font-outfit text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight sm:leading-none text-zinc-950 dark:text-white">
             {course.title}
           </h1>
 
@@ -135,82 +146,101 @@ export default function CourseClient({ initialData }) {
             {course.subtitle}
           </p>
 
-          <div className="flex flex-wrap items-center gap-3 pt-2">
+          {/* Main Primary Hero Actions Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-2">
+            {/* Primary Action Button - Solid Primary Color without Gradient */}
             <Link
               href={`/${activeCourseSlug}/${firstChapterSlug}`}
-              className="flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold shadow-lg shadow-blue-500/25 active:scale-95 transition-all"
+              className="group flex-1 inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-black shadow-md shadow-blue-600/25 hover:shadow-lg hover:shadow-blue-600/35 active:scale-95 transition-all duration-200"
             >
-              <Play className="w-4 h-4 fill-current" />
-              <span>Start Learning Course (Lesson 1)</span>
-            </Link>
-
-            {courseCheatsheet ? (
-              <Link
-                href={`/cheatsheets/${courseCheatsheet.slug}`}
-                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 text-xs font-bold transition-all active:scale-95"
-              >
-                <FileCode className="w-4 h-4 text-emerald-500" />
-                <span>View {tech?.name || course?.techId} Cheatsheet</span>
-              </Link>
-            ) : (
-              <div
-                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 text-xs font-bold cursor-not-allowed"
-                aria-disabled="true"
-              >
-                <FileCode className="w-4 h-4 text-zinc-400" />
-                <span>Cheatsheet Coming Soon</span>
+              <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                <Play className="w-3.5 h-3.5 text-white fill-current translate-x-0.5" />
               </div>
-            )}
-
-            <Link
-              href="/quiz"
-              className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 text-xs font-bold transition-all active:scale-95"
-            >
-              <Brain className="w-4 h-4 text-purple-500" />
-              <span>Practice Quiz</span>
+              <span>Start (Lesson 1)</span>
             </Link>
 
-            <Link
-              href="/revision"
-              className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 text-xs font-bold transition-all active:scale-95"
-            >
-              <Layers className="w-4 h-4 text-emerald-500" />
-              <span>Flashcards</span>
-            </Link>
-
-            <Link
-              href={`/${activeCourseSlug}/interview-questions`}
-              className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 text-xs font-bold transition-all active:scale-95"
-            >
-              <MessagesSquare className="w-4 h-4 text-orange-500" />
-              <span>Interview Questions</span>
-            </Link>
-
-            {/* Save Course Button */}
-            <SaveButton
-              itemId={course._id}
-              itemType="course"
-              label="Save Course"
-              className="w-full sm:w-auto justify-center"
-            />
-
+            {/* Final Exam CTA - Secondary Button in Primary Blue Outline Style */}
             {examEnabled ? (
               <Link
                 href={`/courses/${activeCourseSlug}/final-exam`}
-                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs font-bold shadow-lg shadow-purple-500/20 transition-all active:scale-95"
+                className="group flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full border-2 border-blue-600 dark:border-blue-500 bg-transparent text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 text-xs sm:text-sm font-black active:scale-95 transition-all duration-200"
               >
-                <GraduationCap className="w-4 h-4" />
+                <div className="w-6 h-6 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                  <GraduationCap className="w-3.5 h-3.5" />
+                </div>
                 <span>Take Final Exam</span>
               </Link>
             ) : (
               <div
-                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 text-xs font-bold cursor-not-allowed"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-full bg-zinc-100/50 dark:bg-zinc-800/30 border border-zinc-200/40 dark:border-zinc-800/40 text-zinc-400 dark:text-zinc-500 text-xs font-bold cursor-not-allowed opacity-60"
                 aria-disabled="true"
               >
-                <GraduationCap className="w-4 h-4" />
+                <GraduationCap className="w-3.5 h-3.5" />
                 <span>Final Exam Coming Soon</span>
               </div>
             )}
+          </div>
+
+          {/* Structured 4-Column Secondary Tools Bar with Primary Blue Rounded Outline Buttons */}
+          <div className="mt-2 pt-4 border-t border-zinc-200/60 dark:border-zinc-800/60 space-y-2">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-400 block px-1">
+              Course Tools & Resources
+            </span>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
+              {/* Cheatsheet Button */}
+              {courseCheatsheet ? (
+                <Link
+                  href={`/cheatsheets/${courseCheatsheet.slug}`}
+                  className="group flex items-center justify-center gap-2 px-3.5 py-3 rounded-full border border-blue-600/40 dark:border-blue-500/40 bg-transparent hover:bg-blue-50/70 dark:hover:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:border-blue-600 dark:hover:border-blue-400 text-xs font-bold active:scale-95 transition-all duration-200"
+                >
+                  <div className="w-6 h-6 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <FileCode className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="truncate">Cheatsheet</span>
+                </Link>
+              ) : (
+                <div
+                  className="flex items-center justify-center gap-2 px-3.5 py-3 rounded-full border border-zinc-200 dark:border-zinc-800 bg-transparent text-zinc-400 dark:text-zinc-500 text-xs font-bold cursor-not-allowed opacity-60"
+                  aria-disabled="true"
+                >
+                  <FileCode className="w-3.5 h-3.5" />
+                  <span className="truncate">Cheatsheet Soon</span>
+                </div>
+              )}
+
+              {/* Practice Quiz */}
+              <Link
+                href="/quiz"
+                className="group flex items-center justify-center gap-2 px-3.5 py-3 rounded-full border border-blue-600/40 dark:border-blue-500/40 bg-transparent hover:bg-blue-50/70 dark:hover:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:border-blue-600 dark:hover:border-blue-400 text-xs font-bold active:scale-95 transition-all duration-200"
+              >
+                <div className="w-6 h-6 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                  <Brain className="w-3.5 h-3.5" />
+                </div>
+                <span className="truncate">Practice Quiz</span>
+              </Link>
+
+              {/* Flashcards */}
+              <Link
+                href="/revision"
+                className="group flex items-center justify-center gap-2 px-3.5 py-3 rounded-full border border-blue-600/40 dark:border-blue-500/40 bg-transparent hover:bg-blue-50/70 dark:hover:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:border-blue-600 dark:hover:border-blue-400 text-xs font-bold active:scale-95 transition-all duration-200"
+              >
+                <div className="w-6 h-6 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                  <Layers className="w-3.5 h-3.5" />
+                </div>
+                <span className="truncate">Flashcards</span>
+              </Link>
+
+              {/* Interview Questions */}
+              <Link
+                href={`/${activeCourseSlug}/interview-questions`}
+                className="group flex items-center justify-center gap-2 px-3.5 py-3 rounded-full border border-blue-600/40 dark:border-blue-500/40 bg-transparent hover:bg-blue-50/70 dark:hover:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:border-blue-600 dark:hover:border-blue-400 text-xs font-bold active:scale-95 transition-all duration-200"
+              >
+                <div className="w-6 h-6 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                  <MessagesSquare className="w-3.5 h-3.5" />
+                </div>
+                <span className="truncate">Interview Q&A</span>
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -263,40 +293,47 @@ export default function CourseClient({ initialData }) {
             {course.chapters.map((ch, idx) => (
               <div
                 key={ch._id || ch.slug}
-                className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors duration-200 ${
+                className={`relative p-5 sm:p-6 hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors duration-200 flex flex-col gap-3 group ${
                   idx === 0 ? "rounded-t-[2.5rem]" : ""
                 }`}
               >
+                {/* Top Meta Header: Chapter Badge & Save Button above Title */}
+                <div className="flex items-center justify-between gap-3 w-full">
+                  <div className="shrink-0 w-8 h-8 rounded-2xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/25">
+                    {idx + 1}
+                  </div>
+                  <SaveButton
+                    itemId={ch._id}
+                    itemType="chapter"
+                    label="Save"
+                    size="sm"
+                    className="shrink-0 text-xs px-3 py-1.5"
+                  />
+                </div>
+
+                {/* 100% Full-Width Chapter Title & Summary */}
                 <Link
                   href={`/${activeCourseSlug}/${ch.slug}`}
-                  className="group flex flex-1 items-start justify-between gap-4 min-w-0"
+                  className="block w-full space-y-1"
                 >
-                  <div className="flex items-start gap-4 min-w-0">
-                    <div className="shrink-0 w-8 h-8 rounded-2xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/25">
-                      {idx + 1}
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="font-extrabold text-base text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        {ch.title}
-                      </h3>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 mt-1 font-medium">
-                        {ch.summary}
-                      </p>
-                    </div>
-                  </div>
+                  <h3 className="font-extrabold text-base text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug w-full">
+                    {ch.title}
+                  </h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed w-full">
+                    {ch.summary}
+                  </p>
+                </Link>
 
-                  <div className="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 shrink-0">
+                {/* Bottom Action Row: Start Lesson CTA */}
+                <div className="flex items-center justify-end pt-1">
+                  <Link
+                    href={`/${activeCourseSlug}/${ch.slug}`}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                  >
                     <span>Start Lesson</span>
                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </Link>
-                <SaveButton
-                  itemId={ch._id}
-                  itemType="chapter"
-                  label="Save"
-                  size="sm"
-                  className="self-end sm:self-auto shrink-0"
-                />
+                  </Link>
+                </div>
               </div>
             ))}
 

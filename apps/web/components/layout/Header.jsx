@@ -50,11 +50,11 @@ export default function Header() {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
   // Dropdown states
-  const [coursesDropdownOpen, setCoursesDropdownOpen] = useState(false);
-  const [cheatsheetsDropdownOpen, setCheatsheetsDropdownOpen] = useState(false);
+  const [learnDropdownOpen, setLearnDropdownOpen] = useState(false);
+  const [practiceDropdownOpen, setPracticeDropdownOpen] = useState(false);
 
-  const coursesRef = useRef(null);
-  const cheatsheetsRef = useRef(null);
+  const learnRef = useRef(null);
+  const practiceRef = useRef(null);
 
   const dispatch = useAppDispatch();
   const { user, isAuthenticated, isInitialized } = useAppSelector(
@@ -104,14 +104,11 @@ export default function Header() {
   // Close dropdowns on click outside
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (coursesRef.current && !coursesRef.current.contains(e.target)) {
-        setCoursesDropdownOpen(false);
+      if (learnRef.current && !learnRef.current.contains(e.target)) {
+        setLearnDropdownOpen(false);
       }
-      if (
-        cheatsheetsRef.current &&
-        !cheatsheetsRef.current.contains(e.target)
-      ) {
-        setCheatsheetsDropdownOpen(false);
+      if (practiceRef.current && !practiceRef.current.contains(e.target)) {
+        setPracticeDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -121,6 +118,21 @@ export default function Header() {
   const isNavVisible = useScrollNavVisible();
   const isArticlePage =
     pathname.includes("/articles/") || pathname.includes("/tutorials/");
+
+  const isLearnActive =
+    pathname.startsWith("/courses") ||
+    pathname.startsWith("/cheatsheets") ||
+    pathname.startsWith("/articles") ||
+    pathname.startsWith("/tutorials");
+
+  const isPracticeActive =
+    pathname.startsWith("/revision") ||
+    pathname.startsWith("/quiz") ||
+    pathname.startsWith("/interview-questions") ||
+    pathname.startsWith("/playground") ||
+    pathname.startsWith("/play");
+
+  const isLibraryActive = pathname.startsWith("/library");
 
   // Align Header with 7xl layout across all pages
   const containerMaxWidth = "max-w-7xl";
@@ -186,85 +198,113 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Desktop Navigation with Dropdowns */}
-          <nav className="hidden md:flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800/80 p-1 rounded-full text-xs font-bold">
-            <Link
-              href="/library"
-              className={`flex items-center gap-1 px-4 py-1.5 rounded-full transition-all ${pathname.startsWith("/library") ? "bg-blue-600 text-white shadow-sm" : "text-zinc-600 dark:text-zinc-300 hover:text-foreground"}`}
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>My Library</span>
-            </Link>
-            {/* Courses Dropdown */}
-            <div className="relative" ref={coursesRef}>
+          {/* Desktop Navigation with Categorized Mega-Dropdowns */}
+          <nav className="hidden md:flex items-center gap-1 bg-zinc-100/90 dark:bg-zinc-800/80 p-1 rounded-full text-xs font-bold border border-zinc-200/50 dark:border-zinc-700/50">
+            {/* Learn & Explore Dropdown */}
+            <div className="relative" ref={learnRef}>
               <button
                 onClick={() => {
-                  setCoursesDropdownOpen(!coursesDropdownOpen);
-                  setCheatsheetsDropdownOpen(false);
+                  setLearnDropdownOpen(!learnDropdownOpen);
+                  setPracticeDropdownOpen(false);
                 }}
-                className={`flex items-center gap-1 px-4 py-1.5 rounded-full transition-all ${
-                  pathname.startsWith("/courses") || coursesDropdownOpen
+                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full transition-all ${
+                  isLearnActive || learnDropdownOpen
                     ? "bg-blue-600 text-white shadow-sm"
-                    : "text-zinc-600 dark:text-zinc-300 hover:text-foreground"
+                    : "text-zinc-600 dark:text-zinc-300 hover:text-foreground hover:bg-zinc-200/60 dark:hover:bg-zinc-700/60"
                 }`}
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                <span>Courses</span>
+                <span>Learn</span>
                 <ChevronDown
-                  className={`w-3.5 h-3.5 transition-transform duration-200 ${coursesDropdownOpen ? "rotate-180" : ""}`}
+                  className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                    learnDropdownOpen ? "rotate-180" : ""
+                  }`}
                 />
               </button>
 
-              {coursesDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-72 p-3 rounded-3xl bg-white dark:bg-zinc-900 shadow-2xl border border-zinc-200/80 dark:border-zinc-800 z-50 animate-fadeIn space-y-1">
-                  <div className="flex items-center justify-between px-3 py-1 border-b border-zinc-100 dark:border-zinc-800/80 pb-2 mb-1">
+              {learnDropdownOpen && (
+                <div className="absolute top-full left-0 mt-2.5 w-84 p-3 rounded-3xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl shadow-2xl border border-zinc-200/80 dark:border-zinc-800 z-50 animate-fadeIn space-y-2">
+                  <div className="px-3 py-1 border-b border-zinc-100 dark:border-zinc-800/80 pb-2">
                     <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-400">
-                      Published Courses
+                      Learn & Explore
                     </span>
+                  </div>
+
+                  <div className="space-y-1">
                     <Link
                       href="/courses"
-                      onClick={() => setCoursesDropdownOpen(false)}
-                      className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5"
+                      onClick={() => setLearnDropdownOpen(false)}
+                      className="flex items-start gap-3 p-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors group"
                     >
-                      <span>View All</span>
-                      <ArrowRight className="w-3 h-3" />
+                      <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                        <BookOpen className="w-4 h-4" />
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-xs font-bold text-foreground flex items-center gap-1">
+                          Interactive Courses
+                        </span>
+                        <span className="text-[10px] text-zinc-400 font-normal">
+                          Step-by-step full-stack learning tracks
+                        </span>
+                      </div>
+                    </Link>
+
+                    <Link
+                      href="/cheatsheets"
+                      onClick={() => setLearnDropdownOpen(false)}
+                      className="flex items-start gap-3 p-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors group"
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                        <FileCode className="w-4 h-4" />
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-xs font-bold text-foreground">
+                          Syntax Cheatsheets
+                        </span>
+                        <span className="text-[10px] text-zinc-400 font-normal">
+                          Instant code syntax & API references
+                        </span>
+                      </div>
                     </Link>
                   </div>
-                  {courses.slice(0, 5).map((course) => {
-                    const slug = course.slug || course.id;
-                    return (
-                      <Link
-                        key={course._id || course.id}
-                        href={`/courses/${slug}`}
-                        onClick={() => setCoursesDropdownOpen(false)}
-                        className="flex items-center gap-2.5 p-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-foreground text-xs font-bold"
-                      >
-                        <span className="w-6 h-6 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black text-[10px] shrink-0">
-                          {course.title.slice(0, 2).toUpperCase()}
-                        </span>
-                        <div className="flex flex-col min-w-0">
-                          <span className="line-clamp-1">
-                            {course.title.split(":")[0]}
-                          </span>
-                          <span className="text-[10px] text-zinc-400 font-normal">
-                            {course.chapterCount ??
-                              course.chapters?.length ??
-                              0}{" "}
-                            Lessons
-                          </span>
-                        </div>
-                      </Link>
-                    );
-                  })}
 
-                  {/* Full-width "View All Courses" Action Button */}
-                  <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800/80 mt-1">
+                  {/* Featured Courses Sub-section */}
+                  {courses.length > 0 && (
+                    <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800/80">
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-400 px-3 block mb-1.5">
+                        Top Courses
+                      </span>
+                      <div className="space-y-1">
+                        {courses.slice(0, 3).map((course) => {
+                          const slug = course.slug || course.id;
+                          return (
+                            <Link
+                              key={course._id || course.id}
+                              href={`/courses/${slug}`}
+                              onClick={() => setLearnDropdownOpen(false)}
+                              className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-foreground text-xs font-bold"
+                            >
+                              <span className="w-5 h-5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black text-[9px] shrink-0">
+                                {course.title.slice(0, 2).toUpperCase()}
+                              </span>
+                              <span className="line-clamp-1 text-[11px]">
+                                {course.title.split(":")[0]}
+                              </span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Footer Link */}
+                  <div className="pt-1.5 border-t border-zinc-100 dark:border-zinc-800/80">
                     <Link
                       href="/courses"
-                      onClick={() => setCoursesDropdownOpen(false)}
-                      className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-2xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-extrabold hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
+                      onClick={() => setLearnDropdownOpen(false)}
+                      className="flex items-center justify-center gap-1.5 w-full py-2 rounded-2xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-extrabold hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
                     >
-                      <span>View All Courses</span>
+                      <span>Explore All Courses</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>
@@ -272,98 +312,122 @@ export default function Header() {
               )}
             </div>
 
-            {/* Cheatsheets Dropdown */}
-            <div className="relative" ref={cheatsheetsRef}>
+            {/* Practice & Tools Dropdown */}
+            <div className="relative" ref={practiceRef}>
               <button
                 onClick={() => {
-                  setCheatsheetsDropdownOpen(!cheatsheetsDropdownOpen);
-                  setCoursesDropdownOpen(false);
+                  setPracticeDropdownOpen(!practiceDropdownOpen);
+                  setLearnDropdownOpen(false);
                 }}
-                className={`flex items-center gap-1 px-4 py-1.5 rounded-full transition-all ${
-                  pathname === "/cheatsheets" || cheatsheetsDropdownOpen
+                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full transition-all ${
+                  isPracticeActive || practiceDropdownOpen
                     ? "bg-blue-600 text-white shadow-sm"
-                    : "text-zinc-600 dark:text-zinc-300 hover:text-foreground"
+                    : "text-zinc-600 dark:text-zinc-300 hover:text-foreground hover:bg-zinc-200/60 dark:hover:bg-zinc-700/60"
                 }`}
               >
-                <FileCode className="w-3.5 h-3.5" />
-                <span>Cheatsheets</span>
+                <Layers className="w-3.5 h-3.5" />
+                <span>Practice & Tools</span>
                 <ChevronDown
-                  className={`w-3.5 h-3.5 transition-transform duration-200 ${cheatsheetsDropdownOpen ? "rotate-180" : ""}`}
+                  className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                    practiceDropdownOpen ? "rotate-180" : ""
+                  }`}
                 />
               </button>
 
-              {cheatsheetsDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-72 p-3 rounded-3xl bg-white dark:bg-zinc-900 shadow-2xl border border-zinc-200/80 dark:border-zinc-800 z-50 animate-fadeIn space-y-1">
-                  <div className="flex items-center justify-between px-3 py-1 border-b border-zinc-100 dark:border-zinc-800/80 pb-2 mb-1">
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-400 block">
-                      Syntax Cheatsheets
+              {practiceDropdownOpen && (
+                <div className="absolute top-full left-0 mt-2.5 w-84 p-3 rounded-3xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl shadow-2xl border border-zinc-200/80 dark:border-zinc-800 z-50 animate-fadeIn space-y-1">
+                  <div className="px-3 py-1 border-b border-zinc-100 dark:border-zinc-800/80 pb-2 mb-1">
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-400">
+                      Practice & Tools
                     </span>
-                    <Link
-                      href="/cheatsheets"
-                      onClick={() => setCheatsheetsDropdownOpen(false)}
-                      className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5"
-                    >
-                      <span>View All</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </Link>
                   </div>
-                  {cheatsheets.slice(0, 5).map((cs) => {
-                    const csSlug = cs.slug || cs.id || cs._id;
-                    return (
-                      <Link
-                        key={cs._id || cs.id}
-                        href={`/cheatsheets/${csSlug}`}
-                        onClick={() => setCheatsheetsDropdownOpen(false)}
-                        className="flex items-center gap-2.5 p-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-foreground text-xs font-bold"
-                      >
-                        <Sparkles className="w-4 h-4 text-blue-500 shrink-0" />
-                        <div className="flex flex-col min-w-0">
-                          <span className="line-clamp-1">{cs.title}</span>
-                          <span className="text-[10px] text-zinc-400 font-normal">
-                            Article reference
-                          </span>
-                        </div>
-                      </Link>
-                    );
-                  })}
 
-                  {/* Full-width "View All Cheatsheets" Action Button */}
-                  <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800/80 mt-1">
-                    <Link
-                      href="/cheatsheets"
-                      onClick={() => setCheatsheetsDropdownOpen(false)}
-                      className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-2xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-extrabold hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
-                    >
-                      <span>View All Cheatsheets</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
-                  </div>
+                  <Link
+                    href="/revision"
+                    onClick={() => setPracticeDropdownOpen(false)}
+                    className="flex items-start gap-3 p-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors group"
+                  >
+                    <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                      <Layers className="w-4 h-4" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-bold text-foreground">
+                        Revision Deck
+                      </span>
+                      <span className="text-[10px] text-zinc-400 font-normal">
+                        Active recall spaced flashcards
+                      </span>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/quiz"
+                    onClick={() => setPracticeDropdownOpen(false)}
+                    className="flex items-start gap-3 p-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors group"
+                  >
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                      <HelpCircle className="w-4 h-4" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-bold text-foreground">
+                        Practice Quiz
+                      </span>
+                      <span className="text-[10px] text-zinc-400 font-normal">
+                        Knowledge checks & topic quizzes
+                      </span>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/playground"
+                    onClick={() => setPracticeDropdownOpen(false)}
+                    className="flex items-start gap-3 p-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors group"
+                  >
+                    <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                      <Code2 className="w-4 h-4" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-bold text-foreground">
+                        Code Playground
+                      </span>
+                      <span className="text-[10px] text-zinc-400 font-normal">
+                        Interactive live code sandbox
+                      </span>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/interview-questions"
+                    onClick={() => setPracticeDropdownOpen(false)}
+                    className="flex items-start gap-3 p-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors group"
+                  >
+                    <div className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-bold text-foreground">
+                        Interview Q&A
+                      </span>
+                      <span className="text-[10px] text-zinc-400 font-normal">
+                        Technical interview questions & answers
+                      </span>
+                    </div>
+                  </Link>
                 </div>
               )}
             </div>
 
-            {/* Revision Deck Link */}
+            {/* My Library Direct Link */}
             <Link
-              href="/revision"
-              className={`px-4 py-1.5 rounded-full transition-all ${
-                pathname === "/revision"
+              href="/library"
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full transition-all ${
+                isLibraryActive
                   ? "bg-blue-600 text-white shadow-sm"
-                  : "text-zinc-600 dark:text-zinc-300 hover:text-foreground"
+                  : "text-zinc-600 dark:text-zinc-300 hover:text-foreground hover:bg-zinc-200/60 dark:hover:bg-zinc-700/60"
               }`}
             >
-              Revise
-            </Link>
-
-            {/* Quiz Link */}
-            <Link
-              href="/quiz"
-              className={`px-4 py-1.5 rounded-full transition-all ${
-                pathname === "/quiz"
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "text-zinc-600 dark:text-zinc-300 hover:text-foreground"
-              }`}
-            >
-              Quiz
+              <Bookmark className="w-3.5 h-3.5" />
+              <span>My Library</span>
             </Link>
           </nav>
 
