@@ -295,7 +295,7 @@ export default function HomePageClient({ courses = [] }) {
             ))}
           </div>
 
-          <div className="mt-2 flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory">
+          <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
             {filteredCourses.map((course, idx) => {
               const tech = TECH_STACKS.find(
                 (item) => item.id === course.techId,
@@ -305,7 +305,7 @@ export default function HomePageClient({ courses = [] }) {
               return (
                 <article
                   key={course._id || course.id}
-                  className="group flex flex-col justify-between w-70 sm:w-90 shrink-0 snap-start rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 p-5 sm:p-6 shadow-sm hover:shadow-md transition-all"
+                  className="group flex flex-col justify-between rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 p-5 sm:p-6 shadow-sm hover:shadow-md transition-all"
                 >
                   <div>
                     <div className="mb-3 flex flex-wrap items-center gap-1.5">
