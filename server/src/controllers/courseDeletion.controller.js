@@ -445,12 +445,18 @@ export const beginCourseDeletion = async (req, res) => {
     createdRequest.initiatorOtpExpiresAt = new Date(Date.now() + OTP_TTL_MS);
     await createdRequest.save();
 
-    await sendCourseDeletionOtpEmail({
+    // Send email in the background so slow SMTP connections do not cause API timeouts
+    sendCourseDeletionOtpEmail({
       to: req.user.email,
       fullName: req.user.fullName || req.user.username,
       otp,
       courseTitle: data.course.title,
       mode: "requester",
+    }).catch(async (emailError) => {
+      console.error("[COURSE DELETE] Background requester OTP email failed:", emailError);
+      if (createdRequest?._id) {
+        await CourseDeletionRequest.deleteOne({ _id: createdRequest._id }).catch(() => {});
+      }
     });
 
     res.status(201).json({
@@ -720,22 +726,28 @@ export const sendCourseDeletionApproverOtp = async (req, res) => {
     request.status = "approval_otp_pending";
     await request.save();
 
-    try {
-      await sendCourseDeletionOtpEmail({
-        to: req.user.email,
-        fullName: req.user.fullName || req.user.username,
-        otp,
-        courseTitle: request.courseSnapshot.title,
-        mode: "approver",
-      });
-    } catch (emailError) {
-      request.approver = null;
-      request.approverOtpHash = "";
-      request.approverOtpExpiresAt = null;
-      request.status = "pending_approval";
-      await request.save();
-      throw emailError;
-    }
+    // Send email in the background so slow SMTP connections do not cause API timeouts
+    sendCourseDeletionOtpEmail({
+      to: req.user.email,
+      fullName: req.user.fullName || req.user.username,
+      otp,
+      courseTitle: request.courseSnapshot.title,
+      mode: "approver",
+    }).catch(async (emailError) => {
+      console.error("[COURSE DELETE] Background approver OTP email failed:", emailError);
+      try {
+        const reqToRollback = await CourseDeletionRequest.findById(request._id);
+        if (reqToRollback && reqToRollback.status === "approval_otp_pending") {
+          reqToRollback.approver = null;
+          reqToRollback.approverOtpHash = "";
+          reqToRollback.approverOtpExpiresAt = null;
+          reqToRollback.status = "pending_approval";
+          await reqToRollback.save();
+        }
+      } catch (rollbackError) {
+        console.error("[COURSE DELETE] Rollback failed:", rollbackError);
+      }
+    });
 
     res.status(200).json({
       success: true,
