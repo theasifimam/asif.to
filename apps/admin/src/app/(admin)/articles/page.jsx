@@ -11,7 +11,7 @@ import { Button, Skeleton } from "@/components/ui";
 
 function ArticleCardSkeleton() {
   return (
-    <div className="admin-surface flex flex-col justify-between p-5 min-h-[160px]">
+    <div className="admin-surface flex flex-col justify-between p-5 min-h-40">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Skeleton className="h-5 w-16 rounded-full" />
@@ -87,8 +87,19 @@ export default function ArticlesPage() {
   const returnTo = listingReturnTo(pathname, searchParams);
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0, limit: 20 });
-  const [filters, setFilters] = useUrlFilters({ search: "", status: "all", page: 1, limit: 20, view: "table" });
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pages: 1,
+    total: 0,
+    limit: 20,
+  });
+  const [filters, setFilters] = useUrlFilters({
+    search: "",
+    status: "all",
+    page: 1,
+    limit: 20,
+    view: "table",
+  });
   const { search, status, page, limit } = filters;
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const viewMode = filters.view || "table";
@@ -112,7 +123,9 @@ export default function ArticlesPage() {
     });
     if (response.success) {
       setArticles(response.data?.data || response.data || []);
-      setPagination(response.data?.pagination || { page, pages: 1, total: 0, limit });
+      setPagination(
+        response.data?.pagination || { page, pages: 1, total: 0, limit },
+      );
     } else {
       toast.error(response.error || "Unable to load articles");
     }
@@ -125,8 +138,10 @@ export default function ArticlesPage() {
   }, [load]);
 
   // Reset page on filter/search change
-  const setStatusFilter = (status) => setFilters((current) => ({ ...current, status, page: 1 }));
-  const setSearchFilter = (search) => setFilters((current) => ({ ...current, search, page: 1 }));
+  const setStatusFilter = (status) =>
+    setFilters((current) => ({ ...current, status, page: 1 }));
+  const setSearchFilter = (search) =>
+    setFilters((current) => ({ ...current, search, page: 1 }));
 
   const remove = async () => {
     if (!deleteTarget) return;
@@ -134,8 +149,13 @@ export default function ArticlesPage() {
     const response = await articlesApi.delete(deleteTarget._id);
     if (response.success) {
       toast.success("Article deleted");
-      setArticles((current) => current.filter((item) => item._id !== deleteTarget._id));
-      setPagination((prev) => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+      setArticles((current) =>
+        current.filter((item) => item._id !== deleteTarget._id),
+      );
+      setPagination((prev) => ({
+        ...prev,
+        total: Math.max(0, prev.total - 1),
+      }));
       setDeleteTarget(null);
     } else {
       toast.error(response.error || "Unable to delete article");
@@ -152,7 +172,9 @@ export default function ArticlesPage() {
         <>
           <ViewToggle view={viewMode} onViewChange={setViewMode} />
           <Button size="sm" className="shadow-lg shadow-blue-500/20" asChild>
-            <Link href={`/articles/new?returnTo=${encodeURIComponent(returnTo)}`}>
+            <Link
+              href={`/articles/new?returnTo=${encodeURIComponent(returnTo)}`}
+            >
               <Plus className="mr-1.5 h-4 w-4" /> New article
             </Link>
           </Button>
@@ -190,7 +212,9 @@ export default function ArticlesPage() {
               ) : articles.length === 0 ? (
                 <div className="col-span-full flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
                   <FileText className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
-                  <p className="text-sm font-medium">No articles match these filters.</p>
+                  <p className="text-sm font-medium">
+                    No articles match these filters.
+                  </p>
                 </div>
               ) : (
                 articles.map((article) => (
@@ -221,7 +245,9 @@ export default function ArticlesPage() {
                         >
                           {article.title}
                         </Link>
-                        <p className="mt-1 text-xs text-zinc-400 truncate">/{article.slug}</p>
+                        <p className="mt-1 text-xs text-zinc-400 truncate">
+                          /{article.slug}
+                        </p>
                       </div>
                     </div>
 
@@ -237,7 +263,12 @@ export default function ArticlesPage() {
 
                       <div className="flex items-center gap-1 shrink-0">
                         <Link href={`/articles/edit/${article._id}`}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" title="Edit article">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 rounded-lg"
+                            title="Edit article"
+                          >
                             <Edit3 className="h-4 w-4" />
                           </Button>
                         </Link>
@@ -263,8 +294,12 @@ export default function ArticlesPage() {
                 total={pagination.total}
                 limit={limit}
                 itemLabel="articles"
-                onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
-                onLimitChange={(limit) => setFilters((current) => ({ ...current, limit, page: 1 }))}
+                onPageChange={(page) =>
+                  setFilters((current) => ({ ...current, page }))
+                }
+                onLimitChange={(limit) =>
+                  setFilters((current) => ({ ...current, limit, page: 1 }))
+                }
               />
             )}
           </div>
@@ -292,7 +327,9 @@ export default function ArticlesPage() {
                         <td colSpan={5} className="px-6 py-10 text-center">
                           <div className="flex flex-col items-center justify-center text-zinc-500">
                             <FileText className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
-                            <p className="text-sm font-medium">No articles match these filters.</p>
+                            <p className="text-sm font-medium">
+                              No articles match these filters.
+                            </p>
                           </div>
                         </td>
                       </tr>
@@ -309,7 +346,9 @@ export default function ArticlesPage() {
                             >
                               {article.title}
                             </Link>
-                            <p className="mt-0.5 text-xs text-zinc-400 truncate">/{article.slug}</p>
+                            <p className="mt-0.5 text-xs text-zinc-400 truncate">
+                              /{article.slug}
+                            </p>
                           </td>
                           <td className="px-6 py-4.5">
                             <div className="flex items-center gap-2">
@@ -374,8 +413,12 @@ export default function ArticlesPage() {
                 total={pagination.total}
                 limit={limit}
                 itemLabel="articles"
-                onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
-                onLimitChange={(limit) => setFilters((current) => ({ ...current, limit, page: 1 }))}
+                onPageChange={(page) =>
+                  setFilters((current) => ({ ...current, page }))
+                }
+                onLimitChange={(limit) =>
+                  setFilters((current) => ({ ...current, limit, page: 1 }))
+                }
               />
             )}
           </div>

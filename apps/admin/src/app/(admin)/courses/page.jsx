@@ -24,7 +24,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function CourseCardSkeleton() {
   return (
-    <div className="admin-surface group flex flex-col justify-between p-5 rounded-3xl min-h-[180px]">
+    <div className="admin-surface group flex flex-col justify-between p-5 rounded-3xl min-h-45">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
@@ -89,7 +89,11 @@ import {
 } from "@/components/ui/select";
 import { coursesApi } from "@/lib/api";
 import { ViewToggle } from "@/components/ui/ViewToggle";
-import { AdminPage, AdminPageHeader, AdminPagination } from "@/components/admin";
+import {
+  AdminPage,
+  AdminPageHeader,
+  AdminPagination,
+} from "@/components/admin";
 import { listingReturnTo, useUrlFilters } from "@/hooks/useUrlFilters";
 import { useAuth } from "@/contexts/AuthContext";
 import CourseDeletionDialog from "./components/CourseDeletionDialog";
@@ -189,7 +193,7 @@ export default function CoursesAdminPage() {
     setUpdating(null);
   };
 
-return (
+  return (
     <AdminPage>
       <AdminPageHeader
         eyebrow="Content / Courses"
@@ -199,7 +203,9 @@ return (
           <>
             <ViewToggle view={viewMode} onViewChange={setViewMode} />
             <Button asChild className="flex-1 sm:flex-initial">
-              <Link href={`/courses/new?returnTo=${encodeURIComponent(returnTo)}`}>
+              <Link
+                href={`/courses/new?returnTo=${encodeURIComponent(returnTo)}`}
+              >
                 <Plus className="mr-2 h-4 w-4" /> New course
               </Link>
             </Button>
@@ -265,7 +271,9 @@ return (
             ) : courses.length === 0 ? (
               <div className="col-span-full flex flex-col items-center justify-center py-16 rounded-3xl border border-zinc-200/80 bg-white text-zinc-500 dark:border-zinc-800/80 dark:bg-[#121215]">
                 <BookOpen className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
-                <p className="text-sm font-medium">No courses match these filters.</p>
+                <p className="text-sm font-medium">
+                  No courses match these filters.
+                </p>
               </div>
             ) : (
               courses.map((course) => (
@@ -369,8 +377,14 @@ return (
                       <Button
                         variant="ghost"
                         size="icon"
-                        title={canDeleteCourse ? "Delete course" : "Only admin/super admin can delete courses"}
-                        onClick={() => canDeleteCourse && setDeleteCourse(course)}
+                        title={
+                          canDeleteCourse
+                            ? "Delete course"
+                            : "Only admin/super admin can delete courses"
+                        }
+                        onClick={() =>
+                          canDeleteCourse && setDeleteCourse(course)
+                        }
                         className="h-8 w-8 rounded-lg text-zinc-400 hover:text-rose-600"
                       >
                         <Trash2 className="h-4 w-4 text-rose-500" />
@@ -416,7 +430,9 @@ return (
                     <td colSpan={5} className="px-6 py-10 text-center">
                       <div className="flex flex-col items-center justify-center text-zinc-500">
                         <BookOpen className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
-                        <p className="text-sm font-medium">No courses match these filters.</p>
+                        <p className="text-sm font-medium">
+                          No courses match these filters.
+                        </p>
                       </div>
                     </td>
                   </tr>
@@ -520,8 +536,14 @@ return (
                           <Button
                             variant="ghost"
                             size="icon"
-                            title={canDeleteCourse ? "Delete course" : "Only admin/super admin can delete courses"}
-                            onClick={() => canDeleteCourse && setDeleteCourse(course)}
+                            title={
+                              canDeleteCourse
+                                ? "Delete course"
+                                : "Only admin/super admin can delete courses"
+                            }
+                            onClick={() =>
+                              canDeleteCourse && setDeleteCourse(course)
+                            }
                             className="h-8 w-8 rounded-full text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
                           >
                             <Trash2 className="h-4 w-4 text-rose-500" />

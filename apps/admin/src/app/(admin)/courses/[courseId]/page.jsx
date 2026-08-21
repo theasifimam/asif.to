@@ -23,7 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function ChapterCardSkeleton() {
   return (
-    <div className="admin-surface group flex flex-col justify-between p-5 rounded-3xl min-h-[160px]">
+    <div className="admin-surface group flex flex-col justify-between p-5 rounded-3xl min-h-40">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Skeleton className="h-5 w-10 rounded-md" />
@@ -82,7 +82,11 @@ import {
 } from "@/components/ui/select";
 import { chaptersApi, coursesApi } from "@/lib/api";
 import { ViewToggle } from "@/components/ui/ViewToggle";
-import { AdminPage, AdminPageHeader, AdminPagination } from "@/components/admin";
+import {
+  AdminPage,
+  AdminPageHeader,
+  AdminPagination,
+} from "@/components/admin";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
 import DiscussButton from "@/components/messaging/DiscussButton";
 
@@ -106,15 +110,15 @@ export default function CourseChaptersPage() {
   });
   const [urlFilters, setUrlFilters] = useUrlFilters({ view: "table" });
   const viewMode = urlFilters.view || "table";
-  const setViewMode = (v) => setUrlFilters((current) => ({ ...current, view: v }));
+  const setViewMode = (v) =>
+    setUrlFilters((current) => ({ ...current, view: v }));
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [pagination, setPagination] = useState(initialPagination);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(null);
   const [deleteChapter, setDeleteChapter] = useState(null);
 
-  const orderingView =
-    filters.status === "all" && pagination.pages <= 1;
+  const orderingView = filters.status === "all" && pagination.pages <= 1;
 
   useEffect(() => {
     const timer = setTimeout(
@@ -149,13 +153,7 @@ export default function CourseChaptersPage() {
       toast.error(chaptersResponse.error || "Unable to load chapters");
     }
     setLoading(false);
-  }, [
-    courseId,
-    debouncedSearch,
-    filters.limit,
-    filters.page,
-    filters.status,
-  ]);
+  }, [courseId, debouncedSearch, filters.limit, filters.page, filters.status]);
 
   useEffect(() => {
     const timer = setTimeout(load, 0);
@@ -179,8 +177,8 @@ export default function CourseChaptersPage() {
       );
       setChapters((current) =>
         current.map((item) =>
-          item._id === chapter._id ? { ...item, status } : item
-        )
+          item._id === chapter._id ? { ...item, status } : item,
+        ),
       );
     } else toast.error(response.error || "Unable to update chapter status");
     setUpdating(null);
@@ -217,7 +215,7 @@ export default function CourseChaptersPage() {
     if (response.success) {
       toast.success("Chapter deleted");
       setChapters((current) =>
-        current.filter((item) => item._id !== deleteChapter._id)
+        current.filter((item) => item._id !== deleteChapter._id),
       );
       setPagination((prev) => ({
         ...prev,
@@ -248,7 +246,9 @@ export default function CourseChaptersPage() {
         }
         actions={
           <>
-            {course && <DiscussButton entityType="course" entityId={courseId} />}
+            {course && (
+              <DiscussButton entityType="course" entityId={courseId} />
+            )}
             <ViewToggle view={viewMode} onViewChange={setViewMode} />
             {course?.status === "published" && (
               <Button variant="outline" asChild>
@@ -315,7 +315,9 @@ export default function CourseChaptersPage() {
             ) : chapters.length === 0 ? (
               <div className="col-span-full flex flex-col items-center justify-center py-16 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white text-zinc-500 dark:border-zinc-800/60 dark:bg-zinc-950">
                 <BookOpen className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
-                <p className="text-sm font-medium">No chapters match these filters.</p>
+                <p className="text-sm font-medium">
+                  No chapters match these filters.
+                </p>
               </div>
             ) : (
               chapters.map((chapter, index) => (
@@ -472,7 +474,9 @@ export default function CourseChaptersPage() {
                     <td colSpan={5} className="px-6 py-10 text-center">
                       <div className="flex flex-col items-center justify-center text-zinc-500">
                         <BookOpen className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
-                        <p className="text-sm font-medium">No chapters match these filters.</p>
+                        <p className="text-sm font-medium">
+                          No chapters match these filters.
+                        </p>
                       </div>
                     </td>
                   </tr>

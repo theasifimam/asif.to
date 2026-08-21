@@ -48,7 +48,7 @@ import { listingReturnTo, useUrlFilters } from "@/hooks/useUrlFilters";
 
 function CategoryCardSkeleton() {
   return (
-    <div className="admin-surface flex flex-col justify-between p-5 rounded-3xl min-h-[160px]">
+    <div className="admin-surface flex flex-col justify-between p-5 rounded-3xl min-h-40">
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Skeleton className="h-5 w-3/4 rounded-md" />
@@ -125,7 +125,14 @@ export default function CategoriesListPage() {
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useUrlFilters({ search: "", filterCourse: "all", filterStatus: "all", page: 1, limit: 20, view: "table" });
+  const [filters, setFilters] = useUrlFilters({
+    search: "",
+    filterCourse: "all",
+    filterStatus: "all",
+    page: 1,
+    limit: 20,
+    view: "table",
+  });
   const { search, filterCourse, filterStatus, page, limit } = filters;
   const viewMode = filters.view || "table";
   const setViewMode = (view) => setFilters((current) => ({ ...current, view }));
@@ -249,7 +256,9 @@ export default function CategoriesListPage() {
           <>
             <ViewToggle view={viewMode} onViewChange={setViewMode} />
             <Button asChild className="shadow-lg shadow-blue-500/20">
-              <Link href={`/categories/new?returnTo=${encodeURIComponent(returnTo)}`}>
+              <Link
+                href={`/categories/new?returnTo=${encodeURIComponent(returnTo)}`}
+              >
                 <Plus className="mr-1.5 h-4 w-4" /> New category
               </Link>
             </Button>
@@ -261,12 +270,19 @@ export default function CategoriesListPage() {
       <AdminFilters>
         <AdminSearch
           value={search}
-          onChange={(search) => setFilters((current) => ({ ...current, search, page: 1 }))}
+          onChange={(search) =>
+            setFilters((current) => ({ ...current, search, page: 1 }))
+          }
           placeholder="Search categories by name, slug, or description..."
         />
 
         <div className="w-full sm:w-56">
-          <Select value={filterCourse} onValueChange={(filterCourse) => setFilters((current) => ({ ...current, filterCourse, page: 1 }))}>
+          <Select
+            value={filterCourse}
+            onValueChange={(filterCourse) =>
+              setFilters((current) => ({ ...current, filterCourse, page: 1 }))
+            }
+          >
             <SelectTrigger className="h-10 rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b]">
               <SelectValue placeholder="All Courses" />
             </SelectTrigger>
@@ -284,7 +300,12 @@ export default function CategoriesListPage() {
         </div>
 
         <div className="w-full sm:w-40">
-          <Select value={filterStatus} onValueChange={(filterStatus) => setFilters((current) => ({ ...current, filterStatus, page: 1 }))}>
+          <Select
+            value={filterStatus}
+            onValueChange={(filterStatus) =>
+              setFilters((current) => ({ ...current, filterStatus, page: 1 }))
+            }
+          >
             <SelectTrigger className="h-10 rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b]">
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
@@ -312,7 +333,9 @@ export default function CategoriesListPage() {
                   No categories match your filters.
                 </p>
                 <Button asChild variant="outline" size="sm" className="mt-4">
-                  <Link href={`/categories/new?returnTo=${encodeURIComponent(returnTo)}`}>
+                  <Link
+                    href={`/categories/new?returnTo=${encodeURIComponent(returnTo)}`}
+                  >
                     <Plus className="mr-1.5 h-4 w-4" /> Create Category
                   </Link>
                 </Button>
@@ -347,7 +370,9 @@ export default function CategoriesListPage() {
               total={filteredCategories.length}
               limit={limit}
               itemLabel="categories"
-              onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
+              onPageChange={(page) =>
+                setFilters((current) => ({ ...current, page }))
+              }
               onLimitChange={(l) => {
                 setFilters((current) => ({ ...current, limit: l, page: 1 }));
               }}
@@ -386,9 +411,17 @@ export default function CategoriesListPage() {
                           <p className="text-sm font-medium">
                             No categories match your filters.
                           </p>
-                          <Button asChild variant="outline" size="sm" className="mt-4">
-                            <Link href={`/categories/new?returnTo=${encodeURIComponent(returnTo)}`}>
-                              <Plus className="mr-1.5 h-4 w-4" /> Create Category
+                          <Button
+                            asChild
+                            variant="outline"
+                            size="sm"
+                            className="mt-4"
+                          >
+                            <Link
+                              href={`/categories/new?returnTo=${encodeURIComponent(returnTo)}`}
+                            >
+                              <Plus className="mr-1.5 h-4 w-4" /> Create
+                              Category
                             </Link>
                           </Button>
                         </div>
@@ -421,7 +454,9 @@ export default function CategoriesListPage() {
               total={filteredCategories.length}
               limit={limit}
               itemLabel="categories"
-              onPageChange={(page) => setFilters((current) => ({ ...current, page }))}
+              onPageChange={(page) =>
+                setFilters((current) => ({ ...current, page }))
+              }
               onLimitChange={(l) => {
                 setFilters((current) => ({ ...current, limit: l, page: 1 }));
               }}
