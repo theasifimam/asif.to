@@ -18,6 +18,7 @@ import courseRoutes from "./routes/course.routes.js";
 import cheatsheetRoutes from "./routes/cheatsheet.routes.js";
 import quizRoutes from "./routes/quiz.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
+import deletionRoutes from "./routes/deletion.routes.js";
 import kanbanRoutes from "./routes/kanban.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
 import searchRoutes from "./routes/search.routes.js";
@@ -109,6 +110,7 @@ app.use("/api/v1/messaging", messagingRoutes);
 app.use("/api/v1/related-content", relatedContentRoutes);
 app.use("/api/v1/social-posts", socialPostRoutes);
 app.use("/api/v1/social-integrations", socialIntegrationRoutes);
+app.use("/api/v1/deletion-requests", deletionRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
 app.use((error, _req, res, next) => {

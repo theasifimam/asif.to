@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { coursesApi } from "@/lib/api";
+import { deletionApi } from "@/lib/api";
 
 const defaultSelections = {
   chapters: true,
@@ -60,8 +60,9 @@ function SelectionRow({
   );
 }
 
-export default function CourseDeletionDialog({
-  course,
+export default function DeletionDialog({
+  entity,
+  entityModel,
   open,
   onClose,
   onDeleted,
@@ -89,14 +90,14 @@ export default function CourseDeletionDialog({
   };
 
   useEffect(() => {
-    if (!open || !course?._id) return;
+    if (!open || !entity?._id) return;
 
     let alive = true;
     reset();
 
     (async () => {
       setBusy(true);
-      const response = await coursesApi.deletionImpact(course._id);
+      const response = await deletionApi.deletionImpact(entityModel, entity._id);
       if (!alive) return;
 
       if (response.success) {
@@ -114,7 +115,7 @@ export default function CourseDeletionDialog({
               : current.quizQuestions,
         }));
       } else {
-        toast.error(response.error || "Unable to inspect course deletion impact");
+        toast.error(response.error || "Unable to inspect deletion impact");
       }
       setBusy(false);
     })();
@@ -122,7 +123,7 @@ export default function CourseDeletionDialog({
     return () => {
       alive = false;
     };
-  }, [open, course?._id]);
+  }, [open, entity?._id]);
 
   const close = () => {
     if (busy) return;
@@ -144,7 +145,7 @@ export default function CourseDeletionDialog({
 
   const begin = async () => {
     setBusy(true);
-    const response = await coursesApi.beginDeletion(course._id, {
+    const response = await deletionApi.beginDeletion(entityModel, entity._id, {
       selections,
     });
     setBusy(false);
@@ -168,7 +169,7 @@ export default function CourseDeletionDialog({
     }
 
     setBusy(true);
-    const response = await coursesApi.verifyDeletionInitiator(requestId, otp);
+    const response = await deletionApi.verifyDeletionInitiator(requestId, otp);
     setBusy(false);
 
     if (!response.success) {
@@ -265,7 +266,8 @@ export default function CourseDeletionDialog({
                     checked
                     disabled
                     title={`Chapters (${impact.chapters || 0})`}
-                    description="Required. Chapters cannot exist without their course, so they are always permanently deleted."
+                    description="Required. Chapters cannot exist without their entity,
+  entityModel, so they are always permanently deleted."
                   />
                   <SelectionRow
                     checked
@@ -279,7 +281,7 @@ export default function CourseDeletionDialog({
                       updateSelection("interviewQuestions", value)
                     }
                     title={`Interview questions (${impact.interviewQuestions || 0})`}
-                    description="Deletes the interview questions assigned directly to this course or to its course categories."
+                    description="Deletes the interview questions assigned directly to this item or to its course categories."
                   />
                   <SelectionRow
                     checked={selections.categories}
@@ -302,8 +304,8 @@ export default function CourseDeletionDialog({
                     title={`Course-exclusive quiz / flashcard questions (${impact.quizExclusive || 0})`}
                     description={
                       required.quizQuestions
-                        ? "Required because these questions belong only to this course and the quiz schema requires at least one course."
-                        : "Deletes quiz questions that belong only to this course."
+                        ? "Required because these questions belong only to this item and the quiz schema requires at least one course."
+                        : "Deletes quiz questions that belong only to this item."
                     }
                   />
                   <SelectionRow
@@ -316,7 +318,7 @@ export default function CourseDeletionDialog({
                     description={
                       selections.sharedQuizQuestions
                         ? "DANGER: these questions are also used by other courses and will be deleted from every course."
-                        : "Recommended: preserve shared questions and only detach this course from them."
+                        : "Recommended: preserve shared questions and only detach this item from them."
                     }
                   />
                   <SelectionRow
@@ -332,7 +334,7 @@ export default function CourseDeletionDialog({
                     description={
                       Number(impact.otherCoursesSameTech || 0) > 0
                         ? `Cheatsheets are linked by techId, and ${impact.otherCoursesSameTech} other course(s) use the same techId. Deleting them can affect those courses too.`
-                        : "Deletes cheatsheets linked to this course technology."
+                        : "Deletes cheatsheets linked to this item technology."
                     }
                   />
 
@@ -341,7 +343,7 @@ export default function CourseDeletionDialog({
                       Automatic reference cleanup:
                     </strong>{" "}
                     {impact.relatedArticles || 0} independent article(s) reference
-                    this course. They are not deleted; their dead course/chapter/question
+                    this item. They are not deleted; their dead course/chapter/question
                     references are removed automatically.
                   </div>
                 </div>

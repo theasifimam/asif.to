@@ -40,7 +40,7 @@ export default function SigninPage() {
 
   return (
     <>
-      {/* Header with asif.to Logo (only logo shown on mobile) */}
+      {/* Form Header with Logo */}
       <div className="flex flex-col items-center text-center gap-3 mb-8">
         <img
           src="/logo.png"
@@ -56,8 +56,7 @@ export default function SigninPage() {
           </span>
         </div>
         <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-xs">
-          Sign in to manage courses, articles, flashcards & administrative
-          settings
+          Sign in to manage courses, articles, flashcards & administrative settings
         </p>
       </div>
 
@@ -122,7 +121,7 @@ export default function SigninPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full h-12 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-extrabold text-xs uppercase tracking-wider rounded-full transition-all flex items-center justify-center gap-2 mt-6 cursor-pointer disabled:opacity-50"
+          className="w-full h-12 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-extrabold text-xs uppercase tracking-wider rounded-full transition-all flex items-center justify-center gap-2 mt-6 cursor-pointer disabled:opacity-50 shadow-md shadow-blue-600/20"
         >
           {isLoading ? (
             <span className="flex items-center gap-2">

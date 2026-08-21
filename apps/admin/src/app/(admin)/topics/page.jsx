@@ -39,7 +39,7 @@ import { Skeleton } from "@/components/ui";
 
 function TopicCardSkeleton() {
   return (
-    <div className="flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs dark:border-zinc-800/80 dark:bg-zinc-950 min-h-[180px]">
+    <div className="flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs dark:border-zinc-800/80 dark:bg-zinc-950 min-h-45">
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -120,7 +120,8 @@ export default function TopicsPage() {
     page: 1,
     view: "table",
   });
-  const editHref = (id) => `/topics/${id}/edit?returnTo=${encodeURIComponent(returnTo)}`;
+  const editHref = (id) =>
+    `/topics/${id}/edit?returnTo=${encodeURIComponent(returnTo)}`;
   const viewMode = filters.view || "table";
   const setViewMode = (v) => setFilters((current) => ({ ...current, view: v }));
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
@@ -248,7 +249,9 @@ export default function TopicsPage() {
               </Link>
             </Button>
             <Button asChild>
-              <Link href={`/topics/new?returnTo=${encodeURIComponent(returnTo)}`}>
+              <Link
+                href={`/topics/new?returnTo=${encodeURIComponent(returnTo)}`}
+              >
                 <Plus className="mr-2 h-4 w-4" /> New topic
               </Link>
             </Button>
@@ -408,7 +411,9 @@ export default function TopicsPage() {
                               size="icon"
                               className="h-8 w-8 rounded-lg"
                               title="Move down"
-                              disabled={reordering || index === topics.length - 1}
+                              disabled={
+                                reordering || index === topics.length - 1
+                              }
                               onClick={() => moveTopic(index, 1)}
                             >
                               <ArrowDown className="h-4 w-4" />
@@ -477,7 +482,10 @@ export default function TopicsPage() {
                 onPageChange={(page) =>
                   setFilters((current) => ({ ...current, page }))
                 }
-                onLimitChange={(l) => { setLimit(l); setFilters((c) => ({ ...c, page: 1 })); }}
+                onLimitChange={(l) => {
+                  setLimit(l);
+                  setFilters((c) => ({ ...c, page: 1 }));
+                }}
               />
             )}
           </div>
@@ -506,7 +514,9 @@ export default function TopicsPage() {
                       <td colSpan={7} className="px-6 py-10 text-center">
                         <div className="flex flex-col items-center justify-center text-zinc-500">
                           <FilePlus2 className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
-                          <p className="text-sm font-medium">No topics match these filters.</p>
+                          <p className="text-sm font-medium">
+                            No topics match these filters.
+                          </p>
                         </div>
                       </td>
                     </tr>
@@ -645,7 +655,10 @@ export default function TopicsPage() {
                 onPageChange={(page) =>
                   setFilters((current) => ({ ...current, page }))
                 }
-                onLimitChange={(l) => { setLimit(l); setFilters((c) => ({ ...c, page: 1 })); }}
+                onLimitChange={(l) => {
+                  setLimit(l);
+                  setFilters((c) => ({ ...c, page: 1 }));
+                }}
               />
             )}
           </div>

@@ -13,15 +13,16 @@ import {
   Layers,
   HelpCircle,
   Home,
+  BookOpen,
 } from "lucide-react";
 import { ThemeToggle } from "../../ui/ThemeToggle";
 import { getImageUrl } from "@/lib/config";
 
 const SIDEBAR_ITEMS = [
   {
-    label: "Home / Courses",
-    href: "/",
-    icon: Home,
+    label: "All Courses",
+    href: "/courses",
+    icon: BookOpen,
     color: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
   },
   {

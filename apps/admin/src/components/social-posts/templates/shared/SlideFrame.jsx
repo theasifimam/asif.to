@@ -151,7 +151,7 @@ export default function SlideFrame({
               style={{
                 fontFamily: "'Outfit', sans-serif",
                 fontWeight: 900,
-                fontSize: 24,
+                fontSize: 32,
                 letterSpacing: "-0.02em",
                 color: "#ffffff",
               }}
@@ -162,7 +162,7 @@ export default function SlideFrame({
           </div>
           <span
             style={{
-              fontSize: 19,
+              fontSize: 24,
               fontWeight: 700,
               color: "rgba(255,255,255,0.58)",
               fontFamily: "'Inter', sans-serif",

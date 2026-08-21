@@ -59,8 +59,8 @@ function StatusBadge({ value }) {
         connected
           ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-500/20"
           : selection
-          ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-500/20"
-          : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400 border border-zinc-200/50 dark:border-zinc-700/50"
+            ? "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-500/20"
+            : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400 border border-zinc-200/50 dark:border-zinc-700/50"
       }`}
     >
       <span
@@ -68,15 +68,11 @@ function StatusBadge({ value }) {
           connected
             ? "bg-emerald-500"
             : selection
-            ? "bg-amber-500"
-            : "bg-zinc-400"
+              ? "bg-amber-500"
+              : "bg-zinc-400"
         }`}
       />
-      {connected
-        ? "Connected"
-        : selection
-        ? "Choose Page"
-        : "Not connected"}
+      {connected ? "Connected" : selection ? "Choose Page" : "Not connected"}
     </span>
   );
 }
@@ -92,7 +88,7 @@ export default function SocialIntegrationsPage() {
 
   const byPlatform = useMemo(
     () => Object.fromEntries(items.map((item) => [item.platform, item])),
-    [items]
+    [items],
   );
 
   async function load() {
@@ -117,9 +113,7 @@ export default function SocialIntegrationsPage() {
     const status = searchParams.get("status");
     const message = searchParams.get("message");
     if (status === "connected" && platform)
-      setNotice(
-        `${META[platform]?.label || platform} connected successfully.`
-      );
+      setNotice(`${META[platform]?.label || platform} connected successfully.`);
     else if (status === "needs_selection")
       setNotice("Facebook connected. Choose the Page you want to publish to.");
     else if (status === "error")
@@ -209,8 +203,8 @@ export default function SocialIntegrationsPage() {
             Secure server-side connections
           </div>
           <p className="mt-1 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-            OAuth tokens are encrypted before database storage and never returned
-            to the admin browser.
+            OAuth tokens are encrypted before database storage and never
+            returned to the admin browser.
           </p>
         </div>
       </div>
@@ -258,7 +252,7 @@ export default function SocialIntegrationsPage() {
                   </p>
 
                   {item.accountName && (
-                    <div className="mt-4 rounded-2xl border border-zinc-200/80 bg-zinc-50/80 p-3.5 dark:border-zinc-800 dark:bg-zinc-900/60">
+                    <div className="mt-4 rounded-xl border border-zinc-200/80 bg-zinc-50/80 p-3.5 dark:border-zinc-800 dark:bg-zinc-900/60">
                       <div className="text-[10px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
                         Connected account
                       </div>
@@ -370,4 +364,3 @@ export default function SocialIntegrationsPage() {
     </AdminPage>
   );
 }
-

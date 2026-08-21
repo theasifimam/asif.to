@@ -331,6 +331,26 @@ export const topicCategoriesApi = {
 };
 
 /**
+ * Protected Deletion Request System
+ */
+export const deletionApi = {
+  deletionImpact: (entityModel, entityId) =>
+    apiGet(`/deletion-requests/${entityModel}/${entityId}/deletion-impact`),
+  beginDeletion: (entityModel, entityId, data) =>
+    apiPost(`/deletion-requests/${entityModel}/${entityId}/begin`, data),
+  getDeletionRequest: (requestId) =>
+    apiGet(`/deletion-requests/${requestId}`),
+  verifyDeletionInitiator: (requestId, otp) =>
+    apiPost(`/deletion-requests/${requestId}/verify-initiator`, { otp }),
+  sendDeletionApprovalOtp: (requestId) =>
+    apiPost(`/deletion-requests/${requestId}/approval-otp`),
+  approveDeletion: (requestId, otp) =>
+    apiPost(`/deletion-requests/${requestId}/approve`, { otp }),
+  rejectDeletion: (requestId) =>
+    apiPost(`/deletion-requests/${requestId}/reject`),
+};
+
+/**
  * Pages Management
  */
 export const pagesApi = {
@@ -381,26 +401,6 @@ export const coursesApi = {
   getBySlug: (slug) => apiGet(`/courses/${slug}`),
   create: (data) => apiPost("/courses", data),
   update: (id, data) => apiPatch(`/courses/${id}`, data),
-
-  // Protected course deletion. Direct DELETE is blocked server-side.
-  deletionImpact: (id) => apiGet(`/courses/admin/${id}/deletion-impact`),
-  beginDeletion: (id, data) =>
-    apiPost(`/courses/${id}/deletion-requests`, data),
-  getDeletionRequest: (requestId) =>
-    apiGet(`/courses/deletion-requests/${requestId}`),
-  verifyDeletionInitiator: (requestId, otp) =>
-    apiPost(`/courses/deletion-requests/${requestId}/verify-initiator`, {
-      otp,
-    }),
-  sendDeletionApprovalOtp: (requestId) =>
-    apiPost(`/courses/deletion-requests/${requestId}/approval-otp`),
-  approveDeletion: (requestId, otp) =>
-    apiPost(`/courses/deletion-requests/${requestId}/approve`, { otp }),
-  rejectDeletion: (requestId) =>
-    apiPost(`/courses/deletion-requests/${requestId}/reject`),
-
-  // Kept only so old callers receive the server's protected-workflow error.
-  delete: (id) => apiDelete(`/courses/${id}`),
 };
 
 /** Chapters */

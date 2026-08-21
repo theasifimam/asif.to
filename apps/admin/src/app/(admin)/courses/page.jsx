@@ -96,8 +96,8 @@ import {
 } from "@/components/admin";
 import { listingReturnTo, useUrlFilters } from "@/hooks/useUrlFilters";
 import { useAuth } from "@/contexts/AuthContext";
-import CourseDeletionDialog from "./components/CourseDeletionDialog";
-import CourseDeletionApprovalDialog from "./components/CourseDeletionApprovalDialog";
+import DeletionDialog from "@/components/shared/DeletionDialog";
+import DeletionApprovalDialog from "@/components/shared/DeletionApprovalDialog";
 
 const initialPagination = { page: 1, pages: 1, total: 0, limit: 20 };
 
@@ -570,8 +570,9 @@ export default function CoursesAdminPage() {
         </section>
       )}
 
-      <CourseDeletionDialog
-        course={deleteCourse}
+      <DeletionDialog
+        entityModel="Course"
+        entity={deleteCourse}
         open={Boolean(deleteCourse)}
         onClose={() => setDeleteCourse(null)}
         onDeleted={async () => {
@@ -580,7 +581,7 @@ export default function CoursesAdminPage() {
         }}
       />
 
-      <CourseDeletionApprovalDialog
+      <DeletionApprovalDialog
         onDeleted={async () => {
           await load();
         }}

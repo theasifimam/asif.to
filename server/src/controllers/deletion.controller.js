@@ -8,7 +8,7 @@ import Question from "../models/Question.js";
 import Article from "../models/Article.js";
 import User from "../models/User.js";
 import Notification from "../models/Notification.js";
-import CourseDeletionRequest from "../models/CourseDeletionRequest.js";
+import DeletionRequest from "../models/DeletionRequest.js";
 import { logActivity } from "../services/activity.service.js";
 import {
   sendCourseDeletionApprovalRequestEmail,
@@ -90,145 +90,196 @@ const sameImpact = (left, right) =>
     (key) => Number(left?.[key] || 0) === Number(right?.[key] || 0),
   );
 
-async function computeImpact(courseId, session = null) {
-  let courseQuery = Course.findById(courseId).select(
-    "_id title slug techId status updatedAt",
-  );
-  if (session) courseQuery = courseQuery.session(session);
-  const course = await courseQuery.lean();
-
-  if (!course) return null;
-
-  let categoryQuery = TopicCategory.find({ course: course._id }).select(
-    "_id updatedAt",
-  );
-  if (session) categoryQuery = categoryQuery.session(session);
-  const categories = await categoryQuery.lean();
-  const categoryIds = categories.map((item) => item._id);
-
+async function computeImpact(entityId, entityModel, session = null) {
   const withSession = (query) => (session ? query.session(session) : query);
 
-  const interviewFilter = {
-    type: "interview",
-    $or: [
-      { course: course._id },
-      ...(categoryIds.length ? [{ category: { $in: categoryIds } }] : []),
-    ],
-  };
+  if (entityModel === "Course") {
+    let courseQuery = Course.findById(entityId).select(
+      "_id title slug techId status updatedAt",
+    );
+    if (session) courseQuery = courseQuery.session(session);
+    const course = await courseQuery.lean();
 
-  const [
-    chapterDocs,
-    courseTopicDocs,
-    interviewDocs,
-    quizDocuments,
-    cheatsheetDocs,
-    otherSameTechDocs,
-    relatedArticleDocs,
-  ] = await Promise.all([
-    withSession(
-      Chapter.find({ course: course._id }).select("_id updatedAt").lean(),
-    ),
-    withSession(
-      CourseTopic.find({ course: course._id }).select("_id updatedAt").lean(),
-    ),
-    withSession(
-      Question.find(interviewFilter).select("_id updatedAt").lean(),
-    ),
-    withSession(
-      Question.find({ type: "quiz", courses: course._id })
-        .select("_id courses updatedAt")
-        .lean(),
-    ),
-    withSession(
-      Article.find({
-        type: "cheatsheet",
-        techId: course.techId,
-      })
-        .select("_id updatedAt")
-        .lean(),
-    ),
-    withSession(
-      Course.find({
-        _id: { $ne: course._id },
-        techId: course.techId,
-      })
-        .select("_id updatedAt")
-        .lean(),
-    ),
-    withSession(
-      Article.find({
-        type: { $ne: "cheatsheet" },
-        relatedCourses: course._id,
-      })
-        .select("_id updatedAt")
-        .lean(),
-    ),
-  ]);
+    if (!course) return null;
 
-  const quizExclusive = quizDocuments.filter(
-    (item) => (item.courses || []).length <= 1,
-  ).length;
-  const quizShared = quizDocuments.length - quizExclusive;
+    let categoryQuery = TopicCategory.find({ course: course._id }).select(
+      "_id updatedAt",
+    );
+    if (session) categoryQuery = categoryQuery.session(session);
+    const categories = await categoryQuery.lean();
+    const categoryIds = categories.map((item) => item._id);
 
-  const fingerprintRows = [
-    `course:${course._id}:${new Date(course.updatedAt || 0).getTime()}`,
-    ...categories.map(
-      (item) =>
-        `category:${item._id}:${new Date(item.updatedAt || 0).getTime()}`,
-    ),
-    ...chapterDocs.map(
-      (item) => `chapter:${item._id}:${new Date(item.updatedAt || 0).getTime()}`,
-    ),
-    ...courseTopicDocs.map(
-      (item) =>
-        `courseTopic:${item._id}:${new Date(item.updatedAt || 0).getTime()}`,
-    ),
-    ...interviewDocs.map(
-      (item) =>
-        `interview:${item._id}:${new Date(item.updatedAt || 0).getTime()}`,
-    ),
-    ...quizDocuments.map(
-      (item) =>
-        `quiz:${item._id}:${new Date(item.updatedAt || 0).getTime()}:${(item.courses || [])
-          .map(String)
-          .sort()
-          .join(",")}`,
-    ),
-    ...cheatsheetDocs.map(
-      (item) =>
-        `cheatsheet:${item._id}:${new Date(item.updatedAt || 0).getTime()}`,
-    ),
-    ...otherSameTechDocs.map(
-      (item) =>
-        `sameTechCourse:${item._id}:${new Date(item.updatedAt || 0).getTime()}`,
-    ),
-    ...relatedArticleDocs.map(
-      (item) =>
-        `relatedArticle:${item._id}:${new Date(item.updatedAt || 0).getTime()}`,
-    ),
-  ].sort();
+    const interviewFilter = {
+      type: "interview",
+      $or: [
+        { course: course._id },
+        ...(categoryIds.length ? [{ category: { $in: categoryIds } }] : []),
+      ],
+    };
 
-  const fingerprint = crypto
-    .createHash("sha256")
-    .update(fingerprintRows.join("|"))
-    .digest("hex");
+    const [
+      chapterDocs,
+      courseTopicDocs,
+      interviewDocs,
+      quizDocuments,
+      cheatsheetDocs,
+      otherSameTechDocs,
+      relatedArticleDocs,
+    ] = await Promise.all([
+      withSession(
+        Chapter.find({ course: course._id }).select("_id updatedAt").lean(),
+      ),
+      withSession(
+        CourseTopic.find({ course: course._id }).select("_id updatedAt").lean(),
+      ),
+      withSession(
+        Question.find(interviewFilter).select("_id updatedAt").lean(),
+      ),
+      withSession(
+        Question.find({ type: "quiz", courses: course._id })
+          .select("_id courses updatedAt")
+          .lean(),
+      ),
+      withSession(
+        Article.find({
+          type: "cheatsheet",
+          techId: course.techId,
+        })
+          .select("_id updatedAt")
+          .lean(),
+      ),
+      withSession(
+        Course.find({
+          _id: { $ne: course._id },
+          techId: course.techId,
+        })
+          .select("_id updatedAt")
+          .lean(),
+      ),
+      withSession(
+        Article.find({
+          type: { $ne: "cheatsheet" },
+          relatedCourses: course._id,
+        })
+          .select("_id updatedAt")
+          .lean(),
+      ),
+    ]);
 
-  return {
-    course,
-    categoryIds,
-    fingerprint,
-    impact: {
-      chapters: chapterDocs.length,
-      courseTopics: courseTopicDocs.length,
-      categories: categories.length,
-      interviewQuestions: interviewDocs.length,
-      quizExclusive,
-      quizShared,
-      cheatsheets: cheatsheetDocs.length,
-      otherCoursesSameTech: otherSameTechDocs.length,
-      relatedArticles: relatedArticleDocs.length,
-    },
-  };
+    const quizExclusive = quizDocuments.filter(
+      (item) => (item.courses || []).length <= 1,
+    ).length;
+    const quizShared = quizDocuments.length - quizExclusive;
+
+    const fingerprintRows = [
+      `course:${course._id}:${new Date(course.updatedAt || 0).getTime()}`,
+      ...categories.map(
+        (item) =>
+          `category:${item._id}:${new Date(item.updatedAt || 0).getTime()}`,
+      ),
+      ...chapterDocs.map(
+        (item) =>
+          `chapter:${item._id}:${new Date(item.updatedAt || 0).getTime()}`,
+      ),
+      ...courseTopicDocs.map(
+        (item) =>
+          `courseTopic:${item._id}:${new Date(item.updatedAt || 0).getTime()}`,
+      ),
+      ...interviewDocs.map(
+        (item) =>
+          `interview:${item._id}:${new Date(item.updatedAt || 0).getTime()}`,
+      ),
+      ...quizDocuments.map(
+        (item) =>
+          `quiz:${item._id}:${new Date(item.updatedAt || 0).getTime()}:${(
+            item.courses || []
+          )
+            .map(String)
+            .sort()
+            .join(",")}`,
+      ),
+      ...cheatsheetDocs.map(
+        (item) =>
+          `cheatsheet:${item._id}:${new Date(item.updatedAt || 0).getTime()}`,
+      ),
+    ];
+    const fingerprint = crypto
+      .createHash("md5")
+      .update(fingerprintRows.sort().join("|"))
+      .digest("hex");
+
+    return {
+      entity: course,
+      entityModel: "Course",
+      impact: {
+        chapters: chapterDocs.length,
+        courseTopics: courseTopicDocs.length,
+        categories: categories.length,
+        interviewQuestions: interviewDocs.length,
+        quizExclusive,
+        quizShared,
+        cheatsheets: cheatsheetDocs.length,
+        otherCoursesSameTech: otherSameTechDocs.length,
+        relatedArticles: relatedArticleDocs.length,
+      },
+      fingerprint,
+    };
+  } else if (entityModel === "TopicCategory") {
+    let categoryQuery = TopicCategory.findById(entityId).select(
+      "_id name slug course updatedAt",
+    );
+    if (session) categoryQuery = categoryQuery.session(session);
+    const category = await categoryQuery.lean();
+
+    if (!category) return null;
+
+    const [courseTopicDocs, interviewDocs] = await Promise.all([
+      withSession(
+        CourseTopic.find({ category: category._id })
+          .select("_id updatedAt")
+          .lean(),
+      ),
+      withSession(
+        Question.find({ type: "interview", category: category._id })
+          .select("_id updatedAt")
+          .lean(),
+      ),
+    ]);
+
+    const fingerprintRows = [
+      `category:${category._id}:${new Date(category.updatedAt || 0).getTime()}`,
+      ...courseTopicDocs.map(
+        (item) =>
+          `courseTopic:${item._id}:${new Date(item.updatedAt || 0).getTime()}`,
+      ),
+      ...interviewDocs.map(
+        (item) =>
+          `interview:${item._id}:${new Date(item.updatedAt || 0).getTime()}`,
+      ),
+    ];
+    const fingerprint = crypto
+      .createHash("md5")
+      .update(fingerprintRows.sort().join("|"))
+      .digest("hex");
+
+    return {
+      entity: category,
+      entityModel: "TopicCategory",
+      impact: {
+        chapters: 0,
+        courseTopics: courseTopicDocs.length,
+        categories: 1, // itself
+        interviewQuestions: interviewDocs.length,
+        quizExclusive: 0,
+        quizShared: 0,
+        cheatsheets: 0,
+        otherCoursesSameTech: 0,
+        relatedArticles: 0,
+      },
+      fingerprint,
+    };
+  }
+  return null;
 }
 
 async function eligibleApprovers(requesterId) {
@@ -313,8 +364,9 @@ function publicRequest(request, currentUserId) {
 
   return {
     _id: request._id,
-    course: request.course,
-    courseSnapshot: request.courseSnapshot,
+    entityId: request.entityId,
+    entityModel: request.entityModel,
+    entitySnapshot: request.entitySnapshot,
     requestedBy: request.requestedBy,
     selections: request.selections,
     impact: request.impact,
@@ -334,15 +386,19 @@ function publicRequest(request, currentUserId) {
   };
 }
 
-export const getCourseDeletionImpact = async (req, res) => {
+export const getDeletionImpact = async (req, res) => {
   try {
     if (!ensurePrivileged(req, res)) return;
 
-    const data = await computeImpact(req.params.id);
+    const entityModel =
+      req.params.entityModel === "categories" ? "TopicCategory" : "Course";
+    const entityId = req.params.entityId;
+
+    const data = await computeImpact(entityId, entityModel);
     if (!data) {
       return res
         .status(404)
-        .json({ success: false, message: "Course not found." });
+        .json({ success: false, message: `${entityModel} not found.` });
     }
 
     const approvers = await eligibleApprovers(req.user._id);
@@ -350,26 +406,27 @@ export const getCourseDeletionImpact = async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
-        course: data.course,
+        entity: data.entity,
+        entityModel: data.entityModel,
         impact: data.impact,
         eligibleApprovers: approvers.length,
         requiredSelections: {
-          chapters: true,
+          chapters: entityModel === "Course",
           courseTopics: true,
           quizQuestions: data.impact.quizExclusive > 0,
         },
       },
     });
   } catch (error) {
-    console.error("[COURSE DELETE] impact error:", error);
+    console.error("[DELETION] impact error:", error);
     res.status(500).json({
       success: false,
-      message: error.message || "Unable to inspect course deletion impact.",
+      message: error.message || "Unable to inspect deletion impact.",
     });
   }
 };
 
-export const beginCourseDeletion = async (req, res) => {
+export const beginDeletion = async (req, res) => {
   let createdRequest = null;
 
   try {
@@ -378,15 +435,20 @@ export const beginCourseDeletion = async (req, res) => {
     if (!req.user?.email) {
       return res.status(400).json({
         success: false,
-        message: "Your admin account must have an email address before deleting a course.",
+        message:
+          "Your admin account must have an email address before deleting.",
       });
     }
 
-    const data = await computeImpact(req.params.id);
+    const entityModel =
+      req.params.entityModel === "categories" ? "TopicCategory" : "Course";
+    const entityId = req.params.entityId;
+
+    const data = await computeImpact(entityId, entityModel);
     if (!data) {
       return res
         .status(404)
-        .json({ success: false, message: "Course not found." });
+        .json({ success: false, message: `${entityModel} not found.` });
     }
 
     const approvers = await eligibleApprovers(req.user._id);
@@ -394,12 +456,13 @@ export const beginCourseDeletion = async (req, res) => {
       return res.status(409).json({
         success: false,
         message:
-          "Course deletion requires a second active admin or super admin. No eligible approver is currently available.",
+          "Deletion requires a second active admin or super admin. No eligible approver is currently available.",
       });
     }
 
-    const existing = await CourseDeletionRequest.findOne({
-      course: data.course._id,
+    const existing = await DeletionRequest.findOne({
+      entityId: data.entity._id,
+      entityModel: data.entityModel,
       status: { $in: ACTIVE_REQUEST_STATUSES },
     }).lean();
 
@@ -407,7 +470,7 @@ export const beginCourseDeletion = async (req, res) => {
       return res.status(409).json({
         success: false,
         message:
-          "A protected deletion request is already active for this course.",
+          "A protected deletion request is already active for this item.",
         requestId: existing._id,
       });
     }
@@ -422,12 +485,13 @@ export const beginCourseDeletion = async (req, res) => {
       });
     }
 
-    createdRequest = await CourseDeletionRequest.create({
-      course: data.course._id,
-      courseSnapshot: {
-        title: data.course.title,
-        slug: data.course.slug,
-        techId: data.course.techId,
+    createdRequest = await DeletionRequest.create({
+      entityId: data.entity._id,
+      entityModel: data.entityModel,
+      entitySnapshot: {
+        title: data.entity.title || data.entity.name,
+        slug: data.entity.slug,
+        techId: data.entity.techId || "",
       },
       requestedBy: req.user._id,
       selections,
@@ -450,12 +514,17 @@ export const beginCourseDeletion = async (req, res) => {
       to: req.user.email,
       fullName: req.user.fullName || req.user.username,
       otp,
-      courseTitle: data.course.title,
+      courseTitle: data.entity.title || data.entity.name,
       mode: "requester",
     }).catch(async (emailError) => {
-      console.error("[COURSE DELETE] Background requester OTP email failed:", emailError);
+      console.error(
+        "[DELETION] Background requester OTP email failed:",
+        emailError,
+      );
       if (createdRequest?._id) {
-        await CourseDeletionRequest.deleteOne({ _id: createdRequest._id }).catch(() => {});
+        await DeletionRequest.deleteOne({ _id: createdRequest._id }).catch(
+          () => {},
+        );
       }
     });
 
@@ -467,32 +536,31 @@ export const beginCourseDeletion = async (req, res) => {
         maskedEmail: maskEmail(req.user.email),
       },
       message:
-        "A verification code was sent to your admin email. No course content has been deleted.",
+        "A verification code was sent to your admin email. Nothing has been deleted yet.",
     });
   } catch (error) {
-    console.error("[COURSE DELETE] begin error:", error);
+    console.error("[DELETION] begin error:", error);
 
     if (createdRequest?._id) {
-      await CourseDeletionRequest.deleteOne({ _id: createdRequest._id }).catch(
+      await DeletionRequest.deleteOne({ _id: createdRequest._id }).catch(
         () => {},
       );
     }
 
     res.status(500).json({
       success: false,
-      message: error.message || "Unable to start protected course deletion.",
+      message: error.message || "Unable to start protected deletion.",
     });
   }
 };
 
-export const verifyCourseDeletionInitiatorOtp = async (req, res) => {
+export const verifyDeletionInitiatorOtp = async (req, res) => {
   try {
     if (!ensurePrivileged(req, res)) return;
 
-    const request = await CourseDeletionRequest.findById(req.params.requestId)
-      .select(
-        "+initiatorOtpHash +initiatorOtpExpiresAt +initiatorOtpAttempts",
-      );
+    const request = await DeletionRequest.findById(req.params.requestId).select(
+      "+initiatorOtpHash +initiatorOtpExpiresAt +initiatorOtpAttempts",
+    );
 
     if (!request) {
       return res
@@ -503,7 +571,8 @@ export const verifyCourseDeletionInitiatorOtp = async (req, res) => {
     if (String(request.requestedBy) !== String(req.user._id)) {
       return res.status(403).json({
         success: false,
-        message: "Only the administrator who created this request can verify it.",
+        message:
+          "Only the administrator who created this request can verify it.",
       });
     }
 
@@ -522,7 +591,10 @@ export const verifyCourseDeletionInitiatorOtp = async (req, res) => {
       await request.save();
       return res
         .status(410)
-        .json({ success: false, message: "The verification code has expired." });
+        .json({
+          success: false,
+          message: "The verification code has expired.",
+        });
     }
 
     const valid = otpMatches({
@@ -574,8 +646,8 @@ export const verifyCourseDeletionInitiatorOtp = async (req, res) => {
       actor: req.user,
       action: "course.deletion_requested",
       entityType: "course",
-      entityId: request.course,
-      entityTitle: request.courseSnapshot.title,
+      entityId: request.entityId,
+      entityTitle: request.entitySnapshot.title,
       description: "requested protected deletion of",
       severity: "critical",
       url,
@@ -589,7 +661,7 @@ export const verifyCourseDeletionInitiatorOtp = async (req, res) => {
     await createDirectNotifications(directRecipients, {
       actorId: req.user._id,
       title: "Course deletion requires your approval",
-      message: `${req.user.fullName || req.user.username || "An administrator"} requested permanent deletion of “${request.courseSnapshot.title}”. Review the selected content before approving.`,
+      message: `${req.user.fullName || req.user.username || "An administrator"} requested permanent deletion of “${request.entitySnapshot.title}”. Review the selected content before approving.`,
       url,
     });
 
@@ -600,7 +672,7 @@ export const verifyCourseDeletionInitiatorOtp = async (req, res) => {
           sendCourseDeletionApprovalRequestEmail({
             to: user.email,
             fullName: user.fullName || user.username,
-            courseTitle: request.courseSnapshot.title,
+            courseTitle: request.entitySnapshot.title,
             requesterName:
               req.user.fullName || req.user.username || "An administrator",
             requestId: request._id,
@@ -628,11 +700,11 @@ export const verifyCourseDeletionInitiatorOtp = async (req, res) => {
   }
 };
 
-export const getCourseDeletionRequest = async (req, res) => {
+export const getDeletionRequest = async (req, res) => {
   try {
     if (!ensurePrivileged(req, res)) return;
 
-    const request = await CourseDeletionRequest.findById(req.params.requestId)
+    const request = await DeletionRequest.findById(req.params.requestId)
       .populate("requestedBy", "fullName username email role")
       .populate("approver", "fullName username email role");
 
@@ -657,18 +729,19 @@ export const getCourseDeletionRequest = async (req, res) => {
   }
 };
 
-export const sendCourseDeletionApproverOtp = async (req, res) => {
+export const sendDeletionApproverOtp = async (req, res) => {
   try {
     if (!ensurePrivileged(req, res)) return;
 
     if (!req.user?.email) {
       return res.status(400).json({
         success: false,
-        message: "Your admin account must have an email address to approve deletion.",
+        message:
+          "Your admin account must have an email address to approve deletion.",
       });
     }
 
-    const request = await CourseDeletionRequest.findById(req.params.requestId)
+    const request = await DeletionRequest.findById(req.params.requestId)
       .select("+approverOtpExpiresAt")
       .populate("requestedBy", "fullName username email role");
 
@@ -681,7 +754,10 @@ export const sendCourseDeletionApproverOtp = async (req, res) => {
     if (await markExpiredIfNeeded(request)) {
       return res
         .status(410)
-        .json({ success: false, message: "This approval request has expired." });
+        .json({
+          success: false,
+          message: "This approval request has expired.",
+        });
     }
 
     if (String(request.requestedBy?._id) === String(req.user._id)) {
@@ -692,7 +768,9 @@ export const sendCourseDeletionApproverOtp = async (req, res) => {
       });
     }
 
-    if (!["pending_approval", "approval_otp_pending"].includes(request.status)) {
+    if (
+      !["pending_approval", "approval_otp_pending"].includes(request.status)
+    ) {
       return res.status(409).json({
         success: false,
         message: "This request is not waiting for approval.",
@@ -727,16 +805,19 @@ export const sendCourseDeletionApproverOtp = async (req, res) => {
     await request.save();
 
     // Send email in the background so slow SMTP connections do not cause API timeouts
-    sendCourseDeletionOtpEmail({
+    sendDeletionOtpEmail({
       to: req.user.email,
       fullName: req.user.fullName || req.user.username,
       otp,
-      courseTitle: request.courseSnapshot.title,
+      courseTitle: request.entitySnapshot.title,
       mode: "approver",
     }).catch(async (emailError) => {
-      console.error("[COURSE DELETE] Background approver OTP email failed:", emailError);
+      console.error(
+        "[COURSE DELETE] Background approver OTP email failed:",
+        emailError,
+      );
       try {
-        const reqToRollback = await CourseDeletionRequest.findById(request._id);
+        const reqToRollback = await DeletionRequest.findById(request._id);
         if (reqToRollback && reqToRollback.status === "approval_otp_pending") {
           reqToRollback.approver = null;
           reqToRollback.approverOtpHash = "";
@@ -784,214 +865,261 @@ async function executeApprovedDeletion(request, approver) {
     cleanedCourseReferences: 0,
     cleanedTopicReferences: 0,
     course: 0,
+    topicCategory: 0,
   };
 
   try {
     await session.withTransaction(async () => {
-      const course = await Course.findById(request.course).session(session);
-      if (!course) throw new Error("Course no longer exists.");
+      if (request.entityModel === "Course") {
+        const course = await Course.findById(request.entityId).session(session);
+        if (!course) throw new Error("Course no longer exists.");
 
-      const categoryDocs = await TopicCategory.find({ course: course._id })
-        .select("_id")
-        .session(session)
-        .lean();
-      const categoryIds = categoryDocs.map((item) => item._id);
+        const categoryDocs = await TopicCategory.find({ course: course._id })
+          .select("_id")
+          .session(session)
+          .lean();
+        const categoryIds = categoryDocs.map((item) => item._id);
 
-      const chapterDocs = await Chapter.find({ course: course._id })
-        .select("_id")
-        .session(session)
-        .lean();
-      const chapterIds = chapterDocs.map((item) => item._id);
+        const chapterDocs = await Chapter.find({ course: course._id })
+          .select("_id")
+          .session(session)
+          .lean();
+        const chapterIds = chapterDocs.map((item) => item._id);
 
-      const topicDocs = await CourseTopic.find({ course: course._id })
-        .select("_id")
-        .session(session)
-        .lean();
-      const topicIds = topicDocs.map((item) => item._id);
+        const topicDocs = await CourseTopic.find({ course: course._id })
+          .select("_id")
+          .session(session)
+          .lean();
+        const topicIds = topicDocs.map((item) => item._id);
 
-      const interviewFilter = {
-        type: "interview",
-        $or: [
-          { course: course._id },
-          ...(categoryIds.length ? [{ category: { $in: categoryIds } }] : []),
-        ],
-      };
+        const interviewFilter = {
+          type: "interview",
+          $or: [
+            { course: course._id },
+            ...(categoryIds.length ? [{ category: { $in: categoryIds } }] : []),
+          ],
+        };
 
-      const interviewDocs = request.selections.interviewQuestions
-        ? await Question.find(interviewFilter)
-            .select("_id")
-            .session(session)
-            .lean()
-        : [];
-      const interviewIds = interviewDocs.map((item) => item._id);
+        const interviewDocs = request.selections.interviewQuestions
+          ? await Question.find(interviewFilter)
+              .select("_id")
+              .session(session)
+              .lean()
+          : [];
+        const interviewIds = interviewDocs.map((item) => item._id);
 
-      const quizDocs = await Question.find({
-        type: "quiz",
-        courses: course._id,
-      })
-        .select("_id courses")
-        .session(session)
-        .lean();
+        const quizDocs = await Question.find({
+          type: "quiz",
+          courses: course._id,
+        })
+          .select("_id courses")
+          .session(session)
+          .lean();
+        const exclusiveQuizIds = quizDocs
+          .filter((item) => (item.courses || []).length <= 1)
+          .map((item) => item._id);
+        const sharedQuizIds = quizDocs
+          .filter((item) => (item.courses || []).length > 1)
+          .map((item) => item._id);
 
-      const exclusiveQuizIds = quizDocs
-        .filter((item) => (item.courses || []).length <= 1)
-        .map((item) => item._id);
-      const sharedQuizIds = quizDocs
-        .filter((item) => (item.courses || []).length > 1)
-        .map((item) => item._id);
+        if (!request.selections.quizQuestions && exclusiveQuizIds.length) {
+          throw new Error(
+            "Exclusive quiz questions appeared after approval started. Restart the deletion request.",
+          );
+        }
 
-      if (!request.selections.quizQuestions && exclusiveQuizIds.length) {
-        throw new Error(
-          "Exclusive quiz questions appeared after approval started. Restart the deletion request.",
-        );
-      }
+        const sharedQuizDeleteIds = request.selections.sharedQuizQuestions
+          ? sharedQuizIds
+          : [];
 
-      const sharedQuizDeleteIds = request.selections.sharedQuizQuestions
-        ? sharedQuizIds
-        : [];
+        const cheatsheetDocs = request.selections.cheatsheets
+          ? await Article.find({ type: "cheatsheet", techId: course.techId })
+              .select("_id")
+              .session(session)
+              .lean()
+          : [];
+        const cheatsheetIds = cheatsheetDocs.map((item) => item._id);
 
-      const cheatsheetDocs = request.selections.cheatsheets
-        ? await Article.find({
-            type: "cheatsheet",
-            techId: course.techId,
-          })
-            .select("_id")
-            .session(session)
-            .lean()
-        : [];
-      const cheatsheetIds = cheatsheetDocs.map((item) => item._id);
+        if (request.selections.interviewQuestions) {
+          const deletion = await Question.deleteMany({
+            _id: { $in: interviewIds },
+          }).session(session);
+          result.interviewQuestions = deletion.deletedCount || 0;
+        } else {
+          await Question.updateMany(
+            { type: "interview", course: course._id },
+            { $set: { course: null } },
+          ).session(session);
+        }
 
-      if (request.selections.interviewQuestions) {
-        const deletion = await Question.deleteMany({
-          _id: { $in: interviewIds },
+        if (request.selections.quizQuestions && exclusiveQuizIds.length) {
+          const deletion = await Question.deleteMany({
+            _id: { $in: exclusiveQuizIds },
+          }).session(session);
+          result.quizQuestions = deletion.deletedCount || 0;
+        }
+
+        if (sharedQuizDeleteIds.length) {
+          const deletion = await Question.deleteMany({
+            _id: { $in: sharedQuizDeleteIds },
+          }).session(session);
+          result.sharedQuizQuestions = deletion.deletedCount || 0;
+        } else if (sharedQuizIds.length) {
+          const detached = await Question.updateMany(
+            { _id: { $in: sharedQuizIds } },
+            { $pull: { courses: course._id } },
+          ).session(session);
+          result.sharedQuizDetached = detached.modifiedCount || 0;
+        }
+
+        const topicDeletion = await CourseTopic.deleteMany({
+          course: course._id,
         }).session(session);
-        result.interviewQuestions = deletion.deletedCount || 0;
-      } else {
-        await Question.updateMany(
-          { type: "interview", course: course._id },
-          { $set: { course: null } },
-        ).session(session);
-      }
+        result.courseTopics = topicDeletion.deletedCount || 0;
 
-      if (request.selections.quizQuestions && exclusiveQuizIds.length) {
-        const deletion = await Question.deleteMany({
-          _id: { $in: exclusiveQuizIds },
+        const chapterDeletion = await Chapter.deleteMany({
+          course: course._id,
         }).session(session);
-        result.quizQuestions = deletion.deletedCount || 0;
-      }
+        result.chapters = chapterDeletion.deletedCount || 0;
 
-      if (sharedQuizDeleteIds.length) {
-        const deletion = await Question.deleteMany({
-          _id: { $in: sharedQuizDeleteIds },
-        }).session(session);
-        result.sharedQuizQuestions = deletion.deletedCount || 0;
-      } else if (sharedQuizIds.length) {
-        const detached = await Question.updateMany(
-          { _id: { $in: sharedQuizIds } },
-          { $pull: { courses: course._id } },
-        ).session(session);
-        result.sharedQuizDetached = detached.modifiedCount || 0;
-      }
+        if (request.selections.categories) {
+          const categoryDeletion = await TopicCategory.deleteMany({
+            _id: { $in: categoryIds },
+          }).session(session);
+          result.categories = categoryDeletion.deletedCount || 0;
+        } else {
+          await TopicCategory.updateMany(
+            { _id: { $in: categoryIds } },
+            { $set: { course: null }, $pull: { relatedCourses: course._id } },
+          ).session(session);
+        }
 
-      const topicDeletion = await CourseTopic.deleteMany({
-        course: course._id,
-      }).session(session);
-      result.courseTopics = topicDeletion.deletedCount || 0;
+        if (cheatsheetIds.length) {
+          const deletion = await Article.deleteMany({
+            _id: { $in: cheatsheetIds },
+          }).session(session);
+          result.cheatsheets = deletion.deletedCount || 0;
+        }
 
-      const chapterDeletion = await Chapter.deleteMany({
-        course: course._id,
-      }).session(session);
-      result.chapters = chapterDeletion.deletedCount || 0;
+        const deletedQuestionIds = [
+          ...interviewIds,
+          ...exclusiveQuizIds,
+          ...sharedQuizDeleteIds,
+        ];
 
-      if (request.selections.categories) {
-        const categoryDeletion = await TopicCategory.deleteMany({
-          _id: { $in: categoryIds },
-        }).session(session);
-        result.categories = categoryDeletion.deletedCount || 0;
-      } else {
-        await TopicCategory.updateMany(
-          { _id: { $in: categoryIds } },
+        const articleCleanup = await Article.updateMany(
+          {},
           {
-            $set: { course: null },
-            $pull: { relatedCourses: course._id },
-          },
-        ).session(session);
-      }
-
-      if (cheatsheetIds.length) {
-        const deletion = await Article.deleteMany({
-          _id: { $in: cheatsheetIds },
-        }).session(session);
-        result.cheatsheets = deletion.deletedCount || 0;
-      }
-
-      const deletedQuestionIds = [
-        ...interviewIds,
-        ...exclusiveQuizIds,
-        ...sharedQuizDeleteIds,
-      ];
-
-      const articleCleanupPull = {
-        relatedCourses: course._id,
-        relatedChapters: { $in: chapterIds },
-        relatedQuestions: { $in: deletedQuestionIds },
-      };
-      const articleCleanup = await Article.updateMany(
-        {},
-        { $pull: articleCleanupPull },
-      ).session(session);
-      result.cleanedArticleReferences = articleCleanup.modifiedCount || 0;
-
-      const categoryCleanup = await TopicCategory.updateMany(
-        {},
-        {
-          $pull: {
-            relatedCourses: course._id,
-            featuredChapters: { $in: chapterIds },
-            relatedCheatsheets: { $in: cheatsheetIds },
-          },
-        },
-      ).session(session);
-      result.cleanedCategoryReferences = categoryCleanup.modifiedCount || 0;
-
-      const courseCleanup = await Course.updateMany(
-        { _id: { $ne: course._id } },
-        {
-          $pull: {
-            relatedCourses: course._id,
-            popularChapterIds: { $in: chapterIds },
-          },
-        },
-      ).session(session);
-      result.cleanedCourseReferences = courseCleanup.modifiedCount || 0;
-
-      const topicCleanup = await CourseTopic.updateMany(
-        {},
-        {
-          $pull: {
-            relatedTopics: { $in: topicIds },
-            interviewQuestions: {
-              question: { $in: deletedQuestionIds },
+            $pull: {
+              relatedCourses: course._id,
+              relatedChapters: { $in: chapterIds },
+              relatedQuestions: { $in: deletedQuestionIds },
             },
           },
-        },
-      ).session(session);
-      result.cleanedTopicReferences = topicCleanup.modifiedCount || 0;
+        ).session(session);
+        result.cleanedArticleReferences = articleCleanup.modifiedCount || 0;
 
-      // Native collection deletion intentionally bypasses the model-level guard.
-      // This line is reachable only after both OTP gates and the second-admin
-      // approval checks above.
-      const courseDeletion = await Course.collection.deleteOne(
-        { _id: course._id },
-        { session },
-      );
-      result.course = courseDeletion.deletedCount || 0;
+        const categoryCleanup = await TopicCategory.updateMany(
+          {},
+          {
+            $pull: {
+              relatedCourses: course._id,
+              featuredChapters: { $in: chapterIds },
+              relatedCheatsheets: { $in: cheatsheetIds },
+            },
+          },
+        ).session(session);
+        result.cleanedCategoryReferences = categoryCleanup.modifiedCount || 0;
 
-      if (result.course !== 1) {
-        throw new Error("Course deletion did not complete.");
+        const courseCleanup = await Course.updateMany(
+          { _id: { $ne: course._id } },
+          {
+            $pull: {
+              relatedCourses: course._id,
+              popularChapterIds: { $in: chapterIds },
+            },
+          },
+        ).session(session);
+        result.cleanedCourseReferences = courseCleanup.modifiedCount || 0;
+
+        const topicCleanup = await CourseTopic.updateMany(
+          {},
+          {
+            $pull: {
+              relatedTopics: { $in: topicIds },
+              interviewQuestions: { question: { $in: deletedQuestionIds } },
+            },
+          },
+        ).session(session);
+        result.cleanedTopicReferences = topicCleanup.modifiedCount || 0;
+
+        const courseDeletion = await Course.collection.deleteOne(
+          { _id: course._id },
+          { session },
+        );
+        result.course = courseDeletion.deletedCount || 0;
+
+        if (result.course !== 1) {
+          throw new Error("Course deletion did not complete.");
+        }
+      } else if (request.entityModel === "TopicCategory") {
+        const category = await TopicCategory.findById(request.entityId).session(
+          session,
+        );
+        if (!category) throw new Error("Category no longer exists.");
+
+        const topicDocs = await CourseTopic.find({ category: category._id })
+          .select("_id")
+          .session(session)
+          .lean();
+        const topicIds = topicDocs.map((item) => item._id);
+
+        const interviewDocs = await Question.find({
+          type: "interview",
+          category: category._id,
+        })
+          .select("_id")
+          .session(session)
+          .lean();
+        const interviewIds = interviewDocs.map((item) => item._id);
+
+        if (interviewIds.length > 0) {
+          const deletion = await Question.deleteMany({
+            _id: { $in: interviewIds },
+          }).session(session);
+          result.interviewQuestions = deletion.deletedCount || 0;
+        }
+
+        if (topicIds.length > 0) {
+          const topicDeletion = await CourseTopic.deleteMany({
+            category: category._id,
+          }).session(session);
+          result.courseTopics = topicDeletion.deletedCount || 0;
+
+          const topicCleanup = await CourseTopic.updateMany(
+            {},
+            {
+              $pull: {
+                relatedTopics: { $in: topicIds },
+                interviewQuestions: { question: { $in: interviewIds } },
+              },
+            },
+          ).session(session);
+          result.cleanedTopicReferences = topicCleanup.modifiedCount || 0;
+        }
+
+        const categoryDeletion = await TopicCategory.collection.deleteOne(
+          { _id: category._id },
+          { session },
+        );
+        result.topicCategory = categoryDeletion.deletedCount || 0;
+
+        if (result.topicCategory !== 1) {
+          throw new Error("Category deletion did not complete.");
+        }
       }
 
-      await CourseDeletionRequest.updateOne(
+      await DeletionRequest.updateOne(
         { _id: request._id, status: "executing" },
         {
           $set: {
@@ -1013,16 +1141,14 @@ async function executeApprovedDeletion(request, approver) {
   }
 }
 
-export const approveCourseDeletion = async (req, res) => {
+export const approveDeletion = async (req, res) => {
   let claimedRequest = null;
 
   try {
     if (!ensurePrivileged(req, res)) return;
 
-    const request = await CourseDeletionRequest.findById(req.params.requestId)
-      .select(
-        "+approverOtpHash +approverOtpExpiresAt +approverOtpAttempts",
-      )
+    const request = await DeletionRequest.findById(req.params.requestId)
+      .select("+approverOtpHash +approverOtpExpiresAt +approverOtpAttempts")
       .populate("requestedBy", "fullName username email role");
 
     if (!request) {
@@ -1034,7 +1160,10 @@ export const approveCourseDeletion = async (req, res) => {
     if (await markExpiredIfNeeded(request)) {
       return res
         .status(410)
-        .json({ success: false, message: "This approval request has expired." });
+        .json({
+          success: false,
+          message: "This approval request has expired.",
+        });
     }
 
     if (String(request.requestedBy?._id) === String(req.user._id)) {
@@ -1095,7 +1224,7 @@ export const approveCourseDeletion = async (req, res) => {
       });
     }
 
-    const current = await computeImpact(request.course);
+    const current = await computeImpact(request.entityId);
     if (!current) {
       request.status = "failed";
       request.failureReason = "Course no longer exists.";
@@ -1123,7 +1252,7 @@ export const approveCourseDeletion = async (req, res) => {
       });
     }
 
-    claimedRequest = await CourseDeletionRequest.findOneAndUpdate(
+    claimedRequest = await DeletionRequest.findOneAndUpdate(
       {
         _id: request._id,
         status: "approval_otp_pending",
@@ -1156,7 +1285,7 @@ export const approveCourseDeletion = async (req, res) => {
       action: "course.deleted_after_dual_approval",
       entityType: "course",
       entityId: claimedRequest.course,
-      entityTitle: claimedRequest.courseSnapshot.title,
+      entityTitle: claimedRequest.entitySnapshot.title,
       description: "approved and permanently deleted",
       severity: "critical",
       targetUserId: request.requestedBy?._id,
@@ -1181,7 +1310,7 @@ export const approveCourseDeletion = async (req, res) => {
     console.error("[COURSE DELETE] approval error:", error);
 
     if (claimedRequest?._id) {
-      await CourseDeletionRequest.updateOne(
+      await DeletionRequest.updateOne(
         { _id: claimedRequest._id, status: "executing" },
         {
           $set: {
@@ -1204,12 +1333,13 @@ export const approveCourseDeletion = async (req, res) => {
   }
 };
 
-export const rejectCourseDeletion = async (req, res) => {
+export const rejectDeletion = async (req, res) => {
   try {
     if (!ensurePrivileged(req, res)) return;
 
-    const request = await CourseDeletionRequest.findById(req.params.requestId)
-      .populate("requestedBy", "fullName username email role");
+    const request = await DeletionRequest.findById(
+      req.params.requestId,
+    ).populate("requestedBy", "fullName username email role");
 
     if (!request) {
       return res
@@ -1224,7 +1354,9 @@ export const rejectCourseDeletion = async (req, res) => {
       });
     }
 
-    if (!["pending_approval", "approval_otp_pending"].includes(request.status)) {
+    if (
+      !["pending_approval", "approval_otp_pending"].includes(request.status)
+    ) {
       return res.status(409).json({
         success: false,
         message: "This request is no longer waiting for a decision.",
@@ -1242,8 +1374,8 @@ export const rejectCourseDeletion = async (req, res) => {
       actor: req.user,
       action: "course.deletion_rejected",
       entityType: "course",
-      entityId: request.course,
-      entityTitle: request.courseSnapshot.title,
+      entityId: request.entityId,
+      entityTitle: request.entitySnapshot.title,
       description: "rejected protected deletion of",
       severity: "critical",
       targetUserId: request.requestedBy?._id,

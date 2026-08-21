@@ -40,7 +40,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function InterviewQuestionCardSkeleton() {
   return (
-    <div className="group flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs dark:border-zinc-800/80 dark:bg-zinc-950 min-h-[160px]">
+    <div className="group flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs dark:border-zinc-800/80 dark:bg-zinc-950 min-h-40">
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -475,21 +475,19 @@ export default function InterviewQuestionsManager({
             {viewMode === "card" ? (
               <div className="space-y-6">
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {loading ? (
-                    Array.from({ length: limit }).map((_, i) => (
-                      <InterviewQuestionCardSkeleton key={i} />
-                    ))
-                  ) : (
-                    questions.map((item) => (
-                      <SortableCard
-                        key={item._id}
-                        item={item}
-                        onPreview={setPreview}
-                        onDelete={setDeleteTarget}
-                        editHref={editHref}
-                      />
-                    ))
-                  )}
+                  {loading
+                    ? Array.from({ length: limit }).map((_, i) => (
+                        <InterviewQuestionCardSkeleton key={i} />
+                      ))
+                    : questions.map((item) => (
+                        <SortableCard
+                          key={item._id}
+                          item={item}
+                          onPreview={setPreview}
+                          onDelete={setDeleteTarget}
+                          editHref={editHref}
+                        />
+                      ))}
                 </div>
 
                 {!loading && (
@@ -524,21 +522,19 @@ export default function InterviewQuestionsManager({
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
-                        {loading ? (
-                          Array.from({ length: limit }).map((_, i) => (
-                            <InterviewQuestionRowSkeleton key={i} />
-                          ))
-                        ) : (
-                          questions.map((item) => (
-                            <SortableTableRow
-                              key={item._id}
-                              item={item}
-                              onPreview={setPreview}
-                              onDelete={setDeleteTarget}
-                              editHref={editHref}
-                            />
-                          ))
-                        )}
+                        {loading
+                          ? Array.from({ length: limit }).map((_, i) => (
+                              <InterviewQuestionRowSkeleton key={i} />
+                            ))
+                          : questions.map((item) => (
+                              <SortableTableRow
+                                key={item._id}
+                                item={item}
+                                onPreview={setPreview}
+                                onDelete={setDeleteTarget}
+                                editHref={editHref}
+                              />
+                            ))}
                       </tbody>
                     </table>
                   </div>

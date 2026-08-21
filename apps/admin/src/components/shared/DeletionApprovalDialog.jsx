@@ -11,7 +11,7 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { coursesApi } from "@/lib/api";
+import { deletionApi } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 
 function currentRequestId() {
@@ -36,7 +36,7 @@ const labelMap = {
   cheatsheets: "Cheatsheets",
 };
 
-export default function CourseDeletionApprovalDialog({ onDeleted }) {
+export default function DeletionApprovalDialog({ onDeleted }) {
   const { user } = useAuth();
   const [requestId, setRequestId] = useState("");
   const [request, setRequest] = useState(null);
@@ -56,7 +56,7 @@ export default function CourseDeletionApprovalDialog({ onDeleted }) {
     let alive = true;
     setBusy(true);
 
-    coursesApi.getDeletionRequest(requestId).then((response) => {
+    deletionApi.getDeletionRequest(requestId).then((response) => {
       if (!alive) return;
 
       if (response.success) {
@@ -85,7 +85,7 @@ export default function CourseDeletionApprovalDialog({ onDeleted }) {
 
   const sendOtp = async () => {
     setBusy(true);
-    const response = await coursesApi.sendDeletionApprovalOtp(requestId);
+    const response = await deletionApi.sendDeletionApprovalOtp(requestId);
     setBusy(false);
 
     if (!response.success) {
@@ -106,7 +106,7 @@ export default function CourseDeletionApprovalDialog({ onDeleted }) {
     }
 
     setBusy(true);
-    const response = await coursesApi.approveDeletion(requestId, otp);
+    const response = await deletionApi.approveDeletion(requestId, otp);
     setBusy(false);
 
     if (!response.success) {
@@ -114,7 +114,7 @@ export default function CourseDeletionApprovalDialog({ onDeleted }) {
       return;
     }
 
-    toast.success("Course permanently deleted after dual approval");
+    toast.success("Content permanently deleted after dual approval");
     close();
     await onDeleted?.();
   };
@@ -123,14 +123,14 @@ export default function CourseDeletionApprovalDialog({ onDeleted }) {
     if (
       typeof window !== "undefined" &&
       !window.confirm(
-        `Reject deletion of ${request?.courseSnapshot?.title || "this course"}? Nothing will be deleted.`,
+        `Reject deletion of ${request?.entitySnapshot?.title || "this content"}? Nothing will be deleted.`,
       )
     ) {
       return;
     }
 
     setBusy(true);
-    const response = await coursesApi.rejectDeletion(requestId);
+    const response = await deletionApi.rejectDeletion(requestId);
     setBusy(false);
 
     if (!response.success) {
@@ -138,7 +138,7 @@ export default function CourseDeletionApprovalDialog({ onDeleted }) {
       return;
     }
 
-    toast.success("Course deletion request rejected");
+    toast.success("Deletion request rejected");
     close();
   };
 
@@ -172,7 +172,7 @@ export default function CourseDeletionApprovalDialog({ onDeleted }) {
               Second administrator approval
             </p>
             <h2 className="mt-1 text-xl font-black text-zinc-950 dark:text-white">
-              Review protected course deletion
+              Review protected deletion
             </h2>
           </div>
           <Button
@@ -214,7 +214,7 @@ export default function CourseDeletionApprovalDialog({ onDeleted }) {
                   Course
                 </p>
                 <p className="mt-1 font-black text-zinc-950 dark:text-white">
-                  {request.courseSnapshot?.title}
+                  {request.entitySnapshot?.title}
                 </p>
                 <p className="mt-1 text-xs text-zinc-500">
                   Requested by{" "}

@@ -115,7 +115,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
+import DeletionDialog from "@/components/shared/DeletionDialog";
+import DeletionApprovalDialog from "@/components/shared/DeletionApprovalDialog";
 import { coursesApi, topicCategoriesApi } from "@/lib/api";
 
 export default function CategoriesListPage() {
@@ -138,7 +139,6 @@ export default function CategoriesListPage() {
   const setViewMode = (view) => setFilters((current) => ({ ...current, view }));
   const [preview, setPreview] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [deleting, setDeleting] = useState(false);
   const [isReordering, setIsReordering] = useState(false);
 
   const sensors = useSensors(
@@ -230,20 +230,6 @@ export default function CategoriesListPage() {
     } finally {
       setIsReordering(false);
     }
-  };
-
-  const remove = async () => {
-    if (!deleteTarget) return;
-    setDeleting(true);
-    const response = await topicCategoriesApi.delete(deleteTarget._id);
-    if (response.success) {
-      toast.success("Category deleted");
-      setDeleteTarget(null);
-      loadCategories();
-    } else {
-      toast.error(response.error || "Unable to delete category");
-    }
-    setDeleting(false);
   };
 
   return (
@@ -541,15 +527,21 @@ export default function CategoriesListPage() {
       )}
 
       {/* Delete Confirmation */}
-      <ConfirmDialog
+      <DeletionDialog
+        entityModel="TopicCategory"
+        entity={deleteTarget}
         open={!!deleteTarget}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
-        onConfirm={remove}
-        title="Delete category?"
-        description={`Are you sure you want to delete "${deleteTarget?.name}"? Make sure no topics or interview questions are assigned to this category.`}
-        confirmText="Delete category"
-        destructive
-        loading={deleting}
+        onClose={() => setDeleteTarget(null)}
+        onDeleted={async () => {
+          setDeleteTarget(null);
+          await loadCategories();
+        }}
+      />
+
+      <DeletionApprovalDialog
+        onDeleted={async () => {
+          await loadCategories();
+        }}
       />
     </AdminPage>
   );

@@ -47,18 +47,24 @@ const resultSchema = new Schema(
   { _id: false },
 );
 
-const courseDeletionRequestSchema = new Schema(
+const deletionRequestSchema = new Schema(
   {
-    course: {
+    entityId: {
       type: Schema.Types.ObjectId,
-      ref: "Course",
       required: true,
       index: true,
+      refPath: "entityModel",
     },
-    courseSnapshot: {
+    entityModel: {
+      type: String,
+      required: true,
+      enum: ["Course", "TopicCategory"],
+      index: true,
+    },
+    entitySnapshot: {
       title: { type: String, required: true },
       slug: { type: String, required: true },
-      techId: { type: String, required: true },
+      techId: { type: String, default: "" },
     },
     requestedBy: {
       type: Schema.Types.ObjectId,
@@ -111,7 +117,7 @@ const courseDeletionRequestSchema = new Schema(
   { timestamps: true },
 );
 
-courseDeletionRequestSchema.index({ course: 1, status: 1, createdAt: -1 });
-courseDeletionRequestSchema.index({ requestedBy: 1, createdAt: -1 });
+deletionRequestSchema.index({ entityId: 1, entityModel: 1, status: 1, createdAt: -1 });
+deletionRequestSchema.index({ requestedBy: 1, createdAt: -1 });
 
-export default model("CourseDeletionRequest", courseDeletionRequestSchema);
+export default model("DeletionRequest", deletionRequestSchema);

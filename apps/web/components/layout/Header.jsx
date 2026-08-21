@@ -20,6 +20,7 @@ import {
   Database,
   Sparkles,
   Plus,
+  ArrowRight,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { clearCredentials } from "@/lib/store/authSlice";
@@ -215,11 +216,21 @@ export default function Header() {
               </button>
 
               {coursesDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-64 p-3 rounded-3xl bg-white dark:bg-zinc-900 shadow-2xl border-0 z-50 animate-fadeIn space-y-1">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-400 px-3 py-1 block">
-                    Select a Course
-                  </span>
-                  {courses.map((course) => {
+                <div className="absolute top-full left-0 mt-2 w-72 p-3 rounded-3xl bg-white dark:bg-zinc-900 shadow-2xl border border-zinc-200/80 dark:border-zinc-800 z-50 animate-fadeIn space-y-1">
+                  <div className="flex items-center justify-between px-3 py-1 border-b border-zinc-100 dark:border-zinc-800/80 pb-2 mb-1">
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-400">
+                      Published Courses
+                    </span>
+                    <Link
+                      href="/courses"
+                      onClick={() => setCoursesDropdownOpen(false)}
+                      className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5"
+                    >
+                      <span>View All</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+                  {courses.slice(0, 5).map((course) => {
                     const slug = course.slug || course.id;
                     return (
                       <Link
@@ -228,10 +239,10 @@ export default function Header() {
                         onClick={() => setCoursesDropdownOpen(false)}
                         className="flex items-center gap-2.5 p-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-foreground text-xs font-bold"
                       >
-                        <span className="w-6 h-6 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black text-[10px]">
+                        <span className="w-6 h-6 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-black text-[10px] shrink-0">
                           {course.title.slice(0, 2).toUpperCase()}
                         </span>
-                        <div className="flex flex-col">
+                        <div className="flex flex-col min-w-0">
                           <span className="line-clamp-1">
                             {course.title.split(":")[0]}
                           </span>
@@ -245,6 +256,18 @@ export default function Header() {
                       </Link>
                     );
                   })}
+
+                  {/* Full-width "View All Courses" Action Button */}
+                  <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800/80 mt-1">
+                    <Link
+                      href="/courses"
+                      onClick={() => setCoursesDropdownOpen(false)}
+                      className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-2xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-extrabold hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
+                    >
+                      <span>View All Courses</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>
@@ -270,20 +293,21 @@ export default function Header() {
               </button>
 
               {cheatsheetsDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-64 p-3 rounded-3xl bg-white dark:bg-zinc-900 shadow-2xl border-0 z-50 animate-fadeIn space-y-1">
-                  <div className="flex items-center justify-between px-3 py-1">
+                <div className="absolute top-full left-0 mt-2 w-72 p-3 rounded-3xl bg-white dark:bg-zinc-900 shadow-2xl border border-zinc-200/80 dark:border-zinc-800 z-50 animate-fadeIn space-y-1">
+                  <div className="flex items-center justify-between px-3 py-1 border-b border-zinc-100 dark:border-zinc-800/80 pb-2 mb-1">
                     <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-400 block">
                       Syntax Cheatsheets
                     </span>
                     <Link
                       href="/cheatsheets"
                       onClick={() => setCheatsheetsDropdownOpen(false)}
-                      className="text-[10px] text-blue-600 dark:text-blue-400 hover:underline"
+                      className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5"
                     >
-                      View All
+                      <span>View All</span>
+                      <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
-                  {cheatsheets.map((cs) => {
+                  {cheatsheets.slice(0, 5).map((cs) => {
                     const csSlug = cs.slug || cs.id || cs._id;
                     return (
                       <Link
@@ -292,8 +316,8 @@ export default function Header() {
                         onClick={() => setCheatsheetsDropdownOpen(false)}
                         className="flex items-center gap-2.5 p-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-foreground text-xs font-bold"
                       >
-                        <Sparkles className="w-4 h-4 text-blue-500" />
-                        <div className="flex flex-col">
+                        <Sparkles className="w-4 h-4 text-blue-500 shrink-0" />
+                        <div className="flex flex-col min-w-0">
                           <span className="line-clamp-1">{cs.title}</span>
                           <span className="text-[10px] text-zinc-400 font-normal">
                             Article reference
@@ -302,6 +326,18 @@ export default function Header() {
                       </Link>
                     );
                   })}
+
+                  {/* Full-width "View All Cheatsheets" Action Button */}
+                  <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800/80 mt-1">
+                    <Link
+                      href="/cheatsheets"
+                      onClick={() => setCheatsheetsDropdownOpen(false)}
+                      className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-2xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-extrabold hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
+                    >
+                      <span>View All Cheatsheets</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>

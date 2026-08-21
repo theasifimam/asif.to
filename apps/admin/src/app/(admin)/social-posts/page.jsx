@@ -30,7 +30,7 @@ import { Skeleton } from "@/components/ui";
 
 function SocialPostCardSkeleton() {
   return (
-    <div className="admin-surface group flex flex-col justify-between p-5 rounded-3xl min-h-[320px]">
+    <div className="admin-surface group flex flex-col justify-between p-5 rounded-3xl min-h-80">
       <div className="space-y-3">
         <Skeleton className="w-full aspect-square rounded-2xl" />
         <Skeleton className="h-5 w-3/4 rounded-md" />
@@ -311,7 +311,10 @@ export default function SocialPostsPage() {
                     className="admin-surface group flex flex-col justify-between p-5 rounded-3xl transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700"
                   >
                     <div className="space-y-3">
-                      <Link href={`/social-posts/${post._id}`} className="block">
+                      <Link
+                        href={`/social-posts/${post._id}`}
+                        className="block"
+                      >
                         <div className="mb-4 aspect-square rounded-2xl bg-linear-to-br from-zinc-900 via-zinc-950 to-black p-5 text-white shadow-inner flex flex-col justify-between relative overflow-hidden group-hover:scale-[1.01] transition-transform duration-200">
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-[10px] font-black uppercase tracking-wider text-blue-400">
@@ -335,9 +338,13 @@ export default function SocialPostsPage() {
                       </Link>
 
                       <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-semibold">
-                        <span className="capitalize">{post.platform || "social"}</span>
+                        <span className="capitalize">
+                          {post.platform || "social"}
+                        </span>
                         <span>·</span>
-                        <span className="capitalize">{post.format || "post"}</span>
+                        <span className="capitalize">
+                          {post.format || "post"}
+                        </span>
                       </div>
                     </div>
 
@@ -439,7 +446,8 @@ export default function SocialPostsPage() {
                                 <Link
                                   href={`/social-posts/new?returnTo=${encodeURIComponent(returnTo)}`}
                                 >
-                                  <Plus className="mr-1.5 h-4 w-4" /> Create post
+                                  <Plus className="mr-1.5 h-4 w-4" /> Create
+                                  post
                                 </Link>
                               </Button>
                             }
