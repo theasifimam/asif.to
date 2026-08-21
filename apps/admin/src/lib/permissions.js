@@ -11,7 +11,7 @@ export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({
     "interview_questions.view", "interview_questions.manage", "courses.view",
     "courses.manage", "cheatsheets.view", "cheatsheets.manage",
     "question_bank.view", "question_bank.manage", "planner.view",
-    "planner.manage", "analytics.view", "seo.view", "users.view",
+    "planner.manage", "community.moderate", "analytics.view", "seo.view", "users.view",
     "messages.view", "messages.send", "messages.attach", "messages.pin",
   ],
   admin: [
@@ -22,7 +22,7 @@ export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({
     "question_bank.view", "question_bank.manage", "planner.view", "planner.manage",
     "analytics.view", "seo.view", "users.view", "users.create", "users.edit",
     "users.suspend", "users.delete", "authors.manage", "invitations.manage",
-    "playground.manage", "social_integrations.manage", "messages.view", "messages.send", "messages.channels.manage", "messages.attach", "messages.pin", "messages.moderate",
+    "playground.manage", "social_integrations.manage", "messages.view", "messages.send", "messages.channels.manage", "messages.attach", "messages.pin", "messages.moderate", "community.moderate",
   ],
   super_admin: ["*"],
 });
@@ -38,6 +38,7 @@ export const hasPermission = (user, permission) => {
 };
 
 const routeRules = [
+  [/^\/moderation(?:\/|$)/, "community.moderate"],
   [/^\/messages(?:\/|$)/, "messages.view"],
   [/^\/activity(?:\/|$)/, "users.view"],
   [/^\/notifications(?:\/|$)/, "articles.create"],

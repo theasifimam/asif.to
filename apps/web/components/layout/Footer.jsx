@@ -131,6 +131,7 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
                   >
                     Saved Notes
                   </Link>
+                  <Link href="/community" className="hover:text-foreground transition-colors">Community</Link>
                 </nav>
               </div>
 

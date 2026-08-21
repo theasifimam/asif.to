@@ -18,6 +18,7 @@
     "seed:html-exam": "node src/scripts/seed-course-exams.js html",
     "seed:course-exams": "node src/scripts/seed-course-exams.js",
     "migrate:questions": "node src/scripts/migrate-questions-collection.js",
+    "migrate:community-permissions": "node src/scripts/enable-community-moderation.js",
     "seed:css-course": "node src/scripts/seed-css-course.js",
     "seed:courses": "node src/scripts/seed-courses.js",
     "seed:categories": "node src/scripts/seed-course-categories.js",

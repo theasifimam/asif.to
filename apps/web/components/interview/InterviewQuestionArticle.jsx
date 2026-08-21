@@ -18,6 +18,7 @@ import {
 } from "@/lib/publicContent";
 import { absoluteUrl, getSiteUrl, jsonLd } from "@/lib/seo";
 import { notFound } from "next/navigation";
+import DiscussionEmbed from "@/components/community/DiscussionEmbed";
 
 export async function buildInterviewQuestionMetadata(courseSlug, questionSlug) {
   const data = await getPublicInterviewQuestion(courseSlug, questionSlug);
@@ -188,6 +189,8 @@ export default async function InterviewQuestionArticle({
                 />
               </div>
             </article>
+
+            <DiscussionEmbed kind="interview_question" targetId={question._id} title={question.question} prompt="Discuss this question" />
 
             <nav className="mt-6 grid gap-3 sm:grid-cols-2">
               {previous ? (

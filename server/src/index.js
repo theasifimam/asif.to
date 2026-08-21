@@ -30,6 +30,7 @@ import messagingRoutes from "./routes/messaging.routes.js";
 import relatedContentRoutes from "./routes/relatedContent.routes.js";
 import socialPostRoutes from "./routes/socialPost.routes.js";
 import socialIntegrationRoutes from "./routes/socialIntegration.routes.js";
+import communityRoutes from "./routes/community.routes.js";
 import { initializeMessagingSocket } from "./realtime/messaging.socket.js";
 import { ensureMessagingBootstrap } from "./services/messagingBootstrap.service.js";
 import dotenv from "dotenv";
@@ -110,6 +111,7 @@ app.use("/api/v1/messaging", messagingRoutes);
 app.use("/api/v1/related-content", relatedContentRoutes);
 app.use("/api/v1/social-posts", socialPostRoutes);
 app.use("/api/v1/social-integrations", socialIntegrationRoutes);
+app.use("/api/v1/community", communityRoutes);
 app.use("/api/v1/deletion-requests", deletionRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────

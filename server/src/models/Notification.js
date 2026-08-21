@@ -14,11 +14,13 @@ const notificationSchema = new Schema(
     isRead: { type: Boolean, default: false, index: true },
     readAt: Date,
     url: { type: String, trim: true, maxlength: 1000 },
+    dedupeKey: { type: String, trim: true, maxlength: 300, select: false },
   },
   { timestamps: true },
 );
 
 notificationSchema.index({ recipientId: 1, isRead: 1, createdAt: -1 });
 notificationSchema.index({ recipientId: 1, createdAt: -1 });
+notificationSchema.index({ recipientId: 1, dedupeKey: 1 }, { unique: true, sparse: true });
 
 export default model("Notification", notificationSchema);

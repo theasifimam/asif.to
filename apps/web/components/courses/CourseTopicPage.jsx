@@ -17,6 +17,7 @@ import TopicMarkdown from "@/components/articles/TopicMarkdown";
 import AuthorIdentityCard from "@/components/authors/AuthorIdentityCard";
 import { getPublicTopic } from "@/lib/publicContent";
 import { absoluteUrl, getSiteUrl } from "@/lib/seo";
+import DiscussionEmbed from "@/components/community/DiscussionEmbed";
 
 const siteUrl = getSiteUrl();
 
@@ -546,6 +547,8 @@ export default async function CourseTopicPage({ courseSlug, topicPath }) {
             direction="next"
           />
         </nav>
+
+        <DiscussionEmbed kind="topic" targetId={topic._id} title={topic.title} prompt="Ask about this topic" />
 
         {topic.relatedTopics?.length > 0 && (
           <section className="mt-12" aria-labelledby="related-topics-title">

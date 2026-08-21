@@ -11,6 +11,7 @@ import { useGetCheatsheetBySlugQuery } from "@/lib/api/courseApi";
 import { CheatsheetReaderSkeleton } from "@/components/courses/ReaderSkeletons";
 import RelatedContentSidebar from "@/components/related/RelatedContentSidebar";
 import RelatedContentBottom from "@/components/related/RelatedContentBottom";
+import DiscussionEmbed from "@/components/community/DiscussionEmbed";
 
 export default function CheatsheetReader({ slug, initialData, relatedData }) {
   const { data, isLoading } = useGetCheatsheetBySlugQuery(slug, {
@@ -130,6 +131,10 @@ export default function CheatsheetReader({ slug, initialData, relatedData }) {
             <article className="mt-6 min-w-0 py-4 text-justify sm:py-8 cheatsheet-print-article px-0 print:px-6">
               <TopicMarkdown content={cheatsheet.content} />
             </article>
+
+            <div className="print:hidden">
+              <DiscussionEmbed kind="cheatsheet" targetId={cheatsheet._id} title={cheatsheet.title} prompt="Discuss / suggest improvement" />
+            </div>
 
             {/* Dedicated Print Footer with Left/Right Padding */}
             <div className="hidden print:flex items-center justify-between pt-6 border-t border-zinc-300 mt-12 px-6 text-[10px] font-bold text-zinc-500">

@@ -130,6 +130,7 @@ export default function Header() {
     { label: "Cheatsheets", href: "/cheatsheets" },
     { label: "Revision Deck", href: "/revision" },
     { label: "Practice Quiz", href: "/quiz" },
+    { label: "Community", href: "/community" },
   ];
   const displayedUser = oauthSession?.user
     ? {
@@ -341,6 +342,14 @@ export default function Header() {
                 </div>
               )}
             </div>
+
+            {/* Revision Deck Link */}
+            <Link
+              href="/community"
+              className={`px-4 py-1.5 rounded-full transition-all ${pathname.startsWith("/community") ? "bg-blue-600 text-white shadow-sm" : "text-zinc-600 dark:text-zinc-300 hover:text-foreground"}`}
+            >
+              Community
+            </Link>
 
             {/* Revision Deck Link */}
             <Link

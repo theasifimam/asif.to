@@ -25,6 +25,7 @@ export const PERMISSION_CATALOG = Object.freeze([
   ["messages.attach", "Attach files to team messages", "Team messaging"],
   ["messages.pin", "Pin important channel messages", "Team messaging"],
   ["messages.moderate", "Moderate team messages", "Team messaging"],
+  ["community.moderate", "Review reports and moderate community content", "Community"],
   ["analytics.view", "View analytics", "Administration"],
   ["seo.view", "View and manage SEO", "Administration"],
   ["users.view", "View users", "User management"],
@@ -53,7 +54,7 @@ export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({
     "interview_questions.view", "interview_questions.manage", "courses.view",
     "courses.manage", "cheatsheets.view", "cheatsheets.manage",
     "question_bank.view", "question_bank.manage", "planner.view",
-    "planner.manage", "analytics.view", "seo.view", "users.view",
+    "planner.manage", "community.moderate", "analytics.view", "seo.view", "users.view",
     "messages.view", "messages.send", "messages.attach", "messages.pin",
   ],
   admin: PERMISSION_CATALOG.map(([key]) => key).filter(

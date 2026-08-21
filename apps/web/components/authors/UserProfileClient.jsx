@@ -27,6 +27,7 @@ import {
   Award,
   BookOpen,
   Newspaper,
+  MessageSquare,
   LogOut,
   Loader2,
 } from "lucide-react";
@@ -44,6 +45,7 @@ import ProfileQuizTab from "@/components/profile/ProfileQuizTab";
 import ProfileArticlesTab from "@/components/profile/ProfileArticlesTab";
 import ProfilePrivateView from "@/components/profile/ProfilePrivateView";
 import ProfileSkeleton from "@/components/profile/ProfileSkeleton";
+import ProfileCommunityActivity from "@/components/community/ProfileCommunityActivity";
 
 export default function UserProfileClient({ username }) {
   const cleanParam = decodeURIComponent(username || "")
@@ -249,6 +251,11 @@ export default function UserProfileClient({ username }) {
       label: isOwnProfile ? "My Articles" : "Articles",
       icon: Newspaper,
     },
+    {
+      key: "community",
+      label: "Community",
+      icon: MessageSquare,
+    },
   ];
 
   const tabs = isOwnProfile ? allTabs : allTabs.filter((t) => !t.ownOnly);
@@ -338,6 +345,10 @@ export default function UserProfileClient({ username }) {
                   articles={articlesRes?.data || []}
                   isLoading={articlesLoading}
                 />
+              )}
+
+              {activeTab === "community" && (
+                <ProfileCommunityActivity username={user?.username} isOwnProfile={isOwnProfile} />
               )}
             </section>
           </>

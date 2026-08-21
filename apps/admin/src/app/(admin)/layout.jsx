@@ -23,6 +23,7 @@ import {
   ScrollText,
   Image,
   Share2,
+  ShieldAlert,
 } from "lucide-react";
 import AdminGlobalSearch from "@/components/search/AdminGlobalSearch";
 import { useAuth } from "@/contexts/AuthContext";
@@ -155,6 +156,13 @@ const NAV_ITEMS = [
   {
     group: "Management",
     items: [
+      {
+        name: "Community Moderation",
+        href: "/moderation",
+        icon: ShieldAlert,
+        permission: "community.moderate",
+        description: "Reports, reviews & audit history",
+      },
       {
         name: "Users",
         href: "/users",

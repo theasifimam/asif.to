@@ -102,3 +102,9 @@ export const authorize = (...roles) => {
     next();
   };
 };
+
+/** Attach an authenticated viewer when a token is present; otherwise continue as a guest. */
+export const optionalProtect = (req, res, next) => {
+  const hasToken = req.headers.authorization?.startsWith("Bearer") || req.cookies?.token;
+  return hasToken ? protect(req, res, next) : next();
+};

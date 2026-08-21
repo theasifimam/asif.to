@@ -30,6 +30,7 @@ import { useTheme } from "next-themes";
 import AuthorIdentityCard from "../authors/AuthorIdentityCard";
 import ChapterBlocksRenderer from "@/components/chapter/ChapterBlocksRenderer";
 import { parseContentBlocks } from "@/components/chapter/chapterUtils";
+import DiscussionEmbed from "@/components/community/DiscussionEmbed";
 
 const WhatsAppIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -263,6 +264,10 @@ export default function ArticleClient({ slug, initialData }) {
             </div>
           </div>
         </article>
+
+        <div className="w-full max-w-4xl px-6">
+          <DiscussionEmbed kind={article.type === "cheatsheet" ? "cheatsheet" : "article"} targetId={article._id} title={article.title} prompt="Start discussion" />
+        </div>
 
         {/* Related Articles */}
         {moreArticles?.data && (

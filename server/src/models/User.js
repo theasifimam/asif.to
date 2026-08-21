@@ -37,6 +37,7 @@ const userSchema = new Schema(
             "revision",
             "exams",
             "home",
+            "community",
           ];
           return !reserved.includes(v.toLowerCase());
         },
