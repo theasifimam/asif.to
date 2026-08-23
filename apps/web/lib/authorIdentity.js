@@ -8,7 +8,8 @@ const optionalUrl = (value) => {
 export const authorIdentity = {
   name: "Asif",
   role: "Full-Stack JavaScript Developer",
-  url: absoluteUrl("", "/author/asif"),
+  url: absoluteUrl("", "/asif"),
+  image: "https://github.com/theasifimam.png",
   shortBio:
     "Asif builds and maintains asif.to and writes practical Full-Stack JavaScript tutorials grounded in implementation, testing, and primary documentation.",
   technologies: [

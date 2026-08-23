@@ -80,11 +80,10 @@ export const summarizeCourseProgress = ({ course, chapters = [], progress }) => 
     const stage = COURSE_STAGES.find((name) => target.availability[name] && !stageSatisfied(name, target.stages[name]));
     if (stage) {
       const chapterId = String(target.chapter._id);
+      // ASIF_CONTEXTUAL_CHAPTER_LEARNING_V1:next-route
       const href = stage === "learn"
         ? `/${course.slug}/${target.chapter.slug}`
-        : stage === "revise"
-          ? `/revision?course=${encodeURIComponent(course.slug)}&chapter=${encodeURIComponent(chapterId)}`
-          : `/${course.slug}/${target.chapter.slug}#chapter-learning-loop`;
+        : `/${course.slug}/${target.chapter.slug}/${stage}`;
       nextAction = {
         stage,
         chapter: target.chapter,

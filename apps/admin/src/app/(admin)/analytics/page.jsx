@@ -1,487 +1,774 @@
 "use client";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertCircle, ExternalLink, Loader2, RefreshCw } from "lucide-react";
+import {
+  Clock3,
+  Eye,
+  Globe2,
+  Loader2,
+  MousePointerClick,
+  RefreshCw,
+  Search,
+  Users,
+  Waypoints,
+} from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { analyticsApi } from "@/lib/api";
-import AnalyticsChart from "./AnalyticsChart";
-import ReportTable from "./ReportTable";
 import AnalyticsNav from "./AnalyticsNav";
-import OverviewHighlights from "./OverviewHighlights";
-import MetricCard from "./MetricCard";
+import AnalyticsDataTable from "./AnalyticsDataTable";
+import {
+  DonutChart,
+  HorizontalBarChart,
+  TrendChart,
+} from "./SimpleAnalyticsCharts";
+import ReportTable from "./ReportTable";
+
+// ASIF_SIMPLE_ANALYTICS_V1
+const PRESETS = [
+  ["7 days", 7],
+  ["28 days", 28],
+  ["3 months", 90],
+  ["6 months", 180],
+  ["12 months", 365],
+];
 
 const unwrap = (response) => response?.data?.data;
-const presets = {
-  "7 days": 7,
-  "28 days": 28,
-  "3 months": 90,
-  "6 months": 180,
-  "12 months": 365,
-};
-const metricLabels = {
-  clicks: "Total clicks",
-  impressions: "Total impressions",
-  ctr: "Average CTR",
-  position: "Average position",
-  organicVisitors: "Organic visitors",
-  pageViews: "Page views",
-  visitors: "Unique visitors",
-  sessions: "Sessions",
-  engagementTime: "Avg engagement time",
-};
+
 function dates(days) {
   const end = new Date();
   const start = new Date();
+
   start.setDate(end.getDate() - days + 1);
+
   return {
     start: start.toISOString().slice(0, 10),
     end: end.toISOString().slice(0, 10),
   };
 }
-function format(key, value) {
-  if (key === "ctr") return `${value.toFixed(1)}%`;
-  if (key === "position") return value.toFixed(1);
-  if (key === "engagementTime") return `${Math.round(value)}s`;
-  return Math.round(value).toLocaleString();
+
+function number(value) {
+  return Math.round(Number(value) || 0).toLocaleString();
 }
-function timeAgo(value) {
-  if (!value) return "never";
-  const seconds = Math.max(
-    0,
-    Math.floor((Date.now() - new Date(value).getTime()) / 1000),
+
+function seconds(value) {
+  const amount = Number(value) || 0;
+
+  if (amount < 60) {
+    return `${Math.round(amount)}s`;
+  }
+
+  const minutes = Math.floor(amount / 60);
+  const remainder = Math.round(amount % 60);
+
+  return `${minutes}m ${remainder}s`;
+}
+
+function changeText(change) {
+  const value = Number(change) || 0;
+
+  if (!Number.isFinite(value)) return "—";
+
+  return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
+}
+
+function StatCard({ icon: Icon, label, value, change, help }) {
+  const positive = Number(change) >= 0;
+
+  return (
+    <div className="rounded-3xl border border-zinc-200/80 bg-white p-4 dark:border-zinc-800 dark:bg-[#121215]">
+      <div className="flex items-center justify-between gap-3">
+        <span className="grid h-9 w-9 place-items-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300">
+          <Icon className="h-4 w-4" />
+        </span>
+
+        {change !== undefined && (
+          <span
+            className={`rounded-full px-2 py-1 text-[9px] font-black ${
+              positive
+                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
+                : "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300"
+            }`}
+          >
+            {changeText(change)}
+          </span>
+        )}
+      </div>
+
+      <div className="mt-4 text-2xl font-black tracking-tight">{value}</div>
+
+      <div className="mt-1 text-xs font-bold text-zinc-600 dark:text-zinc-300">
+        {label}
+      </div>
+
+      {help && (
+        <p className="mt-1.5 text-[10px] leading-4 text-zinc-400">{help}</p>
+      )}
+    </div>
   );
-  if (seconds < 60) return "just now";
-  const units = [
-    [31536000, "y"],
-    [2592000, "m"],
-    [604800, "w"],
-    [86400, "d"],
-    [3600, "hr"],
-    [60, "min"],
-  ];
-  const [size, label] = units.find(([size]) => seconds >= size);
-  return `${Math.floor(seconds / size)}${label} ago`;
+}
+
+function Section({ eyebrow, title, description, children, action }) {
+  return (
+    <section className="space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-blue-600 dark:text-blue-400">
+            {eyebrow}
+          </p>
+
+          <h2 className="mt-1 text-xl font-black tracking-tight text-zinc-950 dark:text-white">
+            {title}
+          </h2>
+
+          {description && (
+            <p className="mt-1 max-w-3xl text-xs leading-5 text-zinc-500 dark:text-zinc-400">
+              {description}
+            </p>
+          )}
+        </div>
+
+        {action}
+      </div>
+
+      {children}
+    </section>
+  );
 }
 
 export default function AnalyticsPage() {
-  const [period, setPeriod] = useState("28 days");
-  const [range, setRange] = useState(dates(28));
+  const [days, setDays] = useState(28);
+  const range = useMemo(() => dates(days), [days]);
+
   const [overview, setOverview] = useState(null);
+  const [devices, setDevices] = useState([]);
+
+  const [acquisitionDimension, setAcquisitionDimension] = useState("source");
+  const [acquisitionPage, setAcquisitionPage] = useState(1);
+  const [acquisition, setAcquisition] = useState(null);
+
+  const [contentPage, setContentPage] = useState(1);
   const [content, setContent] = useState(null);
-  const [sources, setSources] = useState([]);
+
+  const [locationDimension, setLocationDimension] = useState("timezone");
+  const [locationPage, setLocationPage] = useState(1);
+  const [locations, setLocations] = useState(null);
+
+  const [searchType, setSearchType] = useState("queries");
+  const [searchPage, setSearchPage] = useState(1);
+  const [searchReport, setSearchReport] = useState(null);
+  const [searchText, setSearchText] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
-  const [tab, setTab] = useState("queries");
-  const [report, setReport] = useState(null);
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState("clicks");
-  const [direction, setDirection] = useState("desc");
-  const [page, setPage] = useState(1);
-  const [metrics, setMetrics] = useState({
-    clicks: true,
-    impressions: true,
-    ctr: false,
-    position: false,
-    pageViews: true,
-  });
-  const [contentTab, setContentTab] = useState("courses");
-  const params = useMemo(() => range, [range]);
-  const loadMain = useCallback(async () => {
-    setLoading(true);
-    const [a, b, c] = await Promise.all([
-      analyticsApi.overview(params),
-      analyticsApi.content(params),
-      analyticsApi.sources(params),
+
+  const loadOverview = useCallback(async () => {
+    const [overviewResponse, deviceResponse] = await Promise.all([
+      analyticsApi.simpleOverview(range),
+      analyticsApi.devices(range),
     ]);
-    if (a.success) setOverview(unwrap(a));
-    else toast.error(a.error);
-    if (b.success) setContent(unwrap(b));
-    if (c.success) setSources(unwrap(c) || []);
-    setLoading(false);
-  }, [params]);
-  const loadReport = useCallback(async () => {
-    const response = await analyticsApi.search(tab, {
-      ...params,
-      search,
-      sort,
-      direction,
-      page,
-      limit: 25,
+
+    if (overviewResponse.success) {
+      setOverview(unwrap(overviewResponse));
+    }
+
+    if (deviceResponse.success) {
+      setDevices(unwrap(deviceResponse)?.rows || []);
+    }
+  }, [range]);
+
+  const loadAcquisition = useCallback(async () => {
+    const response = await analyticsApi.acquisition({
+      ...range,
+      dimension: acquisitionDimension,
+      page: acquisitionPage,
+      limit: 15,
     });
-    if (response.success) setReport(unwrap(response));
-    else toast.error(response.error);
-  }, [tab, params, search, sort, direction, page]);
+
+    if (response.success) {
+      setAcquisition(unwrap(response));
+    }
+  }, [range, acquisitionDimension, acquisitionPage]);
+
+  const loadContent = useCallback(async () => {
+    const response = await analyticsApi.localContent({
+      ...range,
+      page: contentPage,
+      limit: 15,
+    });
+
+    if (response.success) {
+      setContent(unwrap(response));
+    }
+  }, [range, contentPage]);
+
+  const loadLocations = useCallback(async () => {
+    const response = await analyticsApi.locations({
+      ...range,
+      dimension: locationDimension,
+      page: locationPage,
+      limit: 15,
+    });
+
+    if (response.success) {
+      setLocations(unwrap(response));
+    }
+  }, [range, locationDimension, locationPage]);
+
+  const loadSearch = useCallback(async () => {
+    const response = await analyticsApi.search(searchType, {
+      ...range,
+      search: searchText,
+      sort: "clicks",
+      direction: "desc",
+      page: searchPage,
+      limit: 15,
+    });
+
+    if (response.success) {
+      setSearchReport(unwrap(response));
+    }
+  }, [range, searchType, searchText, searchPage]);
+
   useEffect(() => {
-    loadMain();
-  }, [loadMain]); // eslint-disable-line react-hooks/set-state-in-effect
-  useEffect(() => {
-    const timer = setTimeout(loadReport, search ? 250 : 0);
-    return () => clearTimeout(timer);
-  }, [loadReport, search]);
-  const setPreset = (name) => {
-    setPeriod(name);
-    if (presets[name]) setRange(dates(presets[name]));
-  };
-  const sync = async () => {
-    const response = await analyticsApi.sync();
-    if (!response.success) return toast.error(response.error);
-    setSyncing(true);
-    toast.success("Search Console sync started");
-    for (let attempt = 0; attempt < 90; attempt++) {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      const statusResponse = await analyticsApi.overview(params);
-      const next = statusResponse.success ? unwrap(statusResponse) : null;
-      if (next?.sync && next.sync.status !== "syncing") {
-        setSyncing(false);
-        await Promise.all([loadMain(), loadReport()]);
-        if (next.sync.status === "error")
-          toast.error(next.sync.error || "Search Console sync failed");
-        else
-          toast.success(
-            next.sync.error
-              ? "Sync completed with warnings"
-              : "Search Console data updated",
-          );
-        return;
+    let active = true;
+
+    async function load() {
+      setLoading(true);
+
+      await Promise.all([
+        loadOverview(),
+        loadAcquisition(),
+        loadContent(),
+        loadLocations(),
+        loadSearch(),
+      ]);
+
+      if (active) {
+        setLoading(false);
       }
     }
-    setSyncing(false);
-    toast.info("Sync is still running. The dashboard will update on refresh.");
+
+    load();
+
+    return () => {
+      active = false;
+    };
+  }, [loadOverview, loadAcquisition, loadContent, loadLocations, loadSearch]);
+
+  const changeRange = (nextDays) => {
+    setDays(nextDays);
+    setAcquisitionPage(1);
+    setContentPage(1);
+    setLocationPage(1);
+    setSearchPage(1);
   };
-  if (loading && !overview)
+
+  const sync = async () => {
+    setSyncing(true);
+
+    const response = await analyticsApi.sync();
+
+    if (!response.success) {
+      setSyncing(false);
+      toast.error(response.error);
+      return;
+    }
+
+    toast.success("Search Console sync started");
+
+    setTimeout(async () => {
+      await Promise.all([loadOverview(), loadSearch()]);
+      setSyncing(false);
+    }, 2500);
+  };
+
+  if (loading && !overview) {
     return (
       <div className="grid min-h-[70vh] place-items-center">
-        <Loader2 className="animate-spin text-blue-600" size={32} />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
-  const connected = overview?.sync?.configured;
+  }
+
+  const metrics = overview?.metrics || {};
+  const metric = (key) =>
+    metrics[key] || {
+      value: 0,
+      change: 0,
+    };
+
+  const sourceLabel =
+    acquisitionDimension === "source"
+      ? "Source"
+      : acquisitionDimension === "referrer"
+        ? "Referrer domain"
+        : "Campaign";
+
   return (
-    <div className="mx-auto flex max-w-375 flex-col gap-8 p-4 sm:p-6 md:p-8 lg:p-10 font-sans">
+    <div className="mx-auto flex max-w-375 flex-col gap-9 p-4 font-sans sm:p-6 md:p-8 lg:p-10">
       <AnalyticsNav />
-      <OverviewHighlights range={params} search={overview?.metrics} />
 
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">
-            Growth intelligence
+            asif.to performance
           </p>
-          <h1 className="mt-1 font-outfit text-3xl sm:text-4xl font-black tracking-tight text-zinc-950 dark:text-white">
-            Search & site analytics
+
+          <h1 className="mt-1 text-3xl font-black tracking-tight text-zinc-950 dark:text-white sm:text-4xl">
+            Understand the site at a glance
           </h1>
-          <p className="mt-1.5 text-xs sm:text-sm font-medium text-zinc-500 dark:text-zinc-400">
-            Real Search Console performance and privacy-conscious first-party
-            traffic.
+
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+            First-party asif.to traffic explains people, sources, content,
+            devices and location. Search Console explains how Google Search is
+            performing.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex flex-wrap rounded-full border border-zinc-200/80 bg-zinc-100/80 p-1 dark:border-zinc-800/80 dark:bg-[#18181b]">
-            {Object.keys(presets).map((name) => (
-              <button
-                key={name}
-                onClick={() => setPreset(name)}
-                className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
-                  period === name
-                    ? "bg-white text-blue-600 shadow-xs dark:bg-zinc-900 dark:text-blue-400"
-                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                }`}
-              >
-                {name}
-              </button>
-            ))}
-            <button
-              onClick={() => setPeriod("Custom")}
-              className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
-                period === "Custom"
-                  ? "bg-white text-blue-600 shadow-xs dark:bg-zinc-900 dark:text-blue-400"
-                  : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-              }`}
-            >
-              Custom
-            </button>
-          </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Select
+            value={String(days)}
+            onValueChange={(val) => changeRange(Number(val))}
+          >
+            <SelectTrigger className="h-10 w-36 rounded-full border-zinc-200/80 bg-white text-xs font-bold dark:border-zinc-800 dark:bg-[#121215]">
+              <SelectValue placeholder="Select range" />
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800">
+              {PRESETS.map(([label, value]) => (
+                <SelectItem
+                  key={value}
+                  value={String(value)}
+                  className="cursor-pointer rounded-xl text-xs font-bold"
+                >
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <Button
+          <button
+            type="button"
             onClick={sync}
-            disabled={
-              !connected || syncing || overview?.sync?.status === "syncing"
-            }
-            className="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-10 px-5 shadow-xs"
+            disabled={syncing}
+            className="inline-flex h-10 items-center gap-2 rounded-full bg-blue-600 px-4 text-xs font-black text-white disabled:opacity-50"
           >
             <RefreshCw
-              size={14}
-              className={
-                syncing || overview?.sync?.status === "syncing"
-                  ? "animate-spin"
-                  : ""
-              }
+              className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`}
             />
-            {syncing ? "Syncing…" : "Sync now"}
-          </Button>
+            {syncing ? "Syncing" : "Sync Search"}
+          </button>
         </div>
       </header>
 
-      {period === "Custom" && (
-        <div className="flex flex-wrap gap-2.5">
-          <input
-            type="date"
-            value={range.start}
-            onChange={(e) => setRange((r) => ({ ...r, start: e.target.value }))}
-            className="rounded-2xl border border-zinc-200/80 bg-white px-4 py-2 text-xs font-semibold dark:border-zinc-800 dark:bg-[#18181b]"
-          />
-          <input
-            type="date"
-            value={range.end}
-            onChange={(e) => setRange((r) => ({ ...r, end: e.target.value }))}
-            className="rounded-2xl border border-zinc-200/80 bg-white px-4 py-2 text-xs font-semibold dark:border-zinc-800 dark:bg-[#18181b]"
-          />
-        </div>
-      )}
-
-      {!connected && (
-        <div className="flex gap-3.5 rounded-3xl border border-amber-200/80 bg-amber-50/70 p-4 sm:p-5 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/25 dark:text-amber-200">
-          <AlertCircle
-            className="shrink-0 text-amber-600 dark:text-amber-400 mt-0.5"
-            size={20}
-          />
-          <div>
-            <strong className="font-bold">
-              Search Console is not connected.
-            </strong>
-            <p className="mt-1 text-xs opacity-85 leading-relaxed">
-              Add the server environment variables described in env.example.
-              First-party traffic will still appear as it is collected.
-            </p>
-          </div>
-        </div>
-      )}
-
-      <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-        <span
-          className={`h-2 w-2 rounded-full ${
-            overview?.sync?.status === "error"
-              ? "bg-rose-500"
-              : "bg-emerald-500"
-          }`}
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <StatCard
+          icon={Users}
+          label="Visitors"
+          value={number(metric("visitors").value)}
+          change={metric("visitors").change}
+          help="Unique first-party visitors."
         />
-        {overview?.sync?.lastSyncedAt ? (
-          <span
-            title={`Last synced ${new Date(
-              overview.sync.lastSyncedAt,
-            ).toLocaleString()} · data through ${new Date(
-              overview.sync.syncedThrough,
-            ).toLocaleDateString()}`}
-          >
-            Last synced {timeAgo(overview.sync.lastSyncedAt)} · data through{" "}
-            {timeAgo(overview.sync.syncedThrough)}
-          </span>
-        ) : (
-          "No Search Console sync yet"
-        )}
-        {overview?.sync?.error && (
-          <span className="text-rose-500"> · {overview.sync.error}</span>
-        )}
-      </div>
 
-      <section className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {Object.entries(metricLabels).map(([key, label]) => {
-          const item = overview?.metrics?.[key] || { value: 0, change: 0 };
-          return (
-            <MetricCard
-              key={key}
-              label={label}
-              value={format(key, item.value)}
-              change={item.change}
-            />
-          );
-        })}
+        <StatCard
+          icon={Eye}
+          label="Page views"
+          value={number(metric("pageViews").value)}
+          change={metric("pageViews").change}
+          help="Pages actually opened on asif.to."
+        />
+
+        <StatCard
+          icon={Waypoints}
+          label="Sessions"
+          value={number(metric("sessions").value)}
+          change={metric("sessions").change}
+          help="Separate browsing sessions."
+        />
+
+        <StatCard
+          icon={Clock3}
+          label="Avg. time / view"
+          value={seconds(metric("engagementTime").value)}
+          change={metric("engagementTime").change}
+          help="First-party engaged time."
+        />
+
+        <StatCard
+          icon={MousePointerClick}
+          label="Google clicks"
+          value={number(metric("searchClicks").value)}
+          change={metric("searchClicks").change}
+          help="Clicks reported by Search Console."
+        />
+
+        <StatCard
+          icon={Search}
+          label="Search impressions"
+          value={number(metric("searchImpressions").value)}
+          change={metric("searchImpressions").change}
+          help="Google Search appearances."
+        />
       </section>
 
-      <section className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          {Object.keys(metrics).map((key) => (
+      <Section
+        eyebrow="Performance over time"
+        title="Are more people using asif.to?"
+        description="The main trend graph uses first-party traffic, so you can see growth without mixing it with Search Console impressions."
+      >
+        <TrendChart
+          data={overview?.trend || []}
+          series={[
+            { key: "visitors", label: "Visitors" },
+            { key: "pageViews", label: "Page views" },
+          ]}
+          height={300}
+        />
+      </Section>
+
+      <Section
+        eyebrow="Acquisition"
+        title="Where did visitors come from?"
+        description="UTM tags take priority. Otherwise asif.to uses the external referrer domain provided by the browser and classifies common search engines, AI tools and social sites."
+        action={
+          <div className="flex rounded-full bg-zinc-100 p-1 dark:bg-zinc-900">
+            {[
+              ["source", "Sources"],
+              ["referrer", "Referrers"],
+              ["campaign", "Campaigns"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => {
+                  setAcquisitionDimension(value);
+                  setAcquisitionPage(1);
+                }}
+                className={`rounded-full px-3 py-1.5 text-[11px] font-black ${
+                  acquisitionDimension === value
+                    ? "bg-white text-blue-600 shadow-sm dark:bg-zinc-800"
+                    : "text-zinc-500"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        }
+      >
+        <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
+          <div className="rounded-3xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800 dark:bg-[#121215]">
+            <HorizontalBarChart
+              rows={acquisition?.chart || []}
+              labelKey="key"
+              valueKey="pageViews"
+              valueLabel="views"
+            />
+          </div>
+
+          <AnalyticsDataTable
+            rows={acquisition?.rows || []}
+            pagination={acquisition?.pagination}
+            onPage={setAcquisitionPage}
+            columns={[
+              {
+                key: "key",
+                label: sourceLabel,
+                render: (row) => (
+                  <div>
+                    <div className="max-w-60 truncate font-black text-zinc-800 dark:text-zinc-100">
+                      {row.key || "Unknown"}
+                    </div>
+                    {row.extra && (
+                      <div className="mt-0.5 text-[10px] font-semibold text-zinc-400">
+                        {row.extra}
+                      </div>
+                    )}
+                  </div>
+                ),
+              },
+              {
+                key: "visitors",
+                label: "Visitors",
+                render: (row) => number(row.visitors),
+              },
+              {
+                key: "sessions",
+                label: "Sessions",
+                render: (row) => number(row.sessions),
+              },
+              {
+                key: "pageViews",
+                label: "Views",
+                render: (row) => number(row.pageViews),
+              },
+              {
+                key: "avgEngagement",
+                label: "Avg. time",
+                render: (row) => seconds(row.avgEngagement),
+              },
+            ]}
+          />
+        </div>
+
+        <p className="text-[10px] leading-4 text-zinc-400">
+          Native apps and privacy-restricted browsers may omit referrer
+          information. Use UTM links when you need guaranteed campaign/app
+          attribution.
+        </p>
+      </Section>
+
+      <Section
+        eyebrow="Content"
+        title="What are people actually reading?"
+        description="This is first-party usage, not Google impressions. It shows the pages visitors really opened."
+      >
+        <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
+          <div className="rounded-3xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800 dark:bg-[#121215]">
+            <HorizontalBarChart
+              rows={content?.chart || []}
+              labelKey="path"
+              valueKey="pageViews"
+              valueLabel="views"
+            />
+          </div>
+
+          <AnalyticsDataTable
+            rows={content?.rows || []}
+            pagination={content?.pagination}
+            onPage={setContentPage}
+            columns={[
+              {
+                key: "path",
+                label: "Page",
+                render: (row) => (
+                  <a
+                    href={`https://asif.to${row.path}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block max-w-80 truncate font-black text-blue-600 hover:underline"
+                    title={row.path}
+                  >
+                    {row.path}
+                  </a>
+                ),
+              },
+              {
+                key: "visitors",
+                label: "Visitors",
+                render: (row) => number(row.visitors),
+              },
+              {
+                key: "sessions",
+                label: "Sessions",
+                render: (row) => number(row.sessions),
+              },
+              {
+                key: "pageViews",
+                label: "Views",
+                render: (row) => number(row.pageViews),
+              },
+              {
+                key: "avgEngagement",
+                label: "Avg. time",
+                render: (row) => seconds(row.avgEngagement),
+              },
+            ]}
+          />
+        </div>
+      </Section>
+
+      <Section
+        eyebrow="Audience"
+        title="Where and how are people visiting?"
+        description="Country is used when your CDN/proxy supplies a country header. Browser timezone remains available as a privacy-conscious location signal."
+        action={
+          <div className="flex rounded-full bg-zinc-100 p-1 dark:bg-zinc-900">
+            {[
+              ["timezone", "Time zones"],
+              ["country", "Countries"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => {
+                  setLocationDimension(value);
+                  setLocationPage(1);
+                }}
+                className={`rounded-full px-3 py-1.5 text-[11px] font-black ${
+                  locationDimension === value
+                    ? "bg-white text-blue-600 shadow-sm dark:bg-zinc-800"
+                    : "text-zinc-500"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        }
+      >
+        <div className="grid gap-4 xl:grid-cols-2">
+          <div className="rounded-3xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800 dark:bg-[#121215]">
+            <div className="mb-4 flex items-center gap-2">
+              <Globe2 className="h-4 w-4 text-blue-600" />
+              <h3 className="text-sm font-black">
+                Top{" "}
+                {locationDimension === "country" ? "countries" : "time zones"}
+              </h3>
+            </div>
+
+            <HorizontalBarChart
+              rows={locations?.chart || []}
+              labelKey="key"
+              valueKey="visitors"
+              valueLabel="visitors"
+            />
+          </div>
+
+          <div className="rounded-3xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800 dark:bg-[#121215]">
+            <h3 className="mb-4 text-sm font-black">Device mix</h3>
+
+            <DonutChart rows={devices} valueKey="pageViews" />
+          </div>
+        </div>
+
+        <AnalyticsDataTable
+          rows={locations?.rows || []}
+          pagination={locations?.pagination}
+          onPage={setLocationPage}
+          columns={[
+            {
+              key: "key",
+              label: locationDimension === "country" ? "Country" : "Time zone",
+              render: (row) => (
+                <span className="font-black text-zinc-800 dark:text-zinc-100">
+                  {row.key}
+                </span>
+              ),
+            },
+            {
+              key: "visitors",
+              label: "Visitors",
+              render: (row) => number(row.visitors),
+            },
+            {
+              key: "sessions",
+              label: "Sessions",
+              render: (row) => number(row.sessions),
+            },
+            ...(locationDimension === "country"
+              ? [
+                  {
+                    key: "pageViews",
+                    label: "Views",
+                    render: (row) => number(row.pageViews),
+                  },
+                ]
+              : []),
+          ]}
+        />
+      </Section>
+
+      <Section
+        eyebrow="Google Search"
+        title="How is organic search performing?"
+        description="Search Console stays separate so clicks and impressions are never confused with actual on-site visitors and page views."
+        action={
+          <div className="flex items-center gap-2">
+            <div
+              className={`h-2 w-2 rounded-full ${
+                overview?.sync?.status === "error"
+                  ? "bg-rose-500"
+                  : "bg-emerald-500"
+              }`}
+            />
+            <span className="text-[10px] font-bold text-zinc-400">
+              {overview?.sync?.lastSyncedAt
+                ? `Synced ${new Date(
+                    overview.sync.lastSyncedAt,
+                  ).toLocaleDateString()}`
+                : "No sync yet"}
+            </span>
+          </div>
+        }
+      >
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div>
+            <h3 className="mb-2 text-xs font-black text-zinc-600 dark:text-zinc-300">
+              Google clicks over time
+            </h3>
+            <TrendChart
+              data={overview?.trend || []}
+              series={[{ key: "clicks", label: "Clicks" }]}
+              height={240}
+            />
+          </div>
+
+          <div>
+            <h3 className="mb-2 text-xs font-black text-zinc-600 dark:text-zinc-300">
+              Search impressions over time
+            </h3>
+            <TrendChart
+              data={overview?.trend || []}
+              series={[
+                {
+                  key: "impressions",
+                  label: "Impressions",
+                },
+              ]}
+              height={240}
+            />
+          </div>
+        </div>
+
+        <div className="flex w-fit rounded-full bg-zinc-100 p-1 dark:bg-zinc-900">
+          {[
+            ["queries", "Queries"],
+            ["pages", "Pages"],
+          ].map(([value, label]) => (
             <button
-              key={key}
-              onClick={() => setMetrics((m) => ({ ...m, [key]: !m[key] }))}
-              className={`rounded-full border px-3.5 py-1.5 text-xs font-bold transition-all ${
-                metrics[key]
-                  ? "border-blue-500/80 bg-blue-50 text-blue-700 dark:border-blue-500/50 dark:bg-blue-500/15 dark:text-blue-300"
-                  : "border-zinc-200/80 bg-white text-zinc-500 hover:border-zinc-300 dark:border-zinc-800 dark:bg-[#18181b] dark:text-zinc-400"
+              key={value}
+              type="button"
+              onClick={() => {
+                setSearchType(value);
+                setSearchPage(1);
+                setSearchText("");
+              }}
+              className={`rounded-full px-3 py-1.5 text-[11px] font-black ${
+                searchType === value
+                  ? "bg-white text-blue-600 shadow-sm dark:bg-zinc-800"
+                  : "text-zinc-500"
               }`}
             >
-              {metricLabels[key] || key}
+              {label}
             </button>
           ))}
         </div>
-        <AnalyticsChart data={overview?.trend || []} active={metrics} />
-      </section>
 
-      <section className="flex flex-col gap-3.5">
-        <div className="flex gap-1.5 overflow-x-auto rounded-full border border-zinc-200/80 bg-white/90 p-1 dark:border-zinc-800/80 dark:bg-[#121215]/90 w-fit scrollbar-none">
-          {["queries", "pages", "countries", "devices", "appearance"].map(
-            (name) => (
-              <button
-                key={name}
-                onClick={() => {
-                  setTab(name);
-                  setPage(1);
-                  setSearch("");
-                }}
-                className={`rounded-full px-4 py-2 text-xs font-bold capitalize transition-all ${
-                  tab === name
-                    ? "bg-blue-600 text-white shadow-xs"
-                    : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
-                }`}
-              >
-                {name}
-              </button>
-            ),
-          )}
-        </div>
         <ReportTable
-          title={`Top ${tab}`}
-          type={tab}
-          report={report}
-          search={search}
+          title={`Top ${searchType}`}
+          type={searchType}
+          report={searchReport}
+          search={searchText}
           onSearch={(value) => {
-            setSearch(value);
-            setPage(1);
+            setSearchText(value);
+            setSearchPage(1);
           }}
-          sort={sort}
-          direction={direction}
-          onSort={(key) => {
-            if (sort === key)
-              setDirection((d) => (d === "desc" ? "asc" : "desc"));
-            else {
-              setSort(key);
-              setDirection("desc");
-            }
-          }}
-          page={page}
-          onPage={setPage}
+          sort="clicks"
+          direction="desc"
+          onSort={() => {}}
+          page={searchPage}
+          onPage={setSearchPage}
           onOpen={(url) => window.open(url, "_blank")}
         />
-      </section>
-
-      <div className="grid gap-6 xl:grid-cols-3">
-        <section className="xl:col-span-2 admin-surface p-6 sm:p-7 rounded-3xl">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-zinc-100 dark:border-zinc-800 pb-4">
-            <h2 className="text-lg font-black font-outfit text-zinc-950 dark:text-white">
-              Content Performance
-            </h2>
-            <div className="flex gap-1 rounded-full border border-zinc-200/80 bg-zinc-50 p-1 dark:border-zinc-800 dark:bg-zinc-900">
-              {["courses", "chapters", "articles"].map((name) => (
-                <button
-                  key={name}
-                  onClick={() => setContentTab(name)}
-                  className={`rounded-full px-3.5 py-1 text-xs font-bold capitalize transition-all ${
-                    contentTab === name
-                      ? "bg-blue-600 text-white shadow-xs"
-                      : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                  }`}
-                >
-                  {name}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="space-y-2">
-            {content?.content?.[contentTab]?.slice(0, 10).map((item, index) => (
-              <a
-                key={item.id}
-                href={`https://asif.to${item.path}`}
-                target="_blank"
-                className="grid grid-cols-[32px_1fr_auto_auto] items-center gap-3 rounded-2xl p-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors"
-              >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-[11px] font-black text-zinc-500 dark:text-zinc-400">
-                  {index + 1}
-                </span>
-                <span className="truncate text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                  {item.title}
-                </span>
-                <span className="text-xs font-extrabold text-blue-600 dark:text-blue-400">
-                  {item.clicks} clicks
-                </span>
-                <span
-                  className={`text-xs font-extrabold ${
-                    item.growth >= 0 ? "text-emerald-600" : "text-rose-600"
-                  }`}
-                >
-                  {item.growth.toFixed(0)}%
-                </span>
-              </a>
-            ))}
-          </div>
-        </section>
-
-        <section className="admin-surface p-6 sm:p-7 rounded-3xl">
-          <h2 className="mb-4 text-lg font-black font-outfit text-zinc-950 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-4">
-            Traffic Sources
-          </h2>
-          <div className="space-y-3">
-            {sources.slice(0, 12).map((source, index) => (
-              <div
-                key={`${source.source}-${source.referrer}-${index}`}
-                className="flex items-center justify-between gap-3 p-2 rounded-2xl bg-zinc-50/70 dark:bg-[#18181b]/60 border border-zinc-200/50 dark:border-zinc-800/50"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-xs font-bold text-zinc-900 dark:text-zinc-100">
-                    {source.source}
-                  </p>
-                  <p className="truncate text-[10px] font-medium text-zinc-400">
-                    {source.medium}
-                    {source.campaign ? ` · ${source.campaign}` : ""}
-                  </p>
-                </div>
-                <span className="text-xs sm:text-sm font-black font-outfit text-zinc-950 dark:text-white">
-                  {source.views}
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-
-      <section className="admin-surface p-6 sm:p-7 rounded-3xl">
-        <h2 className="mb-4 text-lg font-black font-outfit text-zinc-950 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-4">
-          SEO Opportunities
-        </h2>
-        <div className="grid gap-3.5 md:grid-cols-2 xl:grid-cols-3">
-          {content?.opportunities?.length ? (
-            content.opportunities.slice(0, 18).map((item, index) => (
-              <a
-                key={`${item.page}-${item.type}-${index}`}
-                href={item.page}
-                target="_blank"
-                className="rounded-2xl border border-zinc-200/80 bg-white p-4.5 transition-all hover:border-blue-500/60 hover:shadow-sm dark:border-zinc-800 dark:bg-[#18181b]"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase ${
-                      item.impact === "high"
-                        ? "bg-rose-50 text-rose-600 dark:bg-rose-950/50"
-                        : "bg-amber-50 text-amber-600 dark:bg-amber-950/50"
-                    }`}
-                  >
-                    {item.type}
-                  </span>
-                  <ExternalLink size={13} className="text-zinc-400" />
-                </div>
-                <p className="mt-3 truncate text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                  {item.page}
-                </p>
-                <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                  {item.reason}
-                </p>
-              </a>
-            ))
-          ) : (
-            <p className="text-xs sm:text-sm font-medium text-zinc-400 py-6">
-              Opportunities appear after Search Console data is synced.
-            </p>
-          )}
-        </div>
-      </section>
+      </Section>
     </div>
   );
 }

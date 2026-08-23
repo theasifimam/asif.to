@@ -22,27 +22,18 @@ export default function SignUpFormStep({
   onBack,
 }) {
   return (
-    <div className="flex flex-col gap-4.5">
-      <div className="flex items-start justify-between gap-2">
+    <div className="flex flex-col gap-3.5">
+      {onBack && (
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
-            Create with Email
-          </h2>
-          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mt-1">
-            Fill in your details to receive verification OTP
-          </p>
-        </div>
-        {onBack && (
           <button
             type="button"
             onClick={onBack}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800 text-xs font-bold text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-all shrink-0 cursor-pointer mt-1"
+            className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
           >
-            <ArrowLeft size={13} />
-            <span>Options</span>
+            <ArrowLeft size={14} /> Back to Sign Up Options
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       <form onSubmit={handleSendOtp} className="flex flex-col gap-3.5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -185,7 +176,7 @@ export default function SignUpFormStep({
         <button
           type="submit"
           disabled={isBusy}
-          className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 active:scale-98 cursor-pointer"
+          className="mt-1 w-full bg-blue-600 hover:bg-blue-700 text-white h-11 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 active:scale-98 cursor-pointer"
         >
           {otpSending ? (
             <Loader2 size={16} className="animate-spin" />

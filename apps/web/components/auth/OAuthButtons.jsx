@@ -11,16 +11,16 @@ export default function OAuthButtons({ callbackUrl = "/" }) {
     setPending("");
   };
   return (
-    <div className="space-y-3">
+    <div className="grid grid-cols-2 gap-2.5">
       <ProviderButton
-        label="Continue with Google"
+        label="Google"
         provider="google"
         pending={pending}
         onClick={start}
         icon={<GoogleIcon />}
       />
       <ProviderButton
-        label="Continue with GitHub"
+        label="GitHub"
         provider="github"
         pending={pending}
         onClick={start}
@@ -36,7 +36,7 @@ function ProviderButton({ label, provider, pending, onClick, icon }) {
       type="button"
       disabled={busy}
       onClick={() => onClick(provider)}
-      className="flex h-11 w-full items-center justify-center gap-3 rounded-full border border-zinc-200/90 bg-white hover:bg-zinc-50/90 dark:border-zinc-800 dark:bg-zinc-800/70 dark:hover:bg-zinc-800 px-4 text-xs sm:text-sm font-bold text-zinc-900 dark:text-white shadow-xs transition-all duration-150 disabled:cursor-wait disabled:opacity-60 active:scale-98 cursor-pointer"
+      className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-zinc-200/90 bg-white hover:bg-zinc-50/90 dark:border-zinc-800 dark:bg-zinc-800/70 dark:hover:bg-zinc-800 px-3 text-xs font-bold text-zinc-900 dark:text-white shadow-xs transition-all duration-150 disabled:cursor-wait disabled:opacity-60 active:scale-98 cursor-pointer"
     >
       {pending === provider ? (
         <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
@@ -49,7 +49,7 @@ function ProviderButton({ label, provider, pending, onClick, icon }) {
 }
 function GoogleIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-4.5 w-4.5 shrink-0" aria-hidden="true">
       <path
         fill="#4285F4"
         d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.91h5.38a4.6 4.6 0 0 1-2 3.02v2.54h3.24c1.9-1.75 2.98-4.33 2.98-7.4Z"
@@ -73,7 +73,7 @@ function GitHubIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
-      className="h-5 w-5 fill-current"
+      className="h-4.5 w-4.5 fill-current shrink-0"
       aria-hidden="true"
     >
       <path d="M12 .7A11.5 11.5 0 0 0 8.36 23.1c.58.1.79-.25.79-.56v-2.02c-3.22.7-3.9-1.37-3.9-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.17.08 1.78 1.2 1.78 1.2 1.04 1.77 2.72 1.26 3.38.96.1-.75.4-1.26.74-1.55-2.57-.3-5.27-1.29-5.27-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.16 1.18A10.95 10.95 0 0 1 12 6.32c.98 0 1.95.13 2.87.39 2.2-1.49 3.16-1.18 3.16-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.71 5.39-5.29 5.68.42.36.79 1.07.79 2.16v3.03c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z" />

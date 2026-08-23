@@ -2,7 +2,74 @@ import mongoose from "mongoose";
 import Chapter from "../models/Chapter.js";
 import Course from "../models/Course.js";
 import CourseProgress from "../models/CourseProgress.js";
+import Question from "../models/Question.js";
 import { COURSE_STAGES, summarizeCourseProgress } from "../services/courseProgress.service.js";
+
+// ASIF_CONTEXTUAL_CHAPTER_LEARNING_V1:progress-availability
+async function withLearningAvailability(courseId, chapters = []) {
+  if (!chapters.length) return chapters;
+  const ids = chapters.map((chapter) => chapter._id);
+  const rows = await Question.aggregate([
+    {
+      $match: {
+        type: "quiz",
+        status: "published",
+        learningMappings: {
+          $elemMatch: {
+            course: courseId,
+            chapter: { $in: ids },
+            $or: [
+              { source: { $in: ["manual", "legacy"] } },
+              { source: "auto", confidence: { $gte: 75 } },
+            ],
+          },
+        },
+      },
+    },
+    { $unwind: "$learningMappings" },
+    {
+      $match: {
+        "learningMappings.course": courseId,
+        "learningMappings.chapter": { $in: ids },
+        $or: [
+          { "learningMappings.source": { $in: ["manual", "legacy"] } },
+          {
+            "learningMappings.source": "auto",
+            "learningMappings.confidence": { $gte: 75 },
+          },
+        ],
+      },
+    },
+    {
+      $group: {
+        _id: "$learningMappings.chapter",
+        reviseCount: {
+          $sum: { $cond: [{ $ne: ["$flashcardEnabled", false] }, 1, 0] },
+        },
+        practiceCount: {
+          $sum: { $cond: [{ $ne: ["$quizEnabled", false] }, 1, 0] },
+        },
+      },
+    },
+  ]);
+  const map = new Map(rows.map((row) => [String(row._id), row]));
+  return chapters.map((chapter) => {
+    const row = map.get(String(chapter._id)) || {};
+    const build = chapter.learningActivities?.build || {};
+    return {
+      ...chapter,
+      learningAvailability: {
+        reviseCount: Number(row.reviseCount || 0),
+        practiceCount: Number(row.practiceCount || 0),
+        build: Boolean(
+          build.enabled &&
+            (String(build.title || "").trim() ||
+              String(build.description || "").trim()),
+        ),
+      },
+    };
+  });
+}
 
 // ASIF_COURSE_LEARNING_FLOW_V1
 const fail = (res, status, message) => res.status(status).json({ success: false, message });
@@ -30,7 +97,8 @@ function findEntry(progress, chapterId) {
 
 async function summaryFor(progress, course) {
   const chapters = await Chapter.find({ course: course._id, status: "published" }).sort({ order: 1 }).select(chapterSelect).lean();
-  return summarizeCourseProgress({ course, chapters, progress });
+  const decorated = await withLearningAvailability(course._id, chapters);
+  return summarizeCourseProgress({ course, chapters: decorated, progress });
 }
 
 export const getCourseProgress = async (req, res) => {
@@ -38,8 +106,9 @@ export const getCourseProgress = async (req, res) => {
     const course = await resolveCourse(req.params.slug);
     if (!course) return fail(res, 404, "Course not found.");
     const chapters = await Chapter.find({ course: course._id, status: "published" }).sort({ order: 1 }).select(chapterSelect).lean();
+    const decorated = await withLearningAvailability(course._id, chapters);
     const progress = await CourseProgress.findOne({ user: req.user._id, course: course._id }).lean();
-    res.json({ success: true, data: summarizeCourseProgress({ course, chapters, progress }) });
+    res.json({ success: true, data: summarizeCourseProgress({ course, chapters: decorated, progress }) });
   } catch (error) {
     console.error("[COURSE_PROGRESS] getCourseProgress:", error);
     fail(res, 500, "Unable to load course progress.");
@@ -140,7 +209,8 @@ export const getMyCourseProgressSummary = async (req, res) => {
       const course = progress.course;
       if (!course || course.status !== "published") continue;
       const chapters = await Chapter.find({ course: course._id, status: "published" }).sort({ order: 1 }).select(chapterSelect).lean();
-      courses.push(summarizeCourseProgress({ course, chapters, progress }));
+      const decorated = await withLearningAvailability(course._id, chapters);
+      courses.push(summarizeCourseProgress({ course, chapters: decorated, progress }));
     }
     const overallProgress = courses.length ? Math.round(courses.reduce((sum, item) => sum + item.overallProgress, 0) / courses.length) : 0;
     res.json({ success: true, data: { overallProgress, activeCourses: courses.length, current: courses[0] || null, courses } });

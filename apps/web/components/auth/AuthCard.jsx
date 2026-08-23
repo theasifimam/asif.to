@@ -23,6 +23,7 @@ import ForgotPasswordStep from "./ForgotPasswordStep";
 
 export default function AuthCard({
   defaultTab = "signin",
+  initialForgotPassword = false,
   callbackUrl = "/",
   onClose,
   isModal = false,
@@ -32,7 +33,9 @@ export default function AuthCard({
 
   // ─── View State ──────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState(defaultTab);
-  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(
+    initialForgotPassword,
+  );
 
   // Check URL query on mount for direct email signup link support (?mode=email)
   const [suStep, setSuStep] = useState(() => {
@@ -288,32 +291,51 @@ export default function AuthCard({
   const isBusy = siLoading || suLoading || otpSending;
 
   return (
-    <div className="relative w-full max-w-115 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-4xl shadow-2xl shadow-zinc-950/15 dark:shadow-black/40 flex flex-col overflow-hidden max-h-[88vh] sm:max-h-[92vh]">
-      {/* Header Bar */}
-      <div className="flex items-center justify-between px-6 sm:px-8 pt-6 sm:pt-7 pb-2 shrink-0">
-        <Link href="/" className="flex items-center gap-2.5">
-          <img
-            src="/logo.png"
-            alt="asif.to"
-            className="w-8 h-8 rounded-xl object-contain shadow-xs shrink-0"
-          />
-          <span className="font-outfit font-black text-xl tracking-tight text-foreground">
-            asif<span className="text-blue-600 dark:text-blue-400">.to</span>
-          </span>
-        </Link>
+    <div className="relative w-full max-w-110 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-4xl sm:rounded-4xl shadow-lg shadow-zinc-950/15 dark:shadow-black/40 flex flex-col overflow-hidden max-h-[80vh] sm:max-h-[84vh]">
+      {/* Header Bar - Fixed Branding & Title */}
+      <div className="flex flex-col px-6 sm:px-8 pt-5 sm:pt-6 pb-3 border-b border-zinc-100 dark:border-zinc-800/60 shrink-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <img
+              src="/logo.png"
+              alt="asif.to"
+              className="w-7 h-7 rounded-xl object-contain shadow-xs shrink-0"
+            />
+            <span className="font-outfit font-black text-lg tracking-tight text-foreground">
+              asif<span className="text-blue-600 dark:text-blue-400">.to</span>
+            </span>
+          </Link>
 
-        {isModal && onClose && (
-          <button
-            onClick={onClose}
-            aria-label="Close modal"
-            className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-          >
-            <X size={18} />
-          </button>
-        )}
+          {isModal && onClose && (
+            <button
+              onClick={onClose}
+              aria-label="Close modal"
+              className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
+
+        <div className="mt-2.5">
+          <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+            {isForgotPassword
+              ? "Reset Password"
+              : activeTab === "signup"
+                ? "Create Account"
+                : "Welcome Back"}
+          </h2>
+          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mt-0.5">
+            {isForgotPassword
+              ? "Enter your email to receive a reset code"
+              : activeTab === "signup"
+                ? "Create your account & start learning in seconds"
+                : "Access your courses, cheatsheets & bookmarks"}
+          </p>
+        </div>
       </div>
 
-      {/* Main Content Area */}
+      {/* Main Content Area - Scrollable Body */}
       <div className="flex-1 overflow-y-auto px-6 sm:px-8 py-4 scrollbar-none">
         <AnimatePresence mode="wait">
           {isForgotPassword ? (
@@ -342,25 +364,12 @@ export default function AuthCard({
               <Tabs.Root
                 value={activeTab}
                 onValueChange={handleTabChange}
-                className="flex flex-col gap-5"
+                className="flex flex-col gap-4"
               >
-                {/* Modern Pill Tab Switcher */}
-                <Tabs.List className="flex gap-1 p-1 bg-zinc-100 dark:bg-zinc-800/80 rounded-full border border-zinc-200/50 dark:border-zinc-700/50">
-                  {["signin", "signup"].map((tab) => (
-                    <Tabs.Trigger
-                      key={tab}
-                      value={tab}
-                      className="flex-1 py-2.5 text-xs font-bold text-zinc-500 dark:text-zinc-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:rounded-full data-[state=active]:shadow-md data-[state=active]:shadow-blue-500/25 transition-all cursor-pointer"
-                    >
-                      {tab === "signin" ? "Sign In" : "Create Account"}
-                    </Tabs.Trigger>
-                  ))}
-                </Tabs.List>
-
                 {/* SIGN IN TAB */}
                 <Tabs.Content
                   value="signin"
-                  className="flex flex-col gap-5 outline-none"
+                  className="flex flex-col gap-4 outline-none"
                 >
                   <SignInTab
                     email={siEmail}
@@ -376,12 +385,22 @@ export default function AuthCard({
                     onForgotPassword={() => setIsForgotPassword(true)}
                     callbackUrl={callbackUrl}
                   />
+                  <p className="text-center text-xs font-semibold text-zinc-500 dark:text-zinc-400 pt-0.5">
+                    Don&apos;t have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => handleTabChange("signup")}
+                      className="font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                    >
+                      Sign Up
+                    </button>
+                  </p>
                 </Tabs.Content>
 
                 {/* SIGN UP TAB */}
                 <Tabs.Content
                   value="signup"
-                  className="flex flex-col gap-5 outline-none"
+                  className="flex flex-col gap-2 outline-none"
                 >
                   <AnimatePresence mode="wait">
                     {suStep === "options" && (
@@ -458,6 +477,16 @@ export default function AuthCard({
                       </motion.div>
                     )}
                   </AnimatePresence>
+                  <p className="text-center text-xs font-semibold text-zinc-500 dark:text-zinc-400 pt-0.5">
+                    Already have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={() => handleTabChange("signin")}
+                      className="font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                    >
+                      Sign In
+                    </button>
+                  </p>
                 </Tabs.Content>
               </Tabs.Root>
             </motion.div>
@@ -465,7 +494,7 @@ export default function AuthCard({
         </AnimatePresence>
 
         {/* Footer Security Notice & Legal links */}
-        <div className="mt-5 border-t border-zinc-100 dark:border-zinc-800/80 pt-4 flex flex-col gap-2">
+        <div className="pt-3 flex flex-col gap-2">
           <div className="flex items-start gap-2 rounded-2xl bg-zinc-50 dark:bg-zinc-950/60 p-2.5 text-[11px] leading-4 text-zinc-500">
             <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
             <p>

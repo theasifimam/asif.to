@@ -32,6 +32,23 @@ export const chapterAvailability = (chapter) => {
   };
 };
 
+function readLocal(courseSlug, chapters = []) {
+  if (typeof window === "undefined" || !courseSlug) return { chapters: {} };
+  try {
+    const raw = localStorage.getItem(localKey(courseSlug));
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        if (!parsed.chapters) parsed.chapters = {};
+        return parsed;
+      }
+    }
+  } catch (e) {
+    // Ignore parse errors
+  }
+  return { chapters: {} };
+}
+
 function writeLocal(courseSlug, value) {
   if (typeof window === "undefined" || !courseSlug) return;
   localStorage.setItem(
@@ -113,11 +130,10 @@ function localSummary(courseSlug, chapters = []) {
         stage,
         chapter: target.chapter,
         href:
+          // ASIF_CONTEXTUAL_CHAPTER_LEARNING_V1:local-next-route
           stage === "learn"
             ? `/${courseSlug}/${target.chapter.slug}`
-            : stage === "revise"
-              ? `/revision?course=${encodeURIComponent(courseSlug)}&chapter=${encodeURIComponent(id)}`
-              : `/${courseSlug}/${target.chapter.slug}#chapter-learning-loop`,
+            : `/${courseSlug}/${target.chapter.slug}/${stage}`,
         label:
           stage === "learn"
             ? "Continue reading"

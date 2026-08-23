@@ -1,7 +1,7 @@
 "use client";
 
-import SlideFrame from "./shared/SlideFrame";
 import AutoFitText from "./shared/AutoFitText";
+import SlideFrame from "./shared/SlideFrame";
 
 export default function TutorialCover({ slide, ...frame }) {
   const accent = frame.settings?.accentColor || "#2563eb";

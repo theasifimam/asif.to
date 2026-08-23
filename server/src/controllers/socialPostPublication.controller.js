@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import SocialPost from "../models/SocialPost.js";
 import SocialPublication from "../models/SocialPublication.js";
 import { publishSocialPostToPlatform } from "../services/socialPublishing.service.js";
+import ActivityLog from "../models/ActivityLog.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -114,7 +115,11 @@ export async function uploadSocialPostPublishingAssets(req, res) {
 
 export async function publishSocialPost(req, res) {
   try {
-    const post = await SocialPost.findOne({ _id: req.params.id, createdBy: req.user._id });
+    if (!["admin", "super_admin"].includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: "Only admin or super admin can publish posts." });
+    }
+
+    const post = await SocialPost.findOne({ _id: req.params.id });
     if (!post) return res.status(404).json({ success: false, message: "Social post not found." });
 
     const platforms = cleanPlatforms(req.body?.platforms);
@@ -159,8 +164,12 @@ export async function publishSocialPost(req, res) {
 
 export async function scheduleSocialPost(req, res) {
   try {
-    const post = await SocialPost.findOne({ _id: req.params.id, createdBy: req.user._id });
+    const post = await SocialPost.findOne({ _id: req.params.id });
     if (!post) return res.status(404).json({ success: false, message: "Social post not found." });
+
+    if (post.createdBy.toString() !== req.user._id.toString() && !["admin", "super_admin"].includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: "Forbidden" });
+    }
 
     const platforms = cleanPlatforms(req.body?.platforms);
     if (!platforms.length) return res.status(400).json({ success: false, message: "Choose at least one platform." });
@@ -186,6 +195,24 @@ export async function scheduleSocialPost(req, res) {
         publishedBy: req.user._id,
       })),
     );
+
+    post.status = "scheduled";
+    post.scheduledAt = scheduledAt;
+    post.updatedAt = new Date();
+    await post.save();
+
+    // Add activity log to notify admins
+    await ActivityLog.create({
+      actorId: req.user._id,
+      actorRole: req.user.role || "author",
+      action: "schedule_post",
+      entityType: "SocialPost",
+      entityId: post._id,
+      entityTitle: post.name,
+      description: `User scheduled a social post for ${scheduledAt.toLocaleString()}`,
+      severity: "important",
+      url: `/social-posts/${post._id}`
+    });
 
     return res.status(201).json({
       success: true,

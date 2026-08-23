@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   TrendingUp,
   Users,
@@ -11,12 +12,15 @@ import {
   ChevronRight,
   BrainCircuit,
   Info,
+  ListTodo,
+  PenSquare,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useGetDashboardStatsQuery } from "@/redux/services/dashboardApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasPermission } from "@/lib/permissions";
+import { kanbanApi } from "@/lib/api";
 
 const ICON_MAP = {
   Users,
@@ -87,6 +91,43 @@ const DEFAULT_STAT_THEME = {
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const [plannerTasks, setPlannerTasks] = useState([]);
+  const [plannerLoading, setPlannerLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchPlanner() {
+      try {
+        const res = await kanbanApi.boards();
+        if (res.success && res.data?.data?.length > 0) {
+          const firstBoard = res.data.data[0];
+          const boardId = firstBoard._id || firstBoard.id;
+          const detailRes = await kanbanApi.getBoard(boardId);
+          if (detailRes.success && detailRes.data?.data) {
+            const { cards = [], columns = [] } = detailRes.data.data;
+            const pending = cards.filter((card) => {
+              const colId = String(
+                typeof card.column === "object" ? card.column?._id : card.column
+              );
+              const colObj = columns.find(
+                (c) => String(c._id || c.id) === colId
+              );
+              if (colObj && /done|published|complete/i.test(colObj.name || "")) {
+                return false;
+              }
+              return !card.completed;
+            });
+            setPlannerTasks(pending);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch planner tasks:", err);
+      } finally {
+        setPlannerLoading(false);
+      }
+    }
+    fetchPlanner();
+  }, []);
+
   const {
     data: response,
     isLoading,
@@ -163,52 +204,117 @@ export default function DashboardPage() {
     (stat) => stat.icon !== "Users" || hasPermission(user, "users.view"),
   );
 
+  const userName =
+    user?.fullName || user?.name || user?.username || "Asif";
+
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6 sm:gap-8 p-4 font-sans text-zinc-800 dark:text-zinc-300 sm:p-6 md:p-8 lg:p-10">
-      {/* High-Impact Hero Banner - Rich Modern Gradient Canvas */}
-      <section className="relative flex flex-col items-start justify-between gap-6 overflow-hidden p-6 sm:p-8 md:flex-row md:items-center rounded-[28px] sm:rounded-[36px] border border-zinc-200/90 bg-linear-to-br from-white via-blue-50/30 to-indigo-50/40 shadow-xl shadow-blue-500/3 dark:border-white/8 dark:bg-linear-to-br dark:from-[#111319] dark:via-[#131622] dark:to-[#0f1118] dark:shadow-2xl dark:shadow-black/60">
-        {/* Subtle dot matrix texture overlay */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(59,130,246,0.06)_1px,transparent_1px)] dark:bg-[radial-gradient(rgba(255,255,255,0.035)_1px,transparent_1px)] bg-size-[16px_16px] opacity-70" />
+      {/* Plain Header with Welcome Heading & Top-Right Buttons */}
+      <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">
+            Creator Dashboard
+          </p>
 
-        {/* Ambient Top-Right & Bottom-Left Lighting Meshes */}
-        <div className="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-linear-to-br from-blue-500/15 via-indigo-500/10 to-transparent blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-linear-to-tr from-sky-500/10 to-transparent blur-3xl" />
-
-        <div className="relative z-10 max-w-2xl">
-          <div className="mb-3.5 inline-flex items-center gap-2 rounded-full border border-blue-200/80 bg-blue-50/90 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300 shadow-xs backdrop-blur-xs">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
-            </span>
-            <GraduationCap className="h-3.5 w-3.5" />
-            <span>Platform Overview</span>
-          </div>
-          <h1 className="font-outfit text-2xl sm:text-3xl md:text-4xl font-black leading-tight tracking-[-0.035em] text-zinc-950 dark:text-white">
-            Course Learning & Engagements
+          <h1 className="mt-1 text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-zinc-950 dark:text-white">
+            Welcome back, {userName}! 👋
           </h1>
-          <p className="mt-2 max-w-xl text-xs sm:text-sm font-medium leading-relaxed text-zinc-500 dark:text-zinc-400">
-            Monitor real-time course readership growth across days, months, and
-            years. Manage chapters, student completion rates, and curriculum
-            analytics.
+
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+            Here is your platform roadmap, course analytics, and planner status for today.
           </p>
         </div>
 
-        <div className="relative z-10 flex w-full flex-wrap items-center gap-2.5 md:w-auto">
+        {/* Quick Action Buttons at Top Right */}
+        <div className="flex flex-wrap items-center gap-2.5">
           <Link
             href="/courses"
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 px-5 py-3 text-xs font-bold text-white shadow-md shadow-blue-600/25 transition-all duration-200 hover:-translate-y-0.5 active:scale-[.985] md:flex-initial cursor-pointer"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-blue-600 px-4 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-all cursor-pointer"
           >
             <BookOpen className="w-4 h-4" />
             <span>Manage Courses</span>
           </Link>
           <Link
-            href="/quiz"
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-zinc-200/80 bg-white/90 px-5 py-3 text-xs font-bold text-zinc-700 shadow-xs backdrop-blur-md transition-all duration-200 hover:bg-zinc-50 hover:border-zinc-300 hover:-translate-y-0.5 active:scale-[.985] dark:border-white/10 dark:bg-white/5 dark:text-zinc-200 dark:hover:bg-white/9 dark:hover:border-white/20 md:flex-initial cursor-pointer"
+            href="/articles"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-zinc-200/80 bg-white px-4 text-xs font-bold text-zinc-700 shadow-xs hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 transition-all cursor-pointer"
           >
-            <BrainCircuit className="w-4 h-4" />
+            <PenSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <span>Write Articles</span>
+          </Link>
+          <Link
+            href="/quiz"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-zinc-200/80 bg-white px-4 text-xs font-bold text-zinc-700 shadow-xs hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 transition-all cursor-pointer"
+          >
+            <BrainCircuit className="w-4 h-4 text-purple-600 dark:text-purple-400" />
             <span>Quiz Builder</span>
           </Link>
         </div>
+      </header>
+
+      {/* Tasks Left in Planner Section */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+              <ListTodo className="w-4 h-4" />
+            </div>
+            <h2 className="text-sm font-black text-zinc-950 dark:text-white flex items-center gap-2">
+              <span>Tasks Left in Planner</span>
+              <span className="rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 px-2.5 py-0.5 text-[10px] font-black">
+                {plannerLoading ? "..." : `${plannerTasks.length} pending`}
+              </span>
+            </h2>
+          </div>
+
+          <Link
+            href="/planner"
+            className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            <span>Open Planner</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        {plannerLoading ? (
+          <div className="flex items-center gap-2 text-xs text-zinc-400 font-semibold py-2">
+            <span className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            Fetching planner tasks...
+          </div>
+        ) : plannerTasks.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {plannerTasks.slice(0, 3).map((task) => (
+              <Link
+                key={task._id || task.id}
+                href="/planner"
+                className="flex flex-col justify-between p-3.5 rounded-2xl bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800 hover:border-blue-400 dark:hover:border-blue-500/50 transition-all shadow-xs group"
+              >
+                <div className="flex items-start justify-between gap-2 mb-1.5">
+                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                    {task.type || "Task"}
+                  </span>
+                  {task.priority && (
+                    <span
+                      className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${
+                        task.priority === "high" || task.priority === "urgent"
+                          ? "bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"
+                          : "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
+                      }`}
+                    >
+                      {task.priority}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  {task.title}
+                </p>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="p-3.5 rounded-2xl bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+            🎉 All tasks in your planner are completed! Great job!
+          </div>
+        )}
       </section>
 
       {/* Bento Metric Cards Grid */}

@@ -3,17 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+// ASIF_SIMPLE_ANALYTICS_V1
 const links = [
   ["Overview", "/analytics"],
+  ["Search Console", "/analytics/search"],
   ["Platform", "/analytics/platform"],
-  ["Search", "/analytics/search"],
-  ["Audience", "/analytics/audience"],
-  ["Content", "/analytics/content"],
-  ["Insights", "/analytics/insights"],
 ];
 
 export default function AnalyticsNav() {
   const pathname = usePathname();
+
   return (
     <nav
       className="flex gap-1 overflow-x-auto scrollbar-none"

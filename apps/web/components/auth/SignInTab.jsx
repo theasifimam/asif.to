@@ -19,20 +19,11 @@ export default function SignInTab({
   callbackUrl = "/",
 }) {
   return (
-    <div className="flex flex-col gap-4.5">
-      <div>
-        <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
-          Welcome Back
-        </h2>
-        <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mt-1">
-          Access your courses, cheatsheets & bookmarks
-        </p>
-      </div>
-
+    <div className="flex flex-col gap-3.5">
       {/* Primary Email & Password Form */}
-      <form onSubmit={handleSignin} className="flex flex-col gap-3.5">
+      <form onSubmit={handleSignin} className="flex flex-col gap-3">
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-extrabold text-foreground uppercase tracking-wider ml-1">
+          <label className="text-xs pl-3 text-foreground bold tracking-wider">
             Email or Username
           </label>
           <div className="relative">
@@ -53,7 +44,7 @@ export default function SignInTab({
 
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between ml-1">
-            <label className="text-xs font-extrabold text-foreground uppercase tracking-wider">
+            <label className="text-xs pl-3 text-foreground bold tracking-wider">
               Password
             </label>
             <button
@@ -90,7 +81,7 @@ export default function SignInTab({
         <button
           type="submit"
           disabled={isBusy}
-          className="mt-1 w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed active:scale-98 cursor-pointer"
+          className="mt-1 w-full bg-blue-600 hover:bg-blue-700 text-white h-11 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed active:scale-98 cursor-pointer"
         >
           {isLoading ? (
             <Loader2 size={16} className="animate-spin" />

@@ -9,8 +9,8 @@ import {
   ChevronLeft,
   CheckCircle2,
   Loader2,
-  ShieldCheck,
   KeyRound,
+  ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -71,32 +71,21 @@ export default function ForgotPasswordStep({ onBackToSignin }) {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Top Title & Back button */}
-      <div className="flex items-start gap-3">
+    <div className="flex flex-col gap-4">
+      {/* Back button */}
+      <div>
         <button
+          type="button"
           onClick={onBackToSignin}
-          className="mt-1 p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl text-zinc-500 dark:text-zinc-400 transition-colors shrink-0"
+          className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
         >
-          <ChevronLeft size={20} />
+          <ChevronLeft size={14} /> Back to Sign In
         </button>
-        <div>
-          <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
-            Reset Password
-          </h2>
-          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mt-1">
-            {step === "request" &&
-              "Enter your registered email to receive a reset code."}
-            {step === "reset" &&
-              `Enter the verification code sent to ${email} and your new password.`}
-            {step === "done" && "Your password has been successfully updated."}
-          </p>
-        </div>
       </div>
 
       {/* Step 1: Request Reset Code */}
       {step === "request" && (
-        <form onSubmit={handleSendOtp} className="flex flex-col gap-4">
+        <form onSubmit={handleSendOtp} className="flex flex-col gap-3.5">
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-extrabold text-foreground uppercase tracking-wider ml-1">
               Email Address
@@ -120,7 +109,7 @@ export default function ForgotPasswordStep({ onBackToSignin }) {
           <button
             type="submit"
             disabled={isSending}
-            className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 active:scale-98"
+            className="mt-1 w-full bg-blue-600 hover:bg-blue-700 text-white h-11 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 active:scale-98 cursor-pointer"
           >
             {isSending ? (
               <Loader2 size={16} className="animate-spin" />
@@ -135,7 +124,7 @@ export default function ForgotPasswordStep({ onBackToSignin }) {
 
       {/* Step 2: Verification Code & New Password */}
       {step === "reset" && (
-        <form onSubmit={handleResetPassword} className="flex flex-col gap-4">
+        <form onSubmit={handleResetPassword} className="flex flex-col gap-3.5">
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-extrabold text-foreground uppercase tracking-wider ml-1">
               Verification Code
@@ -177,7 +166,7 @@ export default function ForgotPasswordStep({ onBackToSignin }) {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-foreground transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-foreground transition-colors cursor-pointer"
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
@@ -187,7 +176,7 @@ export default function ForgotPasswordStep({ onBackToSignin }) {
           <button
             type="submit"
             disabled={isResetting}
-            className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 active:scale-98"
+            className="mt-1 w-full bg-blue-600 hover:bg-blue-700 text-white h-11 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 active:scale-98 cursor-pointer"
           >
             {isResetting ? (
               <Loader2 size={16} className="animate-spin" />
@@ -200,15 +189,19 @@ export default function ForgotPasswordStep({ onBackToSignin }) {
 
       {/* Step 3: Success Done */}
       {step === "done" && (
-        <div className="flex flex-col gap-5">
-          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5 flex items-start gap-3">
-            <CheckCircle2 size={24} className="text-emerald-500 shrink-0 mt-0.5" />
+        <div className="flex flex-col gap-4">
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 flex items-start gap-3">
+            <CheckCircle2
+              size={22}
+              className="text-emerald-500 shrink-0 mt-0.5"
+            />
             <div>
               <h3 className="font-bold text-sm text-foreground">
                 Password Reset Complete
               </h3>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                Your password has been changed. You can now sign in with your new password.
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                Your password has been updated. You can now sign in with your
+                new password.
               </p>
             </div>
           </div>
@@ -216,7 +209,7 @@ export default function ForgotPasswordStep({ onBackToSignin }) {
           <button
             type="button"
             onClick={onBackToSignin}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all cursor-pointer"
           >
             Back to Sign In
           </button>

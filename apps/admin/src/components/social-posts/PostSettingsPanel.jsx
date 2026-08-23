@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { FORMAT_LIST } from "./formats";
 import { PRESETS } from "./presets";
+import { coursesApi, topicCategoriesApi } from "@/lib/api";
 
 const input =
   "w-full rounded-xl border border-zinc-200/90 dark:border-zinc-800 bg-background px-3.5 py-2.5 text-sm font-medium outline-none focus:ring-2 focus:ring-primary/25 transition-all";
@@ -12,10 +14,32 @@ export default function PostSettingsPanel({
   onSettingsChange,
   onApplyPreset,
 }) {
+  const [courses, setCourses] = useState([]);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    coursesApi.listAll().then((res) => {
+      if (res?.success) setCourses(res.data?.data || res.data || []);
+    });
+  }, []);
+
+  const courseId = typeof post.course === 'object' && post.course ? (post.course._id || post.course.id) : post.course;
+  const categoryId = typeof post.category === 'object' && post.category ? (post.category._id || post.category.id) : post.category;
+
+  useEffect(() => {
+    if (courseId) {
+      topicCategoriesApi.list(courseId).then((res) => {
+        if (res?.success) setCategories(res.data?.data || res.data || []);
+      });
+    } else {
+      setCategories([]);
+    }
+  }, [courseId]);
+
   return (
     <div className="space-y-6">
       {/* Basic Post Metadata */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <label className="block space-y-1.5">
           <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">
             Internal Name
@@ -30,14 +54,42 @@ export default function PostSettingsPanel({
 
         <label className="block space-y-1.5">
           <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">
-            Category / Topic
+            Category (Optional)
           </span>
-          <input
+          <select
             className={input}
-            placeholder="e.g. React.js, Next.js"
-            value={post.category || ""}
-            onChange={(e) => onPostChange({ category: e.target.value })}
-          />
+            value={categoryId || ""}
+            onChange={(e) => onPostChange({ category: e.target.value || null })}
+            disabled={!courseId}
+          >
+            <option value="">No Category Linked</option>
+            {categories.map((c) => (
+              <option key={c._id || c.id} value={c._id || c.id}>
+                {c.name || c.title}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block space-y-1.5">
+          <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">
+            Course (Optional)
+          </span>
+          <select
+            className={input}
+            value={courseId || ""}
+            onChange={(e) => {
+              const newCourse = e.target.value || null;
+              onPostChange({ course: newCourse, category: null });
+            }}
+          >
+            <option value="">No Course Linked</option>
+            {courses.map((c) => (
+              <option key={c._id || c.id} value={c._id || c.id}>
+                {c.title || c.name}
+              </option>
+            ))}
+          </select>
         </label>
       </div>
 

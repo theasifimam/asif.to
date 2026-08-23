@@ -477,7 +477,7 @@ export default function SocialPostStudio({
               format={editor.post.format}
               settings={{
                 ...editor.post.settings,
-                _category: editor.post.category,
+                _category: typeof editor.post.category === 'object' && editor.post.category ? editor.post.category.name : editor.post.category,
               }}
               slideIndex={index}
               totalSlides={editor.post.slides.length}

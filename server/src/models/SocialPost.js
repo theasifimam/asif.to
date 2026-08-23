@@ -58,7 +58,8 @@ const postSettingsSchema = new Schema(
 
 const socialPostSchema = new Schema({
   name: { type: String, required: true, trim: true },
-  category: { type: String, default: "", trim: true },
+  course: { type: Schema.Types.ObjectId, ref: "Course", default: null, index: true },
+  category: { type: Schema.Types.ObjectId, ref: "TopicCategory", default: null, index: true },
   caption: { type: String, default: "", trim: true },
   hashtags: { type: [String], default: [] },
   platform: {
@@ -73,10 +74,11 @@ const socialPostSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ["draft", "published"],
+    enum: ["draft", "published", "scheduled", "ready", "pending_approval"],
     default: "draft",
     index: true,
   },
+  scheduledAt: { type: Date, default: null, index: true },
   settings: { type: postSettingsSchema, default: () => ({}) },
   slides: { type: [slideSchema], default: [] },
   createdBy: {

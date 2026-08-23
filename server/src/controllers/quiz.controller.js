@@ -153,6 +153,11 @@ export const getQuizQuestions = async (req, res) => {
           elem.category = cat._id;
         }
       }
+// ASIF_CONTEXTUAL_CHAPTER_LEARNING_V1:eligible-mapping
+      elem.$or = [
+        { source: { $in: ["manual", "legacy"] } },
+        { source: "auto", confidence: { $gte: 75 } },
+      ];
       filter.learningMappings = { $elemMatch: elem };
     }
     if (difficulty) filter.difficulty = difficulty;

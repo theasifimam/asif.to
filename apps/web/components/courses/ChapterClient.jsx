@@ -12,7 +12,6 @@ import ChapterQuickNav from "@/components/chapter/ChapterQuickNav";
 import ChapterShareSection from "@/components/chapter/ChapterShareSection";
 import ChapterDocumentCard from "@/components/chapter/ChapterDocumentCard";
 import StandaloneCodeSnippets from "@/components/chapter/StandaloneCodeSnippets";
-import TryItChallenge from "@/components/chapter/TryItChallenge";
 import { parseContentBlocks } from "@/components/chapter/chapterUtils";
 import { useGetChapterBySlugQuery } from "@/lib/api/courseApi";
 import { TECH_STACKS } from "@/lib/tutorialData";
@@ -225,10 +224,12 @@ const toggleChapterComplete = async () => {
               standaloneSnippets={standaloneSnippets}
               techName={tech?.name}
             />
-            {/* Try It Challenge */}
-            {/* ASIF_COURSE_LEARNING_FLOW_V1:practice-anchor */}
-            <div id="chapter-practice" className="scroll-mt-28"><TryItChallenge challenge={chapter?.tryItChallenge} /></div>
-            <ChapterLearningLoop courseSlug={activeCourseSlug} chapter={chapter} progress={currentProgress} onStageChange={(stage, options) => courseProgress.markStage(chapter, stage, options)} />
+            {/* Contextual learning activities */}
+            <ChapterLearningLoop
+              courseSlug={activeCourseSlug}
+              chapter={chapter}
+              progress={currentProgress}
+            />
             <AuthorIdentityCard
               author={chapter?.author || course?.author}
               publishedAt={chapter?.createdAt}

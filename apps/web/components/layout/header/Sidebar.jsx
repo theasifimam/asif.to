@@ -184,12 +184,22 @@ export default function Sidebar({
               {!isInitialized ? (
                 <div className="w-full h-11 rounded-full bg-zinc-200 dark:bg-zinc-800 animate-pulse" />
               ) : !isAuthenticated ? (
-                <button
-                  onClick={onSignInClick}
-                  className="w-full py-3 rounded-full bg-blue-600 text-white text-xs font-bold uppercase tracking-wider hover:bg-blue-700 active:scale-95 transition-all cursor-pointer"
-                >
-                  Sign In / Create Account
-                </button>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/login"
+                    onClick={onClose}
+                    className="flex-1 py-3 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-center text-xs font-bold uppercase tracking-wider hover:bg-zinc-200 transition-all"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/signup"
+                    onClick={onClose}
+                    className="flex-1 py-3 rounded-full bg-blue-600 text-white text-center text-xs font-bold uppercase tracking-wider hover:bg-blue-700 active:scale-95 transition-all"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
               ) : (
                 <div className="flex items-center justify-between p-2 rounded-2xl bg-white dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700/60">
                   <Link

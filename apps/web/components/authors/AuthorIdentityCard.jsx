@@ -20,8 +20,8 @@ function resolveAuthorData(author, explicitAvatar) {
       username: "asif",
       role: authorIdentity.role || "Full-Stack JavaScript Developer",
       bio: authorIdentity.shortBio || "",
-      avatar: explicitAvatar || null,
-      profileUrl: "/author/asif",
+      avatar: explicitAvatar || authorIdentity.image || null,
+      profileUrl: "/asif",
     };
   }
 
@@ -36,8 +36,8 @@ function resolveAuthorData(author, explicitAvatar) {
         ? authorIdentity.role || "Full-Stack JavaScript Developer"
         : "Content Author & Contributor",
       bio: isAsif ? authorIdentity.shortBio : "",
-      avatar: explicitAvatar || null,
-      profileUrl: username ? `/author/${encodeURIComponent(username)}` : null,
+      avatar: explicitAvatar || (isAsif ? authorIdentity.image : null) || null,
+      profileUrl: username ? `/${encodeURIComponent(username)}` : null,
     };
   }
 
@@ -66,11 +66,11 @@ function resolveAuthorData(author, explicitAvatar) {
     author.shortBio ||
     (isAsif ? authorIdentity.shortBio : "");
 
-  const resolvedAvatar = explicitAvatar || author.avatar || author.image || null;
+  const resolvedAvatar = explicitAvatar || author.avatar || author.image || (isAsif ? authorIdentity.image : null) || null;
 
   const profileUrl =
     author.url ||
-    (username ? `/author/${encodeURIComponent(username)}` : null);
+    (username ? `/${encodeURIComponent(username)}` : null);
 
   return {
     name,

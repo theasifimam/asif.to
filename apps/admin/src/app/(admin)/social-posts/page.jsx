@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
+  Clock,
   Copy,
   Edit3,
   Image as ImageIcon,
@@ -13,7 +14,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { socialPostsApi } from "@/lib/api";
+import { socialPostsApi, coursesApi } from "@/lib/api";
 import SocialMediaTabs from "@/components/social-posts/SocialMediaTabs";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +28,25 @@ import { ViewToggle } from "@/components/ui/ViewToggle";
 import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { listingReturnTo, useUrlFilters } from "@/hooks/useUrlFilters";
 import { Skeleton } from "@/components/ui";
+import {
+  AdminContent,
+  AdminEmptyState,
+  AdminFilters,
+  AdminPage,
+  AdminPageHeader,
+  AdminPagination,
+  AdminSearch,
+} from "@/components/admin";
+
+function fmt(value, withTime = true) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
 
 function SocialPostCardSkeleton() {
   return (
@@ -78,15 +98,6 @@ function SocialPostRowSkeleton() {
     </tr>
   );
 }
-import {
-  AdminContent,
-  AdminEmptyState,
-  AdminFilters,
-  AdminPage,
-  AdminPageHeader,
-  AdminPagination,
-  AdminSearch,
-} from "@/components/admin";
 
 const statusStyles = {
   published:
@@ -114,15 +125,26 @@ export default function SocialPostsPage() {
     search: "",
     platform: "all",
     status: "all",
+    course: "all",
+    category: "all",
+    sort: "newest",
     page: 1,
     limit: 20,
     view: "card",
   });
-  const { search, platform, status, page, limit } = filters;
+  const { search, platform, status, course, category, sort, page, limit } =
+    filters;
   const viewMode = filters.view || "card";
   const setViewMode = (view) => setFilters((current) => ({ ...current, view }));
 
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [coursesList, setCoursesList] = useState([]);
+
+  useEffect(() => {
+    coursesApi.listAll().then((res) => {
+      if (res?.success) setCoursesList(res.data?.data || res.data || []);
+    });
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search.trim()), 250);
@@ -156,7 +178,7 @@ export default function SocialPostsPage() {
   }, [load]);
 
   const filteredPosts = useMemo(() => {
-    return posts.filter((post) => {
+    const list = posts.filter((post) => {
       const matchPlatform =
         platform === "all" ||
         (post.platform &&
@@ -164,9 +186,79 @@ export default function SocialPostsPage() {
       const matchStatus =
         status === "all" ||
         (post.status && post.status.toLowerCase() === status.toLowerCase());
-      return matchPlatform && matchStatus;
+
+      const postCourseId =
+        typeof post.course === "object" && post.course
+          ? post.course._id
+          : post.course;
+      const matchCourse =
+        course === "all" || (postCourseId && postCourseId === course);
+
+      const postCategoryId =
+        typeof post.category === "object" && post.category
+          ? post.category._id
+          : post.category;
+      const matchCategory =
+        category === "all" || (postCategoryId && postCategoryId === category);
+
+      return matchPlatform && matchStatus && matchCourse && matchCategory;
     });
-  }, [posts, platform, status]);
+
+    // Sort posts by schedule date or creation date
+    return list.sort((a, b) => {
+      if (sort === "scheduled_asc") {
+        if (a.scheduledAt && b.scheduledAt) {
+          return (
+            new Date(a.scheduledAt).getTime() -
+            new Date(b.scheduledAt).getTime()
+          );
+        }
+        if (a.scheduledAt) return -1;
+        if (b.scheduledAt) return 1;
+        return (
+          new Date(b.updatedAt || b.createdAt).getTime() -
+          new Date(a.updatedAt || a.createdAt).getTime()
+        );
+      }
+      if (sort === "scheduled_desc") {
+        if (a.scheduledAt && b.scheduledAt) {
+          return (
+            new Date(b.scheduledAt).getTime() -
+            new Date(a.scheduledAt).getTime()
+          );
+        }
+        if (a.scheduledAt) return -1;
+        if (b.scheduledAt) return 1;
+        return (
+          new Date(b.updatedAt || b.createdAt).getTime() -
+          new Date(a.updatedAt || a.createdAt).getTime()
+        );
+      }
+      if (sort === "oldest") {
+        return (
+          new Date(a.createdAt || a.updatedAt).getTime() -
+          new Date(b.createdAt || b.updatedAt).getTime()
+        );
+      }
+      // default: newest
+      return (
+        new Date(b.updatedAt || b.createdAt).getTime() -
+        new Date(a.updatedAt || a.createdAt).getTime()
+      );
+    });
+  }, [posts, platform, status, course, category, sort]);
+
+  const uniqueCategories = useMemo(() => {
+    const catsMap = new Map();
+    posts.forEach((p) => {
+      if (p.category && typeof p.category === "object") {
+        catsMap.set(p.category._id, p.category.name);
+      }
+    });
+    return Array.from(catsMap.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [posts]);
 
   const pages = Math.max(Math.ceil(filteredPosts.length / limit), 1);
   const visible = useMemo(
@@ -277,12 +369,78 @@ export default function SocialPostsPage() {
             </SelectContent>
           </Select>
         </div>
+
+        <div className="w-full sm:w-48">
+          <Select
+            value={course}
+            onValueChange={(val) =>
+              setFilters((current) => ({ ...current, course: val, page: 1 }))
+            }
+          >
+            <SelectTrigger className="h-10 rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b]">
+              <SelectValue placeholder="All courses" />
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
+              <SelectItem value="all">All courses</SelectItem>
+              {coursesList.map((c) => (
+                <SelectItem key={c._id || c.id} value={c._id || c.id}>
+                  {c.title || c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="w-full sm:w-44">
+          <Select
+            value={category}
+            onValueChange={(val) =>
+              setFilters((current) => ({ ...current, category: val, page: 1 }))
+            }
+          >
+            <SelectTrigger className="h-10 rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b]">
+              <SelectValue placeholder="All categories" />
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
+              <SelectItem value="all">All categories</SelectItem>
+              {uniqueCategories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* 🌟 Scheduled Time Sort Filter */}
+        <div className="w-full sm:w-52">
+          <Select
+            value={sort || "newest"}
+            onValueChange={(val) =>
+              setFilters((current) => ({ ...current, sort: val, page: 1 }))
+            }
+          >
+            <SelectTrigger className="h-10 rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b]">
+              <SelectValue placeholder="Sort Schedule" />
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
+              <SelectItem value="newest">Newest first</SelectItem>
+              <SelectItem value="oldest">Oldest first</SelectItem>
+              <SelectItem value="scheduled_asc">
+                ⚡ Schedule: Soonest first
+              </SelectItem>
+              <SelectItem value="scheduled_desc">
+                📅 Schedule: Latest first
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </AdminFilters>
 
       <AdminContent plain={viewMode === "card"}>
         {viewMode === "card" ? (
           <div className="space-y-6">
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-1 sm:grid-cols-2 xl:grid-cols-3">
               {loading ? (
                 Array.from({ length: limit }).map((_, i) => (
                   <SocialPostCardSkeleton key={i} />
@@ -315,10 +473,12 @@ export default function SocialPostsPage() {
                         href={`/social-posts/${post._id}`}
                         className="block"
                       >
-                        <div className="mb-4 aspect-square rounded-2xl bg-linear-to-br from-zinc-900 via-zinc-950 to-black p-5 text-white shadow-inner flex flex-col justify-between relative overflow-hidden group-hover:scale-[1.01] transition-transform duration-200">
+                        <div className="mb-3 aspect-square rounded-2xl bg-linear-to-br from-zinc-900 via-zinc-950 to-black p-5 text-white shadow-inner flex flex-col justify-between relative overflow-hidden group-hover:scale-[1.01] transition-transform duration-200">
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-[10px] font-black uppercase tracking-wider text-blue-400">
-                              {post.category || "asif.to"}
+                              {(typeof post.category === "object"
+                                ? post.category?.name
+                                : post.category) || "asif.to"}
                             </span>
                             <span
                               className={`rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${
@@ -336,6 +496,17 @@ export default function SocialPostsPage() {
                           </div>
                         </div>
                       </Link>
+
+                      {/* Scheduled Time Badge */}
+                      {post.scheduledAt && (
+                        <div className="flex items-center gap-1.5 rounded-full bg-purple-500/10 dark:bg-purple-500/20 border border-purple-500/20 px-3 py-1 text-[10px] font-bold text-purple-600 dark:text-purple-400 w-fit">
+                          <Clock
+                            size={11}
+                            className="text-purple-500 animate-pulse shrink-0"
+                          />
+                          <span>Auto-post: {fmt(post.scheduledAt)}</span>
+                        </div>
+                      )}
 
                       <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-semibold">
                         <span className="capitalize">
@@ -423,9 +594,9 @@ export default function SocialPostsPage() {
                     <tr>
                       <th className="px-6 py-4.5">Post</th>
                       <th className="px-6 py-4.5">Category</th>
-                      <th className="px-6 py-4.5">Platform & Format</th>
+                      <th className="px-6 py-4.5">Platform &amp; Format</th>
                       <th className="px-6 py-4.5">Slides</th>
-                      <th className="px-6 py-4.5">Status</th>
+                      <th className="px-6 py-4.5">Status &amp; Schedule</th>
                       <th className="px-6 py-4.5 text-right">Actions</th>
                     </tr>
                   </thead>
@@ -470,7 +641,9 @@ export default function SocialPostsPage() {
                           </td>
                           <td className="px-6 py-4.5">
                             <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-400">
-                              {post.category || "asif.to"}
+                              {(typeof post.category === "object"
+                                ? post.category?.name
+                                : post.category) || "asif.to"}
                             </span>
                           </td>
                           <td className="px-6 py-4.5">
@@ -490,14 +663,22 @@ export default function SocialPostsPage() {
                             </span>
                           </td>
                           <td className="px-6 py-4.5">
-                            <span
-                              className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
-                                statusStyles[post.status] ||
-                                "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
-                              }`}
-                            >
-                              {post.status}
-                            </span>
+                            <div className="flex flex-col gap-1">
+                              <span
+                                className={`w-fit rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                                  statusStyles[post.status] ||
+                                  "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+                                }`}
+                              >
+                                {post.status}
+                              </span>
+                              {post.scheduledAt && (
+                                <span className="flex items-center gap-1 text-[10px] font-bold text-purple-600 dark:text-purple-400">
+                                  <Clock size={10} className="shrink-0" />{" "}
+                                  {fmt(post.scheduledAt)}
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="px-6 py-4.5">
                             <div className="flex justify-end gap-1">

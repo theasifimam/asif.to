@@ -59,7 +59,9 @@ function normalizeFormat(value) {
 
 function normalizePlatform(value) {
   const candidate = Array.isArray(value) ? value[0] : value;
-  const normalized = String(candidate || "instagram").trim().toLowerCase();
+  const normalized = String(candidate || "instagram")
+    .trim()
+    .toLowerCase();
 
   return VALID_PLATFORMS.has(normalized) ? normalized : "general";
 }
@@ -172,9 +174,15 @@ export function parseSocialPostImport(raw) {
   };
 }
 
-export default function JsonImportPanel({ onImport }) {
+export default function JsonImportPanel({ onImport, existingPost }) {
   const [sampleId, setSampleId] = useState("educational-carousel");
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(() => {
+    if (existingPost) {
+      const { _id, createdAt, updatedAt, createdBy, __v, slideCount, firstTemplate, course, category, ...cleanPost } = existingPost;
+      return JSON.stringify(cleanPost, null, 2);
+    }
+    return "";
+  });
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -210,9 +218,7 @@ export default function JsonImportPanel({ onImport }) {
       onImport(post);
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Could not import this JSON.",
+        err instanceof Error ? err.message : "Could not import this JSON.",
       );
     }
   };
@@ -226,9 +232,12 @@ export default function JsonImportPanel({ onImport }) {
           </div>
 
           <div>
-            <h2 className="text-base sm:text-lg font-bold font-outfit text-zinc-950 dark:text-white">Import AI JSON Object</h2>
+            <h2 className="text-base sm:text-lg font-bold font-outfit text-zinc-950 dark:text-white">
+              Import AI JSON Object
+            </h2>
             <p className="mt-1 max-w-2xl text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 font-medium">
-              Choose a post format, copy the prompt structure to ChatGPT or your preferred AI, then paste the completed JSON object below.
+              Choose a post format, copy the prompt structure to ChatGPT or your
+              preferred AI, then paste the completed JSON object below.
             </p>
           </div>
         </div>
@@ -277,6 +286,12 @@ export default function JsonImportPanel({ onImport }) {
                 {copied ? "Copied" : "Copy sample"}
               </Button>
             </div>
+            
+            {existingPost && (
+              <p className="mt-4 text-[11px] leading-5 text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/30 p-2.5 rounded-xl border border-amber-200 dark:border-amber-900/50">
+                <strong>Note:</strong> The JSON editor on the right is pre-filled with the current data of this post. You can copy it, ask AI to update it, and paste the result back.
+              </p>
+            )}
           </div>
 
           <div className="rounded-xl border border-zinc-200/80 bg-muted/30 p-4 dark:border-zinc-800">
@@ -305,9 +320,7 @@ export default function JsonImportPanel({ onImport }) {
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                 3
               </span>
-              <span className="text-sm font-semibold">
-                Paste and validate
-              </span>
+              <span className="text-sm font-semibold">Paste and validate</span>
             </div>
 
             <p className="text-xs leading-5 text-muted-foreground">
@@ -333,7 +346,7 @@ export default function JsonImportPanel({ onImport }) {
             }}
             spellCheck={false}
             placeholder="Paste the completed JSON object here..."
-            className="min-h-[470px] resize-y rounded-xl font-mono text-xs leading-5"
+            className="min-h-117.5 resize-y rounded-xl font-mono text-xs leading-5"
           />
 
           {error && (

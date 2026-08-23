@@ -1,4 +1,5 @@
 import SocialPost from "../models/SocialPost.js";
+import SocialPublication from "../models/SocialPublication.js";
 
 /**
  * List all social posts for the current user.
@@ -9,20 +10,40 @@ export const getSocialPosts = async (req, res) => {
     const { status, search, category } = req.query;
     const filter = { createdBy: req.user._id };
     if (status && status !== "all") filter.status = status;
-    if (category) filter.category = { $regex: category, $options: "i" };
+    if (category && category !== "all") filter.category = category;
+    const course = req.query.course;
+    if (course && course !== "all") filter.course = course;
+
     if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { category: { $regex: search, $options: "i" } },
-      ];
+      filter.name = { $regex: search, $options: "i" };
     }
     const posts = await SocialPost.find(filter)
       .sort({ updatedAt: -1 })
-      .select("name category caption hashtags platform format status slides settings createdAt updatedAt")
+      .select("name course category caption hashtags platform format status slides settings scheduledAt createdAt updatedAt")
+      .populate("course", "title")
+      .populate("category", "name")
       .lean();
-    // Attach slide count and first slide template for listing display
+
+    // Also check for any scheduled publications for posts
+    const scheduledPubs = await SocialPublication.find({
+      socialPost: { $in: posts.map((p) => p._id) },
+      status: "scheduled",
+    }).lean();
+
+    const schedMap = {};
+    for (const sp of scheduledPubs) {
+      if (sp.scheduledAt) {
+        const key = sp.socialPost.toString();
+        if (!schedMap[key] || new Date(sp.scheduledAt) < new Date(schedMap[key])) {
+          schedMap[key] = sp.scheduledAt;
+        }
+      }
+    }
+
+    // Attach slide count and scheduledAt for listing display
     const data = posts.map((p) => ({
       ...p,
+      scheduledAt: p.scheduledAt || schedMap[p._id.toString()] || null,
       slideCount: p.slides?.length || 0,
       firstTemplate: p.slides?.[0]?.template || null,
     }));
@@ -42,7 +63,10 @@ export const getSocialPostById = async (req, res) => {
     const post = await SocialPost.findOne({
       _id: req.params.id,
       createdBy: req.user._id,
-    }).lean();
+    })
+      .populate("course", "title")
+      .populate("category", "name")
+      .lean();
     if (!post)
       return res.status(404).json({ success: false, message: "Social post not found." });
     res.status(200).json({ success: true, data: post });
@@ -58,13 +82,14 @@ export const getSocialPostById = async (req, res) => {
  */
 export const createSocialPost = async (req, res) => {
   try {
-    const { name, category, caption, hashtags, platform, format, settings, slides } =
+    const { name, course, category, caption, hashtags, platform, format, settings, slides } =
       req.body;
     if (!name)
       return res.status(400).json({ success: false, message: "Post name is required." });
     const post = await SocialPost.create({
       name,
-      category: category || "",
+      course: course || null,
+      category: category || null,
       caption: caption || "",
       hashtags: Array.isArray(hashtags) ? hashtags : [],
       platform: platform || "instagram",
@@ -87,7 +112,7 @@ export const createSocialPost = async (req, res) => {
 export const updateSocialPost = async (req, res) => {
   try {
     const allowed = [
-      "name", "category", "caption", "hashtags", "platform", "format", "status", "settings", "slides",
+      "name", "course", "category", "caption", "hashtags", "platform", "format", "status", "settings", "slides",
     ];
     const updates = { updatedAt: new Date() };
     allowed.forEach((key) => {

@@ -13,7 +13,13 @@ import {
 } from "../controllers/socialPost.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
 import { requirePermission } from "../utils/permissions.js";
-import { getSocialPostPublications, publishSocialPost, uploadSocialPostPublishingAssets } from "../controllers/socialPostPublication.controller.js";
+import { 
+  getSocialPostPublications, 
+  publishSocialPost, 
+  uploadSocialPostPublishingAssets,
+  scheduleSocialPost,
+  cancelScheduledPublication
+} from "../controllers/socialPostPublication.controller.js";
 
 const router = Router();
 const __filename = fileURLToPath(import.meta.url);
@@ -42,6 +48,8 @@ router.use(protect, requirePermission("articles.create"));
 router.get("/", getSocialPosts);
 router.post("/:id/publishing-assets", publishingUpload.array("files", 20), uploadSocialPostPublishingAssets);
 router.post("/:id/publish", publishSocialPost);
+router.post("/:id/schedule", scheduleSocialPost);
+router.post("/:id/publications/:publicationId/cancel", cancelScheduledPublication);
 router.get("/:id/publications", getSocialPostPublications);
 router.get("/:id", getSocialPostById);
 router.post("/", createSocialPost);

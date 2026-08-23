@@ -459,6 +459,11 @@ export const kanbanApi = {
 };
 
 export const analyticsApi = {
+  simpleOverview: (params) => apiGet(`/analytics/simple/overview?${new URLSearchParams(params)}`),
+  acquisition: (params) => apiGet(`/analytics/simple/acquisition?${new URLSearchParams(params)}`),
+  localContent: (params) => apiGet(`/analytics/simple/content?${new URLSearchParams(params)}`),
+  locations: (params) => apiGet(`/analytics/simple/locations?${new URLSearchParams(params)}`),
+  devices: (params) => apiGet(`/analytics/simple/devices?${new URLSearchParams(params)}`),
   overview: (params) => apiGet(`/analytics/overview?${new URLSearchParams(params)}`),
   search: (type, params) => apiGet(`/analytics/search/${type}?${new URLSearchParams(params)}`),
   content: (params) => apiGet(`/analytics/content?${new URLSearchParams(params)}`),
@@ -534,6 +539,8 @@ export const socialPostsApi = {
   create: (data) => apiPost("/social-posts", data),
   update: (id, data) => apiPatch(`/social-posts/${id}`, data),
   duplicate: (id) => apiPost(`/social-posts/${id}/duplicate`),
+  schedule: (id, data) => apiPost(`/social-posts/${id}/schedule`, data),
+  cancelPublication: (id, pubId) => apiPost(`/social-posts/${id}/publications/${pubId}/cancel`),
   uploadPublishingAssets: (id, files) => {
     const form = new FormData();
     Array.from(files || []).forEach((file) => form.append("files", file));

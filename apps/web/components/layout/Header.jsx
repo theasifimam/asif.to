@@ -449,18 +449,30 @@ export default function Header() {
                   href={`/${user.username}`}
                   className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-bold text-foreground transition-all active:scale-95 shadow-sm"
                 >
-                  <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[11px] flex items-center justify-center font-black shadow-sm">
-                    {user.fullName?.[0]?.toUpperCase() || "U"}
+                  <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[11px] flex items-center justify-center font-black shadow-sm overflow-hidden shrink-0 relative">
+                    {user.avatar ? (
+                      <img src={user.avatar} alt={user.fullName || "User"} className="w-full h-full object-cover" />
+                    ) : (
+                      user.fullName?.[0]?.toUpperCase() || "U"
+                    )}
                   </span>
-                  <span>{user.fullName.split(" ")[0]}</span>
+                  <span>{user.fullName?.split(" ")[0] || "User"}</span>
                 </Link>
               ) : (
-                <Link
-                  href={`/login?callbackUrl=${encodeURIComponent(pathname || "/")}`}
-                  className="px-4 h-10 flex items-center justify-center rounded-full bg-blue-600 text-white text-xs font-bold active:scale-95 transition-all"
-                >
-                  Sign In
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/login?callbackUrl=${encodeURIComponent(pathname || "/")}`}
+                    className="px-3.5 h-9 flex items-center justify-center rounded-full text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xs font-bold transition-all"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href={`/signup?callbackUrl=${encodeURIComponent(pathname || "/")}`}
+                    className="px-4 h-9 flex items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold active:scale-95 transition-all shadow-xs"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
               )}
             </div>
           </div>

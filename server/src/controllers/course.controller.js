@@ -44,18 +44,76 @@ function getPagination(query, defaultLimit = 20) {
   return { page, limit, skip: (page - 1) * limit };
 }
 
-// ASIF_QUESTION_LEARNING_MAPPING_V1:availability-helper
+// ASIF_CONTEXTUAL_CHAPTER_LEARNING_V1:availability-helper
 async function attachLearningAvailability(courseId, chapters = []) {
   if (!chapters.length) return chapters;
-  const ids=chapters.map((c)=>c._id);
-  const rows=await Question.aggregate([
-    {$match:{type:"quiz",status:"published",learningMappings:{$elemMatch:{course:courseId,chapter:{$in:ids}}}}},
-    {$unwind:"$learningMappings"},
-    {$match:{"learningMappings.course":courseId,"learningMappings.chapter":{$in:ids}}},
-    {$group:{_id:"$learningMappings.chapter",reviseCount:{$sum:{$cond:[{$ne:["$flashcardEnabled",false]},1,0]}},practiceCount:{$sum:{$cond:[{$ne:["$quizEnabled",false]},1,0]}}}},
+  const ids = chapters.map((chapter) => chapter._id);
+  const eligible = {
+    course: courseId,
+    chapter: { $in: ids },
+    $or: [
+      { source: { $in: ["manual", "legacy"] } },
+      { source: "auto", confidence: { $gte: 75 } },
+    ],
+  };
+
+  const rows = await Question.aggregate([
+    {
+      $match: {
+        type: "quiz",
+        status: "published",
+        learningMappings: { $elemMatch: eligible },
+      },
+    },
+    { $unwind: "$learningMappings" },
+    {
+      $match: {
+        "learningMappings.course": courseId,
+        "learningMappings.chapter": { $in: ids },
+        $or: [
+          { "learningMappings.source": { $in: ["manual", "legacy"] } },
+          {
+            "learningMappings.source": "auto",
+            "learningMappings.confidence": { $gte: 75 },
+          },
+        ],
+      },
+    },
+    {
+      $group: {
+        _id: "$learningMappings.chapter",
+        reviseCount: {
+          $sum: {
+            $cond: [{ $ne: ["$flashcardEnabled", false] }, 1, 0],
+          },
+        },
+        practiceCount: {
+          $sum: {
+            $cond: [{ $ne: ["$quizEnabled", false] }, 1, 0],
+          },
+        },
+      },
+    },
   ]);
-  const map=new Map(rows.map((r)=>[String(r._id),r]));
-  return chapters.map((chapter)=>{ const row=map.get(String(chapter._id))||{}; const build=chapter.learningActivities?.build||{}; return {...chapter,learningAvailability:{reviseCount:Number(row.reviseCount||0),practiceCount:Number(row.practiceCount||0),build:Boolean(build.enabled&&(String(build.title||"").trim()||String(build.description||"").trim()))}}; });
+
+  const map = new Map(rows.map((row) => [String(row._id), row]));
+
+  return chapters.map((chapter) => {
+    const row = map.get(String(chapter._id)) || {};
+    const build = chapter.learningActivities?.build || {};
+    return {
+      ...chapter,
+      learningAvailability: {
+        reviseCount: Number(row.reviseCount || 0),
+        practiceCount: Number(row.practiceCount || 0),
+        build: Boolean(
+          build.enabled &&
+            (String(build.title || "").trim() ||
+              String(build.description || "").trim()),
+        ),
+      },
+    };
+  });
 }
 
 // ── Public Endpoints ──────────────────────────────────────────────────────────

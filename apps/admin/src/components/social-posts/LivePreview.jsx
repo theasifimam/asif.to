@@ -91,7 +91,7 @@ export default function LivePreview({
                 format={post.format}
                 settings={{
                   ...post.settings,
-                  _category: post.category,
+                  _category: typeof post.category === 'object' && post.category ? post.category.name : post.category,
                 }}
                 slideIndex={activeIndex}
                 totalSlides={post.slides.length}
