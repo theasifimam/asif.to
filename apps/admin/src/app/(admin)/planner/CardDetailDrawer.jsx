@@ -34,7 +34,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CARD_TYPES, CONTENT_TYPES, PRIORITIES, PRIORITY_STYLE } from "./planner-constants";
+import {
+  CARD_TYPES,
+  CONTENT_TYPES,
+  PRIORITIES,
+  PRIORITY_STYLE,
+} from "./planner-constants";
 import Editor, { MarkdownPreview } from "@/components/editor/Editor";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasPermission } from "@/lib/permissions";
@@ -52,14 +57,20 @@ const Field = ({ label, children, wide = false }) => (
 );
 
 const CATEGORIES = [
-  { id: "Development", label: "Development", icon: FolderGit2, defaultType: "Feature" },
+  {
+    id: "Development",
+    label: "Development",
+    icon: FolderGit2,
+    defaultType: "Feature",
+  },
   { id: "SEO", label: "SEO", icon: Globe, defaultType: "SEO" },
   { id: "Content", label: "Content", icon: FileText, defaultType: "Article" },
 ];
 
 function getCategoryFromType(type) {
   if (type === "SEO") return "SEO";
-  if (["Article", "Course", "Chapter", "Tutorial"].includes(type)) return "Content";
+  if (["Article", "Course", "Chapter", "Tutorial"].includes(type))
+    return "Content";
   return "Development";
 }
 
@@ -176,7 +187,7 @@ export default function CardDetailDrawer({
 
   return (
     <div
-      className="fixed inset-0 z-[500] flex justify-end bg-black/50 backdrop-blur-xs"
+      className="fixed inset-0 z-500 flex justify-end bg-black/50 backdrop-blur-xs"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -291,7 +302,9 @@ export default function CardDetailDrawer({
             <div className="flex flex-wrap items-center gap-y-2 gap-x-4 py-3 border-y border-zinc-100 dark:border-zinc-800/80 text-xs">
               {/* Status */}
               <div className="flex items-center gap-2">
-                <span className="font-bold text-zinc-400 dark:text-zinc-500">Status:</span>
+                <span className="font-bold text-zinc-400 dark:text-zinc-500">
+                  Status:
+                </span>
                 <span className="flex items-center gap-1.5 font-extrabold text-zinc-800 dark:text-zinc-200">
                   {currentColumn?.color && (
                     <span
@@ -305,10 +318,13 @@ export default function CardDetailDrawer({
 
               {/* Priority */}
               <div className="flex items-center gap-2">
-                <span className="font-bold text-zinc-400 dark:text-zinc-500">Priority:</span>
+                <span className="font-bold text-zinc-400 dark:text-zinc-500">
+                  Priority:
+                </span>
                 <span
                   className={`rounded-md px-2 py-0.5 text-[11px] font-bold ${
-                    PRIORITY_STYLE[draft.priority] || "text-zinc-600 bg-zinc-200"
+                    PRIORITY_STYLE[draft.priority] ||
+                    "text-zinc-600 bg-zinc-200"
                   }`}
                 >
                   {draft.priority || "None"}
@@ -318,7 +334,9 @@ export default function CardDetailDrawer({
               {/* Due Date */}
               {draft.dueDate && (
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-zinc-400 dark:text-zinc-500">Due:</span>
+                  <span className="font-bold text-zinc-400 dark:text-zinc-500">
+                    Due:
+                  </span>
                   <span className="flex items-center gap-1 font-semibold text-zinc-700 dark:text-zinc-300">
                     <CalendarDays size={13} className="text-zinc-400" />
                     {new Date(draft.dueDate).toLocaleDateString(undefined, {
@@ -392,14 +410,18 @@ export default function CardDetailDrawer({
                         type="checkbox"
                         checked={item.completed}
                         onChange={async () => {
-                          const nextChecklist = draft.checklist.map((entry, i) =>
-                            i === index
-                              ? { ...entry, completed: !entry.completed }
-                              : entry,
+                          const nextChecklist = draft.checklist.map(
+                            (entry, i) =>
+                              i === index
+                                ? { ...entry, completed: !entry.completed }
+                                : entry,
                           );
                           set("checklist", nextChecklist);
                           if (draft._id) {
-                            await onSave({ ...draft, checklist: nextChecklist });
+                            await onSave({
+                              ...draft,
+                              checklist: nextChecklist,
+                            });
                           }
                         }}
                         className="h-4 w-4 rounded border-zinc-300 accent-blue-600 focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-900 cursor-pointer"
@@ -451,13 +473,17 @@ export default function CardDetailDrawer({
                 </h3>
                 <div className="grid grid-cols-2 gap-3 text-xs bg-zinc-50 dark:bg-zinc-900/60 p-3.5 rounded-2xl border border-zinc-200/80 dark:border-zinc-800">
                   <div>
-                    <span className="block font-bold text-zinc-400">Primary Keyword:</span>
+                    <span className="block font-bold text-zinc-400">
+                      Primary Keyword:
+                    </span>
                     <span className="font-extrabold text-zinc-800 dark:text-zinc-200">
                       {draft.seo.primaryKeyword}
                     </span>
                   </div>
                   <div>
-                    <span className="block font-bold text-zinc-400">Intent:</span>
+                    <span className="block font-bold text-zinc-400">
+                      Intent:
+                    </span>
                     <span className="font-extrabold text-zinc-800 dark:text-zinc-200">
                       {draft.seo.searchIntent || "Not set"}
                     </span>
@@ -469,10 +495,18 @@ export default function CardDetailDrawer({
             {/* Footer Action Buttons */}
             <div className="flex items-center justify-between border-t border-zinc-100 pt-6 dark:border-zinc-800/80">
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => onDuplicate(draft)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onDuplicate(draft)}
+                >
                   <Copy size={14} /> Duplicate
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => onArchive(draft)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onArchive(draft)}
+                >
                   <Archive size={14} /> Archive
                 </Button>
               </div>
@@ -702,8 +736,9 @@ export default function CardDetailDrawer({
                   Checklist
                 </h3>
                 <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
-                  {draft.checklist?.filter((item) => item.completed).length || 0}/
-                  {draft.checklist?.length || 0}
+                  {draft.checklist?.filter((item) => item.completed).length ||
+                    0}
+                  /{draft.checklist?.length || 0}
                 </span>
               </div>
               <div className="space-y-2.5">
@@ -830,7 +865,9 @@ export default function CardDetailDrawer({
                         <SelectItem value="Informational">
                           Informational
                         </SelectItem>
-                        <SelectItem value="Navigational">Navigational</SelectItem>
+                        <SelectItem value="Navigational">
+                          Navigational
+                        </SelectItem>
                         <SelectItem value="Commercial">Commercial</SelectItem>
                         <SelectItem value="Transactional">
                           Transactional
@@ -877,7 +914,9 @@ export default function CardDetailDrawer({
                   <Field label="Meta description" wide>
                     <Textarea
                       value={draft.seo?.metaDescription || ""}
-                      onChange={(e) => setSeo("metaDescription", e.target.value)}
+                      onChange={(e) =>
+                        setSeo("metaDescription", e.target.value)
+                      }
                       placeholder="Write meta description..."
                     />
                   </Field>

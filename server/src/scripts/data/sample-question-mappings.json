@@ -1,562 +1,842 @@
 [
   {
-    "id": "6a7d5bb9effda32e5acf30b1",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "Which class is applied to an `<img>` tag to make it fill its container while preserving its aspect ratio and clipping any overflow? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf2967",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073bc",
+    "_comment": "Which of the following is not a valid CSS color value? | Category: Box Model & Flexbox Layouts | Chapter: How to use color in CSS — all color formats explained"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30ba",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "Which class applies the 'multiply' CSS blend mode to an element's background? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf295f",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073b6",
+    "_comment": "How can you perfectly center a block element horizontally within its parent? | Category: Box Model & Flexbox Layouts | Chapter: What is the CSS Box Model?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30b9",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "What combination of classes is required to make text take on the color of a background gradient? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf2960",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073b6",
+    "_comment": "Which property is used to create space between the element's content and its border? | Category: Box Model & Flexbox Layouts | Chapter: What is the CSS Box Model?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30b8",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5f03",
-    "_comment": "Which syntax represents an 'arbitrary variant' used to style direct `<p>` children of a container? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+    "id": "6a7d4a45effda32e5acf2961",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20ae",
+    "chapter": "6a7ccf185f958cf7933073c8",
+    "_comment": "What does the `vh` unit represent in CSS? | Category: CSS Grid & Responsive Design | Chapter: How do you make a website responsive with CSS?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30b7",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2067",
-    "chapter": "6a7a28e2409d8d71833a5f0f",
-    "_comment": "In your `tailwind.config.js` file, where do you define a custom font family so that it generates classes like `font-custom`? | Category: Customization & Production | Chapter: 5. Customization and Dark Mode"
+    "id": "6a7d4a45effda32e5acf2962",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073d8",
+    "_comment": "Which property prevents text from wrapping to the next line? | Category: Animations, Transitions & Effects | Chapter: How does CSS overflow work? (overflow, scroll, clip, hidden)"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30b6",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "How can you visually move a flex or grid item to the very end of its container without changing the HTML structure? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf2963",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073c0",
+    "_comment": "When using `position: absolute;`, relative to what is the element positioned? | Category: Box Model & Flexbox Layouts | Chapter: How does CSS position work? (static, relative, absolute, fixed, sticky)"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30b5",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "Which class allows a flex item to expand and fill any remaining available space in its container? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf2964",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073d8",
+    "_comment": "Which CSS property specifies how an image or video should be resized to fit its container? | Category: Animations, Transitions & Effects | Chapter: How does CSS overflow work? (overflow, scroll, clip, hidden)"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30b4",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "Which Tailwind class prevents a flex item from shrinking when the container becomes smaller than the combined width of its items? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf2965",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073c2",
+    "_comment": "In Flexbox, what does `flex-grow: 1;` do? | Category: Box Model & Flexbox Layouts | Chapter: What is Flexbox and how do you use it?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30b3",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "In a flexbox or grid container, what does the `gap-4` class do? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf2966",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20ae",
+    "chapter": "6a7ccf185f958cf7933073c8",
+    "_comment": "Which media query targets devices with a viewport width of 768px or smaller? | Category: CSS Grid & Responsive Design | Chapter: How do you make a website responsive with CSS?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30b2",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "How do you visually shift an element to the right by exactly 50% of its own width? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf294d",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "Which of the following selectors has the highest specificity? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30bb",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "Which utility class automatically capitalizes the first letter of every word in a sentence? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf2968",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073d0",
+    "_comment": "What is the purpose of the `@keyframes` rule? | Category: Animations, Transitions & Effects | Chapter: How do CSS animations and @keyframes work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30b0",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "Which class acts as a shorthand for setting `top: 0; right: 0; bottom: 0; left: 0;` on an absolutely positioned element? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf2969",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "Which pseudo-class targets an element that is the only child of its parent? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30af",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "How do you set an element's height to exactly 100% of the viewport's height? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf296a",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073be",
+    "_comment": "How can you make a list display horizontally instead of vertically? | Category: Box Model & Flexbox Layouts | Chapter: How does the CSS display property work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30ae",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "Which class is used to increase the letter spacing of text? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf296b",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b8",
+    "_comment": "What is the correct way to specify multiple font fallbacks in CSS? | Category: CSS Fundamentals & Selectors | Chapter: How do you style fonts in CSS? Complete typography guide"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30ad",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "In Tailwind, what CSS property does the `leading-relaxed` utility control? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf296c",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073be",
+    "_comment": "Which CSS property disables user interaction with an element? | Category: CSS Fundamentals & Selectors | Chapter: How does the CSS display property work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30ac",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5f03",
-    "_comment": "Which built-in Tailwind animation class makes an element rotate endlessly? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+    "id": "6a7d4a45effda32e5acf296d",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073d4",
+    "_comment": "What does the `transform: translate(-50%, -50%);` rule do? | Category: Animations, Transitions & Effects | Chapter: How do CSS transforms work? (translate, scale, rotate, skew)"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30ab",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "How do you easily add a top border to every child element in a vertical list, except for the very first child? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf296e",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "Which combination of pseudo-classes represents the correct order for styling hyperlinks? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30aa",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2067",
-    "chapter": "6a7a28e2409d8d71833a5f13",
-    "_comment": "If you are rendering raw HTML (like from a Markdown parser) and want it automatically styled by Tailwind, which official plugin and class should you use? | Category: Customization & Production | Chapter: 6. Extracting Components & Production Prep"
+    "id": "6a7d4a45effda32e5acf294c",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b0",
+    "_comment": "What does CSS stand for? | Category: CSS Fundamentals & Selectors | Chapter: What is CSS and how does it work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30a9",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5f03",
-    "_comment": "Which utility applies a solid, outline-like box shadow, commonly used for accessibility focus states? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+    "id": "6a7d4a45effda32e5acf295d",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073dc",
+    "_comment": "Which pseudo-element is used to insert content before the actual content of an element? | Category: Animations, Transitions & Effects | Chapter: How to use CSS ::before and ::after pseudo-elements?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30a8",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "When using a background gradient, which classes define the starting and ending colors? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf295e",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b4",
+    "_comment": "What does the `!important` rule do in CSS? | Category: CSS Fundamentals & Selectors | Chapter: What is CSS specificity and how does the cascade work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30c5",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5f03",
-    "_comment": "How do you apply a red background to a child element only when its parent container (which has the `group` class) is focused? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+    "id": "6a7d4a45effda32e5acf294e",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073b6",
+    "_comment": "What is the primary effect of using `box-sizing: border-box;` on an element? | Category: Box Model & Flexbox Layouts | Chapter: What is the CSS Box Model?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30ce",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "Which utility class is used to slant text to the right, simulating a cursive or handwritten style? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf294f",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073bc",
+    "_comment": "Which property is used to change the background color? | Category: Box Model & Flexbox Layouts | Chapter: How to use color in CSS — all color formats explained"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30cd",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "Which Flexbox utility explicitly sets the initial main size (flex-basis) of a flex item to 25% of its container? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf2950",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "How do you select all `<p>` elements inside a `<div>` element? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30cc",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "Which utility class makes an entire element and all of its children 50% transparent? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf2951",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073be",
+    "_comment": "What is the difference between `display: none;` and `visibility: hidden;`? | Category: Box Model & Flexbox Layouts | Chapter: How does the CSS display property work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30cb",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "What is the result of applying the `max-w-screen-md` class to a div? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf2952",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073c2",
+    "_comment": "In CSS Flexbox, which property defines the alignment of items along the main axis? | Category: Box Model & Flexbox Layouts | Chapter: What is Flexbox and how do you use it?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30ca",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5f03",
-    "_comment": "How do you enable native smooth scrolling behavior for internal anchor links on the entire page using Tailwind? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+    "id": "6a7d4a45effda32e5acf2953",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073c0",
+    "_comment": "What is the default value of the `position` property in CSS? | Category: Box Model & Flexbox Layouts | Chapter: How does CSS position work? (static, relative, absolute, fixed, sticky)"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30c9",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "Which class changes the color of the blinking text insertion cursor inside an `<input>` field? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf2954",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b8",
+    "_comment": "Which unit is relative to the font-size of the root element (usually the `<html>` element)? | Category: CSS Fundamentals & Selectors | Chapter: How do you style fonts in CSS? Complete typography guide"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30c8",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "Which utility forces an element's dimensions to always form a perfect square? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf2956",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073c0",
+    "_comment": "Which CSS property controls the order of overlapping elements? | Category: Box Model & Flexbox Layouts | Chapter: How does CSS position work? (static, relative, absolute, fixed, sticky)"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30c7",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "Which class sets the fill color of an SVG element to inherit the current text color of its parent? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf2957",
+    "course": "css",
+    "category": "6a89d3b63af78ff755fb20be",
+    "chapter": "6a7ccf185f958cf7933073ca",
+    "_comment": "What is the correct syntax for declaring a CSS variable? | Category: Modern CSS Architecture & Variables | Chapter: How to use CSS Variables (Custom Properties)?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30c6",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5eff",
-    "_comment": "When running the Tailwind CLI, which flag tells the compiler to stay running and automatically rebuild the CSS whenever you save a file? | Category: Tailwind CSS Setup & Utility First | Chapter: 1. Introduction to Tailwind CSS"
+    "id": "6a7d4a45effda32e5acf2958",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "How do you select all elements with the class `container` that are also `div` elements? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30a7",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "Which Tailwind class is used to create a background gradient that flows from left to right? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf2959",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b8",
+    "_comment": "Which property is used to make text bold? | Category: CSS Fundamentals & Selectors | Chapter: How do you style fonts in CSS? Complete typography guide"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30c4",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "Which class applies a frosted-glass blur effect to the background directly behind a semi-transparent element? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf295a",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073da",
+    "_comment": "What is the CSS `calc()` function used for? | Category: Animations, Transitions & Effects | Chapter: How to use CSS calc(), min(), max(), and clamp()?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30c3",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "Which class will truncate text after exactly 3 lines, adding an ellipsis at the end? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf295b",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "Which selector targets an element that is the immediate child of another element? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30c2",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5f03",
-    "_comment": "What is the default minimum screen width for Tailwind's `lg:` (large) responsive breakpoint? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+    "id": "6a7d4a45effda32e5acf295c",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20ae",
+    "chapter": "6a7ccf185f958cf7933073c4",
+    "_comment": "In a CSS Grid layout, how do you define a grid with three equal columns? | Category: CSS Grid & Responsive Design | Chapter: What is CSS Grid and how do you use it?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30c1",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5f03",
-    "_comment": "Which variant applies styles to a parent container when ANY interactive child element inside it (like an input) receives focus? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+    "id": "6a7d4a45effda32e5acf2955",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "How do you apply a style to a link only when the user is hovering over it? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30c0",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "In Tailwind's default color palette scale (e.g., blue, red, green), which numeric shade represents the lightest, most pastel version of the color? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf29a4",
+    "course": "css",
+    "category": "6a89d3b63af78ff755fb20be",
+    "chapter": "6a7ccf185f958cf7933073e0",
+    "_comment": "If you want to create an inner shadow inside an element rather than a drop shadow outside it, which keyword must you add to the `box-shadow` property? | Category: Modern CSS Architecture & Variables | Chapter: How to use CSS box-shadow and create beautiful shadows?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30bf",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "Which utility prevents a string of text from wrapping to a new line when it reaches the edge of its container? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf29a5",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "Which pseudo-class can uniquely style a section of the page when the URL hash (e.g., `#contact`) matches the element's ID? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30be",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5f03",
-    "_comment": "Which variant modifier allows you to change the background color of text only when a user highlights/selects it? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+    "id": "6a7d4a45effda32e5acf29a6",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20ae",
+    "chapter": "6a7ccf185f958cf7933073c8",
+    "_comment": "Which of the following creates a smooth scrolling effect when navigating via anchor links on a webpage? | Category: CSS Grid & Responsive Design | Chapter: How do you make a website responsive with CSS?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30bd",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "Which utility sets a background image to cover the entire element, potentially cropping it if proportions differ? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf29a7",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073d6",
+    "_comment": "Which property allows you to slice an element into a specific geometric shape (like a polygon, circle, or custom path)? | Category: Animations, Transitions & Effects | Chapter: How do CSS filter and backdrop-filter work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30bc",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "How do you render list item bullets (like discs or numbers) inside the content flow of the `<li>` rather than hanging outside? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf29a8",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "What is the purpose of the `:empty` pseudo-class? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3089",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "Which combination of classes perfectly centers a child element using Flexbox? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf29a9",
+    "course": "css",
+    "category": "6a89d3b63af78ff755fb20be",
+    "chapter": "6a7ccf185f958cf7933073e8",
+    "_comment": "Often called the 'parent selector', which CSS pseudo-class allows you to style an element if it contains a specific child element? | Category: Modern CSS Architecture & Variables | Chapter: How to use the CSS :has() selector — the parent selector?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3092",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "In Tailwind v3+, how do you dynamically change the opacity of a background color utility without declaring a new custom color? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf29aa",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073be",
+    "_comment": "Which property ensures that adjacent table cells share a single border rather than displaying double borders side-by-side? | Category: Box Model & Flexbox Layouts | Chapter: How does the CSS display property work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3091",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "Which Tailwind class prevents text from wrapping, hides overflow, and adds an ellipsis (...) to the end of overflowing text? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf29ab",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b8",
+    "_comment": "Which CSS property can change the flow of text so that it reads vertically (e.g., from top to bottom) instead of horizontally? | Category: CSS Fundamentals & Selectors | Chapter: How do you style fonts in CSS? Complete typography guide"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3090",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "How do you write a negative top margin of `1rem` (16px) in Tailwind? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf29ac",
+    "course": "css",
+    "category": "6a89d3b63af78ff755fb20be",
+    "chapter": "6a7ccf185f958cf7933073ed",
+    "_comment": "What does the `mix-blend-mode` property do? | Category: Modern CSS Architecture & Variables | Chapter: How do CSS mix-blend-mode and background-blend-mode work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf308f",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "What does the class `max-w-prose` do? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf29ad",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073bc",
+    "_comment": "Which property is designed to easily change the default system color of form controls like checkboxes, radio buttons, and range sliders? | Category: Box Model & Flexbox Layouts | Chapter: How to use color in CSS — all color formats explained"
   },
   {
-    "id": "6a7d5bb9effda32e5acf308e",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5f03",
-    "_comment": "How can you trigger a hover effect on a child element based on the hover state of its parent container? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+    "id": "6a7d4a45effda32e5acf29a3",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20ae",
+    "chapter": "6a7ccf185f958cf7933073c4",
+    "_comment": "Which property allows you to change the visual sequence of flex or grid items without altering the HTML structure? | Category: CSS Grid & Responsive Design | Chapter: What is CSS Grid and how do you use it?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf308d",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "Which utility class applies `font-weight: 700;`? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf29a2",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073bc",
+    "_comment": "What does the `currentColor` keyword do in CSS? | Category: Box Model & Flexbox Layouts | Chapter: How to use color in CSS — all color formats explained"
   },
   {
-    "id": "6a7d5bb9effda32e5acf308c",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "How do you specify a width of exactly 100% in Tailwind? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf29a1",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20ae",
+    "chapter": "6a7ccf185f958cf7933073c8",
+    "_comment": "Which CSS property easily allows you to maintain a specific width-to-height ratio for an element, regardless of screen size? | Category: CSS Grid & Responsive Design | Chapter: How do you make a website responsive with CSS?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf308b",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "What does the `space-x-4` class do when applied to a parent container? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf29a0",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073c0",
+    "_comment": "How does setting `position: relative;` affect an element? | Category: Box Model & Flexbox Layouts | Chapter: How does CSS position work? (static, relative, absolute, fixed, sticky)"
   },
   {
-    "id": "6a7d5bb9effda32e5acf308a",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "Which Tailwind class is used to make a perfectly circular image or `<div>` (assuming the element is a square)? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf299f",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073dc",
+    "_comment": "Which CSS property is required to make pseudo-elements like `::before` and `::after` visible on the page? | Category: Animations, Transitions & Effects | Chapter: How to use CSS ::before and ::after pseudo-elements?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3093",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "What is the purpose of the `container` class in Tailwind? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf299e",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073ce",
+    "_comment": "What is the primary function of the `transition` property in CSS? | Category: Animations, Transitions & Effects | Chapter: How do CSS transitions work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3088",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2067",
-    "chapter": "6a7a28e2409d8d71833a5f13",
-    "_comment": "What is the purpose of the `@layer` directive in a Tailwind CSS file? | Category: Customization & Production | Chapter: 6. Extracting Components & Production Prep"
+    "id": "6a7d4a45effda32e5acf299d",
+    "course": "css",
+    "category": "6a89d3b63af78ff755fb20be",
+    "chapter": "6a7ccf185f958cf7933073ca",
+    "_comment": "Which pseudo-class is commonly used to define global CSS custom properties (variables) because it represents the highest-level parent element in the DOM? | Category: Modern CSS Architecture & Variables | Chapter: How to use CSS Variables (Custom Properties)?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3087",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5f03",
-    "_comment": "To apply styles specifically for medium-sized screens and larger (default 768px), which prefix is used? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+    "id": "6a7d4a45effda32e5acf299c",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "Which CSS selector acts as a wildcard and targets every single element on the page? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3086",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2067",
-    "chapter": "6a7a28e2409d8d71833a5f13",
-    "_comment": "Which Tailwind directive allows you to extract common utility patterns into custom CSS classes? | Category: Customization & Production | Chapter: 6. Extracting Components & Production Prep"
+    "id": "6a7d4a45effda32e5acf299b",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b8",
+    "_comment": "Which property changes the underline, overline, or strike-through of text? | Category: CSS Fundamentals & Selectors | Chapter: How do you style fonts in CSS? Complete typography guide"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3085",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2067",
-    "chapter": "6a7a28e2409d8d71833a5f0f",
-    "_comment": "How do you use \"Arbitrary Values\" in Tailwind to apply a specific color hex code that isn't in your theme? | Category: Customization & Production | Chapter: 5. Customization and Dark Mode"
+    "id": "6a7d4a45effda32e5acf29c3",
+    "course": "css",
+    "category": "6a89d3b63af78ff755fb20be",
+    "chapter": "6a7ccf185f958cf7933073e2",
+    "_comment": "Which value of `display` hides an element visually but leaves it accessible to screen readers, assuming no other clipping techniques are used? | Category: Modern CSS Architecture & Variables | Chapter: How to write accessible CSS? (Focus styles, screen readers, motion)"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3084",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "Which class would you use to hide an element completely from the document flow (`display: none`)? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf299a",
+    "course": "css",
+    "category": "6a89d3b63af78ff755fb20be",
+    "chapter": "6a7ccf185f958cf7933073e2",
+    "_comment": "Which media feature query is used to check if the user has requested the system to minimize the amount of non-essential animation? | Category: Modern CSS Architecture & Variables | Chapter: How to write accessible CSS? (Focus styles, screen readers, motion)"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3083",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "In Tailwind's default spacing scale, what does the class `mt-4` represent in standard CSS? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf29b8",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20ae",
+    "chapter": "6a7ccf185f958cf7933073c8",
+    "_comment": "What does the media query `@media (hover: hover)` detect? | Category: CSS Grid & Responsive Design | Chapter: How do you make a website responsive with CSS?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3082",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5f03",
-    "_comment": "How do you apply a class only when the user hovers over an element? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+    "id": "6a7d4a45effda32e5acf29c2",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073bc",
+    "_comment": "Which CSS property is used to change the color of the text insertion cursor (the blinking line) in an `<input>` or `<textarea>`? | Category: Box Model & Flexbox Layouts | Chapter: How to use color in CSS — all color formats explained"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3081",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "What is the correct utility class to set an element to `display: flex`? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf29c1",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20ae",
+    "chapter": "6a7ccf185f958cf7933073c8",
+    "_comment": "Which property is used in CSS Multi-column Layout to specify the exact number of columns an element should be divided into, akin to a newspaper? | Category: CSS Grid & Responsive Design | Chapter: How do you make a website responsive with CSS?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3080",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2067",
-    "chapter": "6a7a28e2409d8d71833a5f0f",
-    "_comment": "Which file is automatically generated to customize Tailwind's default theme, colors, and fonts? | Category: Customization & Production | Chapter: 5. Customization and Dark Mode"
+    "id": "6a7d4a45effda32e5acf29c0",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073bc",
+    "_comment": "Which property allows an element to indicate that it can comfortably be rendered in light or dark color schemes based on the user's OS preference? | Category: Box Model & Flexbox Layouts | Chapter: How to use color in CSS — all color formats explained"
   },
   {
-    "id": "6a7d5bb9effda32e5acf309d",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5f03",
-    "_comment": "How do you style the placeholder text of an `<input>` field in Tailwind? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+    "id": "6a7d4a45effda32e5acf29bf",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073c0",
+    "_comment": "Besides `position: absolute/relative/fixed` combined with `z-index`, which property can also trigger the creation of a new stacking context? | Category: Box Model & Flexbox Layouts | Chapter: How does CSS position work? (static, relative, absolute, fixed, sticky)"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30a6",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2067",
-    "chapter": "6a7a28e2409d8d71833a5f0f",
-    "_comment": "How can you inject an arbitrary CSS variable as a value in a Tailwind class? | Category: Customization & Production | Chapter: 5. Customization and Dark Mode"
+    "id": "6a7d4a45effda32e5acf29be",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "What is the difference between `:first-child` and `:first-of-type`? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30a5",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2067",
-    "chapter": "6a7a28e2409d8d71833a5f13",
-    "_comment": "Which Tailwind plugin is officially provided to reset form control styles to a consistent baseline? | Category: Customization & Production | Chapter: 6. Extracting Components & Production Prep"
+    "id": "6a7d4a45effda32e5acf29bd",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073be",
+    "_comment": "What is the benefit of applying `table-layout: fixed;` to an HTML `<table>`? | Category: Box Model & Flexbox Layouts | Chapter: How does the CSS display property work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30a4",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "Which utility class aligns text strictly to the right? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf29bc",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20ae",
+    "chapter": "6a7ccf185f958cf7933073c8",
+    "_comment": "What is the common method to make an image responsive so it scales down on smaller screens but never scales larger than its original dimensions? | Category: CSS Grid & Responsive Design | Chapter: How do you make a website responsive with CSS?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30a3",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5f03",
-    "_comment": "How do you apply styles uniquely to the first child element of a list using Tailwind? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+    "id": "6a7d4a45effda32e5acf29bb",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "Which CSS function can be used to group selectors and reduce repetition, applying the highest specificity among its arguments to the whole group? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30a2",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "What is the correct class to apply `z-index: 50;` to a fixed navigation bar? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf29ba",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073d8",
+    "_comment": "Which property prevents the browser's default \"pull-to-refresh\" or scroll-chaining behavior when a user reaches the edge of a scrollable area? | Category: Animations, Transitions & Effects | Chapter: How does CSS overflow work? (overflow, scroll, clip, hidden)"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30a1",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5f03",
-    "_comment": "Which prefix variant applies styles strictly for users who have requested that the OS minimize non-essential animations? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+    "id": "6a7d4a45effda32e5acf29b9",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073dc",
+    "_comment": "To create an automatically numbering list using CSS (e.g., 'Chapter 1', 'Chapter 2'), which two properties are used together? | Category: Animations, Transitions & Effects | Chapter: How to use CSS ::before and ::after pseudo-elements?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf30a0",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2067",
-    "chapter": "6a7a28e2409d8d71833a5f0f",
-    "_comment": "In the Tailwind `tailwind.config.js` file, what is the difference between placing styles inside `theme.extend` versus just `theme`? | Category: Customization & Production | Chapter: 5. Customization and Dark Mode"
+    "id": "6a7d4a45effda32e5acf29ae",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073d8",
+    "_comment": "To allow a user to drag the corner of a `<textarea>` or `<div>` to change its size, which CSS property is used? | Category: Animations, Transitions & Effects | Chapter: How does CSS overflow work? (overflow, scroll, clip, hidden)"
   },
   {
-    "id": "6a7d5bb9effda32e5acf309f",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f0c",
-    "_comment": "To add a default drop shadow to a card component, which class is used? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+    "id": "6a7d4a45effda32e5acf29b7",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073da",
+    "_comment": "If an element has `width: 100px;` and `min-width: 200px;`, what will the actual rendered width be? | Category: Animations, Transitions & Effects | Chapter: How to use CSS calc(), min(), max(), and clamp()?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf309e",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "If you want an element to span 2 columns in a CSS Grid, which class should you use? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf29b6",
+    "course": "css",
+    "category": "6a89d3b63af78ff755fb20be",
+    "chapter": "6a7ccf185f958cf7933073e4",
+    "_comment": "Which property is used as a performance optimization to inform the browser ahead of time what properties are likely to be animated? | Category: Modern CSS Architecture & Variables | Chapter: How to write performant CSS? Best practices and optimization tips"
   },
   {
-    "id": "6a7d5bb9effda32e5acf307f",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5eff",
-    "_comment": "What is Tailwind CSS fundamentally described as? | Category: Tailwind CSS Setup & Utility First | Chapter: 1. Introduction to Tailwind CSS"
+    "id": "6a7d4a45effda32e5acf29b5",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073ce",
+    "_comment": "In a CSS transition or animation, what does the `linear` timing function do? | Category: Animations, Transitions & Effects | Chapter: How do CSS transitions work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf309c",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5f03",
-    "_comment": "Which utility changes the cursor to a \"pointing hand\" when hovering over an element? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+    "id": "6a7d4a45effda32e5acf29b4",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073be",
+    "_comment": "Which property controls whether the bullet points of a list render inside or outside the flow of the list item's content box? | Category: Box Model & Flexbox Layouts | Chapter: How does the CSS display property work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf309b",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "Which class modifies an image to maintain a 16:9 aspect ratio? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf29b3",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073d8",
+    "_comment": "Which CSS property will forcefully break a very long continuous string of text (like a URL) to prevent it from overflowing its container? | Category: Animations, Transitions & Effects | Chapter: How does CSS overflow work? (overflow, scroll, clip, hidden)"
   },
   {
-    "id": "6a7d5bb9effda32e5acf309a",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2067",
-    "chapter": "6a7a28e2409d8d71833a5f13",
-    "_comment": "What is Tailwind CSS's default strategy for controlling file size in production? | Category: Customization & Production | Chapter: 6. Extracting Components & Production Prep"
+    "id": "6a7d4a45effda32e5acf29b2",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073d4",
+    "_comment": "If you rotate an element using `transform: rotate(45deg);`, which property dictates the point around which the element rotates? | Category: Animations, Transitions & Effects | Chapter: How do CSS transforms work? (translate, scale, rotate, skew)"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3099",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2067",
-    "chapter": "6a7a28e2409d8d71833a5f13",
-    "_comment": "What does the `sr-only` class do? | Category: Customization & Production | Chapter: 6. Extracting Components & Production Prep"
+    "id": "6a7d4a45effda32e5acf29b1",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073c2",
+    "_comment": "Which flexbox property dictates whether a flex item is allowed to decrease its size if the container is too small? | Category: Box Model & Flexbox Layouts | Chapter: What is Flexbox and how do you use it?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3098",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "Which of the following creates a 3-column CSS Grid where all columns are equal width? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf29b0",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20ae",
+    "chapter": "6a7ccf185f958cf7933073c4",
+    "_comment": "In CSS Grid, what is the purpose of `grid-template-areas`? | Category: CSS Grid & Responsive Design | Chapter: What is CSS Grid and how do you use it?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3097",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5f03",
-    "_comment": "How can you style an element based on the `checked` state of a sibling checkbox? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+    "id": "6a7d4a45effda32e5acf29af",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b0",
+    "_comment": "What is the result of applying `all: unset;` to an element? | Category: CSS Fundamentals & Selectors | Chapter: What is CSS and how does it work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3096",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2062",
-    "chapter": "6a7a28e2409d8d71833a5f08",
-    "_comment": "Which utility sets an element's position to `absolute`? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+    "id": "6a7d4a45effda32e5acf2979",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073c2",
+    "_comment": "Which property defines the initial main size of a flex item before free space is distributed? | Category: Box Model & Flexbox Layouts | Chapter: What is Flexbox and how do you use it?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3095",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb205d",
-    "chapter": "6a7a28e2409d8d71833a5eff",
-    "_comment": "What command initializes a basic `tailwind.config.js` file in your project? | Category: Tailwind CSS Setup & Utility First | Chapter: 1. Introduction to Tailwind CSS"
+    "id": "6a7d4a45effda32e5acf2983",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "How do you select every other `<tr>` element starting from the first (odd rows)? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
   },
   {
-    "id": "6a7d5bb9effda32e5acf3094",
-    "course": "tailwind-css",
-    "category": "6a89d3b33af78ff755fb2067",
-    "chapter": "6a7a28e2409d8d71833a5f0f",
-    "_comment": "Which variant allows you to style an element only when the browser/OS is set to dark mode? | Category: Customization & Production | Chapter: 5. Customization and Dark Mode"
+    "id": "6a7d4a45effda32e5acf2982",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073be",
+    "_comment": "Which of the following is true about `display: inline-block;`? | Category: Box Model & Flexbox Layouts | Chapter: How does the CSS display property work?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2981",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "What does the pseudo-class `:not(p)` do? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2980",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20ae",
+    "chapter": "6a7ccf185f958cf7933073c4",
+    "_comment": "In CSS Grid, how can you make an item span across all columns from the first to the last? | Category: CSS Grid & Responsive Design | Chapter: What is CSS Grid and how do you use it?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf297f",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073be",
+    "_comment": "Which property would you use to change the mouse cursor to a pointing hand when hovering over an element? | Category: CSS Fundamentals & Selectors | Chapter: How does the CSS display property work?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf297e",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073b6",
+    "_comment": "What is the default value of the `box-sizing` property? | Category: Box Model & Flexbox Layouts | Chapter: What is the CSS Box Model?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf297d",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20ae",
+    "chapter": "6a7ccf185f958cf7933073cc",
+    "_comment": "How do you specify a background image that does not scroll with the rest of the page? | Category: CSS Grid & Responsive Design | Chapter: How to use CSS backgrounds and gradients?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf297c",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073da",
+    "_comment": "Which CSS function allows you to set a minimum, ideal, and maximum value for a property? | Category: Animations, Transitions & Effects | Chapter: How to use CSS calc(), min(), max(), and clamp()?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf297b",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b8",
+    "_comment": "Which CSS unit is relative to the width of the \"0\" (zero) character of the element's current font? | Category: CSS Fundamentals & Selectors | Chapter: How do you style fonts in CSS? Complete typography guide"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf297a",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073c0",
+    "_comment": "What does the `position: sticky;` value do? | Category: Box Model & Flexbox Layouts | Chapter: How does CSS position work? (static, relative, absolute, fixed, sticky)"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2984",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073be",
+    "_comment": "Which property is used to clear floated elements so that subsequent content drops below them? | Category: Box Model & Flexbox Layouts | Chapter: How does the CSS display property work?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2978",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073c2",
+    "_comment": "In Flexbox, which property determines whether flex items are forced onto one line or can wrap onto multiple lines? | Category: Box Model & Flexbox Layouts | Chapter: What is Flexbox and how do you use it?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2977",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073b6",
+    "_comment": "What is the primary difference between `margin` and `padding`? | Category: Box Model & Flexbox Layouts | Chapter: What is the CSS Box Model?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2976",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "Which CSS selector targets an element that is placed immediately after another specific element? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2975",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073b6",
+    "_comment": "What is the result of applying `border-radius: 50%;` to a perfectly square element? | Category: Box Model & Flexbox Layouts | Chapter: What is the CSS Box Model?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2974",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073b6",
+    "_comment": "Which CSS property is used to control the space between lines of text? | Category: Box Model & Flexbox Layouts | Chapter: What is the CSS Box Model?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2973",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073d4",
+    "_comment": "What is the effect of `text-transform: capitalize;`? | Category: Animations, Transitions & Effects | Chapter: How do CSS transforms work? (translate, scale, rotate, skew)"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2972",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "Which attribute selector targets elements with a specific attribute value ending in a certain string? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2971",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20ae",
+    "chapter": "6a7ccf185f958cf7933073c4",
+    "_comment": "What is the purpose of the `gap` (or `grid-gap`) property? | Category: CSS Grid & Responsive Design | Chapter: What is CSS Grid and how do you use it?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2970",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073d8",
+    "_comment": "Which value for the `overflow` property adds a scrollbar only when the content overflows the element's box? | Category: Animations, Transitions & Effects | Chapter: How does CSS overflow work? (overflow, scroll, clip, hidden)"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf296f",
+    "course": "css",
+    "category": "6a89d3b63af78ff755fb20be",
+    "chapter": "6a7ccf185f958cf7933073e0",
+    "_comment": "How do you add a drop shadow to a text element? | Category: Modern CSS Architecture & Variables | Chapter: How to use CSS box-shadow and create beautiful shadows?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf298e",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073b6",
+    "_comment": "What is a key visual difference between `outline` and `border`? | Category: Box Model & Flexbox Layouts | Chapter: What is the CSS Box Model?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2998",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "Which CSS combinator selects all sibling elements that share the same parent and follow a specified element, not necessarily immediately? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2997",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b8",
+    "_comment": "Which CSS property would you use to increase the spacing between individual letters? | Category: CSS Fundamentals & Selectors | Chapter: How do you style fonts in CSS? Complete typography guide"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2996",
+    "course": "css",
+    "category": "6a89d3b63af78ff755fb20be",
+    "chapter": "6a7ccf185f958cf7933073ca",
+    "_comment": "What happens if a CSS Custom Property (Variable) is used, but it is not defined and there is no fallback value? | Category: Modern CSS Architecture & Variables | Chapter: How to use CSS Variables (Custom Properties)?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2995",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20ae",
+    "chapter": "6a7ccf185f958cf7933073c8",
+    "_comment": "How do you create a media query that applies styles only when a device is held horizontally? | Category: CSS Grid & Responsive Design | Chapter: How do you make a website responsive with CSS?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2994",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073d6",
+    "_comment": "Which of these is a valid CSS function for blurring an element? | Category: Animations, Transitions & Effects | Chapter: How do CSS filter and backdrop-filter work?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2993",
+    "course": "css",
+    "category": "6a89d3b63af78ff755fb20be",
+    "chapter": "6a7ccf185f958cf7933073e4",
+    "_comment": "What is the purpose of the `@supports` rule in CSS? | Category: Modern CSS Architecture & Variables | Chapter: How to write performant CSS? Best practices and optimization tips"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2992",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073c2",
+    "_comment": "In Flexbox, which property aligns flex items along the cross axis (perpendicular to the main axis)? | Category: Box Model & Flexbox Layouts | Chapter: What is Flexbox and how do you use it?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2991",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073be",
+    "_comment": "How do you remove the default bullets from an unordered list (`<ul>`)? | Category: Box Model & Flexbox Layouts | Chapter: How does the CSS display property work?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2990",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b2",
+    "_comment": "Which pseudo-class targets an element if any of its descendants currently have focus? | Category: CSS Fundamentals & Selectors | Chapter: How do CSS selectors work?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf298f",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073b6",
+    "_comment": "Which logical CSS property replaces `margin-left` in a left-to-right (LTR) writing mode? | Category: Box Model & Flexbox Layouts | Chapter: What is the CSS Box Model?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2999",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20a6",
+    "chapter": "6a7ccf185f958cf7933073bc",
+    "_comment": "In the `hsl()` color function, what do the three parameters stand for? | Category: Box Model & Flexbox Layouts | Chapter: How to use color in CSS — all color formats explained"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf298d",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073d8",
+    "_comment": "Which property is used to add \"...\" at the end of a line of text that overflows its container? | Category: Animations, Transitions & Effects | Chapter: How does CSS overflow work? (overflow, scroll, clip, hidden)"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf298c",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b8",
+    "_comment": "What does the `text-align: justify;` property do? | Category: CSS Fundamentals & Selectors | Chapter: How do you style fonts in CSS? Complete typography guide"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf298b",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20ae",
+    "chapter": "6a7ccf185f958cf7933073cc",
+    "_comment": "How do you apply multiple background images to a single element? | Category: CSS Grid & Responsive Design | Chapter: How to use CSS backgrounds and gradients?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf298a",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073d6",
+    "_comment": "Which property adds a visual effect (like blur or color shift) to the area *behind* an element? | Category: Animations, Transitions & Effects | Chapter: How do CSS filter and backdrop-filter work?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2989",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20ae",
+    "chapter": "6a7ccf185f958cf7933073c8",
+    "_comment": "What does the `vw` unit represent? | Category: CSS Grid & Responsive Design | Chapter: How do you make a website responsive with CSS?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2988",
+    "course": "css",
+    "category": "6a89d3b43af78ff755fb209e",
+    "chapter": "6a7ccf185f958cf7933073b8",
+    "_comment": "Which CSS rule allows you to define custom fonts to use on a webpage? | Category: CSS Fundamentals & Selectors | Chapter: How do you style fonts in CSS? Complete typography guide"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2987",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073d0",
+    "_comment": "In a CSS Animation, which property ensures that the element retains the style values from the last keyframe when the animation ends? | Category: Animations, Transitions & Effects | Chapter: How do CSS animations and @keyframes work?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2986",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20ae",
+    "chapter": "6a7ccf185f958cf7933073cc",
+    "_comment": "What is the primary difference between `opacity: 0;` and `background-color: transparent;`? | Category: CSS Grid & Responsive Design | Chapter: How to use CSS backgrounds and gradients?"
+  },
+  {
+    "id": "6a7d4a45effda32e5acf2985",
+    "course": "css",
+    "category": "6a89d3b53af78ff755fb20b6",
+    "chapter": "6a7ccf185f958cf7933073dc",
+    "_comment": "Which pseudo-element allows you to style the text that a user highlights with their mouse? | Category: Animations, Transitions & Effects | Chapter: How to use CSS ::before and ::after pseudo-elements?"
   }
 ]

@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useSearchParams } from "next/navigation";
 import { ChevronLeft, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui";

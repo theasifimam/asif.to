@@ -15,7 +15,10 @@ import { Button } from "@/components/ui/button";
 export default function NewSocialPostPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const returnTo = getModuleBackUrl("/social-posts", searchParams.get("returnTo"));
+  const returnTo = getModuleBackUrl(
+    "/social-posts",
+    searchParams.get("returnTo"),
+  );
   const [mode, setMode] = useState("import");
   const [importedPost, setImportedPost] = useState(null);
 
@@ -75,8 +78,8 @@ export default function NewSocialPostPage() {
               {mode === "import"
                 ? "AI JSON Import"
                 : importedPost
-                ? "Imported JSON Editor"
-                : "Manual Studio Editor"}
+                  ? "Imported JSON Editor"
+                  : "Manual Studio Editor"}
             </strong>
           </span>
         </div>
@@ -120,12 +123,13 @@ export default function NewSocialPostPage() {
                       : "border-zinc-300 dark:border-zinc-700 bg-transparent"
                   }`}
                 >
-                  {mode === "import" && <Check className="h-3 w-3 stroke-[3]" />}
+                  {mode === "import" && <Check className="h-3 w-3 stroke-3" />}
                 </span>
               </div>
 
               <p className="mt-1 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400 font-medium">
-                Copy a sample format, generate post JSON with ChatGPT/AI, and paste to import.
+                Copy a sample format, generate post JSON with ChatGPT/AI, and
+                paste to import.
               </p>
             </div>
           </button>
@@ -163,12 +167,13 @@ export default function NewSocialPostPage() {
                       : "border-zinc-300 dark:border-zinc-700 bg-transparent"
                   }`}
                 >
-                  {isManualActive && <Check className="h-3 w-3 stroke-[3]" />}
+                  {isManualActive && <Check className="h-3 w-3 stroke-3" />}
                 </span>
               </div>
 
               <p className="mt-1 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400 font-medium">
-                Open the Social Studio directly to manually write post copy and design slides.
+                Open the Social Studio directly to manually write post copy and
+                design slides.
               </p>
             </div>
           </button>
@@ -187,5 +192,3 @@ export default function NewSocialPostPage() {
     </AdminPage>
   );
 }
-
-

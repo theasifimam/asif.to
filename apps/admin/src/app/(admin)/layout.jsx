@@ -392,19 +392,6 @@ export default function AdminLayout({ children }) {
                   <div className="hidden h-5 w-px bg-zinc-200 dark:bg-zinc-800 lg:block mx-0.5" />
                 )}
 
-              {/* Primary Action Button - Visible on desktop */}
-              {hasPermission(user, "articles.create") &&
-                pathname !== "/articles/new" &&
-                !pathname.startsWith("/articles/edit/") && (
-                  <Link
-                    href="/articles/new"
-                    className="hidden lg:inline-flex items-center gap-2 h-10 px-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-outfit text-xs font-bold shadow-xs transition-all hover:shadow-md hover:shadow-blue-600/20 active:scale-95 shrink-0"
-                  >
-                    <FileEdit size={14} />
-                    <span>Write article</span>
-                  </Link>
-                )}
-
               <HeaderAccount
                 user={user}
                 avatarUrl={avatarUrl}

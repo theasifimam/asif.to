@@ -23,7 +23,11 @@ function hexToRgba(hex, alpha) {
     return `rgba(100, 116, 139, ${alpha})`;
   }
   let c = hex.substring(1);
-  if (c.length === 3) c = c.split("").map((x) => x + x).join("");
+  if (c.length === 3)
+    c = c
+      .split("")
+      .map((x) => x + x)
+      .join("");
   const num = parseInt(c, 16);
   if (isNaN(num)) return `rgba(100, 116, 139, ${alpha})`;
   return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
@@ -86,7 +90,7 @@ export default function PlannerColumn({
     <section
       ref={setRef}
       style={style}
-      className={`flex h-full w-[85vw] max-w-75 xs:w-[320px] shrink-0 snap-center md:w-75 flex-col rounded-3xl border bg-[var(--col-bg)] border-[var(--col-border)] dark:bg-[var(--col-bg-dark)] dark:border-[var(--col-border-dark)] p-2 shadow-xs transition-colors ${className || ""}`}
+      className={`flex h-full w-[85vw] max-w-75 xs:w-[320px] shrink-0 snap-center md:w-75 flex-col rounded-3xl border bg-(--col-bg) border-(--col-border) dark:bg-(--col-bg-dark) dark:border-(--col-border-dark) p-2 shadow-xs transition-colors ${className || ""}`}
     >
       <header className="group flex items-center gap-2 px-2 py-2.5">
         <button
