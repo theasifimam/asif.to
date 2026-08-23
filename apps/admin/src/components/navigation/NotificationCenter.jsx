@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Bell, Check, ExternalLink } from "lucide-react";
 import { activityApi } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 const timeAgo = (date) => {
   const seconds = Math.max(1, Math.floor((Date.now() - new Date(date)) / 1000));
@@ -16,6 +17,7 @@ const timeAgo = (date) => {
 const tone = { info: "bg-blue-500", important: "bg-amber-500", critical: "bg-rose-500" };
 
 export default function NotificationCenter() {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [data, setData] = useState({ notifications: [], unreadCount: 0 });
   const root = useRef(null);
@@ -32,7 +34,12 @@ export default function NotificationCenter() {
     </button>
     {open && <div className="absolute right-0 top-12 z-60 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-[#121215]">
       <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800"><div><p className="text-sm font-black text-zinc-900 dark:text-white">Notifications</p><p className="text-[10px] font-medium text-zinc-500">{data.unreadCount} unread</p></div><button onClick={markAll} disabled={!data.unreadCount} className="text-[10px] font-bold text-blue-600 disabled:opacity-40">Mark all read</button></div>
-      <div className="max-h-96 overflow-y-auto">{data.notifications.length ? data.notifications.map((notice) => <div key={notice._id} className={`group flex gap-3 border-b border-zinc-100 px-4 py-3 last:border-0 dark:border-zinc-800 ${!notice.isRead ? "bg-blue-50/50 dark:bg-blue-500/5" : ""}`}><span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${tone[notice.severity]}`} /><div className="min-w-0 flex-1">{notice.url ? <Link href={notice.url} onClick={() => { markRead(notice._id); setOpen(false); }} className="block"><p className="truncate text-xs font-bold text-zinc-800 dark:text-zinc-100">{notice.message}</p></Link> : <p className="truncate text-xs font-bold text-zinc-800 dark:text-zinc-100">{notice.message}</p>}<p className="mt-1 text-[10px] text-zinc-500">{notice.activityId?.actorId?.fullName || notice.actorId?.fullName || "System"} · {timeAgo(notice.createdAt)}</p></div>{!notice.isRead && <button onClick={() => markRead(notice._id)} title="Mark as read" className="self-center text-zinc-400 hover:text-blue-600"><Check size={14}/></button>}</div>) : <p className="p-8 text-center text-xs text-zinc-500">You’re all caught up.</p>}</div>
+      <div className="max-h-96 overflow-y-auto">{data.notifications.length ? data.notifications.filter((notice) => {
+        if (notice.type === "message" || notice.activityId?.entityType === "message") {
+          return user?.username && notice.message?.toLowerCase().includes(`@${user.username.toLowerCase()}`);
+        }
+        return true;
+      }).map((notice) => <div key={notice._id} className={`group flex gap-3 border-b border-zinc-100 px-4 py-3 last:border-0 dark:border-zinc-800 ${!notice.isRead ? "bg-blue-50/50 dark:bg-blue-500/5" : ""}`}><span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${tone[notice.severity]}`} /><div className="min-w-0 flex-1">{notice.url ? <Link href={notice.url} onClick={() => { markRead(notice._id); setOpen(false); }} className="block"><p className="truncate text-xs font-bold text-zinc-800 dark:text-zinc-100">{notice.message}</p></Link> : <p className="truncate text-xs font-bold text-zinc-800 dark:text-zinc-100">{notice.message}</p>}<p className="mt-1 text-[10px] text-zinc-500">{notice.activityId?.actorId?.fullName || notice.actorId?.fullName || "System"} · {timeAgo(notice.createdAt)}</p></div>{!notice.isRead && <button onClick={() => markRead(notice._id)} title="Mark as read" className="self-center text-zinc-400 hover:text-blue-600"><Check size={14}/></button>}</div>) : <p className="p-8 text-center text-xs text-zinc-500">You’re all caught up.</p>}</div>
       <Link href="/activity" onClick={() => setOpen(false)} className="flex items-center justify-center gap-2 border-t border-zinc-100 px-4 py-3 text-xs font-bold text-blue-600 dark:border-zinc-800">View all activity <ExternalLink size={13}/></Link>
     </div>}
   </div>;

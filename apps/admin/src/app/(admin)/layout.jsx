@@ -52,6 +52,7 @@ import MessageHeaderButton from "@/components/navigation/MessageHeaderButton";
 import QuickPlannerAdd from "@/components/navigation/QuickPlannerAdd";
 import { MessagingProvider } from "@/contexts/MessagingContext";
 import { FloatingChatDock } from "@/components/messaging";
+import { ModuleHistoryTracker } from "@/hooks/useModuleHistory";
 
 const NAV_ITEMS = [
   {
@@ -326,6 +327,7 @@ export default function AdminLayout({ children }) {
 
   return (
     <MessagingProvider>
+      <ModuleHistoryTracker />
       <div className="flex h-dvh w-full max-w-full overflow-hidden bg-white font-sans text-zinc-900 transition-colors duration-300 dark:bg-[#09090b] dark:text-zinc-200">
         {/* Desktop Sidebar */}
         <Sidebar
@@ -373,11 +375,6 @@ export default function AdminLayout({ children }) {
             </div>
 
             <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
-              <div className="hidden items-center h-10 gap-2 rounded-full border border-zinc-200/80 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-500 transition-colors dark:border-zinc-800/80 sm:flex">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="hidden sm:inline">Active</span>
-              </div>
-
               {hasPermission(user, "planner.view") && <QuickPlannerAdd />}
 
               {/* Utility Icon Actions - Hidden on smaller devices */}

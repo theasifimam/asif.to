@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getModuleBackUrl } from "@/hooks/useModuleHistory";
 import {
   ArrowLeft,
   ExternalLink,
@@ -68,7 +69,7 @@ export default function CategoryForm({
   const router = useRouter();
   const searchParams = useSearchParams();
   const requestedReturnTo = searchParams.get("returnTo");
-  const returnTo = requestedReturnTo?.startsWith("/") ? requestedReturnTo : "/categories";
+  const returnTo = getModuleBackUrl("/categories", requestedReturnTo);
   const [form, setForm] = useState({
     ...initialForm,
     course: initialCourse || "none",

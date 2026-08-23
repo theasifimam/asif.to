@@ -237,7 +237,7 @@ export default function CategoriesListPage() {
       <AdminPageHeader
         eyebrow="Taxonomy & Landing Pages"
         title="Interview Categories"
-        description="Manage category taxonomies, landing intro guides, and search engine metadata. Drag and drop rows to reorder."
+        description={`Manage category taxonomies, landing intro guides, and search engine metadata. ${filterCourse !== "all" ? "Drag and drop rows to reorder." : "Select a course to reorder categories."}`}
         actions={
           <>
             <ViewToggle view={viewMode} onViewChange={setViewMode} />
@@ -340,6 +340,7 @@ export default function CategoriesListPage() {
                     <SortableCategoryCard
                       key={item._id}
                       item={item}
+                      disableDrag={filterCourse === "all"}
                       onPreview={() => setPreview(item)}
                       onDelete={() => setDeleteTarget(item)}
                     />
@@ -422,6 +423,7 @@ export default function CategoriesListPage() {
                         <SortableCategoryRow
                           key={item._id}
                           item={item}
+                          disableDrag={filterCourse === "all"}
                           onPreview={() => setPreview(item)}
                           onDelete={() => setDeleteTarget(item)}
                         />
@@ -547,7 +549,7 @@ export default function CategoriesListPage() {
   );
 }
 
-function SortableCategoryRow({ item, onPreview, onDelete }) {
+function SortableCategoryRow({ item, disableDrag, onPreview, onDelete }) {
   const {
     attributes,
     listeners,
@@ -555,7 +557,7 @@ function SortableCategoryRow({ item, onPreview, onDelete }) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: item._id });
+  } = useSortable({ id: item._id, disabled: disableDrag });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -581,15 +583,17 @@ function SortableCategoryRow({ item, onPreview, onDelete }) {
       }`}
     >
       <td className="py-4 pl-4 sm:pl-6 w-10">
-        <button
-          type="button"
-          {...attributes}
-          {...listeners}
-          aria-label="Drag to reorder"
-          className="cursor-grab active:cursor-grabbing p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors touch-none"
-        >
-          <GripVertical size={16} />
-        </button>
+        {!disableDrag && (
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            aria-label="Drag to reorder"
+            className="cursor-grab active:cursor-grabbing p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors touch-none"
+          >
+            <GripVertical size={16} />
+          </button>
+        )}
       </td>
       <td className="py-4 px-4">
         <div className="min-w-0">
@@ -674,7 +678,7 @@ function SortableCategoryRow({ item, onPreview, onDelete }) {
   );
 }
 
-function SortableCategoryCard({ item, onPreview, onDelete }) {
+function SortableCategoryCard({ item, disableDrag, onPreview, onDelete }) {
   const {
     attributes,
     listeners,
@@ -682,7 +686,7 @@ function SortableCategoryCard({ item, onPreview, onDelete }) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: item._id });
+  } = useSortable({ id: item._id, disabled: disableDrag });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -708,15 +712,17 @@ function SortableCategoryCard({ item, onPreview, onDelete }) {
       <div className="min-w-0 space-y-3">
         <div className="flex items-center justify-between gap-2 flex-wrap min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-            <button
-              type="button"
-              {...attributes}
-              {...listeners}
-              aria-label="Drag to reorder"
-              className="cursor-grab active:cursor-grabbing p-1 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 touch-none"
-            >
-              <GripVertical size={15} />
-            </button>
+            {!disableDrag && (
+              <button
+                type="button"
+                {...attributes}
+                {...listeners}
+                aria-label="Drag to reorder"
+                className="cursor-grab active:cursor-grabbing p-1 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 touch-none"
+              >
+                <GripVertical size={15} />
+              </button>
+            )}
             <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 truncate max-w-full inline-block">
               {item.course?.title || "Global Category"}
             </span>

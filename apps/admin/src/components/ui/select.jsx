@@ -14,8 +14,14 @@ function SelectGroup({ ...props }) {
   return <SelectPrimitive.Group data-slot="select-group" {...props} />;
 }
 
-function SelectValue({ ...props }) {
-  return <SelectPrimitive.Value data-slot="select-value" {...props} />;
+function SelectValue({ className, ...props }) {
+  return (
+    <SelectPrimitive.Value
+      data-slot="select-value"
+      className={cn("truncate min-w-0 block", className)}
+      {...props}
+    />
+  );
 }
 
 function SelectTrigger({ className, size = "default", children, ...props }) {
@@ -24,7 +30,7 @@ function SelectTrigger({ className, size = "default", children, ...props }) {
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "flex h-11 w-full items-center justify-between gap-2 rounded-2xl border border-zinc-200/90 bg-white px-4 py-2 text-sm font-medium text-zinc-800 shadow-none transition-[border-color,box-shadow,background-color] duration-200 outline-none data-placeholder:text-zinc-400 focus-visible:border-blue-500 focus-visible:ring-3 focus-visible:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:data-placeholder:text-zinc-500 dark:focus-visible:border-blue-500 dark:focus-visible:ring-blue-500/15 whitespace-nowrap *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-zinc-400 dark:[&_svg:not([class*='text-'])]:text-zinc-500",
+        "flex h-11 w-full min-w-0 overflow-hidden items-center justify-between gap-2 rounded-2xl border border-zinc-200/90 bg-white px-4 py-2 text-sm font-medium text-zinc-800 shadow-none transition-[border-color,box-shadow,background-color] duration-200 outline-none data-placeholder:text-zinc-400 focus-visible:border-blue-500 focus-visible:ring-3 focus-visible:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:data-placeholder:text-zinc-500 dark:focus-visible:border-blue-500 dark:focus-visible:ring-blue-500/15 whitespace-nowrap *:data-[slot=select-value]:truncate *:data-[slot=select-value]:min-w-0 *:data-[slot=select-value]:block [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-zinc-400 dark:[&_svg:not([class*='text-'])]:text-zinc-500",
         size === "sm" && "h-8 rounded-xl px-3 py-1.5 text-xs",
         className,
       )}
@@ -32,7 +38,7 @@ function SelectTrigger({ className, size = "default", children, ...props }) {
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <ChevronDownIcon className="size-4 opacity-50" />
+        <ChevronDownIcon className="size-4 opacity-50 shrink-0" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   );

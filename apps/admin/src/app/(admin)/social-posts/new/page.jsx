@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { getModuleBackUrl } from "@/hooks/useModuleHistory";
 import { Check, ChevronLeft, FileJson2, PenLine, Sparkles } from "lucide-react";
 import SocialPostStudio from "@/components/social-posts/SocialPostStudio";
 import JsonImportPanel from "@/components/social-posts/JsonImportPanel";
@@ -13,6 +14,8 @@ import { Button } from "@/components/ui/button";
 
 export default function NewSocialPostPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = getModuleBackUrl("/social-posts", searchParams.get("returnTo"));
   const [mode, setMode] = useState("import");
   const [importedPost, setImportedPost] = useState(null);
 
@@ -36,7 +39,7 @@ export default function NewSocialPostPage() {
         description="Select a creation method below: import AI-generated JSON or build the post manually in the studio."
         back={
           <Link
-            href="/social-posts"
+            href={returnTo}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors mb-1"
           >
             <ChevronLeft className="h-4 w-4" /> Back to social posts

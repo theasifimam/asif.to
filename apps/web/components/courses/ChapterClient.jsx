@@ -19,6 +19,9 @@ import { TECH_STACKS } from "@/lib/tutorialData";
 import { AlertCircle } from "lucide-react";
 import AuthorIdentityCard from "@/components/authors/AuthorIdentityCard";
 import { ChapterReaderSkeleton } from "@/components/courses/ReaderSkeletons";
+// ASIF_COURSE_LEARNING_FLOW_V1:chapter-progress-imports
+import ChapterLearningLoop from "@/components/courses/ChapterLearningLoop";
+import { useCourseProgress } from "@/lib/courseProgress";
 
 export default function ChapterClient({
   courseSlug,
@@ -33,42 +36,7 @@ export default function ChapterClient({
   const [sidebarSearch, setSidebarSearch] = useState("");
   const [fontSize, setFontSize] = useState("md"); // 'sm', 'md', 'lg'
 
-  // Local state for completed chapters
-  const [completedChapters, setCompletedChapters] = useState([]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        if (courseId) {
-          const savedComp = localStorage.getItem(
-            `course_completed_${courseId}`,
-          );
-          if (savedComp) setCompletedChapters(JSON.parse(savedComp)); // eslint-disable-line react-hooks/set-state-in-effect
-        }
-      } catch {
-        /* ignore */
-      }
-    }
-  }, [courseId]);
-
-  const toggleChapterComplete = (slug) => {
-    setCompletedChapters((prev) => {
-      const updated = prev.includes(slug)
-        ? prev.filter((s) => s !== slug)
-        : [...prev, slug];
-      if (typeof window !== "undefined" && courseId) {
-        try {
-          localStorage.setItem(
-            `course_completed_${courseId}`,
-            JSON.stringify(updated),
-          );
-        } catch {
-          /* ignore */
-        }
-      }
-      return updated;
-    });
-  };
+  // ASIF_COURSE_LEARNING_FLOW_V1:remove-old-local-progress
 
   const { data, isLoading, isError } = useGetChapterBySlugQuery(
     { courseSlug: courseId, chapterSlug: chapterId },
@@ -89,9 +57,19 @@ export default function ChapterClient({
   const currentChapterIndex = allChapters.findIndex(
     (c) => c.slug === chapter?.slug,
   );
-  const progressPercentage = allChapters.length
-    ? Math.round(((currentChapterIndex + 1) / allChapters.length) * 100)
-    : 0;
+
+// ASIF_COURSE_LEARNING_FLOW_V1:chapter-position-progress
+const positionPercentage = allChapters.length
+  ? Math.round(((currentChapterIndex + 1) / allChapters.length) * 100)
+  : 0;
+const progressChapters = useMemo(() => {
+  if (!chapter) return allChapters;
+  return allChapters.map((item) => String(item._id) === String(chapter._id) ? { ...item, ...chapter } : item);
+}, [allChapters, chapter]);
+const courseProgress = useCourseProgress(activeCourseSlug, progressChapters);
+const currentProgress = chapter?._id ? courseProgress.chapterMap?.[String(chapter._id)] : null;
+const completedChapters = courseProgress.completedChapters || [];
+const progressPercentage = courseProgress.loading ? positionPercentage : courseProgress.overallProgress;
 
   const activeItemRef = useRef(null);
 
@@ -172,7 +150,12 @@ export default function ChapterClient({
         item.length < 300 && !item.includes("#") && !item.includes("```"),
     );
 
-  const isCurrentCompleted = completedChapters.includes(chapter?.slug);
+
+// ASIF_COURSE_LEARNING_FLOW_V1:chapter-completion-handler
+const isCurrentCompleted = Boolean(currentProgress?.stages?.learn?.completed) || completedChapters.includes(chapter?.slug);
+const toggleChapterComplete = async () => {
+  await courseProgress.markStage(chapter, "learn", { completed: !isCurrentCompleted });
+};
 
   // Font size multiplier classes
   const fontBodyClass =
@@ -243,7 +226,9 @@ export default function ChapterClient({
               techName={tech?.name}
             />
             {/* Try It Challenge */}
-            <TryItChallenge challenge={chapter?.tryItChallenge} />
+            {/* ASIF_COURSE_LEARNING_FLOW_V1:practice-anchor */}
+            <div id="chapter-practice" className="scroll-mt-28"><TryItChallenge challenge={chapter?.tryItChallenge} /></div>
+            <ChapterLearningLoop courseSlug={activeCourseSlug} chapter={chapter} progress={currentProgress} onStageChange={(stage, options) => courseProgress.markStage(chapter, stage, options)} />
             <AuthorIdentityCard
               author={chapter?.author || course?.author}
               publishedAt={chapter?.createdAt}

@@ -12,15 +12,16 @@ import {
   Loader2,
 } from "lucide-react";
 
-export default function RevisionFlashcards({ selectedTech }) {
+export default function RevisionFlashcards({ selectedTech, selectedChapterId, onDeckComplete }) {
+  // ASIF_COURSE_LEARNING_FLOW_V1:revision-component-props
   const { data, isLoading } = useGetFlashcardsQuery(
-    selectedTech ? { courseId: selectedTech, limit: 100 } : { limit: 100 },
+    // ASIF_COURSE_LEARNING_FLOW_V1:revision-query
+    { ...(selectedTech ? { courseId: selectedTech } : {}), ...(selectedChapterId ? { chapterId: selectedChapterId } : {}), limit: 100 },
   );
 
   const allCards = data?.data || [];
-  const filteredCards = selectedTech
-    ? allCards.filter((c) => c.techId === selectedTech)
-    : allCards;
+  // ASIF_COURSE_LEARNING_FLOW_V1:server-filtered-cards
+  const filteredCards = allCards;
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -41,6 +42,8 @@ export default function RevisionFlashcards({ selectedTech }) {
   const cardId = card._id || card.id;
 
   const handleNext = () => {
+    // ASIF_COURSE_LEARNING_FLOW_V1:revision-complete
+    if (currentIndex + 1 >= filteredCards.length) onDeckComplete?.();
     setIsFlipped(false);
     setCurrentIndex((prev) => (prev + 1) % filteredCards.length);
   };

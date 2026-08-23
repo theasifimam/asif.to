@@ -6,6 +6,7 @@ import { ArrowLeft, ImagePlus, Save, Send, X } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
+import { getModuleBackUrl } from "@/hooks/useModuleHistory";
 import Editor from "@/components/editor/Editor";
 import AdminFormShell, {
   AdminFormLoading,
@@ -28,7 +29,7 @@ export default function ArticleForm({ articleId = null }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const requestedReturnTo = searchParams.get("returnTo");
-  const returnTo = requestedReturnTo?.startsWith("/") ? requestedReturnTo : "/articles";
+  const returnTo = getModuleBackUrl("/articles", requestedReturnTo);
   const fileRef = useRef(null);
   const [loading, setLoading] = useState(Boolean(articleId));
   const [saving, setSaving] = useState(false);

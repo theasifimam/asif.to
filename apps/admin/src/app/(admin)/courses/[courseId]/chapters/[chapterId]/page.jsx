@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import { getModuleBackUrl } from "@/hooks/useModuleHistory";
 import {
   ArrowLeft,
   ExternalLink,
@@ -25,13 +26,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { chaptersApi, coursesApi } from "@/lib/api";
+import { chaptersApi, coursesApi, topicCategoriesApi } from "@/lib/api";
 import AdminFormShell, {
   AdminFormLoading,
   formSectionClass,
 } from "@/components/forms/AdminFormShell";
 import DiscussButton from "@/components/messaging/DiscussButton";
 import { CanonicalUrlInput } from "@/components/admin";
+// ASIF_COURSE_LEARNING_FLOW_V1:admin-learning-import
+import ChapterLearningActivitiesEditor from "@/components/courses/ChapterLearningActivitiesEditor";
 
 const initialForm = {
   title: "",
@@ -39,10 +42,19 @@ const initialForm = {
   summary: "",
   contentBody: "",
   tryItChallenge: "",
+  // ASIF_COURSE_LEARNING_FLOW_V1:admin-learning-form
+  revisionQuestionIds: [],
+  practiceQuestionIds: [],
+  buildEnabled: false,
+  buildTitle: "",
+  buildDescription: "",
+  buildRequirements: "",
+  buildEstimatedMinutes: 0,
   seoTitle: "",
   seoDescription: "",
   keywords: "",
   canonicalUrl: "",
+  category: "",
   order: 0,
   status: "draft",
 };
@@ -81,8 +93,11 @@ function chapterContent(chapter) {
 
 export default function ChapterFormPage() {
   const { courseId, chapterId } = useParams();
+  const searchParams = useSearchParams();
+  const returnTo = getModuleBackUrl(`/courses/${courseId}`, searchParams.get("returnTo"));
   const isNew = chapterId === "new";
   const [course, setCourse] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [form, setForm] = useState(initialForm);
   const [slugEdited, setSlugEdited] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -100,6 +115,12 @@ export default function ChapterFormPage() {
 
     const courseData = response.data?.data;
     setCourse(courseData);
+
+    const catResponse = await topicCategoriesApi.list(courseId);
+    if (catResponse.success) {
+      setCategories(catResponse.data?.data || []);
+    }
+
     if (isNew) {
       setForm((current) => ({
         ...current,
@@ -118,8 +139,18 @@ export default function ChapterFormPage() {
         ...initialForm,
         ...chapter,
         contentBody: chapterContent(chapter),
-        keywords: (chapter.keywords || []).join(", "),
-      });
+        category: chapter.category || "",
+
+  keywords: (chapter.keywords || []).join(", "),
+  // ASIF_COURSE_LEARNING_FLOW_V1:admin-learning-load
+  revisionQuestionIds: (chapter.learningActivities?.revisionQuestions || chapter.relatedQuestions || []).map((item) => String(item?._id || item)),
+  practiceQuestionIds: (chapter.learningActivities?.practiceQuestions || chapter.relatedQuestions || []).map((item) => String(item?._id || item)),
+  buildEnabled: Boolean(chapter.learningActivities?.build?.enabled),
+  buildTitle: chapter.learningActivities?.build?.title || "",
+  buildDescription: chapter.learningActivities?.build?.description || "",
+  buildRequirements: (chapter.learningActivities?.build?.requirements || []).join("\n"),
+  buildEstimatedMinutes: chapter.learningActivities?.build?.estimatedMinutes || 0,
+});
       setSlugEdited(true);
     }
     setLoading(false);
@@ -154,6 +185,7 @@ export default function ChapterFormPage() {
       .map((item) => item.trim())
       .filter(Boolean),
     canonicalUrl: form.canonicalUrl,
+    category: form.category || null,
     order: Number(form.order) || 0,
     status,
   });
@@ -212,7 +244,7 @@ export default function ChapterFormPage() {
       description="Build a focused lesson with readable content, code examples, and publishing metadata."
       back={
         <Link
-          href={`/courses/${courseId}`}
+          href={returnTo}
           className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" /> Back to chapters
@@ -338,6 +370,9 @@ export default function ChapterFormPage() {
             </div>
           </section>
 
+          {/* ASIF_COURSE_LEARNING_FLOW_V1:admin-learning-editor */}
+          <ChapterLearningActivitiesEditor courseId={courseId} form={form} setForm={setForm} />
+
           <section className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
             <div>
               <h2 className="text-base font-semibold">Search metadata</h2>
@@ -416,6 +451,25 @@ export default function ChapterFormPage() {
                 <SelectContent>
                   <SelectItem value="draft">Draft</SelectItem>
                   <SelectItem value="published">Published</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select
+                value={form.category}
+                onValueChange={(value) => update("category", value === "none" ? "" : value)}
+              >
+                <SelectTrigger className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900">
+                  <SelectValue placeholder="No category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No category</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat._id} value={cat._id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

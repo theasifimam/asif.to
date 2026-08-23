@@ -1,10 +1,23 @@
 import { Schema, model } from "mongoose";
 
+
+// ASIF_QUESTION_LEARNING_MAPPING_V1:schema
+const learningMappingSchema = new Schema({
+  course: { type: Schema.Types.ObjectId, ref: "Course", required: true },
+  category: { type: Schema.Types.ObjectId, ref: "TopicCategory", default: null },
+  chapter: { type: Schema.Types.ObjectId, ref: "Chapter", default: null },
+  source: { type: String, enum: ["manual", "auto", "legacy"], default: "manual" },
+  confidence: { type: Number, min: 0, max: 100, default: 100 },
+  mappedAt: { type: Date, default: Date.now },
+}, { _id: false });
+
 const questionSchema = new Schema({
   type: { type: String, enum: ["quiz", "interview"], required: true, index: true },
   category: { type: Schema.Types.ObjectId, ref: "TopicCategory", default: null, index: true },
   course: { type: Schema.Types.ObjectId, ref: "Course", default: null },
   courses: [{ type: Schema.Types.ObjectId, ref: "Course" }],
+  // ASIF_QUESTION_LEARNING_MAPPING_V1:field
+  learningMappings: { type: [learningMappingSchema], default: [] },
   question: { type: String, required: true, trim: true, maxlength: 500 },
 
   // Quiz/practice answer fields.
@@ -40,6 +53,9 @@ const questionSchema = new Schema({
 questionSchema.index({ type: 1, category: 1, order: 1 });
 questionSchema.index({ type: 1, category: 1, status: 1 });
 questionSchema.index({ type: 1, courses: 1, status: 1 });
+// ASIF_QUESTION_LEARNING_MAPPING_V1:index
+questionSchema.index({ type: 1, "learningMappings.course": 1, "learningMappings.chapter": 1, status: 1 });
+questionSchema.index({ type: 1, "learningMappings.course": 1, "learningMappings.category": 1, status: 1 });
 questionSchema.index({ type: 1, course: 1, difficulty: 1, questionType: 1 });
 questionSchema.index({ legacyFlashcardId: 1 }, { unique: true, partialFilterExpression: { legacyFlashcardId: { $type: "objectId" } } });
 questionSchema.index({ question: "text", answer: "text", tags: "text" });

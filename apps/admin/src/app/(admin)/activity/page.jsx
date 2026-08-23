@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Search, ExternalLink } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Select,
   SelectContent,
@@ -36,6 +37,7 @@ const tone = { info: "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-bl
 const timeAgo = (date) => { const minutes = Math.floor((Date.now() - new Date(date)) / 60000); if (minutes < 1) return "just now"; if (minutes < 60) return `${minutes} minutes ago`; if (minutes < 1440) return `${Math.floor(minutes / 60)} hours ago`; return new Date(date).toLocaleDateString(); };
 
 export default function ActivityPage() {
+  const { user } = useAuth();
   const [filters, setFilters] = useState({ page: 1, limit: 25, actorRole: "all", severity: "all", entityType: "all", search: "" });
   const [data, setData] = useState({ activities: [], pagination: {} });
   const [loading, setLoading] = useState(true);
@@ -51,7 +53,13 @@ export default function ActivityPage() {
           <ActivityRowSkeleton key={i} />
         ))
       ) : data.activities.length ? (
-        data.activities.map((item) => (
+        data.activities.filter((item) => {
+          if (item.entityType === "message") {
+            const content = `${item.description || ""} ${item.entityTitle || ""}`.toLowerCase();
+            return user?.username && content.includes(`@${user.username.toLowerCase()}`);
+          }
+          return true;
+        }).map((item) => (
           <div key={item._id} className="flex gap-4 border-b border-zinc-100 p-5 last:border-0 dark:border-zinc-800">
             <div className="mt-1 h-9 w-9 shrink-0 rounded-full bg-blue-600/10 text-center text-sm font-black leading-9 text-blue-600">
               {item.actorId?.fullName?.[0] || "S"}

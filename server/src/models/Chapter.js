@@ -15,6 +15,12 @@ const chapterSchema = new Schema(
       required: true,
       index: true,
     },
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: "TopicCategory",
+      default: null,
+      index: true,
+    },
     slug: {
       type: String,
       required: true,
@@ -94,7 +100,20 @@ const chapterSchema = new Schema(
       default: 0,
       index: true,
     },
-    relatedQuestions: [{ type: Schema.Types.ObjectId, ref: "Question" }],
+
+// ASIF_COURSE_LEARNING_FLOW_V1:chapter-learning-schema
+learningActivities: {
+  revisionQuestions: [{ type: Schema.Types.ObjectId, ref: "Question" }],
+  practiceQuestions: [{ type: Schema.Types.ObjectId, ref: "Question" }],
+  build: {
+    enabled: { type: Boolean, default: false },
+    title: { type: String, default: "", trim: true, maxlength: 220 },
+    description: { type: String, default: "", trim: true, maxlength: 2000 },
+    requirements: { type: [String], default: [] },
+    estimatedMinutes: { type: Number, default: 0, min: 0, max: 10080 },
+  },
+},
+relatedQuestions: [{ type: Schema.Types.ObjectId, ref: "Question" }],
     relatedArticles: [{ type: Schema.Types.ObjectId, ref: "Article" }],
   },
   {

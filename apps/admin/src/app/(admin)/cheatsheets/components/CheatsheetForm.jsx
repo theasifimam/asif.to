@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { getModuleBackUrl } from "@/hooks/useModuleHistory";
 import { ArrowLeft, FileText, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
 import Editor from "@/components/editor/Editor";
@@ -20,6 +22,8 @@ const initialForm = {
 };
 
 export default function CheatsheetForm({ cheatsheetId }) {
+  const searchParams = useSearchParams();
+  const returnTo = getModuleBackUrl("/cheatsheets", searchParams.get("returnTo"));
   const [form, setForm] = useState(initialForm);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(Boolean(cheatsheetId));
@@ -61,7 +65,7 @@ export default function CheatsheetForm({ cheatsheetId }) {
       : await cheatsheetsApi.create(payload);
     if (response.success) {
       toast.success(cheatsheetId ? "Cheatsheet saved" : "Cheatsheet created");
-      window.location.assign("/cheatsheets");
+      window.location.assign(returnTo);
     } else toast.error(response.error || "Unable to save cheatsheet");
     setSaving(false);
   };
@@ -73,7 +77,7 @@ export default function CheatsheetForm({ cheatsheetId }) {
       eyebrow="Articles / Cheatsheets"
       title={cheatsheetId ? "Edit cheatsheet article" : "Create cheatsheet article"}
       description="Cheatsheets now use the Article content model. Write the complete reference in Markdown and use fenced code blocks for runnable examples."
-      back={<Link href="/cheatsheets" className="inline-flex items-center gap-2 text-sm text-zinc-500"><ArrowLeft className="h-4 w-4" /> Back to cheatsheets</Link>}
+      back={<Link href={returnTo} className="inline-flex items-center gap-2 text-sm text-zinc-500"><ArrowLeft className="h-4 w-4" /> Back to cheatsheets</Link>}
       actions={<Button form="cheatsheet-form" type="submit" loading={saving}><Save className="mr-2 h-4 w-4" /> Save cheatsheet</Button>}
     >
       <form id="cheatsheet-form" onSubmit={submit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">

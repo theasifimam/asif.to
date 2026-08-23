@@ -331,7 +331,16 @@ export default function InterviewQuestionsManager({
         }
       />
 
-      <section className="grid gap-3 rounded-3xl border border-zinc-200/80 bg-white/90 p-3 sm:p-4 dark:border-zinc-800/80 dark:bg-[#121215]/90 md:grid-cols-2 xl:grid-cols-[220px_180px_minmax(180px,1fr)_150px_150px]">
+      <section className="flex flex-wrap items-center gap-1 rounded-3xl border border-zinc-200/80 bg-white/90 p-3 sm:p-4 dark:border-zinc-800/80 dark:bg-[#121215]/90 *:flex-1 *:min-w-35">
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+          <Input
+            value={filters.search}
+            onChange={(event) => setFilter("search", event.target.value)}
+            placeholder="Search questions..."
+            className="h-10 w-full rounded-full border-zinc-200/80 bg-zinc-50/80 pl-9.5 text-xs font-medium dark:border-zinc-800/80 dark:bg-[#18181b]"
+          />
+        </div>
         <Select
           value={isScoped ? lockedCourseId : filters.course}
           disabled={isScoped}
@@ -415,15 +424,7 @@ export default function InterviewQuestionsManager({
             })}
           </SelectContent>
         </Select>
-        <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-          <Input
-            value={filters.search}
-            onChange={(event) => setFilter("search", event.target.value)}
-            placeholder="Search questions..."
-            className="h-10 rounded-full border-zinc-200/80 bg-zinc-50/80 pl-9.5 text-xs font-medium dark:border-zinc-800/80 dark:bg-[#18181b]"
-          />
-        </div>
+
         <Select
           value={filters.difficulty}
           onValueChange={(value) => setFilter("difficulty", value)}
@@ -473,8 +474,8 @@ export default function InterviewQuestionsManager({
             strategy={verticalListSortingStrategy}
           >
             {viewMode === "card" ? (
-              <div className="space-y-6">
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="space-y-1">
+                <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
                   {loading
                     ? Array.from({ length: limit }).map((_, i) => (
                         <InterviewQuestionCardSkeleton key={i} />

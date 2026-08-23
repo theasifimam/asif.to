@@ -251,4 +251,51 @@ const Editor = memo(function Editor({ value, onChange, placeholder }) {
   );
 });
 
+const MDEditorMarkdown = dynamic(
+  () =>
+    import("@uiw/react-md-editor").then(
+      (module) => module.default?.Markdown || module.Markdown,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-16 w-full bg-zinc-50 dark:bg-zinc-900/20 animate-pulse rounded-2xl" />
+    ),
+  },
+);
+
+export const MarkdownPreview = memo(function MarkdownPreview({
+  source,
+  placeholder = "No description provided.",
+}) {
+  const { theme } = useTheme();
+  const [mdSource, setMdSource] = useState(source || "");
+
+  useEffect(() => {
+    setMdSource(source || "");
+  }, [source]);
+
+  if (!mdSource?.trim()) {
+    return (
+      <p className="text-xs text-zinc-400 dark:text-zinc-500 italic p-1">
+        {placeholder}
+      </p>
+    );
+  }
+
+  return (
+    <div
+      className="md-editor-wrapper"
+      data-color-mode={theme === "dark" ? "dark" : "light"}
+    >
+      <MDEditorMarkdown
+        source={mdSource}
+        className="wmde-markdown font-inter bg-transparent p-1 text-xs sm:text-sm text-zinc-900 dark:text-zinc-100"
+        style={{ backgroundColor: "transparent", color: "inherit" }}
+      />
+    </div>
+  );
+});
+
 export default Editor;
+

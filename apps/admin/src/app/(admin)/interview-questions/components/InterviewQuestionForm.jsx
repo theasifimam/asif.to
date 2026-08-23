@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Eye, Save } from "lucide-react";
 import { toast } from "sonner";
+import { getModuleBackUrl } from "@/hooks/useModuleHistory";
 import Editor from "@/components/editor/Editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,9 +66,10 @@ export default function InterviewQuestionForm({
 }) {
   const searchParams = useSearchParams();
   const requestedReturnTo = searchParams.get("returnTo");
-  const returnTo = requestedReturnTo?.startsWith("/")
-    ? requestedReturnTo
-    : "/interview-questions";
+  const returnTo = getModuleBackUrl(
+    "/interview-questions",
+    requestedReturnTo,
+  );
   const taxonomyLocked =
     lockTaxonomy ||
     /^\/courses\/[^/]+\/categories\/[^/]+\/interview-questions(?:\?|$)/.test(

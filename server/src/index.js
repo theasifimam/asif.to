@@ -28,6 +28,8 @@ import libraryRoutes from "./routes/library.routes.js";
 import activityRoutes from "./routes/activity.routes.js";
 import messagingRoutes from "./routes/messaging.routes.js";
 import relatedContentRoutes from "./routes/relatedContent.routes.js";
+// ASIF_LEARNING_JOURNEY_V1:server-import
+
 import socialPostRoutes from "./routes/socialPost.routes.js";
 import socialIntegrationRoutes from "./routes/socialIntegration.routes.js";
 import { initializeMessagingSocket } from "./realtime/messaging.socket.js";
@@ -108,6 +110,8 @@ app.use("/api/v1/library", libraryRoutes);
 app.use("/api/v1/activity", activityRoutes);
 app.use("/api/v1/messaging", messagingRoutes);
 app.use("/api/v1/related-content", relatedContentRoutes);
+// ASIF_LEARNING_JOURNEY_V1:server-mount
+
 app.use("/api/v1/social-posts", socialPostRoutes);
 app.use("/api/v1/social-integrations", socialIntegrationRoutes);
 app.use("/api/v1/deletion-requests", deletionRoutes);

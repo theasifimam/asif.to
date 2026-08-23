@@ -26,6 +26,8 @@ import {
   Settings2,
   X,
 } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -96,8 +98,98 @@ export default function PlannerPage() {
     });
   };
 
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const taskIdParam = searchParams.get("task");
+  const modeParam = searchParams.get("mode");
+
   const [activeCard, setActiveCard] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
+  const [cardModalMode, setCardModalMode] = useState("view");
+
+  const updateTaskUrl = useCallback(
+    (taskId, mode) => {
+      const params = new URLSearchParams(searchParams?.toString() || "");
+      if (taskId) {
+        params.set("task", taskId);
+        if (mode && mode !== "view") {
+          params.set("mode", mode);
+        } else {
+          params.delete("mode");
+        }
+      } else {
+        params.delete("task");
+        params.delete("mode");
+      }
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, {
+        scroll: false,
+      });
+    },
+    [pathname, router, searchParams],
+  );
+
+  const openCardModal = useCallback(
+    (card, mode = "view") => {
+      setSelectedCard(card);
+      setCardModalMode(mode);
+      const taskId = card?._id || (mode === "create" ? "new" : null);
+      if (taskId) {
+        updateTaskUrl(taskId, mode);
+      }
+    },
+    [updateTaskUrl],
+  );
+
+  const closeCardModal = useCallback(() => {
+    setSelectedCard(null);
+    updateTaskUrl(null, null);
+  }, [updateTaskUrl]);
+
+  const changeCardModalMode = useCallback(
+    (newMode) => {
+      setCardModalMode(newMode);
+      if (selectedCard) {
+        const taskId = selectedCard._id || "new";
+        updateTaskUrl(taskId, newMode);
+      }
+    },
+    [selectedCard, updateTaskUrl],
+  );
+
+  useEffect(() => {
+    if (!taskIdParam) {
+      if (selectedCard) setSelectedCard(null);
+      return;
+    }
+
+    if (taskIdParam === "new") {
+      if (!selectedCard || selectedCard._id) {
+        setSelectedCard({
+          title: "",
+          description: "",
+          column: columns[0]?._id || "",
+          type: "Feature",
+          priority: "Medium",
+        });
+        setCardModalMode("create");
+      }
+      return;
+    }
+
+    if (cards.length > 0) {
+      const found = cards.find((card) => card._id === taskIdParam);
+      if (found) {
+        if (selectedCard?._id !== found._id || cardModalMode !== (modeParam || "view")) {
+          setSelectedCard(found);
+          setCardModalMode(modeParam === "edit" ? "edit" : "view");
+        }
+      }
+    }
+  }, [taskIdParam, modeParam, cards, columns]);
+
   const [quickTitle, setQuickTitle] = useState("");
   const [activeColumnTab, setActiveColumnTab] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -316,10 +408,22 @@ export default function PlannerPage() {
     }
 
     const card = await createCard(targetCol, title, templateData);
-    if (card) setSelectedCard(card);
+    if (card) openCardModal(card, "edit");
   };
 
   const saveCard = async (draft) => {
+    if (!draft._id) {
+      const created = await createCard(
+        draft.column || columns[0]?._id,
+        draft.title,
+        draft,
+      );
+      if (created) {
+        openCardModal(created, "view");
+      }
+      return created;
+    }
+
     const old = cards.find((item) => item._id === draft._id);
     const payload = {
       ...draft,
@@ -337,14 +441,18 @@ export default function PlannerPage() {
         current.map((item) => (item._id === updated._id ? updated : item)),
       );
       setSelectedCard(updated);
+      updateTaskUrl(updated._id, "view");
       toast.success("Card saved");
+      return updated;
     } else {
       setCards((current) =>
         current.map((item) => (item._id === old._id ? old : item)),
       );
       toast.error(response.error || "Save failed; changes rolled back");
+      return null;
     }
   };
+
   const archiveCard = async (card) => {
     const response = await kanbanApi.updateCard(card._id, {
       archived: true,
@@ -352,18 +460,21 @@ export default function PlannerPage() {
     });
     if (response.success) {
       setCards((current) => current.filter((item) => item._id !== card._id));
-      setSelectedCard(null);
+      closeCardModal();
       toast.success("Card archived");
     } else toast.error(response.error);
   };
+
   const duplicateCard = async (card) => {
     const response = await kanbanApi.duplicateCard(card._id);
     if (response.success) {
-      setCards((current) => [...current, unwrap(response)]);
-      setSelectedCard(null);
+      const duplicated = unwrap(response);
+      setCards((current) => [...current, duplicated]);
+      openCardModal(duplicated, "view");
       toast.success("Card duplicated");
     } else toast.error(response.error);
   };
+
   const deleteCard = (card) => {
     showConfirm({
       title: "Delete task?",
@@ -374,7 +485,7 @@ export default function PlannerPage() {
         const response = await kanbanApi.deleteCard(card._id);
         if (response.success) {
           setCards((current) => current.filter((item) => item._id !== card._id));
-          setSelectedCard(null);
+          closeCardModal();
           toast.success("Card deleted");
         } else {
           toast.error(response.error || "Unable to delete task");
@@ -958,7 +1069,7 @@ export default function PlannerPage() {
 
                   <button
                     type="button"
-                    onClick={() => setSelectedCard(card)}
+                    onClick={() => openCardModal(card, "view")}
                     className="min-w-0 flex-1 text-left"
                   >
                     <div
@@ -1056,7 +1167,7 @@ export default function PlannerPage() {
                   cards={visibleCards.filter(
                     (card) => getColumnId(card) === column._id,
                   )}
-                  onOpenCard={setSelectedCard}
+                  onOpenCard={(card) => openCardModal(card, "view")}
                   onAddCard={createCard}
                   onRename={renameColumn}
                   onArchive={archiveColumn}
@@ -1073,18 +1184,20 @@ export default function PlannerPage() {
       </div>
       {selectedCard && (
         <CardDetailDrawer
-          key={selectedCard._id}
+          key={selectedCard._id || "new-task"}
           card={selectedCard}
+          initialMode={cardModalMode}
           columns={columns}
           labels={labels}
           courses={courses}
           cards={cards}
-          onClose={() => setSelectedCard(null)}
+          onClose={closeCardModal}
           onSave={saveCard}
           onDuplicate={duplicateCard}
           onArchive={archiveCard}
           onDelete={deleteCard}
           onCreateLabel={createLabel}
+          onModeChange={changeCardModalMode}
         />
       )}
       <ConfirmDialog

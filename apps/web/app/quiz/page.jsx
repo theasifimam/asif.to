@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+// ASIF_COURSE_LEARNING_FLOW_V1:quiz-imports
+import { useSearchParams } from "next/navigation";
+import { recordCourseStage } from "@/lib/courseProgress";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -26,7 +29,12 @@ import {
 } from "lucide-react";
 
 export default function QuizPage() {
-  const [selectedCourseSlug, setSelectedCourseSlug] = useState(null);
+  // ASIF_COURSE_LEARNING_FLOW_V1:quiz-query-state
+  const searchParams = useSearchParams();
+  const initialCourse = searchParams.get("course");
+  const initialChapter = searchParams.get("chapter");
+  const [selectedCourseSlug, setSelectedCourseSlug] = useState(initialCourse || null);
+  const [selectedChapterId, setSelectedChapterId] = useState(initialChapter || null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -37,7 +45,8 @@ export default function QuizPage() {
   const [submitPracticeQuiz] = useSubmitPracticeQuizMutation();
 
   const { data, isLoading } = useGetQuizQuestionsQuery(
-    selectedCourseSlug ? { courseId: selectedCourseSlug } : undefined,
+    // ASIF_COURSE_LEARNING_FLOW_V1:quiz-query-filter
+    selectedCourseSlug || selectedChapterId ? { ...(selectedCourseSlug ? { courseId: selectedCourseSlug } : {}), ...(selectedChapterId ? { chapterId: selectedChapterId } : {}) } : undefined,
   );
   const { data: coursesResponse, isLoading: areCoursesLoading } =
     useGetCoursesQuery();
@@ -82,9 +91,17 @@ export default function QuizPage() {
       setIsAnswered(false);
     } else {
       setIsFinished(true);
+      // ASIF_COURSE_LEARNING_FLOW_V1:quiz-record-progress
+      if (selectedCourseSlug && selectedChapterId) {
+        const percentage = Math.round((score / Math.max(QUIZ_QUESTIONS.length, 1)) * 100);
+        recordCourseStage({ courseSlug: selectedCourseSlug, chapterId: selectedChapterId, stage: "practice", score: percentage, completed: percentage >= 70 });
+      }
+
       if (isAuthenticated) {
         submitPracticeQuiz({
           courseSlug: selectedCourseSlug,
+          // ASIF_COURSE_LEARNING_FLOW_V1:quiz-submit-chapter
+          chapterId: selectedChapterId,
           questionIds: QUIZ_QUESTIONS.map((item) => item._id),
           answers: QUIZ_QUESTIONS.map((_, index) => answers[index]),
         }).unwrap().then(() => toast.success("Quiz score saved to your profile")).catch(() => toast.error("Quiz completed, but the score could not be saved"));
@@ -102,7 +119,9 @@ export default function QuizPage() {
   };
 
   const handleSelectCourse = (slug) => {
+    // ASIF_COURSE_LEARNING_FLOW_V1:quiz-manual-filter
     setSelectedCourseSlug(slug);
+    setSelectedChapterId(null);
     setCurrentIndex(0);
     setSelectedOption(null);
     setIsAnswered(false);

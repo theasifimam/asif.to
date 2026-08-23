@@ -26,6 +26,11 @@ import {
 } from "lucide-react";
 import SaveButton from "@/components/articles/SaveButton";
 import AuthorIdentityCard from "@/components/authors/AuthorIdentityCard";
+// ASIF_COURSE_LEARNING_FLOW_V1:course-progress-imports
+import CourseProgressSummary, {
+  ChapterStageProgress,
+} from "@/components/courses/CourseProgressSummary";
+import { useCourseProgress } from "@/lib/courseProgress";
 
 export default function CourseClient({ initialData }) {
   const params = useParams();
@@ -46,6 +51,14 @@ export default function CourseClient({ initialData }) {
   const firstChapterSlug = course?.chapters?.[0]?.slug || "ch-1";
   const examEnabled = Boolean(course?.examEnabled);
   const examSettings = course?.examSettings || {};
+  // ASIF_COURSE_LEARNING_FLOW_V1:course-progress-hook
+  const courseProgress = useCourseProgress(
+    activeCourseSlug,
+    course?.chapters || [],
+  );
+  const continueHref =
+    courseProgress?.nextAction?.href ||
+    `/${activeCourseSlug}/${firstChapterSlug}`;
 
   if (isInitialLoading) {
     return (
@@ -149,14 +162,20 @@ export default function CourseClient({ initialData }) {
           {/* Main Primary Hero Actions Bar */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-2">
             {/* Primary Action Button - Solid Primary Color without Gradient */}
+            {/* ASIF_COURSE_LEARNING_FLOW_V1:course-primary-action */}
             <Link
-              href={`/${activeCourseSlug}/${firstChapterSlug}`}
+              href={continueHref}
               className="group flex-1 inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-black shadow-md shadow-blue-600/25 hover:shadow-lg hover:shadow-blue-600/35 active:scale-95 transition-all duration-200"
             >
               <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                 <Play className="w-3.5 h-3.5 text-white fill-current translate-x-0.5" />
               </div>
-              <span>Start (Lesson 1)</span>
+              {/* ASIF_COURSE_LEARNING_FLOW_V1:course-primary-label */}
+              <span>
+                {courseProgress?.overallProgress > 0
+                  ? "Continue Learning"
+                  : "Start (Lesson 1)"}
+              </span>
             </Link>
 
             {/* Final Exam CTA - Secondary Button in Primary Blue Outline Style */}
@@ -244,6 +263,9 @@ export default function CourseClient({ initialData }) {
           </div>
         </section>
 
+        {/* ASIF_COURSE_LEARNING_FLOW_V1:course-progress-summary */}
+        <CourseProgressSummary course={course} progress={courseProgress} />
+
         {/* What You Will Learn Section */}
         <section className="p-6 sm:p-8 rounded-[2.5rem] bg-linear-to-br from-blue-500/10 via-indigo-500/10 to-purple-500/10 shadow-sm space-y-4">
           <h2 className="text-lg font-black text-foreground flex items-center gap-2">
@@ -289,65 +311,78 @@ export default function CourseClient({ initialData }) {
             </p>
           </div>
 
-          <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/80">
-            {course.chapters.map((ch, idx) => (
-              <div
-                key={ch._id || ch.slug}
-                className={`relative p-5 sm:p-6 hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors duration-200 flex flex-col gap-3 group ${
-                  idx === 0 ? "rounded-t-[2.5rem]" : ""
-                }`}
-              >
-                {/* Top Meta Header: Chapter Badge & Save Button above Title */}
-                <div className="flex items-center justify-between gap-3 w-full">
-                  <div className="shrink-0 w-8 h-8 rounded-2xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/25">
-                    {idx + 1}
-                  </div>
-                  <SaveButton
-                    itemId={ch._id}
-                    itemType="chapter"
-                    label="Save"
-                    size="sm"
-                    className="shrink-0 text-xs px-3 py-1.5"
-                  />
-                </div>
+          <div className="space-y-3 sm:space-y-4">
+            {course.chapters.map((ch, idx) => {
+              const displayTitle = ch.title.replace(/^\d+[\.\s\-]+/, "");
+              const chapterNumber = String(idx + 1).padStart(2, "0");
+              const progressItem = courseProgress?.chapterMap?.[String(ch._id)];
 
-                {/* 100% Full-Width Chapter Title & Summary */}
-                <Link
-                  href={`/${activeCourseSlug}/${ch.slug}`}
-                  className="block w-full space-y-1"
+              return (
+                <div
+                  key={ch._id || ch.slug}
+                  className="group relative p-5 sm:p-6 rounded-3xl bg-white dark:bg-zinc-900/90 border border-zinc-200/80 dark:border-zinc-800/80 hover:border-blue-500/40 dark:hover:border-blue-500/40 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                 >
-                  <h3 className="font-extrabold text-base text-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-snug w-full">
-                    {ch.title}
-                  </h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed w-full">
-                    {ch.summary}
-                  </p>
-                </Link>
+                  <div className="flex items-start gap-4 min-w-0 flex-1">
+                    {/* Chapter Number Badge */}
+                    <div className="shrink-0 w-10 h-10 rounded-2xl bg-blue-500/10 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 font-black text-sm flex items-center justify-center border border-blue-500/20">
+                      {chapterNumber}
+                    </div>
 
-                {/* Bottom Action Row: Start Lesson CTA */}
-                <div className="flex items-center justify-end pt-1">
-                  <Link
-                    href={`/${activeCourseSlug}/${ch.slug}`}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-                  >
-                    <span>Start Lesson</span>
-                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Link>
+                    {/* Content Block */}
+                    <div className="space-y-1.5 min-w-0 flex-1">
+                      <Link
+                        href={`/${activeCourseSlug}/${ch.slug}`}
+                        className="block group/link"
+                      >
+                        <h3 className="font-outfit font-extrabold text-base sm:text-lg text-foreground group-hover/link:text-blue-600 dark:group-hover/link:text-blue-400 transition-colors leading-snug">
+                          {displayTitle}
+                        </h3>
+                      </Link>
+
+                      {ch.summary && (
+                        <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed line-clamp-2">
+                          {ch.summary}
+                        </p>
+                      )}
+
+                      {/* ASIF_COURSE_LEARNING_FLOW_V1:chapter-stage-progress */}
+                      <ChapterStageProgress progress={progressItem} />
+                    </div>
+                  </div>
+
+                  {/* Right Action Row */}
+                  <div className="flex items-center gap-3 shrink-0 self-end sm:self-center pt-2 sm:pt-0">
+                    <SaveButton
+                      itemId={ch._id}
+                      itemType="chapter"
+                      label="Save"
+                      size="sm"
+                      className="rounded-full px-3.5 py-1.5 text-xs bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border-none shadow-none"
+                    />
+
+                    <Link
+                      href={`/${activeCourseSlug}/${ch.slug}`}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs hover:shadow-md active:scale-95 transition-all group/btn"
+                    >
+                      <span>Start Lesson</span>
+                      <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             {examEnabled ? (
               <Link
                 href={`/courses/${activeCourseSlug}/final-exam`}
-                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-b-[2.5rem] bg-linear-to-r from-blue-500/5 via-purple-500/5 to-blue-500/5 hover:from-blue-500/10 hover:to-purple-500/10 transition-colors duration-200 border-t-2 border-dashed border-blue-500/30"
+                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-blue-500/5 hover:from-blue-500/10 hover:to-purple-500/10 border border-blue-500/30 transition-all duration-200"
               >
                 <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-8 h-8 rounded-2xl bg-linear-to-br from-blue-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/25">
-                    <GraduationCap className="w-4 h-4" />
+                  <div className="shrink-0 w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/25">
+                    <GraduationCap className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-base text-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                    <h3 className="font-outfit font-extrabold text-base sm:text-lg text-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                       Final Exam - Certification Test
                     </h3>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
@@ -357,22 +392,22 @@ export default function CourseClient({ initialData }) {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs font-bold text-purple-600 dark:text-purple-400 self-end sm:self-auto shrink-0">
+                <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-xs hover:shadow-md active:scale-95 transition-all self-end sm:self-center shrink-0">
                   <span>Take Exam</span>
-                  <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </Link>
             ) : (
               <div
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-b-[2.5rem] bg-zinc-50 dark:bg-zinc-900/60 border-t-2 border-dashed border-zinc-200 dark:border-zinc-800"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-3xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800"
                 aria-disabled="true"
               >
                 <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-8 h-8 rounded-2xl bg-zinc-200 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center">
-                    <GraduationCap className="w-4 h-4" />
+                  <div className="shrink-0 w-10 h-10 rounded-2xl bg-zinc-200 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center">
+                    <GraduationCap className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-base text-zinc-500 dark:text-zinc-400">
+                    <h3 className="font-outfit font-extrabold text-base text-zinc-500 dark:text-zinc-400">
                       Final Exam - Coming Soon
                     </h3>
                     <p className="text-xs text-zinc-400 mt-1 font-medium">
@@ -380,7 +415,7 @@ export default function CourseClient({ initialData }) {
                     </p>
                   </div>
                 </div>
-                <span className="text-xs font-bold text-zinc-400 self-end sm:self-auto shrink-0">
+                <span className="text-xs font-bold text-zinc-400 self-end sm:self-center shrink-0">
                   Coming Soon
                 </span>
               </div>

@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { getModuleBackUrl } from "@/hooks/useModuleHistory";
 import {
   Save,
   ArrowLeft,
@@ -28,6 +29,8 @@ export default function LegalPageEditor() {
   const params = useParams();
   const slug = String(params.slug || "");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = getModuleBackUrl("/legal", searchParams.get("returnTo"));
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -169,7 +172,7 @@ export default function LegalPageEditor() {
       description="Manage policy content, publishing status, and complete SEO & OpenGraph meta tags."
       back={
         <Link
-          href="/legal"
+          href={returnTo}
           className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />

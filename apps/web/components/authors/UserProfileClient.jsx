@@ -35,6 +35,8 @@ import { toast } from "sonner";
 // Modular Sub-Components
 import ProfileHero from "@/components/profile/ProfileHero";
 import ProfileStats from "@/components/profile/ProfileStats";
+// ASIF_COURSE_LEARNING_FLOW_V1:profile-summary-import
+import ProfileCourseProgressSummary from "@/components/profile/ProfileCourseProgressSummary";
 import ProfileTabsNav from "@/components/profile/ProfileTabsNav";
 import ProfileLibraryTab from "@/components/profile/ProfileLibraryTab";
 import ProfileSavedTab from "@/components/profile/ProfileSavedTab";
@@ -286,6 +288,9 @@ export default function UserProfileClient({ username }) {
               onSelectTab={handleTabChange}
             />
 
+            {/* ASIF_COURSE_LEARNING_FLOW_V1:profile-summary */}
+            {isOwnProfile && <ProfileCourseProgressSummary />}
+
             {/* Profile Tabs Navigation */}
             <section className="space-y-4">
               <ProfileTabsNav
@@ -295,6 +300,7 @@ export default function UserProfileClient({ username }) {
               />
 
               {/* Tab Contents */}
+
               {activeTab === "library" && (
                 <ProfileLibraryTab
                   user={user}

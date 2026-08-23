@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { getModuleBackUrl } from "@/hooks/useModuleHistory";
 import {
   ArrowDown,
   ArrowLeft,
@@ -71,9 +72,7 @@ function slugify(value) {
 export default function TopicForm({ topicId = null }) {
   const searchParams = useSearchParams();
   const requestedReturnTo = searchParams.get("returnTo");
-  const returnTo = requestedReturnTo?.startsWith("/")
-    ? requestedReturnTo
-    : "/topics";
+  const returnTo = getModuleBackUrl("/topics", requestedReturnTo);
   const [form, setForm] = useState(initialForm);
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);

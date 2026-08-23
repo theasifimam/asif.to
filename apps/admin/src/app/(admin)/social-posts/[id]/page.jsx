@@ -2,7 +2,9 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { AlertCircle, ChevronLeft, Loader2 } from "lucide-react";
+import { getModuleBackUrl } from "@/hooks/useModuleHistory";
 import { socialPostsApi } from "@/lib/api";
 import SocialPostStudio from "@/components/social-posts/SocialPostStudio";
 import SocialMediaTabs from "@/components/social-posts/SocialMediaTabs";
@@ -11,6 +13,8 @@ import { Button } from "@/components/ui/button";
 
 export default function EditSocialPostPage({ params }) {
   const { id } = use(params);
+  const searchParams = useSearchParams();
+  const returnTo = getModuleBackUrl("/social-posts", searchParams.get("returnTo"));
   const [post, setPost] = useState(null);
   const [error, setError] = useState("");
 
@@ -36,7 +40,7 @@ export default function EditSocialPostPage({ params }) {
           description={error}
           action={
             <Button asChild variant="outline">
-              <Link href="/social-posts">Return to Social Posts</Link>
+              <Link href={returnTo}>Return to Social Posts</Link>
             </Button>
           }
         />
@@ -62,7 +66,7 @@ export default function EditSocialPostPage({ params }) {
         description="Customize post content, manage slide sequences, and control publishing settings."
         back={
           <Link
-            href="/social-posts"
+            href={returnTo}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors mb-1"
           >
             <ChevronLeft className="h-4 w-4" /> Back to social posts

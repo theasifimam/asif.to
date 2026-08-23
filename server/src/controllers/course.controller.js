@@ -1,5 +1,7 @@
 import Course from "../models/Course.js";
 import Chapter from "../models/Chapter.js";
+// ASIF_QUESTION_LEARNING_MAPPING_V1:question-import
+import Question from "../models/Question.js";
 import { logActivity } from "../services/activity.service.js";
 import { formatCanonicalUrl } from "../utils/canonical.js";
 
@@ -40,6 +42,20 @@ function getPagination(query, defaultLimit = 20) {
   );
 
   return { page, limit, skip: (page - 1) * limit };
+}
+
+// ASIF_QUESTION_LEARNING_MAPPING_V1:availability-helper
+async function attachLearningAvailability(courseId, chapters = []) {
+  if (!chapters.length) return chapters;
+  const ids=chapters.map((c)=>c._id);
+  const rows=await Question.aggregate([
+    {$match:{type:"quiz",status:"published",learningMappings:{$elemMatch:{course:courseId,chapter:{$in:ids}}}}},
+    {$unwind:"$learningMappings"},
+    {$match:{"learningMappings.course":courseId,"learningMappings.chapter":{$in:ids}}},
+    {$group:{_id:"$learningMappings.chapter",reviseCount:{$sum:{$cond:[{$ne:["$flashcardEnabled",false]},1,0]}},practiceCount:{$sum:{$cond:[{$ne:["$quizEnabled",false]},1,0]}}}},
+  ]);
+  const map=new Map(rows.map((r)=>[String(r._id),r]));
+  return chapters.map((chapter)=>{ const row=map.get(String(chapter._id))||{}; const build=chapter.learningActivities?.build||{}; return {...chapter,learningAvailability:{reviseCount:Number(row.reviseCount||0),practiceCount:Number(row.practiceCount||0),build:Boolean(build.enabled&&(String(build.title||"").trim()||String(build.description||"").trim()))}}; });
 }
 
 // ── Public Endpoints ──────────────────────────────────────────────────────────
@@ -136,10 +152,13 @@ export const getCourseBySlug = async (req, res) => {
       status: "published",
     })
       .sort({ order: 1 })
-      .select("slug title summary order viewCount")
+      // ASIF_COURSE_LEARNING_FLOW_V1:public-course-chapter-select
+.select("slug title summary order viewCount tryItChallenge relatedQuestions learningActivities")
       .lean();
 
-    res.status(200).json({ success: true, data: { ...course, chapters } });
+    // ASIF_QUESTION_LEARNING_MAPPING_V1:course-response
+    const chaptersWithLearning = await attachLearningAvailability(course._id, chapters);
+    res.status(200).json({ success: true, data: { ...course, chapters: chaptersWithLearning } });
   } catch (error) {
     console.error("[COURSES] getCourseBySlug error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -197,6 +216,10 @@ export const getChapterBySlug = async (req, res) => {
       .select("slug title order")
       .lean();
 
+    // ASIF_QUESTION_LEARNING_MAPPING_V1:chapter-response
+    const [chapterWithLearning] = await attachLearningAvailability(course._id, [chapter]);
+    const allChaptersWithLearning = await attachLearningAvailability(course._id, allChapters);
+
     const currentIndex = allChapters.findIndex((c) => c.slug === chapter.slug);
     const prevChapter = currentIndex > 0 ? allChapters[currentIndex - 1] : null;
     const nextChapter =
@@ -219,8 +242,8 @@ export const getChapterBySlug = async (req, res) => {
           examEnabled: course.examEnabled,
           examSettings: course.examSettings,
         },
-        chapter,
-        allChapters,
+        chapter: chapterWithLearning,
+        allChapters: allChaptersWithLearning,
         prevChapter,
         nextChapter,
       },
@@ -570,13 +593,21 @@ export const deleteCourse = async (req, res) => {
 export const getChapters = async (req, res) => {
   try {
     const { courseId } = req.params;
-    const { search = "", status = "all" } = req.query;
+    const { search = "", status = "all", category = "all" } = req.query;
     const hasPagination =
       req.query.page !== undefined || req.query.limit !== undefined;
     const { page, limit, skip } = getPagination(req.query);
     const filter = { course: courseId };
 
     if (status !== "all") filter.status = status;
+    if (category && category !== "all") {
+      if (category === "none" || category === "uncategorized") {
+        filter.category = null;
+      } else {
+        filter.category = category;
+      }
+    }
+
     if (search.trim()) {
       const expression = new RegExp(escapeRegex(search.trim()), "i");
       filter.$or = [
@@ -588,7 +619,9 @@ export const getChapters = async (req, res) => {
     }
 
     const total = await Chapter.countDocuments(filter);
-    let query = Chapter.find(filter).sort({ order: 1, createdAt: -1 });
+    let query = Chapter.find(filter)
+      .populate("category", "name slug")
+      .sort({ order: 1, createdAt: -1 });
     if (hasPagination) query = query.skip(skip).limit(limit);
     const chapters = await query.lean();
 
@@ -629,6 +662,7 @@ export const createChapter = async (req, res) => {
       seoDescription,
       keywords,
       canonicalUrl,
+      category,
     } = req.body;
 
     if (!title || !summary) {
@@ -688,6 +722,7 @@ export const createChapter = async (req, res) => {
       seoDescription: seoDescription || "",
       keywords: normalizeKeywords(keywords),
       canonicalUrl: finalCanonicalUrl,
+      category: category || null,
       order: chapterOrder,
       status: status || "published",
     });
@@ -726,6 +761,7 @@ export const updateChapter = async (req, res) => {
       "seoDescription",
       "keywords",
       "canonicalUrl",
+      "category",
       "order",
       "status",
     ];

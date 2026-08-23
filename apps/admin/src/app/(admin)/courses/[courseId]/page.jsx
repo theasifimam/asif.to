@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import { getModuleBackUrl } from "@/hooks/useModuleHistory";
 import {
   ArrowDown,
   ArrowLeft,
@@ -57,6 +58,9 @@ function ChapterRowSkeleton() {
         <Skeleton className="mt-1 h-3.5 w-32 rounded-md" />
       </td>
       <td className="px-6 py-4">
+        <Skeleton className="h-5 w-24 rounded-full" />
+      </td>
+      <td className="px-6 py-4">
         <Skeleton className="h-4 w-14 rounded-md" />
       </td>
       <td className="px-6 py-4">
@@ -80,7 +84,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { chaptersApi, coursesApi } from "@/lib/api";
+import { chaptersApi, coursesApi, topicCategoriesApi } from "@/lib/api";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import {
   AdminPage,
@@ -100,11 +104,15 @@ const statusStyles = {
 
 export default function CourseChaptersPage() {
   const { courseId } = useParams();
+  const searchParams = useSearchParams();
+  const returnTo = getModuleBackUrl("/courses", searchParams.get("returnTo"));
   const [course, setCourse] = useState(null);
   const [chapters, setChapters] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [filters, setFilters] = useState({
     search: "",
     status: "all",
+    category: "all",
     page: 1,
     limit: 20,
   });
@@ -118,7 +126,20 @@ export default function CourseChaptersPage() {
   const [updating, setUpdating] = useState(null);
   const [deleteChapter, setDeleteChapter] = useState(null);
 
-  const orderingView = filters.status === "all" && pagination.pages <= 1;
+  const orderingView =
+    filters.status === "all" &&
+    filters.category === "all" &&
+    pagination.pages <= 1;
+
+  useEffect(() => {
+    async function loadCategories() {
+      const response = await topicCategoriesApi.list(courseId);
+      if (response.success) {
+        setCategories(response.data?.data || response.data || []);
+      }
+    }
+    if (courseId) loadCategories();
+  }, [courseId]);
 
   useEffect(() => {
     const timer = setTimeout(
@@ -135,6 +156,7 @@ export default function CourseChaptersPage() {
       chaptersApi.list(courseId, {
         search: debouncedSearch,
         status: filters.status,
+        category: filters.category,
         page: filters.page,
         limit: filters.limit,
       }),
@@ -153,7 +175,7 @@ export default function CourseChaptersPage() {
       toast.error(chaptersResponse.error || "Unable to load chapters");
     }
     setLoading(false);
-  }, [courseId, debouncedSearch, filters.limit, filters.page, filters.status]);
+  }, [courseId, debouncedSearch, filters.limit, filters.page, filters.status, filters.category]);
 
   useEffect(() => {
     const timer = setTimeout(load, 0);
@@ -238,7 +260,7 @@ export default function CourseChaptersPage() {
         }
         back={
           <Link
-            href="/courses"
+            href={returnTo}
             className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" /> Back to courses
@@ -289,11 +311,33 @@ export default function CourseChaptersPage() {
           />
         </div>
         <Select
+          value={filters.category}
+          onValueChange={(value) => setFilter("category", value)}
+        >
+          <SelectTrigger
+            className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900 md:w-56"
+            aria-label="Filter by category"
+          >
+            <SelectValue placeholder="All Categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            <SelectItem value="uncategorized">
+              Uncategorized (No Category)
+            </SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat._id} value={cat._id}>
+                {cat.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
           value={filters.status}
           onValueChange={(value) => setFilter("status", value)}
         >
           <SelectTrigger
-            className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900 md:w-48"
+            className="h-12 w-full rounded-2xl border-0 bg-zinc-100 px-4 shadow-none dark:bg-zinc-900 md:w-44"
             aria-label="Filter by status"
           >
             <SelectValue placeholder="All statuses" />
@@ -330,22 +374,33 @@ export default function CourseChaptersPage() {
                       <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-blue-500/10 text-xs font-black text-blue-600 dark:text-blue-400">
                         #{chapter.order}
                       </span>
-                      <button
-                        onClick={() => toggleStatus(chapter)}
-                        disabled={updating === chapter._id}
-                        className={`rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider transition-all ${
-                          updating === chapter._id
-                            ? "bg-zinc-100 text-zinc-400"
-                            : statusStyles[chapter.status]
-                        }`}
-                        title="Toggle status"
-                      >
-                        {updating === chapter._id ? (
-                          <Loader2 className="inline h-2.5 w-2.5 animate-spin" />
+                      <div className="flex items-center gap-1.5">
+                        {chapter.category ? (
+                          <span className="rounded-full bg-blue-50 dark:bg-blue-900/30 px-2.5 py-0.5 text-[9px] font-extrabold text-blue-600 dark:text-blue-400 truncate max-w-32">
+                            {chapter.category.name || "Category"}
+                          </span>
                         ) : (
-                          chapter.status
+                          <span className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-2.5 py-0.5 text-[9px] font-bold text-zinc-400">
+                            Uncategorized
+                          </span>
                         )}
-                      </button>
+                        <button
+                          onClick={() => toggleStatus(chapter)}
+                          disabled={updating === chapter._id}
+                          className={`rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider transition-all ${
+                            updating === chapter._id
+                              ? "bg-zinc-100 text-zinc-400"
+                              : statusStyles[chapter.status]
+                          }`}
+                          title="Toggle status"
+                        >
+                          {updating === chapter._id ? (
+                            <Loader2 className="inline h-2.5 w-2.5 animate-spin" />
+                          ) : (
+                            chapter.status
+                          )}
+                        </button>
+                      </div>
                     </div>
 
                     <Link
@@ -459,6 +514,7 @@ export default function CourseChaptersPage() {
                 <tr>
                   <th className="px-6 py-4 w-16">#</th>
                   <th className="px-6 py-4">Chapter</th>
+                  <th className="px-6 py-4">Category</th>
                   <th className="px-6 py-4 w-28">Views</th>
                   <th className="px-6 py-4 w-28">Status</th>
                   <th className="px-6 py-4 text-right">Actions</th>
@@ -471,7 +527,7 @@ export default function CourseChaptersPage() {
                   ))
                 ) : chapters.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-10 text-center">
+                    <td colSpan={6} className="px-6 py-10 text-center">
                       <div className="flex flex-col items-center justify-center text-zinc-500">
                         <BookOpen className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
                         <p className="text-sm font-medium">
@@ -499,6 +555,17 @@ export default function CourseChaptersPage() {
                         <p className="mt-0.5 text-xs text-zinc-400 truncate">
                           /{chapter.slug}
                         </p>
+                      </td>
+                      <td className="px-6 py-4">
+                        {chapter.category ? (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                            {chapter.category.name || "Category"}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-zinc-400 font-medium italic">
+                            Uncategorized
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">

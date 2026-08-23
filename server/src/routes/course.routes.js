@@ -18,6 +18,13 @@ import {
 } from "../controllers/course.controller.js";
 
 import { blockDirectCourseDeletion } from "../controllers/deletion.controller.js";
+// ASIF_COURSE_LEARNING_FLOW_V1:progress-imports
+import {
+  getCourseProgress,
+  getMyCourseProgressSummary,
+  mergeAnonymousCourseProgress,
+  updateCourseChapterProgress,
+} from "../controllers/courseProgress.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
 import { requirePermission } from "../utils/permissions.js";
 
@@ -38,6 +45,11 @@ router.get(
   requirePermission("courses.view"),
   getCourseAnalytics,
 );
+// ASIF_COURSE_LEARNING_FLOW_V1:progress-routes
+router.get("/progress/me/summary", protect, getMyCourseProgressSummary);
+router.get("/:slug/progress", protect, getCourseProgress);
+router.post("/:slug/progress/merge", protect, mergeAnonymousCourseProgress);
+router.patch("/:slug/chapters/:chapterSlug/progress", protect, updateCourseChapterProgress);
 router.get("/slug/:slug", getCourseBySlug);
 router.get("/slug/:slug/chapters/:chapterSlug", getChapterBySlug);
 router.get("/:slug/chapters/:chapterSlug", getChapterBySlug);

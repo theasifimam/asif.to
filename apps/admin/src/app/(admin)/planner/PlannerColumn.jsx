@@ -18,6 +18,17 @@ import {
 } from "lucide-react";
 import PlannerCard from "./PlannerCard";
 
+function hexToRgba(hex, alpha) {
+  if (!hex || typeof hex !== "string" || !hex.startsWith("#")) {
+    return `rgba(100, 116, 139, ${alpha})`;
+  }
+  let c = hex.substring(1);
+  if (c.length === 3) c = c.split("").map((x) => x + x).join("");
+  const num = parseInt(c, 16);
+  if (isNaN(num)) return `rgba(100, 116, 139, ${alpha})`;
+  return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+}
+
 export default function PlannerColumn({
   column,
   cards,
@@ -38,10 +49,21 @@ export default function PlannerColumn({
     id: `drop:${column._id}`,
     data: { type: "column-drop", column },
   });
+
+  const baseColor = column.color || "#3b82f6";
+  const lightBg = hexToRgba(baseColor, 0.045);
+  const lightBorder = hexToRgba(baseColor, 0.2);
+  const darkBg = hexToRgba(baseColor, 0.09);
+  const darkBorder = hexToRgba(baseColor, 0.28);
+
   const style = {
     transform: CSS.Transform.toString(sortable.transform),
     transition: sortable.transition,
     opacity: sortable.isDragging ? 0.3 : 1,
+    "--col-bg": lightBg,
+    "--col-border": lightBorder,
+    "--col-bg-dark": darkBg,
+    "--col-border-dark": darkBorder,
   };
 
   const setRef = (node) => {
@@ -64,7 +86,7 @@ export default function PlannerColumn({
     <section
       ref={setRef}
       style={style}
-      className={`flex h-full w-[85vw] max-w-75 xs:w-[320px] shrink-0 snap-center md:w-75 flex-col rounded-3xl border border-zinc-200/70 bg-zinc-50 p-2 dark:border-zinc-800 dark:bg-zinc-900/60  ${className || ""}`}
+      className={`flex h-full w-[85vw] max-w-75 xs:w-[320px] shrink-0 snap-center md:w-75 flex-col rounded-3xl border bg-[var(--col-bg)] border-[var(--col-border)] dark:bg-[var(--col-bg-dark)] dark:border-[var(--col-border-dark)] p-2 shadow-xs transition-colors ${className || ""}`}
     >
       <header className="group flex items-center gap-2 px-2 py-2.5">
         <button

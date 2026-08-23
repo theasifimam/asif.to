@@ -1,0 +1,562 @@
+[
+  {
+    "id": "6a7d5bb9effda32e5acf30b1",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "Which class is applied to an `<img>` tag to make it fill its container while preserving its aspect ratio and clipping any overflow? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30ba",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "Which class applies the 'multiply' CSS blend mode to an element's background? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30b9",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "What combination of classes is required to make text take on the color of a background gradient? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30b8",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5f03",
+    "_comment": "Which syntax represents an 'arbitrary variant' used to style direct `<p>` children of a container? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30b7",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2067",
+    "chapter": "6a7a28e2409d8d71833a5f0f",
+    "_comment": "In your `tailwind.config.js` file, where do you define a custom font family so that it generates classes like `font-custom`? | Category: Customization & Production | Chapter: 5. Customization and Dark Mode"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30b6",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "How can you visually move a flex or grid item to the very end of its container without changing the HTML structure? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30b5",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "Which class allows a flex item to expand and fill any remaining available space in its container? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30b4",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "Which Tailwind class prevents a flex item from shrinking when the container becomes smaller than the combined width of its items? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30b3",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "In a flexbox or grid container, what does the `gap-4` class do? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30b2",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "How do you visually shift an element to the right by exactly 50% of its own width? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30bb",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "Which utility class automatically capitalizes the first letter of every word in a sentence? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30b0",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "Which class acts as a shorthand for setting `top: 0; right: 0; bottom: 0; left: 0;` on an absolutely positioned element? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30af",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "How do you set an element's height to exactly 100% of the viewport's height? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30ae",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "Which class is used to increase the letter spacing of text? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30ad",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "In Tailwind, what CSS property does the `leading-relaxed` utility control? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30ac",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5f03",
+    "_comment": "Which built-in Tailwind animation class makes an element rotate endlessly? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30ab",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "How do you easily add a top border to every child element in a vertical list, except for the very first child? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30aa",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2067",
+    "chapter": "6a7a28e2409d8d71833a5f13",
+    "_comment": "If you are rendering raw HTML (like from a Markdown parser) and want it automatically styled by Tailwind, which official plugin and class should you use? | Category: Customization & Production | Chapter: 6. Extracting Components & Production Prep"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30a9",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5f03",
+    "_comment": "Which utility applies a solid, outline-like box shadow, commonly used for accessibility focus states? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30a8",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "When using a background gradient, which classes define the starting and ending colors? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30c5",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5f03",
+    "_comment": "How do you apply a red background to a child element only when its parent container (which has the `group` class) is focused? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30ce",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "Which utility class is used to slant text to the right, simulating a cursive or handwritten style? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30cd",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "Which Flexbox utility explicitly sets the initial main size (flex-basis) of a flex item to 25% of its container? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30cc",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "Which utility class makes an entire element and all of its children 50% transparent? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30cb",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "What is the result of applying the `max-w-screen-md` class to a div? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30ca",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5f03",
+    "_comment": "How do you enable native smooth scrolling behavior for internal anchor links on the entire page using Tailwind? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30c9",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "Which class changes the color of the blinking text insertion cursor inside an `<input>` field? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30c8",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "Which utility forces an element's dimensions to always form a perfect square? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30c7",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "Which class sets the fill color of an SVG element to inherit the current text color of its parent? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30c6",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5eff",
+    "_comment": "When running the Tailwind CLI, which flag tells the compiler to stay running and automatically rebuild the CSS whenever you save a file? | Category: Tailwind CSS Setup & Utility First | Chapter: 1. Introduction to Tailwind CSS"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30a7",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "Which Tailwind class is used to create a background gradient that flows from left to right? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30c4",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "Which class applies a frosted-glass blur effect to the background directly behind a semi-transparent element? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30c3",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "Which class will truncate text after exactly 3 lines, adding an ellipsis at the end? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30c2",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5f03",
+    "_comment": "What is the default minimum screen width for Tailwind's `lg:` (large) responsive breakpoint? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30c1",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5f03",
+    "_comment": "Which variant applies styles to a parent container when ANY interactive child element inside it (like an input) receives focus? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30c0",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "In Tailwind's default color palette scale (e.g., blue, red, green), which numeric shade represents the lightest, most pastel version of the color? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30bf",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "Which utility prevents a string of text from wrapping to a new line when it reaches the edge of its container? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30be",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5f03",
+    "_comment": "Which variant modifier allows you to change the background color of text only when a user highlights/selects it? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30bd",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "Which utility sets a background image to cover the entire element, potentially cropping it if proportions differ? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30bc",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "How do you render list item bullets (like discs or numbers) inside the content flow of the `<li>` rather than hanging outside? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3089",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "Which combination of classes perfectly centers a child element using Flexbox? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3092",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "In Tailwind v3+, how do you dynamically change the opacity of a background color utility without declaring a new custom color? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3091",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "Which Tailwind class prevents text from wrapping, hides overflow, and adds an ellipsis (...) to the end of overflowing text? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3090",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "How do you write a negative top margin of `1rem` (16px) in Tailwind? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf308f",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "What does the class `max-w-prose` do? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf308e",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5f03",
+    "_comment": "How can you trigger a hover effect on a child element based on the hover state of its parent container? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf308d",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "Which utility class applies `font-weight: 700;`? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf308c",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "How do you specify a width of exactly 100% in Tailwind? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf308b",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "What does the `space-x-4` class do when applied to a parent container? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf308a",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "Which Tailwind class is used to make a perfectly circular image or `<div>` (assuming the element is a square)? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3093",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "What is the purpose of the `container` class in Tailwind? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3088",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2067",
+    "chapter": "6a7a28e2409d8d71833a5f13",
+    "_comment": "What is the purpose of the `@layer` directive in a Tailwind CSS file? | Category: Customization & Production | Chapter: 6. Extracting Components & Production Prep"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3087",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5f03",
+    "_comment": "To apply styles specifically for medium-sized screens and larger (default 768px), which prefix is used? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3086",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2067",
+    "chapter": "6a7a28e2409d8d71833a5f13",
+    "_comment": "Which Tailwind directive allows you to extract common utility patterns into custom CSS classes? | Category: Customization & Production | Chapter: 6. Extracting Components & Production Prep"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3085",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2067",
+    "chapter": "6a7a28e2409d8d71833a5f0f",
+    "_comment": "How do you use \"Arbitrary Values\" in Tailwind to apply a specific color hex code that isn't in your theme? | Category: Customization & Production | Chapter: 5. Customization and Dark Mode"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3084",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "Which class would you use to hide an element completely from the document flow (`display: none`)? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3083",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "In Tailwind's default spacing scale, what does the class `mt-4` represent in standard CSS? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3082",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5f03",
+    "_comment": "How do you apply a class only when the user hovers over an element? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3081",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "What is the correct utility class to set an element to `display: flex`? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3080",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2067",
+    "chapter": "6a7a28e2409d8d71833a5f0f",
+    "_comment": "Which file is automatically generated to customize Tailwind's default theme, colors, and fonts? | Category: Customization & Production | Chapter: 5. Customization and Dark Mode"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf309d",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5f03",
+    "_comment": "How do you style the placeholder text of an `<input>` field in Tailwind? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30a6",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2067",
+    "chapter": "6a7a28e2409d8d71833a5f0f",
+    "_comment": "How can you inject an arbitrary CSS variable as a value in a Tailwind class? | Category: Customization & Production | Chapter: 5. Customization and Dark Mode"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30a5",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2067",
+    "chapter": "6a7a28e2409d8d71833a5f13",
+    "_comment": "Which Tailwind plugin is officially provided to reset form control styles to a consistent baseline? | Category: Customization & Production | Chapter: 6. Extracting Components & Production Prep"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30a4",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "Which utility class aligns text strictly to the right? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30a3",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5f03",
+    "_comment": "How do you apply styles uniquely to the first child element of a list using Tailwind? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30a2",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "What is the correct class to apply `z-index: 50;` to a fixed navigation bar? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30a1",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5f03",
+    "_comment": "Which prefix variant applies styles strictly for users who have requested that the OS minimize non-essential animations? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf30a0",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2067",
+    "chapter": "6a7a28e2409d8d71833a5f0f",
+    "_comment": "In the Tailwind `tailwind.config.js` file, what is the difference between placing styles inside `theme.extend` versus just `theme`? | Category: Customization & Production | Chapter: 5. Customization and Dark Mode"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf309f",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f0c",
+    "_comment": "To add a default drop shadow to a card component, which class is used? | Category: Layouts & Responsive Design | Chapter: 4. Typography and Colors"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf309e",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "If you want an element to span 2 columns in a CSS Grid, which class should you use? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf307f",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5eff",
+    "_comment": "What is Tailwind CSS fundamentally described as? | Category: Tailwind CSS Setup & Utility First | Chapter: 1. Introduction to Tailwind CSS"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf309c",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5f03",
+    "_comment": "Which utility changes the cursor to a \"pointing hand\" when hovering over an element? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf309b",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "Which class modifies an image to maintain a 16:9 aspect ratio? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf309a",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2067",
+    "chapter": "6a7a28e2409d8d71833a5f13",
+    "_comment": "What is Tailwind CSS's default strategy for controlling file size in production? | Category: Customization & Production | Chapter: 6. Extracting Components & Production Prep"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3099",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2067",
+    "chapter": "6a7a28e2409d8d71833a5f13",
+    "_comment": "What does the `sr-only` class do? | Category: Customization & Production | Chapter: 6. Extracting Components & Production Prep"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3098",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "Which of the following creates a 3-column CSS Grid where all columns are equal width? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3097",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5f03",
+    "_comment": "How can you style an element based on the `checked` state of a sibling checkbox? | Category: Tailwind CSS Setup & Utility First | Chapter: 2. Core Concepts: Hover, Focus, and Responsive Design"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3096",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2062",
+    "chapter": "6a7a28e2409d8d71833a5f08",
+    "_comment": "Which utility sets an element's position to `absolute`? | Category: Layouts & Responsive Design | Chapter: 3. Layout: Flexbox and Grid"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3095",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb205d",
+    "chapter": "6a7a28e2409d8d71833a5eff",
+    "_comment": "What command initializes a basic `tailwind.config.js` file in your project? | Category: Tailwind CSS Setup & Utility First | Chapter: 1. Introduction to Tailwind CSS"
+  },
+  {
+    "id": "6a7d5bb9effda32e5acf3094",
+    "course": "tailwind-css",
+    "category": "6a89d3b33af78ff755fb2067",
+    "chapter": "6a7a28e2409d8d71833a5f0f",
+    "_comment": "Which variant allows you to style an element only when the browser/OS is set to dark mode? | Category: Customization & Production | Chapter: 5. Customization and Dark Mode"
+  }
+]

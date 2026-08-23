@@ -80,6 +80,7 @@ function CourseRowSkeleton() {
     </tr>
   );
 }
+
 import {
   Select,
   SelectContent,
@@ -213,7 +214,7 @@ export default function CoursesAdminPage() {
         }
       />
 
-      <section className="flex flex-col gap-3 rounded-3xl border border-zinc-200/80 bg-white/90 p-3 sm:p-4 dark:border-zinc-800/80 dark:bg-[#121215]/90 md:flex-row shadow-xs">
+      <section className="flex flex-col gap-1 rounded-3xl border border-zinc-200/80 bg-white/90 p-3 sm:p-4 dark:border-zinc-800/80 dark:bg-[#121215]/90 md:flex-row shadow-xs">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
           <Input
@@ -262,8 +263,8 @@ export default function CoursesAdminPage() {
       </section>
 
       {viewMode === "card" ? (
-        <div className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-1">
+          <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
             {loading ? (
               Array.from({ length: pagination.limit || 20 }).map((_, i) => (
                 <CourseCardSkeleton key={i} />

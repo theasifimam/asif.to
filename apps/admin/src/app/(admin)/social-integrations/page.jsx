@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { getModuleBackUrl } from "@/hooks/useModuleHistory";
 import {
   Check,
   ChevronLeft,
@@ -79,6 +80,7 @@ function StatusBadge({ value }) {
 
 export default function SocialIntegrationsPage() {
   const searchParams = useSearchParams();
+  const returnTo = getModuleBackUrl("/social-posts", searchParams.get("returnTo"));
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState("");
@@ -185,7 +187,7 @@ export default function SocialIntegrationsPage() {
         description="Manage connected accounts and authentication tokens used by Social Media publishing."
         back={
           <Link
-            href="/social-posts"
+            href={returnTo}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors mb-1"
           >
             <ChevronLeft className="h-4 w-4" /> Back to social posts

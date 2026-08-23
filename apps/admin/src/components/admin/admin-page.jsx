@@ -14,7 +14,7 @@ export function AdminPage({ children, className, size = "xl" }) {
   return (
     <div
       className={cn(
-        "mx-auto min-w-0 space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 lg:px-10 lg:py-10",
+        "mx-auto min-w-0 space-y-1 px-4 py-1 sm:space-y-1 sm:px-6 sm:py-1 lg:px-10 lg:py-1",
         size === "lg" ? "max-w-6xl" : "max-w-7xl",
         className,
       )}
@@ -34,7 +34,7 @@ export function AdminPageHeader({
   stickyActions = true,
 }) {
   return (
-    <header className={cn("flex min-w-0 flex-col gap-4", className)}>
+    <header className={cn("flex min-w-0 flex-col gap-1", className)}>
       <div className="min-w-0 w-full">
         {back}
         {eyebrow && (
@@ -75,7 +75,7 @@ export function AdminFilters({ children, className }) {
   return (
     <section
       className={cn(
-        "admin-surface flex min-w-0 flex-col gap-3 p-3.5 sm:p-4 md:flex-row md:items-center rounded-[28px] sm:rounded-4xl",
+        "admin-surface flex min-w-0 flex-col gap-1 p-3.5 sm:p-4 md:flex-row md:items-center rounded-[28px] sm:rounded-4xl",
         className,
       )}
     >

@@ -1,8 +1,10 @@
 "use client";
 
 import React from "react";
+import { useSearchParams } from "next/navigation";
 import { ChevronLeft, Edit3 } from "lucide-react";
 import { Button } from "@/components/ui";
+import { getModuleBackUrl } from "@/hooks/useModuleHistory";
 
 export default function ProfileTopNav({
   isOwnProfile,
@@ -10,12 +12,15 @@ export default function ProfileTopNav({
   setIsEditOpen,
   router,
 }) {
+  const searchParams = useSearchParams();
+  const returnTo = getModuleBackUrl("/users", searchParams.get("returnTo"));
+
   return (
     <div className="sticky top-0 z-40 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/60 dark:border-zinc-850 px-3 sm:px-6 py-2.5 sm:py-4 transition-colors">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 min-w-0">
         <Button
           variant="ghost"
-          onClick={() => router.push("/users")}
+          onClick={() => router.push(returnTo)}
           className="group flex items-center gap-1 -ml-2 sm:-ml-3 text-xs sm:text-sm text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all font-medium rounded-full cursor-pointer shrink-0 px-2 sm:px-4"
         >
           <ChevronLeft

@@ -5,6 +5,8 @@ import { signOut } from "next-auth/react";
 import {
   Bookmark,
   ChevronDown,
+  // ASIF_LEARNING_JOURNEY_V1:menu-icon
+  GraduationCap,
   LogOut,
   Settings,
   UserRound,
@@ -52,6 +54,10 @@ export default function AuthUserMenu({ user }) {
           </MenuLink>
           <MenuLink href={`/${user.username}/settings`} icon={Settings}>
             Profile Settings
+          </MenuLink>
+          {/* ASIF_LEARNING_JOURNEY_V1:menu-link */}
+          <MenuLink href="/my-learning" icon={GraduationCap}>
+            My Learning
           </MenuLink>
           <MenuLink href="/bookmarks" icon={Bookmark}>
             Bookmarks

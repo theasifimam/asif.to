@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+// ASIF_COURSE_LEARNING_FLOW_V1:revision-imports
+import { useSearchParams } from "next/navigation";
+import { recordCourseStage } from "@/lib/courseProgress";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import RevisionFlashcards from "@/components/home/RevisionFlashcards";
@@ -8,7 +11,12 @@ import { TECH_STACKS } from "@/lib/tutorialData";
 import { Layers, Sparkles } from "lucide-react";
 
 export default function RevisionPage() {
-  const [selectedTech, setSelectedTech] = useState(null);
+  // ASIF_COURSE_LEARNING_FLOW_V1:revision-query-state
+  const searchParams = useSearchParams();
+  const initialCourse = searchParams.get("course");
+  const initialChapter = searchParams.get("chapter");
+  const [selectedTech, setSelectedTech] = useState(initialCourse || null);
+  const [selectedChapterId, setSelectedChapterId] = useState(initialChapter || null);
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground transition-colors duration-300 pb-24 sm:pb-12">
@@ -34,7 +42,10 @@ export default function RevisionPage() {
         {/* Filter Pills */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           <button
-            onClick={() => setSelectedTech(null)}
+            onClick={() => { // ASIF_COURSE_LEARNING_FLOW_V1:revision-clear-all
+              setSelectedTech(null);
+              setSelectedChapterId(null);
+            }}
             className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
               !selectedTech
                 ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
@@ -46,7 +57,10 @@ export default function RevisionPage() {
           {TECH_STACKS.map((tech) => (
             <button
               key={tech.id}
-              onClick={() => setSelectedTech(tech.id)}
+              onClick={() => { // ASIF_COURSE_LEARNING_FLOW_V1:revision-clear-tech
+                setSelectedTech(tech.id);
+                setSelectedChapterId(null);
+              }}
               className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
                 selectedTech === tech.id
                   ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
@@ -59,7 +73,8 @@ export default function RevisionPage() {
         </div>
 
         {/* Revision Deck Component */}
-        <RevisionFlashcards selectedTech={selectedTech} />
+        {/* ASIF_COURSE_LEARNING_FLOW_V1:revision-deck */}
+        <RevisionFlashcards selectedTech={selectedTech} selectedChapterId={selectedChapterId} onDeckComplete={() => { if (selectedTech && selectedChapterId) recordCourseStage({ courseSlug: selectedTech, chapterId: selectedChapterId, stage: "revise", completed: true }); }} />
 
         {/* Mobile Tips Box */}
         <div className="p-5 rounded-4xl bg-white dark:bg-zinc-900/90 shadow-sm flex items-start gap-4">

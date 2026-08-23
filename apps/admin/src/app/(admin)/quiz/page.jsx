@@ -5,7 +5,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Edit3, FilePlus2, Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { coursesApi, interviewQuestionsApi, quizApi } from "@/lib/api";
+import {
+  chaptersApi,
+  coursesApi,
+  quizApi,
+  topicCategoriesApi,
+} from "@/lib/api";
 import { Button, Skeleton } from "@/components/ui";
 
 function QuizCardSkeleton() {
@@ -38,9 +43,6 @@ function QuizRowSkeleton() {
       <td className="px-6 py-4.5">
         <Skeleton className="h-5 w-48 rounded-md" />
         <Skeleton className="mt-1 h-3 w-32 rounded-md" />
-      </td>
-      <td className="px-6 py-4.5">
-        <Skeleton className="h-5 w-14 rounded-full" />
       </td>
       <td className="px-6 py-4.5">
         <Skeleton className="h-5 w-16 rounded-full" />
@@ -89,6 +91,9 @@ export default function QuestionsPage() {
   // Data state
   const [questions, setQuestions] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [chapters, setChapters] = useState([]);
+  const [taxonomyLoading, setTaxonomyLoading] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Delete state
@@ -105,19 +110,32 @@ export default function QuestionsPage() {
     limit: 20,
   });
 
-  // URL-synced filters (course, type, search, view)
+  // URL-synced filters (course, category, chapter, search, view)
   const [filters, setFilters] = useUrlFilters({
     courseId: "all",
-    type: "all",
+    categoryId: "all",
+    chapterId: "all",
     search: "",
     view: "table",
   });
-  const { courseId, type, search } = filters;
+  const {
+    courseId,
+    categoryId,
+    chapterId,
+    search,
+  } = filters;
 
   const setCourseId = (value) =>
-    setFilters((current) => ({ ...current, courseId: value }));
-  const setType = (value) =>
-    setFilters((current) => ({ ...current, type: value }));
+    setFilters((current) => ({
+      ...current,
+      courseId: value,
+      categoryId: "all",
+      chapterId: "all",
+    }));
+  const setCategoryId = (value) =>
+    setFilters((current) => ({ ...current, categoryId: value }));
+  const setChapterId = (value) =>
+    setFilters((current) => ({ ...current, chapterId: value }));
   const setSearch = (value) =>
     setFilters((current) => ({ ...current, search: value }));
   const setViewMode = (v) => setFilters((current) => ({ ...current, view: v }));
@@ -126,14 +144,58 @@ export default function QuestionsPage() {
   const editHref = (id) =>
     `/quiz/${id}/edit?returnTo=${encodeURIComponent(returnTo)}`;
 
-  // Data fetching
+  useEffect(() => {
+    let active = true;
+
+    async function loadQuestionTaxonomy() {
+      if (courseId === "all") {
+        setCategories([]);
+        setChapters([]);
+        setTaxonomyLoading(false);
+        return;
+      }
+
+      setTaxonomyLoading(true);
+
+      const [categoryResponse, chapterResponse] = await Promise.all([
+        topicCategoriesApi.list(courseId),
+        chaptersApi.list(courseId, { limit: 100 }),
+      ]);
+
+      if (!active) return;
+
+      const categoryItems =
+        categoryResponse?.data?.data?.data ||
+        categoryResponse?.data?.data ||
+        [];
+
+      const chapterItems =
+        chapterResponse?.data?.data?.data ||
+        chapterResponse?.data?.data ||
+        [];
+
+      setCategories(Array.isArray(categoryItems) ? categoryItems : []);
+      setChapters(Array.isArray(chapterItems) ? chapterItems : []);
+      setTaxonomyLoading(false);
+    }
+
+    loadQuestionTaxonomy();
+
+    return () => {
+      active = false;
+    };
+  }, [courseId]);
+
+  // Data fetching - strictly fetch quiz/practice questions
   const load = useCallback(async () => {
     setLoading(true);
     const params = {
-      type,
+      type: "quiz",
       page,
       limit,
       ...(courseId !== "all" && { courseId }),
+      ...(categoryId !== "all" && { categoryId }),
+      ...(chapterId !== "all" && { chapterId }),
     };
     const [response, courseResponse] = await Promise.all([
       quizApi.listAll(params),
@@ -153,7 +215,7 @@ export default function QuestionsPage() {
       );
     }
     setLoading(false);
-  }, [courseId, courses.length, page, limit, type]);
+  }, [courseId, categoryId, chapterId, courses.length, page, limit]);
 
   useEffect(() => {
     const timer = setTimeout(load, 0);
@@ -187,9 +249,7 @@ export default function QuestionsPage() {
   const remove = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
-    const response = await (
-      deleteTarget.type === "interview" ? interviewQuestionsApi : quizApi
-    ).delete(deleteTarget._id);
+    const response = await quizApi.delete(deleteTarget._id);
     if (response.success) {
       toast.success("Question deleted");
       setQuestions((current) =>
@@ -210,7 +270,7 @@ export default function QuestionsPage() {
     <AdminFormShell
       eyebrow="Learning / Assessment"
       title="Question bank"
-      description="Manage quiz/practice and detailed interview questions from one collection."
+      description="Manage quiz and practice questions."
       actions={
         <>
           <ViewToggle view={viewMode} onViewChange={setViewMode} />
@@ -228,18 +288,7 @@ export default function QuestionsPage() {
           onChange={setSearch}
           placeholder="Search questions and answers..."
         />
-        <div className="w-full md:w-44">
-          <Select value={type} onValueChange={filter(setType)}>
-            <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold dark:border-zinc-800/80 dark:bg-[#18181b]">
-              <SelectValue placeholder="All types" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All types</SelectItem>
-              <SelectItem value="quiz">Quiz / practice</SelectItem>
-              <SelectItem value="interview">Interview</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+
         <div className="w-full md:w-56">
           <Select value={courseId} onValueChange={filter(setCourseId)}>
             <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold dark:border-zinc-800/80 dark:bg-[#18181b]">
@@ -250,6 +299,51 @@ export default function QuestionsPage() {
               {courses.map((course) => (
                 <SelectItem key={course._id} value={course._id}>
                   {course.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="w-full md:w-52">
+          <Select
+            value={categoryId}
+            onValueChange={filter(setCategoryId)}
+            disabled={courseId === "all" || taxonomyLoading}
+          >
+            <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold dark:border-zinc-800/80 dark:bg-[#18181b]">
+              <SelectValue
+                placeholder={courseId === "all" ? "Select course first" : "All categories"}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All categories</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category._id} value={category._id}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="w-full md:w-56">
+          <Select
+            value={chapterId}
+            onValueChange={filter(setChapterId)}
+            disabled={courseId === "all" || taxonomyLoading}
+          >
+            <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold dark:border-zinc-800/80 dark:bg-[#18181b]">
+              <SelectValue
+                placeholder={courseId === "all" ? "Select course first" : "All chapters"}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All chapters</SelectItem>
+              {chapters.map((chapter) => (
+                <SelectItem key={chapter._id} value={chapter._id}>
+                  {chapter.order ? `${chapter.order}. ` : ""}
+                  {chapter.title}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -281,9 +375,6 @@ export default function QuestionsPage() {
                     <div className="min-w-0 space-y-3">
                       <div className="flex items-center justify-between gap-2 flex-wrap min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                          <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 shrink-0">
-                            {item.type}
-                          </span>
                           <span
                             className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shrink-0 ${
                               difficultyStyles[item.difficulty] || ""
@@ -302,24 +393,15 @@ export default function QuestionsPage() {
                           {item.question}
                         </Link>
                         <p className="mt-1 text-xs text-zinc-400 line-clamp-2">
-                          {item.type === "interview"
-                            ? item.answer
-                            : `Correct: ${item.options?.[item.correctIndex] || "—"}`}
+                          Correct: {item.options?.[item.correctIndex] || "—"}
                         </p>
                       </div>
 
-                      {item.type === "interview" && item.course?.title ? (
-                        <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-                          Course: {item.course.title}
+                      {item.courses && item.courses.length > 0 && (
+                        <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 truncate">
+                          Courses:{" "}
+                          {item.courses.map((c) => c.title).join(", ")}
                         </p>
-                      ) : (
-                        item.courses &&
-                        item.courses.length > 0 && (
-                          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 truncate">
-                            Courses:{" "}
-                            {item.courses.map((c) => c.title).join(", ")}
-                          </p>
-                        )
                       )}
                     </div>
 
@@ -380,7 +462,6 @@ export default function QuestionsPage() {
                   <thead className="border-b border-zinc-100 dark:border-zinc-800/80 bg-zinc-50/75 dark:bg-[#18181b]/60 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.16em] text-zinc-400 dark:text-zinc-500">
                     <tr>
                       <th className="px-6 py-4.5">Question</th>
-                      <th className="px-6 py-4.5">Type</th>
                       <th className="px-6 py-4.5">Course</th>
                       <th className="px-6 py-4.5">Difficulty</th>
                       <th className="px-6 py-4.5 text-right">Actions</th>
@@ -393,7 +474,7 @@ export default function QuestionsPage() {
                       ))
                     ) : visible.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-6 py-10 text-center">
+                        <td colSpan={4} className="px-6 py-10 text-center">
                           <div className="flex flex-col items-center justify-center text-zinc-500">
                             <FilePlus2 className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
                             <p className="text-sm font-medium">
@@ -416,22 +497,13 @@ export default function QuestionsPage() {
                               {item.question}
                             </Link>
                             <p className="mt-0.5 line-clamp-1 text-xs text-zinc-400">
-                              {item.type === "interview"
-                                ? item.answer
-                                : `Correct: ${item.options?.[item.correctIndex] || "—"}`}
+                              Correct: {item.options?.[item.correctIndex] || "—"}
                             </p>
                           </td>
-                          <td className="px-6 py-4.5">
-                            <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-500/20">
-                              {item.type}
-                            </span>
-                          </td>
                           <td className="px-6 py-4.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400">
-                            {item.type === "interview"
-                              ? item.course?.title || "—"
-                              : (item.courses || [])
-                                  .map((course) => course.title)
-                                  .join(", ") || "—"}
+                            {(item.courses || [])
+                              .map((course) => course.title)
+                              .join(", ") || "—"}
                           </td>
                           <td className="px-6 py-4.5">
                             <span

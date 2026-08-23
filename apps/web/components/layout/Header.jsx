@@ -35,6 +35,8 @@ import { useScrollNavVisible } from "@/components/layout/ScrollNavProvider";
 import GlobalSearch from "@/components/search/GlobalSearch";
 import { signOut as oauthSignOut, useSession } from "next-auth/react";
 import AuthUserMenu from "@/components/auth/AuthUserMenu";
+// ASIF_COURSE_LEARNING_FLOW_V1:header-progress-import
+import ContinueCoursePill from "@/components/layout/ContinueCoursePill";
 
 const Sidebar = dynamic(() => import("./header/Sidebar"), { ssr: false });
 const LogoutConfirm = dynamic(() => import("./header/LogoutConfirm"), {
@@ -433,6 +435,8 @@ export default function Header() {
 
           {/* User Profile & Actions (Theme toggle visible on mobile, profile on desktop) */}
           <div className="flex items-center gap-2">
+            {/* ASIF_COURSE_LEARNING_FLOW_V1:header-progress */}
+            <ContinueCoursePill />
             <ThemeToggle />
             <GlobalSearch />
             <div className="hidden md:flex items-center gap-2">
