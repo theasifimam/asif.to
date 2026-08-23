@@ -21,6 +21,7 @@ import { useGetDashboardStatsQuery } from "@/redux/services/dashboardApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasPermission } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
+import { kanbanApi } from "@/lib/api";
 
 const ICON_MAP = {
   Users,
@@ -208,7 +209,7 @@ export default function DashboardPage() {
     user?.fullName || user?.name || user?.username || "Asif Imam";
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-2 sm:gap-1 p-4 font-sans text-zinc-800 dark:text-zinc-300 sm:p-6 md:p-8 lg:p-10">
+    <div className="mx-auto flex max-w-7xl flex-col gap-4 p-3.5 font-sans text-zinc-800 dark:text-zinc-300 sm:gap-6 sm:p-6 md:p-8 lg:p-10">
       {/* Plain Header with Welcome Heading & Top-Right Buttons */}
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
@@ -216,38 +217,38 @@ export default function DashboardPage() {
             Creator Dashboard
           </p>
 
-          <h1 className="mt-1 tracking-tight">
-            <span className="block text-3xl sm:text-4xl md:text-5xl font-black text-zinc-950 dark:text-white">
+          <h1 className="mt-1 tracking-tight flex flex-wrap items-baseline gap-x-2">
+            <span className="text-2xl sm:text-4xl md:text-5xl font-black text-zinc-950 dark:text-white">
               Welcome back,
             </span>
-            <span className="block text-2xl sm:text-3xl md:text-4xl font-extrabold text-blue-600 dark:text-blue-400 mt-1">
+            <span className="text-xl sm:text-3xl md:text-4xl font-extrabold text-blue-600 dark:text-blue-400">
               {userName}! 👋
             </span>
           </h1>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+          <p className="mt-1 max-w-3xl text-xs sm:text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
             Here is your platform roadmap, course analytics, and planner status
             for today.
           </p>
         </div>
 
-        {/* Quick Action Buttons at Top Right */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <Button asChild size="sm">
+        {/* Quick Action Buttons - Horizontal scrollable row on mobile */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-3.5 px-3.5 scrollbar-none lg:mx-0 lg:px-0 lg:pb-0 lg:flex-wrap lg:justify-end">
+          <Button asChild size="sm" className="rounded-full shrink-0 h-9 px-3.5 text-xs font-bold gap-1.5 shadow-sm">
             <Link href="/courses">
-              <BookOpen className="w-4 h-4" />
+              <BookOpen className="w-3.5 h-3.5" />
               <span>Manage Courses</span>
             </Link>
           </Button>
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="rounded-full shrink-0 h-9 px-3.5 text-xs font-bold gap-1.5 border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-transparent">
             <Link href="/articles">
-              <PenSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <PenSquare className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
               <span>Write Articles</span>
             </Link>
           </Button>
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="rounded-full shrink-0 h-9 px-3.5 text-xs font-bold gap-1.5 border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-transparent">
             <Link href="/quiz">
-              <BrainCircuit className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              <BrainCircuit className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
               <span>Quiz Builder</span>
             </Link>
           </Button>
@@ -255,23 +256,25 @@ export default function DashboardPage() {
       </header>
 
       {/* Tasks Left in Planner Section */}
-      <section className="space-y-2 mt-3">
-        <div className="flex items-center justify-between gap-1">
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+      <section className="space-y-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
               <ListTodo className="w-4 h-4" />
             </div>
-            <h2 className="text-sm font-black text-zinc-950 dark:text-white flex items-center gap-2">
-              <span>Tasks Left in Planner</span>
-              <span className="rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 px-2.5 py-0.5 text-[10px] font-black">
+            <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+              <h2 className="text-xs sm:text-sm font-black text-zinc-950 dark:text-white truncate">
+                Tasks Left in Planner
+              </h2>
+              <span className="shrink-0 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 px-2.5 py-0.5 text-[9px] sm:text-[10px] font-black">
                 {plannerLoading ? "..." : `${plannerTasks.length} pending`}
               </span>
-            </h2>
+            </div>
           </div>
 
           <Link
             href="/planner"
-            className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
+            className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline shrink-0"
           >
             <span>Open Planner</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -279,17 +282,17 @@ export default function DashboardPage() {
         </div>
 
         {plannerLoading ? (
-          <div className="flex items-center gap-1 text-xs text-zinc-400 font-semibold py-2">
-            <span className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <div className="flex items-center gap-1.5 text-xs text-zinc-400 font-semibold py-2">
+            <span className="w-3.5 h-3.5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
             Fetching planner tasks...
           </div>
         ) : plannerTasks.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
             {plannerTasks.slice(0, 3).map((task) => (
               <Link
                 key={task._id || task.id}
                 href="/planner"
-                className="flex flex-col justify-between p-3.5 rounded-2xl bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800 hover:border-blue-400 dark:hover:border-blue-500/50 transition-all shadow-xs group"
+                className="flex flex-col justify-between p-3 rounded-2xl bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800 hover:border-blue-400 dark:hover:border-blue-500/50 transition-all shadow-xs group"
               >
                 <div className="flex items-start justify-between gap-2 mb-1.5">
                   <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
@@ -320,8 +323,8 @@ export default function DashboardPage() {
         )}
       </section>
 
-      {/* Bento Metric Cards Grid */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-1">
+      {/* Bento Metric Cards Grid - 2 columns on mobile */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3">
         {visibleStats.map((stat, i) => {
           const StatIcon = ICON_MAP[stat.icon] || BookOpen;
           const theme = STAT_THEMES[stat.icon] || DEFAULT_STAT_THEME;
@@ -335,29 +338,29 @@ export default function DashboardPage() {
               className="relative group"
             >
               <div
-                className={`relative flex min-h-42 flex-col justify-between overflow-hidden p-6 rounded-[28px] sm:rounded-4xl border shadow-xs transition-all duration-300 ${theme.bg} ${theme.border} ${theme.borderHover} hover:shadow-md hover:-translate-y-0.5`}
+                className={`relative flex min-h-[125px] sm:min-h-42 flex-col justify-between overflow-hidden p-4 sm:p-6 rounded-[20px] sm:rounded-4xl border shadow-xs transition-all duration-300 ${theme.bg} ${theme.border} ${theme.borderHover} hover:shadow-md hover:-translate-y-0.5`}
               >
-                <div className="relative z-10 flex items-center justify-between gap-2 mb-3">
+                <div className="relative z-10 flex items-center justify-between gap-2 mb-2 sm:mb-3">
                   <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-2xl shadow-xs transition-transform duration-200 group-hover:scale-105 ${theme.iconContainer}`}
+                    className={`flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl sm:rounded-2xl shadow-xs transition-transform duration-200 group-hover:scale-105 ${theme.iconContainer}`}
                   >
-                    <StatIcon className="w-5 h-5" />
+                    <StatIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                   <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${theme.trendBadge}`}
+                    className={`inline-flex items-center rounded-full px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-black uppercase tracking-wider ${theme.trendBadge}`}
                   >
                     {stat.trend}
                   </span>
                 </div>
 
                 <div className="relative z-10 flex flex-col gap-0.5">
-                  <span className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.18em]">
+                  <span className="text-[9px] sm:text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.18em] truncate">
                     {stat.label}
                   </span>
-                  <span className="text-3xl font-black font-outfit text-zinc-950 dark:text-white tracking-tight">
+                  <span className="text-xl sm:text-3xl font-black font-outfit text-zinc-950 dark:text-white tracking-tight">
                     {stat.value}
                   </span>
-                  <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium mt-1">
+                  <span className="text-[10.5px] text-zinc-550 dark:text-zinc-400 font-medium mt-0.5 line-clamp-1">
                     {stat.description}
                   </span>
                 </div>
@@ -368,15 +371,15 @@ export default function DashboardPage() {
       </section>
 
       {/* Real all-time readership by course (Bento Feature Card) */}
-      <section className="admin-surface flex flex-col gap-6 p-6 sm:p-8 rounded-[28px] sm:rounded-[36px]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 dark:border-zinc-800 pb-5">
+      <section className="admin-surface flex flex-col gap-4 p-4 sm:p-8 rounded-[24px] sm:rounded-[36px]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 dark:border-zinc-800 pb-3.5 sm:pb-5">
           <div>
             <div className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">
               <BarChart3 className="w-4 h-4" />
               <span>Readership Analytics</span>
             </div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl sm:text-2xl font-black font-outfit text-zinc-950 dark:text-white tracking-tight">
+              <h2 className="text-lg sm:text-2xl font-black font-outfit text-zinc-950 dark:text-white tracking-tight">
                 Course Readership
               </h2>
               <span className="group/tooltip relative inline-flex" tabIndex={0}>
@@ -401,15 +404,15 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
+          className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-center"
         >
           {/* Left Metrics */}
-          <div className="lg:col-span-5 flex flex-col gap-4">
+          <div className="lg:col-span-5 flex flex-col gap-2.5 sm:gap-4">
             <span className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.18em]">
               {activeGrowth.label}
             </span>
             <div className="flex items-baseline gap-3">
-              <span className="text-4xl sm:text-5xl font-black font-outfit text-zinc-950 dark:text-white tracking-tight">
+              <span className="text-3xl sm:text-5xl font-black font-outfit text-zinc-950 dark:text-white tracking-tight">
                 {activeGrowth.reads}
               </span>
             </div>
@@ -417,14 +420,14 @@ export default function DashboardPage() {
               {activeGrowth.subtext}
             </p>
 
-            <p className="mt-2 border-t border-zinc-100 dark:border-zinc-800/80 pt-4 text-[11px] leading-relaxed text-zinc-400 dark:text-zinc-500">
+            <p className="mt-1 border-t border-zinc-100 dark:border-zinc-800/80 pt-3 text-[10.5px] leading-relaxed text-zinc-400 dark:text-zinc-500">
               A read is recorded whenever a public chapter page increments its
               view counter. Repeat visits are included.
             </p>
           </div>
 
           {/* Right Visual Bar Chart Visualization */}
-          <div className="lg:col-span-7 flex flex-col gap-3 bg-zinc-50/80 dark:bg-[#18181b]/70 p-5 sm:p-6 rounded-[28px] border border-zinc-200/60 dark:border-zinc-800/60">
+          <div className="lg:col-span-7 flex flex-col gap-3 bg-zinc-50/80 dark:bg-[#18181b]/70 p-3.5 sm:p-6 rounded-[20px] sm:rounded-[28px] border border-zinc-200/60 dark:border-zinc-800/60">
             <div className="flex items-center justify-between text-xs font-bold text-zinc-500 mb-1">
               <span>Reads by course</span>
               <span className="text-blue-600 dark:text-blue-400 font-black uppercase text-[9px] tracking-widest px-2.5 py-0.5 rounded-full bg-blue-500/10">
@@ -432,7 +435,7 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            <div className="h-44 flex items-end justify-between gap-3 sm:gap-5 pt-3">
+            <div className="h-36 sm:h-44 flex items-end justify-between gap-3 sm:gap-5 pt-3">
               {chartItems.length > 0 ? (
                 chartItems.map((item) => {
                   const heightPercent =
@@ -464,7 +467,7 @@ export default function DashboardPage() {
                         className="pointer-events-none absolute bottom-11 left-1/2 z-30 hidden w-max max-w-56 -translate-x-1/2 rounded-2xl bg-zinc-950/95 backdrop-blur-md px-3.5 py-2.5 text-center text-[11px] font-semibold text-white shadow-2xl border border-zinc-800 group-hover/bar:block group-focus/bar:block"
                       >
                         <strong className="block text-xs font-black text-blue-400 mb-0.5">
-                          {item.label}
+                           {item.label}
                         </strong>
                         <span className="text-zinc-300 font-bold">
                           {item.value.toLocaleString()}
@@ -485,10 +488,10 @@ export default function DashboardPage() {
       </section>
 
       {/* Bento Lower Grid: Top Courses & Technology Stack */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 sm:gap-1 mt-1 sm:mt-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 mt-2 sm:mt-6">
         {/* Top Performing Courses (Bento Wide Card) */}
-        <section className="lg:col-span-8 flex flex-col gap-1">
-          <div className="flex items-center justify-between pb-2">
+        <section className="lg:col-span-8 flex flex-col gap-2.5">
+          <div className="flex items-center justify-between pb-1">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
                 <BookOpen className="w-4 h-4" />
@@ -501,18 +504,18 @@ export default function DashboardPage() {
               href="/courses"
               className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
             >
-              <span>View All Courses</span>
+              <span>View All</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             {(dashboardData?.topCourses || []).map((course, i) => (
               <div
                 key={course.id}
-                className="admin-surface p-4 sm:p-6 rounded-[28px] sm:rounded-4xl transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group min-w-0"
+                className="admin-surface p-3.5 sm:p-6 rounded-[20px] sm:rounded-4xl transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 group min-w-0"
               >
-                <div className="flex items-start gap-3.5 min-w-0 flex-1">
+                <div className="flex items-start gap-3 min-w-0 flex-1">
                   <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
                     0{i + 1}
                   </span>
@@ -546,7 +549,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-zinc-100 dark:border-zinc-800/80 gap-2">
+                <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto shrink-0 pt-2.5 sm:pt-0 border-t sm:border-t-0 border-zinc-100 dark:border-zinc-800/80 gap-2">
                   <span className="text-sm sm:text-base font-black font-outfit text-zinc-950 dark:text-white">
                     {course.formattedReads} reads
                   </span>
@@ -563,8 +566,8 @@ export default function DashboardPage() {
         </section>
 
         {/* Technology Stack & Platform Ecosystem (Bento Column) */}
-        <section className="lg:col-span-4 flex flex-col gap-1">
-          <div className="pb-2">
+        <section className="lg:col-span-4 flex flex-col gap-2.5">
+          <div className="pb-1">
             <div className="flex items-center gap-1">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
                 <BarChart3 className="w-4 h-4" />
@@ -575,7 +578,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="admin-surface p-6 sm:p-7 rounded-[28px] sm:rounded-[36px] flex flex-col gap-6">
+          <div className="admin-surface p-4 sm:p-7 rounded-[20px] sm:rounded-[36px] flex flex-col gap-5 sm:gap-6">
             <div className="flex flex-col gap-4">
               {(dashboardData?.techDistribution || []).map((item) => {
                 const percentage = Math.min(
@@ -601,8 +604,8 @@ export default function DashboardPage() {
                       <div
                         className="h-full min-w-1 rounded-full transition-[width] duration-500"
                         style={{
-                          width: `${percentage}%`,
-                          backgroundColor: item.color || "#2563eb",
+                           width: `${percentage}%`,
+                           backgroundColor: item.color || "#2563eb",
                         }}
                       />
                     </div>
@@ -612,28 +615,28 @@ export default function DashboardPage() {
             </div>
 
             {/* Platform Ecosystem Secondary Counts */}
-            <div className="pt-5 border-t border-zinc-100 dark:border-zinc-800/80 grid grid-cols-3 gap-2.5 text-center">
-              <div className="flex flex-col p-2.5 bg-zinc-50 dark:bg-[#18181b]/70 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50">
+            <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800/80 grid grid-cols-3 gap-1.5 sm:gap-2.5 text-center">
+              <div className="flex flex-col p-2 sm:p-2.5 bg-zinc-50 dark:bg-[#18181b]/70 rounded-xl sm:rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50">
                 <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
                   Quizzes
                 </span>
-                <span className="text-lg sm:text-xl font-black font-outfit text-zinc-950 dark:text-white mt-0.5">
+                <span className="text-base sm:text-xl font-black font-outfit text-zinc-950 dark:text-white mt-0.5">
                   {dashboardData?.counts?.quizzes || 0}
                 </span>
               </div>
-              <div className="flex flex-col p-2.5 bg-zinc-50 dark:bg-[#18181b]/70 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50">
+              <div className="flex flex-col p-2 sm:p-2.5 bg-zinc-50 dark:bg-[#18181b]/70 rounded-xl sm:rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50">
                 <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
                   Flashcards
                 </span>
-                <span className="text-lg sm:text-xl font-black font-outfit text-zinc-950 dark:text-white mt-0.5">
+                <span className="text-base sm:text-xl font-black font-outfit text-zinc-950 dark:text-white mt-0.5">
                   {dashboardData?.counts?.flashcards || 0}
                 </span>
               </div>
-              <div className="flex flex-col p-2.5 bg-zinc-50 dark:bg-[#18181b]/70 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50">
+              <div className="flex flex-col p-2 sm:p-2.5 bg-zinc-50 dark:bg-[#18181b]/70 rounded-xl sm:rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50">
                 <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
                   Cheats
                 </span>
-                <span className="text-lg sm:text-xl font-black font-outfit text-zinc-950 dark:text-white mt-0.5">
+                <span className="text-base sm:text-xl font-black font-outfit text-zinc-950 dark:text-white mt-0.5">
                   {dashboardData?.counts?.cheatsheets || 0}
                 </span>
               </div>

@@ -732,63 +732,6 @@ export default function PlannerPage() {
                 </div>
               </div>
             </div>
-
-            {/* Mobile Actions Toolbar */}
-            <div className="flex items-center gap-1.5 md:hidden">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={addColumn}
-                className="h-8 text-[11px] px-2.5"
-              >
-                <Plus size={14} /> Col
-              </Button>
-              <div className="group relative">
-                <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                  <Settings2 size={14} />
-                </Button>
-                <div className="invisible absolute right-0 top-full mt-1.5 z-40 w-40 rounded-2xl border border-zinc-200 bg-white p-1 opacity-0 shadow-xl group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100 dark:border-zinc-800 dark:bg-zinc-950 before:absolute before:inset-x-0 before:-top-2 before:h-2 before:content-['']">
-                  <button
-                    onClick={renameBoard}
-                    className="w-full rounded-xl px-3 py-2 text-left text-xs hover:bg-zinc-100 dark:hover:bg-zinc-900"
-                  >
-                    Rename board
-                  </button>
-                  <button
-                    onClick={addBoard}
-                    className="w-full rounded-xl px-3 py-2 text-left text-xs hover:bg-zinc-100 dark:hover:bg-zinc-900"
-                  >
-                    Create board
-                  </button>
-                  <button
-                    onClick={archiveBoard}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
-                  >
-                    <Archive size={13} /> Archive board
-                  </button>
-                  {archivedColumns.length > 0 && (
-                    <>
-                      <div className="border-t border-zinc-100 dark:border-zinc-800/80 my-1"></div>
-                      <div className="px-3 py-1 text-[9px] font-black uppercase tracking-wider text-zinc-400">
-                        Restore Columns
-                      </div>
-                      {archivedColumns.map((col) => (
-                        <button
-                          key={col._id}
-                          onClick={() => unarchiveColumn(col)}
-                          className="w-full rounded-xl px-3 py-1.5 text-left text-[11px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 flex items-center justify-between gap-2"
-                        >
-                          <span className="truncate">{col.name}</span>
-                          <span className="text-[10px] text-blue-600 font-bold shrink-0">
-                            Restore
-                          </span>
-                        </button>
-                      ))}
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -878,7 +821,7 @@ export default function PlannerPage() {
           </div>
         </div>
 
-        <div className="mt-2 sm:mt-3.5 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+        <div className="hidden md:flex mt-2 sm:mt-3.5 flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
           <div className="hidden items-center overflow-x-auto gap-1 rounded-2xl bg-zinc-100 p-1 dark:bg-zinc-900 scrollbar-none sm:grid sm:grid-cols-5">
             {[
               ["Total", stats.total],
@@ -940,7 +883,7 @@ export default function PlannerPage() {
         </div>
 
         {filtersOpen && (
-          <div className="mt-3 flex flex-wrap gap-2 rounded-2xl border border-zinc-200 bg-zinc-50 p-2.5 sm:p-3 dark:border-zinc-800 dark:bg-zinc-900/50">
+          <div className="hidden md:flex mt-3 flex-wrap gap-2 rounded-2xl border border-zinc-200 bg-zinc-50 p-2.5 sm:p-3 dark:border-zinc-800 dark:bg-zinc-900/50">
             {[
               ["type", "All types", CARD_TYPES],
               ["priority", "All priorities", PRIORITIES],

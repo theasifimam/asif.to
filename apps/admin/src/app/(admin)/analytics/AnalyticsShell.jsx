@@ -8,7 +8,7 @@ export default function AnalyticsShell({
   actions,
 }) {
   return (
-    <div className="mx-auto flex max-w-375 flex-col gap-8 p-4 sm:p-6 md:p-8 lg:p-10 font-sans">
+    <div className="mx-auto flex max-w-7xl flex-col gap-6 p-3.5 sm:gap-8 sm:p-6 md:p-8 lg:p-10 font-sans text-zinc-800 dark:text-zinc-300">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           {eyebrow && (
@@ -16,7 +16,7 @@ export default function AnalyticsShell({
               {eyebrow}
             </p>
           )}
-          <h1 className="mt-1 font-outfit text-3xl sm:text-4xl font-black tracking-tight text-zinc-950 dark:text-white">
+          <h1 className="mt-1 font-outfit text-2xl sm:text-4xl font-black tracking-tight text-zinc-950 dark:text-white">
             {title}
           </h1>
           {description && (

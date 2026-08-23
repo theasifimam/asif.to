@@ -16,7 +16,7 @@ export default function OverviewHighlights({ range, search }) {
           Unified telemetry from GA4, Google Search Console, and platform data.
         </p>
       </div>
-      <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <MetricCard label="Active Users" value={n(ga4?.summary?.activeUsers)} source="GA4" />
         <MetricCard label="Sessions" value={n(ga4?.summary?.sessions)} source="GA4" />
         <MetricCard label="Page Views" value={n(ga4?.summary?.screenPageViews)} source="GA4" />

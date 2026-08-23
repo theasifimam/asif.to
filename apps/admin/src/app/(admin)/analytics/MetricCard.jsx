@@ -35,7 +35,7 @@ const getTooltipContent = (label) => {
 
 export default function MetricCard({ label, value, source, change }) {
   return (
-    <div className="admin-surface flex min-h-36 flex-col justify-between p-5 rounded-3xl transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700">
+    <div className="admin-surface flex min-h-[115px] sm:min-h-36 flex-col justify-between p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
           <p className="truncate text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
@@ -69,7 +69,7 @@ export default function MetricCard({ label, value, source, change }) {
           </span>
         )}
       </div>
-      <p className="my-2 text-2xl sm:text-3xl font-black font-outfit tracking-tight text-zinc-950 dark:text-white">
+      <p className="my-1.5 text-xl sm:text-3xl font-black font-outfit tracking-tight text-zinc-950 dark:text-white">
         {value}
       </p>
       {Number.isFinite(change) ? (

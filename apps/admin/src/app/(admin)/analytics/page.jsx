@@ -83,15 +83,15 @@ function StatCard({ icon: Icon, label, value, change, help }) {
   const positive = Number(change) >= 0;
 
   return (
-    <div className="rounded-3xl border border-zinc-200/80 bg-white p-4 dark:border-zinc-800 dark:bg-[#121215]">
+    <div className="rounded-2xl sm:rounded-3xl border border-zinc-200/80 bg-white p-3.5 sm:p-4 dark:border-zinc-800 dark:bg-[#121215] flex flex-col justify-between min-h-[120px] sm:min-h-0">
       <div className="flex items-center justify-between gap-3">
-        <span className="grid h-9 w-9 place-items-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300">
+        <span className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-xl sm:rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300">
           <Icon className="h-4 w-4" />
         </span>
 
         {change !== undefined && (
           <span
-            className={`rounded-full px-2 py-1 text-[9px] font-black ${
+            className={`rounded-full px-2 py-0.5 sm:py-1 text-[9px] font-black ${
               positive
                 ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
                 : "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300"
@@ -102,15 +102,17 @@ function StatCard({ icon: Icon, label, value, change, help }) {
         )}
       </div>
 
-      <div className="mt-4 text-2xl font-black tracking-tight">{value}</div>
+      <div>
+        <div className="mt-3 text-xl sm:text-2xl font-black tracking-tight">{value}</div>
 
-      <div className="mt-1 text-xs font-bold text-zinc-600 dark:text-zinc-300">
-        {label}
+        <div className="mt-0.5 text-xs font-bold text-zinc-600 dark:text-zinc-300">
+          {label}
+        </div>
+
+        {help && (
+          <p className="mt-1 text-[9.5px] leading-3 text-zinc-400 hidden xs:block">{help}</p>
+        )}
       </div>
-
-      {help && (
-        <p className="mt-1.5 text-[10px] leading-4 text-zinc-400">{help}</p>
-      )}
     </div>
   );
 }
@@ -313,7 +315,7 @@ export default function AnalyticsPage() {
         : "Campaign";
 
   return (
-    <div className="mx-auto flex max-w-375 flex-col gap-9 p-4 font-sans sm:p-6 md:p-8 lg:p-10">
+    <div className="mx-auto flex max-w-7xl flex-col gap-6 p-3.5 font-sans sm:gap-9 sm:p-6 md:p-8 lg:p-10 text-zinc-800 dark:text-zinc-300">
       <AnalyticsNav />
 
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -322,11 +324,11 @@ export default function AnalyticsPage() {
             asif.to performance
           </p>
 
-          <h1 className="mt-1 text-3xl font-black tracking-tight text-zinc-950 dark:text-white sm:text-4xl">
+          <h1 className="mt-1 text-2xl font-black tracking-tight text-zinc-950 dark:text-white sm:text-4xl">
             Understand the site at a glance
           </h1>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+          <p className="mt-1.5 max-w-3xl text-xs sm:text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
             First-party asif.to traffic explains people, sources, content,
             devices and location. Search Console explains how Google Search is
             performing.
@@ -368,7 +370,7 @@ export default function AnalyticsPage() {
         </div>
       </header>
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <section className="grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 lg:gap-3">
         <StatCard
           icon={Users}
           label="Visitors"
