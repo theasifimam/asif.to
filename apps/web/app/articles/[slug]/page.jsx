@@ -41,6 +41,8 @@ async function getArticle(slugWithId) {
   }
 }
 
+import { getImageUrl } from "@/lib/config";
+
 export async function generateMetadata({ params }) {
   const { slug: slugWithId } = await params;
   const article = await getArticle(slugWithId);
@@ -78,13 +80,7 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title: article.title,
       description: description,
-      images: [
-        article.image
-          ? article.image.startsWith("http")
-            ? article.image
-            : `${process.env.NEXT_PUBLIC_STORAGE_URL}${article.image}`
-          : "/logo.jpeg",
-      ],
+      images: [getImageUrl(article.image || "/logo.jpeg")],
       type: "article",
       authors: [article.author?.fullName],
       publishedTime: article.createdAt,
@@ -95,13 +91,7 @@ export async function generateMetadata({ params }) {
       card: "summary_large_image",
       title: article.title,
       description: description,
-      images: [
-        article.image
-          ? article.image.startsWith("http")
-            ? article.image
-            : `${process.env.NEXT_PUBLIC_STORAGE_URL}${article.image}`
-          : "/logo.jpeg",
-      ],
+      images: [getImageUrl(article.image || "/logo.jpeg")],
     },
   };
 }

@@ -5,20 +5,113 @@ import Image from "next/image";
 import Link from "next/link";
 import { getImageUrl } from "@/lib/config";
 import { getUserMasteryTier } from "@/lib/masteryTier";
+import ProfileCourseProgressSummary from "@/components/profile/ProfileCourseProgressSummary";
 import {
   Link2,
   MapPin,
   Calendar,
   Edit3,
   LogOut,
+  Flame,
+  BookMarked,
+  BookOpen,
+  Award,
+  Sparkles,
 } from "lucide-react";
 
 export default function ProfileHero({
   user,
   isOwnProfile,
   onOpenLogout,
+  streak = 0,
+  libraryCount = 0,
+  completedCoursesCount = 0,
+  certificatesCount = 0,
+  onSelectTab,
 }) {
-  const masteryTier = getUserMasteryTier(user);
+  const currentStreak = streak || user?.streak || 0;
+  const currentLibraryCount =
+    libraryCount || (user?.libraryCount || 0) + (user?.bookmarks?.length || 0);
+  const currentCompletedCoursesCount =
+    completedCoursesCount || user?.completedCourses?.length || 0;
+  const currentCertificatesCount =
+    certificatesCount || user?.certificates?.length || 0;
+
+  const masteryTier = getUserMasteryTier(user, { streak: currentStreak });
+  const displayLevel = masteryTier.level || user?.masteryLevel || 1;
+  const displayTitle = masteryTier.title || "Learning Explorer";
+
+  const pillStats = [
+    currentStreak > 0 && {
+      key: "streak",
+      render: () => (
+        <Link
+          key="streak"
+          href="/revision"
+          className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 text-xs font-bold text-zinc-700 dark:text-zinc-300 shadow-none hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+        >
+          <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500/20 shrink-0" />
+          <span>{currentStreak} Days Streak</span>
+        </Link>
+      ),
+    },
+    currentLibraryCount > 0 && {
+      key: "library",
+      render: () => (
+        <button
+          key="library"
+          type="button"
+          onClick={() => onSelectTab && onSelectTab("library")}
+          className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 text-xs font-bold text-zinc-700 dark:text-zinc-300 shadow-none hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+        >
+          <BookMarked className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+          <span>{currentLibraryCount} Saved Items</span>
+        </button>
+      ),
+    },
+    currentCompletedCoursesCount > 0 && {
+      key: "courses",
+      render: () => (
+        <button
+          key="courses"
+          type="button"
+          onClick={() => onSelectTab && onSelectTab("courses")}
+          className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 text-xs font-bold text-zinc-700 dark:text-zinc-300 shadow-none hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+        >
+          <BookOpen className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+          <span>{currentCompletedCoursesCount} Courses Completed</span>
+        </button>
+      ),
+    },
+    currentCertificatesCount > 0 && {
+      key: "certs",
+      render: () => (
+        <button
+          key="certs"
+          type="button"
+          onClick={() => onSelectTab && onSelectTab("certificates")}
+          className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 text-xs font-bold text-zinc-700 dark:text-zinc-300 shadow-none hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+        >
+          <Award className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+          <span>{currentCertificatesCount} Certs Won</span>
+        </button>
+      ),
+    },
+    (displayLevel > 1 || currentStreak > 0 || currentCompletedCoursesCount > 0) && {
+      key: "mastery",
+      render: () => (
+        <button
+          key="mastery"
+          type="button"
+          onClick={() => onSelectTab && onSelectTab("quiz")}
+          className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 text-xs font-bold text-zinc-700 dark:text-zinc-300 shadow-none hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+          <span>Level {displayLevel} ({displayTitle})</span>
+        </button>
+      ),
+    },
+  ].filter(Boolean);
 
   return (
     <section className="p-6 sm:p-9 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-md flex flex-col gap-6 relative overflow-hidden border border-zinc-100 dark:border-zinc-800">
@@ -28,7 +121,7 @@ export default function ProfileHero({
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
         {/* Avatar with Ring */}
         <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden shrink-0 shadow-lg ring-4 ring-blue-500/20 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-          {user?.avatar && !user.avatar.includes("ui-avatars.com") ? (
+          {user?.avatar ? (
             <Image
               src={getImageUrl(user.avatar)}
               alt={user?.fullName || "Avatar"}
@@ -110,7 +203,7 @@ export default function ProfileHero({
             <button
               type="button"
               onClick={onOpenLogout}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold transition-colors cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Sign Out</span>
@@ -118,6 +211,16 @@ export default function ProfileHero({
           </div>
         )}
       </div>
+
+      {/* Pill-shaped stats at bottom of first card (minimal border, no shadow) */}
+      {pillStats.length > 0 && (
+        <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800/80 flex flex-wrap items-center gap-2 sm:gap-2.5">
+          {pillStats.map((stat) => stat.render())}
+        </div>
+      )}
+
+      {/* Embedded Learning Progress Summary */}
+      {isOwnProfile && <ProfileCourseProgressSummary />}
     </section>
   );
 }

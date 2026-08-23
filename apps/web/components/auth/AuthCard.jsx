@@ -291,9 +291,9 @@ export default function AuthCard({
   const isBusy = siLoading || suLoading || otpSending;
 
   return (
-    <div className="relative w-full max-w-110 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 rounded-4xl sm:rounded-4xl shadow-lg shadow-zinc-950/15 dark:shadow-black/40 flex flex-col overflow-hidden max-h-[80vh] sm:max-h-[84vh]">
+    <div className="relative w-full max-w-110 bg-white dark:bg-zinc-900 border border-white dark:border-zinc-800 rounded-4xl sm:rounded-4xl shadow-2xl shadow-zinc-950/20 dark:shadow-black/60 flex flex-col overflow-hidden max-h-[85vh] sm:max-h-[88vh]">
       {/* Header Bar - Fixed Branding & Title */}
-      <div className="flex flex-col px-6 sm:px-8 pt-5 sm:pt-6 pb-3 border-b border-zinc-100 dark:border-zinc-800/60 shrink-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl">
+      <div className="flex flex-col px-6 sm:px-8 pt-5 sm:pt-6 pb-3 border-b border-zinc-200 dark:border-zinc-800 shrink-0 bg-white dark:bg-zinc-900">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <img
@@ -306,11 +306,11 @@ export default function AuthCard({
             </span>
           </Link>
 
-          {isModal && onClose && (
+          {(isModal || onClose) && (
             <button
               onClick={onClose}
               aria-label="Close modal"
-              className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer"
+              className="p-1.5 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/80 rounded-full transition-colors text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer"
             >
               <X size={16} />
             </button>
@@ -495,14 +495,6 @@ export default function AuthCard({
 
         {/* Footer Security Notice & Legal links */}
         <div className="pt-3 flex flex-col gap-2">
-          <div className="flex items-start gap-2 rounded-2xl bg-zinc-50 dark:bg-zinc-950/60 p-2.5 text-[11px] leading-4 text-zinc-500">
-            <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
-            <p>
-              Your data is encrypted and secure. asif.to never shares your
-              personal information.
-            </p>
-          </div>
-
           <p className="text-center text-[10px] text-zinc-400">
             By continuing, you agree to our{" "}
             <Link

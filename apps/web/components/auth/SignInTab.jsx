@@ -1,8 +1,9 @@
 "use client";
 
-import { Mail, Lock, Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import OAuthButtons from "./OAuthButtons";
 import { inputClass } from "./authConstants";
+import { Button } from "@/components/ui/button";
 
 export default function SignInTab({
   email,
@@ -78,19 +79,15 @@ export default function SignInTab({
           </div>
         </div>
 
-        <button
+        <Button
           type="submit"
+          loading={isLoading}
           disabled={isBusy}
-          className="mt-1 w-full bg-blue-600 hover:bg-blue-700 text-white h-11 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed active:scale-98 cursor-pointer"
+          className="mt-1 w-full uppercase tracking-widest text-xs h-11"
         >
-          {isLoading ? (
-            <Loader2 size={16} className="animate-spin" />
-          ) : (
-            <>
-              Sign In to Account <ArrowRight size={14} />
-            </>
-          )}
-        </button>
+          <span>Sign In to Account</span>
+          <ArrowRight size={14} />
+        </Button>
       </form>
 
       {/* Divider */}

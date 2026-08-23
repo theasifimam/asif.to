@@ -18,7 +18,7 @@ export function UserOverview() {
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4 xl:grid-cols-8">
+    <div className="grid grid-cols-2 gap-1 sm:grid-cols-4 xl:grid-cols-8">
       {metrics.map(([label, value, Icon]) => (
         <div
           key={label}

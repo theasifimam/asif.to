@@ -50,7 +50,8 @@ export default function UsersPage() {
   const [sort, setSort] = useState("newest");
   const [urlFilters, setUrlFilters] = useUrlFilters({ view: "table" });
   const viewMode = urlFilters.view || "table";
-  const setViewMode = (v) => setUrlFilters((current) => ({ ...current, view: v }));
+  const setViewMode = (v) =>
+    setUrlFilters((current) => ({ ...current, view: v }));
   const [editingUser, setEditingUser] = useState(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const { user: currentUser } = useAuth();
@@ -127,39 +128,39 @@ export default function UsersPage() {
 
   return (
     <UserModuleShell
-        title="Users"
-        description="Manage roles, permissions, and account status for all editorial users."
-        actions={
-          <>
-            <ViewToggle view={viewMode} onViewChange={setViewMode} />
-            {hasPermission(currentUser, "users.edit") && (
-              <Button
-                variant="outline"
-                onClick={handleExport}
-                className="hidden sm:inline-flex"
-              >
-                <Download className="mr-2 h-4 w-4" /> Export
-              </Button>
-            )}
+      title="Users"
+      description="Manage roles, permissions, and account status for all editorial users."
+      actions={
+        <>
+          <ViewToggle view={viewMode} onViewChange={setViewMode} />
+          {hasPermission(currentUser, "users.edit") && (
             <Button
               variant="outline"
-              size="icon"
-              onClick={refetch}
-              title="Refresh users"
-              className="flex-1 sm:flex-initial"
+              onClick={handleExport}
+              className="hidden sm:inline-flex"
             >
-              <RefreshCw className={loading ? "animate-spin" : ""} size={16} />
+              <Download className="mr-2 h-4 w-4" /> Export
             </Button>
-            {hasPermission(currentUser, "invitations.manage") && (
-              <Button
-                onClick={() => setIsAddOpen(true)}
-                className="w-full sm:w-auto"
-              >
-                <UserPlus className="mr-2 h-4 w-4" /> Add user
-              </Button>
-            )}
-          </>
-        }
+          )}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={refetch}
+            title="Refresh users"
+            className="flex-1 sm:flex-initial"
+          >
+            <RefreshCw className={loading ? "animate-spin" : ""} size={16} />
+          </Button>
+          {hasPermission(currentUser, "invitations.manage") && (
+            <Button
+              onClick={() => setIsAddOpen(true)}
+              className="w-full sm:w-auto"
+            >
+              <UserPlus className="mr-2 h-4 w-4" /> Add user
+            </Button>
+          )}
+        </>
+      }
     >
       <UserOverview />
       <AdminFilters>
@@ -169,7 +170,7 @@ export default function UsersPage() {
           placeholder="Search users..."
         />
         <Select value={roleFilter} onValueChange={updateFilter(setRoleFilter)}>
-          <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b] md:w-36">
+          <SelectTrigger className="h-10 w-full rounded-full bg-white/90 px-4 text-xs font-semibold  dark:bg-[#18181b] md:w-36">
             <SelectValue placeholder="All roles" />
           </SelectTrigger>
           <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
@@ -184,7 +185,7 @@ export default function UsersPage() {
           value={statusFilter}
           onValueChange={updateFilter(setStatusFilter)}
         >
-          <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b] md:w-36">
+          <SelectTrigger className="h-10 w-full rounded-full bg-white/90 px-4 text-xs font-semibold  dark:bg-[#18181b] md:w-36">
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
           <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
@@ -200,7 +201,7 @@ export default function UsersPage() {
           value={providerFilter}
           onValueChange={updateFilter(setProviderFilter)}
         >
-          <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b] md:w-36">
+          <SelectTrigger className="h-10 w-full rounded-full bg-white/90 px-4 text-xs font-semibold  dark:bg-[#18181b] md:w-36">
             <SelectValue placeholder="Provider" />
           </SelectTrigger>
           <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
@@ -214,7 +215,7 @@ export default function UsersPage() {
           value={verifiedFilter}
           onValueChange={updateFilter(setVerifiedFilter)}
         >
-          <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b] md:w-36">
+          <SelectTrigger className="h-10 w-full rounded-full bg-white/90 px-4 text-xs font-semibold  dark:bg-[#18181b] md:w-36">
             <SelectValue placeholder="Verification" />
           </SelectTrigger>
           <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">
@@ -224,7 +225,7 @@ export default function UsersPage() {
           </SelectContent>
         </Select>
         <Select value={sort} onValueChange={updateFilter(setSort)}>
-          <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b] md:w-40">
+          <SelectTrigger className="h-10 w-full rounded-full bg-white/90 px-4 text-xs font-semibold  dark:bg-[#18181b] md:w-40">
             <SelectValue placeholder="Sort" />
           </SelectTrigger>
           <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b]">

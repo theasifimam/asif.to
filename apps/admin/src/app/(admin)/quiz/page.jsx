@@ -118,12 +118,7 @@ export default function QuestionsPage() {
     search: "",
     view: "table",
   });
-  const {
-    courseId,
-    categoryId,
-    chapterId,
-    search,
-  } = filters;
+  const { courseId, categoryId, chapterId, search } = filters;
 
   const setCourseId = (value) =>
     setFilters((current) => ({
@@ -170,9 +165,7 @@ export default function QuestionsPage() {
         [];
 
       const chapterItems =
-        chapterResponse?.data?.data?.data ||
-        chapterResponse?.data?.data ||
-        [];
+        chapterResponse?.data?.data?.data || chapterResponse?.data?.data || [];
 
       setCategories(Array.isArray(categoryItems) ? categoryItems : []);
       setChapters(Array.isArray(chapterItems) ? chapterItems : []);
@@ -313,7 +306,9 @@ export default function QuestionsPage() {
           >
             <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold dark:border-zinc-800/80 dark:bg-[#18181b]">
               <SelectValue
-                placeholder={courseId === "all" ? "Select course first" : "All categories"}
+                placeholder={
+                  courseId === "all" ? "Select course first" : "All categories"
+                }
               />
             </SelectTrigger>
             <SelectContent>
@@ -335,7 +330,9 @@ export default function QuestionsPage() {
           >
             <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold dark:border-zinc-800/80 dark:bg-[#18181b]">
               <SelectValue
-                placeholder={courseId === "all" ? "Select course first" : "All chapters"}
+                placeholder={
+                  courseId === "all" ? "Select course first" : "All chapters"
+                }
               />
             </SelectTrigger>
             <SelectContent>
@@ -354,7 +351,7 @@ export default function QuestionsPage() {
       <AdminContent plain={viewMode === "card"}>
         {viewMode === "card" ? (
           <div className="space-y-6">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
               {loading ? (
                 Array.from({ length: limit }).map((_, i) => (
                   <QuizCardSkeleton key={i} />
@@ -399,8 +396,7 @@ export default function QuestionsPage() {
 
                       {item.courses && item.courses.length > 0 && (
                         <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 truncate">
-                          Courses:{" "}
-                          {item.courses.map((c) => c.title).join(", ")}
+                          Courses: {item.courses.map((c) => c.title).join(", ")}
                         </p>
                       )}
                     </div>
@@ -497,7 +493,8 @@ export default function QuestionsPage() {
                               {item.question}
                             </Link>
                             <p className="mt-0.5 line-clamp-1 text-xs text-zinc-400">
-                              Correct: {item.options?.[item.correctIndex] || "—"}
+                              Correct:{" "}
+                              {item.options?.[item.correctIndex] || "—"}
                             </p>
                           </td>
                           <td className="px-6 py-4.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400">

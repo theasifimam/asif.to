@@ -3,6 +3,8 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { Loader2 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+
 export default function OAuthButtons({ callbackUrl = "/" }) {
   const [pending, setPending] = useState("");
   const start = async (provider) => {
@@ -30,21 +32,21 @@ export default function OAuthButtons({ callbackUrl = "/" }) {
   );
 }
 function ProviderButton({ label, provider, pending, onClick, icon }) {
+  const isPending = pending === provider;
   const busy = Boolean(pending);
   return (
-    <button
+    <Button
       type="button"
+      variant="outline"
+      size="sm"
+      loading={isPending}
       disabled={busy}
       onClick={() => onClick(provider)}
-      className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-zinc-200/90 bg-white hover:bg-zinc-50/90 dark:border-zinc-800 dark:bg-zinc-800/70 dark:hover:bg-zinc-800 px-3 text-xs font-bold text-zinc-900 dark:text-white shadow-xs transition-all duration-150 disabled:cursor-wait disabled:opacity-60 active:scale-98 cursor-pointer"
+      className="w-full text-xs font-bold"
     >
-      {pending === provider ? (
-        <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-      ) : (
-        icon
-      )}
-      <span>{pending === provider ? "Connecting…" : label}</span>
-    </button>
+      {!isPending && icon}
+      <span>{isPending ? "Connecting…" : label}</span>
+    </Button>
   );
 }
 function GoogleIcon() {

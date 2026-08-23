@@ -26,6 +26,13 @@ import {
   Loader2,
   BookMarked,
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const LIBRARY_TYPE_CONFIG = {
   note: {
@@ -230,279 +237,287 @@ export default function ProfileLibraryTab({
         )}
       </div>
 
-      {/* Search and Filters Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search notes, code, fixes, tags..."
-            className="w-full rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-800 pl-10 pr-4 py-2.5 text-xs text-foreground placeholder:text-zinc-400 outline-none focus:border-blue-500 dark:focus:border-blue-500 shadow-xs transition"
-          />
-        </div>
-
-        {collections.length > 0 && (
-          <select
-            value={collectionId}
-            onChange={(e) => setCollectionId(e.target.value)}
-            className="rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-800 px-3.5 py-2.5 text-xs font-semibold text-foreground outline-none shadow-xs cursor-pointer"
-          >
-            <option value="all">All Collections ({collections.length})</option>
-            {collections.map((c) => (
-              <option key={c._id} value={c._id}>
-                📁 {c.name}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
-
-      {/* Type Filter Pills */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-        <button
-          type="button"
-          onClick={() => setTypeFilter("all")}
-          className={`px-3 py-1.5 rounded-full text-xs font-bold transition whitespace-nowrap cursor-pointer ${
-            typeFilter === "all"
-              ? "bg-blue-600 text-white shadow-xs"
-              : "bg-white dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-foreground"
-          }`}
-        >
-          All ({entries.length + bookmarks.length})
-        </button>
-        {Object.entries(LIBRARY_TYPE_CONFIG).map(([tKey, cfg]) => {
-          const count = entries.filter((e) => e.type === tKey).length;
-          if (count === 0 && !isOwnProfile) return null;
-          const Icon = cfg.icon;
-          return (
-            <button
-              key={tKey}
-              type="button"
-              onClick={() => setTypeFilter(tKey)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition whitespace-nowrap cursor-pointer ${
-                typeFilter === tKey
-                  ? "bg-blue-600 text-white shadow-xs"
-                  : "bg-white dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-foreground"
-              }`}
-            >
-              <Icon className="w-3 h-3" />
-              <span>{cfg.label}</span>
-              <span className="text-[10px] opacity-75 font-semibold">
-                ({count})
-              </span>
-            </button>
-          );
-        })}
-        {bookmarks.length > 0 && (
-          <button
-            type="button"
-            onClick={() => setTypeFilter("bookmark")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition whitespace-nowrap cursor-pointer ${
-              typeFilter === "bookmark"
-                ? "bg-blue-600 text-white shadow-xs"
-                : "bg-white dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-foreground"
-            }`}
-          >
-            <Bookmark className="w-3 h-3 text-purple-500" />
-            <span>Bookmarks</span>
-            <span className="text-[10px] opacity-75 font-semibold">
-              ({bookmarks.length})
-            </span>
-          </button>
-        )}
-      </div>
-
-      {/* Knowledge Entries Grid */}
-      {isLoading ? (
-        <div className="p-12 rounded-3xl bg-white dark:bg-zinc-900 shadow-sm flex items-center justify-center border border-zinc-100 dark:border-zinc-800">
-          <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-        </div>
-      ) : filteredEntries.length > 0 || filteredBookmarks.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredEntries.map((entry) => {
-            const cfg =
-              LIBRARY_TYPE_CONFIG[entry.type] || LIBRARY_TYPE_CONFIG.note;
-            const Icon = cfg.icon;
-            const isPublic = entry.visibility === "public";
-            const isUnlisted = entry.visibility === "unlisted";
-
-            return (
-              <div
-                key={entry._id}
-                className="group p-5 rounded-3xl bg-white dark:bg-zinc-900 shadow-sm border border-zinc-200/60 dark:border-zinc-800/80 flex flex-col justify-between gap-4 hover:border-blue-500/40 dark:hover:border-blue-500/30 hover:shadow-md transition-all"
-              >
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${cfg.color}`}
-                    >
-                      <Icon className="w-3 h-3" />
-                      <span>{cfg.label}</span>
+      {/* Main Knowledge Card Container */}
+      <div className="rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-sm border border-zinc-200/70 dark:border-zinc-800 p-5 sm:p-7 space-y-6">
+        {/* Card Top Bar: Selector on LEFT, Search on RIGHT */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-5 border-b border-zinc-100 dark:border-zinc-800/80">
+          {/* Left Side: Type Selector (shadcn Select) & Collection Selector */}
+          <div className="flex flex-wrap items-center gap-2.5 flex-1 sm:flex-initial">
+            <div className="w-full sm:w-56 shrink-0">
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-full rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800 px-3.5 py-2.5 text-xs font-bold text-foreground">
+                  <SelectValue placeholder="Filter by type" />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl max-h-80">
+                  <SelectItem value="all">
+                    <span className="flex items-center gap-2">
+                      <span>All Knowledge</span>
+                      <span className="text-[10px] opacity-60 font-mono">
+                        ({entries.length + bookmarks.length})
+                      </span>
                     </span>
-
-                    <div className="flex items-center gap-1.5 text-zinc-400 text-[11px]">
-                      {isPublic ? (
-                        <span
-                          className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400"
-                          title="Publicly accessible"
-                        >
-                          <Globe2 size={13} />
-                          <span className="text-[10px] font-bold">Public</span>
-                        </span>
-                      ) : isUnlisted ? (
-                        <span
-                          className="inline-flex items-center gap-1 text-amber-500"
-                          title="Unlisted link"
-                        >
-                          <EyeOff size={13} />
-                          <span className="text-[10px] font-bold">
-                            Unlisted
+                  </SelectItem>
+                  {Object.entries(LIBRARY_TYPE_CONFIG).map(([tKey, cfg]) => {
+                    const count = entries.filter((e) => e.type === tKey).length;
+                    if (count === 0 && !isOwnProfile) return null;
+                    const Icon = cfg.icon;
+                    return (
+                      <SelectItem key={tKey} value={tKey}>
+                        <span className="flex items-center gap-2">
+                          <Icon className="w-3.5 h-3.5 text-zinc-500" />
+                          <span>{cfg.label}</span>
+                          <span className="text-[10px] opacity-60 font-mono">
+                            ({count})
                           </span>
                         </span>
-                      ) : (
-                        <span
-                          className="inline-flex items-center gap-1 text-zinc-400"
-                          title="Private knowledge"
-                        >
-                          <Lock size={13} />
-                          <span className="text-[10px] font-bold">Private</span>
+                      </SelectItem>
+                    );
+                  })}
+                  {bookmarks.length > 0 && (
+                    <SelectItem value="bookmark">
+                      <span className="flex items-center gap-2">
+                        <Bookmark className="w-3.5 h-3.5 text-purple-500" />
+                        <span>Bookmarks</span>
+                        <span className="text-[10px] opacity-60 font-mono">
+                          ({bookmarks.length})
                         </span>
-                      )}
+                      </span>
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {collections.length > 0 && (
+              <div className="w-full sm:w-48 shrink-0">
+                <Select value={collectionId} onValueChange={setCollectionId}>
+                  <SelectTrigger className="w-full rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800 px-3.5 py-2.5 text-xs font-bold text-foreground">
+                    <SelectValue placeholder="All Collections" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl">
+                    <SelectItem value="all">
+                      All Collections ({collections.length})
+                    </SelectItem>
+                    {collections.map((c) => (
+                      <SelectItem key={c._id} value={c._id}>
+                        📁 {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+
+          {/* Right Side: Search Field */}
+          <div className="relative w-full sm:w-72 shrink-0">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search notes, code, fixes, tags..."
+              className="w-full rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800 pl-10 pr-4 py-2.5 text-xs text-foreground placeholder:text-zinc-400 outline-none focus:border-blue-500 dark:focus:border-blue-500 transition"
+            />
+          </div>
+        </div>
+
+        {/* Knowledge Entries Grid */}
+        {isLoading ? (
+          <div className="p-12 rounded-3xl bg-zinc-50 dark:bg-zinc-950/60 shadow-xs flex items-center justify-center border border-zinc-100 dark:border-zinc-800">
+            <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+          </div>
+        ) : filteredEntries.length > 0 || filteredBookmarks.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredEntries.map((entry) => {
+              const cfg =
+                LIBRARY_TYPE_CONFIG[entry.type] || LIBRARY_TYPE_CONFIG.note;
+              const Icon = cfg.icon;
+              const isPublic = entry.visibility === "public";
+              const isUnlisted = entry.visibility === "unlisted";
+
+              return (
+                <div
+                  key={entry._id}
+                  className="group p-5 rounded-3xl bg-zinc-50/70 dark:bg-zinc-950/70 shadow-xs border border-zinc-200/60 dark:border-zinc-800/80 flex flex-col justify-between gap-4 hover:border-blue-500/40 dark:hover:border-blue-500/30 hover:shadow-md transition-all"
+                >
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${cfg.color}`}
+                      >
+                        <Icon className="w-3 h-3" />
+                        <span>{cfg.label}</span>
+                      </span>
+
+                      <div className="flex items-center gap-1.5 text-zinc-400 text-[11px]">
+                        {isPublic ? (
+                          <span
+                            className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400"
+                            title="Publicly accessible"
+                          >
+                            <Globe2 size={13} />
+                            <span className="text-[10px] font-bold">
+                              Public
+                            </span>
+                          </span>
+                        ) : isUnlisted ? (
+                          <span
+                            className="inline-flex items-center gap-1 text-amber-500"
+                            title="Unlisted link"
+                          >
+                            <EyeOff size={13} />
+                            <span className="text-[10px] font-bold">
+                              Unlisted
+                            </span>
+                          </span>
+                        ) : (
+                          <span
+                            className="inline-flex items-center gap-1 text-zinc-400"
+                            title="Private knowledge"
+                          >
+                            <Lock size={13} />
+                            <span className="text-[10px] font-bold">
+                              Private
+                            </span>
+                          </span>
+                        )}
+                      </div>
                     </div>
+
+                    <h4 className="font-extrabold text-sm text-foreground leading-snug line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      {entry.title}
+                    </h4>
+
+                    {entry.content && (
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed font-normal">
+                        {entry.content
+                          .replace(/[#`*_\-\[\]]/g, "")
+                          .slice(0, 140)}
+                      </p>
+                    )}
+
+                    {entry.tags && entry.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 pt-1">
+                        {entry.tags.slice(0, 3).map((tag, idx) => (
+                          <span
+                            key={idx}
+                            className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 bg-zinc-200/60 dark:bg-zinc-800/80 px-2 py-0.5 rounded-md"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                        {entry.tags.length > 3 && (
+                          <span className="text-[10px] text-zinc-400 font-semibold">
+                            +{entry.tags.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
 
-                  <h4 className="font-extrabold text-sm text-foreground leading-snug line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {entry.title}
-                  </h4>
-
-                  {entry.content && (
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed font-normal">
-                      {entry.content.replace(/[#`*_\-\[\]]/g, "").slice(0, 140)}
-                    </p>
-                  )}
-
-                  {entry.tags && entry.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 pt-1">
-                      {entry.tags.slice(0, 3).map((tag, idx) => (
-                        <span
-                          key={idx}
-                          className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/80 px-2 py-0.5 rounded-md"
+                  <div className="pt-3 border-t border-zinc-200/60 dark:border-zinc-800/80 flex items-center justify-between gap-2 text-xs">
+                    {isOwnProfile ? (
+                      <>
+                        <Link
+                          href={`/library/edit/${entry._id}`}
+                          className="inline-flex items-center gap-1 font-bold text-zinc-600 dark:text-zinc-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
                         >
-                          #{tag}
-                        </span>
-                      ))}
-                      {entry.tags.length > 3 && (
-                        <span className="text-[10px] text-zinc-400 font-semibold">
-                          +{entry.tags.length - 3}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between gap-2 text-xs">
-                  {isOwnProfile ? (
-                    <>
+                          <Edit3 size={13} />
+                          <span>Edit</span>
+                        </Link>
+                        <Link
+                          href={
+                            isPublic && entry.slug
+                              ? `/${user?.username}/${entry.slug}`
+                              : `/library`
+                          }
+                          className="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                          <span>Open</span>
+                          <ChevronRight size={14} />
+                        </Link>
+                      </>
+                    ) : (
                       <Link
-                        href={`/library/edit/${entry._id}`}
-                        className="inline-flex items-center gap-1 font-bold text-zinc-600 dark:text-zinc-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+                        href={`/${user?.username}/${entry.slug}`}
+                        className="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline ml-auto"
                       >
-                        <Edit3 size={13} />
-                        <span>Edit</span>
-                      </Link>
-                      <Link
-                        href={
-                          isPublic && entry.slug
-                            ? `/${user?.username}/${entry.slug}`
-                            : `/library`
-                        }
-                        className="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline"
-                      >
-                        <span>Open</span>
+                        <span>Read Note</span>
                         <ChevronRight size={14} />
                       </Link>
-                    </>
-                  ) : (
-                    <Link
-                      href={`/${user?.username}/${entry.slug}`}
-                      className="inline-flex items-center gap-1 font-bold text-blue-600 dark:text-blue-400 hover:underline ml-auto"
-                    >
-                      <span>Read Note</span>
-                      <ChevronRight size={14} />
-                    </Link>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+
+            {filteredBookmarks.map((b) => (
+              <a
+                key={b._id}
+                href={b.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group p-5 rounded-3xl bg-zinc-50/70 dark:bg-zinc-950/70 shadow-xs border border-zinc-200/60 dark:border-zinc-800/80 flex flex-col justify-between gap-4 hover:border-purple-500/40 hover:shadow-md transition-all"
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                      <Bookmark className="w-3 h-3" />
+                      <span>Bookmark</span>
+                    </span>
+                    <span className="text-[11px] font-semibold text-zinc-400 truncate max-w-30">
+                      {b.domain}
+                    </span>
+                  </div>
+
+                  <h4 className="font-extrabold text-sm text-foreground leading-snug line-clamp-2 group-hover:text-purple-600 transition-colors">
+                    {b.title}
+                  </h4>
+
+                  {b.description && (
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed font-normal">
+                      {b.description}
+                    </p>
                   )}
                 </div>
-              </div>
-            );
-          })}
 
-          {filteredBookmarks.map((b) => (
-            <a
-              key={b._id}
-              href={b.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group p-5 rounded-3xl bg-white dark:bg-zinc-900 shadow-sm border border-zinc-200/60 dark:border-zinc-800/80 flex flex-col justify-between gap-4 hover:border-purple-500/40 hover:shadow-md transition-all"
-            >
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-                    <Bookmark className="w-3 h-3" />
-                    <span>Bookmark</span>
-                  </span>
-                  <span className="text-[11px] font-semibold text-zinc-400 truncate max-w-30">
-                    {b.domain}
-                  </span>
+                <div className="pt-3 border-t border-zinc-200/60 dark:border-zinc-800/80 flex items-center justify-between text-xs font-bold text-purple-600 dark:text-purple-400">
+                  <span>Open Link</span>
+                  <ExternalLink size={13} />
                 </div>
-
-                <h4 className="font-extrabold text-sm text-foreground leading-snug line-clamp-2 group-hover:text-purple-600 transition-colors">
-                  {b.title}
-                </h4>
-
-                {b.description && (
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed font-normal">
-                    {b.description}
-                  </p>
-                )}
-              </div>
-
-              <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between text-xs font-bold text-purple-600 dark:text-purple-400">
-                <span>Open Link</span>
-                <ExternalLink size={13} />
-              </div>
-            </a>
-          ))}
-        </div>
-      ) : (
-        <div className="p-12 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-sm text-center flex flex-col items-center gap-3 border border-zinc-100 dark:border-zinc-800">
-          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-            <BookMarked className="w-6 h-6" />
+              </a>
+            ))}
           </div>
-          <h3 className="font-extrabold text-base text-foreground">
-            {query
-              ? "No matching notes found"
-              : isOwnProfile
-                ? "Your Library is Empty"
-                : "No Public Notes Yet"}
-          </h3>
-          <p className="text-xs text-zinc-500 max-w-sm">
-            {query
-              ? "Try adjusting your search terms or filters to find what you're looking for."
-              : isOwnProfile
-                ? "Save code snippets, debug solutions, useful commands and guides so you never lose them again."
-                : `@${user?.username} hasn't published any public notes or code snippets yet.`}
-          </p>
-          {isOwnProfile && (
-            <Link
-              href="/library/new"
-              className="mt-2 px-6 py-2.5 rounded-full bg-blue-600 text-white text-xs font-bold shadow-md shadow-blue-500/25 hover:bg-blue-700 transition-all active:scale-95"
-            >
-              Create your first note
-            </Link>
-          )}
-        </div>
-      )}
+        ) : (
+          <div className="py-12 px-6 text-center flex flex-col items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+              <BookMarked className="w-6 h-6" />
+            </div>
+            <h3 className="font-extrabold text-base text-foreground">
+              {query
+                ? "No matching notes found"
+                : isOwnProfile
+                  ? "Your Library is Empty"
+                  : "No Public Notes Yet"}
+            </h3>
+            <p className="text-xs text-zinc-500 max-w-sm">
+              {query
+                ? "Try adjusting your search terms or filters to find what you're looking for."
+                : isOwnProfile
+                  ? "Save code snippets, debug solutions, useful commands and guides so you never lose them again."
+                  : `@${user?.username} hasn't published any public notes or code snippets yet.`}
+            </p>
+            {isOwnProfile && (
+              <Link
+                href="/library/new"
+                className="mt-2 px-6 py-2.5 rounded-full bg-blue-600 text-white text-xs font-bold shadow-md shadow-blue-500/25 hover:bg-blue-700 transition-all active:scale-95"
+              >
+                Create your first note
+              </Link>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

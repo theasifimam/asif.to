@@ -20,7 +20,7 @@ import Link from "next/link";
 import { useGetDashboardStatsQuery } from "@/redux/services/dashboardApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasPermission } from "@/lib/permissions";
-import { kanbanApi } from "@/lib/api";
+import { Button } from "@/components/ui/button";
 
 const ICON_MAP = {
   Users,
@@ -34,10 +34,9 @@ const ICON_MAP = {
 const STAT_THEMES = {
   // Course Reads / Engagement -> Light Sky Blue / Deep Navy Tint
   BookOpen: {
-    bg: "bg-sky-50/75 dark:bg-[#0c1524]",
-    border: "border-sky-200/70 dark:border-sky-900/40",
-    borderHover: "hover:border-sky-300 dark:hover:border-sky-600/60",
-    glow: "from-sky-400/20 via-sky-400/5 to-transparent",
+    bg: "bg-white dark:bg-[#121215]",
+    border: "border-zinc-200/80 dark:border-zinc-800",
+    borderHover: "hover:border-zinc-300 dark:hover:border-zinc-700",
     iconContainer:
       "bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300 border border-sky-200/80 dark:border-sky-500/30",
     trendBadge:
@@ -45,10 +44,9 @@ const STAT_THEMES = {
   },
   // Active Courses / Curriculum -> Light Mint Emerald / Deep Forest Tint
   GraduationCap: {
-    bg: "bg-emerald-50/75 dark:bg-[#0a1a14]",
-    border: "border-emerald-200/70 dark:border-emerald-900/40",
-    borderHover: "hover:border-emerald-300 dark:hover:border-emerald-600/60",
-    glow: "from-emerald-400/20 via-emerald-400/5 to-transparent",
+    bg: "bg-white dark:bg-[#121215]",
+    border: "border-zinc-200/80 dark:border-zinc-800",
+    borderHover: "hover:border-zinc-300 dark:hover:border-zinc-700",
     iconContainer:
       "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-500/30",
     trendBadge:
@@ -56,10 +54,9 @@ const STAT_THEMES = {
   },
   // Avg Completion Rate / Performance -> Light Warm Amber / Deep Amber Tint
   TrendingUp: {
-    bg: "bg-amber-50/75 dark:bg-[#1a1308]",
-    border: "border-amber-200/70 dark:border-amber-900/40",
-    borderHover: "hover:border-amber-300 dark:hover:border-amber-600/60",
-    glow: "from-amber-400/20 via-amber-400/5 to-transparent",
+    bg: "bg-white dark:bg-[#121215]",
+    border: "border-zinc-200/80 dark:border-zinc-800",
+    borderHover: "hover:border-zinc-300 dark:hover:border-zinc-700",
     iconContainer:
       "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300 border border-amber-200/80 dark:border-amber-500/30",
     trendBadge:
@@ -67,10 +64,9 @@ const STAT_THEMES = {
   },
   // Enrolled Learners / Community -> Light Soft Purple / Deep Violet Tint
   Users: {
-    bg: "bg-purple-50/75 dark:bg-[#140d22]",
-    border: "border-purple-200/70 dark:border-purple-900/40",
-    borderHover: "hover:border-purple-300 dark:hover:border-purple-600/60",
-    glow: "from-purple-400/20 via-purple-400/5 to-transparent",
+    bg: "bg-white dark:bg-[#121215]",
+    border: "border-zinc-200/80 dark:border-zinc-800",
+    borderHover: "hover:border-zinc-300 dark:hover:border-zinc-700",
     iconContainer:
       "bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300 border border-purple-200/80 dark:border-purple-500/30",
     trendBadge:
@@ -79,10 +75,9 @@ const STAT_THEMES = {
 };
 
 const DEFAULT_STAT_THEME = {
-  bg: "bg-sky-50/75 dark:bg-[#0c1524]",
-  border: "border-sky-200/70 dark:border-sky-900/40",
-  borderHover: "hover:border-sky-300 dark:hover:border-sky-600/60",
-  glow: "from-sky-400/20 via-sky-400/5 to-transparent",
+  bg: "bg-white dark:bg-[#121215]",
+  border: "border-zinc-200/80 dark:border-zinc-800",
+  borderHover: "hover:border-zinc-300 dark:hover:border-zinc-700",
   iconContainer:
     "bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300 border border-sky-200/80 dark:border-sky-500/30",
   trendBadge:
@@ -106,12 +101,17 @@ export default function DashboardPage() {
             const { cards = [], columns = [] } = detailRes.data.data;
             const pending = cards.filter((card) => {
               const colId = String(
-                typeof card.column === "object" ? card.column?._id : card.column
+                typeof card.column === "object"
+                  ? card.column?._id
+                  : card.column,
               );
               const colObj = columns.find(
-                (c) => String(c._id || c.id) === colId
+                (c) => String(c._id || c.id) === colId,
               );
-              if (colObj && /done|published|complete/i.test(colObj.name || "")) {
+              if (
+                colObj &&
+                /done|published|complete/i.test(colObj.name || "")
+              ) {
                 return false;
               }
               return !card.completed;
@@ -205,10 +205,10 @@ export default function DashboardPage() {
   );
 
   const userName =
-    user?.fullName || user?.name || user?.username || "Asif";
+    user?.fullName || user?.name || user?.username || "Asif Imam";
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-6 sm:gap-8 p-4 font-sans text-zinc-800 dark:text-zinc-300 sm:p-6 md:p-8 lg:p-10">
+    <div className="mx-auto flex max-w-7xl flex-col gap-2 sm:gap-1 p-4 font-sans text-zinc-800 dark:text-zinc-300 sm:p-6 md:p-8 lg:p-10">
       {/* Plain Header with Welcome Heading & Top-Right Buttons */}
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
@@ -216,44 +216,47 @@ export default function DashboardPage() {
             Creator Dashboard
           </p>
 
-          <h1 className="mt-1 text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-zinc-950 dark:text-white">
-            Welcome back, {userName}! 👋
+          <h1 className="mt-1 tracking-tight">
+            <span className="block text-3xl sm:text-4xl md:text-5xl font-black text-zinc-950 dark:text-white">
+              Welcome back,
+            </span>
+            <span className="block text-2xl sm:text-3xl md:text-4xl font-extrabold text-blue-600 dark:text-blue-400 mt-1">
+              {userName}! 👋
+            </span>
           </h1>
 
           <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-500 dark:text-zinc-400">
-            Here is your platform roadmap, course analytics, and planner status for today.
+            Here is your platform roadmap, course analytics, and planner status
+            for today.
           </p>
         </div>
 
         {/* Quick Action Buttons at Top Right */}
         <div className="flex flex-wrap items-center gap-2.5">
-          <Link
-            href="/courses"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-blue-600 px-4 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-all cursor-pointer"
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>Manage Courses</span>
-          </Link>
-          <Link
-            href="/articles"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-zinc-200/80 bg-white px-4 text-xs font-bold text-zinc-700 shadow-xs hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 transition-all cursor-pointer"
-          >
-            <PenSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <span>Write Articles</span>
-          </Link>
-          <Link
-            href="/quiz"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-zinc-200/80 bg-white px-4 text-xs font-bold text-zinc-700 shadow-xs hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 transition-all cursor-pointer"
-          >
-            <BrainCircuit className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-            <span>Quiz Builder</span>
-          </Link>
+          <Button asChild size="sm">
+            <Link href="/courses">
+              <BookOpen className="w-4 h-4" />
+              <span>Manage Courses</span>
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href="/articles">
+              <PenSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span>Write Articles</span>
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href="/quiz">
+              <BrainCircuit className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              <span>Quiz Builder</span>
+            </Link>
+          </Button>
         </div>
       </header>
 
       {/* Tasks Left in Planner Section */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
+      <section className="space-y-2 mt-3">
+        <div className="flex items-center justify-between gap-1">
           <div className="flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
               <ListTodo className="w-4 h-4" />
@@ -276,12 +279,12 @@ export default function DashboardPage() {
         </div>
 
         {plannerLoading ? (
-          <div className="flex items-center gap-2 text-xs text-zinc-400 font-semibold py-2">
+          <div className="flex items-center gap-1 text-xs text-zinc-400 font-semibold py-2">
             <span className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
             Fetching planner tasks...
           </div>
         ) : plannerTasks.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1">
             {plannerTasks.slice(0, 3).map((task) => (
               <Link
                 key={task._id || task.id}
@@ -318,7 +321,7 @@ export default function DashboardPage() {
       </section>
 
       {/* Bento Metric Cards Grid */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-1">
         {visibleStats.map((stat, i) => {
           const StatIcon = ICON_MAP[stat.icon] || BookOpen;
           const theme = STAT_THEMES[stat.icon] || DEFAULT_STAT_THEME;
@@ -332,13 +335,8 @@ export default function DashboardPage() {
               className="relative group"
             >
               <div
-                className={`relative flex min-h-42 flex-col justify-between overflow-hidden p-6 rounded-[28px] sm:rounded-4xl border shadow-xs transition-all duration-300 ${theme.bg} ${theme.border} ${theme.borderHover} hover:shadow-xl hover:-translate-y-0.5`}
+                className={`relative flex min-h-42 flex-col justify-between overflow-hidden p-6 rounded-[28px] sm:rounded-4xl border shadow-xs transition-all duration-300 ${theme.bg} ${theme.border} ${theme.borderHover} hover:shadow-md hover:-translate-y-0.5`}
               >
-                {/* Ultra-minimal ambient corner glow */}
-                <div
-                  className={`pointer-events-none absolute -top-12 -right-12 h-32 w-32 rounded-full bg-linear-to-br ${theme.glow} blur-2xl transition-opacity duration-300 group-hover:opacity-100 opacity-60`}
-                />
-
                 <div className="relative z-10 flex items-center justify-between gap-2 mb-3">
                   <div
                     className={`flex h-10 w-10 items-center justify-center rounded-2xl shadow-xs transition-transform duration-200 group-hover:scale-105 ${theme.iconContainer}`}
@@ -487,9 +485,9 @@ export default function DashboardPage() {
       </section>
 
       {/* Bento Lower Grid: Top Courses & Technology Stack */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 sm:gap-1 mt-1 sm:mt-4">
         {/* Top Performing Courses (Bento Wide Card) */}
-        <section className="lg:col-span-8 flex flex-col gap-4">
+        <section className="lg:col-span-8 flex flex-col gap-1">
           <div className="flex items-center justify-between pb-2">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
@@ -508,7 +506,7 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          <div className="flex flex-col gap-3.5">
+          <div className="flex flex-col gap-1">
             {(dashboardData?.topCourses || []).map((course, i) => (
               <div
                 key={course.id}
@@ -565,9 +563,9 @@ export default function DashboardPage() {
         </section>
 
         {/* Technology Stack & Platform Ecosystem (Bento Column) */}
-        <section className="lg:col-span-4 flex flex-col gap-4">
+        <section className="lg:col-span-4 flex flex-col gap-1">
           <div className="pb-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
                 <BarChart3 className="w-4 h-4" />
               </div>

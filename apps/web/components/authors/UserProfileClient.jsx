@@ -270,26 +270,17 @@ export default function UserProfileClient({ username }) {
           />
         ) : (
           <>
-            {/* User Profile Hero Card */}
+            {/* User Profile Hero Card with Integrated Pill Stats */}
             <ProfileHero
               user={user}
               isOwnProfile={isOwnProfile}
               onOpenLogout={() => setIsLogoutModalOpen(true)}
-            />
-
-            {/* Quick Stats Grid */}
-            <ProfileStats
-              user={user}
               streak={user?.streak || 0}
               libraryCount={libraryEntries.length + libraryBookmarks.length || 0}
               completedCoursesCount={completedCourses.length || 0}
               certificatesCount={certificates.length || 0}
-              masteryLevel={user?.masteryLevel || 1}
               onSelectTab={handleTabChange}
             />
-
-            {/* ASIF_COURSE_LEARNING_FLOW_V1:profile-summary */}
-            {isOwnProfile && <ProfileCourseProgressSummary />}
 
             {/* Profile Tabs Navigation */}
             <section className="space-y-4">

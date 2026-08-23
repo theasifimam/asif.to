@@ -35,6 +35,8 @@ import { useScrollNavVisible } from "@/components/layout/ScrollNavProvider";
 import GlobalSearch from "@/components/search/GlobalSearch";
 import { signOut as oauthSignOut, useSession } from "next-auth/react";
 import AuthUserMenu from "@/components/auth/AuthUserMenu";
+import { Button } from "@/components/ui/button";
+import { getImageUrl } from "@/lib/config";
 // ASIF_COURSE_LEARNING_FLOW_V1:header-progress-import
 import ContinueCoursePill from "@/components/layout/ContinueCoursePill";
 
@@ -451,7 +453,7 @@ export default function Header() {
                 >
                   <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[11px] flex items-center justify-center font-black shadow-sm overflow-hidden shrink-0 relative">
                     {user.avatar ? (
-                      <img src={user.avatar} alt={user.fullName || "User"} className="w-full h-full object-cover" />
+                      <img src={getImageUrl(user.avatar)} alt={user.fullName || "User"} className="w-full h-full object-cover" />
                     ) : (
                       user.fullName?.[0]?.toUpperCase() || "U"
                     )}
@@ -460,18 +462,20 @@ export default function Header() {
                 </Link>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Link
-                    href={`/login?callbackUrl=${encodeURIComponent(pathname || "/")}`}
-                    className="px-3.5 h-9 flex items-center justify-center rounded-full text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xs font-bold transition-all"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href={`/signup?callbackUrl=${encodeURIComponent(pathname || "/")}`}
-                    className="px-4 h-9 flex items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold active:scale-95 transition-all shadow-xs"
-                  >
-                    Sign Up
-                  </Link>
+                  <Button asChild variant="ghost" size="sm">
+                    <Link
+                      href={`/login?callbackUrl=${encodeURIComponent(pathname || "/")}`}
+                    >
+                      Sign In
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm">
+                    <Link
+                      href={`/signup?callbackUrl=${encodeURIComponent(pathname || "/")}`}
+                    >
+                      Sign Up
+                    </Link>
+                  </Button>
                 </div>
               )}
             </div>

@@ -70,6 +70,14 @@ self.onmessage = async ({ data }) => {
     const wasm = await project.readFile("program.wasm");
     const program = await sdk.Wasmer.fromFile(wasm);
     const instance = await program.entrypoint.run();
+    if (data.input) {
+      const stdin = instance.stdin?.getWriter();
+      if (stdin) {
+        const encoder = new TextEncoder();
+        await stdin.write(encoder.encode(data.input));
+        await stdin.close();
+      }
+    }
     const result = await instance.wait();
     self.postMessage({ type: "result", stdout: result.stdout || "", stderr: result.stderr || (result.ok ? "" : `Program exited with code ${result.code}.`) });
   } catch (error) {

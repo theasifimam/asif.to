@@ -1,7 +1,7 @@
 export const BROWSER_RUNTIME_CONFIG = {
   python: { label: "Python", file: "/main.py", worker: "/workers/python-runtime.mjs", loading: "Loading Python runtime...", note: "Python downloads only when you first press Run." },
   c: { label: "C", file: "/main.c", worker: "/workers/clang-runtime.mjs", loading: "Loading C compiler (large first download)...", note: "The browser Clang toolchain has a large one-time download." },
-  cpp: { label: "C++", file: "/main.cpp", worker: "/workers/cpp-runtime.js", workerType: "classic", loading: "Loading C++ runtime...", note: "The lightweight C++ interpreter downloads only when you press Run." },
+  cpp: { label: "C++", file: "/main.cpp", worker: "/workers/clang-runtime.mjs", loading: "Loading C++ compiler (large first download)...", note: "The browser Clang toolchain has a large one-time download." },
   java: { label: "Java", file: "/Main.java", iframe: "/runtimes/java.html", loading: "Loading Java runtime and compiler...", note: "The browser OpenJDK runtime has a large one-time download." },
 };
 

@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { getImageUrl } from "@/lib/config";
 import {
   Bookmark,
   ChevronDown,
@@ -32,8 +33,8 @@ export default function AuthUserMenu({ user }) {
         className="flex items-center gap-1 rounded-full bg-zinc-100 p-1 pr-2 text-xs font-bold transition hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700"
       >
         <img
-          src={user.image || "/logo.png"}
-          alt=""
+          src={getImageUrl(user.image || user.avatar || "/logo.png")}
+          alt={user.name || user.fullName || "User"}
           className="h-8 w-8 rounded-full object-cover"
         />
         <ChevronDown

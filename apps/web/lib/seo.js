@@ -4,13 +4,13 @@ const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://asif.to").replace(
 );
 
 const apiOrigin = (() => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (!apiUrl) return siteUrl;
+  const target = process.env.NEXT_PUBLIC_STORAGE_URL || process.env.NEXT_PUBLIC_API_URL;
+  if (!target) return siteUrl;
 
   try {
-    return new URL(apiUrl).origin;
+    return new URL(target).origin;
   } catch {
-    return siteUrl;
+    return target.replace(/\/$/, "");
   }
 })();
 

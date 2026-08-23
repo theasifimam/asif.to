@@ -16,6 +16,8 @@ async function getAuthor(username) {
   return body.data.user;
 }
 
+import { getImageUrl } from "@/lib/config";
+
 export async function generateMetadata({ params }) {
   const { username } = await params;
   if (username.toLowerCase() === "asif") return {
@@ -65,13 +67,7 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title: `${user.fullName} | asif.to`,
       description: description,
-      images: [
-        user.avatar
-          ? user.avatar.startsWith("http")
-            ? user.avatar
-            : `${process.env.NEXT_PUBLIC_STORAGE_URL}${user.avatar}`
-          : "/logo.jpeg",
-      ],
+      images: [getImageUrl(user.avatar || "/logo.jpeg")],
       type: "profile",
       username: user.username,
     },
@@ -79,13 +75,7 @@ export async function generateMetadata({ params }) {
       card: "summary_large_image",
       title: `${user.fullName} (@${user.username}) | asif.to`,
       description: user.bio || `Read articles by ${user.fullName} on asif.to.`,
-      images: [
-        user.avatar
-          ? user.avatar.startsWith("http")
-            ? user.avatar
-            : `${process.env.NEXT_PUBLIC_STORAGE_URL}${user.avatar}`
-          : "/logo.jpeg",
-      ],
+      images: [getImageUrl(user.avatar || "/logo.jpeg")],
     },
   };
 }

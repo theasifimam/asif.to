@@ -15,7 +15,10 @@ function excerpt(content = "") {
     .slice(0, 170);
 }
 
-export default function CheatsheetsClient({ initialCourses = [], initialCheatsheets = [] }) {
+export default function CheatsheetsClient({
+  initialCourses = [],
+  initialCheatsheets = [],
+}) {
   const [selectedTech, setSelectedTech] = useState("");
   const [search, setSearch] = useState("");
 
@@ -24,7 +27,9 @@ export default function CheatsheetsClient({ initialCourses = [], initialCheatshe
 
     // Map each course to a cheatsheet if it exists in the database
     const list = initialCourses.map((course) => {
-      const cheatsheet = initialCheatsheets.find((cs) => cs.techId === course.techId);
+      const cheatsheet = initialCheatsheets.find(
+        (cs) => cs.techId === course.techId,
+      );
       if (cheatsheet) {
         return {
           type: "present",
@@ -76,7 +81,9 @@ export default function CheatsheetsClient({ initialCourses = [], initialCheatshe
     // Filter by search query
     if (query) {
       filtered = filtered.filter((item) =>
-        `${item.title} ${item.content} ${(item.keywords || []).join(" ")}`.toLowerCase().includes(query)
+        `${item.title} ${item.content} ${(item.keywords || []).join(" ")}`
+          .toLowerCase()
+          .includes(query),
       );
     }
 
@@ -93,7 +100,8 @@ export default function CheatsheetsClient({ initialCourses = [], initialCheatshe
           Coding cheatsheets built for fast reading and live practice.
         </h1>
         <p className="mt-4 max-w-2xl text-sm font-medium leading-6 text-blue-100 sm:text-base">
-          Each cheatsheet is a focused article with searchable explanations and code blocks you can open directly in the interactive editor.
+          Each cheatsheet is a focused article with searchable explanations and
+          code blocks you can open directly in the interactive editor.
         </p>
       </section>
 
@@ -154,7 +162,12 @@ export default function CheatsheetsClient({ initialCourses = [], initialCheatshe
                     {tech?.name || item.techId}
                   </span>
                   {!isComingSoon ? (
-                    <SaveButton itemId={item.id} itemType="cheatsheet" label="Save" size="sm" />
+                    <SaveButton
+                      itemId={item.id}
+                      itemType="cheatsheet"
+                      label="Save"
+                      size="sm"
+                    />
                   ) : (
                     <span className="rounded-full bg-zinc-200/60 dark:bg-zinc-800 px-2.5 py-0.5 text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                       Coming Soon
@@ -168,7 +181,9 @@ export default function CheatsheetsClient({ initialCourses = [], initialCheatshe
                   <BookOpen className="mt-6 h-7 w-7 text-blue-500" />
                 )}
 
-                <h2 className="mt-4 text-xl font-black leading-tight">{item.title}</h2>
+                <h2 className="mt-4 text-xl font-black leading-tight">
+                  {item.title}
+                </h2>
 
                 <p className="mt-3 line-clamp-3 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
                   {item.seoDescription ||
@@ -198,7 +213,9 @@ export default function CheatsheetsClient({ initialCourses = [], initialCheatshe
       ) : (
         <div className="mt-6 rounded-3xl border border-zinc-200 bg-white py-20 text-center dark:border-zinc-800 dark:bg-zinc-900">
           <FileText className="mx-auto h-10 w-10 text-zinc-300" />
-          <p className="mt-3 text-sm font-bold text-zinc-500">No cheatsheets match your search.</p>
+          <p className="mt-3 text-sm font-bold text-zinc-500">
+            No cheatsheets match your search.
+          </p>
         </div>
       )}
     </main>

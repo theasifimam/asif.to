@@ -146,7 +146,7 @@ function BrowserRuntimeWorkspace({
     setProgress(null);
     setStatus("loading");
     setStatusText(config.loading);
-    if (language === "c" && !window.crossOriginIsolated) {
+    if (["c", "cpp"].includes(language) && !window.crossOriginIsolated) {
       finish({
         type: "error",
         error: `${config.label} needs an isolated browser page to run its WebAssembly compiler. Open this editor from /play, /run, /playground, or /practice and reload once.`,

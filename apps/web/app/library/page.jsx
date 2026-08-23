@@ -279,19 +279,10 @@ export default function LibraryPage() {
             )}
           </aside>
           <div>
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row ">
-              <label className="flex flex-1 items-center gap-2 rounded-full bg-white px-4 py-3 shadow-sm dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 ">
-                <Search size={16} className="text-zinc-400" />
-                <input
-                  className="w-full bg-transparent text-sm outline-none"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search your library"
-                />
-              </label>
-              <div className="w-full sm:w-48 shrink-0">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row items-stretch sm:items-center justify-between">
+              <div className="w-full sm:w-52 shrink-0">
                 <Select value={filter} onValueChange={setFilter}>
-                  <SelectTrigger className="w-full rounded-full bg-white px-4 py-3 text-sm dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 font-semibold">
+                  <SelectTrigger className="w-full rounded-2xl bg-white px-4 py-2.5 text-xs dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-800 font-bold">
                     <SelectValue placeholder="All types" />
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl">
@@ -304,6 +295,15 @@ export default function LibraryPage() {
                   </SelectContent>
                 </Select>
               </div>
+              <label className="flex flex-1 items-center gap-2 rounded-2xl bg-white px-4 py-2.5 shadow-xs dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-800">
+                <Search size={16} className="text-zinc-400" />
+                <input
+                  className="w-full bg-transparent text-xs outline-none"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search your library..."
+                />
+              </label>
             </div>
             {isLoading ? (
               <p className="p-10 text-center text-zinc-500">

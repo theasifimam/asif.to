@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { BookOpen, Sparkles } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 export default function ProfileQuizTab({
   quizAttempts = [],
@@ -50,22 +51,20 @@ export default function ProfileQuizTab({
                     </Link>
                   )}
                 </div>
-                <label className="flex items-center gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-300 cursor-pointer">
+                <div className="flex items-center gap-2.5 text-xs font-bold text-zinc-600 dark:text-zinc-300">
                   <span>Public score</span>
-                  <input
-                    type="checkbox"
+                  <Switch
                     checked={attempt.visibility === "public"}
                     disabled={updatingPrivacy}
-                    onChange={(event) =>
+                    onCheckedChange={(checked) =>
                       onChangeScorePrivacy &&
                       onChangeScorePrivacy(
                         attempt._id,
-                        event.target.checked ? "public" : "private",
+                        checked ? "public" : "private",
                       )
                     }
-                    className="h-4 w-4 accent-blue-600"
                   />
-                </label>
+                </div>
               </div>
             ))}
           </div>
