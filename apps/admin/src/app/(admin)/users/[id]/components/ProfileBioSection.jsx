@@ -7,7 +7,7 @@ export default function ProfileBioSection({ user }) {
   return (
     <section className="space-y-3">
       <SectionHeader title="Biography & Narrative" />
-      <div className="rounded-[28px] sm:rounded-[32px] bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800 p-5 sm:p-6 shadow-xs">
+      <div className="rounded-[28px] sm:rounded-4xl bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800 p-5 sm:p-6 shadow-xs">
         <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed font-medium">
           {user.bio || "No public biography provided for this user profile."}
         </p>

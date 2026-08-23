@@ -25,7 +25,7 @@ export default function ProfileClearanceSidebar({
       {/* System Clearance Box */}
       <section className="space-y-3">
         <SectionHeader title="System Clearance" />
-        <div className="rounded-[28px] sm:rounded-[32px] bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800 p-5 sm:p-6 shadow-xs space-y-4">
+        <div className="rounded-[28px] sm:rounded-4xl bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800 p-5 sm:p-6 shadow-xs space-y-4">
           <div className="space-y-2">
             <label className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
               Clearance Level
@@ -47,7 +47,7 @@ export default function ProfileClearanceSidebar({
               <SelectTrigger className="h-10 rounded-full bg-zinc-50 dark:bg-zinc-900 border-zinc-200/80 dark:border-zinc-800 font-bold text-xs focus:ring-0 px-4">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl border-zinc-200 dark:border-zinc-800 z-[1000]">
+              <SelectContent className="rounded-2xl border-zinc-200 dark:border-zinc-800 z-1000">
                 <SelectItem value="reader">Reader</SelectItem>
                 <SelectItem value="author">Author</SelectItem>
                 <SelectItem value="editor">Editor</SelectItem>
@@ -124,7 +124,7 @@ export default function ProfileClearanceSidebar({
       {/* Account Security Controls / Danger Zone */}
       <section className="space-y-3">
         <SectionHeader title="Account Security Controls" />
-        <div className="rounded-[28px] sm:rounded-[32px] bg-white dark:bg-[#121215] border border-rose-200/80 dark:border-rose-900/30 p-5 sm:p-6 shadow-xs space-y-3">
+        <div className="rounded-[28px] sm:rounded-4xl bg-white dark:bg-[#121215] border border-rose-200/80 dark:border-rose-900/30 p-5 sm:p-6 shadow-xs space-y-3">
           {isOwnProfile ? (
             <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200/80 dark:border-zinc-800 text-center text-[10px] font-bold text-zinc-400 leading-relaxed uppercase tracking-wider">
               Self-Account Protection Active. Account suspension & deletion are

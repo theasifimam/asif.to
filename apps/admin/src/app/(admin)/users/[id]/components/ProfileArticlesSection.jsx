@@ -18,13 +18,13 @@ export default function ProfileArticlesSection({ recentArticles }) {
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04 }}
-              className="group rounded-[24px] sm:rounded-[28px] bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800 p-4 sm:p-4.5 shadow-xs hover:border-blue-500/80 transition-all cursor-pointer flex items-center gap-4"
+              className="group rounded-3xl sm:rounded-[28px] bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800 p-4 sm:p-4.5 shadow-xs hover:border-blue-500/80 transition-all cursor-pointer flex items-center gap-4"
             >
               <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 shrink-0 border border-zinc-200/60 dark:border-zinc-800">
                 <img
                   src={article.image}
                   alt={article.title || ""}
-                  className="w-full h-full object-cover grayscale-[15%] group-hover:grayscale-0 transition-all duration-300"
+                  className="w-full h-full object-cover grayscale-15 group-hover:grayscale-0 transition-all duration-300"
                 />
               </div>
               <div className="flex-1 min-w-0 space-y-1">
