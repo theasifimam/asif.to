@@ -19,19 +19,19 @@ function RowAvatar({ user, online = false }) {
         <img
           src={source}
           alt=""
-          className="h-10 w-10 shrink-0 rounded-xl object-cover"
+          className="h-11 w-11 shrink-0 rounded-2xl object-cover shadow-2xs border border-zinc-200/60 dark:border-zinc-800"
         />
       ) : (
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-200 text-xs font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
-          {user?.fullName?.[0] || <UserRound size={16} />}
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-zinc-200 text-sm font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+          {user?.fullName?.[0] || <UserRound size={18} />}
         </span>
       )}
       {online && (
         <span
-          className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full border-2 border-white bg-emerald-500 dark:border-zinc-950"
+          className="absolute -bottom-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-white bg-emerald-500 dark:border-zinc-950 shadow-2xs"
           title="Online"
         >
-          <span className="h-1 w-1 rounded-full bg-white" />
+          <span className="h-1.5 w-1.5 rounded-full bg-white" />
         </span>
       )}
     </div>
@@ -73,27 +73,27 @@ export default function ConversationRow({
   return (
     <button
       onClick={onClick}
-      className={`group relative mb-1.5 flex w-full items-center gap-3 rounded-2xl p-3 text-left border transition-all duration-150 cursor-pointer ${rowStyle}`}
+      className={`group relative mb-1.5 flex w-full items-center gap-3.5 rounded-2xl p-3 sm:p-3.5 text-left border transition-all duration-150 cursor-pointer ${rowStyle}`}
     >
       {/* Left subtle unread accent vertical indicator bar */}
       {hasUnread && !isSelected && (
-        <span className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-blue-600 dark:bg-blue-500 shadow-xs" />
+        <span className="absolute left-0 top-3.5 bottom-3.5 w-1 rounded-r-full bg-blue-600 dark:bg-blue-500 shadow-xs" />
       )}
 
       {conversation.type === "direct" ? (
         <RowAvatar user={member} online={online} />
       ) : (
         <span
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-colors ${
             hasUnread
               ? "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300"
               : "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400"
           }`}
         >
           {conversation.type === "discussion" ? (
-            <Link2 size={17} />
+            <Link2 size={19} />
           ) : (
-            <Hash size={17} />
+            <Hash size={19} />
           )}
         </span>
       )}
@@ -101,10 +101,10 @@ export default function ConversationRow({
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <p
-            className={`truncate text-xs ${
+            className={`truncate text-sm sm:text-base ${
               hasUnread
                 ? "font-black text-zinc-950 dark:text-white"
-                : "font-bold text-zinc-800 dark:text-zinc-200"
+                : "font-bold text-zinc-900 dark:text-zinc-100"
             }`}
           >
             {conversation.type === "discussion"
@@ -112,26 +112,26 @@ export default function ConversationRow({
               : conversationName(conversation, userId)}
           </p>
           <span
-            className={`ml-auto shrink-0 text-[9px] ${
+            className={`ml-auto shrink-0 text-xs font-semibold ${
               hasUnread
-                ? "font-bold text-blue-600 dark:text-blue-400"
-                : "text-zinc-400"
+                ? "text-blue-600 dark:text-blue-400"
+                : "text-zinc-400 dark:text-zinc-500"
             }`}
           >
             {formatTime(conversation.lastMessageAt)}
           </span>
         </div>
 
-        <div className="mt-1 flex items-center gap-2">
+        <div className="mt-0.5 flex items-center gap-2">
           {isTyping ? (
-            <p className="truncate text-[10px] font-bold text-blue-600 dark:text-blue-400 animate-pulse">
+            <p className="truncate text-xs font-bold text-blue-600 dark:text-blue-400 animate-pulse">
               typing…
             </p>
           ) : (
             <p
-              className={`truncate text-[10.5px] ${
+              className={`truncate text-xs sm:text-sm leading-relaxed ${
                 hasUnread
-                  ? "font-semibold text-zinc-800 dark:text-zinc-200"
+                  ? "font-medium text-zinc-800 dark:text-zinc-200"
                   : "text-zinc-500 dark:text-zinc-400"
               }`}
             >
@@ -140,7 +140,7 @@ export default function ConversationRow({
           )}
 
           {hasUnread && (
-            <span className="ml-auto min-w-5 shrink-0 rounded-full bg-blue-600 dark:bg-blue-500 px-1.5 text-center text-[9px] font-black leading-5 text-white shadow-xs">
+            <span className="ml-auto min-w-5.5 h-5.5 shrink-0 rounded-full bg-blue-600 dark:bg-blue-500 px-2 flex items-center justify-center text-xs font-black text-white shadow-xs">
               {conversation.unreadCount}
             </span>
           )}
@@ -149,4 +149,3 @@ export default function ConversationRow({
     </button>
   );
 }
-

@@ -10,8 +10,45 @@ import {
   Linkedin,
   Github,
   Instagram,
+  ShieldCheck,
+  ShieldAlert,
+  Shield,
+  User as UserIcon,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage, Badge } from "@/components/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui";
+
+const ROLE_THEMES = {
+  super_admin: {
+    label: "Super Admin",
+    badge:
+      "bg-fuchsia-100/90 text-fuchsia-800 dark:bg-fuchsia-500/15 dark:text-fuchsia-200 border border-fuchsia-200/80 dark:border-fuchsia-500/30",
+    icon: ShieldCheck,
+  },
+  admin: {
+    label: "Admin",
+    badge:
+      "bg-rose-100/90 text-rose-800 dark:bg-rose-500/15 dark:text-rose-200 border border-rose-200/80 dark:border-rose-500/30",
+    icon: ShieldCheck,
+  },
+  editor: {
+    label: "Editor",
+    badge:
+      "bg-blue-100/90 text-blue-800 dark:bg-blue-500/15 dark:text-blue-200 border border-blue-200/80 dark:border-blue-500/30",
+    icon: ShieldAlert,
+  },
+  author: {
+    label: "Author",
+    badge:
+      "bg-purple-100/90 text-purple-800 dark:bg-purple-500/15 dark:text-purple-200 border border-purple-200/80 dark:border-purple-500/30",
+    icon: Shield,
+  },
+  reader: {
+    label: "Reader",
+    badge:
+      "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200/80 dark:border-zinc-700",
+    icon: UserIcon,
+  },
+};
 
 export default function ProfileHeroHeader({
   user,
@@ -20,63 +57,86 @@ export default function ProfileHeroHeader({
   statusConf,
   getInitials,
 }) {
-  return (
-    <header className="admin-surface relative overflow-hidden">
+  const theme =
+    ROLE_THEMES[user.role] ||
+    ROLE_THEMES[user.role?.toLowerCase()] ||
+    ROLE_THEMES.reader;
+  const RoleIcon = theme.icon;
 
-      {/* Profile Content Body */}
-      <div className="p-6 sm:p-8 md:p-10 relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
+  return (
+    <header className="rounded-4xl sm:rounded-[36px] bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800 p-5 sm:p-6 md:p-7 shadow-xs space-y-4">
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-5 sm:gap-6">
         {/* Avatar with Status Ring */}
-        <div className="relative shrink-0 group">
-          <Avatar className="h-28 w-28 shrink-0 overflow-hidden rounded-3xl border-4 border-white bg-zinc-100 shadow-sm transition-transform duration-200 group-hover:scale-[1.01] dark:border-zinc-900 dark:bg-zinc-950 sm:h-36 sm:w-36">
+        <div className="relative shrink-0">
+          <Avatar className="h-20 w-20 sm:h-24 sm:w-24 shrink-0 overflow-hidden rounded-3xl sm:rounded-[28px] border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 shadow-2xs">
             <AvatarImage src={avatarUrl || ""} className="object-cover" />
-            <AvatarFallback className="bg-zinc-100 text-3xl font-black text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 sm:text-4xl">
+            <AvatarFallback className="bg-zinc-100 text-2xl font-black text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
               {getInitials(user.fullName)}
             </AvatarFallback>
           </Avatar>
           <div
-            className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-4 border-white dark:border-zinc-900 ${statusConf.dot} shadow-md flex items-center justify-center`}
+            className={`absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full border-2 border-white dark:border-[#121215] ${statusConf.dot} shadow-2xs`}
             title={`Status: ${statusConf.label}`}
           />
         </div>
 
-        {/* Profile Information */}
-        <div className="flex-1 text-center md:text-left space-y-4 min-w-0">
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight truncate">
+        {/* Profile Details */}
+        <div className="flex-1 text-center md:text-left space-y-2 min-w-0">
+          {/* Name & Role Tag */}
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5">
+            <h1 className="text-2xl sm:text-3xl font-black font-outfit tracking-[-0.03em] text-zinc-950 dark:text-white leading-none truncate">
               {user.fullName}
             </h1>
-            <Badge
-              className={`${roleConf.bg} ${roleConf.color} ${roleConf.ring} ring-1 border-none rounded-full px-3.5 py-1 text-[11px] font-black uppercase tracking-widest`}
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-[10px] font-black uppercase tracking-wider ${theme.badge}`}
             >
-              {roleConf.label}
-            </Badge>
+              <RoleIcon className="h-3.5 w-3.5 shrink-0" />
+              <span>{theme.label}</span>
+            </span>
           </div>
 
-          {/* Metadata Pills */}
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-2.5 text-zinc-600 dark:text-zinc-400 font-bold text-xs">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100/80 dark:bg-zinc-800/60 border border-zinc-200/50 dark:border-zinc-700/50 truncate">
-              <Mail size={13} className="text-blue-500 shrink-0" />
+          {/* Clean Inline Metadata (No bulky pill borders) */}
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-3 gap-y-1 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+            <span className="inline-flex items-center gap-1.5">
+              <Mail
+                size={13}
+                className="text-zinc-400 dark:text-zinc-500 shrink-0"
+              />
               <span className="truncate">{user.email}</span>
-            </div>
-            {user.mNumber && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100/80 dark:bg-zinc-800/60 border border-zinc-200/50 dark:border-zinc-700/50">
-                <Phone size={13} className="text-blue-500 shrink-0" />
-                <span>{user.mNumber}</span>
-              </div>
-            )}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100/80 dark:bg-zinc-800/60 border border-zinc-200/50 dark:border-zinc-700/50 uppercase text-[10px] tracking-wider">
-              <MapPin size={13} className="text-blue-500 shrink-0" />
+            </span>
+            <span className="text-zinc-300 dark:text-zinc-700">•</span>
+            <span className="inline-flex items-center gap-1.5">
+              <MapPin
+                size={13}
+                className="text-zinc-400 dark:text-zinc-500 shrink-0"
+              />
               <span>{user.location || "Remote Node"}</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100/80 dark:bg-zinc-800/60 border border-zinc-200/50 dark:border-zinc-700/50">
-              <Globe size={13} className="text-blue-500 shrink-0" />
-              <span className="opacity-80">@{user.username}</span>
-            </div>
+            </span>
+            <span className="text-zinc-300 dark:text-zinc-700">•</span>
+            <span className="inline-flex items-center gap-1.5">
+              <Globe
+                size={13}
+                className="text-zinc-400 dark:text-zinc-500 shrink-0"
+              />
+              <span>@{user.username}</span>
+            </span>
+            {user.mNumber && (
+              <>
+                <span className="text-zinc-300 dark:text-zinc-700">•</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Phone
+                    size={13}
+                    className="text-zinc-400 dark:text-zinc-500 shrink-0"
+                  />
+                  <span>{user.mNumber}</span>
+                </span>
+              </>
+            )}
           </div>
 
-          {/* Social Links Row */}
+          {/* Minimalist Social Links */}
           {user.socials && Object.values(user.socials).some((link) => link) && (
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-1">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-1 pt-1 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
               {user.socials.twitter && (
                 <a
                   href={
@@ -86,7 +146,7 @@ export default function ProfileHeroHeader({
                   }
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/70 dark:hover:bg-zinc-700/70 border border-zinc-200/60 dark:border-zinc-700/60 transition-all shadow-xs"
+                  className="inline-flex items-center gap-1.5 hover:text-sky-500 transition-colors"
                 >
                   <Twitter size={13} className="text-sky-400" />
                   <span>Twitter</span>
@@ -101,7 +161,7 @@ export default function ProfileHeroHeader({
                   }
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/70 dark:hover:bg-zinc-700/70 border border-zinc-200/60 dark:border-zinc-700/60 transition-all shadow-xs"
+                  className="inline-flex items-center gap-1.5 hover:text-blue-600 transition-colors"
                 >
                   <Linkedin size={13} className="text-blue-500" />
                   <span>LinkedIn</span>
@@ -116,7 +176,7 @@ export default function ProfileHeroHeader({
                   }
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/70 dark:hover:bg-zinc-700/70 border border-zinc-200/60 dark:border-zinc-700/60 transition-all shadow-xs"
+                  className="inline-flex items-center gap-1.5 hover:text-emerald-600 transition-colors"
                 >
                   <Globe size={13} className="text-emerald-500" />
                   <span>Website</span>
@@ -131,11 +191,11 @@ export default function ProfileHeroHeader({
                   }
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/70 dark:hover:bg-zinc-700/70 border border-zinc-200/60 dark:border-zinc-700/60 transition-all shadow-xs"
+                  className="inline-flex items-center gap-1.5 hover:text-zinc-900 dark:hover:text-white transition-colors"
                 >
                   <Github
                     size={13}
-                    className="text-zinc-900 dark:text-zinc-100"
+                    className="text-zinc-700 dark:text-zinc-300"
                   />
                   <span>GitHub</span>
                 </a>
@@ -149,7 +209,7 @@ export default function ProfileHeroHeader({
                   }
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/70 dark:hover:bg-zinc-700/70 border border-zinc-200/60 dark:border-zinc-700/60 transition-all shadow-xs"
+                  className="inline-flex items-center gap-1.5 hover:text-pink-500 transition-colors"
                 >
                   <Instagram size={13} className="text-pink-500" />
                   <span>Instagram</span>
@@ -158,6 +218,28 @@ export default function ProfileHeroHeader({
             </div>
           )}
         </div>
+      </div>
+
+      {/* Biography & Narrative */}
+      <div className="pt-3.5 border-t border-zinc-100 dark:border-zinc-800/80 space-y-1.5">
+        <h2 className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
+          Biography & Narrative
+        </h2>
+        <p className="text-xs sm:text-sm font-medium text-zinc-700 dark:text-zinc-300 leading-relaxed">
+          {user.bio || "No public biography provided for this user profile."}
+        </p>
+        {user.expertise && user.expertise.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {user.expertise.map((exp) => (
+              <span
+                key={exp}
+                className="px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800/60 text-[10px] font-bold text-zinc-600 dark:text-zinc-400"
+              >
+                {exp}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </header>
   );

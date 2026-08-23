@@ -4,7 +4,7 @@ import ConversationRead from "../models/ConversationRead.js";
 import Message from "../models/Message.js";
 import Notification from "../models/Notification.js";
 import User from "../models/User.js";
-import MessageReaction from "../models/MessageReaction.js";
+import MessageReaction, { ALLOWED_REACTIONS } from "../models/MessageReaction.js";
 import MessagePin from "../models/MessagePin.js";
 import MessageAttachment from "../models/MessageAttachment.js";
 import AuditLog from "../models/AuditLog.js";
@@ -43,7 +43,7 @@ export const accessibleConversationFilter = (user) => ({
 });
 
 const senderFields = "fullName username avatar role";
-const REACTIONS = ["👍", "✅", "👀", "🎉"];
+const REACTIONS = ALLOWED_REACTIONS;
 
 async function hydrateMessages(messages) {
   if (!messages.length) return messages;

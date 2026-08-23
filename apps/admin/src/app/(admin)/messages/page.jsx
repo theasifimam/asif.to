@@ -22,10 +22,10 @@ function TypingAvatar({ user }) {
     <img
       src={source}
       alt=""
-      className="h-7 w-7 rounded-full object-cover shadow-xs border border-zinc-200/80 dark:border-zinc-800/80"
+      className="h-8 w-8 rounded-full object-cover shadow-xs border border-zinc-200/80 dark:border-zinc-800/80"
     />
   ) : (
-    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-200 text-[10px] font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 shadow-xs">
+    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-200 text-xs font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 shadow-xs">
       {user?.fullName?.[0] || "•"}
     </span>
   );
@@ -70,6 +70,21 @@ export default function MessagesPage() {
 
   const listRef = useRef(null);
   const initializedFromUrl = useRef(false);
+
+  const scrollToBottom = useCallback((smooth = false) => {
+    const doScroll = () => {
+      if (listRef.current) {
+        listRef.current.scrollTo({
+          top: listRef.current.scrollHeight,
+          behavior: smooth ? "smooth" : "auto",
+        });
+      }
+    };
+    doScroll();
+    requestAnimationFrame(doScroll);
+    setTimeout(doScroll, 50);
+    setTimeout(doScroll, 150);
+  }, []);
 
   const loadSidebar = useCallback(async (term) => {
     setLoading(true);
@@ -139,16 +154,6 @@ export default function MessagesPage() {
         setHasMore(Boolean(result.data.data.hasMore));
         if (memberResult.success) setMembers(memberResult.data.data.users);
         loadPins(conversation._id);
-        requestAnimationFrame(() => {
-          const target =
-            targetMessageId &&
-            document.getElementById(`message-${targetMessageId}`);
-          if (target) {
-            target.scrollIntoView({ block: "center" });
-          } else if (listRef.current) {
-            listRef.current.scrollTop = listRef.current.scrollHeight;
-          }
-        });
         socket?.emit(
           "conversation:join",
           { conversationId: conversation._id },
@@ -167,9 +172,25 @@ export default function MessagesPage() {
         setError("Messages could not be loaded.");
       }
       setLoadingMessages(false);
+      requestAnimationFrame(() => {
+        const target =
+          targetMessageId &&
+          document.getElementById(`message-${targetMessageId}`);
+        if (target) {
+          target.scrollIntoView({ block: "center" });
+        } else {
+          scrollToBottom();
+        }
+      });
     },
-    [socket, refreshUnread, loadPins],
+    [socket, refreshUnread, loadPins, scrollToBottom],
   );
+
+  useEffect(() => {
+    if (!loadingMessages && selected?._id && messages.length > 0) {
+      scrollToBottom();
+    }
+  }, [loadingMessages, selected?._id, scrollToBottom, messages.length]);
 
   useEffect(() => {
     if (initializedFromUrl.current || !conversations.length) return;
@@ -200,11 +221,7 @@ export default function MessagesPage() {
           return [...items, message];
         });
         messagingApi.markRead(message.conversationId).then(refreshUnread);
-        requestAnimationFrame(() => {
-          if (listRef.current) {
-            listRef.current.scrollTop = listRef.current.scrollHeight;
-          }
-        });
+        scrollToBottom(true);
       }
       loadSidebar(search);
     };
@@ -511,11 +528,7 @@ export default function MessagesPage() {
       setAttachments([]);
       setAttachedContent([]);
       setReplyTo(null);
-      requestAnimationFrame(() => {
-        if (listRef.current) {
-          listRef.current.scrollTop = listRef.current.scrollHeight;
-        }
-      });
+      scrollToBottom(true);
     }
 
     const result = await deliver(fullContent, clientId, options);
@@ -676,18 +689,18 @@ export default function MessagesPage() {
               className="min-h-0 flex-1 overflow-y-auto bg-zinc-50/60 px-4 py-5 dark:bg-zinc-950/40 sm:px-6"
             >
               {loadingMessages ? (
-                <div className="flex min-h-40 items-center justify-center text-center text-xs text-zinc-500">
+                <div className="flex min-h-40 items-center justify-center text-center text-sm font-medium text-zinc-500">
                   Loading messages…
                 </div>
               ) : (
                 <>
                   {loadingOlder && (
-                    <p className="pb-3 text-center text-[10px] text-zinc-500">
+                    <p className="pb-3 text-center text-xs font-semibold text-zinc-500">
                       Loading older messages…
                     </p>
                   )}
                   {!messages.length && (
-                    <div className="flex min-h-40 items-center justify-center text-center text-xs text-zinc-500">
+                    <div className="flex min-h-40 items-center justify-center text-center text-sm font-medium text-zinc-500">
                       No messages yet. Start the conversation.
                     </div>
                   )}
@@ -763,17 +776,17 @@ export default function MessagesPage() {
 
                     {/* Live Typing Indicator Bubble in Stream */}
                     {Object.values(typingUsers).length > 0 && (
-                      <div className="flex flex-col gap-1.5 pt-1.5 pb-0.5">
+                      <div className="flex flex-col gap-1.5 pt-2 pb-1">
                         {Object.values(typingUsers).map((typer) => (
                           <div
                             key={typer._id}
-                            className="flex items-end gap-1.5 animate-in fade-in slide-in-from-bottom-2 duration-150"
+                            className="flex items-end gap-2 animate-in fade-in slide-in-from-bottom-2 duration-150"
                           >
-                            <div className="w-7 sm:w-8 shrink-0 flex items-end justify-center mb-0.5">
+                            <div className="w-8 sm:w-9 shrink-0 flex items-end justify-center mb-0.5">
                               <TypingAvatar user={typer} />
                             </div>
-                            <div className="flex items-center gap-2 rounded-2xl rounded-bl-xs border border-zinc-200/80 bg-white dark:border-zinc-800 dark:bg-[#18181c] px-3.5 py-2 shadow-xs">
-                              <span className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300">
+                            <div className="flex items-center gap-2 rounded-2xl rounded-bl-xs border border-zinc-200/80 bg-white dark:border-zinc-800 dark:bg-[#18181c] px-4 py-2.5 shadow-xs">
+                              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
                                 {selected?.type !== "direct"
                                   ? `${typer.fullName?.split(" ")[0] || "Someone"}`
                                   : "typing"}

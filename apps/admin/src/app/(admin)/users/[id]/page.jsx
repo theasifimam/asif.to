@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, Edit3 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -13,11 +15,13 @@ import {
   useDeleteUserMutation,
   useResetUserPasswordMutation,
 } from "@/redux/services/userApi";
+import { AdminPage, AdminPageHeader } from "@/components/admin";
+import { Button } from "@/components/ui/button";
+import { getModuleBackUrl } from "@/hooks/useModuleHistory";
 import { EditUserModal } from "../EditUserModal";
 import { PasswordResetModal } from "../PasswordResetModal";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  ProfileTopNav,
   ProfileHeroHeader,
   ProfileStatsGrid,
   ProfileBioSection,
@@ -37,7 +41,9 @@ const STORAGE_URL = process.env.NEXT_PUBLIC_STORAGE_URL;
 export default function UserProfilePage() {
   const { id } = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user: currentUser, checkUser } = useAuth();
+  const returnTo = getModuleBackUrl("/users", searchParams.get("returnTo"));
 
   const isOwnProfile = currentUser?._id === id;
 
@@ -136,7 +142,10 @@ export default function UserProfilePage() {
   if (loading) return <ProfileSkeleton />;
   if (!user) return <ProfileNotFound router={router} />;
 
-  const roleConf = ROLE_CONFIG[user.role] || ROLE_CONFIG.reader;
+  const roleConf =
+    ROLE_CONFIG[user.role] ||
+    ROLE_CONFIG[user.role?.toLowerCase()] ||
+    ROLE_CONFIG.reader;
   const statusConf = STATUS_CONFIG[user.status] || STATUS_CONFIG.active;
   const avatarUrl =
     user.avatar && !user.avatar.includes("ui-avatars.com")
@@ -146,20 +155,52 @@ export default function UserProfilePage() {
       : null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-300 font-sans selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black transition-colors duration-300"
-    >
-      {/* Top Navigation */}
-      <ProfileTopNav
-        isOwnProfile={isOwnProfile}
-        statusConf={statusConf}
-        setIsEditOpen={setIsEditOpen}
-        router={router}
+    <AdminPage size="xl">
+      <AdminPageHeader
+        eyebrow="User Management / Profile"
+        title={user.fullName}
+        description="View public profile details, clearance authorization level, content dispatches, and administrative audit logs."
+        back={
+          <Link
+            href={returnTo}
+            className="inline-flex items-center gap-1 text-xs font-bold text-zinc-500 hover:text-zinc-950 dark:hover:text-white transition-colors mb-1"
+          >
+            <ChevronLeft className="h-4 w-4" /> Back to users
+          </Link>
+        }
+        actions={
+          <>
+            {isOwnProfile && (
+              <span className="inline-flex items-center rounded-full bg-emerald-100/90 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-500/30 px-3 py-1 text-[10px] font-black uppercase tracking-wider">
+                Your Profile
+              </span>
+            )}
+            <div
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-zinc-200/80 dark:border-zinc-800 ${statusConf.bg}`}
+            >
+              <div className={`w-1.5 h-1.5 rounded-full ${statusConf.dot}`} />
+              <span
+                className={`text-[10px] font-black uppercase tracking-wider ${statusConf.text}`}
+              >
+                {statusConf.label}
+              </span>
+            </div>
+            <Button
+              onClick={() => setIsEditOpen(true)}
+              className="rounded-full font-bold text-xs px-5 shadow-2xs"
+            >
+              <Edit3 className="mr-1.5 h-3.5 w-3.5" />
+              {isOwnProfile ? "Edit My Profile" : "Edit Profile"}
+            </Button>
+          </>
+        }
       />
 
-      <main className="max-w-7xl mx-auto p-4 sm:p-6 md:p-10 space-y-10">
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-1 sm:space-y-1"
+      >
         {/* Profile Hero Header Card */}
         <ProfileHeroHeader
           user={user}
@@ -173,10 +214,9 @@ export default function UserProfilePage() {
         <ProfileStatsGrid stats={stats} />
 
         {/* Content Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: Bio & Articles */}
-          <div className="lg:col-span-8 space-y-8">
-            <ProfileBioSection user={user} />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 sm:gap-1 items-start">
+          {/* Left Column: Published Dispatches / Articles */}
+          <div className="lg:col-span-8 space-y-5 sm:space-y-6">
             <ProfileArticlesSection recentArticles={recentArticles} />
           </div>
 
@@ -189,13 +229,15 @@ export default function UserProfilePage() {
             canManageRoles={currentUser?.role === "super_admin"}
           />
         </div>
+
+        {/* Audit & Notes */}
         <UserAdminHistory
           userId={id}
           notes={userResponse?.data?.notes}
           audit={userResponse?.data?.audit}
           isOwnProfile={isOwnProfile}
         />
-      </main>
+      </motion.div>
 
       {/* Confirmation Dialog */}
       <AnimatePresence>
@@ -230,6 +272,6 @@ export default function UserProfilePage() {
         onReset={handleResetPassword}
         submitting={isActionLoading}
       />
-    </motion.div>
+    </AdminPage>
   );
 }

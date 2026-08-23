@@ -21,13 +21,13 @@ export default function ProfileClearanceSidebar({
   canManageRoles,
 }) {
   return (
-    <aside className="lg:col-span-4 space-y-8">
+    <aside className="lg:col-span-4 space-y-6">
       {/* System Clearance Box */}
-      <section className="space-y-4">
+      <section className="space-y-3">
         <SectionHeader title="System Clearance" />
-        <div className="bg-white/70 dark:bg-zinc-900/70 border border-zinc-200/60 dark:border-zinc-800/60 backdrop-blur-xl rounded-[2rem] p-7 space-y-6 shadow-sm">
-          <div className="space-y-3">
-            <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">
+        <div className="rounded-[28px] sm:rounded-[32px] bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800 p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
               Clearance Level
             </label>
             <Select
@@ -44,47 +44,47 @@ export default function ProfileClearanceSidebar({
                 })
               }
             >
-              <SelectTrigger className="h-12 rounded-full bg-zinc-50/50 dark:bg-zinc-950 border-zinc-200/80 dark:border-zinc-800 font-bold text-xs focus:ring-0">
+              <SelectTrigger className="h-10 rounded-full bg-zinc-50 dark:bg-zinc-900 border-zinc-200/80 dark:border-zinc-800 font-bold text-xs focus:ring-0 px-4">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="rounded-2xl border-zinc-200 dark:border-zinc-800 z-[1000]">
-                <SelectItem value="reader">Reader Only</SelectItem>
-                <SelectItem value="author">Contributing Author</SelectItem>
-                <SelectItem value="editor">Editor-in-Chief</SelectItem>
-                <SelectItem value="admin">System Admin</SelectItem>
+                <SelectItem value="reader">Reader</SelectItem>
+                <SelectItem value="author">Author</SelectItem>
+                <SelectItem value="editor">Editor</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
                 <SelectItem value="super_admin">Super Admin</SelectItem>
               </SelectContent>
             </Select>
             {isOwnProfile && !canManageRoles && (
-              <p className="text-[9px] font-bold text-zinc-450 flex items-center gap-1.5 mt-1 px-1">
+              <p className="text-[10px] font-bold text-zinc-400 flex items-center gap-1.5 mt-1 px-1">
                 <Lock size={11} className="text-zinc-400" /> You cannot change
                 your own clearance level.
               </p>
             )}
             {isOwnProfile && canManageRoles && (
-              <p className="text-[9px] font-bold text-amber-600 dark:text-amber-400">
+              <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400">
                 Changing your own role signs you out immediately. At least one
                 other active super admin must remain.
               </p>
             )}
             {!isOwnProfile && !canManageRoles && (
-              <p className="text-[9px] font-bold text-zinc-500">
+              <p className="text-[10px] font-bold text-zinc-500">
                 Only a super admin can change roles.
               </p>
             )}
           </div>
 
-          <div className="space-y-3">
-            <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
               Security Credentials
             </label>
             <Button
               variant="outline"
               onClick={() => setIsPwOpen(true)}
               disabled={user.provider !== "credentials"}
-              className="w-full h-12 rounded-full border-zinc-200 dark:border-zinc-800 gap-2.5 font-black uppercase tracking-widest text-[9px] hover:bg-zinc-50 dark:hover:bg-zinc-950 bg-white dark:bg-transparent shadow-sm transition-all cursor-pointer"
+              className="w-full h-10 rounded-full border-zinc-200/80 dark:border-zinc-800 gap-2 font-bold uppercase tracking-wider text-[10px] hover:bg-zinc-50 dark:hover:bg-zinc-900 bg-white dark:bg-transparent shadow-2xs transition-all cursor-pointer"
             >
-              <Key size={14} />
+              <Key size={13} />
               {user.provider !== "credentials"
                 ? "Managed by OAuth provider"
                 : isOwnProfile
@@ -93,13 +93,13 @@ export default function ProfileClearanceSidebar({
             </Button>
           </div>
 
-          <div className="space-y-3">
-            <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
               Account Lifecycle
             </label>
-            <div className="p-4 rounded-2xl bg-zinc-50/50 dark:bg-zinc-950/50 border border-zinc-150 dark:border-zinc-850 space-y-2.5">
+            <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800 space-y-2">
               <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
-                <span className="text-zinc-450 dark:text-zinc-555">Joined</span>
+                <span className="text-zinc-400 dark:text-zinc-500">Joined</span>
                 <span className="text-zinc-700 dark:text-zinc-200">
                   {user.createdAt
                     ? format(new Date(user.createdAt), "MMM d, yyyy")
@@ -107,13 +107,13 @@ export default function ProfileClearanceSidebar({
                 </span>
               </div>
               <div className="flex justify-between text-xs font-bold uppercase tracking-wider">
-                <span className="text-zinc-450 dark:text-zinc-555">
+                <span className="text-zinc-400 dark:text-zinc-500">
                   Last Login
                 </span>
                 <span className="text-zinc-700 dark:text-zinc-200">
                   {user.lastLogin
                     ? format(new Date(user.lastLogin), "MMM d, yyyy")
-                    : "Null"}
+                    : "—"}
                 </span>
               </div>
             </div>
@@ -122,11 +122,11 @@ export default function ProfileClearanceSidebar({
       </section>
 
       {/* Account Security Controls / Danger Zone */}
-      <section className="space-y-6">
+      <section className="space-y-3">
         <SectionHeader title="Account Security Controls" />
-        <div className="bg-rose-50/10 dark:bg-rose-950/5 border border-rose-100/30 dark:border-rose-900/10 rounded-[2rem] p-7 space-y-4">
+        <div className="rounded-[28px] sm:rounded-[32px] bg-white dark:bg-[#121215] border border-rose-200/80 dark:border-rose-900/30 p-5 sm:p-6 shadow-xs space-y-3">
           {isOwnProfile ? (
-            <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200/50 dark:border-zinc-800/50 text-center text-[10px] font-bold text-zinc-450 leading-relaxed uppercase tracking-wider">
+            <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200/80 dark:border-zinc-800 text-center text-[10px] font-bold text-zinc-400 leading-relaxed uppercase tracking-wider">
               Self-Account Protection Active. Account suspension & deletion are
               restricted.
             </div>
@@ -151,19 +151,19 @@ export default function ProfileClearanceSidebar({
                     requireReason: user.status === "active",
                   })
                 }
-                className={`w-full h-12 rounded-full gap-2.5 font-black uppercase tracking-widest text-[9px] cursor-pointer ${
+                className={`w-full h-10 rounded-full gap-2 font-black uppercase tracking-wider text-[10px] cursor-pointer ${
                   user.status === "active"
-                    ? "bg-rose-500 hover:bg-rose-600 shadow-md shadow-rose-500/20 border-none"
+                    ? "bg-rose-500 hover:bg-rose-600 shadow-2xs border-none"
                     : ""
                 }`}
               >
                 {user.status === "active" ? (
                   <>
-                    <Ban size={14} /> Suspend Operations
+                    <Ban size={13} /> Suspend Operations
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 size={14} /> Activate Protocol
+                    <CheckCircle2 size={13} /> Activate Protocol
                   </>
                 )}
               </Button>
@@ -182,9 +182,9 @@ export default function ProfileClearanceSidebar({
                       requireReason: true,
                     })
                   }
-                  className="w-full h-12 rounded-full gap-2.5 font-black uppercase tracking-widest text-[9px] border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-900"
+                  className="w-full h-10 rounded-full gap-2 font-black uppercase tracking-wider text-[10px] border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-900/60"
                 >
-                  <Ban size={14} /> Ban account
+                  <Ban size={13} /> Ban account
                 </Button>
               )}
 
@@ -201,9 +201,9 @@ export default function ProfileClearanceSidebar({
                     requireReason: true,
                   })
                 }
-                className="w-full h-12 rounded-full gap-2.5 font-black uppercase tracking-widest text-[9px] text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 cursor-pointer"
+                className="w-full h-10 rounded-full gap-2 font-black uppercase tracking-wider text-[10px] text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 cursor-pointer"
               >
-                <Trash2 size={14} />
+                <Trash2 size={13} />
                 Deactivate account
               </Button>
             </>

@@ -104,6 +104,21 @@ export default function FloatingChatDock({ isNavVisible = true }) {
     }
   }, [isOpen, selected, search, loadConversations]);
 
+  const scrollToBottom = useCallback((smooth = false) => {
+    const doScroll = () => {
+      if (listRef.current) {
+        listRef.current.scrollTo({
+          top: listRef.current.scrollHeight,
+          behavior: smooth ? "smooth" : "auto",
+        });
+      }
+    };
+    doScroll();
+    requestAnimationFrame(doScroll);
+    setTimeout(doScroll, 50);
+    setTimeout(doScroll, 150);
+  }, []);
+
   const openConversation = useCallback(
     async (conversation) => {
       if (!conversation?._id) return;
@@ -115,18 +130,21 @@ export default function FloatingChatDock({ isNavVisible = true }) {
       });
       if (result.success) {
         setMessages(result.data.data.messages);
-        requestAnimationFrame(() => {
-          if (listRef.current)
-            listRef.current.scrollTop = listRef.current.scrollHeight;
-        });
         socket?.emit("conversation:join", { conversationId: conversation._id });
         await messagingApi.markRead(conversation._id);
         refreshUnread();
       }
       setLoading(false);
+      scrollToBottom();
     },
-    [socket, refreshUnread],
+    [socket, refreshUnread, scrollToBottom],
   );
+
+  useEffect(() => {
+    if (!loading && selected?._id && messages.length > 0) {
+      scrollToBottom();
+    }
+  }, [loading, selected?._id, scrollToBottom, messages.length]);
 
   const handleTyping = useCallback(
     (isTyping) => {
@@ -183,10 +201,7 @@ export default function FloatingChatDock({ isNavVisible = true }) {
           return [...items, message];
         });
         messagingApi.markRead(message.conversationId).then(refreshUnread);
-        requestAnimationFrame(() => {
-          if (listRef.current)
-            listRef.current.scrollTop = listRef.current.scrollHeight;
-        });
+        scrollToBottom(true);
       }
     };
 
@@ -283,10 +298,7 @@ export default function FloatingChatDock({ isNavVisible = true }) {
       },
     ]);
 
-    requestAnimationFrame(() => {
-      if (listRef.current)
-        listRef.current.scrollTop = listRef.current.scrollHeight;
-    });
+    scrollToBottom(true);
 
     if (socket?.connected) {
       socket.emit("message:send", {

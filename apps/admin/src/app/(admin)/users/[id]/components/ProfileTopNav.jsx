@@ -20,14 +20,13 @@ export default function ProfileTopNav({
         <Button
           variant="ghost"
           onClick={() => router.push(returnTo)}
-          className="group flex items-center gap-1 -ml-2 sm:-ml-3 text-xs sm:text-sm text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all font-medium rounded-full cursor-pointer shrink-0 px-2 sm:px-4"
+          className="group flex items-center gap-1 -ml-2 sm:-ml-3 text-xs sm:text-sm font-semibold text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-all rounded-full cursor-pointer shrink-0 px-2 sm:px-4"
         >
           <ChevronLeft
             size={18}
             className="transition-transform group-hover:-translate-x-1 shrink-0"
           />
-          <span className="hidden xs:inline">All Personnel</span>
-          <span className="xs:hidden">Back</span>
+          <span>Back to users</span>
         </Button>
 
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 flex-wrap justify-end">
