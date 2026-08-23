@@ -6,6 +6,10 @@ import {
   getUniqueListableCourses,
 } from "@/lib/courseSchema";
 
+export const metadata = {
+  alternates: { canonical: "/" },
+};
+
 export const dynamic = "force-dynamic";
 
 const getCourses = cache(async () => {

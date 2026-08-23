@@ -97,12 +97,10 @@ async function fetchApi(endpoint) {
 
 export default async function sitemap() {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://asif.to";
-  const now = new Date();
 
   // 1. Static Pages
   const staticEntries = STATIC_ROUTES.map((route) => ({
     url: `${siteUrl}${route.path}`,
-    lastModified: now,
     changeFrequency: route.changeFrequency,
     priority: route.priority,
   }));
@@ -152,7 +150,9 @@ export default async function sitemap() {
       existingUrls.add(url);
       dynamicEntries.push({
         url,
-        lastModified: item.updatedAt ? new Date(item.updatedAt) : now,
+        ...(item.updatedAt
+          ? { lastModified: new Date(item.updatedAt) }
+          : {}),
         changeFrequency,
         priority,
       });
@@ -171,7 +171,9 @@ export default async function sitemap() {
         existingUrls.add(catUrl);
         dynamicEntries.push({
           url: catUrl,
-          lastModified: cat.updatedAt ? new Date(cat.updatedAt) : now,
+          ...(cat.updatedAt
+            ? { lastModified: new Date(cat.updatedAt) }
+            : {}),
           changeFrequency: "weekly",
           priority: 0.8,
         });
@@ -187,7 +189,14 @@ export default async function sitemap() {
       const url = `${siteUrl}/library/${entry.username}/${entry.slug}`;
       if (!existingUrls.has(url)) {
         existingUrls.add(url);
-        dynamicEntries.push({ url, lastModified: entry.updatedAt ? new Date(entry.updatedAt) : now, changeFrequency: "monthly", priority: 0.6 });
+        dynamicEntries.push({
+          url,
+          ...(entry.updatedAt
+            ? { lastModified: new Date(entry.updatedAt) }
+            : {}),
+          changeFrequency: "monthly",
+          priority: 0.6,
+        });
       }
     }
   }
@@ -197,13 +206,11 @@ export default async function sitemap() {
   const practiceEntries = [
     ...Object.keys(TECHNOLOGIES).map((technology) => ({
       url: `${siteUrl}/practice/${technology}`,
-      lastModified: now,
       changeFrequency: "weekly",
       priority: 0.8,
     })),
     ...PRACTICE_PROBLEMS.map(({ technology, slug }) => ({
       url: `${siteUrl}/practice/${technology}/${slug}`,
-      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,
     })),

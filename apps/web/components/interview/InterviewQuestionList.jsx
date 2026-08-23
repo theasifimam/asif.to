@@ -28,6 +28,16 @@ export default function InterviewQuestionList({
   basePath,
   indexedQuestionsMap = {},
 }) {
+  const questionPageHref = (item) => {
+    if (!item?.slug) return null;
+
+    const marker = "/interview-questions";
+    const markerIndex = basePath.indexOf(marker);
+    const prefix = markerIndex >= 0 ? basePath.slice(0, markerIndex) : "";
+
+    return `${prefix}${marker}/${encodeURIComponent(item.slug)}`;
+  };
+
   // Store collapsed state per question ID (default: all expanded)
   const [collapsedMap, setCollapsedMap] = useState({});
 
@@ -118,7 +128,16 @@ export default function InterviewQuestionList({
                   </div>
 
                   <h2 className="mt-2 text-base font-black leading-snug tracking-tight text-foreground sm:text-xl md:text-2xl">
-                    {item.question}
+                    {questionPageHref(item) ? (
+                      <Link
+                        href={questionPageHref(item)}
+                        className="transition-colors hover:text-orange-600 dark:hover:text-orange-400"
+                      >
+                        {item.question}
+                      </Link>
+                    ) : (
+                      item.question
+                    )}
                   </h2>
 
                   <div className="mt-2.5 flex flex-wrap items-center gap-2">

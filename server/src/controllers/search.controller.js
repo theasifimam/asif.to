@@ -78,7 +78,10 @@ export async function getSearchIndex(_req, res) {
     questions.forEach((item) => {
       const courseSlug = item.course?.slug;
       const catSlug = item.category?.slug || "fundamentals";
-      const url = courseSlug ? `/${courseSlug}/interview-questions/${catSlug}` : `/interview-questions/${catSlug}`;
+      const url =
+        courseSlug && item.slug
+          ? `/${courseSlug}/interview-questions/${item.slug}`
+          : `/interview-questions/${catSlug}`;
       items.push({
         id: `question:${item._id}`, type: "question", title: item.question,
         url, description: plainText(item.answer).slice(0, 180),

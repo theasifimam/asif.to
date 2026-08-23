@@ -56,9 +56,6 @@ export const metadata = {
     siteName: "asif.to Tutorials",
     type: "website",
   },
-  alternates: {
-    canonical: "/",
-  },
   robots: {
     index: true,
     follow: true,
