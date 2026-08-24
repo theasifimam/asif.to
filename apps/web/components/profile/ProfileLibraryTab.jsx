@@ -140,110 +140,15 @@ export default function ProfileLibraryTab({
   }, [bookmarks, collectionId, query, typeFilter]);
 
   return (
-    <div className="space-y-6">
-      {/* Library Hero Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-blue-200/80 bg-linear-to-br from-blue-600 via-blue-700 to-indigo-800 p-6 text-white shadow-xl shadow-blue-500/10 dark:border-white/8 dark:bg-linear-to-br dark:from-[#11141f] dark:via-[#131728] dark:to-[#0f111a] dark:text-zinc-100 dark:shadow-2xl dark:shadow-black/60">
-        <div className="pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full bg-blue-400/20 dark:bg-blue-500/15 blur-3xl" />
-        <div className="relative z-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <div>
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-white backdrop-blur-xs dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-300">
-              <Sparkles className="h-3 w-3 text-blue-200 dark:text-blue-400" />
-              <span>
-                {isOwnProfile
-                  ? "Personal Knowledge Hub"
-                  : `@${user?.username}'s Library`}
-              </span>
-            </div>
-            <h3 className="mt-2 text-xl sm:text-2xl font-black text-white tracking-tight">
-              {isOwnProfile
-                ? "Developer Second Brain"
-                : "Shared Knowledge & Code Notes"}
-            </h3>
-            <p className="mt-1 text-xs sm:text-sm font-medium text-blue-100/90 dark:text-zinc-400 max-w-xl">
-              {isOwnProfile
-                ? "All your saved code snippets, debug fixes, command cheatsheets, and bookmarks in one place."
-                : `Public notes, useful fixes, and snippets shared by ${user?.fullName || user?.username}.`}
-            </p>
-          </div>
-
-          {isOwnProfile && (
-            <div className="flex flex-row items-center gap-2 w-full sm:w-auto *:flex-1 sm:*:flex-initial">
-              <Link
-                href="/library/new"
-                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-white px-4 py-2.5 text-xs font-bold text-blue-700 shadow-md hover:bg-blue-50 transition active:scale-95 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-500 text-center whitespace-nowrap"
-              >
-                <Plus size={15} />
-                <span>New knowledge</span>
-              </Link>
-              <Link
-                href="/library"
-                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 px-3.5 py-2.5 text-xs font-bold text-white transition active:scale-95 dark:bg-white/6 dark:border-white/10 dark:text-zinc-200 text-center whitespace-nowrap"
-              >
-                <span>Full Workspace</span>
-                <ExternalLink size={13} />
-              </Link>
-            </div>
-          )}
-        </div>
-
-        {/* Quick Action Chips (For Own Profile) */}
-        {isOwnProfile && (
-          <div className="relative z-10 mt-5 flex flex-wrap items-center gap-2 pt-2 border-t border-white/15 dark:border-white/10 *:flex-1 *:grow">
-            <Link
-              href="/library/new?type=note"
-              className="inline-flex items-center justify-center gap-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 dark:bg-white/4 dark:border-white/8 dark:hover:bg-white/8 px-3 py-1.5 text-[11px] font-bold text-inherit transition text-center whitespace-nowrap"
-            >
-              <BookOpen
-                size={13}
-                className="text-blue-300 dark:text-blue-400"
-              />
-              <span>New Note</span>
-            </Link>
-            <Link
-              href="/library/new?type=code_snippet"
-              className="inline-flex items-center justify-center gap-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 dark:bg-white/4 dark:border-white/8 dark:hover:bg-white/8 px-3 py-1.5 text-[11px] font-bold text-inherit transition text-center whitespace-nowrap"
-            >
-              <Code2 size={13} className="text-cyan-300 dark:text-cyan-400" />
-              <span>Code Snippet</span>
-            </Link>
-            <Link
-              href="/library/new?type=debug_fix"
-              className="inline-flex items-center justify-center gap-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 dark:bg-white/4 dark:border-white/8 dark:hover:bg-white/8 px-3 py-1.5 text-[11px] font-bold text-inherit transition text-center whitespace-nowrap"
-            >
-              <Bug size={13} className="text-rose-300 dark:text-rose-400" />
-              <span>Save a Fix</span>
-            </Link>
-            <Link
-              href="/library/new?type=command"
-              className="inline-flex items-center justify-center gap-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 dark:bg-white/4 dark:border-white/8 dark:hover:bg-white/8 px-3 py-1.5 text-[11px] font-bold text-inherit transition text-center whitespace-nowrap"
-            >
-              <Terminal
-                size={13}
-                className="text-amber-300 dark:text-amber-400"
-              />
-              <span>Command</span>
-            </Link>
-            <Link
-              href="/library"
-              className="inline-flex items-center justify-center gap-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 dark:bg-white/4 dark:border-white/8 dark:hover:bg-white/8 px-3 py-1.5 text-[11px] font-bold text-inherit transition text-center whitespace-nowrap"
-            >
-              <FolderPlus
-                size={13}
-                className="text-emerald-300 dark:text-emerald-400"
-              />
-              <span>Collection</span>
-            </Link>
-          </div>
-        )}
-      </div>
-
+    <div className="space-y-4">
       {/* Main Knowledge Card Container */}
-      <div className="rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-sm border border-zinc-200/70 dark:border-zinc-800 p-5 sm:p-7 space-y-6">
-        {/* Card Top Bar: Selector on LEFT, Search on RIGHT */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-5 border-b border-zinc-100 dark:border-zinc-800/80">
-          {/* Left Side: Type Selector (shadcn Select) & Collection Selector */}
-          <div className="flex flex-wrap items-center gap-2.5 flex-1 sm:flex-initial">
-            <div className="w-full sm:w-56 shrink-0">
+      <div className="rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/70 dark:border-zinc-800 p-5 sm:p-7 space-y-5">
+        {/* Top Controls: Type/Collection Selectors & Action Buttons */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 pb-4 border-b border-zinc-100 dark:border-zinc-800/80">
+          {/* Left: Filters & Search */}
+          <div className="flex flex-wrap items-center gap-2.5 flex-1">
+            {/* Type Selector */}
+            <div className="w-full sm:w-52 shrink-0">
               <Select value={typeFilter} onValueChange={setTypeFilter}>
                 <SelectTrigger className="w-full rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800 px-3.5 py-2.5 text-xs font-bold text-foreground">
                   <SelectValue placeholder="Filter by type" />
@@ -288,8 +193,9 @@ export default function ProfileLibraryTab({
               </Select>
             </div>
 
+            {/* Collection Selector */}
             {collections.length > 0 && (
-              <div className="w-full sm:w-48 shrink-0">
+              <div className="w-full sm:w-44 shrink-0">
                 <Select value={collectionId} onValueChange={setCollectionId}>
                   <SelectTrigger className="w-full rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800 px-3.5 py-2.5 text-xs font-bold text-foreground">
                     <SelectValue placeholder="All Collections" />
@@ -307,19 +213,83 @@ export default function ProfileLibraryTab({
                 </Select>
               </div>
             )}
+
+            {/* Search Input */}
+            <div className="relative w-full sm:w-64 grow sm:grow-0">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search notes, code, fixes, tags..."
+                className="w-full rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800 pl-10 pr-4 py-2.5 text-xs text-foreground placeholder:text-zinc-400 outline-none focus:border-blue-500 dark:focus:border-blue-500 transition"
+              />
+            </div>
           </div>
 
-          {/* Right Side: Search Field */}
-          <div className="relative w-full sm:w-72 shrink-0">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search notes, code, fixes, tags..."
-              className="w-full rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800 pl-10 pr-4 py-2.5 text-xs text-foreground placeholder:text-zinc-400 outline-none focus:border-blue-500 dark:focus:border-blue-500 transition"
-            />
-          </div>
+          {/* Right: Action Buttons (For Own Profile) */}
+          {isOwnProfile && (
+            <div className="flex items-center gap-2 shrink-0">
+              <Link
+                href="/library/new"
+                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 text-xs font-bold shadow-md shadow-blue-500/20 transition active:scale-95"
+              >
+                <Plus size={14} />
+                <span>New Knowledge</span>
+              </Link>
+              <Link
+                href="/library"
+                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700/80 border border-zinc-200/80 dark:border-zinc-700/80 px-3.5 py-2.5 text-xs font-bold text-zinc-700 dark:text-zinc-300 transition active:scale-95"
+              >
+                <span>Full Workspace</span>
+                <ExternalLink size={13} />
+              </Link>
+            </div>
+          )}
         </div>
+
+        {/* Quick Create Shortcuts (For Own Profile) */}
+        {isOwnProfile && (
+          <div className="flex flex-wrap items-center gap-2 pt-1 pb-1">
+            <span className="text-[11px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mr-1 hidden sm:inline-block">
+              Quick Add:
+            </span>
+            <Link
+              href="/library/new?type=note"
+              className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 border border-blue-200/60 dark:border-blue-800/40 px-3 py-1.5 text-[11px] font-bold text-blue-700 dark:text-blue-300 transition active:scale-95"
+            >
+              <BookOpen size={12} className="text-blue-500" />
+              <span>Note</span>
+            </Link>
+            <Link
+              href="/library/new?type=code_snippet"
+              className="inline-flex items-center gap-1.5 rounded-full bg-cyan-50 hover:bg-cyan-100 dark:bg-cyan-950/40 dark:hover:bg-cyan-900/50 border border-cyan-200/60 dark:border-cyan-800/40 px-3 py-1.5 text-[11px] font-bold text-cyan-700 dark:text-cyan-300 transition active:scale-95"
+            >
+              <Code2 size={12} className="text-cyan-500" />
+              <span>Snippet</span>
+            </Link>
+            <Link
+              href="/library/new?type=debug_fix"
+              className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 border border-rose-200/60 dark:border-rose-800/40 px-3 py-1.5 text-[11px] font-bold text-rose-700 dark:text-rose-300 transition active:scale-95"
+            >
+              <Bug size={12} className="text-rose-500" />
+              <span>Fix</span>
+            </Link>
+            <Link
+              href="/library/new?type=command"
+              className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 border border-amber-200/60 dark:border-amber-800/40 px-3 py-1.5 text-[11px] font-bold text-amber-700 dark:text-amber-300 transition active:scale-95"
+            >
+              <Terminal size={12} className="text-amber-500" />
+              <span>Command</span>
+            </Link>
+            <Link
+              href="/library"
+              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/50 border border-emerald-200/60 dark:border-emerald-800/40 px-3 py-1.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 transition active:scale-95"
+            >
+              <FolderPlus size={12} className="text-emerald-500" />
+              <span>Collection</span>
+            </Link>
+          </div>
+        )}
 
         {/* Knowledge Entries Grid */}
         {isLoading ? (

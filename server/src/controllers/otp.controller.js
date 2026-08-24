@@ -26,10 +26,12 @@ export const sendOtp = async (req, res) => {
 
     normalizedEmail = email.toLowerCase().trim();
 
+    let targetUser = null;
+
     // For signup: ensure email is NOT already taken
     if (purpose === "signup") {
-      const existing = await User.findOne({ email: normalizedEmail });
-      if (existing) {
+      const existingUser = await User.findOne({ email: normalizedEmail });
+      if (existingUser) {
         res
           .status(409)
           .json({
@@ -42,8 +44,8 @@ export const sendOtp = async (req, res) => {
 
     // For signin or forgot-password: ensure account exists
     if (purpose === "signin" || purpose === "forgot-password") {
-      const existing = await User.findOne({ email: normalizedEmail });
-      if (!existing) {
+      targetUser = await User.findOne({ email: normalizedEmail });
+      if (!targetUser) {
         res
           .status(404)
           .json({
@@ -55,8 +57,8 @@ export const sendOtp = async (req, res) => {
     }
 
     // Rate-limit: block if already pending and not expired yet (< 1 min since last send)
-    const existing = otpStore.get(normalizedEmail);
-    if (existing && existing.expiresAt - Date.now() > EXPIRY_MS - 60_000) {
+    const existingOtp = otpStore.get(normalizedEmail);
+    if (existingOtp && existingOtp.expiresAt - Date.now() > EXPIRY_MS - 60_000) {
       res
         .status(429)
         .json({
@@ -73,8 +75,12 @@ export const sendOtp = async (req, res) => {
       attempts: 0,
     });
 
-    const name = fullName?.trim() || normalizedEmail.split("@")[0];
-    await sendOtpEmail(normalizedEmail, name, otp);
+    const name =
+      fullName?.trim() ||
+      targetUser?.fullName ||
+      normalizedEmail.split("@")[0];
+
+    await sendOtpEmail(normalizedEmail, name, otp, purpose);
 
     res
       .status(200)
@@ -87,7 +93,9 @@ export const sendOtp = async (req, res) => {
     console.error("[OTP] sendOtp error:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to send verification email. Please try again shortly.",
+      message: error?.message?.includes("Email delivery is not configured")
+        ? "Email delivery service is not configured on the server."
+        : error?.message || "Failed to send verification email. Please try again shortly.",
     });
   }
 };
