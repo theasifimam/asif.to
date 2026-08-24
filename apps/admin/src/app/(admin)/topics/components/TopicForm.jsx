@@ -415,139 +415,139 @@ export default function TopicForm({ topicId = null }) {
             </div>
           </div>
           <div className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
-              <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-                <div>
-                  <h2 className="font-semibold text-zinc-900 dark:text-white">
-                    Interview questions
-                  </h2>
-                  <p className="mt-1 text-sm text-zinc-500">
-                    Assign reusable questions and set their display order.
-                  </p>
-                </div>
-                <Link
-                  href={
-                    form.course
-                      ? `/interview-questions/new?course=${form.course}`
-                      : "/interview-questions/new"
-                  }
-                  target="_blank"
-                >
-                  <Button type="button" variant="outline" size="sm">
-                    <Plus className="h-4 w-4" /> Create question
-                  </Button>
-                </Link>
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <div>
+                <h2 className="font-semibold text-zinc-900 dark:text-white">
+                  Interview questions
+                </h2>
+                <p className="mt-1 text-sm text-zinc-500">
+                  Assign reusable questions and set their display order.
+                </p>
               </div>
+              <Link
+                href={
+                  form.course
+                    ? `/interview-questions/new?course=${form.course}`
+                    : "/interview-questions/new"
+                }
+                target="_blank"
+              >
+                <Button type="button" variant="outline" size="sm">
+                  <Plus className="h-4 w-4" /> Create question
+                </Button>
+              </Link>
+            </div>
 
-              <div className="space-y-2">
-                <Label>Find existing questions</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-                  <Input
-                    value={questionSearch}
-                    onChange={(event) => setQuestionSearch(event.target.value)}
-                    placeholder="Search the question library"
-                    className="rounded-2xl bg-zinc-100 pl-9 dark:bg-zinc-900"
-                  />
-                </div>
-                <div className="max-h-56 overflow-y-auto rounded-2xl bg-zinc-50 p-1 dark:bg-zinc-900/70">
-                  {!form.course ? (
-                    <p className="px-3 py-6 text-center text-sm text-zinc-500">
-                      Select a course to browse its reusable question library.
-                    </p>
-                  ) : questionsLoading ? (
-                    <Loader2 className="mx-auto my-6 h-5 w-5 animate-spin text-blue-600" />
-                  ) : (
-                    questionOptions.map((question) => {
-                      const assigned = form.interviewQuestions.some(
-                        (item) => item._id === question._id,
-                      );
-                      return (
-                        <button
-                          key={question._id}
-                          type="button"
-                          disabled={assigned}
-                          onClick={() => addQuestion(question)}
-                          className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left text-sm enabled:hover:bg-white disabled:opacity-50 dark:enabled:hover:bg-zinc-800"
-                        >
-                          <span className="line-clamp-2">
-                            {question.question}
-                          </span>
-                          <span className="shrink-0 text-xs capitalize text-zinc-500">
-                            {assigned ? "Assigned" : question.difficulty}
-                          </span>
-                        </button>
-                      );
-                    })
-                  )}
-                  {form.course &&
-                    !questionsLoading &&
-                    questionOptions.length === 0 && (
-                      <p className="px-3 py-6 text-center text-sm text-zinc-500">
-                        No matching questions.
-                      </p>
-                    )}
-                </div>
+            <div className="space-y-2">
+              <Label>Find existing questions</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                <Input
+                  value={questionSearch}
+                  onChange={(event) => setQuestionSearch(event.target.value)}
+                  placeholder="Search the question library"
+                  className="rounded-2xl bg-zinc-100 pl-9 dark:bg-zinc-900"
+                />
               </div>
-
-              <div className="space-y-2">
-                <Label>Assigned order ({form.interviewQuestions.length})</Label>
-                {form.interviewQuestions.map((question, index) => (
-                  <div
-                    key={question._id}
-                    className="flex items-center gap-3 rounded-2xl bg-zinc-50 p-3 dark:bg-zinc-900/70"
-                  >
-                    <span className="w-6 shrink-0 text-center text-sm font-semibold text-zinc-500">
-                      {index + 1}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-zinc-900 dark:text-white">
-                        {question.question}
-                      </p>
-                      <p className="mt-1 text-xs capitalize text-zinc-500">
-                        {question.difficulty} · {question.questionType}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 gap-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        title="Move question up"
-                        disabled={index === 0}
-                        onClick={() => moveQuestion(index, -1)}
-                      >
-                        <ArrowUp className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        title="Move question down"
-                        disabled={index === form.interviewQuestions.length - 1}
-                        onClick={() => moveQuestion(index, 1)}
-                      >
-                        <ArrowDown className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        title="Remove question"
-                        onClick={() => removeQuestion(question._id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                {form.interviewQuestions.length === 0 && (
-                  <p className="rounded-2xl bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-500 dark:bg-zinc-900/70">
-                    Assign at least one question before publishing.
+              <div className="max-h-56 overflow-y-auto rounded-2xl bg-zinc-50 p-1 dark:bg-zinc-900/70">
+                {!form.course ? (
+                  <p className="px-3 py-6 text-center text-sm text-zinc-500">
+                    Select a course to browse its reusable question library.
                   </p>
+                ) : questionsLoading ? (
+                  <Loader2 className="mx-auto my-6 h-5 w-5 animate-spin text-blue-600" />
+                ) : (
+                  questionOptions.map((question) => {
+                    const assigned = form.interviewQuestions.some(
+                      (item) => item._id === question._id,
+                    );
+                    return (
+                      <button
+                        key={question._id}
+                        type="button"
+                        disabled={assigned}
+                        onClick={() => addQuestion(question)}
+                        className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left text-sm enabled:hover:bg-white disabled:opacity-50 dark:enabled:hover:bg-zinc-800"
+                      >
+                        <span className="line-clamp-2">
+                          {question.question}
+                        </span>
+                        <span className="shrink-0 text-xs capitalize text-zinc-500">
+                          {assigned ? "Assigned" : question.difficulty}
+                        </span>
+                      </button>
+                    );
+                  })
                 )}
+                {form.course &&
+                  !questionsLoading &&
+                  questionOptions.length === 0 && (
+                    <p className="px-3 py-6 text-center text-sm text-zinc-500">
+                      No matching questions.
+                    </p>
+                  )}
               </div>
             </div>
-          )}
+
+            <div className="space-y-2">
+              <Label>Assigned order ({form.interviewQuestions.length})</Label>
+              {form.interviewQuestions.map((question, index) => (
+                <div
+                  key={question._id}
+                  className="flex items-center gap-3 rounded-2xl bg-zinc-50 p-3 dark:bg-zinc-900/70"
+                >
+                  <span className="w-6 shrink-0 text-center text-sm font-semibold text-zinc-500">
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-zinc-900 dark:text-white">
+                      {question.question}
+                    </p>
+                    <p className="mt-1 text-xs capitalize text-zinc-500">
+                      {question.difficulty} · {question.questionType}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      title="Move question up"
+                      disabled={index === 0}
+                      onClick={() => moveQuestion(index, -1)}
+                    >
+                      <ArrowUp className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      title="Move question down"
+                      disabled={index === form.interviewQuestions.length - 1}
+                      onClick={() => moveQuestion(index, 1)}
+                    >
+                      <ArrowDown className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      title="Remove question"
+                      onClick={() => removeQuestion(question._id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              {form.interviewQuestions.length === 0 && (
+                <p className="rounded-2xl bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-500 dark:bg-zinc-900/70">
+                  Assign at least one question before publishing.
+                </p>
+              )}
+            </div>
+          </div>
+
           <div className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
             <h2 className="font-semibold text-zinc-900 dark:text-white">
               Search metadata
