@@ -145,7 +145,7 @@ export default function TopicForm({ topicId = null }) {
   }, [form.course, topicId]);
 
   useEffect(() => {
-    if (form.type !== "interview" || !form.course) {
+    if (!form.course) {
       setQuestionOptions([]);
       return;
     }
@@ -223,13 +223,10 @@ export default function TopicForm({ topicId = null }) {
 
     data.append("relatedTopics", JSON.stringify(form.relatedTopics));
 
-    const questions =
-      form.type === "interview"
-        ? form.interviewQuestions.map((item, order) => ({
-            question: item._id,
-            order,
-          }))
-        : [];
+    const questions = form.interviewQuestions.map((item, order) => ({
+      question: item._id,
+      order,
+    }));
     data.append("interviewQuestions", JSON.stringify(questions));
 
     if (imageFile) {
@@ -417,8 +414,7 @@ export default function TopicForm({ topicId = null }) {
               />
             </div>
           </div>
-          {form.type === "interview" && (
-            <div className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+          <div className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
               <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div>
                   <h2 className="font-semibold text-zinc-900 dark:text-white">

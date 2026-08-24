@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import {
   ArrowLeft,
@@ -17,6 +18,7 @@ import TopicMarkdown from "@/components/articles/TopicMarkdown";
 import AuthorIdentityCard from "@/components/authors/AuthorIdentityCard";
 import { getPublicTopic } from "@/lib/publicContent";
 import { absoluteUrl, getSiteUrl } from "@/lib/seo";
+import { getImageUrl } from "@/lib/config";
 
 const siteUrl = getSiteUrl();
 
@@ -253,6 +255,38 @@ function QuestionIndex({ questions, titleId }) {
   );
 }
 
+function ChapterIndex({ chapters, courseSlug, titleId }) {
+  if (!chapters?.length) return null;
+
+  return (
+    <nav aria-labelledby={titleId}>
+      <div className="flex items-center gap-2">
+        <BookOpen className="h-4 w-4 text-emerald-500" aria-hidden="true" />
+        <h2 id={titleId} className="text-sm font-extrabold">
+          Course Chapters
+        </h2>
+      </div>
+      <ol className="mt-4 space-y-1.5">
+        {chapters.map((chapter, index) => (
+          <li key={chapter._id}>
+            <Link
+              href={`/${encodeURIComponent(courseSlug)}/${encodeURIComponent(chapter.slug)}`}
+              className="group flex gap-3 rounded-xl px-3 py-2.5 text-sm text-zinc-600 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-zinc-400 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-300"
+            >
+              <span className="font-bold text-zinc-400 group-hover:text-emerald-500">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span className="line-clamp-2 font-medium leading-5">
+                {chapter.title}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
+
 function InterviewQuestions({ questions }) {
   return (
     <section className="divide-y divide-zinc-200/80 dark:divide-zinc-800">
@@ -353,13 +387,10 @@ export default async function CourseTopicPage({ courseSlug, topicPath }) {
     .join("/")}`;
   if (currentPath !== canonicalPath) redirect(canonicalPath);
 
-  const questions =
-    topic.type === "interview"
-      ? (topic.interviewQuestions || []).map((question, index) => ({
-          ...question,
-          anchorId: questionAnchor(question, index),
-        }))
-      : [];
+  const questions = (topic.interviewQuestions || []).map((question, index) => ({
+    ...question,
+    anchorId: questionAnchor(question, index),
+  }));
   const jsonLd = structuredData(courseSlug, topic, questions);
   const readingMinutes = estimateReadingTime(topic, questions);
 
@@ -417,9 +448,8 @@ export default async function CourseTopicPage({ courseSlug, topicPath }) {
           </ol>
         </nav>
 
-        <header className="overflow-hidden rounded-3xl border border-zinc-200/70 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
-          <div className="h-1.5 w-full bg-linear-to-r from-blue-600 via-cyan-500 to-emerald-500" />
-          <div className="p-5 sm:p-8 lg:p-10">
+        <header className="py-2 sm:py-6 lg:py-8">
+          <div>
             <div className="mb-5 flex flex-wrap items-center gap-2.5 text-xs font-bold">
               <Link
                 href={`/courses/${encodeURIComponent(courseSlug)}`}
@@ -474,8 +504,23 @@ export default async function CourseTopicPage({ courseSlug, topicPath }) {
           </div>
         </header>
 
+        {topic.image && (
+          <div className="mb-10 lg:mb-12">
+            <div className="relative aspect-video w-full overflow-hidden rounded-2xl md:rounded-3xl bg-zinc-100 dark:bg-zinc-900 shadow-sm border border-zinc-200/70 dark:border-zinc-800">
+              <Image
+                src={getImageUrl(topic.image)}
+                alt={topic.title}
+                fill
+                className="object-cover"
+                priority
+                unoptimized
+              />
+            </div>
+          </div>
+        )}
+
         {questions.length > 0 && (
-          <div className="mt-6 rounded-2xl border border-zinc-200/70 bg-white p-4 shadow-sm lg:hidden dark:border-zinc-800 dark:bg-zinc-900/90">
+          <div className="mt-6 lg:hidden">
             <QuestionIndex
               questions={questions}
               titleId="mobile-question-index-title"
@@ -483,17 +528,18 @@ export default async function CourseTopicPage({ courseSlug, topicPath }) {
           </div>
         )}
 
-        <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
-          <article className="min-w-0 rounded-none bg-transparent px-1 py-4 sm:rounded-3xl sm:border sm:border-zinc-200/70 sm:bg-white sm:p-8 sm:shadow-sm lg:p-10 dark:sm:border-zinc-800 dark:sm:bg-zinc-900/90">
+        <div className="mt-6 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
+          <article className="min-w-0">
             {topic.content && (
               <div className="pb-8">
                 <TopicMarkdown content={topic.content} />
               </div>
             )}
-            {topic.type === "interview" && (
+
+            {questions.length > 0 && (
               <InterviewQuestions questions={questions} />
             )}
-            <div className="mt-8">
+            <div className="mt-8 border-t border-zinc-200/80 pt-8 dark:border-zinc-800/80">
               <AuthorIdentityCard
                 author={topic.author || topic.course?.author}
                 publishedAt={topic.createdAt}
@@ -504,18 +550,27 @@ export default async function CourseTopicPage({ courseSlug, topicPath }) {
           </article>
 
           <aside className="hidden lg:block">
-            <div className="sticky top-24 space-y-4">
+            <div className="sticky top-24 space-y-6 pt-2">
               {questions.length > 0 && (
-                <div className="max-h-[calc(100vh-8rem)] overflow-y-auto rounded-2xl border border-zinc-200/70 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90">
+                <div className="max-h-[calc(100vh-8rem)] overflow-y-auto">
                   <QuestionIndex
                     questions={questions}
                     titleId="desktop-question-index-title"
                   />
                 </div>
               )}
+              {topic.courseChapters?.length > 0 && (
+                <div className="max-h-[calc(100vh-8rem)] overflow-y-auto">
+                  <ChapterIndex
+                    chapters={topic.courseChapters}
+                    courseSlug={courseSlug}
+                    titleId="desktop-chapter-index-title"
+                  />
+                </div>
+              )}
               <Link
                 href={`/courses/${encodeURIComponent(courseSlug)}`}
-                className="group flex items-center justify-between gap-3 rounded-2xl border border-zinc-200/70 bg-white p-4 shadow-sm transition-colors hover:border-blue-300 dark:border-zinc-800 dark:bg-zinc-900/90 dark:hover:border-blue-700"
+                className="group flex items-center justify-between gap-3 py-4 transition-colors hover:text-blue-600 dark:hover:text-blue-400"
               >
                 <span>
                   <span className="block text-[11px] font-bold uppercase text-zinc-400">

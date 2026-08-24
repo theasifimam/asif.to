@@ -3,6 +3,7 @@ import Course from "../models/Course.js";
 import CourseTopic from "../models/CourseTopic.js";
 import TopicCategory from "../models/TopicCategory.js";
 import InterviewQuestion from "../models/Question.js";
+import Chapter from "../models/Chapter.js";
 import { formatCanonicalUrl } from "../utils/canonical.js";
 import fs from "fs";
 
@@ -138,6 +139,7 @@ function publicTopic(topic) {
     })),
     previousTopic: item.previousTopic || null,
     nextTopic: item.nextTopic || null,
+    courseChapters: item.courseChapters || [],
   };
 }
 
@@ -657,11 +659,19 @@ export const getPublicTopic = async (req, res) => {
     const index = siblings.findIndex(
       (item) => String(item._id) === String(topic._id),
     );
+    const courseChapters = await Chapter.find({
+      course: course._id,
+      status: "published",
+    })
+      .select("title slug order")
+      .sort({ order: 1 })
+      .lean();
     const data = publicTopic({
       ...topic,
       course,
       previousTopic: siblings[index - 1] || null,
       nextTopic: siblings[index + 1] || null,
+      courseChapters,
     });
     res.json({ success: true, data });
   } catch (error) {

@@ -441,7 +441,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Right Visual Bar Chart Visualization */}
-          <div className="lg:col-span-7 flex flex-col gap-3 bg-zinc-50/80 dark:bg-[#18181b]/70 p-3.5 sm:p-6 rounded-[20px] sm:rounded-[28px] border border-zinc-200/60 dark:border-zinc-800/60">
+          <div className="lg:col-span-7 flex flex-col gap-3 bg-zinc-50/80 dark:bg-[#18181b]/70 p-3.5 sm:p-6 rounded-[20px] sm:rounded-[28px] ">
             <div className="flex items-center justify-between text-xs font-bold text-zinc-500 mb-1">
               <span>Reads by course</span>
               <span className="text-blue-600 dark:text-blue-400 font-black uppercase text-[9px] tracking-widest px-2.5 py-0.5 rounded-full bg-blue-500/10">
@@ -523,11 +523,11 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 bg-white rounded-[20px] sm:rounded-4xl transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700 max-h-141 overflow-y-auto">
             {(dashboardData?.topCourses || []).map((course, i) => (
               <div
                 key={course.id}
-                className="admin-surface p-3.5 sm:p-6 rounded-[20px] sm:rounded-4xl transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 group min-w-0"
+                className="p-3.5 sm:p-6  flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 group min-w-0"
               >
                 <div className="flex items-start gap-3 min-w-0 flex-1">
                   <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 flex items-center justify-center text-xs font-black shrink-0 mt-0.5">
