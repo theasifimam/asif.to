@@ -293,8 +293,30 @@ export const articleTopicsApi = {
 export const topicsApi = {
   list: (params = {}) => apiGet(`/topics?${new URLSearchParams(params)}`),
   get: (id) => apiGet(`/topics/${id}`),
-  create: (data) => apiPost("/topics", data),
-  update: (id, data) => apiPatch(`/topics/${id}`, data),
+  create: (formData) => {
+    const authHeaders = getAuthHeaders();
+    const headers = { ...authHeaders, "ngrok-skip-browser-warning": "true" };
+    delete headers["Content-Type"];
+
+    return fetch(buildUrl("/topics"), {
+      method: "POST",
+      headers: headers,
+      body: formData,
+      credentials: "include",
+    }).then((res) => handleResponse(res));
+  },
+  update: (id, formData) => {
+    const authHeaders = getAuthHeaders();
+    const headers = { ...authHeaders, "ngrok-skip-browser-warning": "true" };
+    delete headers["Content-Type"];
+
+    return fetch(buildUrl(`/topics/${id}`), {
+      method: "PATCH",
+      headers: headers,
+      body: formData,
+      credentials: "include",
+    }).then((res) => handleResponse(res));
+  },
   setStatus: (id, status) => apiPatch(`/topics/${id}/publish`, { status }),
   reorder: (course, orders) => apiPatch("/topics/reorder", { course, orders }),
   delete: (id) => apiDelete(`/topics/${id}`),

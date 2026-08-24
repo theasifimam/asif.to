@@ -101,6 +101,10 @@ const courseTopicSchema = new Schema(
         },
       },
     ],
+    image: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true },
 );

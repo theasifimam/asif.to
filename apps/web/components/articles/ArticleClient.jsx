@@ -18,6 +18,7 @@ import Image from "next/image";
 import {
   useGetArticleByIdQuery,
   useGetArticlesQuery,
+  useGetArticleBySlugQuery,
 } from "@/lib/api/articlesApi";
 import { format } from "date-fns";
 import { getImageUrl } from "@/lib/config";
@@ -39,8 +40,26 @@ const WhatsAppIcon = ({ size = 18 }) => (
 
 export default function ArticleClient({ slug, initialData }) {
   const { theme } = useTheme();
-  const id = slug.substring(slug.lastIndexOf("-") + 1);
-  const { data: response, isLoading, error } = useGetArticleByIdQuery(id);
+  const lastDash = slug.lastIndexOf("-");
+  const possibleId = lastDash >= 0 ? slug.substring(lastDash + 1) : "";
+  const looksLikeMongoId = /^[a-f0-9]{24}$/i.test(possibleId);
+
+  const cleanSlug = looksLikeMongoId ? slug.substring(0, lastDash) : slug;
+
+  const { data: responseById, isLoading: idLoading, error: idError } = useGetArticleByIdQuery(
+    possibleId,
+    { skip: !looksLikeMongoId }
+  );
+
+  const { data: responseBySlug, isLoading: slugLoading, error: slugError } = useGetArticleBySlugQuery(
+    cleanSlug,
+    { skip: looksLikeMongoId }
+  );
+
+  const response = looksLikeMongoId ? responseById : responseBySlug;
+  const isLoading = looksLikeMongoId ? idLoading : slugLoading;
+  const error = looksLikeMongoId ? idError : slugError;
+
   const { data: moreArticles } = useGetArticlesQuery({ limit: 4 });
   const article = response?.data || initialData;
   const [copied, setCopied] = useState(false);

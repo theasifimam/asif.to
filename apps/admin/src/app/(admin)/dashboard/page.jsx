@@ -234,19 +234,33 @@ export default function DashboardPage() {
 
         {/* Quick Action Buttons - Horizontal scrollable row on mobile */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-3.5 px-3.5 scrollbar-none lg:mx-0 lg:px-0 lg:pb-0 lg:flex-wrap lg:justify-end">
-          <Button asChild size="sm" className="rounded-full shrink-0 h-9 px-3.5 text-xs font-bold gap-1.5 shadow-sm">
+          <Button
+            asChild
+            size="sm"
+            className="rounded-full shrink-0 h-9 px-3.5 text-xs font-bold gap-1.5 shadow-sm"
+          >
             <Link href="/courses">
               <BookOpen className="w-3.5 h-3.5" />
               <span>Manage Courses</span>
             </Link>
           </Button>
-          <Button asChild variant="outline" size="sm" className="rounded-full shrink-0 h-9 px-3.5 text-xs font-bold gap-1.5 border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-transparent">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="rounded-full shrink-0 h-9 px-3.5 text-xs font-bold gap-1.5 border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-transparent"
+          >
             <Link href="/articles">
               <PenSquare className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
               <span>Write Articles</span>
             </Link>
           </Button>
-          <Button asChild variant="outline" size="sm" className="rounded-full shrink-0 h-9 px-3.5 text-xs font-bold gap-1.5 border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-transparent">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="rounded-full shrink-0 h-9 px-3.5 text-xs font-bold gap-1.5 border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-transparent"
+          >
             <Link href="/quiz">
               <BrainCircuit className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
               <span>Quiz Builder</span>
@@ -338,7 +352,7 @@ export default function DashboardPage() {
               className="relative group"
             >
               <div
-                className={`relative flex min-h-[125px] sm:min-h-42 flex-col justify-between overflow-hidden p-4 sm:p-6 rounded-[20px] sm:rounded-4xl border shadow-xs transition-all duration-300 ${theme.bg} ${theme.border} ${theme.borderHover} hover:shadow-md hover:-translate-y-0.5`}
+                className={`relative flex min-h-31.25 sm:min-h-42 flex-col justify-between overflow-hidden p-4 sm:p-6 rounded-[20px] sm:rounded-4xl border shadow-xs transition-all duration-300 ${theme.bg} ${theme.border} ${theme.borderHover} hover:shadow-md hover:-translate-y-0.5`}
               >
                 <div className="relative z-10 flex items-center justify-between gap-2 mb-2 sm:mb-3">
                   <div
@@ -371,7 +385,7 @@ export default function DashboardPage() {
       </section>
 
       {/* Real all-time readership by course (Bento Feature Card) */}
-      <section className="admin-surface flex flex-col gap-4 p-4 sm:p-8 rounded-[24px] sm:rounded-[36px]">
+      <section className="admin-surface flex flex-col gap-4 p-4 sm:p-8 rounded-3xl sm:rounded-[36px]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 dark:border-zinc-800 pb-3.5 sm:pb-5">
           <div>
             <div className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">
@@ -467,7 +481,7 @@ export default function DashboardPage() {
                         className="pointer-events-none absolute bottom-11 left-1/2 z-30 hidden w-max max-w-56 -translate-x-1/2 rounded-2xl bg-zinc-950/95 backdrop-blur-md px-3.5 py-2.5 text-center text-[11px] font-semibold text-white shadow-2xl border border-zinc-800 group-hover/bar:block group-focus/bar:block"
                       >
                         <strong className="block text-xs font-black text-blue-400 mb-0.5">
-                           {item.label}
+                          {item.label}
                         </strong>
                         <span className="text-zinc-300 font-bold">
                           {item.value.toLocaleString()}
@@ -604,8 +618,8 @@ export default function DashboardPage() {
                       <div
                         className="h-full min-w-1 rounded-full transition-[width] duration-500"
                         style={{
-                           width: `${percentage}%`,
-                           backgroundColor: item.color || "#2563eb",
+                          width: `${percentage}%`,
+                          backgroundColor: item.color || "#2563eb",
                         }}
                       />
                     </div>

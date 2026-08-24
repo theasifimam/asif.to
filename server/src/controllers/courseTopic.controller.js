@@ -4,6 +4,7 @@ import CourseTopic from "../models/CourseTopic.js";
 import TopicCategory from "../models/TopicCategory.js";
 import InterviewQuestion from "../models/Question.js";
 import { formatCanonicalUrl } from "../utils/canonical.js";
+import fs from "fs";
 
 function slugify(value = "") {
   return value
@@ -118,6 +119,7 @@ function publicTopic(topic) {
     updatedAt: item.updatedAt,
     course: item.course,
     category: item.category,
+    image: item.image || "",
     interviewQuestions: (item.interviewQuestions || [])
       .filter((entry) => entry.question)
       .sort((a, b) => a.order - b.order)
@@ -224,6 +226,16 @@ export const getCourseTopicAdmin = async (req, res) => {
 
 export const createCourseTopic = async (req, res) => {
   try {
+    if (typeof req.body.interviewQuestions === "string") {
+      try {
+        req.body.interviewQuestions = JSON.parse(req.body.interviewQuestions);
+      } catch {}
+    }
+    if (typeof req.body.relatedTopics === "string") {
+      try {
+        req.body.relatedTopics = JSON.parse(req.body.relatedTopics);
+      } catch {}
+    }
     const course = await resolveCourse(req.body.course || req.body.courseId);
     if (!course)
       return res
@@ -261,6 +273,11 @@ export const createCourseTopic = async (req, res) => {
       targetSlug,
     );
 
+    let imageUrl = "";
+    if (req.file) {
+      imageUrl = `/uploads/articles/${req.file.filename}`;
+    }
+
     const topic = await CourseTopic.create({
       ...req.body,
       type,
@@ -271,6 +288,7 @@ export const createCourseTopic = async (req, res) => {
       keywords: parseKeywords(req.body.keywords),
       relatedTopics,
       interviewQuestions,
+      image: imageUrl,
       author: req.user._id,
       status: "draft",
       publishedAt: null,
@@ -281,6 +299,7 @@ export const createCourseTopic = async (req, res) => {
     });
   } catch (error) {
     console.error("[COURSE TOPICS] create error:", error);
+    if (req.file) fs.unlinkSync(req.file.path);
     res
       .status(error.code === 11000 ? 409 : 400)
       .json({ success: false, message: validationMessage(error) });
@@ -289,6 +308,16 @@ export const createCourseTopic = async (req, res) => {
 
 export const updateCourseTopic = async (req, res) => {
   try {
+    if (typeof req.body.interviewQuestions === "string") {
+      try {
+        req.body.interviewQuestions = JSON.parse(req.body.interviewQuestions);
+      } catch {}
+    }
+    if (typeof req.body.relatedTopics === "string") {
+      try {
+        req.body.relatedTopics = JSON.parse(req.body.relatedTopics);
+      } catch {}
+    }
     const topic = await CourseTopic.findById(req.params.id);
     if (!topic)
       return res
@@ -371,6 +400,25 @@ export const updateCourseTopic = async (req, res) => {
         course._id,
       );
     }
+
+    if (req.file) {
+      if (topic.image && topic.image.startsWith("/")) {
+        const oldImagePath = topic.image.slice(1);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+      topic.image = `/uploads/articles/${req.file.filename}`;
+    } else if (req.body.image === "" || req.body.image === "null" || req.body.image === null) {
+      if (topic.image && topic.image.startsWith("/")) {
+        const oldImagePath = topic.image.slice(1);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+      topic.image = "";
+    }
+
     await topic.save();
     res.json({
       success: true,
@@ -378,6 +426,7 @@ export const updateCourseTopic = async (req, res) => {
     });
   } catch (error) {
     console.error("[COURSE TOPICS] update error:", error);
+    if (req.file) fs.unlinkSync(req.file.path);
     res
       .status(error.code === 11000 ? 409 : 400)
       .json({ success: false, message: validationMessage(error) });
@@ -438,6 +487,14 @@ export const deleteCourseTopic = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: "Topic not found." });
+
+    if (topic.image && topic.image.startsWith("/")) {
+      const oldImagePath = topic.image.slice(1);
+      if (fs.existsSync(oldImagePath)) {
+        fs.unlinkSync(oldImagePath);
+      }
+    }
+
     await CourseTopic.updateMany(
       { relatedTopics: topic._id },
       { $pull: { relatedTopics: topic._id } },

@@ -1,41 +1,69 @@
 import { Info, TrendingDown, TrendingUp } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const getTooltipContent = (label) => {
   const normalized = label.toLowerCase().replace(/\s+/g, " ").trim();
   const descriptions = {
-    "total clicks": "The total number of clicks from Google Search results that directed users to your site.",
-    "search clicks": "The total number of clicks from Google Search results that directed users to your site.",
-    "total impressions": "The number of times a URL from your site appeared in Google Search results.",
-    "impressions": "The number of times a URL from your site appeared in Google Search results.",
-    "average ctr": "Click-Through Rate: The percentage of search impressions that resulted in a click (Clicks / Impressions * 100).",
-    "average position": "The average ranking position of your site's URLs in search results for queries.",
-    "organic visitors": "The number of unique users who reached the site specifically through unpaid search engine results.",
-    "page views": "The total number of pages viewed. Repeated views of a single page are counted.",
-    "unique visitors": "The number of distinct visitors who initiated at least one session on your website during the period.",
-    "visitors": "The number of distinct visitors who initiated at least one session on your website during the period.",
-    "sessions": "The total number of sessions initiated by users. A session is a group of user interactions within a given time frame.",
-    "avg engagement time": "The average duration that the site was active and in the foreground of users' screens.",
-    "avg engagement": "The average duration that the site was active and in the foreground of users' screens.",
-    "active users": "The number of distinct users who visited the site and had an active session during the selected range.",
-    "active users now": "The number of active users currently online and interacting with the website in real-time.",
-    "new users": "The number of users who interacted with your site for the first time during the period.",
-    "engaged sessions": "The number of sessions that lasted longer than 10 seconds, had a conversion event, or had 2 or more page views.",
-    "engagement rate": "The percentage of sessions that were engaged sessions (Engaged sessions / Sessions).",
-    
+    "total clicks":
+      "The total number of clicks from Google Search results that directed users to your site.",
+    "search clicks":
+      "The total number of clicks from Google Search results that directed users to your site.",
+    "total impressions":
+      "The number of times a URL from your site appeared in Google Search results.",
+    impressions:
+      "The number of times a URL from your site appeared in Google Search results.",
+    "average ctr":
+      "Click-Through Rate: The percentage of search impressions that resulted in a click (Clicks / Impressions * 100).",
+    "average position":
+      "The average ranking position of your site's URLs in search results for queries.",
+    "organic visitors":
+      "The number of unique users who reached the site specifically through unpaid search engine results.",
+    "page views":
+      "The total number of pages viewed. Repeated views of a single page are counted.",
+    "unique visitors":
+      "The number of distinct visitors who initiated at least one session on your website during the period.",
+    visitors:
+      "The number of distinct visitors who initiated at least one session on your website during the period.",
+    sessions:
+      "The total number of sessions initiated by users. A session is a group of user interactions within a given time frame.",
+    "avg engagement time":
+      "The average duration that the site was active and in the foreground of users' screens.",
+    "avg engagement":
+      "The average duration that the site was active and in the foreground of users' screens.",
+    "active users":
+      "The number of distinct users who visited the site and had an active session during the selected range.",
+    "active users now":
+      "The number of active users currently online and interacting with the website in real-time.",
+    "new users":
+      "The number of users who interacted with your site for the first time during the period.",
+    "engaged sessions":
+      "The number of sessions that lasted longer than 10 seconds, had a conversion event, or had 2 or more page views.",
+    "engagement rate":
+      "The percentage of sessions that were engaged sessions (Engaged sessions / Sessions).",
+
     // Platform metrics
-    "articles": "The total number of educational articles currently published on the platform.",
-    "courses": "The total number of educational courses created and published.",
-    "chapters": "The total number of chapters published across all courses.",
-    "authors": "The total number of registered content creators and authors on the platform.",
-    "published content": "The cumulative total of all published courses, chapters, and articles."
+    articles:
+      "The total number of educational articles currently published on the platform.",
+    courses: "The total number of educational courses created and published.",
+    chapters: "The total number of chapters published across all courses.",
+    authors:
+      "The total number of registered content creators and authors on the platform.",
+    "published content":
+      "The cumulative total of all published courses, chapters, and articles.",
   };
-  return descriptions[normalized] || `Information and telemetry details about ${label}.`;
+  return (
+    descriptions[normalized] ||
+    `Information and telemetry details about ${label}.`
+  );
 };
 
 export default function MetricCard({ label, value, source, change }) {
   return (
-    <div className="admin-surface flex min-h-[115px] sm:min-h-36 flex-col justify-between p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700">
+    <div className="admin-surface flex min-h-28.75 sm:min-h-36 flex-col justify-between p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
           <p className="truncate text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400 dark:text-zinc-500">
@@ -57,7 +85,9 @@ export default function MetricCard({ label, value, source, change }) {
               className="w-64 p-3.5 text-xs font-medium text-zinc-600 dark:text-zinc-400 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xs shadow-lg border border-zinc-200/60 dark:border-zinc-800 rounded-2xl z-50"
             >
               <div className="space-y-1">
-                <p className="font-bold text-zinc-900 dark:text-zinc-100">{label}</p>
+                <p className="font-bold text-zinc-900 dark:text-zinc-100">
+                  {label}
+                </p>
                 <p className="leading-relaxed">{getTooltipContent(label)}</p>
               </div>
             </PopoverContent>
@@ -81,7 +111,11 @@ export default function MetricCard({ label, value, source, change }) {
                 : "bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"
             }`}
           >
-            {change >= 0 ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+            {change >= 0 ? (
+              <TrendingUp size={11} />
+            ) : (
+              <TrendingDown size={11} />
+            )}
             <span>{Math.abs(change).toFixed(1)}%</span>
           </span>
         </div>
@@ -91,4 +125,3 @@ export default function MetricCard({ label, value, source, change }) {
     </div>
   );
 }
-

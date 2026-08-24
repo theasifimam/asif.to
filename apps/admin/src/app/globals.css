@@ -142,6 +142,12 @@ body {
 }
 
 .admin-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(248, 250, 252, 0.98);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(228, 228, 231, 0.85);
   padding: 1rem 1.5rem;
   font-size: 0.6875rem;
   font-weight: 900;
@@ -151,6 +157,8 @@ body {
 }
 
 .dark .admin-table thead th {
+  background: rgba(24, 24, 27, 0.98);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   color: #a1a1aa;
 }
 
@@ -178,6 +186,39 @@ body {
 .admin-table tbody td {
   padding: 1.125rem 1.5rem;
   vertical-align: middle;
+}
+
+/* Global scroll limit and behavior for admin tables */
+.overflow-x-auto:has(> table) {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* Sleek custom scrollbars for table containers */
+.overflow-x-auto:has(> table)::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.overflow-x-auto:has(> table)::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-x-auto:has(> table)::-webkit-scrollbar-thumb {
+  background: rgba(161, 161, 170, 0.3);
+  border-radius: 9999px;
+}
+
+.overflow-x-auto:has(> table)::-webkit-scrollbar-thumb:hover {
+  background: rgba(161, 161, 170, 0.5);
+}
+
+.dark .overflow-x-auto:has(> table)::-webkit-scrollbar-thumb {
+  background: rgba(63, 63, 70, 0.4);
+}
+
+.dark .overflow-x-auto:has(> table)::-webkit-scrollbar-thumb:hover {
+  background: rgba(63, 63, 70, 0.6);
 }
 
 .font-outfit {

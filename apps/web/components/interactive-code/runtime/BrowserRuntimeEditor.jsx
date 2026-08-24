@@ -85,9 +85,9 @@ function BrowserRuntimeWorkspace({
   const finish = useCallback((message) => {
     if (message.type === "ready") {
       javaReadyRef.current = true;
-      if (pendingJavaRef.current != null && javaRef.current?.contentWindow)
+      if (pendingJavaRef.current && javaRef.current?.contentWindow)
         javaRef.current.contentWindow.postMessage(
-          { type: "run", code: pendingJavaRef.current },
+          pendingJavaRef.current,
           "*",
         );
       return;
@@ -146,7 +146,7 @@ function BrowserRuntimeWorkspace({
     setProgress(null);
     setStatus("loading");
     setStatusText(config.loading);
-    if (["c", "cpp"].includes(language) && !window.crossOriginIsolated) {
+    if (language === "c" && !window.crossOriginIsolated) {
       finish({
         type: "error",
         error: `${config.label} needs an isolated browser page to run its WebAssembly compiler. Open this editor from /play, /run, /playground, or /practice and reload once.`,
@@ -162,14 +162,17 @@ function BrowserRuntimeWorkspace({
       language === "c" ? 600000 : language === "java" ? 360000 : 180000,
     );
     if (language === "java") {
-      pendingJavaRef.current = source;
+      const request = {
+        type: "run",
+        code: source,
+        files: sandpack.files,
+        entry: activeFile,
+      };
+      pendingJavaRef.current = request;
       if (!javaMounted) {
         setJavaMounted(true);
       } else if (javaReadyRef.current && javaRef.current?.contentWindow) {
-        javaRef.current.contentWindow.postMessage(
-          { type: "run", code: source, files: sandpack.files, entry: activeFile },
-          "*",
-        );
+        javaRef.current.contentWindow.postMessage(request, "*");
       }
       return;
     }
@@ -198,7 +201,10 @@ function BrowserRuntimeWorkspace({
 
   useEffect(() => {
     const onMessage = (event) => {
-      if (event.data?.source === "asif-java-runtime")
+      if (
+        event.source === javaRef.current?.contentWindow &&
+        event.data?.source === "asif-java-runtime"
+      )
         finish(event.data);
     };
     window.addEventListener("message", onMessage);
@@ -314,19 +320,32 @@ function BrowserRuntimeWorkspace({
   );
 
   return (
-    <Workspace
-      language={language}
-      languageOptions={languageOptions}
-      onLanguageChange={onLanguageChange}
-      title={title}
-      editorTheme="dark"
-      onThemeChange={() => {}}
-      fillViewport={fillViewport}
-      playgroundId={playgroundId}
-      starterFiles={{ [config.file]: starter }}
-      runtimeAdapter={{ run, status, output: runtimeOutput }}
-      executionEnabled={executionEnabled !== false}
-    />
+    <>
+      <Workspace
+        language={language}
+        languageOptions={languageOptions}
+        onLanguageChange={onLanguageChange}
+        title={title}
+        editorTheme="dark"
+        onThemeChange={() => {}}
+        fillViewport={fillViewport}
+        playgroundId={playgroundId}
+        starterFiles={{ [config.file]: starter }}
+        runtimeAdapter={{ run, status, output: runtimeOutput }}
+        executionEnabled={executionEnabled !== false}
+      />
+      {javaMounted && (
+        <iframe
+          ref={javaRef}
+          src={config.iframe}
+          sandbox="allow-scripts allow-same-origin"
+          credentialless="true"
+          referrerPolicy="no-referrer"
+          className="hidden"
+          title="Isolated credentialless Java browser runtime"
+        />
+      )}
+    </>
   );
 
   /* The legacy standalone shell below is intentionally unreachable while the

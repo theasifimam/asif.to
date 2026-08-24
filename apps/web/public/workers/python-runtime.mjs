@@ -1,62 +1,79 @@
+import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.mjs";
+
+const PYODIDE_BASE = "https://cdn.jsdelivr.net/pyodide/v0.27.7/full/";
 let pyodidePromise;
 let stdout = "";
 let stderr = "";
 
-async function reportSize(url, file, message) {
-  try {
-    const response = await fetch(url, { method: "HEAD", mode: "cors" });
-    const total = Number(response.headers.get("content-length")) || 0;
-    self.postMessage({ type: "progress", message, file, loaded: 0, total });
-    return total;
-  } catch {
-    self.postMessage({ type: "progress", message, file, loaded: 0, total: 0 });
-    return 0;
-  }
-}
-
 async function runtime() {
   if (!pyodidePromise) {
-    const moduleUrl = "https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.mjs";
-    const total = await reportSize(moduleUrl, "pyodide.mjs", "Downloading the Python runtime loader...");
-    pyodidePromise = import(moduleUrl).then(({ loadPyodide }) => {
-      self.postMessage({ type: "progress", message: "Python runtime loader downloaded.", file: "pyodide.mjs", loaded: total, total });
-      self.postMessage({ type: "status", message: "Initializing Python WebAssembly..." });
-      return loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.27.7/full/" });
+    self.postMessage({
+      type: "status",
+      message: "Downloading and initializing Python WebAssembly...",
+    });
+
+    pyodidePromise = loadPyodide({ indexURL: PYODIDE_BASE }).then((pyodide) => {
+      pyodide.setStdout({
+        raw: (value) => {
+          stdout += String.fromCharCode(value);
+        },
+      });
+      pyodide.setStderr({
+        raw: (value) => {
+          stderr += String.fromCharCode(value);
+        },
+      });
+      return pyodide;
     });
   }
-  const pyodide = await pyodidePromise;
-  pyodide.setStdout({ raw: (value) => { stdout += String.fromCharCode(value); } });
-  pyodide.setStderr({ raw: (value) => { stderr += String.fromCharCode(value); } });
-  return pyodide;
+
+  return pyodidePromise;
 }
 
 self.onmessage = async ({ data }) => {
   if (data?.type !== "run") return;
-  stdout = ""; stderr = "";
+
+  stdout = "";
+  stderr = "";
+
   try {
     const pyodide = await runtime();
-    self.postMessage({ type: "status", message: "Running Python..." });
+
     if (data.files) {
       for (const [path, fileObj] of Object.entries(data.files)) {
-        if (!fileObj.code) continue;
+        if (!fileObj?.code) continue;
+
         const parts = path.split("/").filter(Boolean);
         let currentPath = "";
-        for (let i = 0; i < parts.length - 1; i++) {
-          currentPath += "/" + parts[i];
+
+        for (let i = 0; i < parts.length - 1; i += 1) {
+          currentPath += `/${parts[i]}`;
           try {
             pyodide.FS.mkdir(currentPath);
-          } catch (e) {
-            // ignore if exists
+          } catch {
+            // Directory already exists.
           }
         }
+
         pyodide.FS.writeFile(path, fileObj.code);
       }
     }
-    const codeToRun = data.code || "";
+
+    const codeToRun = String(data.code || "");
+    self.postMessage({ type: "status", message: "Preparing Python imports..." });
     await pyodide.loadPackagesFromImports(codeToRun);
+
+    self.postMessage({ type: "status", message: "Running Python..." });
     await pyodide.runPythonAsync(codeToRun);
+
     self.postMessage({ type: "result", stdout, stderr });
   } catch (error) {
-    self.postMessage({ type: "error", error: error?.message || String(error) });
+    self.postMessage({
+      type: "error",
+      error:
+        error?.message ||
+        String(error) ||
+        "The Python browser runtime could not execute this code.",
+    });
   }
 };

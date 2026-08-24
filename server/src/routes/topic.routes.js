@@ -12,6 +12,10 @@ import {
 } from "../controllers/courseTopic.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
 import { requirePermission } from "../utils/permissions.js";
+import {
+  compressArticleImage,
+  uploadArticleImage,
+} from "../middlewares/upload.middleware.js";
 
 const router = Router();
 const canView = [protect, requirePermission("topics.view")];
@@ -22,10 +26,22 @@ router.get("/public/:courseSlug/:topicSlug", getPublicTopic);
 router.get("/public/:courseSlug/*topicPath", getPublicTopic);
 router.get("/", ...canView, listCourseTopics);
 router.get("/:id", ...canView, getCourseTopicAdmin);
-router.post("/", ...canManage, createCourseTopic);
+router.post(
+  "/",
+  ...canManage,
+  uploadArticleImage.single("image"),
+  compressArticleImage,
+  createCourseTopic,
+);
 router.patch("/reorder", ...canManage, reorderCourseTopics);
 router.patch("/:id/publish", ...canManage, publishCourseTopic);
-router.patch("/:id", ...canManage, updateCourseTopic);
+router.patch(
+  "/:id",
+  ...canManage,
+  uploadArticleImage.single("image"),
+  compressArticleImage,
+  updateCourseTopic,
+);
 router.delete("/:id", ...canManage, deleteCourseTopic);
 
 export default router;

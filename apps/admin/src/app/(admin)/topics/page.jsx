@@ -32,7 +32,7 @@ import {
   AdminPagination,
   AdminSearch,
 } from "@/components/admin";
-import { coursesApi, topicsApi } from "@/lib/api";
+import { coursesApi, topicsApi, topicCategoriesApi } from "@/lib/api";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { listingReturnTo, useUrlFilters } from "@/hooks/useUrlFilters";
 import { Skeleton } from "@/components/ui";
@@ -112,9 +112,11 @@ export default function TopicsPage() {
   const returnTo = listingReturnTo(pathname, searchParams);
   const [topics, setTopics] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [filters, setFilters] = useUrlFilters({
     search: "",
     course: "all",
+    category: "all",
     type: "all",
     status: "all",
     page: 1,
@@ -132,6 +134,7 @@ export default function TopicsPage() {
   const [deleting, setDeleting] = useState(false);
   const canReorder =
     filters.course !== "all" &&
+    filters.category === "all" &&
     !filters.search &&
     filters.type === "all" &&
     filters.status === "all";
@@ -144,11 +147,13 @@ export default function TopicsPage() {
     };
     if (filters.search.trim()) topicParams.search = filters.search.trim();
     if (filters.course !== "all") topicParams.course = filters.course;
+    if (filters.category !== "all") topicParams.category = filters.category;
     if (filters.type !== "all") topicParams.type = filters.type;
     if (filters.status !== "all") topicParams.status = filters.status;
-    const [topicResponse, courseResponse] = await Promise.all([
+    const [topicResponse, courseResponse, categoryResponse] = await Promise.all([
       topicsApi.list(topicParams),
       courses.length ? Promise.resolve(null) : coursesApi.listAll(),
+      categories.length ? Promise.resolve(null) : topicCategoriesApi.list("all"),
     ]);
     if (topicResponse.success) {
       const payload = topicResponse.data?.data;
@@ -161,6 +166,10 @@ export default function TopicsPage() {
       setCourses(
         courseResponse.data?.data?.data || courseResponse.data?.data || [],
       );
+    if (categoryResponse?.success)
+      setCategories(
+        categoryResponse.data?.data?.data || categoryResponse.data?.data || [],
+      );
     setLoading(false);
   };
 
@@ -170,6 +179,7 @@ export default function TopicsPage() {
   }, [
     filters.search,
     filters.course,
+    filters.category,
     filters.type,
     filters.status,
     filters.page,
@@ -274,7 +284,20 @@ export default function TopicsPage() {
         <Select
           value={filters.course}
           onValueChange={(course) =>
-            setFilters((current) => ({ ...current, course, page: 1 }))
+            setFilters((current) => {
+              const currentCat = categories.find((c) => c._id === current.category);
+              const catCourseId = currentCat?.course?._id || currentCat?.course;
+              const keepCat =
+                course === "all" ||
+                !catCourseId ||
+                String(catCourseId) === String(course);
+              return {
+                ...current,
+                course,
+                category: keepCat ? current.category : "all",
+                page: 1,
+              };
+            })
           }
         >
           <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b] md:w-56">
@@ -287,6 +310,56 @@ export default function TopicsPage() {
                 {course.title}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={filters.category}
+          onValueChange={(category) =>
+            setFilters((current) => {
+              if (category === "all") {
+                return { ...current, category, page: 1 };
+              }
+              const selectedCat = categories.find((c) => c._id === category);
+              const catCourseId = selectedCat?.course?._id || selectedCat?.course;
+              return {
+                ...current,
+                category,
+                course: catCourseId ? String(catCourseId) : current.course,
+                page: 1,
+              };
+            })
+          }
+        >
+          <SelectTrigger className="h-10 w-full rounded-full border border-zinc-200/80 bg-white/90 px-4 text-xs font-semibold shadow-none dark:border-zinc-800/80 dark:bg-[#18181b] md:w-48">
+            <SelectValue placeholder="All categories" />
+          </SelectTrigger>
+          <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800 dark:bg-[#18181b] max-h-80">
+            <SelectItem value="all">All categories</SelectItem>
+            {(filters.course !== "all"
+              ? categories.filter((c) => {
+                  const catCourseId = c.course?._id || c.course;
+                  return (
+                    !catCourseId ||
+                    String(catCourseId) === String(filters.course)
+                  );
+                })
+              : categories
+            ).map((cat) => {
+              const courseTitle =
+                cat.course?.title ||
+                courses.find((c) => String(c._id) === String(cat.course))
+                  ?.title;
+              return (
+                <SelectItem key={cat._id} value={cat._id}>
+                  {cat.name}{" "}
+                  {filters.course === "all" && courseTitle && (
+                    <span className="text-zinc-400 font-normal">
+                      ({courseTitle})
+                    </span>
+                  )}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
         <Select
@@ -324,7 +397,7 @@ export default function TopicsPage() {
 
       {filters.course !== "all" && !canReorder && (
         <p className="text-xs text-zinc-500">
-          Clear search, type, and status filters to reorder this course&apos;s
+          Clear search, category, type, and status filters to reorder this course&apos;s
           topics.
         </p>
       )}

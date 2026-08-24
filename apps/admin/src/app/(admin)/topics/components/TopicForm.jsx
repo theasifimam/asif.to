@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { getModuleBackUrl } from "@/hooks/useModuleHistory";
 import {
@@ -15,6 +15,8 @@ import {
   Search,
   Send,
   Trash2,
+  ImagePlus,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import Editor from "@/components/editor/Editor";
@@ -86,6 +88,10 @@ export default function TopicForm({ topicId = null }) {
   const [saving, setSaving] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
 
+  const fileRef = useRef(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+
   useEffect(() => {
     Promise.all([
       coursesApi.listAll(),
@@ -108,6 +114,13 @@ export default function TopicForm({ topicId = null }) {
             .sort((a, b) => a.order - b.order)
             .map((entry) => entry.question),
         });
+        setImagePreview(
+          topic.image?.startsWith("http")
+            ? topic.image
+            : topic.image
+              ? `http://localhost:5000${topic.image}`
+              : "",
+        );
         setSlugEdited(true);
       }
       setLoading(false);
@@ -180,20 +193,53 @@ export default function TopicForm({ topicId = null }) {
       seoTitle: current.seoTitle || title,
     }));
 
-  const payload = () => ({
-    ...form,
-    keywords: form.keywords
+  const chooseImage = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const payload = () => {
+    const data = new FormData();
+    data.append("type", form.type);
+    data.append("title", form.title);
+    data.append("slug", form.slug);
+    data.append("course", form.course);
+    data.append("category", form.category);
+    data.append("excerpt", form.excerpt);
+    data.append("content", form.content);
+    data.append("seoTitle", form.seoTitle);
+    data.append("seoDescription", form.seoDescription);
+    data.append("order", String(form.order));
+    data.append("canonicalUrl", form.canonicalUrl);
+    data.append("status", form.status);
+
+    const keywordsArray = form.keywords
       .split(",")
       .map((item) => item.trim())
-      .filter(Boolean),
-    interviewQuestions:
+      .filter(Boolean);
+    data.append("keywords", keywordsArray.join(", "));
+
+    data.append("relatedTopics", JSON.stringify(form.relatedTopics));
+
+    const questions =
       form.type === "interview"
         ? form.interviewQuestions.map((item, order) => ({
             question: item._id,
             order,
           }))
-        : [],
-  });
+        : [];
+    data.append("interviewQuestions", JSON.stringify(questions));
+
+    if (imageFile) {
+      data.append("image", imageFile);
+    } else if (!imagePreview) {
+      data.append("image", "");
+    }
+
+    return data;
+  };
 
   const save = async () => {
     if (!form.title.trim() || !form.course || !form.category)
@@ -642,6 +688,46 @@ export default function TopicForm({ topicId = null }) {
                   update("order", Number(event.target.value))
                 }
               />
+            </div>
+          </div>
+          <div className="space-y-4 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+            <h2 className="font-semibold text-zinc-900 dark:text-white">
+              Article Image
+            </h2>
+            <div className="space-y-2">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={chooseImage}
+              />
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-zinc-300 px-4 py-4 text-xs font-bold text-zinc-500 hover:border-blue-500 hover:text-blue-600 dark:border-zinc-700"
+              >
+                <ImagePlus className="h-4 w-4" /> Choose image
+              </button>
+              {imagePreview && (
+                <div className="relative overflow-hidden rounded-2xl">
+                  <img
+                    src={imagePreview}
+                    alt="Article preview"
+                    className="h-32 w-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImagePreview("");
+                      setImageFile(null);
+                    }}
+                    className="absolute right-2 top-2 rounded-full bg-black/60 p-1 text-white"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
           <div className="space-y-4 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
