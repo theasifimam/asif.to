@@ -455,6 +455,8 @@ export const createCourse = async (req, res) => {
     const finalCanonicalUrl = formatCanonicalUrl("/courses", canonicalUrl, slug);
     const finalInterviewCanonicalUrl = formatCanonicalUrl(`/${slug}/interview-questions`, interviewCanonicalUrl, "");
 
+    const finalThumbnail = req.file ? `/uploads/articles/${req.file.filename}` : (thumbnail || "");
+
     const course = await Course.create({
       slug,
       title,
@@ -462,8 +464,8 @@ export const createCourse = async (req, res) => {
       techId,
       level: level || "Beginner - Advanced",
       duration: duration || "Self-paced",
-      thumbnail: thumbnail || "",
-      learningOutcomes: learningOutcomes || [],
+      thumbnail: finalThumbnail,
+      learningOutcomes: typeof learningOutcomes === "string" ? (() => { try { return JSON.parse(learningOutcomes); } catch { return []; } })() : (learningOutcomes || []),
       seoTitle: seoTitle || "",
       seoDescription: seoDescription || "",
       keywords: normalizeKeywords(keywords),
@@ -473,13 +475,13 @@ export const createCourse = async (req, res) => {
       interviewKeywords: normalizeKeywords(interviewKeywords),
       interviewCanonicalUrl: finalInterviewCanonicalUrl,
       interviewOgImage: interviewOgImage || "",
-      order: order ?? 0,
+      order: Number(order) || 0,
       status: status || "published",
-      examEnabled: Boolean(examEnabled),
-      examSettings: examSettings || undefined,
-      relatedCourses: Array.isArray(relatedCourses) ? relatedCourses : [],
-      relatedArticles: Array.isArray(relatedArticles) ? relatedArticles : [],
-      popularChapterIds: Array.isArray(popularChapterIds) ? popularChapterIds : [],
+      examEnabled: examEnabled === true || examEnabled === "true",
+      examSettings: typeof examSettings === "string" ? (() => { try { return JSON.parse(examSettings); } catch { return undefined; } })() : (examSettings || undefined),
+      relatedCourses: typeof relatedCourses === "string" ? (() => { try { return JSON.parse(relatedCourses); } catch { return []; } })() : (Array.isArray(relatedCourses) ? relatedCourses : []),
+      relatedArticles: typeof relatedArticles === "string" ? (() => { try { return JSON.parse(relatedArticles); } catch { return []; } })() : (Array.isArray(relatedArticles) ? relatedArticles : []),
+      popularChapterIds: typeof popularChapterIds === "string" ? (() => { try { return JSON.parse(popularChapterIds); } catch { return []; } })() : (Array.isArray(popularChapterIds) ? popularChapterIds : []),
     });
     await logActivity({ actor: req.user, action: "course.created", entityType: "course", entityId: course._id, entityTitle: course.title, description: "created", severity: "info", url: `/courses/${course._id}` });
 
@@ -533,6 +535,42 @@ export const updateCourse = async (req, res) => {
     allowed.forEach((key) => {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
     });
+
+    if (req.file) {
+      updates.thumbnail = `/uploads/articles/${req.file.filename}`;
+    }
+
+    if (req.body.learningOutcomes !== undefined) {
+      updates.learningOutcomes = typeof req.body.learningOutcomes === "string"
+        ? (() => { try { return JSON.parse(req.body.learningOutcomes); } catch { return []; } })()
+        : req.body.learningOutcomes;
+    }
+    if (req.body.examSettings !== undefined) {
+      updates.examSettings = typeof req.body.examSettings === "string"
+        ? (() => { try { return JSON.parse(req.body.examSettings); } catch { return undefined; } })()
+        : req.body.examSettings;
+    }
+    if (req.body.relatedCourses !== undefined) {
+      updates.relatedCourses = typeof req.body.relatedCourses === "string"
+        ? (() => { try { return JSON.parse(req.body.relatedCourses); } catch { return []; } })()
+        : (Array.isArray(req.body.relatedCourses) ? req.body.relatedCourses : []);
+    }
+    if (req.body.relatedArticles !== undefined) {
+      updates.relatedArticles = typeof req.body.relatedArticles === "string"
+        ? (() => { try { return JSON.parse(req.body.relatedArticles); } catch { return []; } })()
+        : (Array.isArray(req.body.relatedArticles) ? req.body.relatedArticles : []);
+    }
+    if (req.body.popularChapterIds !== undefined) {
+      updates.popularChapterIds = typeof req.body.popularChapterIds === "string"
+        ? (() => { try { return JSON.parse(req.body.popularChapterIds); } catch { return []; } })()
+        : (Array.isArray(req.body.popularChapterIds) ? req.body.popularChapterIds : []);
+    }
+    if (req.body.examEnabled !== undefined) {
+      updates.examEnabled = req.body.examEnabled === true || req.body.examEnabled === "true";
+    }
+    if (req.body.order !== undefined) {
+      updates.order = Number(req.body.order) || 0;
+    }
 
     if (req.body.keywords !== undefined) {
       updates.keywords = normalizeKeywords(req.body.keywords);

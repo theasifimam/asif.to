@@ -421,8 +421,34 @@ export const coursesApi = {
   list: (params) =>
     apiGet(`/courses?${params ? new URLSearchParams(params) : ""}`),
   getBySlug: (slug) => apiGet(`/courses/${slug}`),
-  create: (data) => apiPost("/courses", data),
-  update: (id, data) => apiPatch(`/courses/${id}`, data),
+  create: (data) => {
+    if (typeof FormData !== "undefined" && data instanceof FormData) {
+      const authHeaders = getAuthHeaders();
+      const headers = { ...authHeaders, "ngrok-skip-browser-warning": "true" };
+      delete headers["Content-Type"];
+      return fetch(buildUrl("/courses"), {
+        method: "POST",
+        headers,
+        body: data,
+        credentials: "include",
+      }).then((res) => handleResponse(res));
+    }
+    return apiPost("/courses", data);
+  },
+  update: (id, data) => {
+    if (typeof FormData !== "undefined" && data instanceof FormData) {
+      const authHeaders = getAuthHeaders();
+      const headers = { ...authHeaders, "ngrok-skip-browser-warning": "true" };
+      delete headers["Content-Type"];
+      return fetch(buildUrl(`/courses/${id}`), {
+        method: "PATCH",
+        headers,
+        body: data,
+        credentials: "include",
+      }).then((res) => handleResponse(res));
+    }
+    return apiPatch(`/courses/${id}`, data);
+  },
 };
 
 /** Chapters */

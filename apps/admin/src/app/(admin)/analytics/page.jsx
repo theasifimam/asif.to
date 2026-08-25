@@ -13,6 +13,8 @@ import {
   Waypoints,
 } from "lucide-react";
 import { toast } from "sonner";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 import {
   Select,
@@ -83,7 +85,7 @@ function StatCard({ icon: Icon, label, value, change, help }) {
   const positive = Number(change) >= 0;
 
   return (
-    <div className="rounded-2xl sm:rounded-3xl border border-zinc-200/80 bg-white p-3.5 sm:p-4 dark:border-zinc-800 dark:bg-[#121215] flex flex-col justify-between min-h-[120px] sm:min-h-0">
+    <div className="rounded-2xl sm:rounded-3xl border border-zinc-200/80 bg-white p-3.5 sm:p-4 dark:border-zinc-800 dark:bg-[#121215] flex flex-col justify-between min-h-30 sm:min-h-0">
       <div className="flex items-center justify-between gap-3">
         <span className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-xl sm:rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300">
           <Icon className="h-4 w-4" />
@@ -103,14 +105,18 @@ function StatCard({ icon: Icon, label, value, change, help }) {
       </div>
 
       <div>
-        <div className="mt-3 text-xl sm:text-2xl font-black tracking-tight">{value}</div>
+        <div className="mt-3 text-xl sm:text-2xl font-black tracking-tight">
+          {value}
+        </div>
 
         <div className="mt-0.5 text-xs font-bold text-zinc-600 dark:text-zinc-300">
           {label}
         </div>
 
         {help && (
-          <p className="mt-1 text-[9.5px] leading-3 text-zinc-400 hidden xs:block">{help}</p>
+          <p className="mt-1 text-[9.5px] leading-3 text-zinc-400 hidden xs:block">
+            {help}
+          </p>
         )}
       </div>
     </div>
@@ -146,24 +152,51 @@ function Section({ eyebrow, title, description, children, action }) {
 }
 
 export default function AnalyticsPage() {
-  const [days, setDays] = useState(28);
+  return (
+    <Suspense
+      fallback={
+        <div className="grid min-h-[70vh] place-items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
+      }
+    >
+      <AnalyticsContent />
+    </Suspense>
+  );
+}
+
+function AnalyticsContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const setQueryParam = (key, value) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set(key, value);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const days = Number(searchParams.get("days")) || 28;
   const range = useMemo(() => dates(days), [days]);
 
   const [overview, setOverview] = useState(null);
   const [devices, setDevices] = useState([]);
 
-  const [acquisitionDimension, setAcquisitionDimension] = useState("source");
+  const acquisitionDimension = searchParams.get("acquisition") || "source";
+  const setAcquisitionDimension = (val) => setQueryParam("acquisition", val);
   const [acquisitionPage, setAcquisitionPage] = useState(1);
   const [acquisition, setAcquisition] = useState(null);
 
   const [contentPage, setContentPage] = useState(1);
   const [content, setContent] = useState(null);
 
-  const [locationDimension, setLocationDimension] = useState("timezone");
+  const locationDimension = searchParams.get("location") || "timezone";
+  const setLocationDimension = (val) => setQueryParam("location", val);
   const [locationPage, setLocationPage] = useState(1);
   const [locations, setLocations] = useState(null);
 
-  const [searchType, setSearchType] = useState("queries");
+  const searchType = searchParams.get("searchType") || "queries";
+  const setSearchType = (val) => setQueryParam("searchType", val);
   const [searchPage, setSearchPage] = useState(1);
   const [searchReport, setSearchReport] = useState(null);
   const [searchText, setSearchText] = useState("");
@@ -266,7 +299,7 @@ export default function AnalyticsPage() {
   }, [loadOverview, loadAcquisition, loadContent, loadLocations, loadSearch]);
 
   const changeRange = (nextDays) => {
-    setDays(nextDays);
+    setQueryParam("days", nextDays);
     setAcquisitionPage(1);
     setContentPage(1);
     setLocationPage(1);

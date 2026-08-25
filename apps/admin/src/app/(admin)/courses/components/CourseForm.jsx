@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getModuleBackUrl } from "@/hooks/useModuleHistory";
 import {
   ArrowLeft,
   BookOpen,
   ExternalLink,
+  ImagePlus,
   Loader2,
   Save,
   Send,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
@@ -90,6 +92,9 @@ export default function CourseForm({ courseId = null }) {
   const [publishOpen, setPublishOpen] = useState(false);
   const [allCourses, setAllCourses] = useState([]);
   const [courseChapters, setCourseChapters] = useState([]);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const fileRef = useRef(null);
 
   useEffect(() => {
     coursesApi.listAll({ limit: 100 }).then((res) => {
@@ -131,6 +136,15 @@ export default function CourseForm({ courseId = null }) {
           ...(course.examSettings || {}),
         },
       });
+      if (course?.thumbnail) {
+        setImagePreview(
+          course.thumbnail.startsWith("http")
+            ? course.thumbnail
+            : course.thumbnail.startsWith("/uploads")
+              ? `http://localhost:5000${course.thumbnail}`
+              : `http://localhost:5000/uploads/articles/${course.thumbnail}`,
+        );
+      }
       setSlugEdited(true);
       setLoading(false);
     });
@@ -151,35 +165,96 @@ export default function CourseForm({ courseId = null }) {
       seoTitle: current.seoTitle || title,
     }));
 
-  const payload = (status = form.status) => ({
-    ...form,
-    status,
-    order: Number(form.order) || 0,
-    keywords: form.keywords
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean),
-    interviewKeywords: form.interviewKeywords
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean),
-    learningOutcomes: form.learningOutcomes
-      .split("\n")
-      .map((item) => item.trim())
-      .filter(Boolean),
-    relatedCourses: Array.isArray(form.relatedCourses)
-      ? form.relatedCourses
-      : [],
-    popularChapterIds: Array.isArray(form.popularChapterIds)
-      ? form.popularChapterIds
-      : [],
-    examSettings: Object.fromEntries(
-      Object.entries(form.examSettings).map(([key, value]) => [
-        key,
-        Number(value),
-      ]),
-    ),
-  });
+  const chooseImage = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const payload = (status = form.status) => {
+    if (imageFile || !imagePreview || form.thumbnail) {
+      const data = new FormData();
+      data.append("title", form.title);
+      data.append("slug", form.slug);
+      data.append("subtitle", form.subtitle);
+      data.append("techId", form.techId);
+      data.append("level", form.level || "Beginner - Advanced");
+      data.append("duration", form.duration || "Self-paced");
+      data.append("status", status);
+      data.append("order", String(Number(form.order) || 0));
+      data.append("examEnabled", String(Boolean(form.examEnabled)));
+      data.append("seoTitle", form.seoTitle || "");
+      data.append("seoDescription", form.seoDescription || "");
+      data.append("canonicalUrl", form.canonicalUrl || "");
+      data.append("interviewSeoTitle", form.interviewSeoTitle || "");
+      data.append("interviewSeoDescription", form.interviewSeoDescription || "");
+      data.append("interviewCanonicalUrl", form.interviewCanonicalUrl || "");
+      data.append("interviewOgImage", form.interviewOgImage || "");
+
+      const keywordsArray = form.keywords
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+      data.append("keywords", keywordsArray.join(", "));
+
+      const interviewKeywordsArray = form.interviewKeywords
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+      data.append("interviewKeywords", interviewKeywordsArray.join(", "));
+
+      const outcomesArray = form.learningOutcomes
+        .split("\n")
+        .map((item) => item.trim())
+        .filter(Boolean);
+      data.append("learningOutcomes", JSON.stringify(outcomesArray));
+
+      data.append("relatedCourses", JSON.stringify(form.relatedCourses || []));
+      data.append("popularChapterIds", JSON.stringify(form.popularChapterIds || []));
+      data.append("examSettings", JSON.stringify(form.examSettings || {}));
+
+      if (imageFile) {
+        data.append("thumbnail", imageFile);
+      } else if (!imagePreview) {
+        data.append("thumbnail", "");
+      } else {
+        data.append("thumbnail", form.thumbnail);
+      }
+
+      return data;
+    }
+
+    return {
+      ...form,
+      status,
+      order: Number(form.order) || 0,
+      keywords: form.keywords
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+      interviewKeywords: form.interviewKeywords
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+      learningOutcomes: form.learningOutcomes
+        .split("\n")
+        .map((item) => item.trim())
+        .filter(Boolean),
+      relatedCourses: Array.isArray(form.relatedCourses)
+        ? form.relatedCourses
+        : [],
+      popularChapterIds: Array.isArray(form.popularChapterIds)
+        ? form.popularChapterIds
+        : [],
+      examSettings: Object.fromEntries(
+        Object.entries(form.examSettings).map(([key, value]) => [
+          key,
+          Number(value),
+        ]),
+      ),
+    };
+  };
 
   const persist = async (status) => {
     if (!form.title.trim() || !form.subtitle.trim() || !form.techId.trim()) {
@@ -340,15 +415,58 @@ export default function CourseForm({ courseId = null }) {
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="course-thumbnail">Thumbnail URL</Label>
-              <Input
-                id="course-thumbnail"
-                type="url"
-                value={form.thumbnail}
-                onChange={(event) => update("thumbnail", event.target.value)}
-                placeholder="https://..."
+            <div className="space-y-3">
+              <Label>Course Image / Thumbnail</Label>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={chooseImage}
               />
+              <div className="flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-700 px-4 py-5 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  <ImagePlus className="h-4 w-4" /> Choose course image
+                </button>
+                {imagePreview && (
+                  <div className="relative overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900">
+                    <img
+                      src={imagePreview}
+                      alt="Course preview"
+                      className="h-40 w-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImagePreview("");
+                        setImageFile(null);
+                        update("thumbnail", "");
+                      }}
+                      className="absolute right-2 top-2 rounded-full bg-black/60 p-1.5 text-white hover:bg-black/80 transition-colors"
+                      title="Remove image"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
+                <div className="space-y-1">
+                  <Label htmlFor="course-thumbnail" className="text-xs text-muted-foreground">Or direct image URL</Label>
+                  <Input
+                    id="course-thumbnail"
+                    type="text"
+                    value={form.thumbnail}
+                    onChange={(event) => {
+                      update("thumbnail", event.target.value);
+                      if (!imageFile) setImagePreview(event.target.value);
+                    }}
+                    placeholder="https://... or uploaded image filename"
+                  />
+                </div>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="course-outcomes">Learning outcomes</Label>

@@ -21,6 +21,7 @@ const router = Router();
 const canView = [protect, requirePermission("topics.view")];
 const canManage = [protect, requirePermission("topics.manage")];
 
+router.get("/public", getPublicTopics);
 router.get("/public/:courseSlug", getPublicTopics);
 router.get("/public/:courseSlug/:topicSlug", getPublicTopic);
 router.get("/public/:courseSlug/*topicPath", getPublicTopic);

@@ -13,7 +13,15 @@ export const topicsApi = createApi({
       }),
       providesTags: ["Topics"],
     }),
+    getPublicTopics: builder.query({
+      query: (params) => ({
+        url: "/topics/public",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["Topics"],
+    }),
   }),
 });
 
-export const { useGetTopicsQuery } = topicsApi;
+export const { useGetTopicsQuery, useGetPublicTopicsQuery } = topicsApi;

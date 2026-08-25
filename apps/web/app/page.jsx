@@ -5,6 +5,7 @@ import {
   buildCourseItemListSchema,
   getUniqueListableCourses,
 } from "@/lib/courseSchema";
+import { getPublicAllTopics, getPublicArticles } from "@/lib/publicContent";
 
 export const metadata = {
   alternates: { canonical: "/" },
@@ -31,12 +32,25 @@ const getCourses = cache(async () => {
 });
 
 export default async function HomePage() {
-  const courses = await getCourses();
+  const [courses, topicsData, articlesData] = await Promise.all([
+    getCourses(),
+    getPublicAllTopics(10),
+    getPublicArticles(6),
+  ]);
+
+  const initialTopics = topicsData?.topics || [];
+  const initialArticles = Array.isArray(articlesData)
+    ? articlesData
+    : articlesData?.data || [];
 
   return (
     <>
       <JsonLd data={buildCourseItemListSchema(courses)} />
-      <HomePageClient courses={courses} />
+      <HomePageClient
+        courses={courses}
+        initialTopics={initialTopics}
+        initialArticles={initialArticles}
+      />
     </>
   );
 }

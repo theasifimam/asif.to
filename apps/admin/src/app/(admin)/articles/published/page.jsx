@@ -37,8 +37,15 @@ export default function PublishedPage() {
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return "";
-    if (imagePath.startsWith("http")) return imagePath;
-    return `http://localhost:5000${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
+    if (imagePath.startsWith("http") || imagePath.startsWith("data:")) return imagePath;
+    let clean = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
+    if (!clean.startsWith("/uploads/")) {
+      if (clean.startsWith("/article-")) clean = `/uploads/articles${clean}`;
+      else if (clean.startsWith("/avatar-")) clean = `/uploads/avatars${clean}`;
+      else clean = `/uploads${clean}`;
+    }
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL ? process.env.NEXT_PUBLIC_API_URL.split('/api/v1')[0].replace(/\/$/, '') : "http://localhost:5000";
+    return `${baseUrl}${clean}`;
   };
 
   const fetchArticles = useCallback(async () => {

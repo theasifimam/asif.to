@@ -266,6 +266,76 @@ function sourceFrom({
   };
 }
 
+const TIMEZONE_COUNTRY_MAP = {
+  "Asia/Kolkata": "IN", "Asia/Calcutta": "IN", "Asia/Dhaka": "BD", "Asia/Karachi": "PK",
+  "Asia/Kathmandu": "NP", "Asia/Colombo": "LK", "Asia/Dubai": "AE", "Asia/Riyadh": "SA",
+  "Asia/Singapore": "SG", "Asia/Tokyo": "JP", "Asia/Seoul": "KR", "Asia/Bangkok": "TH",
+  "Asia/Jakarta": "ID", "Asia/Manila": "PH", "Asia/Kuala_Lumpur": "MY", "Asia/Ho_Chi_Minh": "VN",
+  "Asia/Shanghai": "CN", "Asia/Chongqing": "CN", "Asia/Urumqi": "CN", "Asia/Hong_Kong": "HK",
+  "Asia/Taipei": "TW", "Asia/Almaty": "KZ", "Asia/Tashkent": "UZ", "Asia/Baku": "AZ",
+  "Asia/Tbilisi": "GE", "Asia/Yerevan": "AM", "Asia/Beirut": "LB", "Asia/Amman": "JO",
+  "Asia/Jerusalem": "IL", "Asia/Tel_Aviv": "IL", "Asia/Muscat": "OM", "Asia/Qatar": "QA",
+  "Asia/Kuwait": "KW", "Asia/Bahrain": "BH", "Asia/Baghdad": "IQ", "Asia/Tehran": "IR",
+  "Asia/Kabul": "AF",
+
+  "America/New_York": "US", "America/Chicago": "US", "America/Los_Angeles": "US",
+  "America/Denver": "US", "America/Phoenix": "US", "America/Anchorage": "US",
+  "America/Honolulu": "US", "America/Detroit": "US", "America/Indiana/Indianapolis": "US",
+  "America/Boise": "US", "America/Juneau": "US", "America/Kentucky/Louisville": "US",
+  "America/Toronto": "CA", "America/Vancouver": "CA", "America/Montreal": "CA",
+  "America/Edmonton": "CA", "America/Winnipeg": "CA", "America/Halifax": "CA",
+  "America/Mexico_City": "MX", "America/Cancun": "MX", "America/Monterrey": "MX", "America/Tijuana": "MX",
+  "America/Sao_Paulo": "BR", "America/Rio_de_Janeiro": "BR", "America/Fortaleza": "BR",
+  "America/Buenos_Aires": "AR", "America/Argentina/Buenos_Aires": "AR", "America/Santiago": "CL",
+  "America/Bogota": "CO", "America/Lima": "PE", "America/Caracas": "VE", "America/Guayaquil": "EC",
+  "America/Montevideo": "UY", "America/Asuncion": "PY", "America/La_Paz": "BO", "America/Panama": "PA",
+  "America/Costa_Rica": "CR", "America/Guatemala": "GT", "America/San_Salvador": "SV",
+  "America/Tegucigalpa": "HN", "America/Managua": "NI", "America/Jamaica": "JM",
+  "America/Santo_Domingo": "DO", "America/Puerto_Rico": "PR",
+
+  "Europe/London": "GB", "Europe/Dublin": "IE", "Europe/Paris": "FR", "Europe/Berlin": "DE",
+  "Europe/Rome": "IT", "Europe/Madrid": "ES", "Europe/Amsterdam": "NL", "Europe/Brussels": "BE",
+  "Europe/Vienna": "AT", "Europe/Zurich": "CH", "Europe/Stockholm": "SE", "Europe/Oslo": "NO",
+  "Europe/Copenhagen": "DK", "Europe/Helsinki": "FI", "Europe/Warsaw": "PL", "Europe/Prague": "CZ",
+  "Europe/Budapest": "HU", "Europe/Bucharest": "RO", "Europe/Sofia": "BG", "Europe/Athens": "GR",
+  "Europe/Istanbul": "TR", "Europe/Lisbon": "PT", "Europe/Belgrade": "RS", "Europe/Zagreb": "HR",
+  "Europe/Bratislava": "SK", "Europe/Ljubljana": "SI", "Europe/Kiev": "UA", "Europe/Kyiv": "UA",
+  "Europe/Minsk": "BY", "Europe/Moscow": "RU", "Europe/Riga": "LV", "Europe/Tallinn": "EE",
+  "Europe/Vilnius": "LT", "Europe/Reykjavik": "IS",
+
+  "Australia/Sydney": "AU", "Australia/Melbourne": "AU", "Australia/Brisbane": "AU",
+  "Australia/Perth": "AU", "Australia/Adelaide": "AU", "Australia/Hobart": "AU",
+  "Australia/Darwin": "AU", "Pacific/Auckland": "NZ", "Pacific/Fiji": "FJ", "Pacific/Honolulu": "US",
+
+  "Africa/Cairo": "EG", "Africa/Johannesburg": "ZA", "Africa/Lagos": "NG", "Africa/Nairobi": "KE",
+  "Africa/Casablanca": "MA", "Africa/Algiers": "DZ", "Africa/Tunis": "TN", "Africa/Accra": "GH",
+  "Africa/Addis_Ababa": "ET", "Africa/Kampala": "UG", "Africa/Dar_es_Salaam": "TZ",
+};
+
+function resolveCountryName(countryCodeOrTimezone) {
+  if (!countryCodeOrTimezone || countryCodeOrTimezone === "Unknown") {
+    return "Unknown";
+  }
+
+  let code = String(countryCodeOrTimezone).trim();
+
+  if (code.includes("/")) {
+    code = TIMEZONE_COUNTRY_MAP[code] || "";
+  }
+
+  if (!code) return "Unknown";
+
+  if (/^[A-Z]{2}$/i.test(code)) {
+    try {
+      const display = new Intl.DisplayNames(["en"], { type: "region" });
+      const name = display.of(code.toUpperCase());
+      if (name) return name;
+    } catch {}
+  }
+
+  return code;
+}
+
 function countryFromRequest(req, fallback = "") {
   const candidates = [
     req.headers["cf-ipcountry"],
@@ -281,9 +351,14 @@ function countryFromRequest(req, fallback = "") {
       /^[a-z]{2}$/i.test(String(item)),
   );
 
-  return value
-    ? String(value).toUpperCase()
-    : "";
+  if (value) return String(value).toUpperCase();
+
+  const timezone = req.body?.timezone || "";
+  if (timezone && TIMEZONE_COUNTRY_MAP[timezone]) {
+    return TIMEZONE_COUNTRY_MAP[timezone];
+  }
+
+  return "";
 }
 
 function hmac(value) {
@@ -1101,11 +1176,24 @@ export const getLocalContent = async (req, res) => {
 async function identityLocationRows(start, end, field) {
   const match = {
     date: { $gte: start, $lt: end },
-    [field]: {
-      $exists: true,
-      $nin: ["", null],
-    },
   };
+
+  const keyExpression =
+    field === "country"
+      ? {
+          $cond: [
+            {
+              $and: [
+                { $ne: ["$country", ""] },
+                { $ne: ["$country", null] },
+                { $ne: ["$country", "Unknown"] },
+              ],
+            },
+            "$country",
+            "$timezone",
+          ],
+        }
+      : "$timezone";
 
   const [visitors, sessions] = await Promise.all([
     AnalyticsIdentity.aggregate([
@@ -1113,7 +1201,7 @@ async function identityLocationRows(start, end, field) {
       {
         $group: {
           _id: {
-            key: `$${field}`,
+            key: keyExpression,
             visitor: "$visitorHash",
           },
         },
@@ -1130,7 +1218,7 @@ async function identityLocationRows(start, end, field) {
       {
         $group: {
           _id: {
-            key: `$${field}`,
+            key: keyExpression,
             session: "$sessionHash",
           },
         },
@@ -1166,25 +1254,29 @@ export const getLocations = async (req, res) => {
     const map = new Map();
 
     for (const row of identity.visitors) {
-      map.set(row._id, {
-        key: row._id,
-        visitors: row.visitors || 0,
+      const rawKey = row._id || "Unknown";
+      const key = dimension === "country" ? resolveCountryName(rawKey) : rawKey;
+      const current = map.get(key) || {
+        key: key,
+        visitors: 0,
         sessions: 0,
         pageViews: 0,
-      });
+      };
+      current.visitors += row.visitors || 0;
+      map.set(key, current);
     }
 
     for (const row of identity.sessions) {
-      const current =
-        map.get(row._id) || {
-          key: row._id,
-          visitors: 0,
-          sessions: 0,
-          pageViews: 0,
-        };
-
-      current.sessions = row.sessions || 0;
-      map.set(row._id, current);
+      const rawKey = row._id || "Unknown";
+      const key = dimension === "country" ? resolveCountryName(rawKey) : rawKey;
+      const current = map.get(key) || {
+        key: key,
+        visitors: 0,
+        sessions: 0,
+        pageViews: 0,
+      };
+      current.sessions += row.sessions || 0;
+      map.set(key, current);
     }
 
     if (dimension === "country") {
@@ -1192,10 +1284,6 @@ export const getLocations = async (req, res) => {
         {
           $match: {
             date: { $gte: dates.start, $lt: dates.end },
-            country: {
-              $exists: true,
-              $nin: ["", null],
-            },
           },
         },
         {
@@ -1207,16 +1295,16 @@ export const getLocations = async (req, res) => {
       ]);
 
       for (const row of daily) {
-        const current =
-          map.get(row._id) || {
-            key: row._id,
-            visitors: 0,
-            sessions: 0,
-            pageViews: 0,
-          };
-
-        current.pageViews = row.pageViews || 0;
-        map.set(row._id, current);
+        const rawKey = row._id || "Unknown";
+        const key = resolveCountryName(rawKey);
+        const current = map.get(key) || {
+          key: key,
+          visitors: 0,
+          sessions: 0,
+          pageViews: 0,
+        };
+        current.pageViews += row.pageViews || 0;
+        map.set(key, current);
       }
     }
 

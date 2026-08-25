@@ -219,18 +219,21 @@ export default function ArticleClient({ slug, initialData }) {
         </div>
 
         {/* Cover Image Container */}
-        <div className="w-full max-w-4xl px-6 mb-12">
-          <div className="relative aspect-video w-full rounded-2xl md:rounded-3xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 shadow-md">
-            <Image
-              src={getImageUrl(article.image)}
-              alt={article.title}
-              fill
-              className="object-cover"
-              priority
-              unoptimized
-            />
+        {article.image && (
+          <div className="w-full max-w-4xl px-6 mb-12">
+            <div className="w-full rounded-2xl md:rounded-3xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 shadow-md border border-zinc-200/70 dark:border-zinc-800">
+              <Image
+                src={getImageUrl(article.image)}
+                alt={article.title}
+                width={1200}
+                height={630}
+                className="h-auto w-full"
+                priority
+                unoptimized
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Article Body Content */}
         <article className="w-full max-w-4xl px-6 flex flex-col gap-8">

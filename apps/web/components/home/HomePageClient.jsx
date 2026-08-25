@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   BadgeCheck,
@@ -10,10 +11,13 @@ import {
   ChevronRight,
   Code2,
   FileCode,
+  FileText,
   GraduationCap,
   HelpCircle,
   Layers,
+  Layers3,
   MessageSquareText,
+  Newspaper,
   Play,
   Search,
   Sparkles,
@@ -25,6 +29,10 @@ import Footer from "@/components/layout/Footer";
 import SaveButton from "@/components/articles/SaveButton";
 import RevisionFlashcards from "@/components/home/RevisionFlashcards";
 import { TECH_STACKS } from "@/lib/tutorialData";
+import { useGetArticlesQuery } from "@/lib/api/articlesApi";
+import { useGetPublicTopicsQuery } from "@/lib/api/topicsApi";
+import { getImageUrl } from "@/lib/config";
+import { format } from "date-fns";
 
 const FEATURES = [
   {
@@ -86,8 +94,62 @@ const LEARNING_STEPS = [
   [Trophy, "Prove", "Take the exam"],
 ];
 
-export default function HomePageClient({ courses = [] }) {
+function getTopicHref(topic) {
+  if (!topic) return "#";
+  const courseSlug = topic.course?.slug || "courses";
+  if (
+    topic.type === "interview" &&
+    topic.category?.slug &&
+    topic.category.slug !== topic.slug
+  ) {
+    return `/${encodeURIComponent(courseSlug)}/${encodeURIComponent(topic.category.slug)}/${encodeURIComponent(topic.slug)}`;
+  }
+  return `/${encodeURIComponent(courseSlug)}/${encodeURIComponent(topic.slug)}`;
+}
+
+function getArticleHref(article) {
+  if (!article) return "/articles";
+  const slug = article.slug || article._id;
+  return `/articles/${encodeURIComponent(slug)}-${encodeURIComponent(article._id || article.id)}`;
+}
+
+export default function HomePageClient({
+  courses = [],
+  initialTopics = [],
+  initialArticles = [],
+}) {
   const [selectedTech, setSelectedTech] = useState(null);
+
+  const { data: topicsResponse } = useGetPublicTopicsQuery(
+    { limit: 12 },
+    { skip: Boolean(initialTopics?.length > 0) }
+  );
+  const { data: articlesResponse } = useGetArticlesQuery(
+    { limit: 6 },
+    { skip: Boolean(initialArticles?.length > 0) }
+  );
+
+  const allTopics = useMemo(() => {
+    if (initialTopics?.length) return initialTopics;
+    return topicsResponse?.data?.topics || [];
+  }, [initialTopics, topicsResponse]);
+
+  const allArticles = useMemo(() => {
+    if (initialArticles?.length) return initialArticles;
+    return articlesResponse?.data || [];
+  }, [initialArticles, articlesResponse]);
+
+  const filteredTopics = useMemo(() => {
+    if (!selectedTech) return allTopics;
+    return allTopics.filter(
+      (topic) =>
+        topic.course?.techId === selectedTech ||
+        topic.course?.slug === selectedTech
+    );
+  }, [allTopics, selectedTech]);
+
+  const displayTopics = (filteredTopics.length > 0 ? filteredTopics : allTopics).slice(0, 6);
+  const displayArticles = allArticles.slice(0, 6);
 
   const activeTechs = useMemo(() => {
     const ids = new Set(courses.map((course) => course.techId));
@@ -154,20 +216,23 @@ export default function HomePageClient({ courses = [] }) {
 
             <div className="grid grid-cols-2 gap-2 rounded-3xl bg-white/10 border border-white/15 p-3 backdrop-blur-sm">
               {[
-                [BookOpen, "Courses"],
-                [Code2, "Playground"],
-                [Layers, "Flashcards"],
-                [HelpCircle, "Quizzes"],
-                [MessageSquareText, "Interviews"],
-                [Trophy, "Exams"],
-              ].map(([Icon, label]) => (
-                <div
+                [BookOpen, "Courses", "#courses"],
+                [Layers3, "Topics", "#topics"],
+                [Code2, "Playground", "/run"],
+                [FileText, "Articles", "#articles"],
+                [Layers, "Flashcards", "/revision"],
+                [HelpCircle, "Quizzes", "/quiz"],
+                [MessageSquareText, "Interviews", "#interview-prep"],
+                [Trophy, "Exams", "#course-exams"],
+              ].map(([Icon, label, href]) => (
+                <Link
                   key={label}
-                  className="flex items-center gap-2 rounded-2xl bg-white/10 px-3 py-2.5 text-[11px] font-bold"
+                  href={href}
+                  className="flex items-center gap-2 rounded-2xl bg-white/10 px-3 py-2 text-[11px] font-bold hover:bg-white/20 transition-colors"
                 >
                   <Icon className="w-3.5 h-3.5 text-yellow-300" />
                   {label}
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -296,7 +361,7 @@ export default function HomePageClient({ courses = [] }) {
           </div>
 
           <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
-            {filteredCourses.map((course, idx) => {
+            {filteredCourses.slice(0, 3).map((course, idx) => {
               const tech = TECH_STACKS.find(
                 (item) => item.id === course.techId,
               );
@@ -308,6 +373,41 @@ export default function HomePageClient({ courses = [] }) {
                   className="group flex flex-col justify-between rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 p-5 sm:p-6 shadow-sm hover:shadow-md transition-all"
                 >
                   <div>
+                    {course.thumbnail ? (
+                      <Link
+                        href={`/courses/${course.slug}`}
+                        className="relative mb-4 block w-full overflow-hidden rounded-2xl md:rounded-3xl bg-zinc-100 dark:bg-zinc-800/60 aspect-16/9 border border-zinc-200/60 dark:border-zinc-800"
+                      >
+                        <Image
+                          src={getImageUrl(course.thumbnail)}
+                          alt={course.title}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-103"
+                          unoptimized
+                        />
+                      </Link>
+                    ) : (
+                      <Link
+                        href={`/courses/${course.slug}`}
+                        className="relative mb-4 flex w-full flex-col items-center justify-center overflow-hidden rounded-2xl md:rounded-3xl bg-linear-to-br from-zinc-100 via-blue-50/40 to-indigo-50/50 dark:from-zinc-800/80 dark:via-zinc-900 dark:to-zinc-950 aspect-16/9 border border-zinc-200/70 dark:border-zinc-800 transition-all group-hover:border-blue-500/40"
+                      >
+                        <div className="relative z-10 flex flex-col items-center gap-2 p-4 text-center">
+                          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white dark:bg-zinc-800 shadow-xs border border-zinc-200/80 dark:border-zinc-700/80 group-hover:scale-105 group-hover:border-blue-500 transition-all">
+                            <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <span className="font-outfit text-xs font-black tracking-tight text-zinc-800 dark:text-zinc-200 line-clamp-1">
+                            {course.title}
+                          </span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                            {tech?.name || course.techId || "Interactive Course"}
+                          </span>
+                        </div>
+                        <div className="absolute bottom-2.5 right-2.5 z-10 rounded-full bg-white/90 dark:bg-zinc-800/90 backdrop-blur-xs px-2.5 py-0.5 text-[9px] font-black text-zinc-500 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-700/60">
+                          {course.chapterCount ?? course.chapters?.length ?? 0} Lessons
+                        </div>
+                      </Link>
+                    )}
+
                     <div className="mb-3 flex flex-wrap items-center gap-1.5">
                       <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
                         #{rankNum} Most Read
@@ -368,8 +468,146 @@ export default function HomePageClient({ courses = [] }) {
                 </article>
               );
             })}
+
+            {/* 4th Card: View All Courses */}
+            <article className="group relative flex flex-col justify-between overflow-hidden rounded-3xl sm:rounded-[2.5rem] border border-blue-500/25 dark:border-blue-500/20 bg-linear-to-br from-blue-500/10 via-indigo-500/5 to-purple-500/10 dark:from-blue-950/40 dark:via-indigo-950/30 dark:to-purple-950/40 p-6 sm:p-7 shadow-sm hover:shadow-xl hover:border-blue-500/50 transition-all duration-300">
+              <div className="flex flex-col">
+                <div className="mb-4 flex items-center justify-between">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-md shadow-blue-500/25">
+                    <GraduationCap className="h-5 w-5" />
+                  </span>
+                  <span className="rounded-full bg-blue-500/15 border border-blue-500/20 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                    {courses.length > 3 ? `+${courses.length - 3} More Courses` : "Catalog"}
+                  </span>
+                </div>
+
+                <h3 className="text-xl sm:text-2xl font-black tracking-tight text-zinc-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  Explore All Courses
+                </h3>
+
+                <p className="mt-2 text-xs sm:text-sm leading-relaxed font-medium text-zinc-600 dark:text-zinc-300">
+                  Browse our full interactive curriculum across React, Next.js, JavaScript, TypeScript, CSS, Node.js, and more.
+                </p>
+
+                <div className="mt-5 flex flex-wrap gap-1.5">
+                  {activeTechs.slice(0, 6).map((tech) => (
+                    <span
+                      key={tech.id}
+                      className="rounded-full border border-zinc-200/80 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 px-2.5 py-1 text-[10px] font-bold text-zinc-600 dark:text-zinc-300"
+                    >
+                      {tech.name}
+                    </span>
+                  ))}
+                  {activeTechs.length > 6 && (
+                    <span className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 text-[10px] font-bold text-zinc-400">
+                      +{activeTechs.length - 6} more
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-6 pt-5 border-t border-zinc-200/60 dark:border-zinc-800/60 flex flex-wrap items-center justify-between gap-3">
+                <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                  {courses.length} Courses Available
+                </span>
+                <Link
+                  href="/courses"
+                  className="h-11 inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-5 text-xs font-black text-white shadow-md shadow-blue-500/25 hover:bg-blue-700 active:scale-95 transition-all"
+                >
+                  View All Courses
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </div>
+            </article>
           </div>
         </section>
+
+        {/* Topics & Guides */}
+        {displayTopics.length > 0 && (
+          <section id="topics" className="scroll-mt-24">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                  <Layers3 className="w-4 h-4" />
+                  <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.16em]">
+                    Topic Deep Dives
+                  </span>
+                </div>
+                <h2 className="mt-1 text-lg sm:text-2xl font-black tracking-tight">
+                  Featured Guides & Concepts
+                </h2>
+                <p className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                  Focused conceptual guides, architecture breakdowns, and step-by-step topics.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {displayTopics.map((topic) => {
+                const topicUrl = getTopicHref(topic);
+                return (
+                  <Link
+                    key={topic._id || topic.slug}
+                    href={topicUrl}
+                    className="group flex flex-col justify-between rounded-3xl border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-emerald-500/40 hover:shadow-md"
+                  >
+                    {topic.image && (
+                      <div className="relative mb-3.5 w-full overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800/60 aspect-16/9">
+                        <Image
+                          src={getImageUrl(topic.image)}
+                          alt={topic.title}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-103"
+                          unoptimized
+                        />
+                      </div>
+                    )}
+
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
+                        {topic.course?.title && (
+                          <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                            {topic.course.title}
+                          </span>
+                        )}
+                        {topic.category?.name && (
+                          <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                            {topic.category.name}
+                          </span>
+                        )}
+                        <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                          {topic.type === "interview" ? "Interview Q&A" : "Guide"}
+                        </span>
+                      </div>
+
+                      <h3 className="text-sm sm:text-base font-bold leading-snug text-zinc-900 dark:text-white transition-colors group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                        {topic.title}
+                      </h3>
+
+                      {topic.excerpt && (
+                        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed font-medium text-zinc-500 dark:text-zinc-400">
+                          {topic.excerpt}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/60 pt-3 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                      <span className="inline-flex items-center gap-1">
+                        Read Guide
+                        <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                      </span>
+                      {topic.publishedAt && (
+                        <span className="text-zinc-400 font-normal text-[10px]">
+                          {format(new Date(topic.publishedAt || topic.createdAt), "MMM d, yyyy")}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Learning loop */}
         <section className="rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 p-4 sm:p-7 shadow-xs">
@@ -474,6 +712,91 @@ console.log(
             </div>
           </div>
         </section>
+
+        {/* Articles & Technical Dispatches */}
+        {displayArticles.length > 0 && (
+          <section id="articles" className="scroll-mt-24">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="inline-flex items-center gap-1.5 text-purple-600 dark:text-purple-400">
+                  <FileText className="w-4 h-4" />
+                  <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.16em]">
+                    Technical Dispatches
+                  </span>
+                </div>
+                <h2 className="mt-1 text-lg sm:text-2xl font-black tracking-tight">
+                  Latest Articles & Investigations
+                </h2>
+                <p className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                  Technical analyses, architecture explorations, and system design writeups.
+                </p>
+              </div>
+              <Link
+                href="/articles"
+                className="inline-flex items-center gap-1 text-xs font-bold text-purple-600 dark:text-purple-400 hover:underline"
+              >
+                View all articles <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {displayArticles.map((article) => {
+                const articleUrl = getArticleHref(article);
+                return (
+                  <article
+                    key={article._id || article.id}
+                    className="group flex flex-col justify-between rounded-3xl border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 p-4 sm:p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-purple-500/40 hover:shadow-md"
+                  >
+                    {article.image && (
+                      <Link
+                        href={articleUrl}
+                        className="relative mb-3.5 block w-full overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800/60 aspect-16/10"
+                      >
+                        <Image
+                          src={getImageUrl(article.image)}
+                          alt={article.title}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-103"
+                          unoptimized
+                        />
+                      </Link>
+                    )}
+
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-2 flex items-center justify-between gap-2">
+                        <span className="rounded-full bg-purple-50 px-2.5 py-0.5 text-[10px] font-bold text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 uppercase tracking-wider">
+                          {article.topic?.[0]?.name || "Article"}
+                        </span>
+                        <span className="text-[10px] font-medium text-zinc-400">
+                          {format(new Date(article.createdAt || Date.now()), "MMM d, yyyy")}
+                        </span>
+                      </div>
+
+                      <Link href={articleUrl}>
+                        <h3 className="text-sm sm:text-base font-bold leading-snug text-zinc-900 dark:text-white transition-colors group-hover:text-purple-600 dark:group-hover:text-purple-400 line-clamp-2">
+                          {article.title}
+                        </h3>
+                      </Link>
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/60 pt-3 text-[11px]">
+                      <span className="font-semibold text-zinc-500 dark:text-zinc-400 truncate max-w-[120px]">
+                        By {article.author?.fullName || "Asif"}
+                      </span>
+                      <Link
+                        href={articleUrl}
+                        className="inline-flex items-center gap-1 font-bold text-purple-600 dark:text-purple-400"
+                      >
+                        Read
+                        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                      </Link>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Revision, quiz and exam */}
         <section id="course-exams" className="scroll-mt-24">

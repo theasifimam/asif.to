@@ -7,7 +7,18 @@ export const getImageUrl = (path) => {
   if (typeof path !== "string") return "";
   if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) return path;
 
-  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  let cleanPath = path.startsWith("/") ? path : `/${path}`;
+
+  if (!cleanPath.startsWith("/uploads/")) {
+    if (cleanPath.startsWith("/article-")) {
+      cleanPath = `/uploads/articles${cleanPath}`;
+    } else if (cleanPath.startsWith("/avatar-")) {
+      cleanPath = `/uploads/avatars${cleanPath}`;
+    } else if (!cleanPath.startsWith("/images/") && !cleanPath.startsWith("/assets/") && !cleanPath.startsWith("/icons/")) {
+      cleanPath = `/uploads${cleanPath}`;
+    }
+  }
+
   if (STORAGE_URL) {
     return `${STORAGE_URL}${cleanPath}`;
   }

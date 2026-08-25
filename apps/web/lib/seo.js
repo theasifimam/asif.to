@@ -29,8 +29,17 @@ export function assetUrl(value) {
   const candidate = String(value || "/logo.png").trim();
   if (/^https?:\/\//i.test(candidate)) return candidate;
 
-  const origin = candidate.startsWith("/uploads/") ? apiOrigin : siteUrl;
-  return `${origin}/${candidate.replace(/^\/+/, "")}`;
+  let clean = candidate.replace(/^\/+/, "");
+  if (!clean.startsWith("uploads/")) {
+    if (clean.startsWith("article-")) {
+      clean = `uploads/articles/${clean}`;
+    } else if (clean.startsWith("avatar-")) {
+      clean = `uploads/avatars/${clean}`;
+    }
+  }
+
+  const origin = clean.startsWith("uploads/") ? apiOrigin : siteUrl;
+  return `${origin}/${clean}`;
 }
 
 export function jsonLd(value) {

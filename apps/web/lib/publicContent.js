@@ -28,6 +28,14 @@ const getPublicTopicByPath = cache((path) =>
   fetchPublicData(`/topics/public/${path}`, "public topic"),
 );
 
+export const getPublicAllTopics = cache((limit = 8) =>
+  fetchPublicData(`/topics/public?limit=${encodeURIComponent(limit)}`, "all public topics"),
+);
+
+export const getPublicArticles = cache((limit = 6) =>
+  fetchPublicData(`/articles?limit=${encodeURIComponent(limit)}`, "public articles"),
+);
+
 export function getPublicTopic(courseSlug, topicPath) {
   if (!Array.isArray(topicPath) || !topicPath.length) return null;
 

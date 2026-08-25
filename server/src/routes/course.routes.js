@@ -27,6 +27,10 @@ import {
 } from "../controllers/courseProgress.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
 import { requirePermission } from "../utils/permissions.js";
+import {
+  compressArticleImage,
+  uploadArticleImage,
+} from "../middlewares/upload.middleware.js";
 
 const router = Router();
 
@@ -65,8 +69,22 @@ router.get(
   requirePermission("courses.view"),
   getCourseByIdAdmin,
 );
-router.post("/", protect, requirePermission("courses.manage"), createCourse);
-router.patch("/:id", protect, requirePermission("courses.manage"), updateCourse);
+router.post(
+  "/",
+  protect,
+  requirePermission("courses.manage"),
+  uploadArticleImage.single("thumbnail"),
+  compressArticleImage,
+  createCourse,
+);
+router.patch(
+  "/:id",
+  protect,
+  requirePermission("courses.manage"),
+  uploadArticleImage.single("thumbnail"),
+  compressArticleImage,
+  updateCourse,
+);
 
 // Direct deletion is deliberately blocked. The final course row is deleted only
 // by approveDeletion after two different admin accounts verify email OTPs.

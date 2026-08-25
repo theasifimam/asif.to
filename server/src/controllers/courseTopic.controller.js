@@ -560,6 +560,24 @@ export const reorderCourseTopics = async (req, res) => {
 
 export const getPublicTopics = async (req, res) => {
   try {
+    const { courseSlug } = req.params;
+    if (!courseSlug || courseSlug === "all") {
+      const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 12));
+      const topics = await CourseTopic.find({
+        status: "published",
+      })
+        .sort({ updatedAt: -1, createdAt: -1 })
+        .limit(limit)
+        .populate("course", "title slug techId")
+        .populate("category", "name slug order")
+        .populate("author", "fullName avatar")
+        .select(
+          "type title slug excerpt image seoTitle seoDescription keywords canonicalUrl publishedAt order category course author updatedAt createdAt",
+        )
+        .lean();
+      return res.json({ success: true, data: { topics } });
+    }
+
     const course = await Course.findOne({
       slug: req.params.courseSlug,
       status: "published",
@@ -576,8 +594,9 @@ export const getPublicTopics = async (req, res) => {
     })
       .sort({ order: 1, title: 1 })
       .populate("category", "name slug order")
+      .populate("author", "fullName avatar")
       .select(
-        "type title slug excerpt seoTitle seoDescription keywords canonicalUrl publishedAt order category",
+        "type title slug excerpt image seoTitle seoDescription keywords canonicalUrl publishedAt order category updatedAt createdAt",
       )
       .lean();
     res.json({ success: true, data: { course, topics } });

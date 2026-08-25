@@ -506,12 +506,13 @@ export default async function CourseTopicPage({ courseSlug, topicPath }) {
 
         {topic.image && (
           <div className="mb-10 lg:mb-12">
-            <div className="relative aspect-video w-full overflow-hidden rounded-2xl md:rounded-3xl bg-zinc-100 dark:bg-zinc-900 shadow-sm border border-zinc-200/70 dark:border-zinc-800">
+            <div className="overflow-hidden rounded-2xl md:rounded-3xl bg-zinc-100 dark:bg-zinc-900 shadow-sm border border-zinc-200/70 dark:border-zinc-800">
               <Image
                 src={getImageUrl(topic.image)}
                 alt={topic.title}
-                fill
-                className="object-cover"
+                width={1200}
+                height={630}
+                className="h-auto w-full"
                 priority
                 unoptimized
               />
