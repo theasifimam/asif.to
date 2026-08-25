@@ -6,46 +6,17 @@ import { usePathname, useSearchParams } from "next/navigation";
 const API = process.env.NEXT_PUBLIC_API_URL;
 const ATTRIBUTION_KEY = "asif_session_attribution";
 
-// ASIF_TRUSTED_ANALYTICS_V2
-const VISITOR_KEY = "asif_visitor_id";
-const SESSION_KEY = "asif_session_id";
-const SESSION_LAST_ACTIVITY_KEY = "asif_session_last_activity";
-const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
-
-function getVisitorId() {
-  let value = localStorage.getItem(VISITOR_KEY);
+const id = (key, session = false) => {
+  const store = session ? sessionStorage : localStorage;
+  let value = store.getItem(key);
 
   if (!value) {
     value = crypto.randomUUID();
-    localStorage.setItem(VISITOR_KEY, value);
+    store.setItem(key, value);
   }
 
   return value;
-}
-
-function getSessionId() {
-  const now = Date.now();
-  const lastActivity = Number(
-    localStorage.getItem(SESSION_LAST_ACTIVITY_KEY) || 0,
-  );
-  let value = localStorage.getItem(SESSION_KEY);
-
-  if (
-    !value ||
-    !lastActivity ||
-    now - lastActivity > SESSION_TIMEOUT_MS
-  ) {
-    value = crypto.randomUUID();
-    localStorage.setItem(SESSION_KEY, value);
-  }
-
-  localStorage.setItem(
-    SESSION_LAST_ACTIVITY_KEY,
-    String(now),
-  );
-
-  return value;
-}
+};
 
 const isLocalhost = () => {
   if (typeof window === "undefined") return true;
@@ -134,8 +105,8 @@ export default function AnalyticsTracker() {
 
     const payload = {
       path: pathname || "/",
-      visitorId: getVisitorId(),
-      sessionId: getSessionId(),
+      visitorId: id("asif_visitor_id"),
+      sessionId: id("asif_session_id", true),
 
       device:
         width < 768

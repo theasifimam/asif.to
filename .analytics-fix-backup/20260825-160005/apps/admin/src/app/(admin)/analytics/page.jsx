@@ -190,7 +190,7 @@ function AnalyticsContent() {
   const [contentPage, setContentPage] = useState(1);
   const [content, setContent] = useState(null);
 
-  const locationDimension = searchParams.get("location") || "country";
+  const locationDimension = searchParams.get("location") || "timezone";
   const setLocationDimension = (val) => setQueryParam("location", val);
   const [locationPage, setLocationPage] = useState(1);
   const [locations, setLocations] = useState(null);
@@ -245,81 +245,15 @@ function AnalyticsContent() {
   }, [range, contentPage]);
 
   const loadLocations = useCallback(async () => {
-    if (locationDimension === "country") {
-      const response = await analyticsApi.ga4(range);
-
-      if (!response.success) {
-        setLocations({
-          dimension: "country",
-          source: "GA4",
-          error:
-            response.error ||
-            "Google Analytics country data is currently unavailable.",
-          rows: [],
-          chart: [],
-          pagination: {
-            page: 1,
-            limit: 15,
-            total: 0,
-            pages: 1,
-          },
-        });
-        return;
-      }
-
-      const countryRows = (
-        unwrap(response)?.audience?.countries || []
-      )
-        .filter(
-          (row) =>
-            row.country &&
-            row.country !== "(not set)",
-        )
-        .map((row) => ({
-          key: row.country,
-          visitors: Number(row.activeUsers) || 0,
-          sessions: Number(row.sessions) || 0,
-          pageViews: Number(row.screenPageViews) || 0,
-        }))
-        .sort((a, b) => b.visitors - a.visitors);
-
-      const limit = 15;
-      const pages = Math.max(
-        1,
-        Math.ceil(countryRows.length / limit),
-      );
-      const safePage = Math.min(locationPage, pages);
-      const start = (safePage - 1) * limit;
-
-      setLocations({
-        dimension: "country",
-        source: "GA4",
-        error: "",
-        chart: countryRows.slice(0, 8),
-        rows: countryRows.slice(start, start + limit),
-        pagination: {
-          page: safePage,
-          limit,
-          total: countryRows.length,
-          pages,
-        },
-      });
-      return;
-    }
-
     const response = await analyticsApi.locations({
       ...range,
-      dimension: "timezone",
+      dimension: locationDimension,
       page: locationPage,
       limit: 15,
     });
 
     if (response.success) {
-      setLocations({
-        ...unwrap(response),
-        source: "First-party browser timezone",
-        error: "",
-      });
+      setLocations(unwrap(response));
     }
   }, [range, locationDimension, locationPage]);
 
@@ -428,9 +362,9 @@ function AnalyticsContent() {
           </h1>
 
           <p className="mt-1.5 max-w-3xl text-xs sm:text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
-            First-party analytics shows measured browser activity: browser
-            IDs, tracked page views, sessions, acquisition and viewport data.
-            Search Console remains separate for Google Search performance.
+            First-party asif.to traffic explains people, sources, content,
+            devices and location. Search Console explains how Google Search is
+            performing.
           </p>
         </div>
 
@@ -472,34 +406,34 @@ function AnalyticsContent() {
       <section className="grid grid-cols-2 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 lg:gap-3">
         <StatCard
           icon={Users}
-          label="Unique browsers"
+          label="Visitors"
           value={number(metric("visitors").value)}
           change={metric("visitors").change}
-          help="Distinct first-party browser IDs; known bots and local development are excluded."
+          help="Unique first-party visitors."
         />
 
         <StatCard
           icon={Eye}
-          label="Tracked page views"
+          label="Page views"
           value={number(metric("pageViews").value)}
           change={metric("pageViews").change}
-          help="Client-side page and route opens recorded by the asif.to tracker."
+          help="Pages actually opened on asif.to."
         />
 
         <StatCard
           icon={Waypoints}
-          label="30-min sessions"
+          label="Sessions"
           value={number(metric("sessions").value)}
           change={metric("sessions").change}
-          help="Browser sessions separated after 30 minutes of inactivity."
+          help="Separate browsing sessions."
         />
 
         <StatCard
           icon={Clock3}
-          label="Observed time / view"
+          label="Avg. time / view"
           value={seconds(metric("engagementTime").value)}
           change={metric("engagementTime").change}
-          help="Observed page-lifecycle time; browsers can block or drop unload beacons."
+          help="First-party engaged time."
         />
 
         <StatCard
@@ -521,13 +455,13 @@ function AnalyticsContent() {
 
       <Section
         eyebrow="Performance over time"
-        title="Is tracked browser activity growing?"
+        title="Are more people using asif.to?"
         description="The main trend graph uses first-party traffic, so you can see growth without mixing it with Search Console impressions."
       >
         <TrendChart
           data={overview?.trend || []}
           series={[
-            { key: "visitors", label: "Unique browsers" },
+            { key: "visitors", label: "Visitors" },
             { key: "pageViews", label: "Page views" },
           ]}
           height={300}
@@ -536,7 +470,7 @@ function AnalyticsContent() {
 
       <Section
         eyebrow="Acquisition"
-        title="Where did tracked visits come from?"
+        title="Where did visitors come from?"
         description="UTM tags take priority. Otherwise asif.to uses the external referrer domain provided by the browser and classifies common search engines, AI tools and social sites."
         action={
           <div className="flex rounded-full bg-zinc-100 p-1 dark:bg-zinc-900">
@@ -597,7 +531,7 @@ function AnalyticsContent() {
               },
               {
                 key: "visitors",
-                label: "Unique browsers",
+                label: "Visitors",
                 render: (row) => number(row.visitors),
               },
               {
@@ -628,8 +562,8 @@ function AnalyticsContent() {
 
       <Section
         eyebrow="Content"
-        title="What pages are actually being opened?"
-        description="This is first-party browser activity, not Google impressions. It shows page and route opens recorded by the site tracker."
+        title="What are people actually reading?"
+        description="This is first-party usage, not Google impressions. It shows the pages visitors really opened."
       >
         <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
           <div className="rounded-3xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800 dark:bg-[#121215]">
@@ -663,7 +597,7 @@ function AnalyticsContent() {
               },
               {
                 key: "visitors",
-                label: "Unique browsers",
+                label: "Visitors",
                 render: (row) => number(row.visitors),
               },
               {
@@ -688,8 +622,8 @@ function AnalyticsContent() {
 
       <Section
         eyebrow="Audience"
-        title="Where and how is tracked traffic arriving?"
-        description="Countries come directly from Google Analytics 4. Browser timezone is a separate first-party signal and is never converted into a country."
+        title="Where and how are people visiting?"
+        description="Country is used when your CDN/proxy supplies a country header. Browser timezone remains available as a privacy-conscious location signal."
         action={
           <div className="flex rounded-full bg-zinc-100 p-1 dark:bg-zinc-900">
             {[
@@ -715,32 +649,6 @@ function AnalyticsContent() {
           </div>
         }
       >
-        {locationDimension === "country" && (
-          <div className="rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3 text-[11px] leading-5 text-blue-900 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-200">
-            {locations?.quality?.hasVerifiedCountryData ? (
-              <>
-                Verified country coverage:{" "}
-                <strong>
-                  {Number(
-                    locations?.quality?.coveragePercent || 0,
-                  ).toFixed(1)}
-                  %
-                </strong>{" "}
-                of tracked page views in this range. Traffic without a
-                verified edge country header is omitted, not guessed from
-                timezone.
-              </>
-            ) : (
-              <>
-                No verified country data is available for this range. The
-                dashboard intentionally hides guessed country rankings. Put
-                the API behind Cloudflare, Vercel or CloudFront country
-                headers to populate this report.
-              </>
-            )}
-          </div>
-        )}
-
         <div className="grid gap-4 xl:grid-cols-2">
           <div className="rounded-3xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800 dark:bg-[#121215]">
             <div className="mb-4 flex items-center gap-2">
@@ -751,24 +659,16 @@ function AnalyticsContent() {
               </h3>
             </div>
 
-            {locationDimension === "country" &&
-            !locations?.quality?.hasVerifiedCountryData ? (
-              <div className="grid min-h-44 place-items-center rounded-2xl bg-zinc-50 px-6 text-center text-xs font-semibold leading-5 text-zinc-400 dark:bg-zinc-900/50">
-                Country ranking is hidden until verified country observations
-                exist.
-              </div>
-            ) : (
-              <HorizontalBarChart
-                rows={locations?.chart || []}
-                labelKey="key"
-                valueKey="visitors"
-                valueLabel={locationDimension === "country" ? "users" : "browsers"}
-              />
-            )}
+            <HorizontalBarChart
+              rows={locations?.chart || []}
+              labelKey="key"
+              valueKey="visitors"
+              valueLabel="visitors"
+            />
           </div>
 
           <div className="rounded-3xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800 dark:bg-[#121215]">
-            <h3 className="mb-4 text-sm font-black">Viewport mix</h3>
+            <h3 className="mb-4 text-sm font-black">Device mix</h3>
 
             <DonutChart rows={devices} valueKey="pageViews" />
           </div>
@@ -790,10 +690,7 @@ function AnalyticsContent() {
             },
             {
               key: "visitors",
-              label:
-                locationDimension === "country"
-                  ? "Active users"
-                  : "Unique browsers",
+              label: "Visitors",
               render: (row) => number(row.visitors),
             },
             {
@@ -870,7 +767,6 @@ function AnalyticsContent() {
           {[
             ["queries", "Queries"],
             ["pages", "Pages"],
-            ["countries", "Countries"],
           ].map(([value, label]) => (
             <button
               key={value}

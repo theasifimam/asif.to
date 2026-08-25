@@ -1,7 +1,7 @@
 import crypto from "crypto";
 
-import AnalyticsDaily from "../models/AnalyticsTrustedDaily.js";
-import AnalyticsIdentity from "../models/AnalyticsTrustedIdentity.js";
+import AnalyticsDaily from "../models/AnalyticsDaily.js";
+import AnalyticsIdentity from "../models/AnalyticsIdentity.js";
 import AnalyticsSync from "../models/AnalyticsSync.js";
 import SearchMetric from "../models/SearchMetric.js";
 
@@ -266,70 +266,99 @@ function sourceFrom({
   };
 }
 
-// ASIF_TRUSTED_ANALYTICS_V2
-const TRUSTED_COUNTRY_SOURCES = [
-  "cloudflare",
-  "vercel",
-  "cloudfront",
-];
+const TIMEZONE_COUNTRY_MAP = {
+  "Asia/Kolkata": "IN", "Asia/Calcutta": "IN", "Asia/Dhaka": "BD", "Asia/Karachi": "PK",
+  "Asia/Kathmandu": "NP", "Asia/Colombo": "LK", "Asia/Dubai": "AE", "Asia/Riyadh": "SA",
+  "Asia/Singapore": "SG", "Asia/Tokyo": "JP", "Asia/Seoul": "KR", "Asia/Bangkok": "TH",
+  "Asia/Jakarta": "ID", "Asia/Manila": "PH", "Asia/Kuala_Lumpur": "MY", "Asia/Ho_Chi_Minh": "VN",
+  "Asia/Shanghai": "CN", "Asia/Chongqing": "CN", "Asia/Urumqi": "CN", "Asia/Hong_Kong": "HK",
+  "Asia/Taipei": "TW", "Asia/Almaty": "KZ", "Asia/Tashkent": "UZ", "Asia/Baku": "AZ",
+  "Asia/Tbilisi": "GE", "Asia/Yerevan": "AM", "Asia/Beirut": "LB", "Asia/Amman": "JO",
+  "Asia/Jerusalem": "IL", "Asia/Tel_Aviv": "IL", "Asia/Muscat": "OM", "Asia/Qatar": "QA",
+  "Asia/Kuwait": "KW", "Asia/Bahrain": "BH", "Asia/Baghdad": "IQ", "Asia/Tehran": "IR",
+  "Asia/Kabul": "AF",
 
-const TRUSTED_COUNTRY_HEADERS = [
-  ["cf-ipcountry", "cloudflare"],
-  ["x-vercel-ip-country", "vercel"],
-  ["cloudfront-viewer-country", "cloudfront"],
-];
+  "America/New_York": "US", "America/Chicago": "US", "America/Los_Angeles": "US",
+  "America/Denver": "US", "America/Phoenix": "US", "America/Anchorage": "US",
+  "America/Honolulu": "US", "America/Detroit": "US", "America/Indiana/Indianapolis": "US",
+  "America/Boise": "US", "America/Juneau": "US", "America/Kentucky/Louisville": "US",
+  "America/Toronto": "CA", "America/Vancouver": "CA", "America/Montreal": "CA",
+  "America/Edmonton": "CA", "America/Winnipeg": "CA", "America/Halifax": "CA",
+  "America/Mexico_City": "MX", "America/Cancun": "MX", "America/Monterrey": "MX", "America/Tijuana": "MX",
+  "America/Sao_Paulo": "BR", "America/Rio_de_Janeiro": "BR", "America/Fortaleza": "BR",
+  "America/Buenos_Aires": "AR", "America/Argentina/Buenos_Aires": "AR", "America/Santiago": "CL",
+  "America/Bogota": "CO", "America/Lima": "PE", "America/Caracas": "VE", "America/Guayaquil": "EC",
+  "America/Montevideo": "UY", "America/Asuncion": "PY", "America/La_Paz": "BO", "America/Panama": "PA",
+  "America/Costa_Rica": "CR", "America/Guatemala": "GT", "America/San_Salvador": "SV",
+  "America/Tegucigalpa": "HN", "America/Managua": "NI", "America/Jamaica": "JM",
+  "America/Santo_Domingo": "DO", "America/Puerto_Rico": "PR",
 
-function normalizeCountryCode(value) {
-  const code = String(value || "").trim().toUpperCase();
+  "Europe/London": "GB", "Europe/Dublin": "IE", "Europe/Paris": "FR", "Europe/Berlin": "DE",
+  "Europe/Rome": "IT", "Europe/Madrid": "ES", "Europe/Amsterdam": "NL", "Europe/Brussels": "BE",
+  "Europe/Vienna": "AT", "Europe/Zurich": "CH", "Europe/Stockholm": "SE", "Europe/Oslo": "NO",
+  "Europe/Copenhagen": "DK", "Europe/Helsinki": "FI", "Europe/Warsaw": "PL", "Europe/Prague": "CZ",
+  "Europe/Budapest": "HU", "Europe/Bucharest": "RO", "Europe/Sofia": "BG", "Europe/Athens": "GR",
+  "Europe/Istanbul": "TR", "Europe/Lisbon": "PT", "Europe/Belgrade": "RS", "Europe/Zagreb": "HR",
+  "Europe/Bratislava": "SK", "Europe/Ljubljana": "SI", "Europe/Kiev": "UA", "Europe/Kyiv": "UA",
+  "Europe/Minsk": "BY", "Europe/Moscow": "RU", "Europe/Riga": "LV", "Europe/Tallinn": "EE",
+  "Europe/Vilnius": "LT", "Europe/Reykjavik": "IS",
 
-  if (!/^[A-Z]{2}$/.test(code)) return "";
+  "Australia/Sydney": "AU", "Australia/Melbourne": "AU", "Australia/Brisbane": "AU",
+  "Australia/Perth": "AU", "Australia/Adelaide": "AU", "Australia/Hobart": "AU",
+  "Australia/Darwin": "AU", "Pacific/Auckland": "NZ", "Pacific/Fiji": "FJ", "Pacific/Honolulu": "US",
 
-  // Cloudflare uses XX for unknown and T1 for Tor. Neither is a country.
-  if (code === "XX" || code === "T1") return "";
+  "Africa/Cairo": "EG", "Africa/Johannesburg": "ZA", "Africa/Lagos": "NG", "Africa/Nairobi": "KE",
+  "Africa/Casablanca": "MA", "Africa/Algiers": "DZ", "Africa/Tunis": "TN", "Africa/Accra": "GH",
+  "Africa/Addis_Ababa": "ET", "Africa/Kampala": "UG", "Africa/Dar_es_Salaam": "TZ",
+};
+
+function resolveCountryName(countryCodeOrTimezone) {
+  if (!countryCodeOrTimezone || countryCodeOrTimezone === "Unknown") {
+    return "Unknown";
+  }
+
+  let code = String(countryCodeOrTimezone).trim();
+
+  if (code.includes("/")) {
+    code = TIMEZONE_COUNTRY_MAP[code] || "";
+  }
+
+  if (!code) return "Unknown";
+
+  if (/^[A-Z]{2}$/i.test(code)) {
+    try {
+      const display = new Intl.DisplayNames(["en"], { type: "region" });
+      const name = display.of(code.toUpperCase());
+      if (name) return name;
+    } catch {}
+  }
 
   return code;
 }
 
-function resolveCountryName(countryCode) {
-  const code = normalizeCountryCode(countryCode);
+function countryFromRequest(req, fallback = "") {
+  const candidates = [
+    req.headers["cf-ipcountry"],
+    req.headers["x-vercel-ip-country"],
+    req.headers["x-country-code"],
+    req.headers["cloudfront-viewer-country"],
+    fallback,
+  ];
 
-  if (!code) return "Unknown";
+  const value = candidates.find(
+    (item) =>
+      item &&
+      /^[a-z]{2}$/i.test(String(item)),
+  );
 
-  try {
-    const display = new Intl.DisplayNames(["en"], { type: "region" });
-    return display.of(code) || code;
-  } catch {
-    return code;
-  }
-}
+  if (value) return String(value).toUpperCase();
 
-function countryFromRequest(req) {
-  for (const [header, source] of TRUSTED_COUNTRY_HEADERS) {
-    const raw = req.headers[header];
-    const value = Array.isArray(raw) ? raw[0] : raw;
-    const code = normalizeCountryCode(value);
-
-    if (code) {
-      return { code, source };
-    }
+  const timezone = req.body?.timezone || "";
+  if (timezone && TIMEZONE_COUNTRY_MAP[timezone]) {
+    return TIMEZONE_COUNTRY_MAP[timezone];
   }
 
-  return { code: "", source: "" };
-}
-
-const BOT_USER_AGENT =
-  /bot|crawler|spider|slurp|bingpreview|facebookexternalhit|facebot|twitterbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest|developers\.google\.com\/\+\/web\/snippet|headlesschrome|lighthouse|pagespeed|pingdom|uptimerobot|statuscake|python-requests|python\/|curl\/|wget\/|postmanruntime|node-fetch|axios\//i;
-
-function shouldIgnoreAnalyticsRequest(req) {
-  const userAgent = clean(req.headers["user-agent"], 1024);
-
-  // Real browsers normally send a UA. With a strict/trust-first dashboard,
-  // requests without one are not counted.
-  if (!userAgent || BOT_USER_AGENT.test(userAgent)) {
-    return true;
-  }
-
-  return false;
+  return "";
 }
 
 function hmac(value) {
@@ -359,6 +388,7 @@ export const captureVisit = async (req, res) => {
       event = "pageview",
       engagementMs = 0,
       device = "other",
+      country = "",
       timezone = "",
       language = "",
     } = req.body || {};
@@ -376,10 +406,6 @@ export const captureVisit = async (req, res) => {
       origin.includes("localhost") ||
       origin.includes("127.0.0.1")
     ) {
-      return res.status(204).end();
-    }
-
-    if (shouldIgnoreAnalyticsRequest(req)) {
       return res.status(204).end();
     }
 
@@ -402,8 +428,7 @@ export const captureVisit = async (req, res) => {
       ? device
       : "other";
 
-    const { code: safeCountry, source: countrySource } =
-      countryFromRequest(req);
+    const safeCountry = countryFromRequest(req, country);
 
     const dimensions = {
       date,
@@ -413,7 +438,6 @@ export const captureVisit = async (req, res) => {
       campaign: acquisition.campaign,
       referrer: acquisition.referrerDomain,
       country: safeCountry,
-      countrySource,
       device: safeDevice,
     };
 
@@ -441,7 +465,6 @@ export const captureVisit = async (req, res) => {
                 landingPath || safePath,
               ),
               country: safeCountry,
-              countrySource,
               device: safeDevice,
               timezone: clean(timezone, 100),
               language: clean(language, 32),
@@ -668,19 +691,6 @@ export const getSimpleOverview = async (req, res) => {
           ]),
         ),
         trend,
-        quality: {
-          collection: "trusted-v2",
-          legacyFirstPartyDataExcluded: true,
-          knownBotsExcluded: true,
-          visitorDefinition:
-            "Distinct first-party browser identifiers, not guaranteed unique people.",
-          sessionDefinition:
-            "30-minute inactivity browser sessions.",
-          pageViewDefinition:
-            "Client-side route/page opens recorded by the asif.to tracker.",
-          countryDefinition:
-            "Country is accepted only from verified CDN/edge ISO headers and is never inferred from timezone.",
-        },
         sync: {
           status: sync?.status || "idle",
           lastSyncedAt: sync?.lastSyncedAt || null,
@@ -1168,19 +1178,21 @@ async function identityLocationRows(start, end, field) {
     date: { $gte: start, $lt: end },
   };
 
-  if (field === "country") {
-    match.country = { $regex: /^[A-Z]{2}$/ };
-    match.countrySource = { $in: TRUSTED_COUNTRY_SOURCES };
-  } else {
-    match.timezone = {
-      $exists: true,
-      $nin: ["", null],
-    };
-  }
-
   const keyExpression =
     field === "country"
-      ? "$country"
+      ? {
+          $cond: [
+            {
+              $and: [
+                { $ne: ["$country", ""] },
+                { $ne: ["$country", null] },
+                { $ne: ["$country", "Unknown"] },
+              ],
+            },
+            "$country",
+            "$timezone",
+          ],
+        }
       : "$timezone";
 
   const [visitors, sessions] = await Promise.all([
@@ -1267,61 +1279,26 @@ export const getLocations = async (req, res) => {
       map.set(key, current);
     }
 
-    let quality =
-      dimension === "country"
-        ? {
-            source: "verified-edge-country",
-            hasVerifiedCountryData: false,
-            countryInferredFromTimezone: false,
-            coveragePercent: 0,
-            knownCountryPageViews: 0,
-            totalTrackedPageViews: 0,
-            note:
-              "Only verified CDN/edge ISO country headers are shown. Unlocated traffic is omitted rather than guessed.",
-          }
-        : {
-            source: "browser-timezone",
-            trustworthyAsCountry: false,
-            note:
-              "Timezone is a browser-reported setting and is not used to infer country.",
-          };
-
     if (dimension === "country") {
-      const [daily, totals] = await Promise.all([
-        AnalyticsDaily.aggregate([
-          {
-            $match: {
-              date: { $gte: dates.start, $lt: dates.end },
-              country: { $regex: /^[A-Z]{2}$/ },
-              countrySource: { $in: TRUSTED_COUNTRY_SOURCES },
-            },
+      const daily = await AnalyticsDaily.aggregate([
+        {
+          $match: {
+            date: { $gte: dates.start, $lt: dates.end },
           },
-          {
-            $group: {
-              _id: "$country",
-              pageViews: { $sum: "$pageViews" },
-            },
+        },
+        {
+          $group: {
+            _id: "$country",
+            pageViews: { $sum: "$pageViews" },
           },
-        ]),
-        AnalyticsDaily.aggregate([
-          {
-            $match: {
-              date: { $gte: dates.start, $lt: dates.end },
-            },
-          },
-          {
-            $group: {
-              _id: null,
-              pageViews: { $sum: "$pageViews" },
-            },
-          },
-        ]),
+        },
       ]);
 
       for (const row of daily) {
-        const key = resolveCountryName(row._id);
+        const rawKey = row._id || "Unknown";
+        const key = resolveCountryName(rawKey);
         const current = map.get(key) || {
-          key,
+          key: key,
           visitors: 0,
           sessions: 0,
           pageViews: 0,
@@ -1329,27 +1306,6 @@ export const getLocations = async (req, res) => {
         current.pageViews += row.pageViews || 0;
         map.set(key, current);
       }
-
-      const knownCountryPageViews = daily.reduce(
-        (sum, row) => sum + (row.pageViews || 0),
-        0,
-      );
-      const totalTrackedPageViews = totals[0]?.pageViews || 0;
-
-      quality = {
-        source: "verified-edge-country",
-        hasVerifiedCountryData:
-          knownCountryPageViews > 0 || map.size > 0,
-        countryInferredFromTimezone: false,
-        coveragePercent:
-          totalTrackedPageViews > 0
-            ? (knownCountryPageViews / totalTrackedPageViews) * 100
-            : 0,
-        knownCountryPageViews,
-        totalTrackedPageViews,
-        note:
-          "Only verified CDN/edge ISO country headers are shown. Unlocated traffic is omitted rather than guessed.",
-      };
     }
 
     let rows = Array.from(map.values());
@@ -1378,7 +1334,6 @@ export const getLocations = async (req, res) => {
       success: true,
       data: {
         dimension,
-        quality,
         chart,
         ...paginateRows(rows, page, limit),
       },

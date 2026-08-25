@@ -190,7 +190,7 @@ function AnalyticsContent() {
   const [contentPage, setContentPage] = useState(1);
   const [content, setContent] = useState(null);
 
-  const locationDimension = searchParams.get("location") || "country";
+  const locationDimension = searchParams.get("location") || "timezone";
   const setLocationDimension = (val) => setQueryParam("location", val);
   const [locationPage, setLocationPage] = useState(1);
   const [locations, setLocations] = useState(null);
@@ -245,81 +245,15 @@ function AnalyticsContent() {
   }, [range, contentPage]);
 
   const loadLocations = useCallback(async () => {
-    if (locationDimension === "country") {
-      const response = await analyticsApi.ga4(range);
-
-      if (!response.success) {
-        setLocations({
-          dimension: "country",
-          source: "GA4",
-          error:
-            response.error ||
-            "Google Analytics country data is currently unavailable.",
-          rows: [],
-          chart: [],
-          pagination: {
-            page: 1,
-            limit: 15,
-            total: 0,
-            pages: 1,
-          },
-        });
-        return;
-      }
-
-      const countryRows = (
-        unwrap(response)?.audience?.countries || []
-      )
-        .filter(
-          (row) =>
-            row.country &&
-            row.country !== "(not set)",
-        )
-        .map((row) => ({
-          key: row.country,
-          visitors: Number(row.activeUsers) || 0,
-          sessions: Number(row.sessions) || 0,
-          pageViews: Number(row.screenPageViews) || 0,
-        }))
-        .sort((a, b) => b.visitors - a.visitors);
-
-      const limit = 15;
-      const pages = Math.max(
-        1,
-        Math.ceil(countryRows.length / limit),
-      );
-      const safePage = Math.min(locationPage, pages);
-      const start = (safePage - 1) * limit;
-
-      setLocations({
-        dimension: "country",
-        source: "GA4",
-        error: "",
-        chart: countryRows.slice(0, 8),
-        rows: countryRows.slice(start, start + limit),
-        pagination: {
-          page: safePage,
-          limit,
-          total: countryRows.length,
-          pages,
-        },
-      });
-      return;
-    }
-
     const response = await analyticsApi.locations({
       ...range,
-      dimension: "timezone",
+      dimension: locationDimension,
       page: locationPage,
       limit: 15,
     });
 
     if (response.success) {
-      setLocations({
-        ...unwrap(response),
-        source: "First-party browser timezone",
-        error: "",
-      });
+      setLocations(unwrap(response));
     }
   }, [range, locationDimension, locationPage]);
 
@@ -689,7 +623,7 @@ function AnalyticsContent() {
       <Section
         eyebrow="Audience"
         title="Where and how is tracked traffic arriving?"
-        description="Countries come directly from Google Analytics 4. Browser timezone is a separate first-party signal and is never converted into a country."
+        description="Countries are shown only when a trusted CDN/edge supplies an ISO country header. Browser timezone is displayed separately and is never converted into a country."
         action={
           <div className="flex rounded-full bg-zinc-100 p-1 dark:bg-zinc-900">
             {[
@@ -762,7 +696,7 @@ function AnalyticsContent() {
                 rows={locations?.chart || []}
                 labelKey="key"
                 valueKey="visitors"
-                valueLabel={locationDimension === "country" ? "users" : "browsers"}
+                valueLabel="browsers"
               />
             )}
           </div>
@@ -790,10 +724,7 @@ function AnalyticsContent() {
             },
             {
               key: "visitors",
-              label:
-                locationDimension === "country"
-                  ? "Active users"
-                  : "Unique browsers",
+              label: "Unique browsers",
               render: (row) => number(row.visitors),
             },
             {
@@ -870,7 +801,6 @@ function AnalyticsContent() {
           {[
             ["queries", "Queries"],
             ["pages", "Pages"],
-            ["countries", "Countries"],
           ].map(([value, label]) => (
             <button
               key={value}
