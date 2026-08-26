@@ -42,10 +42,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.resolve(__dirname, "../.env"), override: false });
-dotenv.config({
-  path: path.resolve(__dirname, "../.env.auth.local"),
-  override: false,
-});
 
 const app = express();
 const allowedOrigins = [

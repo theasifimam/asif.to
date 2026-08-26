@@ -5,7 +5,7 @@ import Link from "next/link";
 import * as Tabs from "@radix-ui/react-tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { X, ShieldCheck } from "lucide-react";
+import { X, ShieldCheck, AlertCircle } from "lucide-react";
 import {
   useSigninMutation,
   useSignupMutation,
@@ -28,6 +28,7 @@ export default function AuthCard({
   onClose,
   isModal = false,
   updateUrl = true,
+  initialError = null,
 }) {
   const dispatch = useAppDispatch();
 
@@ -36,6 +37,7 @@ export default function AuthCard({
   const [isForgotPassword, setIsForgotPassword] = useState(
     initialForgotPassword,
   );
+  const [oauthError, setOauthError] = useState(initialError);
 
   // Check URL query on mount for direct email signup link support (?mode=email)
   const [suStep, setSuStep] = useState(() => {
@@ -292,6 +294,23 @@ export default function AuthCard({
 
   return (
     <div className="relative w-full max-w-110 bg-white dark:bg-zinc-900 border border-white dark:border-zinc-800 rounded-4xl sm:rounded-4xl shadow-2xl shadow-zinc-950/20 dark:shadow-black/60 flex flex-col overflow-hidden max-h-[85vh] sm:max-h-[88vh]">
+      {/* OAuth error banner */}
+      {oauthError && (
+        <div className="flex items-start gap-2.5 bg-red-50 dark:bg-red-950/40 border-b border-red-200 dark:border-red-900 px-5 py-3">
+          <AlertCircle size={15} className="shrink-0 text-red-500 mt-0.5" />
+          <p className="flex-1 text-xs font-semibold text-red-700 dark:text-red-400 leading-snug">
+            {oauthError}
+          </p>
+          <button
+            type="button"
+            onClick={() => setOauthError(null)}
+            aria-label="Dismiss error"
+            className="shrink-0 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors cursor-pointer"
+          >
+            <X size={13} />
+          </button>
+        </div>
+      )}
       {/* Header Bar - Fixed Branding & Title */}
       <div className="flex flex-col px-6 sm:px-8 pt-5 sm:pt-6 pb-3 border-b border-zinc-200 dark:border-zinc-800 shrink-0 bg-white dark:bg-zinc-900">
         <div className="flex items-center justify-between">

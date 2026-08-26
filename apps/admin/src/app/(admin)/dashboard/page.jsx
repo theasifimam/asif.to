@@ -523,7 +523,7 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          <div className="flex flex-col gap-2 bg-white rounded-[20px] sm:rounded-4xl transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700 max-h-141 overflow-y-auto">
+          <div className="admin-surface flex flex-col gap-2 transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700 max-h-141 overflow-y-auto">
             {(dashboardData?.topCourses || []).map((course, i) => (
               <div
                 key={course.id}
