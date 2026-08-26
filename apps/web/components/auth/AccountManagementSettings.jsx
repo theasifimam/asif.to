@@ -191,14 +191,14 @@ export default function AccountManagementSettings({ user }) {
           <DangerAction
             icon={UserX}
             title="Deactivate account"
-            description="Temporarily disable sign-in and hide your profile. Your saved data and published content remain preserved."
+            description="Temporarily disable sign-in and hide your profile. Your saved data and published content remain preserved. Sign back in any time to instantly reactivate."
             button="Deactivate"
             onClick={() => openActionModal("deactivate")}
           />
           <DangerAction
             icon={Trash2}
             title="Delete account"
-            description="Permanently remove your account profile. Published contributions remain safely preserved to avoid breaking links."
+            description="Request account removal. You have a 30-day window to sign back in and restore it. After 30 days your personal data is permanently removed, but published contributions stay preserved."
             button="Delete account"
             destructive
             onClick={() => openActionModal("delete")}

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useTransition } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signOut as oauthSignOut } from "next-auth/react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import AuthModal from "@/components/auth/AuthModal";
@@ -199,13 +199,18 @@ export default function UserProfileClient({ username }) {
 
   const handleLogout = async () => {
     try {
+      await fetch("/api/auth/backend-session", { method: "DELETE" }).catch(
+        () => {},
+      );
       await signout().unwrap();
+      await oauthSignOut({ redirect: false }).catch(() => {});
     } catch {
       // Ignore API signout error if session expired
     } finally {
       dispatch(clearCredentials());
       setIsLogoutModalOpen(false);
       toast.success("Successfully signed out");
+      window.location.reload();
     }
   };
 

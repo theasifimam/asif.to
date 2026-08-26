@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -15,13 +15,12 @@ import {
   HelpCircle,
   ChevronRight,
   LogOut,
-  Sparkles,
-  Search,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { clearCredentials } from "@/lib/store/authSlice";
 import { useSignoutMutation } from "@/lib/api/authApi";
+import { signOut as oauthSignOut } from "next-auth/react";
 import { getImageUrl } from "@/lib/config";
 import { useScrollNavVisible } from "@/components/layout/ScrollNavProvider";
 import { ThemeToggle } from "../ui/ThemeToggle";
@@ -86,15 +85,19 @@ export default function BottomNav() {
 
   const handleLogout = async () => {
     try {
+      await fetch("/api/auth/backend-session", { method: "DELETE" }).catch(
+        () => {},
+      );
       await signout().unwrap();
-      dispatch(clearCredentials());
-      toast.success("Signed out successfully");
-      setIsLogoutConfirmOpen(false);
-      setIsMenuOpen(false);
+      await oauthSignOut({ redirect: false }).catch(() => {});
     } catch {
+      /* ignore */
+    } finally {
       dispatch(clearCredentials());
       setIsLogoutConfirmOpen(false);
       setIsMenuOpen(false);
+      toast.success("Signed out successfully");
+      window.location.reload();
     }
   };
 

@@ -10,6 +10,10 @@ import { writeAudit } from "../utils/audit.js";
 import mongoose from "mongoose";
 import { roleRank } from "../utils/permissions.js";
 import { logActivity } from "../services/activity.service.js";
+import {
+  sendAccountDeactivatedEmail,
+  sendAccountDeletedEmail,
+} from "../services/email.service.js";
 
 // ─── Admin: List all users ──────────────────────────────────────────────────
 // GET /api/v1/users?page=1&limit=10&search=&role=&status=
@@ -643,11 +647,15 @@ export const deactivateMyAccount = async (req, res) => {
       },
     );
     await writeAudit(req, "user.self_deactivated", req.user._id);
+    // Fire farewell email — non-blocking so it doesn't delay the response
+    sendAccountDeactivatedEmail(req.user.email, req.user.fullName).catch(
+      (err) => console.error("[EMAIL] Deactivation email failed:", err.message),
+    );
     res.clearCookie("token");
     return res.json({
       success: true,
       message:
-        "Your account has been deactivated. Contact support to restore it.",
+        "Your account has been deactivated. Sign in any time to reactivate it instantly.",
     });
   } catch (error) {
     console.error("[USERS] Self-deactivation error:", error.message);
@@ -732,11 +740,15 @@ export const deleteMyAccount = async (req, res) => {
       },
     );
     await writeAudit(req, "user.self_deleted", req.user._id);
+    // Fire farewell email — non-blocking so it doesn't delay the response
+    sendAccountDeletedEmail(req.user.email, req.user.fullName).catch(
+      (err) => console.error("[EMAIL] Deletion email failed:", err.message),
+    );
     res.clearCookie("token");
     return res.json({
       success: true,
       message:
-        "Your account has been removed. Published content remains preserved.",
+        "Your account has been removed. You have 30 days to sign back in and restore it. Published content remains preserved.",
     });
   } catch (error) {
     console.error("[USERS] Self-deletion error:", error.message);

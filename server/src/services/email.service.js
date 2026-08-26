@@ -457,3 +457,107 @@ export const sendCourseDeletionApprovalRequestEmail = async ({
   });
 };
 
+/**
+ * Sent to a user immediately after they deactivate their account.
+ * Lets them know they can sign back in any time to reactivate.
+ */
+export const sendAccountDeactivatedEmail = async (to, fullName) => {
+  const from = process.env.EMAIL_FROM || "asif.to <noreply@asif.to>";
+  const siteUrl = getSiteUrl();
+  const safeName = escapeHtml(fullName || "there");
+
+  await getTransporter().sendMail({
+    from,
+    to,
+    subject: "Your asif.to account has been deactivated",
+    text: `Hi ${fullName || "there"},\n\nYour asif.to account has been successfully deactivated.\n\nWe'll miss you! Whenever you're ready to come back, simply sign in at ${siteUrl}/login and your account will be instantly reactivated — no hoops, no waiting.\n\nYour learning progress, bookmarks, and certificates are all safely stored and will be right where you left them.\n\nWe hope to see you again.\n\nasif.to`,
+    html: renderEmailLayout({
+      preheader:
+        "Your asif.to account is deactivated. Come back any time to reactivate it instantly.",
+      eyebrow: "Account deactivated",
+      badgeText: "Account",
+      title: `We'll miss you, ${fullName || "there"} 💙`,
+      intro: `Hi ${safeName}, your asif.to account has been successfully deactivated. We're sorry to see you go — but the door is always open.`,
+      content: `
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;background:${BRAND.primaryContainer};border:1px solid ${BRAND.primaryContainerBorder};border-radius:20px;">
+          <tr>
+            <td style="padding:22px 24px;">
+              <p style="margin:0 0 6px;font-family:'Outfit',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;font-weight:800;color:${BRAND.primaryContainerInk};">Coming back is easy</p>
+              <p style="margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;line-height:20px;color:${BRAND.primaryContainerInk};">Simply sign in at asif.to any time and your account will be <strong>instantly reactivated</strong>. Your progress, bookmarks, and certificates are all safely preserved.</p>
+            </td>
+          </tr>
+        </table>
+        ${renderButton("Sign in to reactivate", `${siteUrl}/login`)}
+        ${renderNotice(
+          `If you ever need help, reach out to <a href='mailto:support@asif.to' style='color:${BRAND.primary};font-weight:700;text-decoration:none;'>support@asif.to</a>.`,
+        )}
+        <p style="margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;line-height:19px;color:${BRAND.subtle};">Sent automatically by <strong style="color:${BRAND.muted};">noreply@asif.to</strong>. Please do not reply to this message.</p>`,
+    }),
+  });
+};
+
+/**
+ * Sent to a user immediately after they request account deletion.
+ * Explains the 30-day grace window to restore and what happens to published content.
+ */
+export const sendAccountDeletedEmail = async (to, fullName) => {
+  const from = process.env.EMAIL_FROM || "asif.to <noreply@asif.to>";
+  const siteUrl = getSiteUrl();
+  const safeName = escapeHtml(fullName || "there");
+  const restoreDeadline = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString(
+    "en-US",
+    { year: "numeric", month: "long", day: "numeric" },
+  );
+
+  await getTransporter().sendMail({
+    from,
+    to,
+    subject: "Your asif.to account deletion request",
+    text: `Hi ${fullName || "there"},\n\nWe've received your request to delete your asif.to account.\n\nWe'll miss you more than you know. The dev community you've been part of here is a little smaller without you.\n\nYou have until ${restoreDeadline} to change your mind. Simply sign in at ${siteUrl}/login within the next 30 days and your account will be fully restored.\n\nAfter ${restoreDeadline}, your account will be permanently removed. Your published articles and course contributions will remain preserved so the community can still benefit from your work.\n\nIf you'd like to discuss your account, contact us at support@asif.to.\n\nTake care,\nasif.to`,
+    html: renderEmailLayout({
+      preheader: `You have 30 days to restore your asif.to account. We'll miss you!`,
+      eyebrow: "Account deletion requested",
+      badgeText: "Account",
+      title: `Goodbye for now, ${fullName || "there"} 👋`,
+      intro: `Hi ${safeName}, we've received your request to delete your asif.to account. We're genuinely sad to see you go — you've been a valued part of our learning community.`,
+      content: `
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;background:${BRAND.primaryContainer};border:1px solid ${BRAND.primaryContainerBorder};border-radius:20px;">
+          <tr>
+            <td style="padding:22px 24px;">
+              <p style="margin:0 0 6px;font-family:'Outfit',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;font-weight:800;color:${BRAND.primaryContainerInk};">Changed your mind? You have 30 days.</p>
+              <p style="margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;line-height:20px;color:${BRAND.primaryContainerInk};">Simply sign in before <strong>${escapeHtml(restoreDeadline)}</strong> and your account will be <strong>fully restored</strong> — all your progress, bookmarks, and certificates intact.</p>
+            </td>
+          </tr>
+        </table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+          <tr>
+            <td class="stack-cell" width="50%" valign="top" style="padding-right:6px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.surfaceLow};border:1px solid ${BRAND.border};border-radius:18px;">
+                <tr>
+                  <td style="padding:18px;">
+                    <p style="margin:0 0 6px;font-family:'Outfit',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;font-weight:800;color:${BRAND.heading};">Your content stays</p>
+                    <p style="margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;line-height:18px;color:${BRAND.muted};">Articles and course contributions you've published remain preserved so the community still benefits from your work.</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <td class="stack-cell stack-gap" width="50%" valign="top" style="padding-left:6px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.surfaceLow};border:1px solid ${BRAND.border};border-radius:18px;">
+                <tr>
+                  <td style="padding:18px;">
+                    <p style="margin:0 0 6px;font-family:'Outfit',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;font-weight:800;color:${BRAND.heading};">Data removed after 30 days</p>
+                    <p style="margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;line-height:18px;color:${BRAND.muted};">Your personal profile, bookmarks, quiz history, and private data will be permanently deleted after the grace window closes.</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+        ${renderButton("Restore my account", `${siteUrl}/login`)}
+        ${renderNotice(
+          `If you did not request this deletion or believe this was done in error, contact us immediately at <a href='mailto:support@asif.to' style='color:${BRAND.primary};font-weight:700;text-decoration:none;'>support@asif.to</a>.`,
+        )}
+        <p style="margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;line-height:19px;color:${BRAND.subtle};">Sent automatically by <strong style="color:${BRAND.muted};">noreply@asif.to</strong>. Please do not reply to this message.</p>`,
+    }),
+  });
+};

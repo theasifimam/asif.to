@@ -5,8 +5,6 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { ThemeToggle } from "../ui/ThemeToggle";
 import {
-  LogOut,
-  Menu,
   ArrowLeft,
   ChevronDown,
   BookOpen,
@@ -15,11 +13,7 @@ import {
   HelpCircle,
   Bookmark,
   Code2,
-  Zap,
-  Server,
-  Database,
   Sparkles,
-  Plus,
   ArrowRight,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
@@ -30,7 +24,7 @@ import {
   useGetCheatsheetsQuery,
 } from "@/lib/api/courseApi";
 import { toast } from "sonner";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useScrollNavVisible } from "@/components/layout/ScrollNavProvider";
 import GlobalSearch from "@/components/search/GlobalSearch";
 import { signOut as oauthSignOut, useSession } from "next-auth/react";
@@ -40,17 +34,13 @@ import { getImageUrl } from "@/lib/config";
 // ASIF_COURSE_LEARNING_FLOW_V1:header-progress-import
 import ContinueCoursePill from "@/components/layout/ContinueCoursePill";
 
-const Sidebar = dynamic(() => import("./header/Sidebar"), { ssr: false });
 const LogoutConfirm = dynamic(() => import("./header/LogoutConfirm"), {
   ssr: false,
 });
 
 export default function Header() {
-  const router = useRouter();
   const pathname = usePathname();
   const { data: oauthSession, status: oauthStatus } = useSession();
-  const [currentTime, setCurrentTime] = useState("");
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
   // Dropdown states
@@ -68,42 +58,23 @@ export default function Header() {
   const { data: coursesData } = useGetCoursesQuery();
   const { data: cheatsheetsData } = useGetCheatsheetsQuery();
   const courses = coursesData?.data || [];
-  const cheatsheets = cheatsheetsData?.data || [];
 
   const handleLogout = async () => {
     try {
-      if (oauthSession?.user) {
-        await fetch("/api/auth/backend-session", { method: "DELETE" }).catch(
-          () => {},
-        );
-        await oauthSignOut({ redirectTo: "/" });
-        return;
-      }
+      await fetch("/api/auth/backend-session", { method: "DELETE" }).catch(
+        () => {},
+      );
       await signout().unwrap();
+      await oauthSignOut({ redirect: false }).catch(() => {});
     } catch {
       /* ignore */
     } finally {
       dispatch(clearCredentials());
       setIsLogoutConfirmOpen(false);
-      setIsMenuOpen(false);
       toast.success("Signed out successfully.");
+      window.location.reload();
     }
   };
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date();
-      setCurrentTime(
-        now.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        }),
-      );
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   // Close dropdowns on click outside
   useEffect(() => {
@@ -203,7 +174,7 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation with Categorized Mega-Dropdowns */}
-          <nav className="hidden md:flex items-center gap-1 bg-zinc-100/90 dark:bg-zinc-800/80 p-1 rounded-full text-xs font-bold border border-zinc-200/50 dark:border-zinc-700/50">
+          <nav className="hidden md:flex items-center gap-1 text-xs font-bold">
             {/* Learn & Explore Dropdown */}
             <div className="relative" ref={learnRef}>
               <button
@@ -211,7 +182,7 @@ export default function Header() {
                   setLearnDropdownOpen(!learnDropdownOpen);
                   setPracticeDropdownOpen(false);
                 }}
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full transition-all ${
+                className={`flex h-10 items-center gap-1.5 px-4 rounded-full transition-all ${
                   isLearnActive || learnDropdownOpen
                     ? "bg-blue-600 text-white shadow-sm"
                     : "text-zinc-600 dark:text-zinc-300 hover:text-foreground hover:bg-zinc-200/60 dark:hover:bg-zinc-700/60"
@@ -323,7 +294,7 @@ export default function Header() {
                   setPracticeDropdownOpen(!practiceDropdownOpen);
                   setLearnDropdownOpen(false);
                 }}
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full transition-all ${
+                className={`flex h-10 items-center gap-1.5 px-4 rounded-full transition-all ${
                   isPracticeActive || practiceDropdownOpen
                     ? "bg-blue-600 text-white shadow-sm"
                     : "text-zinc-600 dark:text-zinc-300 hover:text-foreground hover:bg-zinc-200/60 dark:hover:bg-zinc-700/60"
@@ -424,7 +395,7 @@ export default function Header() {
             {/* My Library Direct Link */}
             <Link
               href="/library"
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full transition-all ${
+              className={`flex h-10 items-center gap-1.5 px-4 rounded-full transition-all ${
                 isLibraryActive
                   ? "bg-blue-600 text-white shadow-sm"
                   : "text-zinc-600 dark:text-zinc-300 hover:text-foreground hover:bg-zinc-200/60 dark:hover:bg-zinc-700/60"
@@ -449,11 +420,15 @@ export default function Header() {
               ) : isAuthenticated && user ? (
                 <Link
                   href={`/${user.username}`}
-                  className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-bold text-foreground transition-all active:scale-95 shadow-sm"
+                  className="flex h-10 items-center gap-2.5 px-4 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-bold text-foreground transition-all active:scale-95 shadow-sm"
                 >
                   <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[11px] flex items-center justify-center font-black shadow-sm overflow-hidden shrink-0 relative">
                     {user.avatar ? (
-                      <img src={getImageUrl(user.avatar)} alt={user.fullName || "User"} className="w-full h-full object-cover" />
+                      <img
+                        src={getImageUrl(user.avatar)}
+                        alt={user.fullName || "User"}
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       user.fullName?.[0]?.toUpperCase() || "U"
                     )}
@@ -462,14 +437,14 @@ export default function Header() {
                 </Link>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Button asChild variant="ghost" size="sm">
+                  <Button asChild variant="ghost" className="h-10 text-xs px-4">
                     <Link
                       href={`/login?callbackUrl=${encodeURIComponent(pathname || "/")}`}
                     >
                       Sign In
                     </Link>
                   </Button>
-                  <Button asChild size="sm">
+                  <Button asChild className="h-10 text-xs px-4">
                     <Link
                       href={`/signup?callbackUrl=${encodeURIComponent(pathname || "/")}`}
                     >

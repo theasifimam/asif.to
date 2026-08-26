@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { useAppDispatch } from "@/lib/store/hooks";
+import { clearCredentials } from "@/lib/store/authSlice";
 import { getImageUrl } from "@/lib/config";
 import {
   Bookmark,
@@ -14,6 +16,7 @@ import {
 } from "lucide-react";
 
 export default function AuthUserMenu({ user }) {
+  const dispatch = useAppDispatch();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   useEffect(() => {
@@ -69,6 +72,7 @@ export default function AuthUserMenu({ user }) {
               await fetch("/api/auth/backend-session", {
                 method: "DELETE",
               }).catch(() => {});
+              dispatch(clearCredentials());
               await signOut({ redirectTo: "/" });
             }}
             className="mt-1 flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"

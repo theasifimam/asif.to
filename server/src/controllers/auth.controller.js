@@ -114,10 +114,34 @@ export const upsertOAuthUser = async (req, res) => {
         });
       }
     }
-    if (["suspended", "banned", "deactivated"].includes(user.status))
+    // Admin-imposed blocks are always hard-blocked
+    if (["suspended", "banned"].includes(user.status))
       return res
         .status(403)
         .json({ success: false, message: "This account has been suspended." });
+
+    // Soft-deleted: allow restore within 30-day grace window
+    if (user.deletedAt) {
+      const daysSince =
+        (Date.now() - new Date(user.deletedAt).getTime()) / 86_400_000;
+      if (daysSince > 30)
+        return res.status(403).json({
+          success: false,
+          message:
+            "This account was permanently deleted and can no longer be recovered.",
+        });
+      // Within grace period — restore
+      user.deletedAt = null;
+      user.deletedBy = null;
+      user.status = "active";
+      user.statusReason = "Restored by owner within 30-day grace period (OAuth)";
+      user.statusChangedAt = new Date();
+    } else if (user.status === "deactivated") {
+      // Deactivated: let the user back in — this is a self-service reactivation
+      user.status = "active";
+      user.statusReason = "Reactivated by owner via OAuth login";
+      user.statusChangedAt = new Date();
+    }
     if (!user.avatar && image) user.avatar = image;
     if (!user.fullName && name) user.fullName = String(name).slice(0, 120);
     user.provider ||= provider;
@@ -165,7 +189,18 @@ export const issueOAuthSession = async (req, res) => {
     const user = await User.findById(req.body?.userId).select(
       "fullName username email avatar role status provider createdAt sessionsRevokedAt",
     );
-    if (!user || ["suspended", "banned", "deactivated"].includes(user.status))
+    // By the time this runs, upsertOAuthUser has already reactivated the account if applicable.
+    // Only hard-block admin-imposed statuses.
+    if (!user || ["suspended", "banned"].includes(user.status))
+      return res
+        .status(403)
+        .json({ success: false, message: "This account is unavailable." });
+    // Permanently deleted (grace period expired)
+    if (
+      user.status === "deactivated" ||
+      (user.deletedAt &&
+        (Date.now() - new Date(user.deletedAt).getTime()) / 86_400_000 > 30)
+    )
       return res
         .status(403)
         .json({ success: false, message: "This account is unavailable." });
@@ -315,11 +350,37 @@ export const signin = async (req, res) => {
       return;
     }
 
-    if (["suspended", "banned", "deactivated"].includes(user.status)) {
+    // Admin-imposed blocks are always hard-blocked
+    if (["suspended", "banned"].includes(user.status)) {
       res
         .status(403)
         .json({ success: false, message: "Your account has been suspended." });
       return;
+    }
+
+    // Soft-deleted: allow restore within 30-day grace window
+    if (user.deletedAt) {
+      const daysSince =
+        (Date.now() - new Date(user.deletedAt).getTime()) / 86_400_000;
+      if (daysSince > 30) {
+        res.status(403).json({
+          success: false,
+          message:
+            "This account was permanently deleted and can no longer be recovered.",
+        });
+        return;
+      }
+      // Within grace period — restore silently
+      user.deletedAt = null;
+      user.deletedBy = null;
+      user.status = "active";
+      user.statusReason = "Restored by owner within 30-day grace period";
+      user.statusChangedAt = new Date();
+    } else if (user.status === "deactivated") {
+      // Deactivated: reactivate on sign-in
+      user.status = "active";
+      user.statusReason = "Reactivated by owner via credentials login";
+      user.statusChangedAt = new Date();
     }
 
     // Update last login
