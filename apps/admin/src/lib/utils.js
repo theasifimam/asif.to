@@ -79,3 +79,33 @@ export function getInitials(name) {
 export function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+/**
+ * Get full image URL from relative path or absolute URL
+ */
+export function getImageUrl(imagePath) {
+  if (!imagePath) return "";
+  if (
+    imagePath.startsWith("http://") ||
+    imagePath.startsWith("https://") ||
+    imagePath.startsWith("data:")
+  ) {
+    return imagePath;
+  }
+  let clean = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
+  if (!clean.startsWith("/uploads/")) {
+    if (clean.startsWith("/course-") || clean.startsWith("/courses/")) {
+      clean = `/uploads/courses${clean.replace(/^\/courses/, "")}`;
+    } else if (clean.startsWith("/article-")) {
+      clean = `/uploads/articles${clean}`;
+    } else if (clean.startsWith("/avatar-")) {
+      clean = `/uploads/avatars${clean}`;
+    } else {
+      clean = `/uploads${clean}`;
+    }
+  }
+  const apiHost = process.env.NEXT_PUBLIC_API_URL
+    ? process.env.NEXT_PUBLIC_API_URL.split("/api/v1")[0].replace(/\/$/, "")
+    : "http://localhost:5000";
+  return `${apiHost}${clean}`;
+}

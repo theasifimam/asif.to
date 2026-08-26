@@ -248,14 +248,14 @@ export default function CoursesClient({ initialCourses = [] }) {
               return (
                 <div
                   key={course._id || course.id || slug}
-                  className={`group relative flex flex-col justify-between overflow-hidden rounded-[30px] border p-6 sm:p-7 shadow-xs hover:shadow-xl transition-all duration-300 ${theme.cardBg} ${theme.border}`}
+                  className={`group relative flex flex-col justify-between overflow-hidden rounded-4xl sm:rounded-4xl border p-4 sm:p-5 shadow-xs hover:shadow-md transition-all duration-300 ${theme.cardBg} ${theme.border}`}
                 >
                   {/* Card Top Info */}
                   <div>
                     {course.thumbnail ? (
                       <Link
                         href={`/courses/${slug}`}
-                        className="relative mb-4 block w-full overflow-hidden rounded-2xl md:rounded-3xl bg-zinc-100 dark:bg-zinc-800/60 aspect-video border border-zinc-200/60 dark:border-zinc-800"
+                        className="relative mb-3 block w-full overflow-hidden rounded-xl md:rounded-2xl bg-zinc-100 dark:bg-zinc-800/60 aspect-[2.1/1] border border-zinc-200/60 dark:border-zinc-800"
                       >
                         <Image
                           src={getImageUrl(course.thumbnail)}
@@ -268,48 +268,45 @@ export default function CoursesClient({ initialCourses = [] }) {
                     ) : (
                       <Link
                         href={`/courses/${slug}`}
-                        className="relative mb-4 flex w-full flex-col items-center justify-center overflow-hidden rounded-2xl md:rounded-3xl bg-linear-to-br from-zinc-100 via-blue-50/40 to-indigo-50/50 dark:from-zinc-800/80 dark:via-zinc-900 dark:to-zinc-950 aspect-video border border-zinc-200/70 dark:border-zinc-800 transition-all group-hover:border-blue-500/40"
+                        className="relative mb-3 flex w-full flex-col items-center justify-center overflow-hidden rounded-4xl md:rounded-4xl bg-linear-to-br from-zinc-100 via-blue-50/40 to-indigo-50/50 dark:from-zinc-800/80 dark:via-zinc-900 dark:to-zinc-950 aspect-[2.1/1] border border-zinc-200/70 dark:border-zinc-800 transition-all group-hover:border-blue-500/40"
                       >
-                        <div className="relative z-10 flex flex-col items-center gap-2 p-4 text-center">
-                          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white dark:bg-zinc-800 shadow-xs border border-zinc-200/80 dark:border-zinc-700/80 group-hover:scale-105 group-hover:border-blue-500 transition-all">
-                            <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        <div className="relative z-10 flex flex-col items-center gap-1.5 p-3 text-center">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white dark:bg-zinc-800 shadow-xs border border-zinc-200/80 dark:border-zinc-700/80 group-hover:scale-105 group-hover:border-blue-500 transition-all">
+                            <GraduationCap className="h-4.5 w-4.5 text-blue-600 dark:text-blue-400" />
                           </div>
                           <span className="font-outfit text-xs font-black tracking-tight text-zinc-800 dark:text-zinc-200 line-clamp-1">
                             {course.title}
                           </span>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                          <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">
                             {course.techId?.toUpperCase() || "DEVELOPER TRACK"}
                           </span>
-                        </div>
-                        <div className="absolute bottom-2.5 right-2.5 z-10 rounded-full bg-white/90 dark:bg-zinc-800/90 backdrop-blur-xs px-2.5 py-0.5 text-[9px] font-black text-zinc-500 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-700/60">
-                          {lessonCount} Lessons
                         </div>
                       </Link>
                     )}
 
-                    <div className="flex items-center justify-between gap-2 mb-4">
+                    <div className="flex items-center justify-between gap-2 mb-2.5">
                       <span
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider border ${theme.badgeBg}`}
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider border ${theme.badgeBg}`}
                       >
                         {course.techId
                           ? course.techId.toUpperCase()
                           : "DEVELOPER"}
                       </span>
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-500/20 px-2.5 py-0.5 rounded-full border border-emerald-200/80 dark:border-emerald-800/50">
-                        <CheckCircle2 className="w-3 h-3" />
+                      <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-200/80 dark:border-emerald-800/50">
+                        <CheckCircle2 className="w-2.5 h-2.5" />
                         <span>Online</span>
                       </span>
                     </div>
 
                     {/* Title */}
                     <h3
-                      className={`font-outfit text-xl font-bold tracking-tight text-zinc-950 dark:text-white ${theme.titleHover} transition-colors`}
+                      className={`font-outfit text-sm sm:text-base font-bold tracking-tight text-zinc-950 dark:text-white ${theme.titleHover} transition-colors line-clamp-1`}
                     >
                       <Link href={`/courses/${slug}`}>{course.title}</Link>
                     </h3>
 
                     {/* Subtitle / Description */}
-                    <p className="mt-2.5 text-xs text-zinc-600 dark:text-zinc-300 font-medium leading-relaxed line-clamp-3">
+                    <p className="mt-1 text-[11px] text-zinc-600 dark:text-zinc-300 font-medium leading-relaxed line-clamp-2">
                       {course.description ||
                         course.subtitle ||
                         `Master ${course.title} with step-by-step interactive lessons and syntax guides on asif.to.`}
@@ -317,15 +314,15 @@ export default function CoursesClient({ initialCourses = [] }) {
                   </div>
 
                   {/* Card Bottom Actions */}
-                  <div className="mt-6 pt-5 border-t border-zinc-200/60 dark:border-zinc-800/60 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-500 dark:text-zinc-400">
-                      <BookOpen className={`w-4 h-4 ${theme.iconColor}`} />
+                  <div className="mt-3.5 pt-3 border-t border-zinc-200/60 dark:border-zinc-800/60 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-500 dark:text-zinc-400">
+                      <BookOpen className={`w-3.5 h-3.5 ${theme.iconColor}`} />
                       <span>{lessonCount} Lessons</span>
                     </div>
 
                     <Link
                       href={`/courses/${slug}`}
-                      className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-extrabold shadow-sm transition-transform active:scale-95 cursor-pointer ${theme.btn}`}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-extrabold shadow-xs transition-transform active:scale-95 cursor-pointer ${theme.btn}`}
                     >
                       <span>Start Course</span>
                       <ArrowRight className="w-3.5 h-3.5" />

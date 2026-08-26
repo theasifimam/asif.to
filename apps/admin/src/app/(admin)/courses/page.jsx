@@ -5,8 +5,6 @@ import { useCallback, useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
   BookOpen,
-  ChevronLeft,
-  ChevronRight,
   ExternalLink,
   FilePenLine,
   FolderOpen,
@@ -25,7 +23,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 function CourseCardSkeleton() {
   return (
     <div className="admin-surface group flex flex-col justify-between p-5 rounded-3xl min-h-45">
-      <div className="space-y-4">
+      <div className="space-y-3">
+        <Skeleton className="w-full aspect-[2.1/1] rounded-2xl" />
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <Skeleton className="h-5 w-16 rounded-full" />
@@ -57,8 +56,13 @@ function CourseRowSkeleton() {
   return (
     <tr>
       <td className="px-6 py-4.5">
-        <Skeleton className="h-5 w-48 rounded-md" />
-        <Skeleton className="mt-1 h-3.5 w-32 rounded-md" />
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-12 w-12 rounded-xl shrink-0" />
+          <div className="space-y-1.5">
+            <Skeleton className="h-5 w-48 rounded-md" />
+            <Skeleton className="h-3.5 w-32 rounded-md" />
+          </div>
+        </div>
       </td>
       <td className="px-6 py-4.5">
         <Skeleton className="h-5 w-16 rounded-full" />
@@ -89,6 +93,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { coursesApi } from "@/lib/api";
+import { getImageUrl } from "@/lib/utils";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import {
   AdminPage,
@@ -283,6 +288,26 @@ export default function CoursesAdminPage() {
                   className="admin-surface group flex flex-col justify-between p-5 rounded-3xl transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700"
                 >
                   <div className="space-y-3">
+                    <Link
+                      href={`/courses/${course._id}`}
+                      className="block relative w-full aspect-[2.1/1] overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-800 group-hover:border-blue-500/40 transition-all"
+                    >
+                      {course.thumbnail ? (
+                        <img
+                          src={getImageUrl(course.thumbnail)}
+                          alt={course.title}
+                          className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-800/50 text-zinc-400 p-3 text-center">
+                          <BookOpen className="h-6 w-6 text-zinc-400 mb-1" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                            No Image
+                          </span>
+                        </div>
+                      )}
+                    </Link>
+
                     <div className="flex items-center justify-between gap-2 flex-wrap">
                       <div className="flex items-center gap-1.5">
                         <span className="text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
@@ -444,18 +469,38 @@ export default function CoursesAdminPage() {
                       className="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors"
                     >
                       <td className="px-6 py-4.5">
-                        <Link
-                          href={`/courses/${course._id}`}
-                          className="font-bold font-outfit text-zinc-950 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 transition-colors line-clamp-1"
-                        >
-                          {course.title}
-                        </Link>
-                        <p className="mt-0.5 text-xs text-zinc-400 truncate">
-                          /courses/{course.slug} ·{" "}
-                          <span className="font-semibold text-zinc-500">
-                            {course.techId}
-                          </span>
-                        </p>
+                        <div className="flex items-center gap-3.5">
+                          <Link
+                            href={`/courses/${course._id}`}
+                            className="shrink-0"
+                          >
+                            <div className="w-12 h-12 rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-zinc-200/80 dark:border-zinc-800 flex items-center justify-center group-hover:border-blue-500/40 transition-all">
+                              {course.thumbnail ? (
+                                <img
+                                  src={getImageUrl(course.thumbnail)}
+                                  alt={course.title}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <BookOpen className="h-5 w-5 text-zinc-400" />
+                              )}
+                            </div>
+                          </Link>
+                          <div className="min-w-0">
+                            <Link
+                              href={`/courses/${course._id}`}
+                              className="font-bold font-outfit text-zinc-950 hover:text-blue-600 dark:text-white dark:hover:text-blue-400 transition-colors line-clamp-1"
+                            >
+                              {course.title}
+                            </Link>
+                            <p className="mt-0.5 text-xs text-zinc-400 truncate">
+                              /courses/{course.slug} ·{" "}
+                              <span className="font-semibold text-zinc-500">
+                                {course.techId}
+                              </span>
+                            </p>
+                          </div>
+                        </div>
                       </td>
                       <td className="px-6 py-4.5">
                         <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[9px] font-black uppercase text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-500/20">
