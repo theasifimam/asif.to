@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   ChevronDown,
@@ -66,6 +66,7 @@ export default function FloatingChatDock({ isNavVisible = true }) {
 
   const [isOpen, setIsOpen] = useState(false);
   const [conversations, setConversations] = useState([]);
+  const [teamMembers, setTeamMembers] = useState([]);
   const [selected, setSelected] = useState(null);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -93,16 +94,69 @@ export default function FloatingChatDock({ isNavVisible = true }) {
       term ? { search: term } : {},
     );
     if (result.success) {
-      setConversations(result.data.data.conversations);
+      setConversations(result.data.data.conversations || []);
     }
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    loadConversations();
+    messagingApi
+      .team()
+      .then((res) => {
+        if (res.success && res.data?.data?.users) {
+          setTeamMembers(res.data.data.users);
+        }
+      })
+      .catch(() => {});
+  }, [loadConversations]);
 
   useEffect(() => {
     if (isOpen && !selected) {
       loadConversations(search);
     }
   }, [isOpen, selected, search, loadConversations]);
+
+  // Extract unique online users
+  const onlineUsers = useMemo(() => {
+    const map = new Map();
+    conversations.forEach((conv) => {
+      conv.members?.forEach((member) => {
+        const id = idOf(member);
+        if (id && id !== String(currentUserId) && isOnline(id)) {
+          map.set(id, member);
+        }
+      });
+    });
+    teamMembers.forEach((member) => {
+      const id = idOf(member);
+      if (id && id !== String(currentUserId) && isOnline(id)) {
+        map.set(id, member);
+      }
+    });
+    return Array.from(map.values());
+  }, [conversations, teamMembers, currentUserId, isOnline]);
+
+  const startDirectChatWithUser = async (targetUser) => {
+    const targetId = idOf(targetUser);
+    if (!targetId) return;
+    const existing = conversations.find(
+      (c) =>
+        c.type === "direct" && c.members?.some((m) => idOf(m) === targetId),
+    );
+    if (existing) {
+      openConversation(existing);
+    } else {
+      setLoading(true);
+      const res = await messagingApi.startDirect(targetId);
+      if (res.success && res.data?.data?.conversation) {
+        const newConv = res.data.data.conversation;
+        setConversations((prev) => [newConv, ...prev]);
+        openConversation(newConv);
+      }
+      setLoading(false);
+    }
+  };
 
   const scrollToBottom = useCallback((smooth = false) => {
     const doScroll = () => {
@@ -348,20 +402,67 @@ export default function FloatingChatDock({ isNavVisible = true }) {
           }}
           className="flex items-center gap-2.5 rounded-full border border-zinc-200/90 bg-white px-3.5 py-2 sm:px-4 sm:py-2.5 shadow-xl shadow-zinc-950/10 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-2xl dark:border-zinc-800 dark:bg-[#121215] dark:shadow-black/50 cursor-pointer"
         >
-          <div className="relative flex items-center justify-center">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
-              <MessageSquare size={14} />
-            </span>
-            {unread.totalUnread > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-emerald-600 px-1 text-[9px] font-black text-white">
-                {unread.totalUnread}
+          {onlineUsers.length > 0 ? (
+            <div className="flex items-center -space-x-2 shrink-0">
+              {onlineUsers.slice(0, 3).map((u, idx) => {
+                const src = avatarUrl(u.avatar);
+                return (
+                  <div
+                    key={idOf(u)}
+                    className="relative rounded-full ring-2 ring-white dark:ring-[#121215] shrink-0"
+                    style={{ zIndex: 10 - idx }}
+                    title={`${u.fullName || "User"} (Online)`}
+                  >
+                    {src ? (
+                      <img
+                        src={src}
+                        alt={u.fullName || ""}
+                        className="h-6 w-6 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-200 text-[10px] font-black text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                        {u.fullName?.[0] || <UserRound size={11} />}
+                      </span>
+                    )}
+                    {idx === 0 && (
+                      <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-white bg-emerald-500 dark:border-zinc-950" />
+                    )}
+                  </div>
+                );
+              })}
+              {onlineUsers.length > 3 && (
+                <div
+                  className="relative z-0 flex h-6 w-6 items-center justify-center rounded-full bg-zinc-100 text-[9px] font-black text-zinc-600 ring-2 ring-white dark:bg-zinc-800 dark:text-zinc-300 dark:ring-[#121215]"
+                  title={`${onlineUsers.length - 3} more online`}
+                >
+                  +{onlineUsers.length - 3}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="relative flex items-center justify-center">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+                <MessageSquare size={14} />
               </span>
+            </div>
+          )}
+
+          <div className="flex items-center gap-1.5">
+            {onlineUsers.length > 0 && (
+              <span
+                className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"
+                title={`${onlineUsers.length} online`}
+              />
             )}
           </div>
-          <span className="font-outfit text-xs font-bold text-zinc-900 dark:text-zinc-100">
-            Messages
-          </span>
-          <ChevronUp size={14} className="text-zinc-400" />
+
+          {unread.totalUnread > 0 && (
+            <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-emerald-600 px-1.5 text-[9px] font-black text-white">
+              {unread.totalUnread}
+            </span>
+          )}
+
+          <ChevronUp size={14} className="text-zinc-400 ml-0.5" />
         </button>
       ) : (
         /* Expanded LinkedIn/Instagram-style Chat Dock Window */
@@ -408,12 +509,58 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                 </>
               ) : (
                 <div className="flex items-center gap-2.5">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-500/10">
-                    <MessageSquare size={14} />
-                  </span>
-                  <h3 className="font-outfit text-sm font-black tracking-tight text-zinc-950 dark:text-white">
-                    Messages
-                  </h3>
+                  {onlineUsers.length > 0 ? (
+                    <div className="flex items-center -space-x-2 shrink-0">
+                      {onlineUsers.slice(0, 3).map((u, idx) => {
+                        const src = avatarUrl(u.avatar);
+                        return (
+                          <div
+                            key={idOf(u)}
+                            className="relative rounded-full ring-2 ring-white dark:ring-[#121215] shrink-0"
+                            style={{ zIndex: 10 - idx }}
+                            title={`${u.fullName || "User"} (Online)`}
+                          >
+                            {src ? (
+                              <img
+                                src={src}
+                                alt={u.fullName || ""}
+                                className="h-7 w-7 rounded-full object-cover"
+                              />
+                            ) : (
+                              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-200 text-[11px] font-black text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                                {u.fullName?.[0] || <UserRound size={12} />}
+                              </span>
+                            )}
+                            {idx === 0 && (
+                              <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-white bg-emerald-500 dark:border-zinc-950" />
+                            )}
+                          </div>
+                        );
+                      })}
+                      {onlineUsers.length > 3 && (
+                        <div
+                          className="relative z-0 flex h-7 w-7 items-center justify-center rounded-full bg-zinc-100 text-[10px] font-black text-zinc-600 ring-2 ring-white dark:bg-zinc-800 dark:text-zinc-300 dark:ring-[#121215]"
+                          title={`${onlineUsers.length - 3} more online`}
+                        >
+                          +{onlineUsers.length - 3}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-500/10">
+                      <MessageSquare size={14} />
+                    </span>
+                  )}
+                  <div>
+                    <h3 className="font-outfit text-sm font-black tracking-tight text-zinc-950 dark:text-white">
+                      Messages
+                    </h3>
+                    {onlineUsers.length > 0 && (
+                      <p className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                        {onlineUsers.length} online
+                      </p>
+                    )}
+                  </div>
                   {unread.totalUnread > 0 && (
                     <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-black text-white">
                       {unread.totalUnread}
@@ -463,6 +610,45 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                   </div>
                 </div>
 
+                {/* Instagram-style Active Now Online Row */}
+                {onlineUsers.length > 0 && !search && (
+                  <div className="flex items-center gap-3 overflow-x-auto px-3.5 py-2.5 border-b border-zinc-100 dark:border-zinc-800/80 scrollbar-none">
+                    {onlineUsers.map((onlineUser) => {
+                      const src = avatarUrl(onlineUser.avatar);
+                      return (
+                        <button
+                          key={idOf(onlineUser)}
+                          onClick={() => startDirectChatWithUser(onlineUser)}
+                          className="flex flex-col items-center gap-1 group shrink-0 cursor-pointer"
+                          title={`Chat with ${onlineUser.fullName}`}
+                        >
+                          <div className="relative">
+                            <div className="h-10 w-10 rounded-full ring-2 ring-emerald-500/80 p-0.5 transition-transform group-hover:scale-105">
+                              {src ? (
+                                <img
+                                  src={src}
+                                  alt={onlineUser.fullName || ""}
+                                  className="h-full w-full rounded-full object-cover"
+                                />
+                              ) : (
+                                <span className="flex h-full w-full items-center justify-center rounded-full bg-zinc-200 text-xs font-black text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                                  {onlineUser.fullName?.[0] || (
+                                    <UserRound size={14} />
+                                  )}
+                                </span>
+                              )}
+                            </div>
+                            <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500 dark:border-zinc-950" />
+                          </div>
+                          <span className="max-w-12 truncate text-[10px] font-semibold text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-950 dark:group-hover:text-white">
+                            {onlineUser.fullName?.split(" ")[0] || "User"}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
                 <div className="min-h-0 flex-1 overflow-y-auto p-2.5 space-y-1">
                   {loading ? (
                     <div className="p-6 text-center text-xs text-zinc-400">
@@ -472,7 +658,8 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                     conversations.map((conv) => {
                       const member = otherMember(conv, currentUserId);
                       const hasUnread = (conv.unreadCount || 0) > 0;
-                      return (                        <button
+                      return (
+                        <button
                           key={conv._id}
                           onClick={() => openConversation(conv)}
                           className="group relative flex w-full items-center gap-3 rounded-xl p-2.5 text-left border border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all duration-150 cursor-pointer"
