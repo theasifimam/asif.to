@@ -19,32 +19,37 @@ if (!MONGO_URI) {
 }
 
 const courseData = {
-  slug: "dsa-in-javascript",
-  title: "Data Structures & Algorithms in JavaScript",
+  slug: "python-complete-course",
+  title: "Python: The Complete Beginner to Advanced Guide",
   subtitle:
-    "Master data structures, algorithmic thinking, problem-solving patterns, complexity analysis, and coding interview techniques with JavaScript.",
-  techId: "javascript",
-  level: "Intermediate - Advanced",
-  duration: "Self-paced (35+ hours)",
+    "Learn Python from absolute basics to real-world programming with clear explanations, practical examples, object-oriented programming, files, APIs, databases, testing, automation, and projects.",
+  techId: "python",
+  level: "Beginner - Advanced",
+  duration: "Self-paced (45+ hours)",
   thumbnail: "",
   learningOutcomes: [
-    "Analyze time and space complexity using Big O, Big Omega, and Big Theta notation",
-    "Understand JavaScript-specific performance considerations when solving DSA problems",
-    "Master arrays, strings, hash maps, sets, linked lists, stacks, queues, trees, heaps, and graphs",
-    "Implement common data structures from scratch using modern JavaScript",
-    "Use two pointers, sliding window, prefix sums, frequency counters, fast/slow pointers, and monotonic structures",
-    "Master recursion, backtracking, divide and conquer, greedy algorithms, and dynamic programming",
-    "Implement and compare searching and sorting algorithms with their complexity trade-offs",
-    "Solve tree and graph problems using BFS, DFS, topological sorting, and shortest-path techniques",
-    "Recognize common coding interview patterns instead of memorizing isolated solutions",
-    "Write clean, testable, interview-ready JavaScript solutions and explain their complexity",
+    "Understand Python syntax, variables, data types, operators, and program flow from the ground up",
+    "Write clean Python programs using conditions, loops, functions, modules, and reusable code",
+    "Work confidently with strings, lists, tuples, sets, dictionaries, and nested data structures",
+    "Understand scope, recursion, lambda functions, comprehensions, iterators, generators, and decorators",
+    "Build object-oriented programs using classes, objects, inheritance, composition, and special methods",
+    "Read, write, and process text, CSV, and JSON files safely",
+    "Handle errors with exceptions and write programs that fail gracefully",
+    "Use Python standard-library modules for dates, paths, collections, regular expressions, and utilities",
+    "Create and manage virtual environments and project dependencies",
+    "Consume REST APIs and work with HTTP and JSON data",
+    "Store and query data using SQLite from Python",
+    "Write tests, debug programs, and structure maintainable Python projects",
+    "Understand concurrency fundamentals with threading, multiprocessing, and async programming",
+    "Automate repetitive tasks and build practical command-line applications",
+    "Complete realistic Python projects that combine multiple concepts",
   ],
-  order: 6,
+  order: 7,
   status: "published",
   examEnabled: true,
   examSettings: {
-    questionCount: 20,
-    durationMinutes: 30,
+    questionCount: 25,
+    durationMinutes: 35,
     passingPercentage: 70,
     cooldownHours: 24,
   },
@@ -52,1453 +57,1859 @@ const courseData = {
 
 const chaptersData = [
   {
-    slug: "big-o-notation-and-complexity",
-    title: "1. Big O Notation & Complexity Analysis",
+    slug: "python-introduction-and-setup",
+    title: "1. Introduction to Python & Development Setup",
     summary:
-      "Build a practical understanding of time and space complexity, asymptotic analysis, amortized cost, and JavaScript-specific performance trade-offs.",
+      "Understand what Python is, why it is popular, how Python executes code, and how to set up a clean development environment.",
     content: [
-      "## Why Complexity Analysis Matters",
-      "Two solutions can return the same correct result but behave very differently as input grows. Complexity analysis helps us reason about scalability before running the code on huge datasets. Instead of asking only whether a solution works, we ask how the amount of work and memory grow with input size.",
-      "## Input Size and Growth Rate",
-      "We usually describe input size using `n`. For an array, `n` is commonly the number of elements. For a string, it may be the number of characters. For a graph, complexity is often expressed using `V` for vertices and `E` for edges. The important idea is not the exact number of operations, but how quickly the work grows.",
-      "## Big O, Big Omega, and Big Theta",
-      "**Big O** describes an asymptotic upper bound, **Big Omega** describes a lower bound, and **Big Theta** describes a tight bound. In coding interviews, Big O is used most often to communicate worst-case or growth-rate complexity, but understanding the distinction prevents sloppy reasoning.",
-      "## Common Time Complexities",
-      "1. **O(1) — Constant:** direct array index access, object/Map lookup on average.\n2. **O(log n) — Logarithmic:** binary search, repeatedly halving a search space.\n3. **O(n) — Linear:** one full pass through input.\n4. **O(n log n) — Linearithmic:** efficient comparison sorting such as merge sort.\n5. **O(n²) — Quadratic:** many nested-loop comparisons.\n6. **O(2^n) — Exponential:** exploring every include/exclude combination.\n7. **O(n!) — Factorial:** generating every permutation.",
-      "## Drop Constants and Lower-Order Terms",
-      "Big O focuses on dominant growth. `O(3n + 20)` becomes `O(n)`, and `O(n² + n)` becomes `O(n²)`. This does not mean constants never matter in real software; it means asymptotic notation intentionally abstracts them away.",
-      "## Nested Loops Are Not Automatically O(n²)",
-      "A nested loop is `O(n²)` only when both loops independently traverse roughly `n` items. Two pointers can contain a loop inside another structure while still moving each pointer at most `n` times, resulting in `O(n)`. Always count total work, not visual nesting.",
-      "## Space Complexity",
-      "Auxiliary space measures additional memory used by an algorithm beyond the input itself. Creating a frequency map for `n` unique values is `O(n)` extra space. A few counters are `O(1)`. Recursive calls also consume stack space, so a recursion depth of `n` normally contributes `O(n)` auxiliary space.",
-      "## Amortized Analysis",
-      "Some individual operations can occasionally be expensive while the average cost across many operations remains cheap. Dynamic-array append is a classic example: resizing may cost `O(n)` occasionally, but repeated appends are considered amortized `O(1)`.",
-      "## JavaScript Performance Notes",
-      "JavaScript arrays are high-level dynamic structures, not raw fixed-size arrays. `push()` and `pop()` are typically efficient, while `shift()` and `unshift()` can require reindexing many elements. `Map` and `Set` are often preferable when the problem is fundamentally about key lookup, membership, or counting.",
-      "## Complexity Checklist",
-      "For every solution, identify: the input variables, how many times each element can be processed, whether loops are dependent or independent, how much auxiliary memory is created, and whether recursion adds call-stack usage.",
+      "## What Is Python?",
+      "Python is a high-level, general-purpose programming language designed to make code readable and expressive. It is used for web development, automation, scripting, data analysis, artificial intelligence, testing, DevOps, cybersecurity tooling, desktop applications, and many other areas.",
+      "## Why Python Is Beginner Friendly",
+      "Python removes much of the punctuation and boilerplate found in many other languages. Blocks are defined using indentation instead of braces, variable declarations are concise, and many useful data structures are built into the language.",
+      "## Python Is Still a Real Production Language",
+      "Beginner-friendly does not mean limited. Python powers production systems, backend services, automation pipelines, scientific workloads, machine-learning systems, testing tools, and developer infrastructure. The same syntax you learn as a beginner scales into serious software engineering.",
+      "## Python Implementations",
+      "The most commonly used implementation is **CPython**, which is the reference implementation written primarily in C. Other implementations exist, but beginners should normally use the standard Python distribution unless a project specifically requires something else.",
+      "## How Python Runs Your Code",
+      "When using CPython, source code is parsed and compiled into an intermediate bytecode representation. That bytecode is executed by the Python virtual machine. You usually do not need to manage this process manually, but understanding that Python is more than simply 'reading source code line by line' gives a better mental model.",
+      "## The Python REPL",
+      "The interactive Python shell, commonly called the REPL, lets you type expressions and see results immediately. It is useful for experimenting with syntax, checking library behavior, and quickly testing small ideas.",
+      "## Python Scripts",
+      "A Python script is generally a `.py` file executed with a command such as `python app.py` or `python3 app.py`, depending on the operating system and installation.",
+      "## Choosing an Editor",
+      "Visual Studio Code, PyCharm, and other editors work well. The most important beginner features are syntax highlighting, automatic indentation, code completion, an integrated terminal, and readable error highlighting.",
+      "## Indentation Is Syntax",
+      "Python uses indentation to define code blocks. Mixing indentation levels carelessly can change program meaning or cause an `IndentationError`. A standard convention is four spaces per indentation level.",
+      "## Comments",
+      "Use `#` for single-line comments. Good comments explain *why* something is done when the reason is not obvious. Avoid comments that simply repeat what the code already says.",
+      "## Your First Learning Goal",
+      "Do not try to memorize the whole language. Learn how values are stored, how decisions are made, how repetition works, and how logic is organized into functions. Everything later builds on those foundations.",
     ],
     codeSnippets: [
       {
-        title: "Comparing Common Time Complexities",
-        language: "javascript",
-        code: `// O(1)
-function getFirstElement(arr) {
-  return arr[0];
-}
+        title: "Your First Python Program",
+        language: "python",
+        code: `print("Hello, Python!")
 
-// O(n)
-function findMax(arr) {
-  let max = -Infinity;
+name = "Asif"
+print("Welcome,", name)
 
-  for (const value of arr) {
-    if (value > max) max = value;
-  }
-
-  return max;
-}
-
-// O(n^2)
-function hasDuplicateNested(arr) {
-  for (let i = 0; i < arr.length; i++) {
-    for (let j = i + 1; j < arr.length; j++) {
-      if (arr[i] === arr[j]) return true;
-    }
-  }
-
-  return false;
-}
-
-// O(n) average time, O(n) extra space
-function hasDuplicateSet(arr) {
-  const seen = new Set();
-
-  for (const value of arr) {
-    if (seen.has(value)) return true;
-    seen.add(value);
-  }
-
-  return false;
-}`,
+age = 25
+print("Next year you will be", age + 1)`,
       },
       {
-        title: "A Nested-Looking Pattern That Is Still O(n)",
-        language: "javascript",
-        code: `function removeDuplicatesFromSortedArray(arr) {
-  if (arr.length === 0) return 0;
+        title: "Using the Python REPL",
+        language: "python",
+        code: `print(2 + 3)
 
-  let write = 1;
+print("python".upper())
 
-  for (let read = 1; read < arr.length; read++) {
-    if (arr[read] !== arr[read - 1]) {
-      arr[write] = arr[read];
-      write++;
-    }
-  }
-
-  return write;
-}
-
-// Each element is read once.
-// Time: O(n)
-// Extra space: O(1)`,
+print(len([10, 20, 30]))`,
       },
     ],
-    language: "javascript",
+    language: "python",
     tryItChallenge:
-      "For three different duplicate-checking solutions—nested loops, sorting first, and using a Set—write the time and space complexity and explain when each approach may still be reasonable.",
+      "Create a Python script that prints your name, your reason for learning Python, and the result of two arithmetic calculations. Run it from the terminal.",
     order: 1,
   },
+
   {
-    slug: "arrays-and-string-manipulation",
-    title: "2. Arrays, Strings & Core Problem-Solving Patterns",
+    slug: "variables-data-types-and-type-conversion",
+    title: "2. Variables, Data Types & Type Conversion",
     summary:
-      "Master the highest-value array and string techniques: two pointers, sliding window, prefix sums, frequency counters, and in-place processing.",
+      "Learn how Python stores values, how dynamic typing works, and how to use numbers, strings, booleans, None, and type conversion safely.",
     content: [
-      "## Why Arrays and Strings Matter",
-      "A large percentage of coding interview problems are expressed using arrays or strings even when the real concept being tested is hashing, greedy reasoning, dynamic programming, or pointer movement. Becoming fluent with array and string patterns gives you a reusable toolkit for many later chapters.",
-      "## Two-Pointer Technique",
-      "Two pointers maintain two positions in the same sequence. They may move toward each other, move in the same direction at different speeds, or represent read/write positions. Common uses include palindrome checking, removing duplicates, partitioning, merging sorted sequences, and pair-sum problems.",
-      "## When Two Pointers Works Best",
-      "Two pointers is especially powerful when input is sorted, when you need an in-place transformation, or when the answer depends on comparing elements from different positions without restarting a scan.",
-      "## Sliding Window",
-      "Sliding window is used for contiguous subarrays or substrings. A **fixed-size window** keeps exactly `k` elements. A **variable-size window** expands and shrinks based on a condition such as distinct character count, sum threshold, or duplicate presence.",
-      "## Fixed vs Variable Sliding Window",
-      "For a fixed-size window, compute the first window once and then update the result by adding the incoming value and removing the outgoing value. For a variable-size window, move the right pointer to expand and the left pointer to restore validity.",
-      "## Frequency Counter Pattern",
-      "A frequency counter stores how often each value appears. In JavaScript, `Map` is usually the most general choice. Plain objects can also work for controlled string keys. Frequency counters often replace repeated searches and reduce `O(n²)` solutions to `O(n)`.",
-      "## Prefix Sums",
-      "A prefix sum array stores cumulative totals so range-sum queries become constant time after linear preprocessing. If `prefix[i]` stores the sum of the first `i` values, the sum from index `left` through `right` can be computed using subtraction.",
-      "## In-Place Array Modification",
-      "Some problems require `O(1)` extra space. Instead of building another array, use read/write pointers or swapping. This is common in remove-element, move-zeroes, partition, and deduplication problems.",
-      "## Strings in JavaScript",
-      "JavaScript strings are immutable. Methods such as `slice`, `replace`, and concatenation produce new strings. For repeated character-level mutation, converting to an array and joining at the end may be easier to reason about.",
-      "## Pattern Selection Guide",
-      "Use two pointers for opposite-end or read/write movement; sliding window for contiguous ranges; frequency maps for counts and membership; prefix sums for repeated range totals; sorting when ordering unlocks a simpler scan.",
-      "## Common Mistakes",
-      "Typical mistakes include moving the wrong pointer, forgetting to remove values when a window shrinks, mishandling repeated characters, using an object when keys may collide with inherited properties, and ignoring whether input order may be modified.",
+      "## What Is a Variable?",
+      "A variable is a name that refers to a value. In Python, you do not declare a variable's type separately. The type belongs to the value itself, and a variable name can later refer to a value of another type.",
+      "## Dynamic Typing",
+      "Python is dynamically typed. This means type checking happens while the program runs, rather than requiring every variable type to be declared in advance.",
+      "## Common Built-in Types",
+      "Important beginner types include `int` for whole numbers, `float` for decimal numbers, `str` for text, `bool` for `True` or `False`, and `NoneType` whose only value is `None`.",
+      "## Integers",
+      "Python integers can represent very large whole numbers without the fixed-width limitations common in some languages. Operations such as addition, subtraction, multiplication, integer division, modulo, and exponentiation are built in.",
+      "## Floating-Point Numbers",
+      "Floats represent decimal values approximately using binary floating-point representation. This means expressions such as `0.1 + 0.2` may not equal exactly `0.3`. For financial calculations requiring exact decimal behavior, specialized tools such as `decimal.Decimal` are preferable.",
+      "## Strings",
+      "Strings are immutable sequences of Unicode characters. You can use single quotes, double quotes, or triple-quoted strings. Because strings are immutable, operations that appear to modify a string actually create a new string.",
+      "## Booleans",
+      "`True` and `False` represent truth values. Comparisons produce booleans, and booleans control conditional execution.",
+      "## None",
+      "`None` represents the absence of a value. It is not the same as `0`, an empty string, or `False`, even though some of those values are also considered falsy in boolean contexts.",
+      "## type() and isinstance()",
+      "`type(value)` shows the exact runtime type. `isinstance(value, SomeType)` is often more useful when checking whether a value belongs to a type or compatible subclass.",
+      "## Type Conversion",
+      "Use constructors such as `int()`, `float()`, `str()`, and `bool()` to convert compatible values. Conversion may fail when the input does not represent a valid target value.",
+      "## Naming Conventions",
+      "Python variables normally use `snake_case`. Names should describe meaning rather than implementation details. Constants are conventionally written using uppercase names such as `MAX_RETRIES`.",
+      "## Multiple Assignment",
+      "Python supports assigning multiple names at once and unpacking iterable values. This enables elegant swapping and structured assignment.",
+      "## Mutable vs Immutable",
+      "Numbers, strings, and tuples are immutable. Lists, dictionaries, and sets are mutable. This distinction becomes extremely important when passing values into functions and sharing references.",
     ],
     codeSnippets: [
       {
-        title: "Two Pointers: Pair Sum in a Sorted Array",
-        language: "javascript",
-        code: `function twoSumSorted(arr, target) {
-  let left = 0;
-  let right = arr.length - 1;
+        title: "Basic Types",
+        language: "python",
+        code: `name = "Aisha"
+age = 24
+height = 1.67
+is_learning = True
+middle_name = None
 
-  while (left < right) {
-    const sum = arr[left] + arr[right];
-
-    if (sum === target) {
-      return [left, right];
-    }
-
-    if (sum < target) {
-      left++;
-    } else {
-      right--;
-    }
-  }
-
-  return [-1, -1];
-}
-
-// Time: O(n)
-// Space: O(1)`,
+print(type(name))
+print(type(age))
+print(type(height))
+print(type(is_learning))
+print(type(middle_name))`,
       },
       {
-        title: "Variable Sliding Window: Longest Unique Substring",
-        language: "javascript",
-        code: `function lengthOfLongestSubstring(s) {
-  const lastSeen = new Map();
-  let left = 0;
-  let best = 0;
+        title: "Safe Type Conversion",
+        language: "python",
+        code: `age_text = "25"
+age = int(age_text)
 
-  for (let right = 0; right < s.length; right++) {
-    const char = s[right];
+price = float("199.50")
+message = str(404)
 
-    if (lastSeen.has(char) && lastSeen.get(char) >= left) {
-      left = lastSeen.get(char) + 1;
-    }
-
-    lastSeen.set(char, right);
-    best = Math.max(best, right - left + 1);
-  }
-
-  return best;
-}
-
-// Time: O(n)
-// Space: O(min(n, characterSetSize))`,
+print(age + 5)
+print(price)
+print(message)`,
       },
       {
-        title: "Prefix Sum for Fast Range Queries",
-        language: "javascript",
-        code: `function buildPrefixSum(arr) {
-  const prefix = new Array(arr.length + 1).fill(0);
+        title: "Unpacking and Swapping",
+        language: "python",
+        code: `x = 10
+y = 20
 
-  for (let i = 0; i < arr.length; i++) {
-    prefix[i + 1] = prefix[i] + arr[i];
-  }
+x, y = y, x
+print(x, y)
 
-  return prefix;
-}
-
-function rangeSum(prefix, left, right) {
-  return prefix[right + 1] - prefix[left];
-}
-
-const nums = [2, 4, 1, 7, 3];
-const prefix = buildPrefixSum(nums);
-
-console.log(rangeSum(prefix, 1, 3)); // 12`,
+name, age, city = ("Sara", 22, "Delhi")
+print(name, age, city)`,
       },
     ],
-    language: "javascript",
+    language: "python",
     tryItChallenge:
-      "Implement `minimumWindowSubstring(s, t)` using a variable sliding window and frequency map. Then explain why repeatedly slicing and recounting every candidate window would be slower.",
+      "Ask the user for their birth year using `input()`, convert it to an integer, calculate an approximate age, and print a readable result.",
     order: 2,
   },
+
   {
-    slug: "hash-tables-maps-and-sets",
-    title: "3. Hash Tables, Map & Set",
+    slug: "operators-expressions-and-input-output",
+    title: "3. Operators, Expressions & User Input",
     summary:
-      "Understand hashing conceptually and use JavaScript Map and Set effectively for lookup, counting, grouping, deduplication, and index tracking.",
+      "Master arithmetic, comparison, logical, membership, identity, assignment operators, precedence, and interactive input/output.",
     content: [
-      "## What Is a Hash Table?",
-      "A hash table stores key-value associations and aims for near constant-time average lookup, insertion, and deletion. Internally, a hash function converts a key into a location or bucket. Different keys may map to the same bucket, so implementations require collision-handling strategies.",
-      "## Why Hashing Is Important in Interviews",
-      "Hashing frequently converts repeated linear searches into direct membership or lookup checks. This is why problems such as Two Sum, anagrams, duplicate detection, grouping, prefix-sum counting, and caching often have efficient hash-based solutions.",
-      "## JavaScript Map",
-      "`Map` supports keys of any type, preserves insertion order, exposes a reliable `size`, and avoids prototype-key concerns associated with plain objects. Its API clearly communicates operations such as `set`, `get`, `has`, and `delete`.",
-      "## JavaScript Set",
-      "`Set` stores unique values and is ideal when you only need membership or deduplication. Typical uses include detecting duplicates, tracking visited graph nodes, or keeping a sliding window unique.",
-      "## Map vs Object",
-      "Plain objects are still useful when modeling records with known property names or when JSON serialization is central. For algorithmic key-value lookup with dynamic keys, `Map` is often clearer and more predictable.",
-      "## Frequency Maps",
-      "A frequency map counts how many times each value appears. Many comparison problems become a two-pass solution: build counts from the first input, then consume or compare counts using the second input.",
-      "## Index Maps",
-      "Sometimes the value we need to store is not a count but an index, last-seen position, or metadata. Two Sum stores a number's index; sliding-window solutions often store each character's most recent index.",
-      "## Grouping with Maps",
-      "A Map can associate a normalized key with an array of matching items. Group Anagrams is a classic example: derive a canonical signature for each word and group words with the same signature.",
-      "## Complexity Nuance",
-      "Map and Set operations are treated as `O(1)` average-time in typical interview analysis, but hashing is not magical worst-case constant time in every possible implementation or adversarial situation. For interview reasoning, state the accepted average-time assumption.",
-      "## Common Mistakes",
-      "Watch for `undefined` as a legitimate stored value, confusing `map[key]` with `map.get(key)`, mutating objects used as keys, and using arrays as Map keys while accidentally creating different array references.",
+      "## Expressions",
+      "An expression is code that produces a value. `2 + 3`, `name.upper()`, and `age >= 18` are all expressions.",
+      "## Arithmetic Operators",
+      "Python provides `+`, `-`, `*`, `/`, `//`, `%`, and `**`. Normal division `/` produces a float. Floor division `//` discards the fractional portion according to floor semantics.",
+      "## Comparison Operators",
+      "Use `==`, `!=`, `<`, `<=`, `>`, and `>=` to compare values. Comparison expressions return booleans.",
+      "## Logical Operators",
+      "`and`, `or`, and `not` combine or invert truth values. Python uses short-circuit evaluation, meaning the second part may not execute when the result is already known.",
+      "## Assignment Operators",
+      "Operators such as `+=`, `-=`, `*=`, and `/=` update a variable using its current value.",
+      "## Membership Operators",
+      "`in` and `not in` test whether a value exists in a collection or substring. They are heavily used with strings, lists, tuples, sets, and dictionaries.",
+      "## Identity Operators",
+      "`is` and `is not` compare object identity, not ordinary value equality. Use `==` for value comparison. A common legitimate use of `is` is checking `value is None`.",
+      "## Truthy and Falsy Values",
+      "Values such as `False`, `None`, numeric zero, empty strings, and empty collections are falsy. Most non-empty values are truthy.",
+      "## Operator Precedence",
+      "Python follows precedence rules, but parentheses are often preferable when an expression could be confusing. Readability matters more than showing that you memorized precedence.",
+      "## input() Always Returns a String",
+      "`input()` reads user text and returns a string. If you need a number, convert it explicitly and handle invalid input where appropriate.",
+      "## f-Strings",
+      "Formatted string literals provide a clean way to insert expressions into strings. They begin with `f` and place expressions inside braces.",
+      "## Formatting Numbers",
+      "f-strings can format decimal places, percentages, commas, alignment, and other presentation details.",
     ],
     codeSnippets: [
       {
-        title: "Two Sum with a Map",
-        language: "javascript",
-        code: `function twoSum(nums, target) {
-  const indexByValue = new Map();
+        title: "Operators in Practice",
+        language: "python",
+        code: `a = 17
+b = 5
 
-  for (let i = 0; i < nums.length; i++) {
-    const needed = target - nums[i];
+print(a + b)   # 22
+print(a - b)   # 12
+print(a * b)   # 85
+print(a / b)   # 3.4
+print(a // b)  # 3
+print(a % b)   # 2
+print(a ** 2)  # 289
 
-    if (indexByValue.has(needed)) {
-      return [indexByValue.get(needed), i];
-    }
-
-    indexByValue.set(nums[i], i);
-  }
-
-  return [];
-}
-
-// Time: O(n) average
-// Space: O(n)`,
+print(a > b)
+print(a == b)
+print(a != b)`,
       },
       {
-        title: "Group Anagrams",
-        language: "javascript",
-        code: `function groupAnagrams(words) {
-  const groups = new Map();
+        title: "Interactive Bill Calculator",
+        language: "python",
+        code: `price = float(input("Enter item price: "))
+quantity = int(input("Enter quantity: "))
 
-  for (const word of words) {
-    const key = [...word].sort().join("");
+subtotal = price * quantity
+tax_rate = 0.18
+tax = subtotal * tax_rate
+total = subtotal + tax
 
-    if (!groups.has(key)) {
-      groups.set(key, []);
-    }
-
-    groups.get(key).push(word);
-  }
-
-  return [...groups.values()];
-}`,
+print(f"Subtotal: ₹{subtotal:.2f}")
+print(f"Tax: ₹{tax:.2f}")
+print(f"Total: ₹{total:.2f}")`,
       },
     ],
-    language: "javascript",
+    language: "python",
     tryItChallenge:
-      "Solve `subarraySumEqualsK(nums, k)` in O(n) average time using a running prefix sum and a Map of previously seen prefix-sum frequencies.",
+      "Build a BMI-style calculator that reads two numeric values from the user, performs a formula, and prints the answer rounded to two decimal places.",
     order: 3,
   },
+
   {
-    slug: "linked-lists-implementation",
-    title: "4. Linked Lists: Singly, Doubly & Pointer Techniques",
+    slug: "conditional-statements-and-decision-making",
+    title: "4. Conditional Statements & Decision Making",
     summary:
-      "Build linked lists from scratch and master pointer operations, reversal, cycle detection, middle-node search, merging, and deletion.",
+      "Learn if, elif, else, nested conditions, boolean reasoning, guard clauses, and Python's match statement.",
     content: [
-      "## What Is a Linked List?",
-      "A linked list stores data in nodes connected by references. Unlike an array, logical neighbors do not need to occupy neighboring memory locations. A singly linked node stores a value and `next`; a doubly linked node also stores `prev`.",
-      "## Why Learn Linked Lists in JavaScript?",
-      "JavaScript developers rarely implement linked lists for normal application code, but they are excellent for learning references, pointer manipulation, mutation, and complexity trade-offs. Interview problems also use linked lists heavily.",
-      "## Core Singly Linked List Operations",
-      "Typical operations are `push`, `pop`, `shift`, `unshift`, `get`, `set`, `insert`, `remove`, and `reverse`. Head insertion/removal can be `O(1)`, while locating an arbitrary index requires traversal and is `O(n)`.",
-      "## Singly vs Doubly Linked Lists",
-      "A doubly linked list uses more memory per node but supports efficient movement in both directions. When you already have a reference to a node, deletion can be simpler because its previous node is directly available.",
-      "## Fast and Slow Pointers",
-      "The fast/slow pointer pattern uses two references moving at different speeds. It can find the middle node, detect cycles, locate cycle entry points, or split a list for merge sort.",
-      "## Reversing a Linked List",
-      "Reversal requires carefully preserving the next node before changing a pointer. At every step maintain three references: `prev`, `current`, and `next`. Losing `next` disconnects the remainder of the list.",
-      "## Dummy Nodes",
-      "A dummy or sentinel node removes edge cases around operations at the head. Merging sorted lists and deleting nodes conditionally become cleaner when the result list always has a stable temporary starting node.",
-      "## Cycle Detection",
-      "Floyd's Tortoise and Hare algorithm detects a cycle with `O(1)` extra space. If a slow pointer moves one step and a fast pointer moves two, they eventually meet when a cycle exists.",
-      "## Complexity",
-      "Access by index is `O(n)`. Insertion or deletion at a known node can be `O(1)`. Searching is `O(n)`. Reversal is `O(n)` time and `O(1)` extra space when iterative.",
+      "## Why Conditions Matter",
+      "Programs become useful when they can make decisions. Conditional statements allow different code paths to run depending on data and state.",
+      "## if Statements",
+      "An `if` block runs when its condition is truthy. The condition does not need to be literally `True`; Python evaluates its truth value.",
+      "## elif",
+      "`elif` adds mutually exclusive alternatives. Python checks branches from top to bottom and runs the first matching branch.",
+      "## else",
+      "`else` runs when no previous condition in the chain matched.",
+      "## Ordering Conditions",
+      "The order of conditions matters. More specific cases often need to be checked before broader ones, otherwise an earlier branch may capture them.",
+      "## Nested Conditions",
+      "Conditions can be nested, but excessive nesting makes programs hard to read. Combine related boolean expressions or use guard clauses when possible.",
+      "## Guard Clauses",
+      "A guard clause handles an exceptional or invalid case early and returns or exits, allowing the main logic to remain less indented.",
+      "## Chained Comparisons",
+      "Python allows expressions such as `18 <= age < 60`, which are both concise and readable.",
+      "## Conditional Expressions",
+      "Python supports a one-line conditional expression: `value_if_true if condition else value_if_false`. Use it for simple choices, not complex branching.",
+      "## Structural Pattern Matching",
+      "Modern Python supports `match` and `case` for structural pattern matching. It can provide clean branching for commands, shapes of data, and structured values.",
       "## Common Mistakes",
-      "Frequent bugs include dereferencing `null`, losing the rest of the list during reversal, forgetting to update the tail, creating accidental cycles, and mishandling one-node or empty-list cases.",
+      "Typical mistakes include using `=` instead of comparison logic in languages where that is possible, writing conditions in the wrong order, confusing `is` with `==`, and creating deeply nested logic unnecessarily.",
     ],
     codeSnippets: [
       {
-        title: "Singly Linked List with Core Operations",
-        language: "javascript",
-        code: `class ListNode {
-  constructor(value) {
-    this.value = value;
-    this.next = null;
-  }
-}
+        title: "Grade Classifier",
+        language: "python",
+        code: `score = 84
 
-class SinglyLinkedList {
-  constructor() {
-    this.head = null;
-    this.tail = null;
-    this.length = 0;
-  }
+if score >= 90:
+    grade = "A"
+elif score >= 80:
+    grade = "B"
+elif score >= 70:
+    grade = "C"
+elif score >= 60:
+    grade = "D"
+else:
+    grade = "F"
 
-  push(value) {
-    const node = new ListNode(value);
-
-    if (!this.head) {
-      this.head = node;
-      this.tail = node;
-    } else {
-      this.tail.next = node;
-      this.tail = node;
-    }
-
-    this.length++;
-    return this;
-  }
-
-  unshift(value) {
-    const node = new ListNode(value);
-
-    if (!this.head) {
-      this.head = node;
-      this.tail = node;
-    } else {
-      node.next = this.head;
-      this.head = node;
-    }
-
-    this.length++;
-    return this;
-  }
-
-  reverse() {
-    let prev = null;
-    let current = this.head;
-
-    this.tail = this.head;
-
-    while (current) {
-      const next = current.next;
-      current.next = prev;
-      prev = current;
-      current = next;
-    }
-
-    this.head = prev;
-    return this;
-  }
-}`,
+print(grade)`,
       },
       {
-        title: "Middle Node and Cycle Detection",
-        language: "javascript",
-        code: `function findMiddle(head) {
-  let slow = head;
-  let fast = head;
+        title: "Guard Clause Example",
+        language: "python",
+        code: `def withdraw(balance, amount):
+    if amount <= 0:
+        return "Amount must be positive"
 
-  while (fast && fast.next) {
-    slow = slow.next;
-    fast = fast.next.next;
-  }
+    if amount > balance:
+        return "Insufficient balance"
 
-  return slow;
-}
+    balance -= amount
+    return f"Remaining balance: {balance}"`,
+      },
+      {
+        title: "match / case",
+        language: "python",
+        code: `command = "start"
 
-function hasCycle(head) {
-  let slow = head;
-  let fast = head;
-
-  while (fast && fast.next) {
-    slow = slow.next;
-    fast = fast.next.next;
-
-    if (slow === fast) return true;
-  }
-
-  return false;
-}`,
+match command:
+    case "start":
+        print("Starting application")
+    case "stop":
+        print("Stopping application")
+    case "restart":
+        print("Restarting application")
+    case _:
+        print("Unknown command")`,
       },
     ],
-    language: "javascript",
+    language: "python",
     tryItChallenge:
-      "Implement `mergeTwoSortedLists(list1, list2)` iteratively using a dummy node, then implement `removeNthFromEnd(head, n)` using two pointers in one pass.",
+      "Create a ticket-price calculator where price depends on age, student status, and whether the booking is on a weekend.",
     order: 4,
   },
+
   {
-    slug: "stacks-and-queues",
-    title: "5. Stacks, Queues, Deques & Monotonic Structures",
+    slug: "loops-and-iteration",
+    title: "5. Loops & Iteration",
     summary:
-      "Master LIFO/FIFO structures, efficient queue design, monotonic stacks and queues, and their most common interview applications.",
+      "Learn for loops, while loops, range, enumerate, zip, break, continue, nested loops, and practical iteration patterns.",
     content: [
-      "## Stack: Last In, First Out",
-      "A stack adds and removes from the same end. In JavaScript, an array with `push()` and `pop()` is usually enough. Common uses include nested-expression validation, undo history, DFS, parsing, and tracking unresolved elements.",
-      "## Queue: First In, First Out",
-      "A queue adds at the back and removes from the front. Queues are used in BFS, scheduling, buffering, and level-order tree traversal.",
-      "## Avoid Repeated Array.shift() in Performance-Critical Algorithms",
-      "`shift()` may require reindexing remaining array elements. For interview-friendly efficient queues, store a head index or build a small queue class rather than repeatedly shifting.",
-      "## Deque",
-      "A deque supports insertion and removal at both ends. It is useful for sliding-window maximum and other problems requiring candidates to expire from the front while new candidates enter from the back.",
-      "## Monotonic Stack",
-      "A monotonic stack keeps values or indices in increasing or decreasing order. It is powerful for Next Greater Element, Daily Temperatures, histogram-area problems, and removing dominated candidates.",
-      "## Why Monotonic Structures Are Often O(n)",
-      "Although a while loop may appear inside a for loop, each index is generally pushed once and popped at most once. Total stack operations are linear, so the whole algorithm remains `O(n)`.",
-      "## Expression and Parentheses Problems",
-      "Stacks naturally match nested structure. Push opening symbols or operands; pop them when the corresponding closing symbol or operator resolves the most recent unfinished work.",
-      "## Queue Using Two Stacks",
-      "A queue can be implemented with an input stack and an output stack. Moving elements only when the output stack is empty gives amortized `O(1)` enqueue and dequeue.",
-      "## Complexity",
-      "Stack push/pop are normally `O(1)`. A head-index queue supports amortized `O(1)` enqueue/dequeue. Monotonic stack solutions are commonly `O(n)` with `O(n)` auxiliary space.",
+      "## Why Loops Exist",
+      "Loops repeat logic without duplicating code. The two main looping structures in Python are `for` and `while`.",
+      "## for Loops",
+      "Python's `for` loop iterates directly over items from an iterable rather than requiring a numeric counter in most cases.",
+      "## range()",
+      "`range()` generates integer sequences lazily. Common forms are `range(stop)`, `range(start, stop)`, and `range(start, stop, step)`.",
+      "## while Loops",
+      "A `while` loop repeats as long as its condition remains truthy. It is useful when the number of repetitions is unknown in advance.",
+      "## Avoid Infinite Loops",
+      "A while-loop condition must eventually become false unless an intentional infinite loop is being controlled with `break`.",
+      "## break",
+      "`break` exits the nearest loop immediately.",
+      "## continue",
+      "`continue` skips the rest of the current iteration and moves to the next iteration.",
+      "## enumerate()",
+      "`enumerate()` provides both an index and value while iterating, avoiding manual index bookkeeping.",
+      "## zip()",
+      "`zip()` pairs items from multiple iterables and stops when the shortest iterable is exhausted.",
+      "## Nested Loops",
+      "Nested loops are appropriate for grids, combinations, and pairwise work, but can increase time complexity quickly.",
+      "## Loop else",
+      "Python loops can have an `else` block that executes when the loop finishes normally rather than through `break`. It is less common but useful for search logic.",
       "## Common Mistakes",
-      "Watch for empty-structure access, storing values when indices are needed, discarding candidates too early, and failing to remove out-of-window deque entries.",
+      "Beginners often modify a list while iterating over it, forget to update while-loop state, use unnecessary index loops, or confuse `break` and `continue`.",
     ],
     codeSnippets: [
       {
-        title: "Efficient Queue Without shift()",
-        language: "javascript",
-        code: `class Queue {
-  constructor() {
-    this.items = [];
-    this.head = 0;
-  }
+        title: "for, range, enumerate, and zip",
+        language: "python",
+        code: `names = ["Aman", "Sara", "Ravi"]
 
-  enqueue(value) {
-    this.items.push(value);
-  }
+for name in names:
+    print(name)
 
-  dequeue() {
-    if (this.head >= this.items.length) return undefined;
+for number in range(1, 6):
+    print(number)
 
-    const value = this.items[this.head];
-    this.head++;
-    return value;
-  }
+for index, name in enumerate(names, start=1):
+    print(index, name)
 
-  get size() {
-    return this.items.length - this.head;
-  }
-}`,
+scores = [88, 92, 75]
+
+for name, score in zip(names, scores):
+    print(f"{name}: {score}")`,
       },
       {
-        title: "Daily Temperatures with a Monotonic Stack",
-        language: "javascript",
-        code: `function dailyTemperatures(temperatures) {
-  const result = new Array(temperatures.length).fill(0);
-  const stack = []; // indices with decreasing temperatures
+        title: "while Loop with Validation",
+        language: "python",
+        code: `attempts = 3
 
-  for (let i = 0; i < temperatures.length; i++) {
-    while (
-      stack.length &&
-      temperatures[i] > temperatures[stack[stack.length - 1]]
-    ) {
-      const previousIndex = stack.pop();
-      result[previousIndex] = i - previousIndex;
-    }
+while attempts > 0:
+    password = input("Password: ")
 
-    stack.push(i);
-  }
+    if password == "python123":
+        print("Access granted")
+        break
 
-  return result;
-}
-
-// Time: O(n)
-// Space: O(n)`,
+    attempts -= 1
+    print(f"{attempts} attempts remaining")
+else:
+    print("Account temporarily locked")`,
       },
     ],
-    language: "javascript",
+    language: "python",
     tryItChallenge:
-      "Implement Sliding Window Maximum in O(n) using a deque of indices. Explain why storing only values makes expiration from the left side harder.",
+      "Create a number-guessing loop that keeps asking until the user guesses correctly or reaches a maximum number of attempts.",
     order: 5,
   },
+
   {
-    slug: "recursion-and-backtracking",
-    title: "6. Recursion & Backtracking",
+    slug: "strings-in-depth",
+    title: "6. Strings in Depth",
     summary:
-      "Understand recursive call structure, base cases, recursion trees, backtracking state, combinations, permutations, subsets, and search-space pruning.",
+      "Master indexing, slicing, immutability, common methods, formatting, parsing, searching, and text-processing patterns.",
     content: [
-      "## What Is Recursion?",
-      "Recursion occurs when a function solves a problem by calling itself on a smaller version of that problem. Every correct recursive solution needs a base case that stops recursion and a recursive step that moves toward the base case.",
-      "## The Call Stack",
-      "Each recursive call creates a stack frame containing its local state and return location. Deep recursion consumes stack memory, so recursive depth is part of space-complexity analysis.",
-      "## How to Design a Recursive Solution",
-      "Define what the function means, identify the smallest solvable input, determine how one call reduces the problem, and trust the recursive call to solve the smaller version. This prevents trying to mentally simulate every level at once.",
-      "## Recursion Trees",
-      "A recursion tree visualizes branching. A single recursive call per level often creates linear depth; two independent recursive branches can create exponential work if overlapping work is not eliminated.",
-      "## What Is Backtracking?",
-      "Backtracking explores choices, recursively continues with a choice, then undoes that choice before trying another. It is a structured search through a decision tree.",
-      "## Choose, Explore, Unchoose",
-      "Most backtracking implementations follow the same template: make a choice, add it to current state, recurse, remove the choice, and continue with the next option.",
-      "## Common Backtracking Problems",
-      "Subsets, permutations, combinations, combination sum, N-Queens, word search, Sudoku, and path-finding with constraints are classic backtracking applications.",
-      "## Pruning",
-      "Pruning stops exploring a branch as soon as it cannot produce a valid or better answer. Good pruning can dramatically reduce practical runtime even when worst-case complexity remains exponential.",
-      "## Mutable State vs Copying",
-      "You can create a new array for each recursive branch or mutate one path and undo changes after recursion. Mutate-and-undo usually reduces allocations but requires disciplined backtracking.",
+      "## Strings Are Sequences",
+      "A Python string is a sequence of Unicode characters. This means you can index, slice, iterate, test membership, and use sequence operations.",
+      "## Indexing",
+      "Positive indexes start at zero. Negative indexes count backward from the end, so `text[-1]` is the last character.",
+      "## Slicing",
+      "The syntax `text[start:stop:step]` returns a new string. The stop index is excluded. Omitting boundaries lets Python infer the beginning or end.",
+      "## Strings Are Immutable",
+      "You cannot assign directly to a character position. To change text, create a new string using slicing, replacement, concatenation, or another transformation.",
+      "## Useful Methods",
+      "Important methods include `lower`, `upper`, `strip`, `replace`, `split`, `join`, `find`, `startswith`, `endswith`, `count`, and `title`.",
+      "## split and join",
+      "`split()` converts text into pieces. `join()` combines strings using a separator. Joining is often preferable to repeated concatenation when assembling many pieces.",
+      "## Searching",
+      "Use `in` for membership, `.find()` when you need an index with `-1` for absence, or `.index()` when absence should raise an error.",
+      "## String Formatting",
+      "f-strings are generally the clearest modern formatting approach. Expressions can be embedded directly and formatted using format specifiers.",
+      "## Unicode Awareness",
+      "Python strings represent Unicode text, but human text can contain characters whose visual appearance does not correspond one-to-one with simple byte counts. This matters more in internationalized and low-level text-processing applications.",
+      "## Common Text Problems",
+      "Typical exercises include palindrome checks, word counting, normalization, frequency analysis, parsing CSV-like text, validation, and extracting structured parts from strings.",
       "## Common Mistakes",
-      "Typical bugs include missing base cases, not reducing the problem, forgetting to undo state, pushing the same mutable path reference into results, and allowing duplicate choices when the problem requires unique combinations.",
+      "Remember that slicing returns new strings, `strip()` removes characters from the ends rather than the middle, and string comparison may be case-sensitive unless normalized.",
     ],
     codeSnippets: [
       {
-        title: "Generate All Subsets",
-        language: "javascript",
-        code: `function subsets(nums) {
-  const result = [];
-  const path = [];
+        title: "Indexing and Slicing",
+        language: "python",
+        code: `text = "Python Programming"
 
-  function backtrack(index) {
-    if (index === nums.length) {
-      result.push([...path]);
-      return;
-    }
-
-    // Exclude nums[index]
-    backtrack(index + 1);
-
-    // Include nums[index]
-    path.push(nums[index]);
-    backtrack(index + 1);
-    path.pop();
-  }
-
-  backtrack(0);
-  return result;
-}
-
-// Time: O(n * 2^n) including result copying
-// Recursive depth: O(n)`,
+print(text[0])
+print(text[-1])
+print(text[:6])
+print(text[7:])
+print(text[::-1])`,
       },
       {
-        title: "Generate Permutations",
-        language: "javascript",
-        code: `function permutations(nums) {
-  const result = [];
-  const path = [];
-  const used = new Array(nums.length).fill(false);
+        title: "Word Frequency",
+        language: "python",
+        code: `sentence = "python is simple and python is powerful"
 
-  function backtrack() {
-    if (path.length === nums.length) {
-      result.push([...path]);
-      return;
-    }
+words = sentence.lower().split()
+counts = {}
 
-    for (let i = 0; i < nums.length; i++) {
-      if (used[i]) continue;
+for word in words:
+    counts[word] = counts.get(word, 0) + 1
 
-      used[i] = true;
-      path.push(nums[i]);
+print(counts)`,
+      },
+      {
+        title: "Normalize User Input",
+        language: "python",
+        code: `raw_email = "  USER@Example.COM  "
 
-      backtrack();
+email = raw_email.strip().lower()
 
-      path.pop();
-      used[i] = false;
-    }
-  }
-
-  backtrack();
-  return result;
-}`,
+print(email)`,
       },
     ],
-    language: "javascript",
+    language: "python",
     tryItChallenge:
-      "Solve `combinationSum(candidates, target)` with backtracking. Add pruning so recursion stops when the remaining target becomes negative.",
+      "Write a function that accepts a sentence and returns the most frequently occurring word, ignoring letter case and extra spaces.",
     order: 6,
   },
+
   {
-    slug: "trees-and-binary-search-trees",
-    title: "7. Trees & Binary Search Trees",
+    slug: "lists-tuples-sets-and-dictionaries",
+    title: "7. Lists, Tuples, Sets & Dictionaries",
     summary:
-      "Master tree terminology, recursive structure, BST operations, DFS traversals, BFS level order, height/depth problems, and tree construction.",
+      "Develop a strong command of Python's essential collection types, their methods, complexity trade-offs, mutability, and common use cases.",
     content: [
-      "## Tree Fundamentals",
-      "A tree is a hierarchical structure of nodes connected by edges. Important terms include root, parent, child, sibling, leaf, subtree, depth, height, and level. A tree with `n` nodes has `n - 1` edges when it is connected and acyclic.",
-      "## Binary Trees",
-      "A binary tree allows each node to have at most two children, commonly named `left` and `right`. A binary tree is not automatically a binary search tree.",
-      "## Binary Search Tree Property",
-      "In a BST, values in the left subtree are ordered before the current node and values in the right subtree after it according to the chosen comparison rule. Search, insertion, and deletion depend on this ordering.",
-      "## Balanced vs Skewed BST",
-      "A reasonably balanced BST can provide `O(log n)` search and insertion. A skewed BST may behave like a linked list and degrade to `O(n)`.",
-      "## Depth-First Traversals",
-      "**Preorder:** node, left, right. **Inorder:** left, node, right. **Postorder:** left, right, node. Inorder traversal of a valid BST produces values in sorted order.",
-      "## Breadth-First Traversal",
-      "BFS visits nodes level by level using a queue. It is useful for level-order output, minimum depth in an unweighted tree, nearest-node problems, and level-based aggregation.",
-      "## Recursive Tree Thinking",
-      "Many tree problems become simpler when each recursive call is defined as solving the same problem for one subtree. Height, balance, subtree sums, validation, and lowest common ancestor all benefit from this viewpoint.",
-      "## Height and Depth",
-      "Depth measures distance from root to a node. Height measures the longest downward path from a node to a leaf. Be explicit whether you count edges or nodes because conventions differ.",
-      "## Tree Construction",
-      "Some interview problems reconstruct trees from traversal sequences or convert sorted arrays to balanced BSTs. These problems test understanding of traversal ordering and recursive partition boundaries.",
+      "## Python Collections",
+      "Python provides powerful built-in collection types. Choosing the right one makes code simpler and often more efficient.",
+      "## Lists",
+      "Lists are ordered, mutable sequences. They can contain mixed types, duplicate values, and nested collections.",
+      "## List Operations",
+      "Important methods include `append`, `extend`, `insert`, `remove`, `pop`, `sort`, `reverse`, `count`, and `index`.",
+      "## Copying Lists",
+      "Assignment does not copy a list; it creates another reference to the same list. Use `.copy()`, slicing, or `list()` for a shallow copy. Nested mutable values still remain shared in a shallow copy.",
+      "## Tuples",
+      "Tuples are ordered and immutable. They are useful for fixed groups of values, returning multiple values, dictionary keys when contents are hashable, and communicating that a sequence should not be mutated.",
+      "## Sets",
+      "Sets store unique hashable values. They are ideal for membership checks, deduplication, intersections, unions, and set differences.",
+      "## Dictionaries",
+      "Dictionaries map unique hashable keys to values. They preserve insertion order in modern Python and are central to structured data processing.",
+      "## Dictionary Methods",
+      "Useful operations include `.get()`, `.items()`, `.keys()`, `.values()`, `.update()`, `.pop()`, and `.setdefault()`.",
+      "## Nested Collections",
+      "Real data often combines dictionaries and lists. Learning how to navigate nested structures is essential for JSON, APIs, configuration, and database results.",
+      "## Mutability",
+      "Lists, sets, and dictionaries are mutable. Tuples are immutable, though a tuple can contain mutable objects.",
+      "## Hashability",
+      "Dictionary keys and set elements must be hashable. Immutable scalar values and tuples of hashable values are commonly hashable; lists and dictionaries are not.",
+      "## Choosing a Collection",
+      "Use a list for ordered mutable items, a tuple for fixed records or immutable grouping, a set for uniqueness/membership, and a dictionary for key-value relationships.",
       "## Common Mistakes",
-      "Do not assume a binary tree is a BST, forget null base cases, accidentally use repeated array `shift()` in BFS, or validate a BST by comparing only each node with its immediate children.",
+      "Common problems include aliasing instead of copying, modifying collections during iteration, assuming set order, accessing missing dictionary keys directly when absence is expected, and using mutable values as dictionary keys.",
     ],
     codeSnippets: [
       {
-        title: "BST Insert and Search",
-        language: "javascript",
-        code: `class TreeNode {
-  constructor(value) {
-    this.value = value;
-    this.left = null;
-    this.right = null;
-  }
-}
+        title: "Working with Lists",
+        language: "python",
+        code: `numbers = [10, 20, 30]
 
-class BinarySearchTree {
-  constructor() {
-    this.root = null;
-  }
+numbers.append(40)
+numbers.extend([50, 60])
 
-  insert(value) {
-    const node = new TreeNode(value);
+removed = numbers.pop()
 
-    if (!this.root) {
-      this.root = node;
-      return this;
-    }
+print(numbers)
+print("Removed:", removed)
 
-    let current = this.root;
-
-    while (true) {
-      if (value === current.value) return this;
-
-      if (value < current.value) {
-        if (!current.left) {
-          current.left = node;
-          return this;
-        }
-
-        current = current.left;
-      } else {
-        if (!current.right) {
-          current.right = node;
-          return this;
-        }
-
-        current = current.right;
-      }
-    }
-  }
-
-  contains(value) {
-    let current = this.root;
-
-    while (current) {
-      if (value === current.value) return true;
-      current = value < current.value ? current.left : current.right;
-    }
-
-    return false;
-  }
-}`,
+numbers.sort(reverse=True)
+print(numbers)`,
       },
       {
-        title: "DFS and BFS Traversals",
-        language: "javascript",
-        code: `function inorder(root) {
-  const result = [];
+        title: "Set Operations",
+        language: "python",
+        code: `frontend = {"html", "css", "javascript", "react"}
+backend = {"python", "javascript", "sql"}
 
-  function dfs(node) {
-    if (!node) return;
-
-    dfs(node.left);
-    result.push(node.value);
-    dfs(node.right);
-  }
-
-  dfs(root);
-  return result;
+print(frontend & backend)  # intersection
+print(frontend | backend)  # union
+print(frontend - backend)  # difference`,
+      },
+      {
+        title: "Nested Dictionary Data",
+        language: "python",
+        code: `user = {
+    "name": "Asif",
+    "skills": ["Python", "JavaScript", "MongoDB"],
+    "address": {
+        "city": "Delhi",
+        "country": "India"
+    }
 }
 
-function levelOrder(root) {
-  if (!root) return [];
-
-  const result = [];
-  const queue = [root];
-  let head = 0;
-
-  while (head < queue.length) {
-    const node = queue[head++];
-    result.push(node.value);
-
-    if (node.left) queue.push(node.left);
-    if (node.right) queue.push(node.right);
-  }
-
-  return result;
-}`,
+print(user["name"])
+print(user["skills"][0])
+print(user["address"]["city"])`,
       },
     ],
-    language: "javascript",
+    language: "python",
     tryItChallenge:
-      "Implement `isValidBST(root)` using lower and upper bounds, then implement `isBalanced(root)` so that each subtree height is computed only once.",
+      "Create a small inventory system using a dictionary where product names map to quantity and price. Add, update, remove, and calculate the total inventory value.",
     order: 7,
   },
+
   {
-    slug: "heaps-and-priority-queues",
-    title: "8. Heaps & Priority Queues",
+    slug: "functions-parameters-and-scope",
+    title: "8. Functions, Parameters, Return Values & Scope",
     summary:
-      "Learn binary heaps, heap invariants, insertion/removal, top-k problems, streaming selection, and priority-driven algorithms.",
+      "Learn to break programs into reusable functions and understand parameters, arguments, return values, scope, *args, **kwargs, and function design.",
     content: [
-      "## What Is a Heap?",
-      "A binary heap is a complete binary tree usually stored compactly in an array. A min-heap keeps every parent less than or equal to its children; a max-heap keeps every parent greater than or equal to its children.",
-      "## Array Representation",
-      "For a zero-based array index `i`, the left child is `2 * i + 1`, the right child is `2 * i + 2`, and the parent is `Math.floor((i - 1) / 2)`.",
-      "## Heap vs BST",
-      "A heap guarantees only parent-child priority, not full sorted ordering. It gives fast access to the minimum or maximum element but is not ideal for searching arbitrary values.",
-      "## Priority Queue",
-      "A priority queue removes the highest- or lowest-priority item rather than strictly following insertion order. A binary heap is a common implementation.",
-      "## Heap Insert",
-      "Append the new value at the end, then repeatedly swap it with its parent while the heap property is violated. This upward repair is called bubble-up or sift-up and takes `O(log n)`.",
-      "## Heap Removal",
-      "To remove the root, replace it with the last element, remove the last slot, and repeatedly swap downward with the preferred child. This is called sink-down or sift-down and takes `O(log n)`.",
-      "## Top K Problems",
-      "For `k` largest values, a min-heap of size `k` lets you discard values that cannot belong to the final answer. This often gives `O(n log k)` instead of sorting all `n` values in `O(n log n)`.",
-      "## Common Applications",
-      "Heaps appear in kth-largest problems, task scheduling, merge-k-sorted-lists, streaming median variations, graph shortest paths, and event simulation.",
-      "## Complexity",
-      "Peek is `O(1)`. Insert and root removal are `O(log n)`. Building a heap bottom-up can be `O(n)`.",
+      "## Why Functions Matter",
+      "Functions organize behavior into reusable units. They reduce duplication, improve readability, make testing easier, and help programs grow without becoming one giant script.",
+      "## Defining Functions",
+      "Functions are defined with `def`, followed by a name, parameters, and an indented body.",
+      "## Parameters and Arguments",
+      "Parameters are names in the function definition. Arguments are actual values passed when calling the function.",
+      "## Return Values",
+      "`return` sends a value back to the caller and immediately ends the function. A function without an explicit return returns `None`.",
+      "## Positional Arguments",
+      "Positional arguments are matched according to order.",
+      "## Keyword Arguments",
+      "Keyword arguments are matched by parameter name and can make calls more readable.",
+      "## Default Parameters",
+      "Parameters can have default values. Be careful with mutable defaults such as `[]` or `{}` because the same object is reused between calls.",
+      "## *args",
+      "`*args` collects extra positional arguments into a tuple.",
+      "## **kwargs",
+      "`**kwargs` collects extra keyword arguments into a dictionary.",
+      "## Scope",
+      "Names defined inside a function are normally local. Python resolves names using the LEGB model: Local, Enclosing, Global, Built-in.",
+      "## global and nonlocal",
+      "`global` and `nonlocal` can rebind names outside the current local scope, but overusing them often makes programs harder to reason about.",
+      "## Pure Functions",
+      "A function is easier to test when its output depends primarily on its inputs and it avoids unnecessary external side effects.",
+      "## Function Documentation",
+      "Docstrings explain what a function does, its parameters, return value, and important behavior. They are especially valuable for reusable public functions.",
       "## Common Mistakes",
-      "Frequent issues include incorrect child-index calculations, choosing the wrong child during sink-down, forgetting heap-size boundaries, and using a min-heap where a max-heap strategy is required.",
+      "Watch for printing when a function should return, mutable default arguments, overly large functions, unclear parameter names, and unexpected modification of mutable arguments.",
     ],
     codeSnippets: [
       {
-        title: "Min Heap Implementation",
-        language: "javascript",
-        code: `class MinHeap {
-  constructor() {
-    this.values = [];
-  }
+        title: "A Clean Function",
+        language: "python",
+        code: `def calculate_total(price, quantity=1, discount=0):
+    """Return the final price after applying a percentage discount."""
+    subtotal = price * quantity
+    discount_amount = subtotal * (discount / 100)
+    return subtotal - discount_amount
 
-  peek() {
-    return this.values[0];
-  }
+total = calculate_total(
+    price=500,
+    quantity=2,
+    discount=10
+)
 
-  push(value) {
-    this.values.push(value);
-    this.#bubbleUp();
-  }
+print(total)`,
+      },
+      {
+        title: "*args and **kwargs",
+        language: "python",
+        code: `def total_numbers(*numbers):
+    return sum(numbers)
 
-  pop() {
-    if (this.values.length === 0) return undefined;
-    if (this.values.length === 1) return this.values.pop();
+print(total_numbers(10, 20, 30, 40))
 
-    const min = this.values[0];
-    this.values[0] = this.values.pop();
-    this.#sinkDown();
+def create_profile(**details):
+    return details
 
-    return min;
-  }
+profile = create_profile(
+    name="Sara",
+    role="Developer",
+    city="Delhi"
+)
 
-  #bubbleUp() {
-    let index = this.values.length - 1;
+print(profile)`,
+      },
+      {
+        title: "Avoid Mutable Default Arguments",
+        language: "python",
+        code: `# Avoid this:
+# def add_item(item, items=[]):
+#     items.append(item)
+#     return items
 
-    while (index > 0) {
-      const parent = Math.floor((index - 1) / 2);
+def add_item(item, items=None):
+    if items is None:
+        items = []
 
-      if (this.values[parent] <= this.values[index]) break;
-
-      [this.values[parent], this.values[index]] =
-        [this.values[index], this.values[parent]];
-
-      index = parent;
-    }
-  }
-
-  #sinkDown() {
-    let index = 0;
-
-    while (true) {
-      const left = index * 2 + 1;
-      const right = index * 2 + 2;
-      let smallest = index;
-
-      if (
-        left < this.values.length &&
-        this.values[left] < this.values[smallest]
-      ) {
-        smallest = left;
-      }
-
-      if (
-        right < this.values.length &&
-        this.values[right] < this.values[smallest]
-      ) {
-        smallest = right;
-      }
-
-      if (smallest === index) break;
-
-      [this.values[index], this.values[smallest]] =
-        [this.values[smallest], this.values[index]];
-
-      index = smallest;
-    }
-  }
-}`,
+    items.append(item)
+    return items`,
       },
     ],
-    language: "javascript",
+    language: "python",
     tryItChallenge:
-      "Use a heap to implement `findKthLargest(nums, k)` in O(n log k), then explain why keeping only k candidates is more memory-efficient than sorting a copy of the entire array.",
+      "Build a function-based shopping-cart calculator using separate functions for subtotal, discount, tax, and final total. Keep each function focused on one responsibility.",
     order: 8,
   },
+
   {
-    slug: "graphs-and-graph-traversal",
-    title: "9. Graphs: Representation, BFS, DFS & Connectivity",
+    slug: "comprehensions-lambda-and-functional-tools",
+    title: "9. Comprehensions, Lambda Functions & Functional Tools",
     summary:
-      "Understand directed and undirected graphs, adjacency lists, traversal, connected components, cycle detection, and grid-as-graph reasoning.",
+      "Write expressive transformations using list, set, and dictionary comprehensions, lambdas, map, filter, sorted, any, and all.",
     content: [
-      "## What Is a Graph?",
-      "A graph contains vertices connected by edges. Graphs model social networks, roads, dependencies, computer networks, grids, recommendations, and many other non-hierarchical relationships.",
-      "## Directed vs Undirected",
-      "An undirected edge connects both ways. A directed edge has an explicit direction. This distinction changes traversal, cycle detection, degree calculations, and connectivity reasoning.",
-      "## Weighted vs Unweighted",
-      "Weighted edges carry costs such as distance, time, or price. Unweighted graph shortest path can be solved with BFS, while weighted shortest-path problems may require algorithms such as Dijkstra.",
-      "## Adjacency List",
-      "An adjacency list stores each vertex together with its neighbors. It is typically space-efficient for sparse graphs and makes traversing outgoing edges straightforward.",
-      "## BFS",
-      "Breadth-first search explores vertices in increasing edge distance from the start. In an unweighted graph, the first time BFS reaches a node gives a shortest path in number of edges.",
-      "## DFS",
-      "Depth-first search follows one path deeply before backtracking. It is useful for connected components, cycle detection, topological reasoning, flood fill, and exploring all reachable states.",
-      "## Visited Tracking",
-      "Without a visited Set or equivalent state, traversal on a cyclic graph can repeat forever. Marking at the correct time also prevents duplicate work.",
-      "## Connected Components",
-      "To count connected components, iterate over every vertex and start a traversal whenever an unvisited vertex is found. Each new traversal discovers one component.",
-      "## Grids as Graphs",
-      "Matrix problems such as Number of Islands can be treated as graph problems where each cell is a node and edges connect allowed neighboring cells.",
-      "## Complexity",
-      "With an adjacency list, BFS and DFS are `O(V + E)` because each vertex is processed and each edge is examined a bounded number of times.",
-      "## Common Mistakes",
-      "Common errors include forgetting disconnected vertices, mixing directed and undirected edge insertion, marking visited too late, mutating a grid unexpectedly, and assuming BFS always works for weighted shortest paths.",
+      "## Comprehensions",
+      "Comprehensions create collections from iterables using compact declarative syntax. They are useful when transforming or filtering data in a readable way.",
+      "## List Comprehensions",
+      "A list comprehension typically combines an expression with a `for` clause and an optional condition.",
+      "## Set Comprehensions",
+      "Set comprehensions are useful when transformed results should remain unique.",
+      "## Dictionary Comprehensions",
+      "Dictionary comprehensions generate key-value pairs from existing data.",
+      "## Nested Comprehensions",
+      "Nested comprehensions can flatten or transform nested structures, but if they become difficult to read, ordinary loops are better.",
+      "## Lambda Functions",
+      "`lambda` creates a small anonymous function containing one expression. Lambdas are most useful as short callback functions for operations such as sorting.",
+      "## sorted() and key",
+      "`sorted()` returns a new sorted list. Its `key` argument can extract the property used for ordering.",
+      "## map()",
+      "`map()` lazily applies a function to each item. Comprehensions are often easier to read for simple transformations, but understanding map is useful.",
+      "## filter()",
+      "`filter()` lazily keeps values for which a predicate is truthy. Again, comprehensions are often more idiomatic for straightforward filtering.",
+      "## any() and all()",
+      "`any()` checks whether at least one item is truthy. `all()` checks whether every item is truthy.",
+      "## Readability First",
+      "Compact code is not automatically better code. Prefer a regular loop when a comprehension contains complex nested logic or side effects.",
     ],
     codeSnippets: [
       {
-        title: "Adjacency List Graph",
-        language: "javascript",
-        code: `class Graph {
-  constructor() {
-    this.adjacency = new Map();
-  }
+        title: "Comprehensions",
+        language: "python",
+        code: `numbers = [1, 2, 3, 4, 5, 6]
 
-  addVertex(vertex) {
-    if (!this.adjacency.has(vertex)) {
-      this.adjacency.set(vertex, []);
-    }
-  }
+squares = [n * n for n in numbers]
+even_squares = [n * n for n in numbers if n % 2 == 0]
 
-  addUndirectedEdge(a, b) {
-    this.addVertex(a);
-    this.addVertex(b);
+unique_lengths = {len(word) for word in ["cat", "python", "dog", "code"]}
 
-    this.adjacency.get(a).push(b);
-    this.adjacency.get(b).push(a);
-  }
+square_map = {n: n * n for n in numbers}
 
-  bfs(start) {
-    const visited = new Set([start]);
-    const queue = [start];
-    const result = [];
-    let head = 0;
-
-    while (head < queue.length) {
-      const node = queue[head++];
-      result.push(node);
-
-      for (const neighbor of this.adjacency.get(node) ?? []) {
-        if (!visited.has(neighbor)) {
-          visited.add(neighbor);
-          queue.push(neighbor);
-        }
-      }
-    }
-
-    return result;
-  }
-}`,
+print(squares)
+print(even_squares)
+print(unique_lengths)
+print(square_map)`,
       },
       {
-        title: "Number of Islands with DFS",
-        language: "javascript",
-        code: `function numIslands(grid) {
-  const rows = grid.length;
-  const cols = grid[0].length;
-  let islands = 0;
+        title: "Sorting Structured Data",
+        language: "python",
+        code: `users = [
+    {"name": "Aman", "score": 76},
+    {"name": "Sara", "score": 95},
+    {"name": "Ravi", "score": 88},
+]
 
-  function dfs(r, c) {
-    if (
-      r < 0 ||
-      c < 0 ||
-      r >= rows ||
-      c >= cols ||
-      grid[r][c] !== "1"
-    ) {
-      return;
-    }
+ranked = sorted(
+    users,
+    key=lambda user: user["score"],
+    reverse=True
+)
 
-    grid[r][c] = "0";
-
-    dfs(r + 1, c);
-    dfs(r - 1, c);
-    dfs(r, c + 1);
-    dfs(r, c - 1);
-  }
-
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      if (grid[r][c] === "1") {
-        islands++;
-        dfs(r, c);
-      }
-    }
-  }
-
-  return islands;
-}`,
+print(ranked)`,
       },
     ],
-    language: "javascript",
+    language: "python",
     tryItChallenge:
-      "Implement `cloneGraph(node)` with DFS or BFS and a Map from original nodes to cloned nodes. Then implement connected-component counting for an undirected graph.",
+      "Given a list of product dictionaries, create a new list containing only in-stock products priced below a chosen limit, sorted from cheapest to most expensive.",
     order: 9,
   },
+
   {
-    slug: "sorting-and-searching-algorithms",
-    title: "10. Searching, Sorting & Divide and Conquer",
+    slug: "modules-packages-and-virtual-environments",
+    title: "10. Modules, Packages, Imports & Virtual Environments",
     summary:
-      "Master binary search variants, elementary sorts, merge sort, quick sort, partitioning, and divide-and-conquer reasoning.",
+      "Learn how Python projects are split across files, how imports work, how packages are organized, and how dependencies are isolated.",
     content: [
-      "## Linear Search",
-      "Linear search checks values sequentially and works on unsorted input. Its worst-case time is `O(n)`, but it may be perfectly appropriate for small data or one-time scans.",
-      "## Binary Search",
-      "Binary search repeatedly eliminates half of a sorted search space. Standard array search is `O(log n)`, but the deeper skill is learning to binary-search an answer space or boundary condition.",
-      "## Binary Search Invariants",
-      "Choose a consistent interval style such as inclusive `[left, right]` and maintain its meaning throughout. Most binary-search bugs are boundary bugs rather than conceptual bugs.",
-      "## Elementary Sorting",
-      "Bubble, selection, and insertion sort are generally `O(n²)`. They remain useful pedagogically because they teach swapping, local ordering, stability, and loop invariants. Insertion sort can also be efficient on small or nearly sorted data.",
-      "## Merge Sort",
-      "Merge sort divides input into halves, recursively sorts each half, and merges them. It guarantees `O(n log n)` time but commonly uses `O(n)` auxiliary space.",
-      "## Quick Sort",
-      "Quick sort partitions values around a pivot, then recursively sorts partitions. Average time is `O(n log n)` but poor pivot choices can degrade to `O(n²)`.",
-      "## Divide and Conquer",
-      "Divide and conquer breaks a problem into independent smaller problems, solves them recursively, and combines results. Merge sort and binary search are core examples.",
-      "## Stable Sorting",
-      "A stable sort preserves the relative order of equal-key items. Stability matters when sorting records by multiple fields in stages.",
-      "## JavaScript Array.sort()",
-      "For numeric sorting, provide a comparator such as `(a, b) => a - b`; otherwise values are compared as strings. Built-in sorting is appropriate in many interviews unless implementing sorting is itself the task.",
+      "## Why Modules Matter",
+      "As programs grow, placing everything in one file becomes difficult to maintain. A Python module is simply a Python file that can contain functions, classes, constants, and executable code.",
+      "## import",
+      "The `import` statement makes names from another module available. You can import a whole module or selected names.",
+      "## Module Namespaces",
+      "Using `import math` and then `math.sqrt()` makes the source of the function explicit. Importing selected names can be convenient but should not make code ambiguous.",
+      "## __name__",
+      'Every module has a `__name__`. When a file is executed directly, its value is usually `"__main__"`. When imported, it becomes the module name.',
+      "## The Main Guard",
+      '`if __name__ == "__main__":` allows code to run only when a file is executed directly, not when imported as a module.',
+      "## Packages",
+      "A package organizes multiple modules under a directory structure. Real applications often contain packages for models, services, utilities, configuration, and other concerns.",
+      "## Standard Library",
+      "Python ships with a large standard library. Before installing a package, check whether Python already provides what you need.",
+      "## Third-Party Packages",
+      "Packages can be installed from Python package repositories using package-management tooling such as `pip`.",
+      "## Virtual Environments",
+      "A virtual environment creates an isolated Python environment for one project so its dependencies do not conflict with other projects.",
+      "## Dependency Files",
+      "Projects often record dependencies in files or modern project configuration so others can reproduce the environment.",
+      "## Import Design",
+      "Avoid circular imports by organizing responsibilities clearly. Utility modules should not depend unnecessarily on high-level application modules.",
       "## Common Mistakes",
-      "Typical errors include binary searching unsorted input, integer-boundary mistakes, forgetting a numeric comparator, losing elements during merge, and writing partition logic that does not guarantee progress.",
+      "Beginners often name files after standard modules such as `random.py`, install dependencies globally, use wildcard imports, or execute side-effect-heavy code at import time.",
     ],
     codeSnippets: [
       {
-        title: "Binary Search and First Occurrence",
-        language: "javascript",
-        code: `function binarySearch(arr, target) {
-  let left = 0;
-  let right = arr.length - 1;
+        title: "A Simple Module",
+        language: "python",
+        code: `# math_utils.py
+def add(a, b):
+    return a + b
 
-  while (left <= right) {
-    const mid = left + Math.floor((right - left) / 2);
+def multiply(a, b):
+    return a * b
 
-    if (arr[mid] === target) return mid;
 
-    if (arr[mid] < target) {
-      left = mid + 1;
-    } else {
-      right = mid - 1;
-    }
-  }
+# app.py
+import math_utils
 
-  return -1;
-}
-
-function firstOccurrence(arr, target) {
-  let left = 0;
-  let right = arr.length - 1;
-  let answer = -1;
-
-  while (left <= right) {
-    const mid = left + Math.floor((right - left) / 2);
-
-    if (arr[mid] >= target) {
-      if (arr[mid] === target) answer = mid;
-      right = mid - 1;
-    } else {
-      left = mid + 1;
-    }
-  }
-
-  return answer;
-}`,
+print(math_utils.add(2, 3))
+print(math_utils.multiply(4, 5))`,
       },
       {
-        title: "Merge Sort",
-        language: "javascript",
-        code: `function merge(left, right) {
-  const result = [];
-  let i = 0;
-  let j = 0;
+        title: "Main Guard",
+        language: "python",
+        code: `def main():
+    print("Application started")
 
-  while (i < left.length && j < right.length) {
-    if (left[i] <= right[j]) {
-      result.push(left[i++]);
-    } else {
-      result.push(right[j++]);
-    }
-  }
+if __name__ == "__main__":
+    main()`,
+      },
+      {
+        title: "Virtual Environment Commands",
+        language: "python",
+        code: `# Create a virtual environment:
+# python -m venv .venv
 
-  return result.concat(left.slice(i), right.slice(j));
-}
+# Windows PowerShell:
+# .venv\\Scripts\\Activate.ps1
 
-function mergeSort(arr) {
-  if (arr.length <= 1) return arr;
+# macOS/Linux:
+# source .venv/bin/activate
 
-  const mid = Math.floor(arr.length / 2);
-  const left = mergeSort(arr.slice(0, mid));
-  const right = mergeSort(arr.slice(mid));
+# Install a package:
+# python -m pip install requests
 
-  return merge(left, right);
-}
-
-// Time: O(n log n)
-// Extra space: O(n)`,
+# Inspect installed packages:
+# python -m pip list`,
       },
     ],
-    language: "javascript",
+    language: "python",
     tryItChallenge:
-      "Implement search in a rotated sorted array in O(log n). Then implement Quick Sort and explain how pivot choice affects worst-case behavior.",
+      "Split a calculator program into `calculator.py` containing reusable functions and `app.py` containing user interaction. Run user interaction only through the main guard.",
     order: 10,
   },
+
   {
-    slug: "greedy-algorithms",
-    title: "11. Greedy Algorithms & Interval Problems",
+    slug: "object-oriented-programming",
+    title: "11. Object-Oriented Programming: Classes & Objects",
     summary:
-      "Learn how to make locally optimal choices, recognize when greedy reasoning is valid, and solve interval, scheduling, and reachability problems.",
+      "Understand classes, instances, attributes, methods, constructors, class attributes, static methods, class methods, and encapsulation.",
     content: [
-      "## What Is a Greedy Algorithm?",
-      "A greedy algorithm makes the best-looking choice available at the current step and does not normally revisit previous choices. The challenge is proving that these local choices lead to a globally optimal result.",
-      "## Greedy Is Not Just 'Pick the Largest'",
-      "Different problems require different greedy criteria: earliest finishing interval, smallest cost, farthest reachable position, highest gain per constraint, or another property justified by the problem structure.",
-      "## Greedy Choice Property",
-      "A problem is suitable for greedy reasoning when an optimal solution can be built by making a locally optimal choice and then solving the remaining subproblem without needing to reconsider that choice.",
-      "## Interval Problems",
-      "Sorting intervals by start or end time often reveals a greedy strategy. Common problems include merging intervals, selecting maximum non-overlapping intervals, meeting rooms, and minimum removals for overlap.",
-      "## Reachability Problems",
-      "Problems such as Jump Game can track the farthest reachable index. Instead of exploring every sequence of jumps, greedily retain the best reach achieved so far.",
-      "## Greedy vs Dynamic Programming",
-      "Greedy keeps one locally best state, while DP keeps enough subproblem information to compare multiple possibilities. If a local decision can block a better future outcome, greedy may fail and DP may be needed.",
-      "## Exchange Argument Intuition",
-      "One common proof technique shows that if an optimal solution makes a different first choice, we can exchange it with the greedy choice without making the solution worse.",
-      "## Sorting Cost",
-      "Many greedy algorithms are linear after sorting, so total complexity becomes `O(n log n)`. Always include the sorting step in complexity analysis.",
+      "## What Is Object-Oriented Programming?",
+      "Object-oriented programming organizes related data and behavior into objects. A class describes how objects are created and what behavior they provide.",
+      "## Classes and Instances",
+      "A class is a blueprint. An instance is a concrete object created from that class. Different instances can hold different attribute values while sharing method definitions.",
+      "## __init__",
+      "`__init__` initializes a newly created instance. The first parameter is conventionally named `self`, which refers to the instance receiving the method call.",
+      "## Instance Attributes",
+      "Attributes assigned through `self` belong to each instance.",
+      "## Instance Methods",
+      "Instance methods operate on instance state and receive `self` automatically.",
+      "## Class Attributes",
+      "Class attributes are stored on the class and are shared unless shadowed by an instance attribute.",
+      "## Class Methods",
+      "A `@classmethod` receives the class as `cls`. It is commonly used for alternate constructors or behavior tied to the class rather than one instance.",
+      "## Static Methods",
+      "A `@staticmethod` does not automatically receive an instance or class. It is useful when a helper logically belongs near the class but does not use object state.",
+      "## Encapsulation in Python",
+      "Python relies heavily on conventions rather than strict private enforcement. A leading underscore communicates that an attribute is intended for internal use.",
+      "## Properties",
+      "`@property` lets method logic be accessed using attribute syntax. This is useful for validation, computed values, or preserving an interface while implementation changes.",
+      "## When to Use Classes",
+      "Use classes when data and behavior naturally belong together and multiple instances or stateful objects make the domain clearer. Do not create classes merely because object-oriented programming exists.",
       "## Common Mistakes",
-      "The biggest mistake is applying greedy logic because it feels natural without proving or testing it. Build counterexamples, especially when choices interact over long distances.",
+      "Typical mistakes include forgetting `self`, accidentally sharing mutable class attributes across instances, placing unrelated behavior inside classes, and writing classes that only hold data with no meaningful behavior.",
     ],
     codeSnippets: [
       {
-        title: "Jump Game",
-        language: "javascript",
-        code: `function canJump(nums) {
-  let farthest = 0;
+        title: "A Beginner-Friendly BankAccount Class",
+        language: "python",
+        code: `class BankAccount:
+    bank_name = "Python Bank"
 
-  for (let i = 0; i < nums.length; i++) {
-    if (i > farthest) return false;
+    def __init__(self, owner, balance=0):
+        self.owner = owner
+        self._balance = balance
 
-    farthest = Math.max(farthest, i + nums[i]);
+    @property
+    def balance(self):
+        return self._balance
 
-    if (farthest >= nums.length - 1) {
-      return true;
-    }
-  }
+    def deposit(self, amount):
+        if amount <= 0:
+            raise ValueError("Deposit must be positive")
 
-  return true;
-}
+        self._balance += amount
 
-// Time: O(n)
-// Space: O(1)`,
+    def withdraw(self, amount):
+        if amount > self._balance:
+            raise ValueError("Insufficient balance")
+
+        self._balance -= amount
+
+account = BankAccount("Sara", 1000)
+account.deposit(500)
+account.withdraw(200)
+
+print(account.balance)`,
       },
       {
-        title: "Minimum Intervals to Remove",
-        language: "javascript",
-        code: `function eraseOverlapIntervals(intervals) {
-  if (intervals.length <= 1) return 0;
+        title: "Class Method as Alternate Constructor",
+        language: "python",
+        code: `class User:
+    def __init__(self, name, email):
+        self.name = name
+        self.email = email
 
-  intervals.sort((a, b) => a[1] - b[1]);
+    @classmethod
+    def from_string(cls, text):
+        name, email = text.split(",")
+        return cls(name.strip(), email.strip())
 
-  let removals = 0;
-  let previousEnd = intervals[0][1];
+user = User.from_string("Aman, aman@example.com")
 
-  for (let i = 1; i < intervals.length; i++) {
-    const [start, end] = intervals[i];
-
-    if (start < previousEnd) {
-      removals++;
-    } else {
-      previousEnd = end;
-    }
-  }
-
-  return removals;
-}`,
+print(user.name)
+print(user.email)`,
       },
     ],
-    language: "javascript",
+    language: "python",
     tryItChallenge:
-      "Solve the Gas Station problem using greedy reasoning, then write a short explanation of why restarting after a failed segment does not skip a valid start inside that failed segment.",
+      "Create a `Product` class with name, price, stock, a `sell(quantity)` method, a `restock(quantity)` method, and a read-only property that returns current inventory value.",
     order: 11,
   },
+
   {
-    slug: "dynamic-programming",
-    title: "12. Dynamic Programming: Memoization, Tabulation & State Design",
+    slug: "inheritance-composition-and-dunder-methods",
+    title: "12. Inheritance, Composition & Special Methods",
     summary:
-      "Learn how to recognize overlapping subproblems, define DP state and transitions, and solve 1D, 2D, subsequence, knapsack, and path problems.",
+      "Learn inheritance, method overriding, super(), composition, polymorphism, dataclasses, and Python's special dunder methods.",
     content: [
-      "## What Is Dynamic Programming?",
-      "Dynamic programming solves problems that contain overlapping subproblems and optimal substructure by storing results instead of recomputing them. DP is less about memorizing tables and more about defining the right state.",
-      "## Recognizing DP Problems",
-      "DP is a strong candidate when a brute-force recursive solution repeatedly solves the same states, when a problem asks for a count/minimum/maximum/best value, or when decisions depend on a small set of changing parameters.",
-      "## Step 1: Define the State",
-      "A DP state must capture all information needed to solve the remaining problem. Examples include `dp[i]`, `dp[i][j]`, `(index, remainingAmount)`, or `(row, column)`.",
-      "## Step 2: Write the Transition",
-      "The transition explains how the answer for one state depends on smaller states. For climbing stairs, `dp[i] = dp[i - 1] + dp[i - 2]`. For minimum-cost problems, transitions often use `Math.min`.",
-      "## Step 3: Base Cases",
-      "Base states anchor the recurrence. Incorrect base cases create wrong answers even if the recurrence is correct.",
-      "## Memoization",
-      "Top-down memoization starts with recursive problem structure and caches state results in an array, object, or Map. It often mirrors the mathematical recurrence clearly.",
-      "## Tabulation",
-      "Bottom-up tabulation computes states in dependency order. It avoids recursion-stack overhead and can make space optimization easier.",
-      "## Space Optimization",
-      "If each state depends only on a few previous states, you may not need the full DP table. Fibonacci and House Robber can be reduced from `O(n)` memory to `O(1)`.",
-      "## Common DP Families",
-      "Important families include 1D sequence DP, grid/path DP, 0/1 knapsack, unbounded knapsack, subsequence DP, string DP, interval DP, and tree DP.",
-      "## DP vs Backtracking",
-      "Backtracking usually enumerates possibilities and can prune branches. DP reuses solutions for repeated states. Some problems begin as backtracking and become efficient once memoization is added.",
+      "## Inheritance",
+      "Inheritance lets one class reuse or specialize behavior from another class. The new class is often called a subclass, while the inherited class is a base or parent class.",
+      "## Method Overriding",
+      "A subclass can provide its own version of an inherited method.",
+      "## super()",
+      "`super()` provides access to behavior from the parent class and is commonly used when extending parent initialization.",
+      "## Polymorphism",
+      "Different objects can support the same operation with different implementations. Python often relies on behavior rather than requiring rigid inheritance hierarchies.",
+      "## Duck Typing",
+      "A common Python idea is that if an object provides the required behavior, its exact class may not matter. This supports flexible interfaces.",
+      "## Composition",
+      "Composition builds objects using other objects. It often produces more flexible designs than deep inheritance hierarchies.",
+      "## Prefer Composition When Appropriate",
+      "If the relationship is 'has-a' rather than 'is-a', composition is usually more natural. A `Car` has an `Engine`; it is not an Engine.",
+      "## Special Methods",
+      "Methods such as `__str__`, `__repr__`, `__len__`, `__eq__`, and `__iter__` let custom objects integrate naturally with Python syntax and built-in functions.",
+      "## dataclasses",
+      "The `dataclasses` module reduces boilerplate for classes mainly used to store structured data.",
+      "## Equality",
+      "Without custom equality behavior, instances are generally compared by identity. Defining suitable data models or dataclasses can provide value-based comparison.",
+      "## Keep Hierarchies Shallow",
+      "Very deep inheritance chains are difficult to understand and modify. Favor clear responsibilities and small abstractions.",
       "## Common Mistakes",
-      "Typical errors include an incomplete state definition, wrong iteration order, accidental reuse of current-row values, mixing 0/1 and unbounded knapsack transitions, and optimizing space before the recurrence is fully understood.",
+      "Common mistakes include inheritance for code reuse without a true subtype relationship, forgetting parent initialization, overusing magic methods, and creating classes with unclear ownership of responsibilities.",
     ],
     codeSnippets: [
       {
-        title: "House Robber with O(1) Extra Space",
-        language: "javascript",
-        code: `function rob(nums) {
-  let twoBack = 0;
-  let oneBack = 0;
+        title: "Inheritance and Method Overriding",
+        language: "python",
+        code: `class Employee:
+    def __init__(self, name):
+        self.name = name
 
-  for (const money of nums) {
-    const current = Math.max(
-      oneBack,
-      twoBack + money
-    );
+    def describe_role(self):
+        return "Employee"
 
-    twoBack = oneBack;
-    oneBack = current;
-  }
 
-  return oneBack;
-}
+class Developer(Employee):
+    def __init__(self, name, language):
+        super().__init__(name)
+        self.language = language
 
-// Time: O(n)
-// Space: O(1)`,
+    def describe_role(self):
+        return f"Developer using {self.language}"
+
+
+developer = Developer("Sara", "Python")
+print(developer.describe_role())`,
       },
       {
-        title: "Coin Change: Bottom-Up DP",
-        language: "javascript",
-        code: `function coinChange(coins, amount) {
-  const dp = new Array(amount + 1).fill(Infinity);
-  dp[0] = 0;
+        title: "Composition",
+        language: "python",
+        code: `class Engine:
+    def start(self):
+        return "Engine started"
 
-  for (let current = 1; current <= amount; current++) {
-    for (const coin of coins) {
-      if (coin <= current) {
-        dp[current] = Math.min(
-          dp[current],
-          dp[current - coin] + 1
-        );
-      }
-    }
-  }
 
-  return dp[amount] === Infinity ? -1 : dp[amount];
-}
+class Car:
+    def __init__(self, model, engine):
+        self.model = model
+        self.engine = engine
 
-// Time: O(amount * coins.length)
-// Space: O(amount)`,
+    def start(self):
+        return self.engine.start()
+
+
+car = Car("Demo Car", Engine())
+print(car.start())`,
       },
       {
-        title: "Longest Common Subsequence",
-        language: "javascript",
-        code: `function longestCommonSubsequence(a, b) {
-  const rows = a.length + 1;
-  const cols = b.length + 1;
+        title: "Dataclass",
+        language: "python",
+        code: `from dataclasses import dataclass
 
-  const dp = Array.from(
-    { length: rows },
-    () => new Array(cols).fill(0)
-  );
+@dataclass
+class Product:
+    name: str
+    price: float
+    stock: int = 0
 
-  for (let i = 1; i < rows; i++) {
-    for (let j = 1; j < cols; j++) {
-      if (a[i - 1] === b[j - 1]) {
-        dp[i][j] = dp[i - 1][j - 1] + 1;
-      } else {
-        dp[i][j] = Math.max(
-          dp[i - 1][j],
-          dp[i][j - 1]
-        );
-      }
-    }
-  }
+    def inventory_value(self):
+        return self.price * self.stock
 
-  return dp[a.length][b.length];
-}`,
+product = Product("Keyboard", 1499.0, 10)
+print(product)
+print(product.inventory_value())`,
       },
     ],
-    language: "javascript",
+    language: "python",
     tryItChallenge:
-      "Solve `wordBreak(s, wordDict)` first with brute-force recursion, then add memoization. Identify the exact repeated state that memoization eliminates.",
+      "Model an order system using composition: an `Order` contains multiple `OrderItem` objects. Use a dataclass for `OrderItem` and calculate the order total.",
     order: 12,
   },
+
   {
-    slug: "advanced-graph-algorithms",
-    title: "13. Advanced Graph Algorithms: Topological Sort & Shortest Paths",
+    slug: "exceptions-and-error-handling",
+    title: "13. Exceptions & Error Handling",
     summary:
-      "Move beyond basic traversal into dependency ordering, DAG reasoning, weighted shortest paths, and union-find connectivity.",
+      "Learn how Python reports runtime problems and how to handle expected failures using try, except, else, finally, raise, and custom exceptions.",
     content: [
-      "## Topological Sorting",
-      "A topological ordering places every directed edge `u -> v` so that `u` appears before `v`. It is defined only for directed acyclic graphs (DAGs). Typical applications include course prerequisites, build systems, and dependency scheduling.",
-      "## Kahn's Algorithm",
-      "Kahn's algorithm tracks indegrees, begins with all zero-indegree vertices, repeatedly removes one, and decreases the indegree of its outgoing neighbors. If fewer than `V` vertices are processed, a directed cycle exists.",
-      "## DFS Topological Sort",
-      "A DFS-based approach records nodes after all descendants are processed and then reverses the finishing order. Cycle detection requires tracking recursion-path state separately from globally visited state.",
-      "## Shortest Path in Unweighted Graphs",
-      "Use BFS when every edge has equal cost. BFS explores by edge distance, so the first visit to a node yields a shortest unweighted path.",
-      "## Dijkstra's Algorithm",
-      "Dijkstra solves single-source shortest paths with non-negative edge weights. It repeatedly processes the currently known closest vertex, usually using a min-priority queue.",
-      "## Relaxation",
-      "Relaxing an edge checks whether reaching `neighbor` through `current` improves the known distance. If so, update the distance and priority.",
-      "## Negative Weights",
-      "Standard Dijkstra is not valid when negative edge weights can invalidate the greedy finalized-distance assumption. Different algorithms are needed for such graphs.",
-      "## Union-Find / Disjoint Set",
-      "Union-Find efficiently tracks which vertices belong to the same connected component. With path compression and union by rank/size, operations are extremely close to constant time in practice.",
-      "## Common Union-Find Uses",
-      "Cycle detection in undirected graphs, Kruskal-style minimum spanning tree logic, account merging, dynamic connectivity, and redundant-connection problems commonly use DSU.",
-      "## Complexity",
-      "Kahn topological sort is `O(V + E)`. Dijkstra with a binary heap is commonly `O((V + E) log V)`. DSU operations are near-constant amortized time with standard optimizations.",
+      "## What Is an Exception?",
+      "An exception is an object representing an error or unusual condition that interrupts normal program flow.",
+      "## Syntax Errors vs Exceptions",
+      "A syntax error means Python cannot correctly parse the code. An exception happens while valid Python code is running.",
+      "## try and except",
+      "Place operations that may fail in a `try` block and handle specific expected exceptions using `except`.",
+      "## Catch Specific Exceptions",
+      "Avoid broad `except:` blocks unless there is a strong reason. Catching specific exceptions helps distinguish expected failures from programming bugs.",
+      "## else",
+      "The `else` block runs only when the `try` block succeeds without raising an exception.",
+      "## finally",
+      "`finally` executes whether an exception occurs or not. It is useful for cleanup, although context managers often provide cleaner resource management.",
+      "## raise",
+      "`raise` lets your own code signal invalid state or input using an exception.",
+      "## Custom Exceptions",
+      "Domain-specific exception classes can make errors clearer in larger applications.",
+      "## EAFP",
+      "Python code often follows the style 'Easier to Ask Forgiveness than Permission': attempt an operation and handle the expected exception rather than checking every precondition separately.",
+      "## Exceptions Are Not for Normal Control Flow Everywhere",
+      "Exceptions are useful for exceptional or failure conditions, but deliberately triggering exceptions for routine decisions can reduce clarity.",
+      "## Error Messages",
+      "Useful exceptions explain what went wrong and, when appropriate, what value or condition caused it.",
       "## Common Mistakes",
-      "Watch for applying topological sort to undirected graphs, using Dijkstra with negative weights, marking a node permanently too early with stale heap entries, and implementing Union-Find without path compression.",
+      "Do not silently ignore failures, catch `Exception` and discard useful debugging information, or use exceptions to hide logic bugs.",
     ],
     codeSnippets: [
       {
-        title: "Course Schedule with Kahn's Algorithm",
-        language: "javascript",
-        code: `function canFinish(numCourses, prerequisites) {
-  const graph = Array.from(
-    { length: numCourses },
-    () => []
-  );
-
-  const indegree = new Array(numCourses).fill(0);
-
-  for (const [course, prerequisite] of prerequisites) {
-    graph[prerequisite].push(course);
-    indegree[course]++;
-  }
-
-  const queue = [];
-  let head = 0;
-
-  for (let i = 0; i < numCourses; i++) {
-    if (indegree[i] === 0) queue.push(i);
-  }
-
-  let completed = 0;
-
-  while (head < queue.length) {
-    const course = queue[head++];
-    completed++;
-
-    for (const next of graph[course]) {
-      indegree[next]--;
-
-      if (indegree[next] === 0) {
-        queue.push(next);
-      }
-    }
-  }
-
-  return completed === numCourses;
-}`,
+        title: "Handling Invalid User Input",
+        language: "python",
+        code: `try:
+    age = int(input("Enter your age: "))
+except ValueError:
+    print("Please enter a valid whole number.")
+else:
+    print(f"You entered {age}.")`,
       },
       {
-        title: "Disjoint Set Union",
-        language: "javascript",
-        code: `class DSU {
-  constructor(n) {
-    this.parent = Array.from(
-      { length: n },
-      (_, index) => index
-    );
+        title: "Raise a Meaningful Exception",
+        language: "python",
+        code: `def set_discount(percent):
+    if not 0 <= percent <= 100:
+        raise ValueError("Discount must be between 0 and 100")
 
-    this.size = new Array(n).fill(1);
-  }
+    return percent
 
-  find(x) {
-    if (this.parent[x] !== x) {
-      this.parent[x] = this.find(this.parent[x]);
-    }
+print(set_discount(20))`,
+      },
+      {
+        title: "Custom Exception",
+        language: "python",
+        code: `class InsufficientBalanceError(Exception):
+    pass
 
-    return this.parent[x];
-  }
+def withdraw(balance, amount):
+    if amount > balance:
+        raise InsufficientBalanceError(
+            f"Cannot withdraw {amount}; balance is {balance}"
+        )
 
-  union(a, b) {
-    let rootA = this.find(a);
-    let rootB = this.find(b);
-
-    if (rootA === rootB) return false;
-
-    if (this.size[rootA] < this.size[rootB]) {
-      [rootA, rootB] = [rootB, rootA];
-    }
-
-    this.parent[rootB] = rootA;
-    this.size[rootA] += this.size[rootB];
-
-    return true;
-  }
-}`,
+    return balance - amount`,
       },
     ],
-    language: "javascript",
+    language: "python",
     tryItChallenge:
-      "Implement Network Delay Time using Dijkstra's algorithm with your own min-heap. Then solve Redundant Connection using Union-Find.",
+      "Create a reusable function that repeatedly asks for an integer within a minimum and maximum range and handles invalid text without crashing.",
     order: 13,
   },
+
   {
-    slug: "coding-interview-problem-solving",
-    title: "14. Coding Interview Problem Solving & Pattern Recognition",
+    slug: "files-paths-csv-and-json",
+    title: "14. Files, Paths, CSV & JSON",
     summary:
-      "Combine the course into a practical interview workflow: clarify, model, choose patterns, prove correctness, analyze complexity, test edge cases, and optimize.",
+      "Learn safe file handling with context managers, pathlib, text files, CSV, JSON, encoding, and practical data-processing workflows.",
     content: [
-      "## The Goal Is Pattern Recognition, Not Memorization",
-      "Memorizing hundreds of finished solutions is fragile. A stronger approach is learning signals that point toward reusable patterns and then deriving the implementation from constraints.",
-      "## Step 1: Clarify the Problem",
-      "Confirm input format, output format, constraints, whether values can repeat, whether input is sorted, whether mutation is allowed, and what should happen for empty or invalid input.",
-      "## Step 2: Build a Brute-Force Baseline",
-      "A simple correct solution creates a reference point. It proves you understand the task and reveals exactly where repeated work occurs.",
-      "## Step 3: Use Constraints to Guide Optimization",
-      "Large `n` often rules out quadratic solutions. Sorted input suggests binary search or two pointers. Contiguous ranges suggest sliding window or prefix sums. Repeated lookup suggests hashing.",
-      "## Pattern Signals",
-      "**Two pointers:** sorted arrays, opposite ends, in-place compaction.\n**Sliding window:** contiguous subarray/substring.\n**Hashing:** membership, counting, complements, grouping.\n**Stack:** nested structure, previous/next greater value.\n**Heap:** top-k, repeated best-choice extraction.\n**BFS:** shortest unweighted path, level order.\n**DFS/backtracking:** exhaustive state exploration.\n**DP:** overlapping optimization/counting states.",
-      "## Step 4: State the Invariant",
-      "An invariant is a condition that remains true as the algorithm runs. Examples: everything left of a pointer is already processed; the current window contains no duplicates; the heap contains the best `k` candidates seen so far.",
-      "## Step 5: Prove Correctness Informally",
-      "Explain why every candidate answer is considered or why discarded candidates can never become optimal. Good interview explanations focus on the key reason the algorithm cannot miss a valid answer.",
-      "## Step 6: Analyze Complexity",
-      "State time and auxiliary space. Mention sorting, recursion depth, result storage, and any assumptions about Map/Set operations.",
-      "## Step 7: Test Edge Cases",
-      "Test empty input, one element, duplicates, already sorted/reversed input, negative values, maximum constraints, disconnected graphs, skewed trees, and cases where no valid answer exists.",
-      "## Step 8: Write Clean JavaScript",
-      "Use meaningful variable names, avoid unnecessary cleverness, separate helpers when they improve clarity, and use the data structure that matches the algorithm rather than forcing everything through arrays or objects.",
-      "## A Practical Study Loop",
-      "For each problem: solve it, explain the pattern, record the mistake or insight, re-solve it after a delay without looking at the previous code, and then solve a different problem using the same pattern. This builds transferable skill.",
-      "## Final Course Checklist",
-      "You should be able to explain Big O, recognize core patterns, implement foundational structures, traverse trees and graphs, use heaps and hashing, reason recursively, formulate DP states, and communicate why a solution is correct and efficient.",
+      "## Why File Handling Matters",
+      "Files allow programs to persist data beyond one execution and communicate with other tools. Common formats include plain text, CSV, and JSON.",
+      "## Opening Files",
+      "Python's `open()` can read or write files. Common modes include `r`, `w`, `a`, and binary variants.",
+      "## Context Managers",
+      "Use `with open(...) as file:` so the file is closed automatically even if an exception occurs.",
+      "## Reading Text",
+      "`read()` loads the entire file, `readline()` reads one line, and iteration over the file processes lines lazily.",
+      "## Writing Text",
+      "`write()` writes strings. Opening with `w` replaces existing contents, while `a` appends.",
+      "## Encoding",
+      'Specify encodings such as `encoding="utf-8"` when working with text files to make behavior more predictable across environments.',
+      "## pathlib",
+      "`pathlib.Path` provides an object-oriented, cross-platform way to construct, inspect, read, and write paths.",
+      "## CSV",
+      "The `csv` module handles comma-separated data while correctly dealing with quoting and delimiters.",
+      "## JSON",
+      "JSON maps naturally to Python dictionaries, lists, strings, numbers, booleans, and `None`. Use the `json` module rather than manually parsing JSON text.",
+      "## Serialization",
+      "Serialization converts in-memory data into a format that can be stored or transmitted. Deserialization reconstructs useful program values from that representation.",
+      "## File Safety",
+      "Validate paths and inputs when file names come from users, avoid overwriting important files accidentally, and handle missing-file conditions.",
+      "## Common Mistakes",
+      "Do not forget that JSON keys are strings in serialized form, CSV is not safely parsed by simple `.split(',')` in all cases, and file paths may differ across operating systems.",
     ],
     codeSnippets: [
       {
-        title: "Reusable Interview Solution Template",
-        language: "javascript",
-        code: `function solve(input) {
-  // 1. Clarify constraints and expected output.
+        title: "Read and Write Text with pathlib",
+        language: "python",
+        code: `from pathlib import Path
 
-  // 2. Identify the pattern:
-  //    hashing, two pointers, sliding window,
-  //    stack, heap, BFS/DFS, DP, etc.
+file_path = Path("notes.txt")
 
-  // 3. State the invariant before coding.
+file_path.write_text(
+    "Learning Python\\nPractice every day\\n",
+    encoding="utf-8"
+)
 
-  // 4. Implement the simplest correct optimized solution.
-
-  // 5. Verify important edge cases.
-
-  // 6. State:
-  //    Time complexity: O(...)
-  //    Space complexity: O(...)
-
-  return input;
-}`,
+content = file_path.read_text(encoding="utf-8")
+print(content)`,
       },
       {
-        title: "Pattern Example: Product Except Self",
-        language: "javascript",
-        code: `function productExceptSelf(nums) {
-  const result = new Array(nums.length).fill(1);
+        title: "Working with JSON",
+        language: "python",
+        code: `import json
 
-  let prefix = 1;
-
-  for (let i = 0; i < nums.length; i++) {
-    result[i] = prefix;
-    prefix *= nums[i];
-  }
-
-  let suffix = 1;
-
-  for (let i = nums.length - 1; i >= 0; i--) {
-    result[i] *= suffix;
-    suffix *= nums[i];
-  }
-
-  return result;
+user = {
+    "name": "Sara",
+    "skills": ["Python", "SQL"],
+    "active": True
 }
 
-// Time: O(n)
-// Extra space: O(1) if output array is excluded`,
+with open("user.json", "w", encoding="utf-8") as file:
+    json.dump(user, file, indent=2)
+
+with open("user.json", "r", encoding="utf-8") as file:
+    loaded_user = json.load(file)
+
+print(loaded_user["skills"])`,
+      },
+      {
+        title: "CSV DictReader and DictWriter",
+        language: "python",
+        code: `import csv
+
+rows = [
+    {"name": "Aman", "score": 88},
+    {"name": "Sara", "score": 94},
+]
+
+with open("scores.csv", "w", newline="", encoding="utf-8") as file:
+    writer = csv.DictWriter(
+        file,
+        fieldnames=["name", "score"]
+    )
+    writer.writeheader()
+    writer.writerows(rows)
+
+with open("scores.csv", "r", encoding="utf-8") as file:
+    reader = csv.DictReader(file)
+
+    for row in reader:
+        print(row)`,
       },
     ],
-    language: "javascript",
+    language: "python",
     tryItChallenge:
-      "Take five problems you previously solved by memorization. For each one, rewrite the solution from scratch and label the pattern, invariant, time complexity, space complexity, and the clue that should help you recognize the pattern next time.",
+      "Build a small contact manager that stores contacts in JSON. It should load existing contacts, add a new contact, search by name, and save changes.",
     order: 14,
+  },
+
+  {
+    slug: "iterators-generators-and-decorators",
+    title: "15. Iterators, Generators & Decorators",
+    summary:
+      "Understand Python's iteration protocol, lazy generators, yield, generator expressions, closures, and function decorators.",
+    content: [
+      "## Iterable vs Iterator",
+      "An iterable is an object you can iterate over, such as a list or string. An iterator produces items one at a time and keeps track of iteration state.",
+      "## iter() and next()",
+      "`iter()` obtains an iterator. `next()` asks that iterator for the next value. When no values remain, the iterator raises `StopIteration`.",
+      "## for Loops Use Iterators",
+      "A Python `for` loop automatically obtains an iterator and repeatedly requests values until iteration finishes.",
+      "## Generators",
+      "A generator function uses `yield` to produce values lazily. Execution pauses after each yielded value and resumes later with its local state preserved.",
+      "## Why Generators Matter",
+      "Generators avoid creating every result in memory at once. They are useful for large files, streams, pipelines, infinite sequences, and expensive data generation.",
+      "## Generator Expressions",
+      "Generator expressions resemble list comprehensions but use parentheses and produce values lazily.",
+      "## Closures",
+      "A closure is a function that remembers values from an enclosing scope even after that outer function has finished.",
+      "## Decorators",
+      "A decorator takes a callable and returns a callable, usually adding reusable behavior such as logging, timing, authorization, caching, or validation.",
+      "## @ Syntax",
+      "The `@decorator` syntax is a clean way to replace a function with the result of passing that function into a decorator.",
+      "## functools.wraps",
+      "Decorators should commonly use `functools.wraps` so metadata such as function name and documentation are preserved.",
+      "## Do Not Overuse Decorators",
+      "Decorators are powerful but can hide control flow. Use them for behavior that is genuinely cross-cutting and reusable.",
+      "## Common Mistakes",
+      "Beginners often expect a generator to be reusable after it is exhausted, forget to yield, accidentally return instead of yield, or write decorators that discard return values and arguments.",
+    ],
+    codeSnippets: [
+      {
+        title: "A Generator Function",
+        language: "python",
+        code: `def countdown(start):
+    current = start
+
+    while current > 0:
+        yield current
+        current -= 1
+
+for number in countdown(3):
+    print(number)`,
+      },
+      {
+        title: "Lazy Processing",
+        language: "python",
+        code: `numbers = range(1_000_000)
+
+squares = (
+    number * number
+    for number in numbers
+    if number % 2 == 0
+)
+
+for value in squares:
+    if value > 100:
+        break
+
+    print(value)`,
+      },
+      {
+        title: "Simple Timing Decorator",
+        language: "python",
+        code: `from functools import wraps
+from time import perf_counter
+
+def timer(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = perf_counter()
+        result = func(*args, **kwargs)
+        elapsed = perf_counter() - start
+
+        print(f"{func.__name__} took {elapsed:.6f}s")
+        return result
+
+    return wrapper
+
+@timer
+def calculate():
+    return sum(range(100_000))
+
+print(calculate())`,
+      },
+    ],
+    language: "python",
+    tryItChallenge:
+      "Create a decorator that logs a function's name, arguments, and return value without changing the function's behavior.",
+    order: 15,
+  },
+
+  {
+    slug: "standard-library-essentials",
+    title: "16. Python Standard Library Essentials",
+    summary:
+      "Explore high-value standard-library modules for dates, collections, paths, math, randomization, regular expressions, statistics, and utilities.",
+    content: [
+      "## Batteries Included",
+      "Python's standard library contains a large set of production-quality modules that solve common problems without third-party dependencies.",
+      "## datetime",
+      "Use `datetime` for dates and times, arithmetic with timedeltas, parsing, and formatting. Time-zone-aware programming requires careful handling of timezone information.",
+      "## collections",
+      "`collections` provides specialized structures such as `Counter`, `defaultdict`, `deque`, and `namedtuple`.",
+      "## Counter",
+      "`Counter` is ideal for frequency counting and exposes helpers for most-common values and arithmetic between counters.",
+      "## defaultdict",
+      "`defaultdict` creates missing values using a factory and can simplify grouping or adjacency-list code.",
+      "## deque",
+      "`deque` supports efficient additions and removals from both ends and is a better general-purpose queue than repeated list `pop(0)`.",
+      "## re",
+      "The `re` module provides regular-expression matching, searching, substitution, and extraction. Regex is powerful for pattern-based text work but should not replace simpler string operations when they are sufficient.",
+      "## math and statistics",
+      "`math` contains mathematical functions and constants, while `statistics` provides descriptive-statistics helpers.",
+      "## random",
+      "`random` is useful for simulations and ordinary pseudo-random behavior. It should not be used for security-sensitive secrets or tokens; the `secrets` module is designed for that purpose.",
+      "## pathlib",
+      "`pathlib` provides readable cross-platform file-system paths and should be part of a modern Python developer's toolkit.",
+      "## itertools",
+      "`itertools` provides memory-efficient iterator building blocks for combinations, permutations, chaining, grouping, and repeated iteration patterns.",
+      "## Common Mistakes",
+      "Do not reinvent functionality already provided by the standard library, use `random` for passwords, or parse dates manually when established library behavior is safer.",
+    ],
+    codeSnippets: [
+      {
+        title: "Counter and defaultdict",
+        language: "python",
+        code: `from collections import Counter, defaultdict
+
+words = ["python", "js", "python", "sql", "python", "js"]
+
+counts = Counter(words)
+print(counts.most_common(2))
+
+groups = defaultdict(list)
+
+for word in words:
+    groups[len(word)].append(word)
+
+print(dict(groups))`,
+      },
+      {
+        title: "Dates and Times",
+        language: "python",
+        code: `from datetime import datetime, timedelta
+
+now = datetime.now()
+next_week = now + timedelta(days=7)
+
+print(now.strftime("%Y-%m-%d %H:%M"))
+print(next_week.strftime("%Y-%m-%d"))`,
+      },
+      {
+        title: "Regular Expression Search",
+        language: "python",
+        code: `import re
+
+text = "Contact us at team@example.com"
+
+match = re.search(
+    r"[\\w.-]+@[\\w.-]+\\.\\w+",
+    text
+)
+
+if match:
+    print(match.group())`,
+      },
+    ],
+    language: "python",
+    tryItChallenge:
+      "Read a paragraph and use `Counter` to print the five most common normalized words. Then use `datetime` to timestamp the generated report.",
+    order: 16,
+  },
+
+  {
+    slug: "testing-debugging-and-code-quality",
+    title: "17. Testing, Debugging & Code Quality",
+    summary:
+      "Learn assertions, unittest, debugging techniques, logging, type hints, docstrings, style, and strategies for finding bugs systematically.",
+    content: [
+      "## Why Testing Matters",
+      "Testing gives confidence that code behaves as expected and continues behaving correctly after changes. Good tests also clarify intended behavior.",
+      "## Assertions",
+      "`assert` is useful for internal invariants and tests, but application input validation should not depend on assertions because they can be disabled.",
+      "## Unit Tests",
+      "Unit tests focus on small pieces of behavior in isolation. Python's standard `unittest` module provides test cases, assertions, setup hooks, and test discovery.",
+      "## Arrange, Act, Assert",
+      "A useful test structure is: arrange the initial data, act by calling the code, and assert the expected result.",
+      "## Test Edge Cases",
+      "Do not test only the happy path. Include empty input, boundaries, invalid values, duplicates, and known failure scenarios.",
+      "## Debugging",
+      "Debugging is the process of identifying why actual behavior differs from expected behavior. Reduce the problem, inspect assumptions, reproduce reliably, and observe program state.",
+      "## print vs Debugger",
+      "Print statements are useful for quick inspection, but an interactive debugger can pause execution, inspect variables, and move through code step-by-step.",
+      "## Logging",
+      "The `logging` module is preferable to scattered prints in production applications because it supports levels, formatting, destinations, and configuration.",
+      "## Type Hints",
+      "Type hints document expected types and help static-analysis tools catch mistakes. Python still remains dynamically typed at runtime unless additional validation is used.",
+      "## Docstrings",
+      "Docstrings document public modules, classes, and functions. Good documentation explains behavior, inputs, outputs, and exceptional cases.",
+      "## Code Style",
+      "Readable naming, small focused functions, consistent formatting, and clear module boundaries matter more than clever syntax.",
+      "## Refactoring",
+      "Refactoring improves structure without intentionally changing behavior. Tests make refactoring safer.",
+      "## Common Mistakes",
+      "Avoid tests that depend on one another, overly broad tests that fail for many reasons, debugging by random code changes, and ignoring error tracebacks.",
+    ],
+    codeSnippets: [
+      {
+        title: "A Testable Function",
+        language: "python",
+        code: `def divide(a: float, b: float) -> float:
+    if b == 0:
+        raise ValueError("b cannot be zero")
+
+    return a / b`,
+      },
+      {
+        title: "Unit Tests",
+        language: "python",
+        code: `import unittest
+
+class DivideTests(unittest.TestCase):
+    def test_divides_numbers(self):
+        self.assertEqual(divide(10, 2), 5)
+
+    def test_rejects_zero_divisor(self):
+        with self.assertRaises(ValueError):
+            divide(10, 0)
+
+if __name__ == "__main__":
+    unittest.main()`,
+      },
+      {
+        title: "Basic Logging",
+        language: "python",
+        code: `import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname)s:%(message)s"
+)
+
+logging.info("Application started")
+
+try:
+    result = 10 / 0
+except ZeroDivisionError:
+    logging.exception("Calculation failed")`,
+      },
+    ],
+    language: "python",
+    tryItChallenge:
+      "Write tests for a function that calculates shipping cost. Cover normal cost, free-shipping threshold, invalid negative amount, and a boundary value.",
+    order: 17,
+  },
+
+  {
+    slug: "http-apis-and-json",
+    title: "18. HTTP, REST APIs & JSON with Python",
+    summary:
+      "Understand requests and responses, HTTP methods, status codes, JSON payloads, query parameters, headers, errors, and API consumption.",
+    content: [
+      "## What Is an API?",
+      "An API provides a defined way for software systems to communicate. Web APIs commonly expose resources over HTTP and exchange JSON.",
+      "## HTTP Requests and Responses",
+      "A client sends a request containing a method, URL, headers, and sometimes a body. A server returns a status code, headers, and response body.",
+      "## Common HTTP Methods",
+      "`GET` retrieves data, `POST` commonly creates data, `PUT` replaces a resource, `PATCH` partially updates it, and `DELETE` removes it.",
+      "## Status Codes",
+      "2xx generally indicates success, 4xx indicates a client-side problem, and 5xx indicates a server-side problem. Specific status codes communicate more precise meaning.",
+      "## JSON APIs",
+      "JSON responses usually become Python dictionaries and lists after parsing.",
+      "## Query Parameters",
+      "Query parameters communicate filters, pagination, search terms, or other optional request values through the URL.",
+      "## Headers",
+      "Headers can contain metadata such as content type, authorization credentials, user agent, and caching information.",
+      "## Timeouts",
+      "Network calls should generally use reasonable timeouts so an application does not wait forever on an unavailable service.",
+      "## API Errors",
+      "Handle network failures, unsuccessful status codes, invalid JSON, and missing fields. External systems are outside your control.",
+      "## Secrets",
+      "API keys should not be hard-coded into source files committed to version control. Environment variables are a common approach for configuration secrets.",
+      "## Pagination",
+      "Many APIs return data in pages. Real clients often need to continue requesting pages until the required data has been collected.",
+      "## Rate Limits",
+      "APIs may restrict request frequency. Respect documented limits and retry guidance.",
+      "## Common Mistakes",
+      "Do not assume every response is JSON, ignore status codes, omit timeouts, log sensitive credentials, or trust remote data without validation.",
+    ],
+    codeSnippets: [
+      {
+        title: "GET Request with requests",
+        language: "python",
+        code: `import requests
+
+url = "https://jsonplaceholder.typicode.com/users"
+
+response = requests.get(
+    url,
+    timeout=10
+)
+
+response.raise_for_status()
+
+users = response.json()
+
+for user in users[:3]:
+    print(user["name"])`,
+      },
+      {
+        title: "Query Parameters and Error Handling",
+        language: "python",
+        code: `import requests
+
+try:
+    response = requests.get(
+        "https://jsonplaceholder.typicode.com/posts",
+        params={"userId": 1},
+        timeout=10
+    )
+
+    response.raise_for_status()
+    posts = response.json()
+
+except requests.RequestException as error:
+    print(f"Request failed: {error}")
+else:
+    print(f"Received {len(posts)} posts")`,
+      },
+    ],
+    language: "python",
+    tryItChallenge:
+      "Build a small CLI program that calls a public JSON API, accepts one search/filter input from the user, handles request failures, and displays selected fields cleanly.",
+    order: 18,
+  },
+
+  {
+    slug: "sqlite-and-database-programming",
+    title: "19. SQLite & Database Programming",
+    summary:
+      "Learn database fundamentals, SQL operations, SQLite connections, parameters, transactions, and safe CRUD programming from Python.",
+    content: [
+      "## Why Databases?",
+      "Files are useful, but databases provide structured querying, constraints, transactions, indexing, and reliable updates for growing applications.",
+      "## Relational Databases",
+      "Relational databases store structured data in tables composed of rows and columns. Relationships connect records across tables.",
+      "## SQLite",
+      "SQLite is a lightweight relational database stored in a local file. Python includes built-in SQLite support through the `sqlite3` module.",
+      "## Connections and Cursors",
+      "A connection manages communication with the database. SQL can be executed through the connection or cursor APIs.",
+      "## Creating Tables",
+      "`CREATE TABLE` defines columns, types, constraints, and primary keys.",
+      "## CRUD",
+      "CRUD means Create, Read, Update, and Delete. These operations map naturally to `INSERT`, `SELECT`, `UPDATE`, and `DELETE`.",
+      "## Parameterized Queries",
+      "Never build SQL by concatenating untrusted values into query strings. Use parameters so values are passed safely.",
+      "## Transactions",
+      "A transaction groups changes that should succeed or fail together. Committing makes changes durable; rolling back reverses uncommitted changes.",
+      "## Constraints",
+      "Primary keys, uniqueness, non-null requirements, foreign keys, and other constraints protect data integrity.",
+      "## Row Mapping",
+      "Database rows can be converted into tuples, mappings, or application objects depending on project needs.",
+      "## Indexes",
+      "Indexes can speed up common lookup patterns but consume storage and add write overhead. They should reflect actual query needs.",
+      "## Closing Resources",
+      "Database connections should be closed reliably. Context-manager patterns can simplify transaction and resource management.",
+      "## Common Mistakes",
+      "The most serious beginner mistakes are SQL string interpolation with user data, forgetting commits, ignoring uniqueness constraints, and treating database errors as impossible.",
+    ],
+    codeSnippets: [
+      {
+        title: "Create and Insert",
+        language: "python",
+        code: `import sqlite3
+
+with sqlite3.connect("app.db") as connection:
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE
+        )
+    """)
+
+    connection.execute(
+        "INSERT INTO users (name, email) VALUES (?, ?)",
+        ("Sara", "sara@example.com")
+    )`,
+      },
+      {
+        title: "Read and Update Safely",
+        language: "python",
+        code: `import sqlite3
+
+with sqlite3.connect("app.db") as connection:
+    connection.row_factory = sqlite3.Row
+
+    rows = connection.execute(
+        "SELECT id, name, email FROM users"
+    ).fetchall()
+
+    for row in rows:
+        print(dict(row))
+
+    connection.execute(
+        "UPDATE users SET name = ? WHERE email = ?",
+        ("Sara Khan", "sara@example.com")
+    )`,
+      },
+    ],
+    language: "python",
+    tryItChallenge:
+      "Build a SQLite-backed task manager supporting create, list, mark-complete, and delete operations. Use parameterized queries for every user-provided value.",
+    order: 19,
+  },
+
+  {
+    slug: "concurrency-threading-multiprocessing-and-asyncio",
+    title: "20. Concurrency: Threading, Multiprocessing & Asyncio",
+    summary:
+      "Develop a beginner-friendly mental model for concurrent work, the GIL, threads, processes, async/await, and choosing the right approach.",
+    content: [
+      "## Concurrency vs Parallelism",
+      "Concurrency means managing multiple tasks whose execution overlaps. Parallelism means tasks literally execute at the same time on different processing resources.",
+      "## Why Concurrency Matters",
+      "Programs often spend time waiting for files, networks, databases, or external services. Concurrency can let other work progress during those waits.",
+      "## Threads",
+      "Threads share process memory and are useful for many I/O-bound workloads. Shared mutable state introduces synchronization and correctness concerns.",
+      "## The GIL",
+      "In traditional CPython builds, the Global Interpreter Lock historically allows only one thread at a time to execute Python bytecode within a process. This means CPU-bound pure Python work does not usually scale across cores merely by adding threads.",
+      "## Multiprocessing",
+      "Multiple processes have separate memory spaces and can use multiple CPU cores. This makes multiprocessing useful for CPU-bound work, but process creation and data exchange have overhead.",
+      "## Async Programming",
+      "`asyncio` uses cooperative concurrency. Coroutines voluntarily yield control at `await` points, allowing an event loop to run other work while one operation waits.",
+      "## async and await",
+      "`async def` defines a coroutine function. Calling it creates a coroutine object; the coroutine must be awaited or scheduled by an event loop.",
+      "## I/O-Bound vs CPU-Bound",
+      "For I/O-heavy tasks, threading or asyncio can be effective. For CPU-intensive Python computations, processes may be more appropriate.",
+      "## Race Conditions",
+      "When threads modify shared state, results can depend on timing. Synchronization primitives can protect critical sections, though avoiding unnecessary shared mutable state is often simpler.",
+      "## Do Not Add Concurrency Too Early",
+      "Concurrent programs are harder to debug and reason about. First make the synchronous version correct, then add concurrency when measurements or requirements justify it.",
+      "## Common Mistakes",
+      "Typical mistakes include calling blocking code inside async functions, assuming threads always make CPU work faster, modifying shared state unsafely, and forgetting to await coroutines.",
+    ],
+    codeSnippets: [
+      {
+        title: "ThreadPool for I/O-Style Work",
+        language: "python",
+        code: `from concurrent.futures import ThreadPoolExecutor
+from time import sleep
+
+def fetch_item(item_id):
+    sleep(1)
+    return f"Item {item_id}"
+
+with ThreadPoolExecutor(max_workers=4) as executor:
+    results = list(
+        executor.map(fetch_item, range(4))
+    )
+
+print(results)`,
+      },
+      {
+        title: "Basic asyncio",
+        language: "python",
+        code: `import asyncio
+
+async def task(name, delay):
+    await asyncio.sleep(delay)
+    return f"{name} finished"
+
+async def main():
+    results = await asyncio.gather(
+        task("A", 1),
+        task("B", 1),
+        task("C", 1)
+    )
+
+    print(results)
+
+asyncio.run(main())`,
+      },
+    ],
+    language: "python",
+    tryItChallenge:
+      "Create a synchronous program that simulates five slow I/O tasks, then rewrite it with `asyncio.gather()` and compare the total runtime.",
+    order: 20,
+  },
+
+  {
+    slug: "automation-and-command-line-programs",
+    title: "21. Automation & Command-Line Programs",
+    summary:
+      "Apply Python to practical automation using pathlib, shutil, subprocess concepts, command-line arguments, environment variables, and reusable scripts.",
+    content: [
+      "## Python as an Automation Language",
+      "Python is excellent for automating repetitive computer tasks such as renaming files, moving data, generating reports, processing logs, transforming CSV files, and calling APIs.",
+      "## Think in Pipelines",
+      "Many automation scripts follow a simple pattern: discover input, validate it, transform data, perform an action, report the result, and handle failures.",
+      "## pathlib for File Automation",
+      "`Path.glob()` and `Path.rglob()` can discover matching files. Paths can be renamed, moved, inspected, and combined without hard-coding operating-system separators.",
+      "## shutil",
+      "The `shutil` module provides higher-level file and directory operations such as copying, moving, and archive handling.",
+      "## Command-Line Arguments",
+      "A useful automation tool should often accept inputs from the command line instead of requiring source-code edits.",
+      "## argparse",
+      "`argparse` provides structured command-line argument parsing, help messages, required arguments, defaults, and option validation.",
+      "## Environment Variables",
+      "Environment variables are useful for configuration that differs between machines or environments, especially credentials and deployment-specific settings.",
+      "## Idempotency",
+      "A well-designed automation may be safe to run repeatedly without producing duplicate or destructive results. Thinking about idempotency improves reliability.",
+      "## Dry-Run Mode",
+      "For destructive tasks, consider a dry-run mode that shows intended changes before applying them.",
+      "## Logging Automation",
+      "Automation scripts should report what changed and what failed. Logging makes scheduled and unattended scripts easier to diagnose.",
+      "## Security",
+      "Treat file names, external commands, environment values, and remote data as untrusted when applicable. Avoid blindly executing constructed shell commands.",
+      "## Common Mistakes",
+      "Avoid hard-coded absolute paths, destructive operations without validation, swallowing errors, and scripts that assume every machine has the same environment.",
+    ],
+    codeSnippets: [
+      {
+        title: "Rename Files with pathlib",
+        language: "python",
+        code: `from pathlib import Path
+
+folder = Path("photos")
+
+for index, file_path in enumerate(
+    folder.glob("*.jpg"),
+    start=1
+):
+    new_name = f"photo_{index:03}.jpg"
+    destination = file_path.with_name(new_name)
+
+    print(f"{file_path.name} -> {new_name}")
+    file_path.rename(destination)`,
+      },
+      {
+        title: "Command-Line Arguments with argparse",
+        language: "python",
+        code: `import argparse
+
+parser = argparse.ArgumentParser(
+    description="Simple greeting tool"
+)
+
+parser.add_argument("name")
+parser.add_argument(
+    "--uppercase",
+    action="store_true"
+)
+
+args = parser.parse_args()
+
+message = f"Hello, {args.name}!"
+
+if args.uppercase:
+    message = message.upper()
+
+print(message)`,
+      },
+    ],
+    language: "python",
+    tryItChallenge:
+      "Build a CLI file-organizer that groups files by extension into folders. Add a `--dry-run` option that prints planned moves without modifying files.",
+    order: 21,
+  },
+
+  {
+    slug: "python-project-structure-and-best-practices",
+    title: "22. Project Structure, Clean Code & Python Best Practices",
+    summary:
+      "Learn how to organize real Python applications with clear boundaries, configuration, reusable modules, tests, type hints, and maintainable design.",
+    content: [
+      "## From Scripts to Applications",
+      "A one-file script is excellent for small tasks. As responsibilities grow, separate application logic, data access, configuration, utilities, and user interfaces into focused modules.",
+      "## Separation of Concerns",
+      "Code is easier to maintain when input/output, business logic, persistence, and external integrations are not tightly mixed together.",
+      "## Keep the Core Testable",
+      "Business rules should ideally be callable without requiring interactive input, a real database, or a live network request. This makes testing fast and reliable.",
+      "## Configuration",
+      "Configuration that changes by environment should be kept separate from application logic. Secrets should not be committed into source control.",
+      "## Naming",
+      "Use descriptive module, function, class, and variable names. Python conventions normally use `snake_case` for variables/functions and `PascalCase` for classes.",
+      "## Type Hints",
+      "Use type hints where they improve communication and tooling. Avoid treating type annotations as a replacement for tests or runtime validation.",
+      "## Small Functions",
+      "Functions should usually have a clear purpose. If a function performs unrelated jobs, it may need to be split.",
+      "## Avoid Premature Abstraction",
+      "Do not create complex frameworks for problems that have not appeared yet. Repetition can reveal where an abstraction is actually useful.",
+      "## Error Boundaries",
+      "Handle errors at layers that have enough context to respond meaningfully. Low-level functions may raise exceptions; higher-level interfaces may convert them into user-friendly messages.",
+      "## Dependency Direction",
+      "Core logic should avoid unnecessary dependence on UI or infrastructure details. This keeps code flexible and easier to test.",
+      "## Documentation",
+      "A project README should explain purpose, setup, dependencies, execution, tests, and important environment configuration.",
+      "## Common Mistakes",
+      "Common beginner architecture mistakes include one massive file, global mutable state, hard-coded credentials, duplicate logic, circular imports, and mixing database/UI code into every function.",
+    ],
+    codeSnippets: [
+      {
+        title: "Example Project Structure",
+        language: "python",
+        code: `# my_app/
+# ├── app/
+# │   ├── __init__.py
+# │   ├── services.py
+# │   ├── models.py
+# │   ├── repository.py
+# │   └── config.py
+# ├── tests/
+# │   ├── test_services.py
+# │   └── test_repository.py
+# ├── main.py
+# ├── requirements.txt
+# └── README.md`,
+      },
+      {
+        title: "Separate Business Logic from Input",
+        language: "python",
+        code: `def calculate_order_total(items):
+    return sum(
+        item["price"] * item["quantity"]
+        for item in items
+    )
+
+def main():
+    items = [
+        {"price": 100, "quantity": 2},
+        {"price": 50, "quantity": 3},
+    ]
+
+    total = calculate_order_total(items)
+    print(f"Total: {total}")
+
+if __name__ == "__main__":
+    main()`,
+      },
+    ],
+    language: "python",
+    tryItChallenge:
+      "Take one earlier single-file project from this course and refactor it into at least three modules: interface, business logic, and persistence/data handling.",
+    order: 22,
+  },
+
+  {
+    slug: "python-capstone-projects",
+    title: "23. Python Capstone Projects: Build Real Applications",
+    summary:
+      "Bring the entire course together through practical projects that require planning, modular code, persistence, validation, testing, APIs, and clean structure.",
+    content: [
+      "## Why Capstone Projects Matter",
+      "Tutorial examples teach individual concepts. Projects teach how those concepts interact. The goal is not merely to finish a project but to practice making design decisions.",
+      "## Project 1: Expense Tracker",
+      "Build a command-line expense tracker supporting categories, amounts, dates, filtering, monthly summaries, persistence, and input validation. Start with JSON and optionally migrate the persistence layer to SQLite.",
+      "## Project 2: Task Manager",
+      "Create tasks with title, priority, due date, and status. Support listing, filtering, completion, deletion, and persistence. Organize the program so domain logic is separate from storage and CLI input.",
+      "## Project 3: API Dashboard",
+      "Consume a public API, let users search or filter data, cache or store selected results, handle unavailable services, and present readable summaries.",
+      "## Project 4: File Automation Tool",
+      "Build a safe file organizer, duplicate-report generator, or batch-renaming tool. Include dry-run behavior, logs, and useful command-line arguments.",
+      "## Project 5: Inventory Manager",
+      "Use classes and SQLite to manage products, stock adjustments, low-stock reporting, and inventory value. Add tests for core business rules.",
+      "## Plan Before Coding",
+      "Write down requirements, core entities, data flow, storage approach, expected errors, and module boundaries before implementation.",
+      "## Build in Iterations",
+      "Start with the smallest useful feature. Add persistence, validation, tests, and advanced functionality only after the basic workflow works.",
+      "## Test Business Rules",
+      "For each project, identify logic that can be tested without user input or a network. Write tests for important calculations, validations, and edge cases.",
+      "## Refactor After It Works",
+      "Do not demand perfect architecture from the first line. Once behavior is correct, look for duplication, unclear responsibilities, long functions, and hidden dependencies.",
+      "## Document the Project",
+      "Add a README explaining what the project does, installation, how to run it, example commands, project structure, and important design choices.",
+      "## Portfolio Standard",
+      "A strong beginner portfolio project should be understandable, runnable, documented, reasonably tested, and demonstrate thoughtful error handling. A smaller polished project is often more valuable than a large unfinished one.",
+      "## Final Learning Strategy",
+      "After completing the course, keep building. Revisit weak topics, read other people's Python code, practice debugging, solve small problems, and gradually learn the frameworks required by the area of Python you want to pursue.",
+    ],
+    codeSnippets: [
+      {
+        title: "Capstone Planning Template",
+        language: "python",
+        code: `# 1. Define the user problem.
+# 2. List required features.
+# 3. Identify core data/entities.
+# 4. Choose storage: memory / JSON / SQLite.
+# 5. Separate:
+#       - input/output
+#       - business logic
+#       - persistence
+# 6. Identify expected errors.
+# 7. Write the smallest working version.
+# 8. Add tests.
+# 9. Refactor.
+# 10. Document usage.`,
+      },
+      {
+        title: "Simple Application Entry Point",
+        language: "python",
+        code: `def main():
+    print("Welcome to the Python capstone project")
+
+    # Load application data
+    # Show menu
+    # Read user choice
+    # Call service functions
+    # Persist changes
+    # Handle expected errors
+
+if __name__ == "__main__":
+    main()`,
+      },
+    ],
+    language: "python",
+    tryItChallenge:
+      "Choose one capstone project and build it to portfolio quality. Require at least three modules, persistent storage, validation, exception handling, type hints, a README, and automated tests for core logic.",
+    order: 23,
   },
 ];
 
-async function seedDSAInJavaScript() {
+async function seedPythonCourse() {
   try {
     console.log("Connecting to MongoDB...");
     await mongoose.connect(MONGO_URI);
@@ -1540,7 +1951,7 @@ async function seedDSAInJavaScript() {
       }
     }
 
-    console.log("Seeding complete!");
+    console.log("Python course seeding complete!");
     console.log(`- Course ID: ${course._id}`);
     console.log(`- Course Slug: /courses/${course.slug}`);
     console.log(`- Chapters created: ${createdCount}`);
@@ -1548,9 +1959,9 @@ async function seedDSAInJavaScript() {
 
     process.exit(0);
   } catch (error) {
-    console.error("Error seeding DSA in JavaScript course:", error);
+    console.error("Error seeding Python course:", error);
     process.exit(1);
   }
 }
 
-seedDSAInJavaScript();
+seedPythonCourse();

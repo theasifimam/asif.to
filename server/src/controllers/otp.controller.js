@@ -80,7 +80,10 @@ export const sendOtp = async (req, res) => {
       targetUser?.fullName ||
       normalizedEmail.split("@")[0];
 
-    await sendOtpEmail(normalizedEmail, name, otp, purpose);
+    sendOtpEmail(normalizedEmail, name, otp, purpose).catch((error) => {
+      console.error("[OTP] Background sendOtpEmail error:", error);
+      otpStore.delete(normalizedEmail);
+    });
 
     res
       .status(200)

@@ -120,6 +120,54 @@ function getArticleHref(article) {
   return `/articles/${encodeURIComponent(slug)}-${encodeURIComponent(article._id || article.id)}`;
 }
 
+const getTechColorClasses = (techId) => {
+  const colors = {
+    reactjs: {
+      card: "border-blue-200/70 dark:border-blue-900/50 hover:border-blue-300 dark:hover:border-blue-800 hover:shadow-blue-500/10",
+      btn: "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20",
+    },
+    nextjs: {
+      card: "border-amber-200/70 dark:border-amber-900/50 hover:border-amber-300 dark:hover:border-amber-800 hover:shadow-amber-500/10",
+      btn: "bg-amber-600 hover:bg-amber-700 text-white shadow-amber-500/20",
+    },
+    javascript: {
+      card: "border-emerald-200/70 dark:border-emerald-900/50 hover:border-emerald-300 dark:hover:border-emerald-800 hover:shadow-emerald-500/10",
+      btn: "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20",
+    },
+    css: {
+      card: "border-purple-200/70 dark:border-purple-900/50 hover:border-purple-300 dark:hover:border-purple-800 hover:shadow-purple-500/10",
+      btn: "bg-purple-600 hover:bg-purple-700 text-white shadow-purple-500/20",
+    },
+    typescript: {
+      card: "border-teal-200/70 dark:border-teal-900/50 hover:border-teal-300 dark:hover:border-teal-800 hover:shadow-teal-500/10",
+      btn: "bg-teal-600 hover:bg-teal-700 text-white shadow-teal-500/20",
+    },
+    nodejs: {
+      card: "border-green-200/70 dark:border-green-900/50 hover:border-green-300 dark:hover:border-green-800 hover:shadow-green-500/10",
+      btn: "bg-green-600 hover:bg-green-700 text-white shadow-green-500/20",
+    },
+    mongodb: {
+      card: "border-emerald-200/70 dark:border-emerald-900/50 hover:border-emerald-300 dark:hover:border-emerald-800 hover:shadow-emerald-500/10",
+      btn: "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20",
+    },
+    expressjs: {
+      card: "border-zinc-300/70 dark:border-zinc-700/50 hover:border-zinc-400 dark:hover:border-zinc-600 hover:shadow-zinc-500/10",
+      btn: "bg-zinc-700 hover:bg-zinc-800 text-white shadow-zinc-500/20",
+    },
+    tailwindcss: {
+      card: "border-sky-200/70 dark:border-sky-900/50 hover:border-sky-300 dark:hover:border-sky-800 hover:shadow-sky-500/10",
+      btn: "bg-sky-500 hover:bg-sky-600 text-white shadow-sky-500/20",
+    },
+  };
+
+  return (
+    colors[techId] || {
+      card: "border-zinc-200/70 dark:border-zinc-800/70 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-md",
+      btn: "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20",
+    }
+  );
+};
+
 export default function HomePageClient({
   courses = [],
   initialTopics = [],
@@ -391,11 +439,12 @@ export default function HomePageClient({
               const rankNum = course.rank || idx + 1;
               const lessonCount =
                 course.chapterCount ?? course.chapters?.length ?? 0;
+              const techColors = getTechColorClasses(course.techId);
 
               return (
                 <article
                   key={course._id || course.id}
-                  className="group flex w-71.25 sm:w-[320px] md:w-85 shrink-0 snap-start flex-col justify-between rounded-3xl border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 p-4 sm:p-5 shadow-xs hover:shadow-md transition-all"
+                  className={`group flex w-71.25 sm:w-[320px] md:w-85 shrink-0 snap-start flex-col justify-between rounded-3xl border bg-white dark:bg-zinc-900/90 p-4 sm:p-5 shadow-xs transition-all ${techColors.card}`}
                 >
                   <div>
                     {course.thumbnail ? (
@@ -479,7 +528,7 @@ export default function HomePageClient({
 
                     <Link
                       href={`/courses/${course.slug}`}
-                      className="h-8.5 inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 active:scale-95 transition-all shrink-0"
+                      className={`h-8.5 inline-flex items-center gap-1.5 rounded-full px-3.5 text-xs font-bold shadow-xs active:scale-95 transition-all shrink-0 ${techColors.btn}`}
                     >
                       <Play className="w-3 h-3 fill-current" /> Start Course
                     </Link>
