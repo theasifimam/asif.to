@@ -17,10 +17,6 @@ export default function ChapterReaderHeader({
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="px-2.5 py-0.5 rounded-full bg-blue-600/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 font-black text-[10px] uppercase tracking-widest border border-blue-500/20 shrink-0">
-            asif.to Tutorial
-          </span>
-          <span className="text-zinc-300 dark:text-zinc-700">•</span>
           <span className="text-[11px] sm:text-xs font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-widest">
             Lesson {currentChapterIndex + 1} of {allChaptersCount}
           </span>

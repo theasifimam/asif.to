@@ -16,11 +16,21 @@ import {
   Send,
   Trash2,
   ImagePlus,
+  UserPen,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
 import Editor from "@/components/editor/Editor";
 import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
+import { getImageUrl } from "@/lib/utils";
+import {
+  coursesApi,
+  interviewQuestionsApi,
+  topicCategoriesApi,
+  topicsApi,
+  usersApi,
+} from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,17 +42,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  coursesApi,
-  interviewQuestionsApi,
-  topicCategoriesApi,
-  topicsApi,
-} from "@/lib/api";
-import AdminFormShell, {
-  AdminFormLoading,
-  formSectionClass,
-} from "@/components/forms/AdminFormShell";
-import DiscussButton from "@/components/messaging/DiscussButton";
 import { CanonicalUrlInput } from "@/components/admin";
 
 const initialForm = {
@@ -91,41 +90,55 @@ export default function TopicForm({ topicId = null }) {
   const fileRef = useRef(null);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [overrideAuthorId, setOverrideAuthorId] = useState("");
+  const { user: currentAdminUser } = useAuth();
+  const isSuperAdmin = currentAdminUser?.role?.toLowerCase() === "super_admin";
 
   useEffect(() => {
-    Promise.all([
+    const queries = [
       coursesApi.listAll(),
       topicId ? topicsApi.get(topicId) : Promise.resolve(null),
-    ]).then(([courseResponse, topicResponse]) => {
-      setCourses(courseResponse.data?.data || []);
-      if (topicResponse?.success) {
-        const topic = topicResponse.data?.data;
-        setForm({
-          ...initialForm,
-          ...topic,
-          course: topic.course?._id || topic.course,
-          category: topic.category?._id || topic.category,
-          keywords: (topic.keywords || []).join(", "),
-          relatedTopics: (topic.relatedTopics || []).map(
-            (item) => item._id || item,
-          ),
-          interviewQuestions: (topic.interviewQuestions || [])
-            .filter((entry) => entry.question)
-            .sort((a, b) => a.order - b.order)
-            .map((entry) => entry.question),
-        });
-        setImagePreview(
-          topic.image?.startsWith("http")
-            ? topic.image
-            : topic.image
-              ? `http://localhost:5000${topic.image}`
-              : "",
-        );
-        setSlugEdited(true);
-      }
-      setLoading(false);
-    });
-  }, [topicId]);
+    ];
+    if (isSuperAdmin) {
+      queries.push(usersApi.list({ limit: 100 }));
+    }
+    Promise.all(queries).then(
+      ([courseResponse, topicResponse, usersResponse]) => {
+        setCourses(courseResponse.data?.data || []);
+        if (usersResponse?.success) {
+          const usersData =
+            usersResponse?.data?.data?.users ||
+            usersResponse?.data?.users ||
+            usersResponse?.data?.data ||
+            (Array.isArray(usersResponse?.data) ? usersResponse.data : []);
+          setAdminUsers(Array.isArray(usersData) ? usersData : []);
+        }
+        if (topicResponse?.success) {
+          const topic = topicResponse.data?.data;
+          setForm({
+            ...initialForm,
+            ...topic,
+            course: topic.course?._id || topic.course,
+            category: topic.category?._id || topic.category,
+            keywords: (topic.keywords || []).join(", "),
+            relatedTopics: (topic.relatedTopics || []).map(
+              (item) => item._id || item,
+            ),
+            interviewQuestions: (topic.interviewQuestions || [])
+              .filter((entry) => entry.question)
+              .sort((a, b) => a.order - b.order)
+              .map((entry) => entry.question),
+          });
+          const currentAuthorId = topic?.author?._id || topic?.author || "";
+          setOverrideAuthorId(String(currentAuthorId));
+          setImagePreview(getImageUrl(topic.image));
+          setSlugEdited(true);
+        }
+        setLoading(false);
+      },
+    );
+  }, [topicId, isSuperAdmin]);
 
   useEffect(() => {
     if (!form.course) {
@@ -235,6 +248,10 @@ export default function TopicForm({ topicId = null }) {
       data.append("image", "");
     }
 
+    if (isSuperAdmin && overrideAuthorId) {
+      data.append("authorId", overrideAuthorId);
+    }
+
     return data;
   };
 
@@ -247,8 +264,7 @@ export default function TopicForm({ topicId = null }) {
       : await topicsApi.create(payload());
     if (response.success) {
       toast.success(topicId ? "Topic saved" : "Draft created");
-      if (!topicId)
-        window.location.assign(`/topics/${response.data?.data?._id}/edit`);
+      window.location.assign(returnTo);
     } else toast.error(response.error || "Unable to save topic");
     setSaving(false);
     return response;
@@ -271,7 +287,7 @@ export default function TopicForm({ topicId = null }) {
     if (response.success) {
       toast.success("Topic published");
       setForm((current) => ({ ...current, status: "published" }));
-      if (!topicId) window.location.assign(`/topics/${id}/edit`);
+      window.location.assign(returnTo);
     } else toast.error(response.error || "Unable to publish topic");
     setSaving(false);
     setPublishOpen(false);
@@ -759,6 +775,54 @@ export default function TopicForm({ topicId = null }) {
                 </p>
               )}
             </div>
+            {/* Super-admin author override */}
+            {isSuperAdmin && (
+              <div className="space-y-3 rounded-4xl border-2 border-dashed border-amber-300 dark:border-amber-700/50 bg-amber-50/40 dark:bg-amber-900/10 p-5">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-xl bg-amber-100 dark:bg-amber-500/15 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+                    <UserPen className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <h2 className="font-bold text-xs text-zinc-900 dark:text-white">
+                      Author Override
+                    </h2>
+                    <p className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">
+                      Super Admin only
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Assign Author</Label>
+                  <Select
+                    value={overrideAuthorId}
+                    onValueChange={setOverrideAuthorId}
+                  >
+                    <SelectTrigger className="h-10 w-full rounded-xl border-0 bg-white dark:bg-zinc-900 px-3 text-xs shadow-sm">
+                      <SelectValue placeholder="Select author..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {adminUsers.map((u) => (
+                        <SelectItem key={u._id} value={u._id}>
+                          <span className="font-medium">
+                            {u.fullName || u.name || u.username}
+                          </span>
+                          {u.email && (
+                            <span className="ml-1 text-zinc-400 text-[10px]">
+                              ({u.email})
+                            </span>
+                          )}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {adminUsers.length === 0 && (
+                    <p className="text-[10px] text-zinc-400 italic">
+                      Loading users...
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </aside>
       </div>

@@ -38,6 +38,36 @@ const nextConfig = {
           },
         ],
       },
+      {
+        // Chapter pages can embed the C/C++ WebAssembly compiler.
+        source: '/:username/:topicSlug',
+        headers: [
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'credentialless',
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+        ],
+      },
+      {
+        // Wasmer needs SharedArrayBuffer inside its module worker. The worker
+        // response must opt into the same isolation policy as the playground
+        // page or Chromium blocks it before any compiler code can run.
+        source: '/workers/:path*',
+        headers: [
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'credentialless',
+          },
+          {
+            key: 'Cross-Origin-Resource-Policy',
+            value: 'same-origin',
+          },
+        ],
+      },
     ];
   },
   images: {

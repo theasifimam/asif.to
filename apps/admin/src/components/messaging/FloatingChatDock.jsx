@@ -466,7 +466,7 @@ export default function FloatingChatDock({ isNavVisible = true }) {
         </button>
       ) : (
         /* Expanded LinkedIn/Instagram-style Chat Dock Window */
-        <div className="flex h-125 sm:h-140 w-85 sm:w-96 flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-[#121215] dark:shadow-black/70 animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex h-125 sm:h-140 w-85 sm:w-96 flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-[#121215] dark:shadow-black/70 animate-in fade-in zoom-in-95 duration-150">
           {/* Dock Header */}
           <div className="flex h-14 sm:h-15 shrink-0 items-center justify-between border-b border-zinc-200/80 px-4 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-900/60 backdrop-blur-md">
             <div className="flex min-w-0 items-center gap-2.5">

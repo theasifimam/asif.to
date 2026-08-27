@@ -311,7 +311,8 @@ export default function CourseClient({ initialData }) {
             </p>
           </div>
 
-          <div className="space-y-3 sm:space-y-4">
+          {/* Master Unified Container Card for Chapters */}
+          <div className="overflow-hidden rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-md border border-zinc-200/80 dark:border-zinc-800/80 divide-y divide-zinc-100 dark:divide-zinc-800/80">
             {course.chapters.map((ch, idx) => {
               const displayTitle = ch.title.replace(/^\d+[\.\s\-]+/, "");
               const chapterNumber = String(idx + 1).padStart(2, "0");
@@ -320,16 +321,16 @@ export default function CourseClient({ initialData }) {
               return (
                 <div
                   key={ch._id || ch.slug}
-                  className="group relative p-5 sm:p-6 rounded-3xl bg-white dark:bg-zinc-900/90 border border-zinc-200/80 dark:border-zinc-800/80 hover:border-blue-500/40 dark:hover:border-blue-500/40 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  className="group relative p-4 sm:p-5 hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 transition-colors duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                 >
                   <div className="flex items-start gap-4 min-w-0 flex-1">
                     {/* Chapter Number Badge */}
-                    <div className="shrink-0 w-10 h-10 rounded-2xl bg-blue-500/10 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 font-black text-sm flex items-center justify-center border border-blue-500/20">
+                    <div className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-blue-500/10 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 font-black text-xs sm:text-sm flex items-center justify-center border border-blue-500/20">
                       {chapterNumber}
                     </div>
 
                     {/* Content Block */}
-                    <div className="space-y-1.5 min-w-0 flex-1">
+                    <div className="space-y-1 min-w-0 flex-1">
                       <Link
                         href={`/${activeCourseSlug}/${ch.slug}`}
                         className="block group/link"
@@ -340,7 +341,7 @@ export default function CourseClient({ initialData }) {
                       </Link>
 
                       {ch.summary && (
-                        <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed line-clamp-2">
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed line-clamp-2">
                           {ch.summary}
                         </p>
                       )}
@@ -375,17 +376,17 @@ export default function CourseClient({ initialData }) {
             {examEnabled ? (
               <Link
                 href={`/courses/${activeCourseSlug}/final-exam`}
-                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-blue-500/5 hover:from-blue-500/10 hover:to-purple-500/10 border border-blue-500/30 transition-all duration-200"
+                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-blue-500/5 hover:from-blue-500/10 hover:to-purple-500/10 transition-colors duration-200"
               >
                 <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/25">
+                  <div className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/25">
                     <GraduationCap className="w-5 h-5" />
                   </div>
                   <div>
                     <h3 className="font-outfit font-extrabold text-base sm:text-lg text-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                       Final Exam - Certification Test
                     </h3>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-medium">
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 font-medium">
                       {examSettings.questionCount || 20} questions ·{" "}
                       {examSettings.durationMinutes || 30} minutes · Proctored ·
                       Earn your certificate
@@ -399,18 +400,18 @@ export default function CourseClient({ initialData }) {
               </Link>
             ) : (
               <div
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 sm:p-6 rounded-3xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 bg-zinc-50/50 dark:bg-zinc-900/60 opacity-80"
                 aria-disabled="true"
               >
                 <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-10 h-10 rounded-2xl bg-zinc-200 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center">
+                  <div className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-zinc-200 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center">
                     <GraduationCap className="w-5 h-5" />
                   </div>
                   <div>
                     <h3 className="font-outfit font-extrabold text-base text-zinc-500 dark:text-zinc-400">
                       Final Exam - Coming Soon
                     </h3>
-                    <p className="text-xs text-zinc-400 mt-1 font-medium">
+                    <p className="text-xs text-zinc-400 mt-0.5 font-medium">
                       The certification exam for this course is being prepared.
                     </p>
                   </div>

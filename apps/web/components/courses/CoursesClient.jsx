@@ -157,6 +157,11 @@ export default function CoursesClient({ initialCourses = [] }) {
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 pb-24 pt-24 sm:px-6 md:px-8">
+      <nav className="mb-7 flex items-center gap-2 text-xs font-bold text-zinc-400">
+        <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+        <span>/</span>
+        <span className="text-zinc-700 dark:text-zinc-200">Courses</span>
+      </nav>
       {/* Hero Banner Section */}
       <section className="rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 p-6 sm:p-10 shadow-xs">
         <div className="max-w-3xl">

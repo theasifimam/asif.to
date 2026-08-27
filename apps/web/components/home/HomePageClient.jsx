@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -8,6 +8,7 @@ import {
   BadgeCheck,
   BookOpen,
   BrainCircuit,
+  ChevronLeft,
   ChevronRight,
   Code2,
   FileCode,
@@ -119,6 +120,45 @@ export default function HomePageClient({
   initialArticles = [],
 }) {
   const [selectedTech, setSelectedTech] = useState(null);
+  const coursesScrollRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkCoursesScroll = useCallback(() => {
+    if (!coursesScrollRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = coursesScrollRef.current;
+    setCanScrollLeft(scrollLeft > 5);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
+  }, []);
+
+  useEffect(() => {
+    const el = coursesScrollRef.current;
+    if (!el) return;
+    checkCoursesScroll();
+    el.addEventListener("scroll", checkCoursesScroll, { passive: true });
+    window.addEventListener("resize", checkCoursesScroll);
+    return () => {
+      el.removeEventListener("scroll", checkCoursesScroll);
+      window.removeEventListener("resize", checkCoursesScroll);
+    };
+  }, [checkCoursesScroll]);
+
+  const scrollCourses = (direction) => {
+    if (!coursesScrollRef.current) return;
+    const { clientWidth } = coursesScrollRef.current;
+    const scrollAmount = Math.max(300, clientWidth * 0.75);
+    coursesScrollRef.current.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  };
+
+  const handleSelectTech = (techId) => {
+    setSelectedTech(techId);
+    if (coursesScrollRef.current) {
+      coursesScrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
+    }
+  };
 
   const { data: topicsResponse } = useGetPublicTopicsQuery(
     { limit: 12 },
@@ -269,22 +309,46 @@ export default function HomePageClient({
                 Explore Courses & Tracks
               </h2>
               <p className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                Pick a technology and follow step-by-step lessons from fundamentals to advanced patterns.
+                Pick a technology and follow step-by-step lessons from
+                fundamentals to advanced patterns.
               </p>
             </div>
-            <Link
-              href="/courses"
-              className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline shrink-0"
-            >
-              All Published Courses <ChevronRight className="w-4 h-4" />
-            </Link>
+
+            <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+              <Link
+                href="/courses"
+                className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                All Published Courses <ChevronRight className="w-4 h-4" />
+              </Link>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => scrollCourses("left")}
+                  disabled={!canScrollLeft}
+                  aria-label="Previous courses"
+                  className="flex h-8.5 w-8.5 items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 shadow-xs transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 cursor-pointer"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollCourses("right")}
+                  disabled={!canScrollRight}
+                  aria-label="Next courses"
+                  className="flex h-8.5 w-8.5 items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 shadow-xs transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 cursor-pointer"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Tech Stack Filters */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
             <button
               type="button"
-              onClick={() => setSelectedTech(null)}
+              onClick={() => handleSelectTech(null)}
               className={`h-9 shrink-0 rounded-full border px-4 text-[11px] font-black transition-all cursor-pointer ${
                 !selectedTech
                   ? "bg-blue-600 border-blue-600 text-white shadow-xs"
@@ -297,7 +361,7 @@ export default function HomePageClient({
               <button
                 key={tech.id}
                 type="button"
-                onClick={() => setSelectedTech(tech.id)}
+                onClick={() => handleSelectTech(tech.id)}
                 className={`h-9 shrink-0 rounded-full border px-4 text-[11px] font-black transition-all cursor-pointer ${
                   selectedTech === tech.id
                     ? "bg-blue-600 border-blue-600 text-white shadow-xs"
@@ -309,9 +373,12 @@ export default function HomePageClient({
             ))}
           </div>
 
-          {/* Compact Course Cards Grid */}
-          <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
-            {filteredCourses.slice(0, 3).map((course, idx) => {
+          {/* Compact Course Cards Horizontally Slidable */}
+          <div
+            ref={coursesScrollRef}
+            className="mt-3 flex gap-4 overflow-x-auto scroll-smooth scrollbar-none snap-x snap-mandatory py-1.5 -mx-1 px-1 min-w-0"
+          >
+            {filteredCourses.map((course, idx) => {
               const tech = TECH_STACKS.find(
                 (item) => item.id === course.techId,
               );
@@ -322,7 +389,7 @@ export default function HomePageClient({
               return (
                 <article
                   key={course._id || course.id}
-                  className="group flex flex-col justify-between rounded-3xl border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 p-4 sm:p-5 shadow-xs hover:shadow-md transition-all"
+                  className="group flex w-[285px] sm:w-[320px] md:w-[340px] shrink-0 snap-start flex-col justify-between rounded-3xl border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 p-4 sm:p-5 shadow-xs hover:shadow-md transition-all"
                 >
                   <div>
                     {course.thumbnail ? (
@@ -415,8 +482,8 @@ export default function HomePageClient({
               );
             })}
 
-            {/* 4th Catalog Pill Card */}
-            <article className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-blue-500/25 dark:border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/20 p-4 sm:p-5 shadow-xs hover:shadow-md hover:border-blue-500/50 transition-all duration-300">
+            {/* Catalog Pill Card */}
+            <article className="group relative flex w-[285px] sm:w-[320px] md:w-[340px] shrink-0 snap-start flex-col justify-between overflow-hidden rounded-3xl border border-blue-500/25 dark:border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/20 p-4 sm:p-5 shadow-xs hover:shadow-md hover:border-blue-500/50 transition-all duration-300">
               <div className="flex flex-col">
                 <div className="mb-3 flex items-center justify-between">
                   <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-xs">
@@ -483,10 +550,12 @@ export default function HomePageClient({
                 </span>
               </div>
               <h3 className="mt-2 text-xl sm:text-2xl font-black tracking-tight">
-                Don't just read code. <span className="text-blue-400">Run it live.</span>
+                Don't just read code.{" "}
+                <span className="text-blue-400">Run it live.</span>
               </h3>
               <p className="mt-2 text-xs leading-relaxed font-medium text-zinc-400">
-                Experiment instantly with HTML, CSS, JS, React and Next.js right inside your browser without configuration.
+                Experiment instantly with HTML, CSS, JS, React and Next.js right
+                inside your browser without configuration.
               </p>
 
               {/* Code Snippet Output Box */}
@@ -513,31 +582,33 @@ console.log(\`Mastering \${app}...\`);`}</pre>
 
           {/* Ecosystem Tools Bento Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {FEATURES.map(({ title, description, href, icon: Icon, accent }) => (
-              <Link
-                key={title}
-                href={title === "Course Exams" ? examHref : href}
-                className="group flex flex-col justify-between rounded-3xl border border-zinc-200/70 bg-white p-4 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/90"
-              >
-                <div>
-                  <span
-                    className={`flex h-9 w-9 items-center justify-center rounded-2xl ${accent}`}
-                  >
-                    <Icon className="h-4.5 w-4.5" />
+            {FEATURES.map(
+              ({ title, description, href, icon: Icon, accent }) => (
+                <Link
+                  key={title}
+                  href={title === "Course Exams" ? examHref : href}
+                  className="group flex flex-col justify-between rounded-3xl border border-zinc-200/70 bg-white p-4 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/90"
+                >
+                  <div>
+                    <span
+                      className={`flex h-9 w-9 items-center justify-center rounded-2xl ${accent}`}
+                    >
+                      <Icon className="h-4.5 w-4.5" />
+                    </span>
+                    <h4 className="mt-3 text-xs sm:text-sm font-black group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      {title}
+                    </h4>
+                    <p className="mt-1 text-[10px] sm:text-[11px] leading-relaxed font-medium text-zinc-500 dark:text-zinc-400 line-clamp-2">
+                      {description}
+                    </p>
+                  </div>
+                  <span className="mt-3 inline-flex items-center gap-1 text-[10px] font-black text-blue-600 dark:text-blue-400">
+                    Explore{" "}
+                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
                   </span>
-                  <h4 className="mt-3 text-xs sm:text-sm font-black group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {title}
-                  </h4>
-                  <p className="mt-1 text-[10px] sm:text-[11px] leading-relaxed font-medium text-zinc-500 dark:text-zinc-400 line-clamp-2">
-                    {description}
-                  </p>
-                </div>
-                <span className="mt-3 inline-flex items-center gap-1 text-[10px] font-black text-blue-600 dark:text-blue-400">
-                  Explore{" "}
-                  <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-                </span>
-              </Link>
-            ))}
+                </Link>
+              ),
+            )}
           </div>
         </section>
 
@@ -556,7 +627,8 @@ console.log(\`Mastering \${app}...\`);`}</pre>
                   Featured Guides & Concepts
                 </h2>
                 <p className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                  Focused conceptual guides, architecture breakdowns, and step-by-step topics.
+                  Focused conceptual guides, architecture breakdowns, and
+                  step-by-step topics.
                 </p>
               </div>
             </div>
@@ -571,7 +643,7 @@ console.log(\`Mastering \${app}...\`);`}</pre>
                     className="group flex flex-col justify-between overflow-hidden rounded-3xl border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 shadow-xs transition-all hover:-translate-y-0.5 hover:border-emerald-500/40 hover:shadow-md"
                   >
                     {/* Top Image Container with Dark Gradient & Overlay Title */}
-                    <div className="relative w-full aspect-[16/9.5] overflow-hidden bg-gradient-to-br from-emerald-950 via-zinc-900 to-black">
+                    <div className="relative w-full aspect-16/9.5 overflow-hidden bg-linear-to-br from-emerald-950 via-zinc-900 to-black">
                       {topic.image ? (
                         <Image
                           src={getImageUrl(topic.image)}
@@ -581,11 +653,11 @@ console.log(\`Mastering \${app}...\`);`}</pre>
                           unoptimized
                         />
                       ) : (
-                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/40 via-zinc-900 to-zinc-950" />
+                        <div className="absolute inset-0 bg-linear-to-br from-emerald-900/40 via-zinc-900 to-zinc-950" />
                       )}
 
                       {/* Dark Gradient Overlay for Maximum Text Readability */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/95 via-black/50 to-transparent pointer-events-none" />
 
                       {/* Top Badges Floating Over Image */}
                       <div className="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center gap-1.5 pointer-events-none">
@@ -595,7 +667,7 @@ console.log(\`Mastering \${app}...\`);`}</pre>
                             : "Guide"}
                         </span>
                         {topic.course?.title && (
-                          <span className="rounded-full bg-black/50 backdrop-blur-md px-2.5 py-0.5 text-[9px] font-bold text-white/90 border border-white/20 truncate max-w-[170px]">
+                          <span className="rounded-full bg-black/50 backdrop-blur-md px-2.5 py-0.5 text-[9px] font-bold text-white/90 border border-white/20 truncate max-w-42.5">
                             {topic.course.title}
                           </span>
                         )}
@@ -648,7 +720,6 @@ console.log(\`Mastering \${app}...\`);`}</pre>
           </section>
         )}
 
-
         {/* 3. INTERACTIVE BENTO SHOWCASE (PLAYGROUND + ENGINE) */}
         <section className="grid gap-4 md:grid-cols-[1.1fr_.9fr]">
           {/* Playground Bento Card */}
@@ -661,10 +732,12 @@ console.log(\`Mastering \${app}...\`);`}</pre>
                 </span>
               </div>
               <h3 className="mt-2 text-xl sm:text-2xl font-black tracking-tight">
-                Don't just read code. <span className="text-blue-400">Run it live.</span>
+                Don't just read code.{" "}
+                <span className="text-blue-400">Run it live.</span>
               </h3>
               <p className="mt-2 text-xs leading-relaxed font-medium text-zinc-400">
-                Experiment instantly with HTML, CSS, JS, React and Next.js right inside your browser without configuration.
+                Experiment instantly with HTML, CSS, JS, React and Next.js right
+                inside your browser without configuration.
               </p>
 
               {/* Code Snippet Output Box */}
@@ -691,31 +764,33 @@ console.log(\`Mastering \${app}...\`);`}</pre>
 
           {/* Ecosystem Tools Bento Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {FEATURES.map(({ title, description, href, icon: Icon, accent }) => (
-              <Link
-                key={title}
-                href={title === "Course Exams" ? examHref : href}
-                className="group flex flex-col justify-between rounded-3xl border border-zinc-200/70 bg-white p-4 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/90"
-              >
-                <div>
-                  <span
-                    className={`flex h-9 w-9 items-center justify-center rounded-2xl ${accent}`}
-                  >
-                    <Icon className="h-4.5 w-4.5" />
+            {FEATURES.map(
+              ({ title, description, href, icon: Icon, accent }) => (
+                <Link
+                  key={title}
+                  href={title === "Course Exams" ? examHref : href}
+                  className="group flex flex-col justify-between rounded-3xl border border-zinc-200/70 bg-white p-4 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/90"
+                >
+                  <div>
+                    <span
+                      className={`flex h-9 w-9 items-center justify-center rounded-2xl ${accent}`}
+                    >
+                      <Icon className="h-4.5 w-4.5" />
+                    </span>
+                    <h4 className="mt-3 text-xs sm:text-sm font-black group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      {title}
+                    </h4>
+                    <p className="mt-1 text-[10px] sm:text-[11px] leading-relaxed font-medium text-zinc-500 dark:text-zinc-400 line-clamp-2">
+                      {description}
+                    </p>
+                  </div>
+                  <span className="mt-3 inline-flex items-center gap-1 text-[10px] font-black text-blue-600 dark:text-blue-400">
+                    Explore{" "}
+                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
                   </span>
-                  <h4 className="mt-3 text-xs sm:text-sm font-black group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {title}
-                  </h4>
-                  <p className="mt-1 text-[10px] sm:text-[11px] leading-relaxed font-medium text-zinc-500 dark:text-zinc-400 line-clamp-2">
-                    {description}
-                  </p>
-                </div>
-                <span className="mt-3 inline-flex items-center gap-1 text-[10px] font-black text-blue-600 dark:text-blue-400">
-                  Explore{" "}
-                  <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-                </span>
-              </Link>
-            ))}
+                </Link>
+              ),
+            )}
           </div>
         </section>
 
@@ -734,7 +809,8 @@ console.log(\`Mastering \${app}...\`);`}</pre>
                   Featured Guides & Concepts
                 </h2>
                 <p className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                  Focused conceptual guides, architecture breakdowns, and step-by-step topics.
+                  Focused conceptual guides, architecture breakdowns, and
+                  step-by-step topics.
                 </p>
               </div>
             </div>
@@ -749,7 +825,7 @@ console.log(\`Mastering \${app}...\`);`}</pre>
                     className="group flex flex-col justify-between overflow-hidden rounded-3xl border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 shadow-xs transition-all hover:-translate-y-0.5 hover:border-emerald-500/40 hover:shadow-md"
                   >
                     {/* Top Image Container with Dark Gradient & Overlay Title */}
-                    <div className="relative w-full aspect-[16/9.5] overflow-hidden bg-gradient-to-br from-emerald-950 via-zinc-900 to-black">
+                    <div className="relative w-full aspect-16/9.5 overflow-hidden bg-linear-to-br from-emerald-950 via-zinc-900 to-black">
                       {topic.image ? (
                         <Image
                           src={getImageUrl(topic.image)}
@@ -759,11 +835,11 @@ console.log(\`Mastering \${app}...\`);`}</pre>
                           unoptimized
                         />
                       ) : (
-                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/40 via-zinc-900 to-zinc-950" />
+                        <div className="absolute inset-0 bg-linear-to-br from-emerald-900/40 via-zinc-900 to-zinc-950" />
                       )}
 
                       {/* Dark Gradient Overlay for Maximum Text Readability */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/95 via-black/50 to-transparent pointer-events-none" />
 
                       {/* Top Badges Floating Over Image */}
                       <div className="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center gap-1.5 pointer-events-none">
@@ -773,7 +849,7 @@ console.log(\`Mastering \${app}...\`);`}</pre>
                             : "Guide"}
                         </span>
                         {topic.course?.title && (
-                          <span className="rounded-full bg-black/50 backdrop-blur-md px-2.5 py-0.5 text-[9px] font-bold text-white/90 border border-white/20 truncate max-w-[170px]">
+                          <span className="rounded-full bg-black/50 backdrop-blur-md px-2.5 py-0.5 text-[9px] font-bold text-white/90 border border-white/20 truncate max-w-42.5">
                             {topic.course.title}
                           </span>
                         )}
@@ -829,7 +905,7 @@ console.log(\`Mastering \${app}...\`);`}</pre>
         {/* 5. INTERVIEW PREP & REVISION STICKINESS */}
         <section id="interview-prep" className="scroll-mt-24 space-y-6">
           {/* Interview Questions Showcase */}
-          <div className="rounded-3xl sm:rounded-[2.5rem] bg-gradient-to-br from-orange-500/10 via-rose-500/10 to-amber-500/10 p-5 sm:p-7 border border-orange-500/15 shadow-xs">
+          <div className="rounded-3xl sm:rounded-[2.5rem] bg-linear-to-br from-orange-500/10 via-rose-500/10 to-amber-500/10 p-5 sm:p-7 border border-orange-500/15 shadow-xs">
             <div className="mb-4">
               <div className="flex items-center gap-1.5 text-orange-600 dark:text-orange-400">
                 <MessageSquareText className="h-4 w-4" />
@@ -841,7 +917,8 @@ console.log(\`Mastering \${app}...\`);`}</pre>
                 Turn course knowledge into interview answers
               </h2>
               <p className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                Practice categorized questions, detailed answers, coding problems and real-world scenarios.
+                Practice categorized questions, detailed answers, coding
+                problems and real-world scenarios.
               </p>
             </div>
 
@@ -885,7 +962,7 @@ console.log(\`Mastering \${app}...\`);`}</pre>
             <div className="grid gap-3 sm:grid-cols-2">
               <Link
                 href="/quiz"
-                className="group rounded-3xl border border-blue-500/15 bg-gradient-to-br from-blue-600/10 to-indigo-600/5 p-5 transition-all hover:shadow-md"
+                className="group rounded-3xl border border-blue-500/15 bg-linear-to-br from-blue-600/10 to-indigo-600/5 p-5 transition-all hover:shadow-md"
               >
                 <div className="flex items-start justify-between">
                   <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-md shadow-blue-500/20">
@@ -895,13 +972,14 @@ console.log(\`Mastering \${app}...\`);`}</pre>
                 </div>
                 <h3 className="mt-4 text-base font-black">Practice Quizzes</h3>
                 <p className="mt-1 text-xs leading-relaxed font-medium text-zinc-500 dark:text-zinc-400">
-                  Quickly check concepts, find weak areas and revise before moving ahead.
+                  Quickly check concepts, find weak areas and revise before
+                  moving ahead.
                 </p>
               </Link>
 
               <Link
                 href={examHref}
-                className="group rounded-3xl border border-amber-500/15 bg-gradient-to-br from-amber-500/10 to-orange-500/5 p-5 transition-all hover:shadow-md"
+                className="group rounded-3xl border border-amber-500/15 bg-linear-to-br from-amber-500/10 to-orange-500/5 p-5 transition-all hover:shadow-md"
               >
                 <div className="flex items-start justify-between">
                   <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-md shadow-amber-500/20">
@@ -911,7 +989,8 @@ console.log(\`Mastering \${app}...\`);`}</pre>
                 </div>
                 <h3 className="mt-4 text-base font-black">Course Exams</h3>
                 <p className="mt-1 text-xs leading-relaxed font-medium text-zinc-500 dark:text-zinc-400">
-                  Finish a course, take its exam and demonstrate complete-course expertise.
+                  Finish a course, take its exam and demonstrate complete-course
+                  expertise.
                 </p>
               </Link>
             </div>
@@ -933,7 +1012,8 @@ console.log(\`Mastering \${app}...\`);`}</pre>
                   Latest Articles & System Design
                 </h2>
                 <p className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                  Technical analyses, architecture explorations, and system design writeups.
+                  Technical analyses, architecture explorations, and system
+                  design writeups.
                 </p>
               </div>
               <Link
@@ -959,7 +1039,7 @@ console.log(\`Mastering \${app}...\`);`}</pre>
                     className="group flex flex-col justify-between overflow-hidden rounded-3xl border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 shadow-xs transition-all hover:-translate-y-0.5 hover:border-purple-500/40 hover:shadow-md"
                   >
                     {/* Top Cover Image Box with Dark Gradient Overlay & Title */}
-                    <div className="relative w-full aspect-[16/9.5] overflow-hidden bg-gradient-to-br from-purple-950 via-zinc-900 to-black">
+                    <div className="relative w-full aspect-16/9.5 overflow-hidden bg-linear-to-br from-purple-950 via-zinc-900 to-black">
                       {article.image ? (
                         <Image
                           src={getImageUrl(article.image)}
@@ -969,11 +1049,11 @@ console.log(\`Mastering \${app}...\`);`}</pre>
                           unoptimized
                         />
                       ) : (
-                        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-zinc-900 to-zinc-950" />
+                        <div className="absolute inset-0 bg-linear-to-br from-purple-900/40 via-zinc-900 to-zinc-950" />
                       )}
 
                       {/* Dark Gradient Overlay for Maximum Text Contrast */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/95 via-black/50 to-transparent pointer-events-none" />
 
                       {/* Top Floating Badge */}
                       <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between pointer-events-none">
@@ -996,7 +1076,9 @@ console.log(\`Mastering \${app}...\`);`}</pre>
                         {article.subtitle ||
                           article.description ||
                           (article.content
-                            ? article.content.replace(/<[^>]*>?/gm, "").slice(0, 110)
+                            ? article.content
+                                .replace(/<[^>]*>?/gm, "")
+                                .slice(0, 110)
                             : `Deep dive technical analysis into ${article.title} on asif.to.`)}
                       </p>
 
@@ -1033,7 +1115,8 @@ console.log(\`Mastering \${app}...\`);`}</pre>
               Learn &rarr; Practice &rarr; Master
             </h2>
             <p className="mt-1 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-              From initial conceptual explanation to instant code execution, active flashcard revision, and interview readiness.
+              From initial conceptual explanation to instant code execution,
+              active flashcard revision, and interview readiness.
             </p>
           </div>
 
@@ -1068,7 +1151,8 @@ console.log(\`Mastering \${app}...\`);`}</pre>
                 Build real software engineering skills.
               </h2>
               <p className="mt-1 max-w-xl text-xs font-medium text-blue-100 leading-relaxed">
-                Learn the concept, run live code in the playground, test your recall with flashcards, and prepare for technical interviews.
+                Learn the concept, run live code in the playground, test your
+                recall with flashcards, and prepare for technical interviews.
               </p>
             </div>
             <a

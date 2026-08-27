@@ -205,7 +205,7 @@ export const createArticle = async (req, res) => {
 export const updateArticle = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, topic, status, seoTitle, seoDescription, keywords, canonicalUrl, type, techId, order, relatedCourses, relatedChapters, relatedQuestions } = req.body;
+    const { title, content, topic, status, seoTitle, seoDescription, keywords, canonicalUrl, type, techId, order, relatedCourses, relatedChapters, relatedQuestions, authorId } = req.body;
 
     const article = await Article.findById(id);
     if (!article) {
@@ -254,6 +254,11 @@ export const updateArticle = async (req, res) => {
 
     if (techId !== undefined) updateData.techId = techId;
     if (order !== undefined) updateData.order = Number(order) || 0;
+
+    // Super-admin only: re-assign the content author
+    if (authorId && req.user?.role === "super_admin") {
+      updateData.author = authorId;
+    }
 
     if (req.file) {
       // New image uploaded, delete old one and set new path

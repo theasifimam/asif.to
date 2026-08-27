@@ -6,15 +6,22 @@ const optionalUrl = (value) => {
 };
 
 export const authorIdentity = {
-  name: "Asif",
+  name: "Asif Imam",
   role: "Full-Stack JavaScript Developer",
   url: absoluteUrl("", "/asif"),
   image: "https://github.com/theasifimam.png",
   shortBio:
-    "Asif builds and maintains asif.to and writes practical Full-Stack JavaScript tutorials grounded in implementation, testing, and primary documentation.",
+    "Asif Imam builds and maintains asif.to and writes practical Full-Stack JavaScript tutorials grounded in implementation, testing, and primary documentation.",
   technologies: [
-    "JavaScript", "React.js", "Next.js", "Node.js", "Express.js",
-    "MongoDB", "Mongoose", "Redux Toolkit", "RTK Query",
+    "JavaScript",
+    "React.js",
+    "Next.js",
+    "Node.js",
+    "Express.js",
+    "MongoDB",
+    "Mongoose",
+    "Redux Toolkit",
+    "RTK Query",
   ],
   sameAs: [
     optionalUrl(process.env.NEXT_PUBLIC_AUTHOR_GITHUB_URL),

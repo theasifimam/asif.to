@@ -107,9 +107,10 @@ async function attachLearningAvailability(courseId, chapters = []) {
         reviseCount: Number(row.reviseCount || 0),
         practiceCount: Number(row.practiceCount || 0),
         build: Boolean(
-          build.enabled &&
-            (String(build.title || "").trim() ||
-              String(build.description || "").trim()),
+          (Array.isArray(chapter.codingProblems) && chapter.codingProblems.length) ||
+            (build.enabled &&
+              (String(build.title || "").trim() ||
+                String(build.description || "").trim())),
         ),
       },
     };
@@ -211,7 +212,7 @@ export const getCourseBySlug = async (req, res) => {
     })
       .sort({ order: 1 })
       // ASIF_COURSE_LEARNING_FLOW_V1:public-course-chapter-select
-.select("slug title summary order viewCount tryItChallenge relatedQuestions learningActivities")
+.select("slug title summary order viewCount tryItChallenge relatedQuestions learningActivities codingProblems._id")
       .lean();
 
     // ASIF_QUESTION_LEARNING_MAPPING_V1:course-response
@@ -271,7 +272,7 @@ export const getChapterBySlug = async (req, res) => {
       status: "published",
     })
       .sort({ order: 1 })
-      .select("slug title order")
+      .select("slug title order tryItChallenge learningActivities codingProblems._id")
       .lean();
 
     // ASIF_QUESTION_LEARNING_MAPPING_V1:chapter-response
@@ -577,6 +578,11 @@ export const updateCourse = async (req, res) => {
     }
     if (req.body.interviewKeywords !== undefined) updates.interviewKeywords = normalizeKeywords(req.body.interviewKeywords);
 
+    // Super-admin only: re-assign the course author
+    if (req.body.authorId && req.user?.role === "super_admin") {
+      updates.author = req.body.authorId;
+    }
+
     const currentCourse = await Course.findById(id).lean();
     if (!currentCourse) {
       return res
@@ -752,6 +758,8 @@ export const createChapter = async (req, res) => {
       codeSnippets,
       language,
       tryItChallenge,
+      codingProblems,
+      learningActivities,
       order,
       status,
       seoTitle,
@@ -814,6 +822,8 @@ export const createChapter = async (req, res) => {
       codeSnippets: codeSnippets || [],
       language: language || "javascript",
       tryItChallenge: tryItChallenge || "",
+      codingProblems: codingProblems || [],
+      learningActivities: learningActivities || {},
       seoTitle: seoTitle || "",
       seoDescription: seoDescription || "",
       keywords: normalizeKeywords(keywords),
@@ -853,6 +863,8 @@ export const updateChapter = async (req, res) => {
       "codeSnippets",
       "language",
       "tryItChallenge",
+      "codingProblems",
+      "learningActivities",
       "seoTitle",
       "seoDescription",
       "keywords",

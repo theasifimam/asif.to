@@ -1,6 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import AuthModal from "@/components/auth/AuthModal";
@@ -190,6 +191,11 @@ export default function LibraryPage() {
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
       <Header />
       <main className="mx-auto max-w-6xl px-4 pb-12 pt-24 sm:px-6">
+        <nav className="mb-7 flex items-center gap-2 text-xs font-bold text-zinc-400">
+          <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+          <span>/</span>
+          <span className="text-zinc-700 dark:text-zinc-200">Library</span>
+        </nav>
         <section className="relative overflow-hidden rounded-4xl sm:rounded-[2.5rem] border border-blue-200/80 bg-linear-to-br from-blue-600 via-blue-700 to-indigo-800 p-6 sm:p-10 text-white shadow-xl shadow-blue-500/10 dark:border-white/8 dark:bg-linear-to-br dark:from-[#11141f] dark:via-[#131728] dark:to-[#0f111a] dark:text-zinc-100 dark:shadow-2xl dark:shadow-black/60">
           <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-blue-400/20 dark:bg-blue-500/15 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-indigo-500/15 dark:bg-indigo-600/10 blur-3xl" />

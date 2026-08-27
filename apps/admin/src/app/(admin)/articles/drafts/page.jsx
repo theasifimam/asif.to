@@ -15,6 +15,7 @@ import {
   DraftDeleteDialog,
 } from "./components/DraftDialogs";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
+import { getImageUrl } from "@/lib/utils";
 
 export default function DraftsPage() {
   const [drafts, setDrafts] = useState([]);
@@ -28,11 +29,7 @@ export default function DraftsPage() {
   const viewMode = urlFilters.view || "card";
   const setViewMode = (v) => setUrlFilters((current) => ({ ...current, view: v }));
 
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return "";
-    if (imagePath.startsWith("http")) return imagePath;
-    return `http://localhost:5000${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
-  };
+
 
   const fetchDrafts = useCallback(async () => {
     setLoading(true);

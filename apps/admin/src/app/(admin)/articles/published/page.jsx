@@ -15,6 +15,7 @@ import ArticleDeleteDialog from "./components/ArticleDeleteDialog";
 import { AdminPage } from "@/components/admin";
 import ArticleMetrics from "./components/ArticleMetrics";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
+import { getImageUrl } from "@/lib/utils";
 
 export default function PublishedPage() {
   const [articles, setArticles] = useState([]);
@@ -35,18 +36,7 @@ export default function PublishedPage() {
   const [statusFilter, setStatusFilter] = useState("all"); // 'all' | 'published' | 'draft'
   const [searchQuery, setSearchQuery] = useState("");
 
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return "";
-    if (imagePath.startsWith("http") || imagePath.startsWith("data:")) return imagePath;
-    let clean = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
-    if (!clean.startsWith("/uploads/")) {
-      if (clean.startsWith("/article-")) clean = `/uploads/articles${clean}`;
-      else if (clean.startsWith("/avatar-")) clean = `/uploads/avatars${clean}`;
-      else clean = `/uploads${clean}`;
-    }
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL ? process.env.NEXT_PUBLIC_API_URL.split('/api/v1')[0].replace(/\/$/, '') : "http://localhost:5000";
-    return `${baseUrl}${clean}`;
-  };
+
 
   const fetchArticles = useCallback(async () => {
     setLoading(true);

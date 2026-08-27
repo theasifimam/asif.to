@@ -223,12 +223,18 @@ const toggleChapterComplete = async () => {
             <StandaloneCodeSnippets
               standaloneSnippets={standaloneSnippets}
               techName={tech?.name}
+              chapterSlug={chapter.slug}
             />
             {/* Contextual learning activities */}
             <ChapterLearningLoop
               courseSlug={activeCourseSlug}
               chapter={chapter}
+              chapterIndex={currentChapterIndex}
+              standaloneSnippets={standaloneSnippets}
               progress={currentProgress}
+              onStageComplete={(stage, options) =>
+                courseProgress.markStage(chapter, stage, options)
+              }
             />
             <AuthorIdentityCard
               author={chapter?.author || course?.author}

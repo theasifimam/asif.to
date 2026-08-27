@@ -144,14 +144,16 @@ export async function apiPatch(endpoint, body) {
 /**
  * Generic DELETE request
  */
-export async function apiDelete(endpoint) {
+export async function apiDelete(endpoint, body) {
   try {
     const response = await fetch(buildUrl(endpoint), {
       method: "DELETE",
       headers: {
         ...getAuthHeaders(),
+        ...(body ? { "Content-Type": "application/json" } : {}),
         "ngrok-skip-browser-warning": "true",
       },
+      body: body ? JSON.stringify(body) : undefined,
       credentials: "include",
     });
     return handleResponse(response);
@@ -165,12 +167,23 @@ export async function apiDelete(endpoint) {
 
 export async function apiPostFormData(endpoint, formData) {
   try {
-    const headers = { ...getAuthHeaders(), "ngrok-skip-browser-warning": "true" };
+    const headers = {
+      ...getAuthHeaders(),
+      "ngrok-skip-browser-warning": "true",
+    };
     delete headers["Content-Type"];
-    const response = await fetch(buildUrl(endpoint), { method: "POST", headers, body: formData, credentials: "include" });
+    const response = await fetch(buildUrl(endpoint), {
+      method: "POST",
+      headers,
+      body: formData,
+      credentials: "include",
+    });
     return handleResponse(response);
   } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : "Network error" };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Network error",
+    };
   }
 }
 
@@ -187,6 +200,11 @@ export const dashboardApi = {
   getEngagementStats: () => apiGet("/admin/dashboard/engagement"),
   getGrowthStats: () => apiGet("/admin/dashboard/growth"),
   getLogs: () => apiGet("/admin/logs"),
+};
+
+export const mediaAuditApi = {
+  list: () => apiGet("/media-audit"),
+  deleteOrphan: (path) => apiDelete("/media-audit/file", { path }),
 };
 
 /**
@@ -340,8 +358,8 @@ export const topicCategoriesApi = {
       ? typeof course === "object"
         ? course
         : course !== "all"
-        ? { course }
-        : {}
+          ? { course }
+          : {}
       : {};
     return apiGet(`/topic-categories?${new URLSearchParams(params)}`);
   },
@@ -360,8 +378,7 @@ export const deletionApi = {
     apiGet(`/deletion-requests/${entityModel}/${entityId}/deletion-impact`),
   beginDeletion: (entityModel, entityId, data) =>
     apiPost(`/deletion-requests/${entityModel}/${entityId}/begin`, data),
-  getDeletionRequest: (requestId) =>
-    apiGet(`/deletion-requests/${requestId}`),
+  getDeletionRequest: (requestId) => apiGet(`/deletion-requests/${requestId}`),
   verifyDeletionInitiator: (requestId, otp) =>
     apiPost(`/deletion-requests/${requestId}/verify-initiator`, { otp }),
   sendDeletionApprovalOtp: (requestId) =>
@@ -494,28 +511,42 @@ export const kanbanApi = {
   createBoard: (data) => apiPost("/kanban/boards", data),
   updateBoard: (id, data) => apiPatch(`/kanban/boards/${id}`, data),
   deleteBoard: (id) => apiDelete(`/kanban/boards/${id}`),
-  createColumn: (boardId, data) => apiPost(`/kanban/boards/${boardId}/columns`, data),
+  createColumn: (boardId, data) =>
+    apiPost(`/kanban/boards/${boardId}/columns`, data),
   updateColumn: (id, data) => apiPatch(`/kanban/columns/${id}`, data),
   archiveColumn: (id) => apiDelete(`/kanban/columns/${id}`),
-  reorderColumns: (boardId, items) => apiPatch(`/kanban/boards/${boardId}/columns/reorder`, { items }),
-  createLabel: (boardId, data) => apiPost(`/kanban/boards/${boardId}/labels`, data),
-  createCard: (boardId, data) => apiPost(`/kanban/boards/${boardId}/cards`, data),
+  reorderColumns: (boardId, items) =>
+    apiPatch(`/kanban/boards/${boardId}/columns/reorder`, { items }),
+  createLabel: (boardId, data) =>
+    apiPost(`/kanban/boards/${boardId}/labels`, data),
+  createCard: (boardId, data) =>
+    apiPost(`/kanban/boards/${boardId}/cards`, data),
   updateCard: (id, data) => apiPatch(`/kanban/cards/${id}`, data),
-  reorderCards: (boardId, items) => apiPatch(`/kanban/boards/${boardId}/cards/reorder`, { items }),
+  reorderCards: (boardId, items) =>
+    apiPatch(`/kanban/boards/${boardId}/cards/reorder`, { items }),
   duplicateCard: (id) => apiPost(`/kanban/cards/${id}/duplicate`),
   deleteCard: (id) => apiDelete(`/kanban/cards/${id}`),
 };
 
 export const analyticsApi = {
-  simpleOverview: (params) => apiGet(`/analytics/simple/overview?${new URLSearchParams(params)}`),
-  acquisition: (params) => apiGet(`/analytics/simple/acquisition?${new URLSearchParams(params)}`),
-  localContent: (params) => apiGet(`/analytics/simple/content?${new URLSearchParams(params)}`),
-  locations: (params) => apiGet(`/analytics/simple/locations?${new URLSearchParams(params)}`),
-  devices: (params) => apiGet(`/analytics/simple/devices?${new URLSearchParams(params)}`),
-  overview: (params) => apiGet(`/analytics/overview?${new URLSearchParams(params)}`),
-  search: (type, params) => apiGet(`/analytics/search/${type}?${new URLSearchParams(params)}`),
-  content: (params) => apiGet(`/analytics/content?${new URLSearchParams(params)}`),
-  sources: (params) => apiGet(`/analytics/sources?${new URLSearchParams(params)}`),
+  simpleOverview: (params) =>
+    apiGet(`/analytics/simple/overview?${new URLSearchParams(params)}`),
+  acquisition: (params) =>
+    apiGet(`/analytics/simple/acquisition?${new URLSearchParams(params)}`),
+  localContent: (params) =>
+    apiGet(`/analytics/simple/content?${new URLSearchParams(params)}`),
+  locations: (params) =>
+    apiGet(`/analytics/simple/locations?${new URLSearchParams(params)}`),
+  devices: (params) =>
+    apiGet(`/analytics/simple/devices?${new URLSearchParams(params)}`),
+  overview: (params) =>
+    apiGet(`/analytics/overview?${new URLSearchParams(params)}`),
+  search: (type, params) =>
+    apiGet(`/analytics/search/${type}?${new URLSearchParams(params)}`),
+  content: (params) =>
+    apiGet(`/analytics/content?${new URLSearchParams(params)}`),
+  sources: (params) =>
+    apiGet(`/analytics/sources?${new URLSearchParams(params)}`),
   page: (params) => apiGet(`/analytics/page?${new URLSearchParams(params)}`),
   sync: () => apiPost("/analytics/sync"),
   platform: () => apiGet("/analytics/platform"),
@@ -536,45 +567,89 @@ export const playgroundSettingsApi = {
 
 export const activityApi = {
   list: (params = {}) => apiGet(`/activity?${new URLSearchParams(params)}`),
-  notifications: (params = {}) => apiGet(`/activity/notifications?${new URLSearchParams(params)}`),
+  notifications: (params = {}) =>
+    apiGet(`/activity/notifications?${new URLSearchParams(params)}`),
   markRead: (id) => apiPatch(`/activity/notifications/${id}/read`),
   markAllRead: () => apiPatch("/activity/notifications/read-all"),
 };
 
 export const messagingApi = {
-  conversations: (params = {}) => apiGet(`/messaging/conversations?${new URLSearchParams(params)}`),
-  team: (params = {}) => apiGet(`/messaging/team?${new URLSearchParams(params)}`),
+  conversations: (params = {}) =>
+    apiGet(`/messaging/conversations?${new URLSearchParams(params)}`),
+  team: (params = {}) =>
+    apiGet(`/messaging/team?${new URLSearchParams(params)}`),
   startDirect: (userId) => apiPost("/messaging/direct", { userId }),
-  messages: (conversationId, params = {}) => apiGet(`/messaging/conversations/${conversationId}/messages?${new URLSearchParams(params)}`),
-  send: (conversationId, content, clientId, options = {}) => apiPost(`/messaging/conversations/${conversationId}/messages`, { content, clientId, ...options }),
-  markRead: (conversationId) => apiPatch(`/messaging/conversations/${conversationId}/read`),
+  messages: (conversationId, params = {}) =>
+    apiGet(
+      `/messaging/conversations/${conversationId}/messages?${new URLSearchParams(params)}`,
+    ),
+  send: (conversationId, content, clientId, options = {}) =>
+    apiPost(`/messaging/conversations/${conversationId}/messages`, {
+      content,
+      clientId,
+      ...options,
+    }),
+  markRead: (conversationId) =>
+    apiPatch(`/messaging/conversations/${conversationId}/read`),
   unread: () => apiGet("/messaging/unread"),
-  discussion: (entityType, entityId) => apiPost("/messaging/discussions", { entityType, entityId }),
-  members: (conversationId, search = "") => apiGet(`/messaging/conversations/${conversationId}/members?${new URLSearchParams(search ? { search } : {})}`),
-  edit: (messageId, content) => apiPatch(`/messaging/messages/${messageId}`, { content }),
+  discussion: (entityType, entityId) =>
+    apiPost("/messaging/discussions", { entityType, entityId }),
+  members: (conversationId, search = "") =>
+    apiGet(
+      `/messaging/conversations/${conversationId}/members?${new URLSearchParams(search ? { search } : {})}`,
+    ),
+  edit: (messageId, content) =>
+    apiPatch(`/messaging/messages/${messageId}`, { content }),
   delete: (messageId) => apiDelete(`/messaging/messages/${messageId}`),
-  react: (messageId, emoji) => apiPost(`/messaging/messages/${messageId}/reaction`, { emoji }),
+  react: (messageId, emoji) =>
+    apiPost(`/messaging/messages/${messageId}/reaction`, { emoji }),
   pin: (messageId) => apiPost(`/messaging/messages/${messageId}/pin`),
-  pins: (conversationId) => apiGet(`/messaging/conversations/${conversationId}/pins`),
-  search: (params) => apiGet(`/messaging/search?${new URLSearchParams(params)}`),
+  pins: (conversationId) =>
+    apiGet(`/messaging/conversations/${conversationId}/pins`),
+  search: (params) =>
+    apiGet(`/messaging/search?${new URLSearchParams(params)}`),
   context: (messageId) => apiGet(`/messaging/messages/${messageId}/context`),
-  upload: (conversationId, files, onProgress) => new Promise((resolve) => {
-    const fileList = Array.isArray(files) ? files : Array.from(files || []);
-    const request = new XMLHttpRequest();
-    request.open("POST", buildUrl(`/messaging/conversations/${conversationId}/attachments`));
-    const token = getAuthHeaders().Authorization;
-    if (token) request.setRequestHeader("Authorization", token);
-    request.setRequestHeader("ngrok-skip-browser-warning", "true");
-    request.withCredentials = true;
-    request.upload.onprogress = (event) => event.lengthComputable && onProgress?.(Math.round((event.loaded / event.total) * 100));
-    request.onload = () => { try { const data = JSON.parse(request.responseText); resolve(request.status >= 200 && request.status < 300 ? { success: true, data } : { success: false, error: data.message || "Upload failed" }); } catch { resolve({ success: false, error: "Upload failed" }); } };
-    request.onerror = () => resolve({ success: false, error: "Upload failed" });
-    const form = new FormData();
-    fileList.forEach((file) => form.append("files", file));
-    request.send(form);
-  }),
+  upload: (conversationId, files, onProgress) =>
+    new Promise((resolve) => {
+      const fileList = Array.isArray(files) ? files : Array.from(files || []);
+      const request = new XMLHttpRequest();
+      request.open(
+        "POST",
+        buildUrl(`/messaging/conversations/${conversationId}/attachments`),
+      );
+      const token = getAuthHeaders().Authorization;
+      if (token) request.setRequestHeader("Authorization", token);
+      request.setRequestHeader("ngrok-skip-browser-warning", "true");
+      request.withCredentials = true;
+      request.upload.onprogress = (event) =>
+        event.lengthComputable &&
+        onProgress?.(Math.round((event.loaded / event.total) * 100));
+      request.onload = () => {
+        try {
+          const data = JSON.parse(request.responseText);
+          resolve(
+            request.status >= 200 && request.status < 300
+              ? { success: true, data }
+              : { success: false, error: data.message || "Upload failed" },
+          );
+        } catch {
+          resolve({ success: false, error: "Upload failed" });
+        }
+      };
+      request.onerror = () =>
+        resolve({ success: false, error: "Upload failed" });
+      const form = new FormData();
+      fileList.forEach((file) => form.append("files", file));
+      request.send(form);
+    }),
   attachmentBlob: async (attachmentId) => {
-    const response = await fetch(buildUrl(`/messaging/attachments/${attachmentId}`), { headers: { ...getAuthHeaders(), "ngrok-skip-browser-warning": "true" }, credentials: "include" });
+    const response = await fetch(
+      buildUrl(`/messaging/attachments/${attachmentId}`),
+      {
+        headers: { ...getAuthHeaders(), "ngrok-skip-browser-warning": "true" },
+        credentials: "include",
+      },
+    );
     if (!response.ok) throw new Error("Attachment unavailable");
     return response.blob();
   },
@@ -588,7 +663,8 @@ export const socialPostsApi = {
   update: (id, data) => apiPatch(`/social-posts/${id}`, data),
   duplicate: (id) => apiPost(`/social-posts/${id}/duplicate`),
   schedule: (id, data) => apiPost(`/social-posts/${id}/schedule`, data),
-  cancelPublication: (id, pubId) => apiPost(`/social-posts/${id}/publications/${pubId}/cancel`),
+  cancelPublication: (id, pubId) =>
+    apiPost(`/social-posts/${id}/publications/${pubId}/cancel`),
   uploadPublishingAssets: (id, files) => {
     const form = new FormData();
     Array.from(files || []).forEach((file) => form.append("files", file));
@@ -607,6 +683,7 @@ export const socialPostsApi = {
 export const socialIntegrationsApi = {
   list: () => apiGet("/social-integrations"),
   connect: (platform) => apiGet(`/social-integrations/${platform}/connect`),
-  selectFacebookPage: (pageId) => apiPatch("/social-integrations/facebook/account", { pageId }),
+  selectFacebookPage: (pageId) =>
+    apiPatch("/social-integrations/facebook/account", { pageId }),
   disconnect: (platform) => apiDelete(`/social-integrations/${platform}`),
 };

@@ -362,6 +362,10 @@ export const updateCourseTopic = async (req, res) => {
     topic.course = course._id;
     topic.category = category._id;
 
+    if (req.body.authorId && req.user?.role === "super_admin") {
+      topic.author = req.body.authorId;
+    }
+
     if (
       req.body.canonicalUrl !== undefined ||
       req.body.slug !== undefined ||

@@ -94,6 +94,7 @@ export const getQuizQuestions = async (req, res) => {
     const {
       courseId,
       chapterId,
+      throughChapterId,
       categoryId,
       difficulty,
       format = "quiz",
@@ -120,7 +121,7 @@ export const getQuizQuestions = async (req, res) => {
       }
       filter.courses = resolvedCourse;
     }
-    if (chapterId || categoryId) {
+    if (chapterId || throughChapterId || categoryId) {
       if (!resolvedCourse)
         return res.status(400).json({
           success: false,
@@ -139,6 +140,27 @@ export const getQuizQuestions = async (req, res) => {
           if (!ch) return res.json({ success: true, data: [] });
           elem.chapter = ch._id;
         }
+      } else if (throughChapterId) {
+        const throughChapter = await Chapter.findOne({
+          course: resolvedCourse,
+          status: "published",
+          ...(mongoose.isValidObjectId(throughChapterId)
+            ? { _id: throughChapterId }
+            : { slug: throughChapterId }),
+        })
+          .select("_id order")
+          .lean();
+        if (!throughChapter)
+          return res.json({ success: true, data: [] });
+
+        const learnedChapters = await Chapter.find({
+          course: resolvedCourse,
+          status: "published",
+          order: { $lte: throughChapter.order },
+        })
+          .select("_id")
+          .lean();
+        elem.chapter = { $in: learnedChapters.map((item) => item._id) };
       }
       if (categoryId) {
         if (mongoose.isValidObjectId(categoryId)) elem.category = categoryId;

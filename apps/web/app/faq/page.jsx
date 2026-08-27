@@ -235,6 +235,11 @@ export default function FAQPage() {
       )}
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 pt-20 sm:pt-28 pb-16 space-y-12">
+        <nav className="mb-7 flex items-center gap-2 text-xs font-bold text-zinc-400">
+          <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+          <span>/</span>
+          <span className="text-zinc-700 dark:text-zinc-200">FAQ</span>
+        </nav>
         {/* Hero Section */}
         <section className="text-center max-w-3xl mx-auto space-y-6 pt-6 sm:pt-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-widest">

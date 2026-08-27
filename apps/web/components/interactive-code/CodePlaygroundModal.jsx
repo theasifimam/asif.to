@@ -9,11 +9,15 @@ const LANGUAGE_ALIASES = {
   javascript: "javascript",
   jsx: "react",
   react: "react",
+  reactjs: "react",
+  "react.js": "react",
   ts: "typescript",
   typescript: "typescript",
   tsx: "react-typescript",
   html: "html",
+  html5: "html",
   css: "css",
+  css3: "css",
   next: "nextjs",
   "next.js": "nextjs",
   "next-js": "nextjs",
@@ -53,12 +57,26 @@ export function runnableLanguage(language = "javascript", code = "") {
   if (looksLikeNext) return "nextjs";
 
   const looksLikeReact =
-    /\b(import\s+.*from\s+["']react|use(State|Effect)|<[A-Z][\w.]*)/.test(code);
+    /\b(import\s+.*from\s+["']react|use(State|Effect|Ref|Context|Reducer|Memo|Callback)|<[A-Z][\w.]*|className=|style=\{\{|return\s*\(?\s*<[a-z]+)/i.test(code);
   if (["js", "javascript"].includes(cleanLanguage) && looksLikeReact) {
     return "react";
   }
+  
+  const looksLikeHtml = /^\s*(<!doctype html>|<html|<body|<\/?div|<\/?h[1-6])/i.test(code);
+  if (["js", "javascript", ""].includes(cleanLanguage) && looksLikeHtml) {
+    return "html";
+  }
+
+  const looksLikeCss = /^[^{]+\s*\{\s*[a-z-]+\s*:/i.test(code);
+  if (["js", "javascript", ""].includes(cleanLanguage) && looksLikeCss) {
+    return "css";
+  }
+
   if (LANGUAGE_ALIASES[cleanLanguage]) return LANGUAGE_ALIASES[cleanLanguage];
   if (looksLikeReact) return "react";
+  if (looksLikeHtml) return "html";
+  if (looksLikeCss) return "css";
+  
   return "javascript";
 }
 

@@ -196,6 +196,13 @@ const NAV_ITEMS = [
         permission: "settings.manage",
         description: "Policies & documentation",
       },
+      {
+        name: "Media Audit",
+        href: "/media-audit",
+        icon: Image,
+        permission: "settings.manage",
+        description: "Review uploaded and orphaned images",
+      },
     ],
   },
 ];

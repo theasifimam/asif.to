@@ -26,7 +26,7 @@ export function normalizeFiles(language, code, files) {
     normalized["/index.html"] = html;
   }
   if (normalized) return normalized;
-  if (language === "react") return { "/App.js": code || "" };
+  if (language === "react") return { "/App.jsx": code || "" };
   if (language === "typescript") return { "/index.ts": code || "" };
   if (language === "react-typescript") return { "/App.tsx": code || "" };
   if (language === "nextjs") return { "/pages/index.js": code || "" };

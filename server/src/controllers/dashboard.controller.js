@@ -4,6 +4,7 @@ import Topic from "../models/Topic.js";
 import Course from "../models/Course.js";
 import Chapter from "../models/Chapter.js";
 import QuizQuestion from "../models/Question.js";
+import AnalyticsDaily from "../models/AnalyticsDaily.js";
 
 /**
  * Get dashboard overview stats with REAL chapter readership captured from web apps
@@ -26,6 +27,13 @@ export const getDashboardStats = async (req, res) => {
       { $group: { _id: null, totalViews: { $sum: "$viewCount" } } },
     ]);
     const realTotalCourseReads = realTotalViewsAggregation[0]?.totalViews || 0;
+
+    // Site-wide page visits recorded by the first-party web tracker. Each
+    // tracker pageview increments this counter once, including non-chapter pages.
+    const siteVisitsAggregation = await AnalyticsDaily.aggregate([
+      { $group: { _id: null, totalVisits: { $sum: "$pageViews" } } },
+    ]);
+    const totalSiteVisits = siteVisitsAggregation[0]?.totalVisits || 0;
 
     // Aggregate real viewCount per course
     const courseViewStats = await Chapter.aggregate([
@@ -167,6 +175,13 @@ export const getDashboardStats = async (req, res) => {
     // 5. Stat Cards for Header Grid
     const stats = [
       {
+        label: "Total Site Visits",
+        value: totalSiteVisits.toLocaleString(),
+        trend: "All time",
+        icon: "TrendingUp",
+        description: "One count for every tracked page visit",
+      },
+      {
         label: "Total Course Reads",
         value: formatCount(realTotalCourseReads),
         trend: realTotalCourseReads > 0 ? "+34.2% MoM" : "Live Capture",
@@ -213,6 +228,7 @@ export const getDashboardStats = async (req, res) => {
           cheatsheets: totalCheatsheets,
           articles: totalArticles,
           totalRealViews: realTotalCourseReads,
+          totalSiteVisits,
         },
       },
     });

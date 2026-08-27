@@ -14,6 +14,7 @@ import {
   Info,
   ListTodo,
   PenSquare,
+  Tag,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -217,7 +218,7 @@ export default function DashboardPage() {
             Creator Dashboard
           </p>
 
-          <h1 className="mt-1 tracking-tight flex flex-wrap items-baseline gap-x-2">
+          <h1 className="mt-1 tracking-tight flex flex-col items-start gap-y-1">
             <span className="text-2xl sm:text-4xl md:text-5xl font-black text-zinc-950 dark:text-white">
               Welcome back,
             </span>
@@ -302,33 +303,49 @@ export default function DashboardPage() {
           </div>
         ) : plannerTasks.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-            {plannerTasks.slice(0, 3).map((task) => (
-              <Link
-                key={task._id || task.id}
-                href="/planner"
-                className="flex flex-col justify-between p-3 rounded-2xl bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800 hover:border-blue-400 dark:hover:border-blue-500/50 transition-all shadow-xs group"
-              >
-                <div className="flex items-start justify-between gap-2 mb-1.5">
-                  <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
-                    {task.type || "Task"}
-                  </span>
-                  {task.priority && (
-                    <span
-                      className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${
-                        task.priority === "high" || task.priority === "urgent"
-                          ? "bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"
-                          : "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
-                      }`}
-                    >
-                      {task.priority}
+            {plannerTasks.slice(0, 3).map((task) => {
+              let priorityColorClass = "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
+              let dotColorClass = "bg-zinc-400";
+              if (task.priority === "urgent" || task.priority === "high") {
+                priorityColorClass = "bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300";
+                dotColorClass = "bg-rose-500";
+              } else if (task.priority === "medium") {
+                priorityColorClass = "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300";
+                dotColorClass = "bg-amber-500";
+              } else if (task.priority === "low") {
+                priorityColorClass = "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300";
+                dotColorClass = "bg-emerald-500";
+              }
+
+              return (
+                <Link
+                  key={task._id || task.id}
+                  href="/planner"
+                  className="flex flex-col justify-between p-3.5 rounded-2xl bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500/50 hover:shadow-md dark:hover:shadow-blue-500/5 transition-all duration-300 group"
+                >
+                  <div className="flex gap-2.5 items-start">
+                    <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-zinc-300 dark:border-zinc-700 group-hover:border-blue-500 dark:group-hover:border-blue-400 group-hover:bg-blue-50/30 dark:group-hover:bg-blue-500/10 transition-all mt-0.5">
+                      <div className="h-1.5 w-1.5 rounded-full bg-transparent group-hover:bg-blue-500 dark:group-hover:bg-blue-400 transition-colors" />
+                    </div>
+                    <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 line-clamp-2 leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      {task.title}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between gap-2 mt-3 pt-2.5 border-t border-zinc-100 dark:border-zinc-800/80">
+                    <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase text-zinc-500 dark:text-zinc-400">
+                      <Tag className="w-2.5 h-2.5 text-zinc-400 dark:text-zinc-500" />
+                      {task.type || "Task"}
                     </span>
-                  )}
-                </div>
-                <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                  {task.title}
-                </p>
-              </Link>
-            ))}
+                    {task.priority && (
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${priorityColorClass}`}>
+                        <span className={`w-1 h-1 rounded-full ${dotColorClass}`} />
+                        {task.priority}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         ) : (
           <div className="p-3.5 rounded-2xl bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800 text-xs font-medium text-zinc-500 dark:text-zinc-400">
@@ -338,7 +355,7 @@ export default function DashboardPage() {
       </section>
 
       {/* Bento Metric Cards Grid - 2 columns on mobile */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3">
+      <section className="grid grid-cols-2 lg:grid-cols-5 gap-2 lg:gap-3">
         {visibleStats.map((stat, i) => {
           const StatIcon = ICON_MAP[stat.icon] || BookOpen;
           const theme = STAT_THEMES[stat.icon] || DEFAULT_STAT_THEME;

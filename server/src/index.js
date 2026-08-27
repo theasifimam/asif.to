@@ -27,6 +27,7 @@ import playgroundSettingRoutes from "./routes/playgroundSetting.routes.js";
 import libraryRoutes from "./routes/library.routes.js";
 import activityRoutes from "./routes/activity.routes.js";
 import messagingRoutes from "./routes/messaging.routes.js";
+import mediaAuditRoutes from "./routes/mediaAudit.routes.js";
 import relatedContentRoutes from "./routes/relatedContent.routes.js";
 // ASIF_LEARNING_JOURNEY_V1:server-import
 
@@ -82,6 +83,7 @@ app.get("/health", (req, res) => {
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/admin/users", userRoutes);
 app.use("/api/v1/articles", articleRoutes);
 app.use("/api/v1/article-topics", articleTopicRoutes);
 app.use("/api/v1/topics", topicRoutes);
@@ -105,6 +107,7 @@ app.use("/api/v1/playground-settings", playgroundSettingRoutes);
 app.use("/api/v1/library", libraryRoutes);
 app.use("/api/v1/activity", activityRoutes);
 app.use("/api/v1/messaging", messagingRoutes);
+app.use("/api/v1/media-audit", mediaAuditRoutes);
 app.use("/api/v1/related-content", relatedContentRoutes);
 // ASIF_LEARNING_JOURNEY_V1:server-mount
 

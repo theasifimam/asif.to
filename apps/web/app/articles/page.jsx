@@ -1,6 +1,7 @@
 "use client";
 
 import Header from "@/components/layout/Header";
+import Link from "next/link";
 import Footer from "@/components/layout/Footer";
 import ArticleCard from "@/components/articles/ArticleCard";
 import { useGetArticlesQuery } from "@/lib/api/articlesApi";
@@ -29,7 +30,15 @@ export default function ArticlesPage() {
       <Header />
 
       <main className="flex-1 w-full flex flex-col pt-24 md:pt-28 pb-24">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-12 w-full">
+        <div className="max-w-350 mx-auto px-6 lg:px-12 w-full">
+          <nav className="mb-7 flex items-center gap-2 text-xs font-bold text-zinc-400">
+            <Link href="/" className="hover:text-blue-600 transition-colors">
+              Home
+            </Link>
+            <span>/</span>
+            <span className="text-zinc-700 dark:text-zinc-200">Articles</span>
+          </nav>
+
           {/* Dateline Subheader */}
           <div className="flex items-center justify-between pb-4 mb-8 border-b border-zinc-200/60 dark:border-zinc-800/60 text-[10px] font-black uppercase tracking-[0.25em] text-zinc-400">
             <div className="flex items-center gap-3">

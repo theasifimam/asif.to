@@ -3,7 +3,28 @@
 import { Sparkles, Lightbulb } from "lucide-react";
 import CodeSnippetViewer from "@/components/articles/CodeSnippetViewer";
 import InteractiveCode from "@/components/interactive-code";
+import { runnableLanguage } from "@/components/interactive-code/CodePlaygroundModal";
 import { renderInlineFormatting } from "./chapterUtils";
+
+const EDITABLE_LANGUAGES = new Set([
+  "js",
+  "javascript",
+  "jsx",
+  "react",
+  "ts",
+  "typescript",
+  "tsx",
+  "html",
+  "css",
+  "next",
+  "nextjs",
+  "py",
+  "python",
+  "c",
+  "cpp",
+  "c++",
+  "java",
+]);
 
 export default function ChapterBlocksRenderer({
   chapter,
@@ -89,13 +110,19 @@ export default function ChapterBlocksRenderer({
           );
         }
         if (block.type === "code") {
-          if (block.interactive) {
+          const rawLanguage = String(block.lang || "javascript")
+            .toLowerCase()
+            .replace(/^language-/, "")
+            .trim();
+          if (block.interactive || EDITABLE_LANGUAGES.has(rawLanguage)) {
             return (
               <div key={idx} className="my-5 sm:my-8">
                 <InteractiveCode
-                  language={block.lang}
+                  language={runnableLanguage(block.lang, block.code)}
                   code={block.code}
                   title={block.title}
+                  playgroundId={`${chapter.slug}-content-example-${idx + 1}`}
+                  compact
                 />
               </div>
             );

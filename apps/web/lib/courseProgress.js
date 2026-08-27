@@ -25,14 +25,16 @@ export const chapterAvailability = (chapter) => {
       mapped.build !== undefined
         ? Boolean(mapped.build)
         : Boolean(
-            build.enabled &&
-            (String(build.title || "").trim() ||
-              String(build.description || "").trim()),
+            (Array.isArray(chapter?.codingProblems) &&
+              chapter.codingProblems.length) ||
+              (build.enabled &&
+                (String(build.title || "").trim() ||
+                  String(build.description || "").trim())),
           ),
   };
 };
 
-function readLocal(courseSlug, chapters = []) {
+function readLocal(courseSlug) {
   if (typeof window === "undefined" || !courseSlug) return { chapters: {} };
   try {
     const raw = localStorage.getItem(localKey(courseSlug));
@@ -43,7 +45,7 @@ function readLocal(courseSlug, chapters = []) {
         return parsed;
       }
     }
-  } catch (e) {
+  } catch {
     // Ignore parse errors
   }
   return { chapters: {} };
@@ -124,7 +126,6 @@ function localSummary(courseSlug, chapters = []) {
       (name) =>
         target.availability[name] && !satisfied(name, target.stages[name]),
     );
-    const id = asId(target.chapter._id);
     if (stage)
       nextAction = {
         stage,
@@ -305,7 +306,8 @@ export function useCourseProgress(courseSlug, chapters = []) {
     setState({ ...next, loading: false });
   }, [courseSlug, stableChapters]);
   useEffect(() => {
-    refresh();
+    const timer = window.setTimeout(refresh, 0);
+    return () => window.clearTimeout(timer);
   }, [refresh]);
   useEffect(() => {
     const handler = (event) => {

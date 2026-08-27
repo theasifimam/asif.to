@@ -147,8 +147,8 @@ body {
 }
 
 ::selection {
-  background: #18181b;
-  color: #ffffff;
+  background: var(--m3-primary, #2563eb);
+  color: var(--m3-on-primary, #ffffff);
 }
 
 /* Safely override fixed inline styles from pastes without breaking special components */

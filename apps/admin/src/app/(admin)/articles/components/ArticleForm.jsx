@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ImagePlus, Save, Send, X } from "lucide-react";
+import { ArrowLeft, ImagePlus, RefreshCw, Save, Send, UserPen, X } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
@@ -15,7 +15,9 @@ import AdminFormShell, {
 } from "@/components/forms/AdminFormShell";
 import DiscussButton from "@/components/messaging/DiscussButton";
 import { CanonicalUrlInput } from "@/components/admin";
-import { articlesApi, articleTopicsApi, coursesApi } from "@/lib/api";
+import { articlesApi, articleTopicsApi, coursesApi, usersApi } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { getImageUrl } from "@/lib/utils";
 import { Button, Input, Label, Textarea } from "@/components/ui";
 import {
   Select,
@@ -35,6 +37,10 @@ export default function ArticleForm({ articleId = null }) {
   const [saving, setSaving] = useState(false);
   const [topics, setTopics] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [overrideAuthorId, setOverrideAuthorId] = useState("");
+  const { user: currentAdminUser } = useAuth();
+  const isSuperAdmin = currentAdminUser?.role?.toLowerCase() === "super_admin";
   const [form, setForm] = useState({
     title: "",
     content: "",
@@ -52,15 +58,27 @@ export default function ArticleForm({ articleId = null }) {
 
   useEffect(() => {
     let active = true;
-    Promise.all([
+    const queries = [
       articleTopicsApi.list(),
       coursesApi.listAll(),
       articleId ? articlesApi.get(articleId) : Promise.resolve(null),
-    ]).then(([topicResponse, courseResponse, articleResponse]) => {
+    ];
+    if (isSuperAdmin) {
+      queries.push(usersApi.list({ limit: 100 }));
+    }
+    Promise.all(queries).then(([topicResponse, courseResponse, articleResponse, usersResponse]) => {
       if (!active) return;
       const topicData = topicResponse?.data?.data ?? topicResponse?.data ?? [];
       setTopics(Array.isArray(topicData) ? topicData : []);
       setCourses(courseResponse?.data?.data || []);
+      if (usersResponse?.success) {
+        const usersData =
+          usersResponse?.data?.data?.users ||
+          usersResponse?.data?.users ||
+          usersResponse?.data?.data ||
+          (Array.isArray(usersResponse?.data) ? usersResponse.data : []);
+        setAdminUsers(Array.isArray(usersData) ? usersData : []);
+      }
       if (articleResponse?.success) {
         const article = articleResponse.data?.data || articleResponse.data;
         setForm({
@@ -77,13 +95,10 @@ export default function ArticleForm({ articleId = null }) {
             typeof c === "object" ? c._id : c,
           ),
         });
-        setImagePreview(
-          article.image?.startsWith("http")
-            ? article.image
-            : article.image
-              ? `http://localhost:5000${article.image}`
-              : "",
-        );
+        // Pre-select the article's current author
+        const currentAuthorId = article.author?._id || article.author || "";
+        setOverrideAuthorId(String(currentAuthorId));
+        setImagePreview(getImageUrl(article.image));
       } else if (articleId)
         toast.error(articleResponse?.error || "Unable to load article");
       setLoading(false);
@@ -91,7 +106,7 @@ export default function ArticleForm({ articleId = null }) {
     return () => {
       active = false;
     };
-  }, [articleId]);
+  }, [articleId, isSuperAdmin]);
 
   const update = (key, value) =>
     setForm((current) => ({ ...current, [key]: value }));
@@ -119,7 +134,7 @@ export default function ArticleForm({ articleId = null }) {
     const data = new FormData();
     data.append("title", form.title);
     data.append("content", form.content);
-    data.append("status", status);
+    data.append("status", status || form.status || "draft");
     data.append("seoTitle", form.seoTitle);
     data.append("seoDescription", form.seoDescription);
     data.append("keywords", form.keywords);
@@ -127,6 +142,8 @@ export default function ArticleForm({ articleId = null }) {
     form.topics.forEach((topic) => data.append("topic", topic));
     (form.relatedCourses || []).forEach((c) => data.append("relatedCourses", c));
     if (imageFile) data.append("image", imageFile);
+    // Super-admin author override
+    if (isSuperAdmin && overrideAuthorId) data.append("authorId", overrideAuthorId);
     const response = articleId
       ? await articlesApi.update(articleId, data)
       : await articlesApi.create(data);
@@ -152,24 +169,36 @@ export default function ArticleForm({ articleId = null }) {
         </Link>
       }
       actions={
-        <div className="flex gap-2 w-full">
-          {articleId && <DiscussButton entityType="article" entityId={articleId} className="flex-1" />}
+        <>
+          {articleId && (
+            <DiscussButton entityType="article" entityId={articleId} />
+          )}
           <Button
             variant="outline"
             disabled={saving}
             onClick={() => persist("draft")}
-            className="flex-2"
+            className="flex-1 sm:flex-initial"
           >
-            <Save className="h-4 w-4" /> Draft
+            <Save className="mr-2 h-4 w-4" /> Save Draft
           </Button>
+          {articleId && (
+            <Button
+              disabled={saving}
+              onClick={() => persist(form.status)}
+              className="w-full sm:w-auto"
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${saving ? "animate-spin" : ""}`} /> Update
+            </Button>
+          )}
           <Button
+            variant={articleId ? "outline" : "default"}
             disabled={saving}
             onClick={() => persist("published")}
-            className="flex-1"
+            className="w-full sm:w-auto"
           >
-            <Send className="h-4 w-4" /> Publish
+            <Send className="mr-2 h-4 w-4" /> Publish
           </Button>
-        </div>
+        </>
       }
     >
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -315,6 +344,47 @@ export default function ArticleForm({ articleId = null }) {
               )}
             </div>
           </div>
+
+          {/* Super-admin author override */}
+          {isSuperAdmin && (
+            <div className={`${formAsideClass} border-2 border-dashed border-amber-300 dark:border-amber-700/50 bg-amber-50/40 dark:bg-amber-900/10`}>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-7 h-7 rounded-xl bg-amber-100 dark:bg-amber-500/15 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+                  <UserPen className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <h2 className="font-bold text-xs text-zinc-900 dark:text-white">
+                    Author Override
+                  </h2>
+                  <p className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">
+                    Super Admin only
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs">Assign Author</Label>
+                <Select
+                  value={overrideAuthorId}
+                  onValueChange={setOverrideAuthorId}
+                >
+                  <SelectTrigger className="h-10 w-full rounded-xl border-0 bg-white dark:bg-zinc-900 px-3 text-xs shadow-sm">
+                    <SelectValue placeholder="Select author..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {adminUsers.map((u) => (
+                      <SelectItem key={u._id} value={u._id}>
+                        <span className="font-medium">{u.fullName || u.name || u.username}</span>
+                        {u.email && <span className="ml-1 text-zinc-400 text-[10px]">({u.email})</span>}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {adminUsers.length === 0 && (
+                  <p className="text-[10px] text-zinc-400 italic">Loading users...</p>
+                )}
+              </div>
+            </div>
+          )}
           <div className={formAsideClass}>
             <h2 className="font-semibold text-zinc-900 dark:text-white">
               Search metadata

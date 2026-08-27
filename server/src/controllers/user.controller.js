@@ -44,7 +44,7 @@ export const getUsers = async (req, res) => {
       ];
       if (mongoose.isValidObjectId(search)) filter.$or.push({ _id: search });
     }
-    if (role) filter.role = role;
+    if (role && role !== "all") filter.role = role;
     if (status) filter.status = status;
     if (provider) filter.provider = provider;
     if (verified === "true" || verified === "false") {

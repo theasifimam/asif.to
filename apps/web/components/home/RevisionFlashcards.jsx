@@ -12,7 +12,12 @@ import {
   Loader2,
 } from "lucide-react";
 
-export default function RevisionFlashcards({ selectedTech, selectedChapterId, onDeckComplete }) {
+export default function RevisionFlashcards({
+  selectedTech,
+  selectedChapterId,
+  onDeckComplete,
+  embedded = false,
+}) {
   // ASIF_COURSE_LEARNING_FLOW_V1:revision-component-props
   const { data, isLoading } = useGetFlashcardsQuery(
     // ASIF_COURSE_LEARNING_FLOW_V1:revision-query
@@ -29,9 +34,9 @@ export default function RevisionFlashcards({ selectedTech, selectedChapterId, on
 
   if (isLoading) {
     return (
-      <section className="w-full my-4 sm:my-6 bg-blue-50/60 dark:bg-zinc-900/60 p-4 sm:p-7 rounded-3xl sm:rounded-[2.5rem] shadow-xs flex items-center justify-center h-44 border border-blue-500/10">
+      <div className="w-full my-3 flex items-center justify-center h-36">
         <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-      </section>
+      </div>
     );
   }
 
@@ -66,32 +71,47 @@ export default function RevisionFlashcards({ selectedTech, selectedChapterId, on
 
   const isSaved = savedIds.includes(cardId);
 
-  return (
-    <section className="w-full my-4 sm:my-6 bg-blue-50/60 dark:bg-zinc-900/60 p-4 sm:p-7 rounded-3xl sm:rounded-[2.5rem] shadow-xs border border-blue-500/10 min-w-0 overflow-hidden">
-      <div className="flex items-center justify-between mb-3.5 gap-2">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="flex h-2 w-2 rounded-full bg-blue-600 animate-pulse shrink-0" />
-            <h2 className="text-base sm:text-lg font-black tracking-tight text-foreground truncate">
-              Mobile Revision Deck
-            </h2>
+  const renderCardBody = () => (
+    <div className="w-full min-w-0 space-y-3">
+      {!embedded && (
+        <div className="flex items-center justify-between mb-3 gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="flex h-2 w-2 rounded-full bg-blue-600 animate-pulse shrink-0" />
+              <h2 className="text-base sm:text-lg font-black tracking-tight text-foreground truncate">
+                Mobile Revision Deck
+              </h2>
+            </div>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+              Tap card to reveal answer
+            </p>
           </div>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
-            Tap card to reveal answer
-          </p>
+          <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-blue-600 text-white shadow-sm shrink-0">
+            {currentIndex + 1} / {filteredCards.length}
+          </span>
         </div>
-        <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-blue-600 text-white shadow-sm shrink-0">
-          {currentIndex + 1} / {filteredCards.length}
-        </span>
-      </div>
+      )}
+
+      {embedded && (
+        <div className="flex items-center justify-between gap-2 px-1">
+          <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+            Tap card to flip answer
+          </span>
+          <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-blue-600 text-white shadow-sm shrink-0">
+            {currentIndex + 1} / {filteredCards.length}
+          </span>
+        </div>
+      )}
 
       {/* Interactive Card */}
       <div
         onClick={() => setIsFlipped(!isFlipped)}
-        className={`relative min-h-52 sm:min-h-60 p-4 sm:p-6 rounded-3xl sm:rounded-4xl cursor-pointer transition-all duration-500 select-none shadow-md min-w-0 overflow-hidden ${
+        className={`relative min-h-40 sm:min-h-52 p-4 sm:p-5 rounded-2xl cursor-pointer transition-all duration-300 select-none min-w-0 overflow-hidden border ${
           isFlipped
-            ? "bg-zinc-950 text-zinc-100 shadow-zinc-950/20"
-            : "bg-white dark:bg-zinc-900 text-foreground hover:shadow-lg"
+            ? "bg-zinc-950 text-zinc-100 border-zinc-900 shadow-sm"
+            : embedded
+              ? "bg-zinc-50 dark:bg-zinc-950 text-foreground border-zinc-200/80 dark:border-zinc-800/80 hover:border-blue-500/50"
+              : "bg-white dark:bg-zinc-900 text-foreground border-zinc-200 dark:border-zinc-800 hover:shadow-md"
         }`}
       >
         <div className="flex items-center justify-between mb-2.5 text-xs gap-2">
@@ -178,6 +198,16 @@ export default function RevisionFlashcards({ selectedTech, selectedChapterId, on
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>
+    </div>
+  );
+
+  if (embedded) {
+    return renderCardBody();
+  }
+
+  return (
+    <section className="w-full my-4 sm:my-6 bg-blue-50/60 dark:bg-zinc-900/60 p-4 sm:p-7 rounded-3xl sm:rounded-[2.5rem] shadow-xs border border-blue-500/10 min-w-0 overflow-hidden">
+      {renderCardBody()}
     </section>
   );
 }

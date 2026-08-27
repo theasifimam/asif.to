@@ -50,6 +50,7 @@ const routeRules = [
   [/^\/seo-settings(?:\/|$)/, "seo.view"],
   [/^\/playground-settings(?:\/|$)/, "playground.manage"],
   [/^\/legal(?:\/|$)/, "settings.manage"],
+  [/^\/media-audit(?:\/|$)/, "settings.manage"],
   [/^\/messages(?:\/|$)/, "users.edit"],
   [/^\/articles(?:\/|$)/, "articles.create"],
   [/^\/topics\/(?:new|[^/]+\/edit)(?:\/|$)/, "topics.manage"],

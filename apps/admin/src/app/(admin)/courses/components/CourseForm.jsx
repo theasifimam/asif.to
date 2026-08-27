@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { getModuleBackUrl } from "@/hooks/useModuleHistory";
 import {
   ArrowLeft,
@@ -12,6 +12,7 @@ import {
   Loader2,
   Save,
   Send,
+  UserPen,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -28,12 +29,14 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { coursesApi } from "@/lib/api";
+import { coursesApi, usersApi } from "@/lib/api";
 import AdminFormShell, {
   AdminFormLoading,
   formSectionClass,
 } from "@/components/forms/AdminFormShell";
 import { CanonicalUrlInput } from "@/components/admin";
+import { useAuth } from "@/contexts/AuthContext";
+import { getImageUrl } from "@/lib/utils";
 
 const initialForm = {
   title: "",
@@ -82,6 +85,7 @@ function slugify(value = "") {
 }
 
 export default function CourseForm({ courseId = null }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const requestedReturnTo = searchParams.get("returnTo");
   const returnTo = getModuleBackUrl("/courses", requestedReturnTo);
@@ -94,7 +98,11 @@ export default function CourseForm({ courseId = null }) {
   const [courseChapters, setCourseChapters] = useState([]);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [overrideAuthorId, setOverrideAuthorId] = useState("");
   const fileRef = useRef(null);
+  const { user: currentAdminUser } = useAuth();
+  const isSuperAdmin = currentAdminUser?.role?.toLowerCase() === "super_admin";
 
   useEffect(() => {
     coursesApi.listAll({ limit: 100 }).then((res) => {
@@ -102,7 +110,20 @@ export default function CourseForm({ courseId = null }) {
         setAllCourses(res.data?.data || []);
       }
     });
-  }, []);
+    // Fetch users for super-admin author override
+    if (isSuperAdmin) {
+      usersApi.list({ limit: 100 }).then((res) => {
+        if (res.success) {
+          const usersData =
+            res?.data?.data?.users ||
+            res?.data?.users ||
+            res?.data?.data ||
+            (Array.isArray(res?.data) ? res.data : []);
+          setAdminUsers(Array.isArray(usersData) ? usersData : []);
+        }
+      });
+    }
+  }, [isSuperAdmin]);
 
   useEffect(() => {
     if (!courseId) return;
@@ -136,14 +157,11 @@ export default function CourseForm({ courseId = null }) {
           ...(course.examSettings || {}),
         },
       });
+      // Pre-select the course's current author (if any)
+      const currentAuthorId = course?.author?._id || course?.author || "";
+      setOverrideAuthorId(String(currentAuthorId));
       if (course?.thumbnail) {
-        setImagePreview(
-          course.thumbnail.startsWith("http")
-            ? course.thumbnail
-            : course.thumbnail.startsWith("/uploads")
-              ? `http://localhost:5000${course.thumbnail}`
-              : `http://localhost:5000/uploads/articles/${course.thumbnail}`,
-        );
+        setImagePreview(getImageUrl(course.thumbnail));
       }
       setSlugEdited(true);
       setLoading(false);
@@ -213,6 +231,8 @@ export default function CourseForm({ courseId = null }) {
       data.append("relatedCourses", JSON.stringify(form.relatedCourses || []));
       data.append("popularChapterIds", JSON.stringify(form.popularChapterIds || []));
       data.append("examSettings", JSON.stringify(form.examSettings || {}));
+      // Super-admin author override
+      if (isSuperAdmin && overrideAuthorId) data.append("authorId", overrideAuthorId);
 
       if (imageFile) {
         data.append("thumbnail", imageFile);
@@ -282,9 +302,7 @@ export default function CourseForm({ courseId = null }) {
     toast.success(status === "published" ? "Course published" : "Course saved");
     setSaving(false);
 
-    if (!courseId && savedCourse?._id) {
-      window.location.assign(returnTo);
-    }
+    window.location.assign(returnTo);
     return savedCourse;
   };
 
@@ -460,8 +478,9 @@ export default function CourseForm({ courseId = null }) {
                     type="text"
                     value={form.thumbnail}
                     onChange={(event) => {
-                      update("thumbnail", event.target.value);
-                      if (!imageFile) setImagePreview(event.target.value);
+                      const val = event.target.value;
+                      update("thumbnail", val);
+                      if (!imageFile) setImagePreview(getImageUrl(val));
                     }}
                     placeholder="https://... or uploaded image filename"
                   />
@@ -787,6 +806,47 @@ export default function CourseForm({ courseId = null }) {
               ))}
             </div>
           </div>
+
+          {/* Super-admin author override */}
+          {isSuperAdmin && (
+            <div className="space-y-3 rounded-4xl border-2 border-dashed border-amber-300 dark:border-amber-700/50 bg-amber-50/40 dark:bg-amber-900/10 p-5">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-amber-100 dark:bg-amber-500/15 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+                  <UserPen className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <h2 className="font-bold text-xs text-zinc-900 dark:text-white">
+                    Author Override
+                  </h2>
+                  <p className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">
+                    Super Admin only
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs">Assign Author</Label>
+                <Select
+                  value={overrideAuthorId}
+                  onValueChange={setOverrideAuthorId}
+                >
+                  <SelectTrigger className="h-10 w-full rounded-xl border-0 bg-white dark:bg-zinc-900 px-3 text-xs shadow-sm">
+                    <SelectValue placeholder="Select author..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {adminUsers.map((u) => (
+                      <SelectItem key={u._id} value={u._id}>
+                        <span className="font-medium">{u.fullName || u.name || u.username}</span>
+                        {u.email && <span className="ml-1 text-zinc-400 text-[10px]">({u.email})</span>}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {adminUsers.length === 0 && (
+                  <p className="text-[10px] text-zinc-400 italic">Loading users...</p>
+                )}
+              </div>
+            </div>
+          )}
         </aside>
       </div>
 

@@ -24,6 +24,11 @@ export default function BookmarksPage() {
       <Header />
 
       <main className="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 pt-20 sm:pt-24 flex flex-col gap-6">
+        <nav className="mb-7 flex items-center gap-2 text-xs font-bold text-zinc-400">
+          <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+          <span>/</span>
+          <span className="text-zinc-700 dark:text-zinc-200">Bookmarks</span>
+        </nav>
         {/* Header Title */}
         <div className="flex flex-col gap-2">
           <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-500 text-white text-xs font-bold w-fit shadow-md shadow-amber-500/20">

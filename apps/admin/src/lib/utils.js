@@ -88,7 +88,8 @@ export function getImageUrl(imagePath) {
   if (
     imagePath.startsWith("http://") ||
     imagePath.startsWith("https://") ||
-    imagePath.startsWith("data:")
+    imagePath.startsWith("data:") ||
+    imagePath.startsWith("blob:")
   ) {
     return imagePath;
   }
@@ -104,8 +105,10 @@ export function getImageUrl(imagePath) {
       clean = `/uploads${clean}`;
     }
   }
-  const apiHost = process.env.NEXT_PUBLIC_API_URL
-    ? process.env.NEXT_PUBLIC_API_URL.split("/api/v1")[0].replace(/\/$/, "")
-    : "http://localhost:5000";
+  const apiHost =
+    process.env.NEXT_PUBLIC_STORAGE_URL ||
+    (process.env.NEXT_PUBLIC_API_URL
+      ? process.env.NEXT_PUBLIC_API_URL.split("/api/v1")[0].replace(/\/$/, "")
+      : "http://localhost:5000");
   return `${apiHost}${clean}`;
 }

@@ -164,129 +164,13 @@ export default function QuizPage() {
           </p>
         </div>
 
-        {/* ── Course List Section ─────────────────────────────────── */}
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <GraduationCap className="w-4 h-4 text-purple-500" />
-              <h2 className="text-sm font-black text-foreground uppercase tracking-widest">
-                Courses & Certification Exams
-              </h2>
-            </div>
-            <span className="text-[11px] font-bold text-zinc-400">
-              Select course to practice or examine
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3">
-            {courses.map((course) => {
-              const isCurrentSelected =
-                selectedCourseSlug === course.slug ||
-                selectedCourseSlug === course.techId;
-
-              return (
-                <div
-                  key={course._id}
-                  className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-[2rem] bg-white dark:bg-zinc-900/90 shadow-sm border transition-all duration-200 ${
-                    isCurrentSelected
-                      ? "border-blue-500 shadow-md ring-2 ring-blue-500/20"
-                      : "border-zinc-200/80 dark:border-zinc-800/80 hover:border-zinc-300 dark:hover:border-zinc-700"
-                  }`}
-                >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div
-                      className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-                        isCurrentSelected
-                          ? "bg-blue-600 text-white shadow-md shadow-blue-500/30"
-                          : "bg-blue-500/10 text-blue-600 dark:text-blue-400"
-                      }`}
-                    >
-                      <HelpCircle className="w-6 h-6" />
-                    </div>
-                    <div className="space-y-1 min-w-0">
-                      <h3 className="font-extrabold text-sm sm:text-base text-foreground leading-snug">
-                        {course.title}
-                      </h3>
-                      <div className="flex flex-wrap gap-2 text-[11px] font-bold">
-                        <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                          {course.chapterCount ?? course.chapters?.length ?? 0}{" "}
-                          Lessons
-                        </span>
-                        {course.examEnabled && (
-                          <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400">
-                            <GraduationCap className="w-3 h-3" />
-                            Final Exam Available
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Actions for each course */}
-                  <div className="flex items-center gap-2 flex-wrap shrink-0">
-                    <SaveButton
-                      itemId={course._id}
-                      itemType="course"
-                      label="Save"
-                      size="sm"
-                    />
-                    <button
-                      onClick={() => {
-                        handleSelectCourse(course.slug);
-                        setTimeout(() => {
-                          document
-                            .getElementById("practice-quiz-section")
-                            ?.scrollIntoView({ behavior: "smooth" });
-                        }, 50);
-                      }}
-                      className={`px-4 py-2.5 rounded-full text-xs font-bold transition-all active:scale-95 flex items-center gap-1.5 ${
-                        isCurrentSelected
-                          ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
-                          : "bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-700"
-                      }`}
-                    >
-                      <HelpCircle className="w-3.5 h-3.5" />
-                      <span>
-                        {isCurrentSelected ? "Practicing Now" : "Practice Quiz"}
-                      </span>
-                    </button>
-
-                    {course.examEnabled ? (
-                      <Link
-                        href={`/courses/${course.slug}/final-exam`}
-                        className="px-4 py-2.5 rounded-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all active:scale-95 shadow-md shadow-purple-500/25 flex items-center gap-1.5"
-                      >
-                        <GraduationCap className="w-3.5 h-3.5" />
-                        <span>Final Exam</span>
-                      </Link>
-                    ) : (
-                      <span className="text-[11px] font-bold text-zinc-400 px-3 py-2 bg-zinc-100 dark:bg-zinc-800/60 rounded-full">
-                        Exam Soon
-                      </span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Divider & Practice Quiz Section Header */}
+        {/* ── Active Quiz Filter & Banner Section ─────────────────── */}
         <div id="practice-quiz-section" className="scroll-mt-24 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800" />
-            <span className="text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" />
-              Untimed Practice Quiz
-            </span>
-            <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800" />
-          </div>
-
           {/* Course Filter Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
             <button
               onClick={() => handleSelectCourse(null)}
-              className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
+              className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 selectedCourseSlug === null
                   ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
                   : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
@@ -302,7 +186,7 @@ export default function QuizPage() {
                 <button
                   key={c._id}
                   onClick={() => handleSelectCourse(c.slug)}
-                  className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
+                  className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                     isActive
                       ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
                       : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
@@ -330,7 +214,7 @@ export default function QuizPage() {
             {selectedCourseSlug && (
               <button
                 onClick={() => handleSelectCourse(null)}
-                className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline shrink-0"
+                className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline shrink-0 cursor-pointer"
               >
                 Reset Filter
               </button>
@@ -338,6 +222,7 @@ export default function QuizPage() {
           </div>
         </div>
 
+        {/* ── Active Quiz Question Card / Results Card ── */}
         {QUIZ_QUESTIONS.length === 0 ? (
           <div className="p-8 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-md text-center flex flex-col items-center gap-3">
             <HelpCircle className="w-10 h-10 text-zinc-300 dark:text-zinc-700" />
@@ -350,7 +235,7 @@ export default function QuizPage() {
             </p>
             <button
               onClick={() => handleSelectCourse(null)}
-              className="mt-2 px-5 py-2.5 rounded-full bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition-all"
+              className="mt-2 px-5 py-2.5 rounded-full bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition-all cursor-pointer"
             >
               Show All Course Questions
             </button>
@@ -422,7 +307,7 @@ export default function QuizPage() {
                     key={idx}
                     onClick={() => handleSelectOption(idx)}
                     disabled={isAnswered}
-                    className={`w-full text-left p-4 sm:p-5 rounded-2xl transition-all duration-200 flex items-center justify-between text-xs sm:text-sm active:scale-[0.99] ${optionStyle}`}
+                    className={`w-full text-left p-4 sm:p-5 rounded-2xl transition-all duration-200 flex items-center justify-between text-xs sm:text-sm active:scale-[0.99] cursor-pointer ${optionStyle}`}
                   >
                     <span>{option}</span>
                     {isAnswered && (
@@ -464,14 +349,14 @@ export default function QuizPage() {
                 <button
                   onClick={handleSubmitAnswer}
                   disabled={selectedOption === null}
-                  className="px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold transition-all active:scale-95 shadow-md shadow-blue-500/25"
+                  className="px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold transition-all active:scale-95 shadow-md shadow-blue-500/25 cursor-pointer"
                 >
                   Submit Answer
                 </button>
               ) : (
                 <button
                   onClick={handleNextQuestion}
-                  className="flex items-center gap-1 px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all active:scale-95 shadow-md shadow-emerald-500/25"
+                  className="flex items-center gap-1 px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all active:scale-95 shadow-md shadow-emerald-500/25 cursor-pointer"
                 >
                   <span>
                     {currentIndex + 1 === QUIZ_QUESTIONS.length
@@ -521,13 +406,121 @@ export default function QuizPage() {
 
             <button
               onClick={handleRestartQuiz}
-              className="flex items-center gap-2 px-7 py-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all active:scale-95 shadow-lg shadow-blue-500/25 mt-2"
+              className="flex items-center gap-2 px-7 py-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all active:scale-95 shadow-lg shadow-blue-500/25 mt-2 cursor-pointer"
             >
               <RotateCcw className="w-4 h-4" />
               <span>Retry Practice</span>
             </button>
           </div>
         )}
+
+        {/* ── Course Selection & Certification Exams Section (Below Quiz) ── */}
+        <section className="mt-6 space-y-3 pt-6 border-t border-zinc-200 dark:border-zinc-800">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="w-4 h-4 text-purple-500" />
+              <h2 className="text-sm font-black text-foreground uppercase tracking-widest">
+                All Courses & Certification Exams
+              </h2>
+            </div>
+            <span className="text-[11px] font-bold text-zinc-400">
+              Select course to practice or examine
+            </span>
+          </div>
+
+          {/* Unified Master Container Card */}
+          <div className="overflow-hidden rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-md border border-zinc-200/80 dark:border-zinc-800/80 divide-y divide-zinc-100 dark:divide-zinc-800/80">
+            {courses.map((course) => {
+              const isCurrentSelected =
+                selectedCourseSlug === course.slug ||
+                selectedCourseSlug === course.techId;
+
+              return (
+                <div
+                  key={course._id}
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 transition-colors ${
+                    isCurrentSelected
+                      ? "bg-blue-50/70 dark:bg-blue-950/30 border-l-4 border-l-blue-600"
+                      : "hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40"
+                  }`}
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div
+                      className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
+                        isCurrentSelected
+                          ? "bg-blue-600 text-white shadow-md shadow-blue-500/30"
+                          : "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                      }`}
+                    >
+                      <HelpCircle className="w-5 h-5" />
+                    </div>
+                    <div className="space-y-1 min-w-0">
+                      <h3 className="font-extrabold text-sm sm:text-base text-foreground leading-snug">
+                        {course.title}
+                      </h3>
+                      <div className="flex flex-wrap gap-2 text-[11px] font-bold">
+                        <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                          {course.chapterCount ?? course.chapters?.length ?? 0}{" "}
+                          Lessons
+                        </span>
+                        {course.examEnabled && (
+                          <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                            <GraduationCap className="w-3 h-3" />
+                            Final Exam Available
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions for each course */}
+                  <div className="flex items-center gap-2 flex-wrap shrink-0">
+                    <SaveButton
+                      itemId={course._id}
+                      itemType="course"
+                      label="Save"
+                      size="sm"
+                    />
+                    <button
+                      onClick={() => {
+                        handleSelectCourse(course.slug);
+                        setTimeout(() => {
+                          document
+                            .getElementById("practice-quiz-section")
+                            ?.scrollIntoView({ behavior: "smooth" });
+                        }, 50);
+                      }}
+                      className={`px-4 py-2 rounded-full text-xs font-bold transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer ${
+                        isCurrentSelected
+                          ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
+                          : "bg-zinc-100 dark:bg-zinc-800 text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                      }`}
+                    >
+                      <HelpCircle className="w-3.5 h-3.5" />
+                      <span>
+                        {isCurrentSelected ? "Practicing Now" : "Practice Quiz"}
+                      </span>
+                    </button>
+
+                    {course.examEnabled ? (
+                      <Link
+                        href={`/courses/${course.slug}/final-exam`}
+                        className="px-4 py-2 rounded-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all active:scale-95 shadow-md shadow-purple-500/25 flex items-center gap-1.5"
+                      >
+                        <GraduationCap className="w-3.5 h-3.5" />
+                        <span>Final Exam</span>
+                      </Link>
+                    ) : (
+                      <span className="text-[11px] font-bold text-zinc-400 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800/60 rounded-full">
+                        Exam Soon
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
       </main>
 
       <Footer />

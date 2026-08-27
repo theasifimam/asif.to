@@ -53,6 +53,7 @@ function BrowserRuntimeWorkspace({
   fillViewport = false,
   starter,
   executionEnabled = true,
+  compact = false,
 }) {
   const config = BROWSER_RUNTIME_CONFIG[language];
   const { sandpack } = useSandpack();
@@ -146,10 +147,10 @@ function BrowserRuntimeWorkspace({
     setProgress(null);
     setStatus("loading");
     setStatusText(config.loading);
-    if (language === "c" && !window.crossOriginIsolated) {
+    if (["c", "cpp"].includes(language) && !window.crossOriginIsolated) {
       finish({
         type: "error",
-        error: `${config.label} needs an isolated browser page to run its WebAssembly compiler. Open this editor from /play, /run, /playground, or /practice and reload once.`,
+        error: `${config.label} needs browser isolation to run its WebAssembly compiler. Reload this page once; if the message remains, use the full playground.`,
       });
       return;
     }
@@ -159,7 +160,11 @@ function BrowserRuntimeWorkspace({
           type: "error",
           error: `${config.label} did not finish loading. Check your connection or content blocker, then run it again.`,
         }),
-      language === "c" ? 600000 : language === "java" ? 360000 : 180000,
+      ["c", "cpp"].includes(language)
+        ? 600000
+        : language === "java"
+          ? 360000
+          : 180000,
     );
     if (language === "java") {
       const request = {
@@ -196,7 +201,8 @@ function BrowserRuntimeWorkspace({
     language,
     source,
     sandpack.files,
-    activeFile
+    activeFile,
+    executionEnabled,
   ]);
 
   useEffect(() => {
@@ -318,6 +324,58 @@ function BrowserRuntimeWorkspace({
       </div>
     </section>
   );
+
+  if (compact) {
+    return (
+      <>
+        <section className="overflow-hidden rounded-2xl border border-zinc-800 bg-[#1e1e1e] text-white shadow-lg">
+          <header className="flex items-center justify-between gap-3 border-b border-zinc-800 px-4 py-3">
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-[0.15em] text-emerald-400">
+                Try it yourself
+              </p>
+              <h3 className="mt-0.5 truncate text-sm font-bold">
+                {title || `${config.label} example`}
+              </h3>
+            </div>
+            <button
+              type="button"
+              onClick={run}
+              disabled={!executionEnabled || status === "loading"}
+              className="inline-flex shrink-0 items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-xs font-black hover:bg-blue-500 disabled:opacity-50"
+            >
+              {status === "loading" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Play className="h-4 w-4 fill-current" />
+              )}
+              Run
+            </button>
+          </header>
+          <div aria-label="Editable code">
+            <SandpackCodeEditor
+              showTabs={false}
+              showLineNumbers
+              wrapContent
+              style={{ height: 260, fontSize: 14 }}
+            />
+          </div>
+          <div className="h-44 border-t border-zinc-800">{runtimeOutput}</div>
+        </section>
+        {javaMounted && (
+          <iframe
+            ref={javaRef}
+            src={config.iframe}
+            sandbox="allow-scripts allow-same-origin"
+            credentialless="true"
+            referrerPolicy="no-referrer"
+            className="hidden"
+            title="Isolated credentialless Java browser runtime"
+          />
+        )}
+      </>
+    );
+  }
 
   return (
     <>
@@ -597,7 +655,7 @@ export default function BrowserRuntimeEditor(props) {
   );
   return (
     <SandpackProvider
-      key={`${props.language}-${config.file}`}
+      key={`${props.playgroundId || "playground"}-${props.language}-${config.file}`}
       template="vanilla"
       files={{
         [config.file]: { code: starter, active: true, readOnly: false },

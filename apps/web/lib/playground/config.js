@@ -14,9 +14,9 @@ export const TECHNOLOGIES = {
 export const DIFFICULTIES = ["Easy", "Medium", "Hard"];
 
 export function sandpackTemplateFor(language) {
-  if (language === "react") return "react";
+  if (language === "react") return "vite-react";
   if (language === "typescript") return "vanilla-ts";
-  if (language === "react-typescript") return "react-ts";
+  if (language === "react-typescript") return "vite-react-ts";
   if (language === "nextjs") return "nextjs";
   return "vanilla";
 }

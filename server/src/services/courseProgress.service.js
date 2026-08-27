@@ -25,7 +25,7 @@ export const chapterQuestionIds = (chapter, stage) => {
 export const chapterStageAvailability = (chapter) => {
   const build=chapter?.learningActivities?.build||{};
   const mapped=chapter?.learningAvailability||{};
-  return { learn:true, revise:Number(mapped.reviseCount||0)>0, practice:Number(mapped.practiceCount||0)>0 || Boolean(String(chapter?.tryItChallenge||"").trim()), build:mapped.build!==undefined ? Boolean(mapped.build) : Boolean(build.enabled&&(String(build.title||"").trim()||String(build.description||"").trim())) };
+  return { learn:true, revise:Number(mapped.reviseCount||0)>0, practice:Number(mapped.practiceCount||0)>0 || Boolean(String(chapter?.tryItChallenge||"").trim()), build:mapped.build!==undefined ? Boolean(mapped.build) : Boolean((Array.isArray(chapter?.codingProblems)&&chapter.codingProblems.length)||(build.enabled&&(String(build.title||"").trim()||String(build.description||"").trim()))) };
 };
 
 const stagePercent = (stage, value = {}) => {

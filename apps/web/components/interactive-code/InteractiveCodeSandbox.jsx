@@ -7,6 +7,7 @@ import { usePlaygroundControl, languageAllowed, runtimeAllowed } from "@/lib/pla
 
 const SandpackCodeEditor = dynamic(() => import("./SandpackCodeEditor"), { ssr: false, loading: RuntimeLoading });
 const BrowserRuntimeEditor = dynamic(() => import("./runtime/BrowserRuntimeEditor"), { ssr: false, loading: RuntimeLoading });
+const LocalChapterWorkspace = dynamic(() => import("./LocalChapterWorkspace"), { ssr: false, loading: RuntimeLoading });
 const BROWSER_LANGUAGES = new Set(["python", "c", "cpp", "java"]);
 
 function RuntimeLoading() {
@@ -52,8 +53,12 @@ export default function InteractiveCodeSandbox(props) {
   
   const adminInitialCode = control.languages?.[props.language]?.initialCode;
   const nextProps = { ...props, languageOptions, executionEnabled: control.executionEnabled && control.languages?.[props.language]?.executionEnabled !== false, playgroundControl: control };
+
+  if (props.compact && ["javascript", "typescript", "react", "nextjs"].includes(props.language)) {
+    return <LocalChapterWorkspace {...nextProps} />;
+  }
   
-  if (adminInitialCode) {
+  if (adminInitialCode && !props.compact) {
     nextProps.code = adminInitialCode;
     delete nextProps.files;
   }

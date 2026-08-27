@@ -7,6 +7,16 @@ const codeSnippetSchema = new Schema({
   showPlay: { type: Boolean, default: false },
 });
 
+const codingProblemSchema = new Schema({
+  title: { type: String, required: true, trim: true, maxlength: 220 },
+  description: { type: String, default: "", trim: true, maxlength: 3000 },
+  language: { type: String, default: "javascript", trim: true },
+  starterCode: { type: String, default: "" },
+  solutionCode: { type: String, default: "" },
+  hints: { type: [String], default: [] },
+  expectedOutput: { type: String, default: "", maxlength: 2000 },
+});
+
 const chapterSchema = new Schema(
   {
     course: {
@@ -84,6 +94,10 @@ const chapterSchema = new Schema(
     tryItChallenge: {
       type: String,
       default: "",
+    },
+    codingProblems: {
+      type: [codingProblemSchema],
+      default: [],
     },
     order: {
       type: Number,

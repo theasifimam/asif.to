@@ -94,6 +94,8 @@ const courseSchema = new Schema(
     relatedCourses: [{ type: Schema.Types.ObjectId, ref: "Course" }],
     relatedArticles: [{ type: Schema.Types.ObjectId, ref: "Article" }],
     popularChapterIds: [{ type: Schema.Types.ObjectId, ref: "Chapter" }],
+    // Optional author attribution (e.g. for re-assigning ownership)
+    author: { type: Schema.Types.ObjectId, ref: "User", default: null },
     // Populated chapters are fetched via Chapter.find({ course: id })
   },
   {

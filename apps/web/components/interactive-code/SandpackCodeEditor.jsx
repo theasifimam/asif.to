@@ -11,6 +11,7 @@ import {
 import { sandpackTemplateFor } from "@/lib/playground/config";
 
 import Workspace from "./Workspace";
+import ChapterWorkspace from "./ChapterWorkspace";
 
 export default function InteractiveCodeSandbox({
   language = "javascript",
@@ -23,6 +24,7 @@ export default function InteractiveCodeSandbox({
   playgroundId,
   testCases = [],
   executionEnabled = true,
+  compact = false,
 }) {
   const [editorTheme, setEditorTheme] = useState("dark");
   const initialFiles = useMemo(
@@ -46,7 +48,7 @@ export default function InteractiveCodeSandbox({
 
   return (
     <SandpackProvider
-      key={`${language}-${Object.keys(initialFiles).join("-")}`}
+      key={`${playgroundId || "playground"}-${language}-${Object.keys(initialFiles).join("-")}`}
       template={sandpackTemplateFor(language)}
       files={initialFiles}
       theme={editorTheme === "dark" ? VSCODE_DARK_THEME : VSCODE_LIGHT_THEME}
@@ -58,6 +60,13 @@ export default function InteractiveCodeSandbox({
         recompileDelay: 2147000000,
       }}
     >
+      {compact ? (
+        <ChapterWorkspace
+          language={language}
+          title={title}
+          executionEnabled={executionEnabled}
+        />
+      ) : (
       <Workspace
         language={language}
         languageOptions={languageOptions}
@@ -73,6 +82,7 @@ export default function InteractiveCodeSandbox({
         testCases={testCases}
         executionEnabled={executionEnabled}
       />
+      )}
     </SandpackProvider>
   );
 }

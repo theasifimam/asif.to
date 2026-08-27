@@ -35,6 +35,7 @@ import DiscussButton from "@/components/messaging/DiscussButton";
 import { CanonicalUrlInput } from "@/components/admin";
 // ASIF_COURSE_LEARNING_FLOW_V1:admin-learning-import
 import ChapterLearningActivitiesEditor from "@/components/courses/ChapterLearningActivitiesEditor";
+import ChapterCodingProblemsEditor from "@/components/courses/ChapterCodingProblemsEditor";
 
 const initialForm = {
   title: "",
@@ -42,6 +43,7 @@ const initialForm = {
   summary: "",
   contentBody: "",
   tryItChallenge: "",
+  codingProblems: [],
   // ASIF_COURSE_LEARNING_FLOW_V1:admin-learning-form
   revisionQuestionIds: [],
   practiceQuestionIds: [],
@@ -140,6 +142,14 @@ export default function ChapterFormPage() {
         ...chapter,
         contentBody: chapterContent(chapter),
         category: chapter.category || "",
+        codingProblems: (chapter.codingProblems || []).map((problem) => ({
+          title: problem.title || "",
+          description: problem.description || "",
+          language: problem.language || "javascript",
+          starterCode: problem.starterCode || "",
+          hints: Array.isArray(problem.hints) ? problem.hints.join("\n") : "",
+          expectedOutput: problem.expectedOutput || "",
+        })),
 
   keywords: (chapter.keywords || []).join(", "),
   // ASIF_COURSE_LEARNING_FLOW_V1:admin-learning-load
@@ -178,6 +188,33 @@ export default function ChapterFormPage() {
     summary: form.summary,
     content: [form.contentBody],
     tryItChallenge: form.tryItChallenge,
+    codingProblems: (form.codingProblems || [])
+      .filter((problem) => problem.title?.trim())
+      .map((problem) => ({
+        title: problem.title.trim(),
+        description: problem.description || "",
+        language: problem.language || "javascript",
+        starterCode: problem.starterCode || "",
+        hints: String(problem.hints || "")
+          .split("\n")
+          .map((item) => item.trim())
+          .filter(Boolean),
+        expectedOutput: problem.expectedOutput || "",
+      })),
+    learningActivities: {
+      revisionQuestions: form.revisionQuestionIds || [],
+      practiceQuestions: form.practiceQuestionIds || [],
+      build: {
+        enabled: Boolean(form.buildEnabled),
+        title: form.buildTitle || "",
+        description: form.buildDescription || "",
+        requirements: String(form.buildRequirements || "")
+          .split("\n")
+          .map((item) => item.trim())
+          .filter(Boolean),
+        estimatedMinutes: Number(form.buildEstimatedMinutes) || 0,
+      },
+    },
     seoTitle: form.seoTitle,
     seoDescription: form.seoDescription,
     keywords: form.keywords
@@ -369,6 +406,11 @@ export default function ChapterFormPage() {
               />
             </div>
           </section>
+
+          <ChapterCodingProblemsEditor
+            problems={form.codingProblems || []}
+            onChange={(codingProblems) => update("codingProblems", codingProblems)}
+          />
 
           {/* ASIF_COURSE_LEARNING_FLOW_V1:admin-learning-editor */}
           <ChapterLearningActivitiesEditor courseId={courseId} form={form} setForm={setForm} />

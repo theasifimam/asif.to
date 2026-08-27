@@ -75,36 +75,33 @@ const Editor = memo(function Editor({ value, onChange, placeholder }) {
           box-sizing: border-box !important;
         }
 
-        /* Slidable tab bar globally so it never wraps or overflows in narrow containers/columns */
+        /* Toolbar wrapping so options flow into multiple lines instead of horizontal scrolling */
         .w-md-editor-toolbar {
           border-bottom: 1px solid var(--md-border-color) !important;
-          padding: 0.5rem 1rem !important;
+          padding: 0.5rem 0.75rem !important;
           width: 100% !important;
           max-width: 100% !important;
           min-width: 0 !important;
           box-sizing: border-box !important;
           
-          overflow-x: auto !important;
-          white-space: nowrap !important;
+          overflow-x: visible !important;
+          white-space: normal !important;
           display: flex !important;
-          flex-wrap: nowrap !important;
+          flex-wrap: wrap !important;
           justify-content: flex-start !important;
           align-items: center !important;
-          gap: 0.5rem !important;
-          scrollbar-width: none !important; /* Hide scrollbar Firefox */
-          -ms-overflow-style: none !important; /* Hide scrollbar IE/Edge */
-          -webkit-overflow-scrolling: touch !important;
+          gap: 0.35rem 0.5rem !important;
         }
 
         .w-md-editor-toolbar::-webkit-scrollbar {
           display: none !important; /* Hide scrollbar Chrome/Safari */
         }
 
-        /* Force toolbar list items into a single row globally */
+        /* Allow toolbar list items to wrap cleanly onto a second line */
         .w-md-editor-toolbar ul {
           display: flex !important;
           flex-direction: row !important;
-          flex-wrap: nowrap !important;
+          flex-wrap: wrap !important;
           align-items: center !important;
           gap: 0.25rem !important;
           padding: 0 !important;

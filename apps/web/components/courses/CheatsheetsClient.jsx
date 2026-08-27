@@ -92,6 +92,11 @@ export default function CheatsheetsClient({
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-24 sm:px-6">
+      <nav className="mb-7 flex items-center gap-2 text-xs font-bold text-zinc-400">
+        <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+        <span>/</span>
+        <span className="text-zinc-700 dark:text-zinc-200">Cheatsheets</span>
+      </nav>
       <section className="overflow-hidden rounded-4xl border border-blue-500/15 bg-linear-to-br from-blue-600 to-indigo-700 p-7 text-white shadow-2xl shadow-blue-600/15 sm:p-12">
         <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-black uppercase tracking-wider">
           <Sparkles className="h-4 w-4" /> Reference guides

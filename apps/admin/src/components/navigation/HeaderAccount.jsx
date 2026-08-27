@@ -143,7 +143,10 @@ export default function HeaderAccount({
 
           <button
             type="button"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            onClick={() => {
+              setTheme(theme === "dark" ? "light" : "dark");
+              setIsOpen(false);
+            }}
             className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-all text-zinc-800 dark:text-zinc-200 font-bold text-xs cursor-pointer group"
           >
             <div className="flex items-center gap-3">

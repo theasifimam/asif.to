@@ -58,6 +58,11 @@ export default async function InterviewQuestionsIndexPage() {
     <div className="min-h-screen w-full bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
       <Header />
       <main className="mx-auto max-w-7xl px-4 pb-20 pt-24 sm:px-6 lg:px-8">
+        <nav className="mb-7 flex items-center gap-2 text-xs font-bold text-zinc-400">
+          <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+          <span>/</span>
+          <span className="text-zinc-700 dark:text-zinc-200">Interview Questions</span>
+        </nav>
         <header className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:rounded-4xl sm:p-10">
           <p className="text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400">
             Interview Preparation Directory

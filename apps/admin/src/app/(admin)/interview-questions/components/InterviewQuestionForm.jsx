@@ -161,15 +161,7 @@ export default function InterviewQuestionForm({
       : await interviewQuestionsApi.create(payload);
     if (response.success) {
       toast.success(questionId ? "Question saved" : "Question created");
-      if (!questionId) {
-        const createdId = response.data?.data?._id;
-        const editBase = `/interview-questions/${createdId}/edit`;
-        const editUrl =
-          returnTo !== "/interview-questions"
-            ? `${editBase}?returnTo=${encodeURIComponent(returnTo)}`
-            : editBase;
-        window.location.assign(editUrl);
-      }
+      window.location.assign(returnTo);
     } else toast.error(response.error || "Unable to save question");
     setSaving(false);
   };

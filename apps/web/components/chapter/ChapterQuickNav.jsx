@@ -13,11 +13,11 @@ export default function ChapterQuickNav({
 }) {
   if (variant === "top") {
     return (
-      <div className="flex items-center justify-between p-2.5 sm:p-4 rounded-4xl sm:rounded-4xl bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 text-xs font-bold gap-2">
+      <div className="flex items-center justify-between px-1.5 py-1 text-xs font-semibold text-zinc-500 dark:text-zinc-400 gap-2">
         {prevChapter ? (
           <Link
             href={`/${courseId}/${prevChapter.slug}`}
-            className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline max-w-[48%]"
+            className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold max-w-[48%] transition-colors"
           >
             <ChevronLeft className="w-4 h-4 shrink-0" />
             <span className="line-clamp-1">
@@ -33,7 +33,7 @@ export default function ChapterQuickNav({
         {nextChapter ? (
           <Link
             href={`/${courseId}/${nextChapter.slug}`}
-            className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline max-w-[48%] justify-end text-right ml-auto"
+            className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold max-w-[48%] justify-end text-right ml-auto transition-colors"
           >
             <span className="line-clamp-1">
               Next: {nextChapter.title?.split(". ")[1] || nextChapter.title}
@@ -43,7 +43,7 @@ export default function ChapterQuickNav({
         ) : examEnabled ? (
           <Link
             href={`/courses/${courseId}/final-exam`}
-            className="flex items-center gap-1 text-purple-600 dark:text-purple-400 hover:underline max-w-[48%] justify-end text-right ml-auto font-bold text-[11px] sm:text-xs"
+            className="flex items-center gap-1 text-purple-600 dark:text-purple-400 hover:text-purple-700 font-bold max-w-[48%] justify-end text-right ml-auto text-[11px] sm:text-xs"
           >
             <GraduationCap className="w-4 h-4 shrink-0" />
             <span>Take Final Exam</span>

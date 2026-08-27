@@ -38,6 +38,11 @@ export default function PracticePage() {
       />
       <Header />
       <main className="mx-auto max-w-6xl px-4 pb-24 pt-24 sm:px-6 sm:pt-28">
+        <nav className="mb-7 flex items-center gap-2 text-xs font-bold text-zinc-400">
+          <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+          <span>/</span>
+          <span className="text-zinc-700 dark:text-zinc-200">Practice</span>
+        </nav>
         <header className="mb-10 max-w-3xl">
           <span className="inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-3 py-1 text-xs font-black text-blue-600 dark:text-blue-400">
             <Code2 className="h-4 w-4" />

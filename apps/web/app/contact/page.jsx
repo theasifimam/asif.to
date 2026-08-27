@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import {
@@ -60,6 +61,11 @@ export default function ContactPage() {
       <Header />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 pt-24 sm:pt-28 pb-16">
+        <nav className="mb-7 flex items-center gap-2 text-xs font-bold text-zinc-400 px-6 sm:px-10">
+          <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+          <span>/</span>
+          <span className="text-zinc-700 dark:text-zinc-200">Contact</span>
+        </nav>
         {/* Main Content Outer Container with Extra Rounded Corners & Solid Surfaces */}
         <div className="p-6 sm:p-10">
           {/* Top Center Header Section */}

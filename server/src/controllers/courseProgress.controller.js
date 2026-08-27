@@ -62,9 +62,10 @@ async function withLearningAvailability(courseId, chapters = []) {
         reviseCount: Number(row.reviseCount || 0),
         practiceCount: Number(row.practiceCount || 0),
         build: Boolean(
-          build.enabled &&
-            (String(build.title || "").trim() ||
-              String(build.description || "").trim()),
+          (Array.isArray(chapter.codingProblems) && chapter.codingProblems.length) ||
+            (build.enabled &&
+              (String(build.title || "").trim() ||
+                String(build.description || "").trim())),
         ),
       },
     };
@@ -73,7 +74,7 @@ async function withLearningAvailability(courseId, chapters = []) {
 
 // ASIF_COURSE_LEARNING_FLOW_V1
 const fail = (res, status, message) => res.status(status).json({ success: false, message });
-const chapterSelect = "title slug summary order tryItChallenge relatedQuestions learningActivities status";
+const chapterSelect = "title slug summary order tryItChallenge relatedQuestions learningActivities codingProblems._id status";
 
 async function resolveCourse(value) {
   if (mongoose.isValidObjectId(value)) return Course.findOne({ _id: value, status: "published" }).lean();

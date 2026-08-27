@@ -286,6 +286,7 @@ export default function ChapterActivityClient({
                 selectedTech={slug}
                 selectedChapterId={chapter._id}
                 onDeckComplete={() => markComplete()}
+                embedded
               />
             )}
 
