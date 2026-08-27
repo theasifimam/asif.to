@@ -51,7 +51,7 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
                   <img
                     src="/logo.png"
                     alt="asif.to"
-                    className="w-9 h-9 rounded-xl object-contain shadow-sm group-hover:scale-105 transition-transform"
+                    className="w-9 h-9 rounded-xl object-contain group-hover:scale-105 transition-transform"
                   />
                 </div>
                 <div className="flex flex-col">

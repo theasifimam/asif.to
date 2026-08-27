@@ -85,7 +85,7 @@ export default function Sidebar({
                 <img
                   src="/logo.png"
                   alt="asif.to"
-                  className="w-9 h-9 rounded-xl object-contain shadow-sm"
+                  className="w-9 h-9 rounded-xl object-contain"
                 />
                 <div className="flex flex-col">
                   <Link

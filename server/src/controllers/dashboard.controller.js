@@ -1,10 +1,10 @@
 import Article from "../models/Article.js";
 import User from "../models/User.js";
-import Topic from "../models/Topic.js";
 import Course from "../models/Course.js";
 import Chapter from "../models/Chapter.js";
 import QuizQuestion from "../models/Question.js";
-import AnalyticsDaily from "../models/AnalyticsDaily.js";
+import AnalyticsDaily from "../models/AnalyticsTrustedDaily.js";
+import AnalyticsDailyLegacy from "../models/AnalyticsDaily.js";
 
 /**
  * Get dashboard overview stats with REAL chapter readership captured from web apps
@@ -30,10 +30,61 @@ export const getDashboardStats = async (req, res) => {
 
     // Site-wide page visits recorded by the first-party web tracker. Each
     // tracker pageview increments this counter once, including non-chapter pages.
-    const siteVisitsAggregation = await AnalyticsDaily.aggregate([
-      { $group: { _id: null, totalVisits: { $sum: "$pageViews" } } },
-    ]);
-    const totalSiteVisits = siteVisitsAggregation[0]?.totalVisits || 0;
+    // NOTE: AnalyticsDaily (legacy) holds historical visits recorded before the
+    // v2 migration. AnalyticsTrustedDaily is the active collection. Both are
+    // summed here so the all-time total is accurate.
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
+
+    const [trustedAllTime, legacyAllTime, thisMonthVisits, lastMonthVisits] =
+      await Promise.all([
+        AnalyticsDaily.aggregate([
+          { $group: { _id: null, totalVisits: { $sum: "$pageViews" } } },
+        ]),
+        AnalyticsDailyLegacy.aggregate([
+          { $group: { _id: null, totalVisits: { $sum: "$pageViews" } } },
+        ]),
+        AnalyticsDaily.aggregate([
+          { $match: { date: { $gte: startOfThisMonth } } },
+          { $group: { _id: null, totalVisits: { $sum: "$pageViews" } } },
+        ]),
+        AnalyticsDaily.aggregate([
+          {
+            $match: { date: { $gte: startOfLastMonth, $lte: endOfLastMonth } },
+          },
+          { $group: { _id: null, totalVisits: { $sum: "$pageViews" } } },
+        ]),
+      ]);
+
+    // All-time = legacy historical + current live collection
+    const totalSiteVisits =
+      (trustedAllTime[0]?.totalVisits || 0) +
+      (legacyAllTime[0]?.totalVisits || 0);
+    const currentMonthVisits = thisMonthVisits[0]?.totalVisits || 0;
+    const previousMonthVisits = lastMonthVisits[0]?.totalVisits || 0;
+
+    let siteVisitsTrend;
+    if (previousMonthVisits === 0 && currentMonthVisits === 0) {
+      siteVisitsTrend = "All time";
+    } else if (previousMonthVisits === 0) {
+      siteVisitsTrend = `${currentMonthVisits.toLocaleString()} this month`;
+    } else {
+      const momChange =
+        ((currentMonthVisits - previousMonthVisits) / previousMonthVisits) *
+        100;
+      const sign = momChange >= 0 ? "+" : "";
+      siteVisitsTrend = `${sign}${momChange.toFixed(1)}% MoM`;
+    }
 
     // Aggregate real viewCount per course
     const courseViewStats = await Chapter.aggregate([
@@ -70,9 +121,10 @@ export const getDashboardStats = async (req, res) => {
           cStats.chapterCount ||
           (await Chapter.countDocuments({ course: course._id }));
         const realReads = cStats.totalViews || 0;
-        const publicationRate = chapterCount > 0
-          ? Math.round(((cStats.publishedChapters || 0) / chapterCount) * 100)
-          : 0;
+        const publicationRate =
+          chapterCount > 0
+            ? Math.round(((cStats.publishedChapters || 0) / chapterCount) * 100)
+            : 0;
 
         return {
           id: course._id,
@@ -99,9 +151,17 @@ export const getDashboardStats = async (req, res) => {
     // 2. Secondary Platform Metrics
     const totalUsers = await User.countDocuments();
     const totalQuizzes = await QuizQuestion.countDocuments({ type: "quiz" });
-    const totalFlashcards = await QuizQuestion.countDocuments({ type: "quiz", flashcardEnabled: { $ne: false } });
-    const totalCheatsheets = await Article.countDocuments({ type: "cheatsheet" });
-    const totalArticles = await Article.countDocuments({ type: { $in: ["article", null] }, status: "published" });
+    const totalFlashcards = await QuizQuestion.countDocuments({
+      type: "quiz",
+      flashcardEnabled: { $ne: false },
+    });
+    const totalCheatsheets = await Article.countDocuments({
+      type: "cheatsheet",
+    });
+    const totalArticles = await Article.countDocuments({
+      type: { $in: ["article", null] },
+      status: "published",
+    });
 
     // 3. Real readership analytics. Chapter counters are all-time only, so the
     // dashboard intentionally compares courses instead of inventing a timeline.
@@ -177,7 +237,7 @@ export const getDashboardStats = async (req, res) => {
       {
         label: "Total Site Visits",
         value: totalSiteVisits.toLocaleString(),
-        trend: "All time",
+        trend: siteVisitsTrend,
         icon: "TrendingUp",
         description: "One count for every tracked page visit",
       },

@@ -4,6 +4,8 @@ import Chapter from "../models/Chapter.js";
 import Question from "../models/Question.js";
 import { logActivity } from "../services/activity.service.js";
 import { formatCanonicalUrl } from "../utils/canonical.js";
+import { resolvePublicAsset } from "../services/asset.service.js";
+import { removeEntityAssetUsages, syncEntityAssetUsages } from "../services/assetUsage.service.js";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -413,6 +415,7 @@ export const createCourse = async (req, res) => {
       level,
       duration,
       thumbnail,
+      thumbnailAsset,
       learningOutcomes,
       order,
       status,
@@ -456,7 +459,8 @@ export const createCourse = async (req, res) => {
     const finalCanonicalUrl = formatCanonicalUrl("/courses", canonicalUrl, slug);
     const finalInterviewCanonicalUrl = formatCanonicalUrl(`/${slug}/interview-questions`, interviewCanonicalUrl, "");
 
-    const finalThumbnail = req.file ? `/uploads/articles/${req.file.filename}` : (thumbnail || "");
+    const selectedAsset = thumbnailAsset ? await resolvePublicAsset(thumbnailAsset, "image") : null;
+    const finalThumbnail = req.file ? `/uploads/articles/${req.file.filename}` : (selectedAsset?.url || thumbnail || "");
 
     const course = await Course.create({
       slug,
@@ -466,6 +470,7 @@ export const createCourse = async (req, res) => {
       level: level || "Beginner - Advanced",
       duration: duration || "Self-paced",
       thumbnail: finalThumbnail,
+      thumbnailAsset: selectedAsset?.asset._id || null,
       learningOutcomes: typeof learningOutcomes === "string" ? (() => { try { return JSON.parse(learningOutcomes); } catch { return []; } })() : (learningOutcomes || []),
       seoTitle: seoTitle || "",
       seoDescription: seoDescription || "",
@@ -483,6 +488,14 @@ export const createCourse = async (req, res) => {
       relatedCourses: typeof relatedCourses === "string" ? (() => { try { return JSON.parse(relatedCourses); } catch { return []; } })() : (Array.isArray(relatedCourses) ? relatedCourses : []),
       relatedArticles: typeof relatedArticles === "string" ? (() => { try { return JSON.parse(relatedArticles); } catch { return []; } })() : (Array.isArray(relatedArticles) ? relatedArticles : []),
       popularChapterIds: typeof popularChapterIds === "string" ? (() => { try { return JSON.parse(popularChapterIds); } catch { return []; } })() : (Array.isArray(popularChapterIds) ? popularChapterIds : []),
+    });
+    await syncEntityAssetUsages({
+      entityType: "course",
+      entityId: course._id,
+      entityTitle: course.title,
+      entityStatus: course.status,
+      route: `/courses/${course._id}/edit`,
+      references: course.thumbnailAsset ? [{ asset: course.thumbnailAsset, field: "thumbnail" }] : [],
     });
     await logActivity({ actor: req.user, action: "course.created", entityType: "course", entityId: course._id, entityTitle: course.title, description: "created", severity: "info", url: `/courses/${course._id}` });
 
@@ -539,6 +552,7 @@ export const updateCourse = async (req, res) => {
 
     if (req.file) {
       updates.thumbnail = `/uploads/articles/${req.file.filename}`;
+      updates.thumbnailAsset = null;
     }
 
     if (req.body.learningOutcomes !== undefined) {
@@ -588,6 +602,16 @@ export const updateCourse = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: "Course not found." });
+    }
+
+    if (!req.file && req.body.thumbnailAsset !== undefined) {
+      if (req.body.thumbnailAsset) {
+        const selectedAsset = await resolvePublicAsset(req.body.thumbnailAsset, "image");
+        updates.thumbnailAsset = selectedAsset.asset._id;
+        updates.thumbnail = selectedAsset.url;
+      } else {
+        updates.thumbnailAsset = null;
+      }
     }
 
     if (req.body.slug !== undefined) {
@@ -641,6 +665,14 @@ export const updateCourse = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Course not found." });
     }
+    await syncEntityAssetUsages({
+      entityType: "course",
+      entityId: course._id,
+      entityTitle: course.title,
+      entityStatus: course.status,
+      route: `/courses/${course._id}/edit`,
+      references: course.thumbnailAsset ? [{ asset: course.thumbnailAsset, field: "thumbnail" }] : [],
+    });
     const seoChanged = ["seoTitle", "seoDescription", "keywords", "canonicalUrl", "interviewSeoTitle", "interviewSeoDescription"].some((key) => updates[key] !== undefined);
     await logActivity({ actor: req.user, action: seoChanged ? "course.seo_updated" : "course.updated", entityType: "course", entityId: course._id, entityTitle: course.title, description: seoChanged ? "changed SEO metadata for" : "updated", severity: seoChanged ? "important" : "info", before: previous ? { title: previous.title, status: previous.status } : undefined, after: { changedFields: Object.keys(updates).filter((key) => key !== "updatedAt") }, url: `/courses/${course._id}` });
 
@@ -675,6 +707,7 @@ export const deleteCourse = async (req, res) => {
     // Delete all associated chapters
     await Chapter.deleteMany({ course: id });
     await Course.findByIdAndDelete(id);
+    await removeEntityAssetUsages("course", course._id);
     await logActivity({ actor: req.user, action: "course.deleted", entityType: "course", entityId: course._id, entityTitle: course.title, description: "permanently deleted", severity: "critical", url: "/courses" });
 
     res

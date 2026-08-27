@@ -37,10 +37,7 @@ export async function generateMetadata({ params }) {
     ].filter(Boolean)),
   );
   const slug = course.slug || courseId;
-  const canonical = absoluteUrl(
-    course.canonicalUrl,
-    coursePath(course, courseId),
-  );
+  const canonical = absoluteUrl(null, coursePath(course, courseId));
   const image = course.thumbnail
     ? assetUrl(course.thumbnail)
     : absoluteUrl("", `/courses/${encodeURIComponent(slug)}/opengraph-image`);

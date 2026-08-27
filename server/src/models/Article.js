@@ -51,6 +51,11 @@ const articleSchema = new Schema({
     type: String,
     default: "",
   },
+  imageAsset: {
+    type: Schema.Types.ObjectId,
+    ref: "Asset",
+    default: null,
+  },
   topic: [
     {
       type: Schema.Types.ObjectId,

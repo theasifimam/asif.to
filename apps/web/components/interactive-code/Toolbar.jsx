@@ -363,7 +363,7 @@ function Toolbar({
           <img
             src="/logo.png"
             alt="asif.to logo"
-            className="h-5 w-5 rounded-lg object-contain shadow-xs transition-transform group-hover:scale-105"
+            className="h-5 w-5 rounded-lg object-contain transition-transform group-hover:scale-105"
           />
           <span className="font-outfit text-xs font-black tracking-tight leading-none sm:text-sm">
             asif<span className="text-blue-500">.to</span>

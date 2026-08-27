@@ -22,7 +22,8 @@
     "seed:courses": "node src/scripts/seed-courses.js",
     "seed:categories": "node src/scripts/seed-course-categories.js",
     "seed:dsa": "node src/scripts/seed_dsa_course.js",
-    "export:quiz": "node src/scripts/export-course-quiz-data.js"
+    "export:quiz": "node src/scripts/export-course-quiz-data.js",
+    "assets:index": "node src/scripts/index-existing-assets.js"
   },
   "keywords": [],
   "author": "",

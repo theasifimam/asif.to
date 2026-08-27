@@ -4,6 +4,7 @@ export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({
     "content.read", "articles.create", "articles.edit_own", "analytics.view",
     "topics.view", "interview_questions.view", "courses.view",
     "cheatsheets.view", "question_bank.view", "messages.view", "messages.send", "messages.attach",
+    "assets.view", "assets.upload",
   ],
   editor: [
     "content.read", "articles.create", "articles.edit_own", "articles.edit_all",
@@ -13,6 +14,7 @@ export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({
     "question_bank.view", "question_bank.manage", "planner.view",
     "planner.manage", "analytics.view", "seo.view", "users.view",
     "messages.view", "messages.send", "messages.attach", "messages.pin",
+    "assets.view", "assets.upload", "assets.manage",
   ],
   admin: [
     "content.read", "articles.create", "articles.edit_own", "articles.edit_all",
@@ -23,6 +25,7 @@ export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({
     "analytics.view", "seo.view", "users.view", "users.create", "users.edit",
     "users.suspend", "users.delete", "authors.manage", "invitations.manage",
     "playground.manage", "social_integrations.manage", "messages.view", "messages.send", "messages.channels.manage", "messages.attach", "messages.pin", "messages.moderate",
+    "assets.view", "assets.upload", "assets.manage",
   ],
   super_admin: ["*"],
 });
@@ -38,6 +41,7 @@ export const hasPermission = (user, permission) => {
 };
 
 const routeRules = [
+  [/^\/files(?:\/|$)/, "assets.view"],
   [/^\/messages(?:\/|$)/, "messages.view"],
   [/^\/activity(?:\/|$)/, "users.view"],
   [/^\/notifications(?:\/|$)/, "articles.create"],

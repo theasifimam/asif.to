@@ -24,6 +24,27 @@ export async function generateMetadata({ params }) {
     return { title: "Redirecting...", robots: { index: false, follow: false } };
   }
 
+  // Check if this slug is a course — if so, don't emit noindex.
+  // Google must be allowed to follow the 301 redirect to /courses/:slug.
+  const isStaticCourse =
+    TECH_STACKS.some((t) => t.id?.toLowerCase() === rawSlug.toLowerCase()) ||
+    COURSES.some(
+      (c) =>
+        c.id?.toLowerCase() === rawSlug.toLowerCase() ||
+        c.slug?.toLowerCase() === rawSlug.toLowerCase() ||
+        c.techId?.toLowerCase() === rawSlug.toLowerCase(),
+    );
+
+  const dynamicCourse = !isStaticCourse ? await getCourse(rawSlug) : null;
+
+  if (isStaticCourse || dynamicCourse) {
+    const courseSlug = dynamicCourse?.slug || rawSlug;
+    return {
+      title: "Redirecting...",
+      alternates: { canonical: `/courses/${encodeURIComponent(courseSlug)}` },
+    };
+  }
+
   return {
     title: `${cleanUsername} - Profile | asif.to`,
     description: `View ${cleanUsername}'s learning progress and profile on asif.to.`,

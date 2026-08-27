@@ -29,6 +29,7 @@ import activityRoutes from "./routes/activity.routes.js";
 import messagingRoutes from "./routes/messaging.routes.js";
 import mediaAuditRoutes from "./routes/mediaAudit.routes.js";
 import relatedContentRoutes from "./routes/relatedContent.routes.js";
+import assetRoutes from "./routes/asset.routes.js";
 // ASIF_LEARNING_JOURNEY_V1:server-import
 
 import socialPostRoutes from "./routes/socialPost.routes.js";
@@ -70,7 +71,21 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Serve static field from uploads directory
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "../uploads"), {
+    setHeaders: (res, filePath) => {
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      const normalized = filePath.replace(/\\/g, "/");
+      if (
+        normalized.includes("/uploads/assets/") &&
+        /\.(?:html?|jsx?|tsx?|css|py|java|cpp|md|json|zip|svg)$/i.test(normalized)
+      ) {
+        res.setHeader("Content-Disposition", `attachment; filename="${path.basename(filePath).replace(/["\\]/g, "")}"`);
+      }
+    },
+  }),
+);
 
 // ─── Routes ────────────────────────────────────────────────────────────────
 app.get("/health", (req, res) => {
@@ -109,6 +124,7 @@ app.use("/api/v1/activity", activityRoutes);
 app.use("/api/v1/messaging", messagingRoutes);
 app.use("/api/v1/media-audit", mediaAuditRoutes);
 app.use("/api/v1/related-content", relatedContentRoutes);
+app.use("/api/v1/assets", assetRoutes);
 // ASIF_LEARNING_JOURNEY_V1:server-mount
 
 app.use("/api/v1/social-posts", socialPostRoutes);
@@ -120,10 +136,13 @@ app.use((error, _req, res, next) => {
   if (error instanceof multer.MulterError) {
     const isTooLarge = error.code === "LIMIT_FILE_SIZE";
     const isMessageAttachment = error.field === "files";
+    const isAssetUpload = req.originalUrl?.startsWith("/api/v1/assets/upload");
     return res.status(isTooLarge ? 413 : 400).json({
       success: false,
       code: error.code,
-      message: isTooLarge && isMessageAttachment
+      message: isTooLarge && isAssetUpload
+        ? `Media Library files can be up to ${process.env.ASSET_MAX_FILE_SIZE_MB || 25} MB each.`
+        : isTooLarge && isMessageAttachment
         ? "Message attachments can be up to 10 MB each."
         : isTooLarge
         ? "The selected image is too large. Avatars support up to 15 MB and article images up to 25 MB before compression."
@@ -142,6 +161,9 @@ app.use((error, _req, res, next) => {
   }
   if (["INVALID_ATTACHMENT_TYPE", "INVALID_ATTACHMENT_CONTENT"].includes(error.code)) {
     return res.status(400).json({ success: false, code: error.code, message: error.message || "The attachment is not allowed." });
+  }
+  if (["INVALID_ASSET_TYPE", "INVALID_ASSET_CONTENT", "UNSAFE_SVG"].includes(error.code)) {
+    return res.status(400).json({ success: false, code: error.code, message: error.message });
   }
   return next(error);
 });

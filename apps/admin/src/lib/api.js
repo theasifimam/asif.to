@@ -32,6 +32,9 @@ async function handleResponse(response) {
     // Return error details without forcing a logout to prevent unintended data loss in editors
     return {
       success: false,
+      status: response.status,
+      code: errorData.code,
+      data: errorData.data,
       error:
         errorData.message || `Request failed with status ${response.status}`,
     };
@@ -571,6 +574,68 @@ export const activityApi = {
     apiGet(`/activity/notifications?${new URLSearchParams(params)}`),
   markRead: (id) => apiPatch(`/activity/notifications/${id}/read`),
   markAllRead: () => apiPatch("/activity/notifications/read-all"),
+};
+
+/** Centralized Media Library */
+export const assetsApi = {
+  list: (params = {}) => apiGet(`/assets?${new URLSearchParams(params)}`),
+  uploaders: () => apiGet("/assets/uploaders"),
+  get: (id) => apiGet(`/assets/${id}`),
+  usages: (id) => apiGet(`/assets/${id}/usages`),
+  folders: (params = {}) => apiGet(`/assets/folders?${new URLSearchParams(params)}`),
+  folder: (id) => apiGet(`/assets/folders/${id}`),
+  createFolder: (data) => apiPost("/assets/folders", data),
+  updateFolder: (id, data) => apiPatch(`/assets/folders/${id}`, data),
+  trashFolder: (id) => apiPost(`/assets/folders/${id}/trash`),
+  restoreFolder: (id) => apiPost(`/assets/folders/${id}/restore`),
+  deleteFolderPermanently: (id) => apiDelete(`/assets/folders/${id}/permanent`),
+  update: (id, data) => apiPatch(`/assets/${id}`, data),
+  trash: (id) => apiPost(`/assets/${id}/trash`),
+  restore: (id) => apiPost(`/assets/${id}/restore`),
+  deletePermanently: (id) => apiDelete(`/assets/${id}/permanent`),
+  bulk: async (action, ids, extra = {}) => {
+    const response = await apiPost("/assets/bulk", { action, ids, ...extra });
+    if (response.success && response.data?.success === false) {
+      return {
+        success: false,
+        error: response.data.message || "One or more files could not be updated.",
+        data: response.data.data,
+      };
+    }
+    return response;
+  },
+  upload: (file, options = {}, onProgress) =>
+    new Promise((resolve) => {
+      const request = new XMLHttpRequest();
+      request.open("POST", buildUrl("/assets/upload"));
+      const token = getAuthHeaders().Authorization;
+      if (token) request.setRequestHeader("Authorization", token);
+      request.setRequestHeader("ngrok-skip-browser-warning", "true");
+      request.withCredentials = true;
+      request.upload.onprogress = (event) => {
+        if (event.lengthComputable) onProgress?.(Math.round((event.loaded / event.total) * 100));
+      };
+      request.onload = () => {
+        try {
+          const payload = JSON.parse(request.responseText);
+          resolve({
+            success: request.status >= 200 && request.status < 300 && payload.success !== false,
+            status: request.status,
+            data: payload.data,
+            error: payload.message,
+          });
+        } catch {
+          resolve({ success: false, status: request.status, error: "Upload failed." });
+        }
+      };
+      request.onerror = () => resolve({ success: false, error: "Upload failed." });
+      const form = new FormData();
+      form.append("files", file);
+      if (options.folderId) form.append("folderId", options.folderId);
+      form.append("visibility", options.visibility || "public");
+      if (options.duplicateStrategy) form.append("duplicateStrategy", options.duplicateStrategy);
+      request.send(form);
+    }),
 };
 
 export const messagingApi = {

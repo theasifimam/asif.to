@@ -10,7 +10,7 @@ export default function AuthHeader() {
         <img
           src="/logo.png"
           alt="asif.to"
-          className="w-8 h-8 rounded-xl object-contain shadow-sm shrink-0"
+          className="w-8 h-8 rounded-xl object-contain shrink-0"
         />
         <span className="font-outfit font-black text-xl tracking-tight text-foreground">
           asif

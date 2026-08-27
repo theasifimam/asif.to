@@ -2,6 +2,11 @@ export const revalidate = 3600; // revalidate every hour
 
 const STATIC_ROUTES = [
   {
+    path: "/courses",
+    priority: 0.9,
+    changeFrequency: "daily",
+  },
+  {
     path: "/practice",
     priority: 0.9,
     changeFrequency: "weekly",

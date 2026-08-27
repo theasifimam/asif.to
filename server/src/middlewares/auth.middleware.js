@@ -88,6 +88,14 @@ export const protect = async (req, res, next) => {
   }
 };
 
+/** Attach a user when credentials are present without requiring authentication. */
+export const optionalProtect = (req, res, next) => {
+  const hasCredentials =
+    req.headers.authorization?.startsWith("Bearer") || req.cookies?.token;
+  if (!hasCredentials) return next();
+  return protect(req, res, next);
+};
+
 /**
  * Restrict routes to specific roles
  */

@@ -45,7 +45,7 @@ export default function SigninPage() {
         <img
           src="/logo.png"
           alt="asif.to"
-          className="w-12 h-12 rounded-xl object-contain shadow-sm lg:hidden"
+          className="w-12 h-12 rounded-xl object-contain lg:hidden"
         />
         <div className="flex items-center gap-2">
           <h1 className="font-outfit font-black text-2xl tracking-tight text-zinc-900 dark:text-white">

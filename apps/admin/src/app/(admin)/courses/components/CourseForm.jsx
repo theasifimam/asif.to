@@ -37,6 +37,8 @@ import AdminFormShell, {
 import { CanonicalUrlInput } from "@/components/admin";
 import { useAuth } from "@/contexts/AuthContext";
 import { getImageUrl } from "@/lib/utils";
+import { getAssetUrl } from "@/lib/assets";
+import AssetPicker from "@/components/assets/AssetPicker";
 
 const initialForm = {
   title: "",
@@ -46,6 +48,7 @@ const initialForm = {
   level: "Beginner - Advanced",
   duration: "Self-paced",
   thumbnail: "",
+  thumbnailAsset: "",
   learningOutcomes: "",
   seoTitle: "",
   seoDescription: "",
@@ -98,6 +101,7 @@ export default function CourseForm({ courseId = null }) {
   const [courseChapters, setCourseChapters] = useState([]);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [selectedImageAsset, setSelectedImageAsset] = useState(null);
   const [adminUsers, setAdminUsers] = useState([]);
   const [overrideAuthorId, setOverrideAuthorId] = useState("");
   const fileRef = useRef(null);
@@ -163,6 +167,9 @@ export default function CourseForm({ courseId = null }) {
       if (course?.thumbnail) {
         setImagePreview(getImageUrl(course.thumbnail));
       }
+      if (course?.thumbnailAsset) {
+        setSelectedImageAsset({ _id: course.thumbnailAsset?._id || course.thumbnailAsset });
+      }
       setSlugEdited(true);
       setLoading(false);
     });
@@ -187,6 +194,8 @@ export default function CourseForm({ courseId = null }) {
     const file = event.target.files?.[0];
     if (!file) return;
     setImageFile(file);
+    setSelectedImageAsset(null);
+    update("thumbnailAsset", "");
     setImagePreview(URL.createObjectURL(file));
   };
 
@@ -241,6 +250,7 @@ export default function CourseForm({ courseId = null }) {
       } else {
         data.append("thumbnail", form.thumbnail);
       }
+      if (form.thumbnailAsset) data.append("thumbnailAsset", form.thumbnailAsset);
 
       return data;
     }
@@ -450,6 +460,19 @@ export default function CourseForm({ courseId = null }) {
                 >
                   <ImagePlus className="h-4 w-4" /> Choose course image
                 </button>
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-zinc-400"><span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />or reuse<span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" /></div>
+                <AssetPicker
+                  value={selectedImageAsset}
+                  accept="image/*"
+                  label="Choose from Library"
+                  onChange={(asset) => {
+                    setSelectedImageAsset(asset);
+                    setImageFile(null);
+                    update("thumbnailAsset", asset._id);
+                    update("thumbnail", getAssetUrl(asset));
+                    setImagePreview(getAssetUrl(asset, { preview: true }));
+                  }}
+                />
                 {imagePreview && (
                   <div className="relative overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900">
                     <img
@@ -462,6 +485,8 @@ export default function CourseForm({ courseId = null }) {
                       onClick={() => {
                         setImagePreview("");
                         setImageFile(null);
+                        setSelectedImageAsset(null);
+                        update("thumbnailAsset", "");
                         update("thumbnail", "");
                       }}
                       className="absolute right-2 top-2 rounded-full bg-black/60 p-1.5 text-white hover:bg-black/80 transition-colors"
@@ -480,6 +505,8 @@ export default function CourseForm({ courseId = null }) {
                     onChange={(event) => {
                       const val = event.target.value;
                       update("thumbnail", val);
+                      update("thumbnailAsset", "");
+                      setSelectedImageAsset(null);
                       if (!imageFile) setImagePreview(getImageUrl(val));
                     }}
                     placeholder="https://... or uploaded image filename"

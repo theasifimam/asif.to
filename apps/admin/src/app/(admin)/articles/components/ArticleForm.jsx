@@ -18,6 +18,8 @@ import { CanonicalUrlInput } from "@/components/admin";
 import { articlesApi, articleTopicsApi, coursesApi, usersApi } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { getImageUrl } from "@/lib/utils";
+import { getAssetUrl } from "@/lib/assets";
+import AssetPicker from "@/components/assets/AssetPicker";
 import { Button, Input, Label, Textarea } from "@/components/ui";
 import {
   Select,
@@ -46,6 +48,7 @@ export default function ArticleForm({ articleId = null }) {
     content: "",
     topics: [],
     image: "",
+    imageAsset: "",
     status: "draft",
     seoTitle: "",
     seoDescription: "",
@@ -55,6 +58,7 @@ export default function ArticleForm({ articleId = null }) {
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [selectedImageAsset, setSelectedImageAsset] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -86,6 +90,7 @@ export default function ArticleForm({ articleId = null }) {
           content: article.content || "",
           topics: (article.topic || []).map((item) => item._id || item),
           image: article.image || "",
+          imageAsset: article.imageAsset?._id || article.imageAsset || "",
           status: article.status || "draft",
           seoTitle: article.seoTitle || "",
           seoDescription: article.seoDescription || "",
@@ -99,6 +104,7 @@ export default function ArticleForm({ articleId = null }) {
         const currentAuthorId = article.author?._id || article.author || "";
         setOverrideAuthorId(String(currentAuthorId));
         setImagePreview(getImageUrl(article.image));
+        if (article.imageAsset) setSelectedImageAsset({ _id: article.imageAsset?._id || article.imageAsset });
       } else if (articleId)
         toast.error(articleResponse?.error || "Unable to load article");
       setLoading(false);
@@ -121,6 +127,8 @@ export default function ArticleForm({ articleId = null }) {
     const file = event.target.files?.[0];
     if (!file) return;
     setImageFile(file);
+    setSelectedImageAsset(null);
+    update("imageAsset", "");
     setImagePreview(URL.createObjectURL(file));
   };
 
@@ -128,7 +136,7 @@ export default function ArticleForm({ articleId = null }) {
     if (!form.title.trim() || !form.content.replace(/<[^>]*>/g, "").trim())
       return toast.error("Title and content are required");
     if (!form.topics.length) return toast.error("Select at least one topic");
-    if (!articleId && !imageFile)
+    if (!articleId && !imageFile && !form.imageAsset)
       return toast.error("Hero image is required for a new article");
     setSaving(true);
     const data = new FormData();
@@ -142,6 +150,7 @@ export default function ArticleForm({ articleId = null }) {
     form.topics.forEach((topic) => data.append("topic", topic));
     (form.relatedCourses || []).forEach((c) => data.append("relatedCourses", c));
     if (imageFile) data.append("image", imageFile);
+    if (form.imageAsset) data.append("imageAsset", form.imageAsset);
     // Super-admin author override
     if (isSuperAdmin && overrideAuthorId) data.append("authorId", overrideAuthorId);
     const response = articleId
@@ -323,6 +332,18 @@ export default function ArticleForm({ articleId = null }) {
               >
                 <ImagePlus className="h-4 w-4" /> Choose image
               </button>
+              <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-zinc-400"><span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />or reuse<span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" /></div>
+              <AssetPicker
+                value={selectedImageAsset}
+                accept="image/*"
+                label="Choose from Library"
+                onChange={(asset) => {
+                  setSelectedImageAsset(asset);
+                  setImageFile(null);
+                  update("imageAsset", asset._id);
+                  setImagePreview(getAssetUrl(asset, { preview: true }));
+                }}
+              />
               {imagePreview && (
                 <div className="relative overflow-hidden rounded-2xl">
                   <img
@@ -335,6 +356,8 @@ export default function ArticleForm({ articleId = null }) {
                     onClick={() => {
                       setImagePreview("");
                       setImageFile(null);
+                      setSelectedImageAsset(null);
+                      update("imageAsset", "");
                     }}
                     className="absolute right-2 top-2 rounded-full bg-black/60 p-1 text-white"
                   >

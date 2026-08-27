@@ -38,6 +38,10 @@ export const PERMISSION_CATALOG = Object.freeze([
   ["settings.manage", "Manage system settings", "System"],
   ["playground.manage", "Manage interactive code playground", "System"],
   ["social_integrations.manage", "Connect and manage social publishing accounts", "System"],
+  ["assets.view", "View and use the media library", "Media library"],
+  ["assets.upload", "Upload files to the media library", "Media library"],
+  ["assets.manage", "Organize and edit media library files", "Media library"],
+  ["assets.delete_permanent", "Permanently delete media library files", "Media library"],
 ]);
 
 export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({
@@ -46,6 +50,7 @@ export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({
     "content.read", "articles.create", "articles.edit_own", "analytics.view",
     "topics.view", "interview_questions.view", "courses.view",
     "cheatsheets.view", "question_bank.view", "messages.view", "messages.send", "messages.attach",
+    "assets.view", "assets.upload",
   ],
   editor: [
     "content.read", "articles.create", "articles.edit_own", "articles.edit_all",
@@ -55,9 +60,10 @@ export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({
     "question_bank.view", "question_bank.manage", "planner.view",
     "planner.manage", "analytics.view", "seo.view", "users.view",
     "messages.view", "messages.send", "messages.attach", "messages.pin",
+    "assets.view", "assets.upload", "assets.manage",
   ],
   admin: PERMISSION_CATALOG.map(([key]) => key).filter(
-    (key) => key !== "roles.manage" && key !== "settings.manage",
+    (key) => !["roles.manage", "settings.manage", "assets.delete_permanent"].includes(key),
   ),
   super_admin: ["*"],
 });

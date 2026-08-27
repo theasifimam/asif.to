@@ -65,6 +65,11 @@ const courseSchema = new Schema(
       type: String,
       default: "",
     },
+    thumbnailAsset: {
+      type: Schema.Types.ObjectId,
+      ref: "Asset",
+      default: null,
+    },
     // What You Will Learn — list of skill bullet points
     learningOutcomes: [
       {

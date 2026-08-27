@@ -155,7 +155,7 @@ export default function Header() {
                   <img
                     src="/logo.png"
                     alt="asif.to logo"
-                    className="w-8 h-8 rounded-xl object-contain shadow-sm group-hover:scale-105 transition-transform"
+                    className="w-8 h-8 rounded-xl object-contain group-hover:scale-105 transition-transform"
                   />
                 </div>
                 <div className="flex flex-col">

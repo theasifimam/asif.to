@@ -318,7 +318,7 @@ export default function AuthCard({
             <img
               src="/logo.png"
               alt="asif.to"
-              className="w-7 h-7 rounded-xl object-contain shadow-xs shrink-0"
+              className="w-7 h-7 rounded-xl object-contain shrink-0"
             />
             <span className="font-outfit font-black text-lg tracking-tight text-foreground">
               asif<span className="text-blue-600 dark:text-blue-400">.to</span>

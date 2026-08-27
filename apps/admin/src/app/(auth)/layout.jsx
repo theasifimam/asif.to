@@ -59,7 +59,7 @@ export default function AuthLayout({ children }) {
           <img
             src="/logo.png"
             alt="asif.to"
-            className="w-12 h-12 rounded-2xl object-contain shadow-sm border border-zinc-200 dark:border-zinc-800"
+            className="w-12 h-12 rounded-2xl object-contain border border-zinc-200 dark:border-zinc-800"
           />
           <div className="flex items-center gap-2">
             <span className="font-outfit font-black text-3xl tracking-tight text-zinc-900 dark:text-white">

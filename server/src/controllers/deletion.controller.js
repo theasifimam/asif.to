@@ -8,6 +8,7 @@ import Question from "../models/Question.js";
 import Article from "../models/Article.js";
 import User from "../models/User.js";
 import Notification from "../models/Notification.js";
+import AssetUsage from "../models/AssetUsage.js";
 import DeletionRequest from "../models/DeletionRequest.js";
 import { logActivity } from "../services/activity.service.js";
 import {
@@ -999,6 +1000,7 @@ async function executeApprovedDeletion(request, approver) {
             _id: { $in: cheatsheetIds },
           }).session(session);
           result.cheatsheets = deletion.deletedCount || 0;
+          await AssetUsage.deleteMany({ entityType: "article", entityId: { $in: cheatsheetIds } }).session(session);
         }
 
         const deletedQuestionIds = [
@@ -1058,6 +1060,7 @@ async function executeApprovedDeletion(request, approver) {
           { session },
         );
         result.course = courseDeletion.deletedCount || 0;
+        await AssetUsage.deleteMany({ entityType: "course", entityId: course._id }).session(session);
 
         if (result.course !== 1) {
           throw new Error("Course deletion did not complete.");

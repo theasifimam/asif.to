@@ -23,6 +23,7 @@ import {
   ScrollText,
   Image,
   Share2,
+  Files,
 } from "lucide-react";
 import AdminGlobalSearch from "@/components/search/AdminGlobalSearch";
 import { useAuth } from "@/contexts/AuthContext";
@@ -131,6 +132,13 @@ const NAV_ITEMS = [
         icon: Image,
         permission: "articles.create",
         description: "Create, publish & connect accounts",
+      },
+      {
+        name: "Files",
+        href: "/files",
+        icon: Files,
+        permission: "assets.view",
+        description: "Reusable media & downloads",
       },
     ],
   },
@@ -331,6 +339,8 @@ export default function AdminLayout({ children }) {
   const requiredPermission = permissionForPath(pathname);
   const canViewPage = hasPermission(user, requiredPermission);
   const isMessagesRoute = pathname?.startsWith("/messages");
+  const isFilesRoute = pathname?.startsWith("/files");
+  const isFullAppRoute = isMessagesRoute || isFilesRoute;
 
   return (
     <MessagingProvider>
@@ -352,7 +362,7 @@ export default function AdminLayout({ children }) {
           {/* Global Minimal Header - Absolute over content for zero layout shift during scroll */}
           <header
             className={`absolute top-0 left-0 right-0 z-40 flex h-16 shrink-0 items-center justify-between bg-zinc-100 backdrop-blur-xl dark:bg-[#09090b]/85 dark:backdrop-blur-xl px-4 transition-all duration-300 ease-out sm:px-6 md:px-8 lg:px-10 ${
-              isMessagesRoute ? "hidden" : ""
+              isFullAppRoute ? "hidden" : ""
             } ${
               isNavVisible
                 ? "translate-y-0 opacity-100"
@@ -368,7 +378,7 @@ export default function AdminLayout({ children }) {
                 <img
                   src="/logo.png"
                   alt="asif.to logo"
-                  className="w-7 h-7 rounded-xl object-contain shadow-xs shrink-0"
+                  className="w-7 h-7 rounded-xl object-contain shrink-0"
                 />
                 <span className="font-outfit font-black text-sm tracking-tight text-zinc-950 dark:text-white leading-none">
                   asif
@@ -410,8 +420,8 @@ export default function AdminLayout({ children }) {
           {/* Content Viewport with constant top and bottom padding */}
           <main
             ref={mainRef}
-            className={`min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain bg-[#f3f4f6] dark:bg-[#09090b] ${
-              !isMessagesRoute ? "pt-16 pb-24 lg:pb-8" : "pt-0 pb-0"
+            className={`min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain scrollbar-none bg-[#f3f4f6] dark:bg-[#09090b] ${
+              !isFullAppRoute ? "pt-16 pb-24 lg:pb-8" : "pt-0 pb-0 flex flex-col h-full"
             }`}
           >
             {canViewPage ? (
@@ -429,7 +439,7 @@ export default function AdminLayout({ children }) {
         <MobileBottomNavbar
           navItems={visibleNavItems}
           user={user}
-          isVisible={isNavVisible && !isMessagesRoute}
+          isVisible={isNavVisible && !isFullAppRoute}
         />
 
         {/* Logout Confirmation Dialog */}

@@ -5,6 +5,8 @@ import fs from "fs";
 import { slugify } from "../utils/slugify.js";
 import { logActivity } from "../services/activity.service.js";
 import { formatCanonicalUrl } from "../utils/canonical.js";
+import { resolvePublicAsset } from "../services/asset.service.js";
+import { removeEntityAssetUsages, syncEntityAssetUsages } from "../services/assetUsage.service.js";
 
 /**
  * List all articles with optional filters and pagination
@@ -141,7 +143,7 @@ export const getArticleBySlug = async (req, res) => {
  */
 export const createArticle = async (req, res) => {
   try {
-    const { title, content, topic, status, seoTitle, seoDescription, keywords, canonicalUrl, type = "article", techId, order, relatedCourses, relatedChapters, relatedQuestions } = req.body;
+    const { title, content, topic, status, seoTitle, seoDescription, keywords, canonicalUrl, type = "article", techId, order, relatedCourses, relatedChapters, relatedQuestions, imageAsset } = req.body;
 
     if (!title || !content || !topic) {
       // Delete uploaded file if validation fails
@@ -150,13 +152,13 @@ export const createArticle = async (req, res) => {
       return;
     }
 
-    if (!req.file) {
+    if (!req.file && !imageAsset) {
       res.status(400).json({ success: false, message: "Article image is required." });
       return;
     }
 
-    // multer adds the file path to req.file
-    const imageUrl = `/uploads/articles/${req.file.filename}`;
+    const selectedAsset = imageAsset ? await resolvePublicAsset(imageAsset, "image") : null;
+    const imageUrl = req.file ? `/uploads/articles/${req.file.filename}` : selectedAsset.url;
 
     const articleStatus = status === "draft" ? "draft" : "published";
 
@@ -179,6 +181,7 @@ export const createArticle = async (req, res) => {
       author: req.user?._id,
       topic: Array.isArray(topic) ? topic : [topic],
       image: imageUrl,
+      imageAsset: selectedAsset?.asset._id || null,
       status: articleStatus,
       seoTitle: seoTitle || "", seoDescription: seoDescription || "", keywords: keywords || [], canonicalUrl: finalCanonicalUrl,
       techId: techId || "", order: Number(order) || 0,
@@ -187,6 +190,15 @@ export const createArticle = async (req, res) => {
       relatedQuestions: Array.isArray(relatedQuestions) ? relatedQuestions : [],
       readCount: 0,
       views: []
+    });
+
+    await syncEntityAssetUsages({
+      entityType: "article",
+      entityId: newArticle._id,
+      entityTitle: newArticle.title,
+      entityStatus: newArticle.status,
+      route: `/articles/edit/${newArticle._id}`,
+      references: newArticle.imageAsset ? [{ asset: newArticle.imageAsset, field: "image" }] : [],
     });
 
     await logActivity({ actor: req.user, action: "article.created", entityType: "article", entityId: newArticle._id, entityTitle: newArticle.title, description: "created", severity: "info", url: `/articles/edit/${newArticle._id}` });
@@ -205,7 +217,7 @@ export const createArticle = async (req, res) => {
 export const updateArticle = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, topic, status, seoTitle, seoDescription, keywords, canonicalUrl, type, techId, order, relatedCourses, relatedChapters, relatedQuestions, authorId } = req.body;
+    const { title, content, topic, status, seoTitle, seoDescription, keywords, canonicalUrl, type, techId, order, relatedCourses, relatedChapters, relatedQuestions, authorId, imageAsset } = req.body;
 
     const article = await Article.findById(id);
     if (!article) {
@@ -262,11 +274,20 @@ export const updateArticle = async (req, res) => {
 
     if (req.file) {
       // New image uploaded, delete old one and set new path
-      const oldImagePath = article.image.startsWith("/") ? article.image.slice(1) : article.image;
-      if (fs.existsSync(oldImagePath)) {
+      const oldImagePath = article.image?.startsWith("/") ? article.image.slice(1) : article.image;
+      if (!article.imageAsset && oldImagePath?.startsWith("uploads/articles/") && fs.existsSync(oldImagePath)) {
         fs.unlinkSync(oldImagePath);
       }
       updateData.image = `/uploads/articles/${req.file.filename}`;
+      updateData.imageAsset = null;
+    } else if (imageAsset !== undefined) {
+      if (imageAsset) {
+        const selectedAsset = await resolvePublicAsset(imageAsset, "image");
+        updateData.imageAsset = selectedAsset.asset._id;
+        updateData.image = selectedAsset.url;
+      } else {
+        updateData.imageAsset = null;
+      }
     }
 
     const updatedArticle = await Article.findByIdAndUpdate(
@@ -274,6 +295,15 @@ export const updateArticle = async (req, res) => {
       updateData,
       { returnDocument: 'after', runValidators: true }
     ).populate("author", "fullName name email avatar").populate("topic", "name");
+
+    await syncEntityAssetUsages({
+      entityType: "article",
+      entityId: updatedArticle._id,
+      entityTitle: updatedArticle.title,
+      entityStatus: updatedArticle.status,
+      route: `/articles/edit/${updatedArticle._id}`,
+      references: updatedArticle.imageAsset ? [{ asset: updatedArticle.imageAsset, field: "image" }] : [],
+    });
 
     const seoChanged = ["seoTitle", "seoDescription", "keywords", "canonicalUrl"].some((key) => updateData[key] !== undefined);
     const statusChanged = updateData.status && updateData.status !== article.status;
@@ -315,6 +345,14 @@ export const publishArticle = async (req, res) => {
     article.status = "published";
     article.updatedAt = new Date();
     await article.save();
+    await syncEntityAssetUsages({
+      entityType: "article",
+      entityId: article._id,
+      entityTitle: article.title,
+      entityStatus: article.status,
+      route: `/articles/edit/${article._id}`,
+      references: article.imageAsset ? [{ asset: article.imageAsset, field: "image" }] : [],
+    });
     await logActivity({ actor: req.user, action: "article.published", entityType: "article", entityId: article._id, entityTitle: article.title, description: "published", severity: "important", targetUserId: article.author, before: { status: "draft" }, after: { status: "published" }, url: `/articles/edit/${article._id}` });
 
     res.status(200).json({ success: true, data: article, message: "Article published successfully." });
@@ -338,12 +376,13 @@ export const deleteArticle = async (req, res) => {
     }
 
     // Delete the image file if it exists
-    const imagePath = article.image.startsWith("/") ? article.image.slice(1) : article.image;
-    if (fs.existsSync(imagePath)) {
+    const imagePath = article.image?.startsWith("/") ? article.image.slice(1) : article.image;
+    if (!article.imageAsset && imagePath?.startsWith("uploads/articles/") && fs.existsSync(imagePath)) {
       fs.unlinkSync(imagePath);
     }
 
     await Article.findByIdAndDelete(id);
+    await removeEntityAssetUsages("article", article._id);
     await logActivity({ actor: req.user, action: "article.deleted", entityType: "article", entityId: article._id, entityTitle: article.title, description: "permanently deleted", severity: "critical", targetUserId: article.author, url: "/articles/published" });
 
     res.status(200).json({ success: true, message: "Article deleted successfully." });
