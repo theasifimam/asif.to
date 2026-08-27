@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -389,7 +395,7 @@ export default function HomePageClient({
               return (
                 <article
                   key={course._id || course.id}
-                  className="group flex w-[285px] sm:w-[320px] md:w-[340px] shrink-0 snap-start flex-col justify-between rounded-3xl border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 p-4 sm:p-5 shadow-xs hover:shadow-md transition-all"
+                  className="group flex w-71.25 sm:w-[320px] md:w-85 shrink-0 snap-start flex-col justify-between rounded-3xl border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 p-4 sm:p-5 shadow-xs hover:shadow-md transition-all"
                 >
                   <div>
                     {course.thumbnail ? (
@@ -483,7 +489,7 @@ export default function HomePageClient({
             })}
 
             {/* Catalog Pill Card */}
-            <article className="group relative flex w-[285px] sm:w-[320px] md:w-[340px] shrink-0 snap-start flex-col justify-between overflow-hidden rounded-3xl border border-blue-500/25 dark:border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/20 p-4 sm:p-5 shadow-xs hover:shadow-md hover:border-blue-500/50 transition-all duration-300">
+            <article className="group relative flex w-71.25 sm:w-[320px] md:w-85 shrink-0 snap-start flex-col justify-between overflow-hidden rounded-3xl border border-blue-500/25 dark:border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/20 p-4 sm:p-5 shadow-xs hover:shadow-md hover:border-blue-500/50 transition-all duration-300">
               <div className="flex flex-col">
                 <div className="mb-3 flex items-center justify-between">
                   <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-xs">

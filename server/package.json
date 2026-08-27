@@ -21,9 +21,8 @@
     "seed:css-course": "node src/scripts/seed-css-course.js",
     "seed:courses": "node src/scripts/seed-courses.js",
     "seed:categories": "node src/scripts/seed-course-categories.js",
-    "seed:interview": "node src/scripts/seed-interview-questions.js",
-    "export:quiz": "node src/scripts/export-course-quiz-data.js",
-    "update:mappings": "node src/scripts/update-question-mappings.js"
+    "seed:dsa": "node src/scripts/seed_dsa_course.js",
+    "export:quiz": "node src/scripts/export-course-quiz-data.js"
   },
   "keywords": [],
   "author": "",

@@ -49,12 +49,12 @@ const escapeHtml = (value) =>
 
 const highlightCode = (value, lang = "javascript") => {
   if (!value) return " ";
-  
+
   let validLang = lang;
   if (lang === "react" || lang === "nextjs") {
     validLang = "javascript";
   }
-  
+
   try {
     return hljs.highlight(value, { language: validLang }).value;
   } catch (e) {
@@ -111,7 +111,9 @@ export default function LocalChapterWorkspace({
 
   return (
     <section className="local-workspace rounded-3xl bg-white dark:bg-[#1e1e1e] text-zinc-900 dark:text-white overflow-hidden">
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         .local-workspace .hljs { color: #000000; }
         .local-workspace .hljs-keyword, .local-workspace .hljs-literal, .local-workspace .hljs-built_in, .local-workspace .hljs-tag .hljs-name { color: #0000ff; }
         .local-workspace .hljs-string, .local-workspace .hljs-doctag { color: #a31515; }
@@ -135,7 +137,9 @@ export default function LocalChapterWorkspace({
         .dark .local-workspace .hljs-attr, .dark .local-workspace .hljs-attribute { color: #9cdcfe; }
         .dark .local-workspace .hljs-punctuation, .dark .local-workspace .hljs-operator { color: #d4d4d4; }
         .dark .local-workspace .hljs-property { color: #9cdcfe; }
-      `}} />
+      `,
+        }}
+      />
       <header className="flex items-center justify-between px-4 py-3">
         <div className="min-w-0">
           <p className="text-[10px] font-black uppercase tracking-[0.15em] text-emerald-400">
@@ -158,7 +162,7 @@ export default function LocalChapterWorkspace({
             type="button"
             onClick={run}
             disabled={running}
-            className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-xs font-black hover:bg-blue-500 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-xs font-black hover:bg-blue-500 disabled:opacity-50 text-white"
           >
             {running ? (
               <Loader2 className="h-4 w-4 animate-spin" color={"#ffffff"} />
@@ -174,7 +178,9 @@ export default function LocalChapterWorkspace({
           aria-hidden="true"
           className="pointer-events-none col-start-1 row-start-1 m-0 whitespace-pre-wrap wrap-break-word p-4 font-mono text-sm leading-6 text-zinc-900 dark:text-zinc-100"
           dangerouslySetInnerHTML={{
-            __html: highlightCode(source, language) + (source.endsWith("\n") ? " " : ""),
+            __html:
+              highlightCode(source, language) +
+              (source.endsWith("\n") ? " " : ""),
           }}
         />
         <textarea

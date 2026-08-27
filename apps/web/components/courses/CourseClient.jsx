@@ -376,10 +376,10 @@ export default function CourseClient({ initialData }) {
             {examEnabled ? (
               <Link
                 href={`/courses/${activeCourseSlug}/final-exam`}
-                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-blue-500/5 hover:from-blue-500/10 hover:to-purple-500/10 transition-colors duration-200"
+                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 bg-linear-to-r from-blue-500/5 via-purple-500/5 to-blue-500/5 hover:from-blue-500/10 hover:to-purple-500/10 transition-colors duration-200"
               >
                 <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/25">
+                  <div className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-linear-to-br from-blue-600 to-purple-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/25">
                     <GraduationCap className="w-5 h-5" />
                   </div>
                   <div>
