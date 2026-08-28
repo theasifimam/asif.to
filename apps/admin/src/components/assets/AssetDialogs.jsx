@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AssetUploadPanel from "./AssetUploadPanel";
 
 export function AssetTextDialog({ open, onOpenChange, title, description, label, initialValue = "", confirmLabel = "Save", loading, onConfirm }) {
@@ -27,32 +26,6 @@ export function AssetTextDialog({ open, onOpenChange, title, description, label,
           <div className="space-y-2"><Label>{label}</Label><Input autoFocus value={value} onChange={(event) => setValue(event.target.value)} maxLength={120} /></div>
           <DialogFooter><Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button><Button type="submit" loading={loading} disabled={!value.trim()}>{confirmLabel}</Button></DialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-export function AssetMoveDialog({ open, onOpenChange, folders = [], currentFolderId, title = "Move files", loading, onConfirm }) {
-  const [folderId, setFolderId] = useState("root");
-  const handleOpenChange = (nextOpen) => {
-    if (nextOpen) setFolderId(currentFolderId || "root");
-    onOpenChange(nextOpen);
-  };
-  return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
-        <DialogHeader><DialogTitle>{title}</DialogTitle><DialogDescription>Moving changes organization only. Stable asset references and URLs remain unchanged.</DialogDescription></DialogHeader>
-        <div className="space-y-2">
-          <Label>Destination</Label>
-          <Select value={folderId} onValueChange={setFolderId}>
-            <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="root">All Files (root)</SelectItem>
-              {folders.map((folder) => <SelectItem key={folder._id} value={folder._id}>{folder.pathLabel || folder.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-        <DialogFooter><Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button><Button type="button" loading={loading} onClick={() => onConfirm(folderId === "root" ? null : folderId)}>Move</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -1,12 +1,14 @@
 "use client";
 
 import {
+  Copy,
   FolderInput,
   Heart,
   MoreHorizontal,
   Pencil,
   RotateCcw,
   Search,
+  Scissors,
   Trash2,
 } from "lucide-react";
 import {
@@ -23,30 +25,44 @@ export default function AssetItemMenu({
   scope,
   onAction,
 }) {
+  const selectAction = (action, folder = isFolder) => (event) => {
+    event.stopPropagation();
+    onAction(action, item, folder);
+  };
+
+  const stopItemInteraction = (event) => event.stopPropagation();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
           aria-label={`Actions for ${item.name}`}
-          onClick={(event) => event.stopPropagation()}
+          onClick={stopItemInteraction}
+          onPointerDown={stopItemInteraction}
+          onKeyDown={stopItemInteraction}
           className="rounded-full p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-white"
         >
           <MoreHorizontal className="h-4 w-4" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent
+        align="end"
+        onClick={stopItemInteraction}
+        onPointerDown={stopItemInteraction}
+        onKeyDown={stopItemInteraction}
+      >
         {scope === "trash" ? (
           <>
             <DropdownMenuItem
-              onSelect={() => onAction("restore", item, isFolder)}
+              onSelect={selectAction("restore")}
             >
               <RotateCcw /> Restore
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               variant="destructive"
-              onSelect={() => onAction("permanent", item, isFolder)}
+              onSelect={selectAction("permanent")}
             >
               <Trash2 /> Delete forever
             </DropdownMenuItem>
@@ -55,22 +71,28 @@ export default function AssetItemMenu({
           <>
             {!isFolder && (
               <DropdownMenuItem
-                onSelect={() => onAction("inspect", item, false)}
+                onSelect={selectAction("inspect", false)}
               >
                 <Search /> Preview details
               </DropdownMenuItem>
             )}
             <DropdownMenuItem
-              onSelect={() => onAction("rename", item, isFolder)}
+              onSelect={selectAction("rename")}
             >
               <Pencil /> Rename
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => onAction("move", item, isFolder)}>
+            <DropdownMenuItem onSelect={selectAction("copy")}>
+              <Copy /> Copy
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={selectAction("cut")}>
+              <Scissors /> Cut
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={selectAction("move")}>
               <FolderInput /> Move
             </DropdownMenuItem>
             {!isFolder && (
               <DropdownMenuItem
-                onSelect={() => onAction("favorite", item, false)}
+                onSelect={selectAction("favorite", false)}
               >
                 <Heart /> {item.isFavorite ? "Unfavorite" : "Favorite"}
               </DropdownMenuItem>
@@ -78,7 +100,7 @@ export default function AssetItemMenu({
             <DropdownMenuSeparator />
             <DropdownMenuItem
               variant="destructive"
-              onSelect={() => onAction("trash", item, isFolder)}
+              onSelect={selectAction("trash")}
             >
               <Trash2 /> Move to Trash
             </DropdownMenuItem>

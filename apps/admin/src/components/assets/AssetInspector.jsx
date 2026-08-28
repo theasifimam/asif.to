@@ -16,8 +16,11 @@ import {
   MoreHorizontal,
   Pencil,
   RotateCcw,
+  Scissors,
   Trash2,
   X,
+  ZoomIn,
+  ZoomOut,
 } from "lucide-react";
 import { assetsApi } from "@/lib/api";
 import { ASSET_TYPE_LABELS, formatAssetBytes, getAssetUrl } from "@/lib/assets";
@@ -44,6 +47,56 @@ function Detail({ label, children }) {
   );
 }
 
+const SLIDE_DURATION = 260;
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 4;
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function touchDistance(touches) {
+  return Math.hypot(
+    touches[0].clientX - touches[1].clientX,
+    touches[0].clientY - touches[1].clientY,
+  );
+}
+
+function touchCenter(touches) {
+  return {
+    x: (touches[0].clientX + touches[1].clientX) / 2,
+    y: (touches[0].clientY + touches[1].clientY) / 2,
+  };
+}
+
+function constrainImagePan(pan, zoom, surface, asset) {
+  if (zoom <= MIN_ZOOM || !surface) return { x: 0, y: 0 };
+  const rect = surface.getBoundingClientRect();
+  let fittedWidth = rect.width;
+  let fittedHeight = rect.height;
+
+  if (asset?.width && asset?.height) {
+    const fit = Math.min(rect.width / asset.width, rect.height / asset.height);
+    fittedWidth = asset.width * fit;
+    fittedHeight = asset.height * fit;
+  }
+
+  const maxX = Math.max(0, (fittedWidth * zoom - rect.width) / 2);
+  const maxY = Math.max(0, (fittedHeight * zoom - rect.height) / 2);
+  return {
+    x: clamp(pan.x, -maxX, maxX),
+    y: clamp(pan.y, -maxY, maxY),
+  };
+}
+
+function isViewerControl(target) {
+  return Boolean(
+    target?.closest?.(
+      "button, a, input, textarea, select, video, iframe, [role='menu'], [role='menuitem']",
+    ),
+  );
+}
+
 export default function AssetInspector({
   asset,
   assets = [],
@@ -53,14 +106,23 @@ export default function AssetInspector({
   onAction,
 }) {
   const containerRef = useRef(null);
-  const touchStartRef = useRef({ x: 0, y: 0 });
+  const mediaStageRef = useRef(null);
+  const gestureRef = useRef({ mode: null });
+  const zoomRef = useRef(1);
+  const panRef = useRef({ x: 0, y: 0 });
+  const transitionTimersRef = useRef([]);
   const [usages, setUsages] = useState([]);
   const [loadingUsage, setLoadingUsage] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [slideOffset, setSlideOffset] = useState(0);
+  const [animateSlide, setAnimateSlide] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isPanning, setIsPanning] = useState(false);
+  const [isPinching, setIsPinching] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
 
   const publicUrl = getAssetUrl(asset);
   const downloadUrl = getAssetUrl(asset, { download: true });
@@ -73,6 +135,87 @@ export default function AssetInspector({
     currentIndex >= 0 && currentIndex < assets.length - 1
       ? assets[currentIndex + 1]
       : null;
+  const positionLabel =
+    currentIndex >= 0 && assets.length
+      ? `${currentIndex + 1} of ${assets.length}`
+      : "";
+
+  const setViewerTransform = useCallback(
+    (nextZoom, nextPan = panRef.current, surface = mediaStageRef.current) => {
+      const normalizedZoom = clamp(nextZoom, MIN_ZOOM, MAX_ZOOM);
+      const normalizedPan = constrainImagePan(
+        nextPan,
+        normalizedZoom,
+        surface,
+        asset,
+      );
+      zoomRef.current = normalizedZoom;
+      panRef.current = normalizedPan;
+      setZoom(normalizedZoom);
+      setPan(normalizedPan);
+    },
+    [asset],
+  );
+
+  const changeZoom = useCallback(
+    (nextZoom, focalPoint = null, surface = mediaStageRef.current) => {
+      const currentZoom = zoomRef.current;
+      let nextPan = panRef.current;
+      if (focalPoint && surface && currentZoom > 0) {
+        const rect = surface.getBoundingClientRect();
+        const focalX = focalPoint.x - (rect.left + rect.width / 2);
+        const focalY = focalPoint.y - (rect.top + rect.height / 2);
+        const ratio = clamp(nextZoom, MIN_ZOOM, MAX_ZOOM) / currentZoom;
+        nextPan = {
+          x: focalX - (focalX - nextPan.x) * ratio,
+          y: focalY - (focalY - nextPan.y) * ratio,
+        };
+      }
+      setViewerTransform(nextZoom, nextPan, surface);
+    },
+    [setViewerTransform],
+  );
+
+  const resetViewerTransform = useCallback(() => {
+    zoomRef.current = 1;
+    panRef.current = { x: 0, y: 0 };
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+    setIsPanning(false);
+    setIsPinching(false);
+    gestureRef.current = { mode: null };
+  }, []);
+
+  const clearTransitionTimers = useCallback(() => {
+    transitionTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+    transitionTimersRef.current = [];
+  }, []);
+
+  const scheduleTransition = useCallback((callback, delay) => {
+    const timer = window.setTimeout(callback, delay);
+    transitionTimersRef.current.push(timer);
+    return timer;
+  }, []);
+
+  useEffect(
+    () => () => {
+      clearTransitionTimers();
+    },
+    [clearTransitionTimers],
+  );
+
+  useEffect(() => {
+    const neighbors = [prevAsset, nextAsset].filter(
+      (item) => item?.category === "image",
+    );
+    neighbors.forEach((item) => {
+      const url = getAssetUrl(item);
+      if (url) {
+        const preload = new window.Image();
+        preload.src = url;
+      }
+    });
+  }, [nextAsset, prevAsset]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -130,89 +273,283 @@ export default function AssetInspector({
   const navigateTo = useCallback(
     (targetAsset, direction) => {
       if (!targetAsset || isTransitioning) return;
+      clearTransitionTimers();
       setIsTransitioning(true);
       setIsDragging(false);
+      setAnimateSlide(true);
+      resetViewerTransform();
 
-      // Phase 1: Slide current item off-screen in navigation direction
-      const exitX =
-        direction === "next" ? -window.innerWidth : window.innerWidth;
+      // The outgoing item follows the navigation direction.
+      const distance = Math.max(window.innerWidth, 640);
+      const exitX = direction === "next" ? -distance : distance;
       setSlideOffset(exitX);
 
-      // Phase 2: Switch asset and position new asset at entrance offset
-      setTimeout(() => {
-        onSelectAsset?.(targetAsset);
-        const entranceX =
-          direction === "next"
-            ? Math.min(window.innerWidth * 0.4, 400)
-            : Math.max(-window.innerWidth * 0.4, -400);
+      scheduleTransition(() => {
+        // Reposition the incoming item without a transition so it never crosses
+        // the viewer from the outgoing side.
+        setAnimateSlide(false);
+        const entranceX = direction === "next" ? distance : -distance;
         setSlideOffset(entranceX);
+        onSelectAsset?.(targetAsset);
 
-        // Phase 3: Animate smoothly to center (0)
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
+            setAnimateSlide(true);
             setSlideOffset(0);
-            setTimeout(() => {
+            scheduleTransition(() => {
               setIsTransitioning(false);
-            }, 220);
+            }, SLIDE_DURATION);
           });
         });
-      }, 180);
+      }, SLIDE_DURATION);
     },
-    [isTransitioning, onSelectAsset],
+    [
+      clearTransitionTimers,
+      isTransitioning,
+      onSelectAsset,
+      resetViewerTransform,
+      scheduleTransition,
+    ],
   );
 
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (isViewerControl(e.target)) return;
       if (e.key === "Escape" || e.key === "Esc") {
+        if (document.fullscreenElement) {
+          e.preventDefault();
+          document.exitFullscreen().catch(() => {});
+          return;
+        }
         handleClose();
+        return;
       }
       if ((e.key === "ArrowLeft" || e.key === "Left") && prevAsset) {
+        e.preventDefault();
         navigateTo(prevAsset, "prev");
       }
       if ((e.key === "ArrowRight" || e.key === "Right") && nextAsset) {
+        e.preventDefault();
         navigateTo(nextAsset, "next");
+      }
+      if (asset.category === "image" && ["+", "="].includes(e.key)) {
+        e.preventDefault();
+        changeZoom(zoomRef.current + 0.5);
+      }
+      if (asset.category === "image" && e.key === "-") {
+        e.preventDefault();
+        changeZoom(zoomRef.current - 0.5);
+      }
+      if (asset.category === "image" && e.key === "0") {
+        e.preventDefault();
+        resetViewerTransform();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleClose, prevAsset, nextAsset, navigateTo]);
+  }, [
+    asset.category,
+    changeZoom,
+    handleClose,
+    navigateTo,
+    nextAsset,
+    prevAsset,
+    resetViewerTransform,
+  ]);
 
-  // Touch & Pointer Drag gesture handling for interactive sliding
-  const handleTouchStart = (e) => {
-    if (isTransitioning) return;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    touchStartRef.current = { x: clientX, y: clientY };
+  const beginSingleGesture = (point, surface) => {
+    if (asset.category === "image" && zoomRef.current > MIN_ZOOM) {
+      gestureRef.current = {
+        mode: "pan",
+        startX: point.x,
+        startY: point.y,
+        startPan: { ...panRef.current },
+        surface,
+      };
+      setIsPanning(true);
+      return;
+    }
+
+    gestureRef.current = {
+      mode: "slide",
+      startX: point.x,
+      startY: point.y,
+      slideOffset: 0,
+    };
     setIsDragging(true);
   };
 
-  const handleTouchMove = (e) => {
-    if (!isDragging || isTransitioning) return;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    const diffX = clientX - touchStartRef.current.x;
-    const diffY = clientY - touchStartRef.current.y;
+  const updateSingleGesture = (point) => {
+    const gesture = gestureRef.current;
+    const diffX = point.x - gesture.startX;
+    const diffY = point.y - gesture.startY;
 
-    if (Math.abs(diffX) > Math.abs(diffY)) {
+    if (gesture.mode === "pan") {
+      setViewerTransform(
+        zoomRef.current,
+        {
+          x: gesture.startPan.x + diffX,
+          y: gesture.startPan.y + diffY,
+        },
+        gesture.surface,
+      );
+      return;
+    }
+
+    if (gesture.mode === "slide" && Math.abs(diffX) > Math.abs(diffY)) {
+      gesture.slideOffset = diffX;
       setSlideOffset(diffX);
     }
   };
 
-  const handleTouchEnd = () => {
-    if (!isDragging) return;
+  const finishSingleGesture = () => {
+    const gesture = gestureRef.current;
+    gestureRef.current = { mode: null };
+    if (gesture.mode === "pan") {
+      setIsPanning(false);
+      return;
+    }
+    if (gesture.mode !== "slide") return;
+
     setIsDragging(false);
-    const threshold = 60; // 60px swipe trigger threshold
-    if (slideOffset < -threshold && nextAsset) {
+    const offset = gesture.slideOffset || 0;
+    if (offset < -60 && nextAsset) {
       navigateTo(nextAsset, "next");
-    } else if (slideOffset > threshold && prevAsset) {
+    } else if (offset > 60 && prevAsset) {
       navigateTo(prevAsset, "prev");
     } else {
-      // Spring back to center smoothly
       setIsTransitioning(true);
+      setAnimateSlide(true);
       setSlideOffset(0);
-      setTimeout(() => setIsTransitioning(false), 200);
+      scheduleTransition(() => setIsTransitioning(false), 200);
     }
   };
+
+  const handlePointerStart = (event) => {
+    if (
+      event.pointerType === "touch" ||
+      event.button !== 0 ||
+      isTransitioning ||
+      isViewerControl(event.target)
+    ) {
+      return;
+    }
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    beginSingleGesture(
+      { x: event.clientX, y: event.clientY },
+      event.currentTarget,
+    );
+  };
+
+  const handlePointerMove = (event) => {
+    if (event.pointerType === "touch" || !gestureRef.current.mode) return;
+    event.preventDefault();
+    updateSingleGesture({ x: event.clientX, y: event.clientY });
+  };
+
+  const handlePointerEnd = (event) => {
+    if (event.pointerType === "touch") return;
+    finishSingleGesture();
+  };
+
+  const handleTouchStart = (event) => {
+    if (isTransitioning || isViewerControl(event.target)) return;
+    if (event.touches.length >= 2 && asset.category === "image") {
+      event.preventDefault();
+      setAnimateSlide(false);
+      setSlideOffset(0);
+      requestAnimationFrame(() => setAnimateSlide(true));
+      const center = touchCenter(event.touches);
+      gestureRef.current = {
+        mode: "pinch",
+        startDistance: touchDistance(event.touches),
+        startZoom: zoomRef.current,
+        startPan: { ...panRef.current },
+        startCenter: center,
+        surface: event.currentTarget,
+      };
+      setIsDragging(false);
+      setIsPanning(false);
+      setIsPinching(true);
+      return;
+    }
+    const touch = event.touches[0];
+    if (touch) {
+      beginSingleGesture(
+        { x: touch.clientX, y: touch.clientY },
+        event.currentTarget,
+      );
+    }
+  };
+
+  const handleTouchMove = (event) => {
+    const gesture = gestureRef.current;
+    if (gesture.mode === "pinch" && event.touches.length >= 2) {
+      event.preventDefault();
+      const center = touchCenter(event.touches);
+      const nextZoom =
+        gesture.startZoom *
+        (touchDistance(event.touches) / Math.max(gesture.startDistance, 1));
+      const rect = gesture.surface.getBoundingClientRect();
+      const focalX = gesture.startCenter.x - (rect.left + rect.width / 2);
+      const focalY = gesture.startCenter.y - (rect.top + rect.height / 2);
+      const ratio = clamp(nextZoom, MIN_ZOOM, MAX_ZOOM) / gesture.startZoom;
+      setViewerTransform(
+        nextZoom,
+        {
+          x:
+            focalX - (focalX - gesture.startPan.x) * ratio +
+            (center.x - gesture.startCenter.x),
+          y:
+            focalY - (focalY - gesture.startPan.y) * ratio +
+            (center.y - gesture.startCenter.y),
+        },
+        gesture.surface,
+      );
+      return;
+    }
+
+    const touch = event.touches[0];
+    if (touch && gesture.mode) {
+      event.preventDefault();
+      updateSingleGesture({ x: touch.clientX, y: touch.clientY });
+    }
+  };
+
+  const handleTouchEnd = (event) => {
+    const gesture = gestureRef.current;
+    if (gesture.mode === "pinch") {
+      setIsPinching(false);
+      if (event.touches.length === 1) {
+        const touch = event.touches[0];
+        beginSingleGesture(
+          { x: touch.clientX, y: touch.clientY },
+          gesture.surface,
+        );
+      } else {
+        gestureRef.current = { mode: null };
+      }
+      return;
+    }
+    finishSingleGesture();
+  };
+
+  useEffect(() => {
+    const stage = mediaStageRef.current;
+    if (!stage || asset.category !== "image") return undefined;
+    const handleWheel = (event) => {
+      if (isTransitioning || isViewerControl(event.target)) return;
+      event.preventDefault();
+      const factor = Math.exp(-event.deltaY * 0.002);
+      changeZoom(
+        zoomRef.current * factor,
+        { x: event.clientX, y: event.clientY },
+        stage,
+      );
+    };
+    stage.addEventListener("wheel", handleWheel, { passive: false });
+    return () => stage.removeEventListener("wheel", handleWheel);
+  }, [asset.category, changeZoom, isFullscreen, isTransitioning]);
 
   if (!asset) return null;
 
@@ -222,19 +559,31 @@ export default function AssetInspector({
     onAction?.("copied", asset);
   };
 
+  const zoomIn = () => changeZoom(zoomRef.current + 0.5);
+  const zoomOut = () => changeZoom(zoomRef.current - 0.5);
+  const toggleImageZoom = () => {
+    if (asset.category !== "image") return;
+    if (zoomRef.current > MIN_ZOOM) resetViewerTransform();
+    else changeZoom(2);
+  };
+
   // Pure Full Screen Mode View
   if (isFullscreen) {
     return (
       <div
-        ref={containerRef}
+        ref={(node) => {
+          containerRef.current = node;
+          mediaStageRef.current = node;
+        }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        onPointerDown={handleTouchStart}
-        onPointerMove={handleTouchMove}
-        onPointerUp={handleTouchEnd}
-        onPointerCancel={handleTouchEnd}
-        className="fixed inset-0 z-3500 flex h-screen w-screen items-center justify-center bg-black select-none touch-pan-y"
+        onTouchCancel={handleTouchEnd}
+        onPointerDown={handlePointerStart}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        onPointerCancel={handlePointerEnd}
+        className="fixed inset-0 z-3500 flex h-screen w-screen items-center justify-center bg-black select-none touch-none"
         data-scroll-ignore
       >
         {/* Fullscreen Navigation Chevrons */}
@@ -242,6 +591,7 @@ export default function AssetInspector({
           <button
             type="button"
             onClick={() => navigateTo(prevAsset, "prev")}
+            disabled={isTransitioning}
             className="absolute left-4 top-1/2 z-50 -translate-y-1/2 rounded-full border border-white/20 bg-black/60 p-3 text-white backdrop-blur-md hover:bg-black/80 shadow-xl transition-all"
             aria-label="Previous file"
           >
@@ -252,6 +602,7 @@ export default function AssetInspector({
           <button
             type="button"
             onClick={() => navigateTo(nextAsset, "next")}
+            disabled={isTransitioning}
             className="absolute right-4 top-1/2 z-50 -translate-y-1/2 rounded-full border border-white/20 bg-black/60 p-3 text-white backdrop-blur-md hover:bg-black/80 shadow-xl transition-all"
             aria-label="Next file"
           >
@@ -261,12 +612,14 @@ export default function AssetInspector({
 
         {/* Pure Full Screen Media Display with Slide Animation */}
         <div
-          className="flex h-full w-full items-center justify-center"
+          className="flex h-full w-full items-center justify-center overflow-hidden"
+          onDoubleClick={toggleImageZoom}
           style={{
             transform: `translateX(${slideOffset}px)`,
-            transition: isDragging
-              ? "none"
-              : "transform 220ms cubic-bezier(0.16, 1, 0.3, 1)",
+            transition:
+              isDragging || !animateSlide
+                ? "none"
+                : `transform ${SLIDE_DURATION}ms cubic-bezier(0.22, 1, 0.36, 1)`,
           }}
         >
           {asset.category === "image" && publicUrl ? (
@@ -274,6 +627,11 @@ export default function AssetInspector({
               src={publicUrl}
               alt={asset.name}
               className="h-full w-full object-contain pointer-events-none"
+              style={{
+                transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoom})`,
+                transition:
+                  isPanning || isPinching ? "none" : "transform 180ms ease",
+              }}
             />
           ) : asset.category === "video" && publicUrl ? (
             <video
@@ -293,6 +651,54 @@ export default function AssetInspector({
               <AssetThumbnail asset={asset} iconClassName="h-24 w-24" />
               <p className="text-base font-bold">{asset.name}</p>
             </div>
+          )}
+        </div>
+
+        <div className="pointer-events-none absolute left-4 top-4 z-50 max-w-[calc(100%-10rem)] rounded-2xl border border-white/15 bg-black/55 px-3.5 py-2 text-white shadow-xl backdrop-blur-md">
+          <p className="truncate text-xs font-bold">{asset.name}</p>
+          <p className="mt-0.5 text-[10px] font-semibold text-zinc-300">
+            {[positionLabel, formatAssetBytes(asset.size)]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+        </div>
+
+        <div className="absolute bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 rounded-full border border-white/15 bg-black/60 p-1 text-white shadow-xl backdrop-blur-md">
+          {asset.category === "image" ? (
+            <>
+              <button
+                type="button"
+                onClick={zoomOut}
+                disabled={zoom <= 1}
+                className="rounded-full p-2 hover:bg-white/15 disabled:opacity-35"
+                aria-label="Zoom out"
+              >
+                <ZoomOut className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={toggleImageZoom}
+                className="min-w-12 rounded-full px-2 py-1.5 text-[11px] font-bold hover:bg-white/15"
+                aria-label="Reset image zoom"
+              >
+                {Math.round(zoom * 100)}%
+              </button>
+              <button
+                type="button"
+                onClick={zoomIn}
+                disabled={zoom >= 4}
+                className="rounded-full p-2 hover:bg-white/15 disabled:opacity-35"
+                aria-label="Zoom in"
+              >
+                <ZoomIn className="h-4 w-4" />
+              </button>
+            </>
+          ) : (
+            positionLabel && (
+              <span className="px-3 py-1.5 text-[11px] font-bold">
+                {positionLabel}
+              </span>
+            )
           )}
         </div>
 
@@ -316,7 +722,7 @@ export default function AssetInspector({
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-3000 flex flex-col bg-zinc-950/95 text-white backdrop-blur-xl transition-all select-none"
+      className="fixed inset-0 z-9990 flex flex-col bg-zinc-950/95 text-white backdrop-blur-xl transition-all select-none"
       data-scroll-ignore
     >
       {/* Top Bar Navigation & Actions */}
@@ -330,6 +736,7 @@ export default function AssetInspector({
             <p className="text-[11px] font-medium text-zinc-400">
               {ASSET_TYPE_LABELS[asset.category]} ·{" "}
               {formatAssetBytes(asset.size)}
+              {positionLabel ? ` · ${positionLabel}` : ""}
               {asset.width && asset.height
                 ? ` · ${asset.width}×${asset.height}px`
                 : ""}
@@ -364,7 +771,7 @@ export default function AssetInspector({
                 className="border-zinc-800 bg-zinc-900/80 text-zinc-200 hover:bg-zinc-800 hover:text-white rounded-xl gap-1.5 font-bold"
               >
                 <MoreHorizontal className="h-4 w-4" />
-                <span>Options</span>
+                <span className="hidden sm:inline">Options</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52 p-1.5">
@@ -417,6 +824,22 @@ export default function AssetInspector({
                   className="gap-2.5 py-2 font-semibold"
                 >
                   <Pencil className="h-4 w-4 text-amber-500" /> Rename
+                </DropdownMenuItem>
+              )}
+              {canManage && asset.status === "active" && (
+                <DropdownMenuItem
+                  onSelect={() => onAction?.("copy", asset)}
+                  className="gap-2.5 py-2 font-semibold"
+                >
+                  <Copy className="h-4 w-4 text-blue-500" /> Copy file
+                </DropdownMenuItem>
+              )}
+              {canManage && asset.status === "active" && (
+                <DropdownMenuItem
+                  onSelect={() => onAction?.("cut", asset)}
+                  className="gap-2.5 py-2 font-semibold"
+                >
+                  <Scissors className="h-4 w-4 text-violet-500" /> Cut file
                 </DropdownMenuItem>
               )}
               {canManage && asset.status === "active" && (
@@ -483,7 +906,8 @@ export default function AssetInspector({
           <button
             type="button"
             onClick={() => navigateTo(prevAsset, "prev")}
-            className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-zinc-800 bg-zinc-900/80 p-3 text-zinc-300 backdrop-blur-md hover:bg-zinc-800 hover:text-white shadow-xl transition-all"
+            disabled={isTransitioning}
+            className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-zinc-800 bg-zinc-900/80 p-3 text-zinc-300 backdrop-blur-md hover:bg-zinc-800 hover:text-white shadow-xl transition-all disabled:opacity-40"
             aria-label="Previous file (Backward key)"
             title="Previous file (Left Arrow)"
           >
@@ -496,7 +920,11 @@ export default function AssetInspector({
           <button
             type="button"
             onClick={() => navigateTo(nextAsset, "next")}
-            className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-zinc-800 bg-zinc-900/80 p-3 text-zinc-300 backdrop-blur-md hover:bg-zinc-800 hover:text-white shadow-xl transition-all"
+            disabled={isTransitioning}
+            className={cn(
+              "absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-zinc-800 bg-zinc-900/80 p-3 text-zinc-300 backdrop-blur-md hover:bg-zinc-800 hover:text-white shadow-xl transition-all disabled:opacity-40",
+              showInfo && "sm:right-84",
+            )}
             aria-label="Next file (Forward key)"
             title="Next file (Right Arrow)"
           >
@@ -509,19 +937,28 @@ export default function AssetInspector({
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
-          onPointerDown={handleTouchStart}
-          onPointerMove={handleTouchMove}
-          onPointerUp={handleTouchEnd}
-          onPointerCancel={handleTouchEnd}
-          className="flex flex-1 items-center justify-center p-4 sm:p-8 min-w-0 min-h-0 touch-pan-y cursor-grab active:cursor-grabbing overflow-hidden"
+          onTouchCancel={handleTouchEnd}
+          onPointerDown={handlePointerStart}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerEnd}
+          onPointerCancel={handlePointerEnd}
+          ref={mediaStageRef}
+          className={cn(
+            "relative flex flex-1 items-center justify-center p-4 sm:p-8 min-w-0 min-h-0 touch-none overflow-hidden",
+            zoom > MIN_ZOOM
+              ? "cursor-grab active:cursor-grabbing"
+              : "cursor-ew-resize",
+          )}
         >
           <div
             className="flex items-center justify-center max-h-full max-w-full"
+            onDoubleClick={toggleImageZoom}
             style={{
               transform: `translateX(${slideOffset}px)`,
-              transition: isDragging
-                ? "none"
-                : "transform 220ms cubic-bezier(0.16, 1, 0.3, 1)",
+              transition:
+                isDragging || !animateSlide
+                  ? "none"
+                  : `transform ${SLIDE_DURATION}ms cubic-bezier(0.22, 1, 0.36, 1)`,
             }}
           >
             {asset.category === "image" && publicUrl ? (
@@ -529,6 +966,11 @@ export default function AssetInspector({
                 src={publicUrl}
                 alt={asset.name}
                 className="max-h-full max-w-full rounded-2xl object-contain shadow-2xl transition-all pointer-events-none"
+                style={{
+                  transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoom})`,
+                  transition:
+                    isPanning || isPinching ? "none" : "transform 180ms ease",
+                }}
               />
             ) : asset.category === "video" && publicUrl ? (
               <video
@@ -547,7 +989,9 @@ export default function AssetInspector({
               <div className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-zinc-800/80 bg-zinc-900/60 p-8 sm:p-12 text-center backdrop-blur-md max-w-md">
                 <AssetThumbnail asset={asset} iconClassName="h-16 w-16" />
                 <div>
-                  <p className="text-base font-black text-white">{asset.name}</p>
+                  <p className="text-base font-black text-white">
+                    {asset.name}
+                  </p>
                   <p className="mt-1 text-xs font-medium text-zinc-400">
                     No direct preview available for{" "}
                     {asset.extension || asset.mimeType} files
@@ -563,11 +1007,52 @@ export default function AssetInspector({
               </div>
             )}
           </div>
+
+          <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1 rounded-full border border-zinc-700/80 bg-zinc-900/85 p-1 shadow-2xl backdrop-blur-md sm:bottom-5">
+            {asset.category === "image" && (
+              <>
+                <button
+                  type="button"
+                  onClick={zoomOut}
+                  disabled={zoom <= 1}
+                  className="rounded-full p-2 text-zinc-200 hover:bg-zinc-700 disabled:opacity-35"
+                  aria-label="Zoom out"
+                  title="Zoom out"
+                >
+                  <ZoomOut className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={toggleImageZoom}
+                  className="min-w-12 rounded-full px-2 py-1.5 text-[11px] font-bold text-white hover:bg-zinc-700"
+                  aria-label="Reset image zoom"
+                  title="Double-click image to toggle zoom"
+                >
+                  {Math.round(zoom * 100)}%
+                </button>
+                <button
+                  type="button"
+                  onClick={zoomIn}
+                  disabled={zoom >= 4}
+                  className="rounded-full p-2 text-zinc-200 hover:bg-zinc-700 disabled:opacity-35"
+                  aria-label="Zoom in"
+                  title="Zoom in"
+                >
+                  <ZoomIn className="h-4 w-4" />
+                </button>
+              </>
+            )}
+            {positionLabel && (
+              <span className="border-l border-zinc-700 px-3 py-1.5 text-[11px] font-bold text-zinc-300 first:border-l-0">
+                {positionLabel}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Sliding Details Drawer */}
         {showInfo && (
-          <aside className="w-80 border-l border-zinc-800/80 bg-zinc-900/95 p-5 overflow-y-auto shrink-0 backdrop-blur-md transition-all z-20">
+          <aside className="absolute inset-y-0 right-0 z-30 w-full max-w-80 shrink-0 overflow-y-auto border-l border-zinc-800/80 bg-zinc-900/95 p-5 shadow-2xl backdrop-blur-md transition-all sm:static sm:shadow-none">
             <h3 className="text-xs font-black uppercase tracking-wider text-blue-400 mb-3">
               File Information
             </h3>

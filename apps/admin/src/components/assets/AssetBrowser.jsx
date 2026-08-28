@@ -5,6 +5,7 @@ import { Files, FolderPlus, Plus, RefreshCw, Trash2, Upload } from "lucide-react
 import { toast } from "@/lib/toast";
 import { assetsApi } from "@/lib/api";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
 import { useAuth } from "@/contexts/AuthContext";
 import { AdminEmptyState } from "@/components/admin";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,6 @@ import { hasPermission } from "@/lib/permissions";
 import AssetInspector from "./AssetInspector";
 import {
   AssetConfirmDialog,
-  AssetMoveDialog,
   AssetTextDialog,
   AssetUploadDialog,
 } from "./AssetDialogs";
@@ -30,6 +30,7 @@ import AssetBulkActions from "./browser/AssetBulkActions";
 import AssetCardGrid from "./browser/AssetCardGrid";
 import AssetContextMenu from "./browser/AssetContextMenu";
 import AssetTableListView from "./browser/AssetTableListView";
+import AssetTransferBar from "./browser/AssetTransferBar";
 import {
   childrenFromDirectorySource,
   fileFromClipboardSource,
@@ -38,7 +39,46 @@ import {
   sourcesFromClipboardData,
   sourcesFromNavigatorClipboard,
 } from "./browser/clipboard";
-import { emptyCopy, folderOptions, unwrap } from "./browser/constants";
+import {
+  DATE_LABELS,
+  emptyCopy,
+  SCOPE_LABELS,
+  SORT_LABELS,
+  unwrap,
+  USAGE_LABELS,
+} from "./browser/constants";
+
+const FILE_URL_DEFAULTS = {
+  folder: "",
+  q: "",
+  scope: "all",
+  sort: "newest",
+  usage: "all",
+  uploader: "all",
+  date: "all",
+  view: "card",
+};
+
+const MONGODB_ID = /^[a-f\d]{24}$/i;
+
+function optionOrDefault(value, options, fallback) {
+  return Object.prototype.hasOwnProperty.call(options, value) ? value : fallback;
+}
+
+function normalizeFileUrlState(state) {
+  const folder = String(state.folder || "");
+  const viewVal = String(state.view || "").toLowerCase();
+  return {
+    folder: !folder || MONGODB_ID.test(folder) ? folder : "",
+    q: String(state.q || ""),
+    scope: optionOrDefault(state.scope, SCOPE_LABELS, "all"),
+    sort: optionOrDefault(state.sort, SORT_LABELS, "newest"),
+    usage: optionOrDefault(state.usage, USAGE_LABELS, "all"),
+    uploader: String(state.uploader || "all"),
+    date: optionOrDefault(state.date, DATE_LABELS, "all"),
+    view: viewVal === "list" || viewVal === "table" ? "list" : "card",
+  };
+}
 
 export default function AssetBrowser({
   pickerMode = false,
@@ -48,22 +88,67 @@ export default function AssetBrowser({
   const { user } = useAuth();
   const canUpload = hasPermission(user, "assets.upload");
   const canManage = hasPermission(user, "assets.manage");
-  const [scope, setScope] = useState("all");
-  const [currentFolderId, setCurrentFolderId] = useState(null);
-  const [breadcrumbs, setBreadcrumbs] = useState([]);
-  const [search, setSearch] = useState("");
+  const [urlState, setUrlState] = useUrlFilters(FILE_URL_DEFAULTS, {
+    enabled: !pickerMode,
+  });
+  const normalizedUrlState = useMemo(
+    () => normalizeFileUrlState(urlState),
+    [urlState],
+  );
+  const {
+    folder,
+    q: search,
+    scope,
+    sort,
+    usage: usageFilter,
+    uploader: uploaderFilter,
+    date: dateFilter,
+    view,
+  } = normalizedUrlState;
+  const currentFolderId = folder || null;
+  const urlSetters = useMemo(() => {
+    const setField = (field, normalize = (value) => value) => (nextValue) => {
+      setUrlState((current) => {
+        const resolved =
+          typeof nextValue === "function"
+            ? nextValue(current[field])
+            : nextValue;
+        return { ...current, [field]: normalize(resolved) };
+      });
+    };
+    return {
+      setCurrentFolderId: setField("folder", (value) => value || ""),
+      setSearch: setField("q", (value) => String(value || "")),
+      setScope: setField("scope"),
+      setSort: setField("sort"),
+      setUsageFilter: setField("usage"),
+      setUploaderFilter: setField("uploader"),
+      setDateFilter: setField("date"),
+      setView: setField("view"),
+    };
+  }, [setUrlState]);
+  const {
+    setCurrentFolderId,
+    setSearch,
+    setScope,
+    setSort,
+    setUsageFilter,
+    setUploaderFilter,
+    setDateFilter,
+    setView,
+  } = urlSetters;
+  const [breadcrumbState, setBreadcrumbState] = useState({
+    folderId: null,
+    items: [],
+  });
+  const breadcrumbs =
+    breadcrumbState.folderId === currentFolderId ? breadcrumbState.items : [];
   const debouncedSearch = useDebouncedValue(search, 350);
-  const [sort, setSort] = useState("newest");
-  const [usageFilter, setUsageFilter] = useState("all");
-  const [uploaderFilter, setUploaderFilter] = useState("all");
-  const [dateFilter, setDateFilter] = useState("all");
   const [uploaders, setUploaders] = useState([]);
-  const [view, setView] = useState("card");
   const [page, setPage] = useState(1);
   const limit = pickerMode ? 20 : 24;
   const [assets, setAssets] = useState([]);
   const [folders, setFolders] = useState([]);
-  const [tree, setTree] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -75,22 +160,42 @@ export default function AssetBrowser({
   const [working, setWorking] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [pasting, setPasting] = useState(false);
+  const [fileClipboard, setFileClipboard] = useState(null);
+  const [destinationMode, setDestinationMode] = useState(null);
+  const [transferring, setTransferring] = useState(false);
   const [dragOverTarget, setDragOverTarget] = useState(null);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const scrollContainerRef = useRef(null);
   const loadMoreRef = useRef(null);
   const requestIdRef = useRef(0);
 
-  const moveFolders = useMemo(() => folderOptions(tree), [tree]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setPage(1);
+      setSelectedIds([]);
+      setPickerSelection(null);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [
+    currentFolderId,
+    dateFilter,
+    debouncedSearch,
+    scope,
+    sort,
+    uploaderFilter,
+    usageFilter,
+    view,
+  ]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (scope !== "all") count += 1;
+    if (sort !== "newest") count += 1;
     if (usageFilter !== "all") count += 1;
     if (uploaderFilter !== "all") count += 1;
     if (dateFilter !== "all") count += 1;
     return count;
-  }, [scope, usageFilter, uploaderFilter, dateFilter]);
+  }, [scope, sort, usageFilter, uploaderFilter, dateFilter]);
 
   const resetFilters = useCallback(() => {
     setScope("all");
@@ -99,7 +204,13 @@ export default function AssetBrowser({
     setUploaderFilter("all");
     setDateFilter("all");
     setPage(1);
-  }, []);
+  }, [
+    setDateFilter,
+    setScope,
+    setSort,
+    setUploaderFilter,
+    setUsageFilter,
+  ]);
 
   const load = useCallback(async () => {
     void refreshKey;
@@ -135,14 +246,11 @@ export default function AssetBrowser({
       status: scope === "trash" ? "trashed" : "active",
       parentId: currentFolderId || "root",
     };
-    const [assetResponse, folderResponse, treeResponse, uploaderResponse] =
+    const [assetResponse, folderResponse, uploaderResponse] =
       await Promise.all([
         assetsApi.list(params),
         isFirstPage && (scope === "all" || scope === "trash")
           ? assetsApi.folders(folderParams)
-          : Promise.resolve(null),
-        isFirstPage
-          ? assetsApi.folders({ tree: "true" })
           : Promise.resolve(null),
         isFirstPage && !uploaders.length
           ? assetsApi.uploaders()
@@ -163,7 +271,6 @@ export default function AssetBrowser({
     });
     setPagination(data.pagination || { page: 1, pages: 1, total: 0 });
     if (folderResponse) setFolders(unwrap(folderResponse, []));
-    if (treeResponse?.success) setTree(unwrap(treeResponse, []));
     if (uploaderResponse?.success) setUploaders(unwrap(uploaderResponse, []));
     if (isFirstPage) setLoading(false);
     else setLoadingMore(false);
@@ -226,7 +333,10 @@ export default function AssetBrowser({
     if (!currentFolderId) return undefined;
     assetsApi.folder(currentFolderId).then((response) => {
       if (active && response.success)
-        setBreadcrumbs(unwrap(response, {}).breadcrumbs || []);
+        setBreadcrumbState({
+          folderId: currentFolderId,
+          items: unwrap(response, {}).breadcrumbs || [],
+        });
     });
     return () => {
       active = false;
@@ -244,7 +354,7 @@ export default function AssetBrowser({
   };
   const openFolder = (folder) => {
     setCurrentFolderId(folder?._id || null);
-    if (!folder) setBreadcrumbs([]);
+    if (!folder) setBreadcrumbState({ folderId: null, items: [] });
     setScope(scope === "trash" ? "trash" : "all");
     resetNavigationState();
   };
@@ -453,9 +563,107 @@ export default function AssetBrowser({
     }
   }, [pasteClipboardSources]);
 
+  const assetEntriesForIds = useCallback(
+    (ids) =>
+      ids.map((id) => {
+        const asset = assets.find((item) => item._id === id);
+        return { id, kind: "asset", name: asset?.name || "File" };
+      }),
+    [assets],
+  );
+
+  const entriesForItemAction = useCallback(
+    (item, isFolder) => {
+      if (!isFolder && selectedIds.includes(item._id)) {
+        return assetEntriesForIds(selectedIds);
+      }
+      return [
+        {
+          id: item._id,
+          kind: isFolder ? "folder" : "asset",
+          name: item.name,
+        },
+      ];
+    },
+    [assetEntriesForIds, selectedIds],
+  );
+
+  const putItemsOnClipboard = useCallback((operation, items) => {
+    if (!items.length) return;
+    setFileClipboard({ operation, items });
+    setDestinationMode(null);
+    setSelectedIds([]);
+    toast.success(
+      `${items.length === 1 ? items[0].name : `${items.length} items`} ${
+        operation === "copy" ? "copied" : "cut"
+      }`,
+      {
+        description: "Open a destination folder and choose Paste here.",
+      },
+    );
+  }, []);
+
+  const beginDestinationSelection = useCallback(
+    (operation, items, fromClipboard = false) => {
+      if (!items?.length) return;
+      setDestinationMode({ operation, items, fromClipboard });
+      setScope("all");
+      setSearch("");
+      setSelectedIds([]);
+      setPage(1);
+    },
+    [setScope, setSearch],
+  );
+
+  const executeFileTransfer = useCallback(
+    async (operation, items, destinationFolderId, consumeClipboard = false) => {
+      if (!items?.length || transferring) return;
+      if (scope === "trash") {
+        toast.error("Items cannot be transferred into Trash.");
+        return;
+      }
+      setTransferring(true);
+      const response = await assetsApi.transfer(
+        operation,
+        items.map(({ id, kind }) => ({ id, kind })),
+        destinationFolderId,
+      );
+      setTransferring(false);
+      if (!response.success) {
+        toast.error(response.error || "Unable to transfer the selected items");
+        return;
+      }
+      toast.success(response.data?.message || (operation === "copy" ? "Items copied" : "Items moved"));
+      if (consumeClipboard) setFileClipboard(null);
+      setDestinationMode(null);
+      setSelectedIds([]);
+      setInspected(null);
+      refresh();
+    },
+    [refresh, scope, transferring],
+  );
+
+  const pasteInternalClipboardHere = useCallback(
+    () =>
+      fileClipboard
+        ? executeFileTransfer(
+            fileClipboard.operation,
+            fileClipboard.items,
+            currentFolderId,
+            fileClipboard.operation === "move",
+          )
+        : undefined,
+    [currentFolderId, executeFileTransfer, fileClipboard],
+  );
+
   const handleClipboardPaste = useCallback(
     async (event) => {
       if (pickerMode || isEditablePasteTarget(event.target)) return;
+      if (fileClipboard) {
+        event.preventDefault();
+        await pasteInternalClipboardHere();
+        return;
+      }
       const clipboardData = event.clipboardData;
       const hasFiles =
         clipboardData?.files?.length > 0 ||
@@ -468,7 +676,7 @@ export default function AssetBrowser({
       const sources = await sourcesFromClipboardData(clipboardData);
       await pasteClipboardSources(sources);
     },
-    [pasteClipboardSources, pickerMode],
+    [fileClipboard, pasteClipboardSources, pasteInternalClipboardHere, pickerMode],
   );
 
   useEffect(() => {
@@ -477,6 +685,35 @@ export default function AssetBrowser({
     window.addEventListener("paste", onPaste);
     return () => window.removeEventListener("paste", onPaste);
   }, [handleClipboardPaste, pickerMode]);
+
+  useEffect(() => {
+    if (pickerMode || scope === "trash" || !canManage) return undefined;
+    const onKeyDown = (event) => {
+      if (
+        (!event.ctrlKey && !event.metaKey) ||
+        isEditablePasteTarget(event.target) ||
+        !selectedIds.length
+      ) {
+        return;
+      }
+      const key = event.key.toLowerCase();
+      if (key !== "c" && key !== "x") return;
+      event.preventDefault();
+      putItemsOnClipboard(
+        key === "c" ? "copy" : "move",
+        assetEntriesForIds(selectedIds),
+      );
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [
+    assetEntriesForIds,
+    canManage,
+    pickerMode,
+    putItemsOnClipboard,
+    scope,
+    selectedIds,
+  ]);
 
   const handleDragStart = (event, item, kind) => {
     if (scope === "trash" || !canManage) return;
@@ -554,6 +791,16 @@ export default function AssetBrowser({
   };
 
   const handleAction = async (action, item, isFolder = false) => {
+    if (["copy", "cut", "move"].includes(action)) {
+      const items = entriesForItemAction(item, isFolder);
+      setInspected(null);
+      if (action === "move") {
+        beginDestinationSelection("move", items);
+      } else {
+        putItemsOnClipboard(action === "copy" ? "copy" : "move", items);
+      }
+      return;
+    }
     if (action === "inspect") return setInspected(item);
     if (action === "favorite") {
       const response = await assetsApi.update(item._id, {
@@ -602,10 +849,6 @@ export default function AssetBrowser({
       response = dialog.isFolder
         ? await assetsApi.updateFolder(dialog.item._id, { name: value })
         : await assetsApi.update(dialog.item._id, { name: value });
-    if (dialog.type === "move")
-      response = dialog.isFolder
-        ? await assetsApi.updateFolder(dialog.item._id, { parentId: value })
-        : await assetsApi.bulk("move", dialog.ids, { folderId: value });
     if (dialog.type === "trash")
       response = dialog.isFolder
         ? await assetsApi.trashFolder(dialog.item._id)
@@ -631,7 +874,16 @@ export default function AssetBrowser({
   };
 
   const runBulk = async (action) => {
-    if (action === "move" || action === "trash" || action === "permanent")
+    if (["move", "copy", "cut"].includes(action)) {
+      const items = assetEntriesForIds(selectedIds);
+      if (action === "move") {
+        beginDestinationSelection("move", items);
+      } else {
+        putItemsOnClipboard(action === "copy" ? "copy" : "move", items);
+      }
+      return;
+    }
+    if (action === "trash" || action === "permanent")
       return setDialog({ type: action, ids: selectedIds, isFolder: false });
     const response = await assetsApi.bulk(action, selectedIds);
     if (!response.success)
@@ -654,10 +906,8 @@ export default function AssetBrowser({
   return (
     <div
       className={cn(
-        "min-w-0 relative",
-        pickerMode
-          ? "flex h-[70vh] flex-col"
-          : "flex h-full w-full flex-1 overflow-hidden bg-zinc-50 dark:bg-zinc-950",
+        "min-w-0 relative flex-1 flex flex-col h-full w-full overflow-hidden bg-zinc-50 dark:bg-zinc-950 min-h-0",
+        pickerMode && "flex h-[70vh] flex-col",
       )}
     >
       <main
@@ -665,7 +915,7 @@ export default function AssetBrowser({
         onDragLeave={clearDropTarget}
         onDrop={(event) => handleDrop(event, currentFolderId)}
         className={cn(
-          "flex min-w-0 flex-1 flex-col overflow-hidden bg-white dark:bg-zinc-950",
+          "flex min-w-0 flex-1 flex-col h-full w-full overflow-hidden bg-white dark:bg-zinc-950 min-h-0",
           dragOverTarget === (currentFolderId || "root") &&
             "ring-2 ring-blue-500/30",
           pickerMode && "flex min-h-0 flex-1 flex-col",
@@ -708,7 +958,7 @@ export default function AssetBrowser({
           resetFilters={resetFilters}
           onScopeChange={() => {
             setCurrentFolderId(null);
-            setBreadcrumbs([]);
+            setBreadcrumbState({ folderId: null, items: [] });
             resetNavigationState();
           }}
         />
@@ -732,6 +982,35 @@ export default function AssetBrowser({
           resetFilters={resetFilters}
         />
 
+        <AssetTransferBar
+          clipboard={fileClipboard}
+          destinationMode={destinationMode}
+          breadcrumbs={breadcrumbs}
+          currentFolderId={currentFolderId}
+          loading={transferring}
+          onPasteHere={pasteInternalClipboardHere}
+          onChooseDestination={() =>
+            beginDestinationSelection(
+              fileClipboard?.operation,
+              fileClipboard?.items,
+              true,
+            )
+          }
+          onConfirmDestination={() =>
+            executeFileTransfer(
+              destinationMode?.operation,
+              destinationMode?.items,
+              currentFolderId,
+              Boolean(
+                destinationMode?.fromClipboard &&
+                  destinationMode?.operation === "move",
+              ),
+            )
+          }
+          onCancelDestination={() => setDestinationMode(null)}
+          onClearClipboard={() => setFileClipboard(null)}
+        />
+
         {/* Selected Items Bulk Action Bar */}
         <AssetBulkActions
           selectedIds={selectedIds}
@@ -749,8 +1028,10 @@ export default function AssetBrowser({
           canUpload={canUpload}
           onCreateFolder={() => setDialog({ type: "create-folder" })}
           onUpload={() => setUploadOpen(true)}
+          clipboard={fileClipboard}
+          onPasteItems={pasteInternalClipboardHere}
           onPaste={pasteFromSystemClipboard}
-          pasteDisabled={pasting}
+          pasteDisabled={pasting || transferring}
           onRefresh={refresh}
           onSelectAll={() => setSelectedIds(assets.map((asset) => asset._id))}
           hasSelectableItems={assets.length > 0}
@@ -1058,22 +1339,6 @@ export default function AssetBrowser({
         }
         label="Name"
         initialValue={dialog?.item?.name || ""}
-        loading={working}
-        onConfirm={runDialogAction}
-      />
-      <AssetMoveDialog
-        key={`move-${dialog?.item?._id || dialog?.ids?.join("-") || "none"}`}
-        open={dialog?.type === "move"}
-        onOpenChange={(open) => !open && setDialog(null)}
-        folders={moveFolders.filter(
-          (folder) => folder._id !== dialog?.item?._id,
-        )}
-        currentFolderId={currentFolderId}
-        title={
-          dialog?.isFolder
-            ? "Move folder"
-            : `Move ${dialog?.ids?.length || 1} file${(dialog?.ids?.length || 1) === 1 ? "" : "s"}`
-        }
         loading={working}
         onConfirm={runDialogAction}
       />

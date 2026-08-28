@@ -1,6 +1,6 @@
 "use client";
 
-import { FolderInput, Heart, RotateCcw, Trash2 } from "lucide-react";
+import { Copy, FolderInput, Heart, RotateCcw, Scissors, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function AssetBulkActions({
@@ -41,6 +41,12 @@ export default function AssetBulkActions({
         <>
           <Button size="sm" variant="outline" onClick={() => runBulk("move")}>
             <FolderInput className="h-3.5 w-3.5" /> Move
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => runBulk("copy")}>
+            <Copy className="h-3.5 w-3.5" /> Copy
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => runBulk("cut")}>
+            <Scissors className="h-3.5 w-3.5" /> Cut
           </Button>
           <Button
             size="sm"

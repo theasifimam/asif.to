@@ -72,7 +72,12 @@ function ContextMenuCheckboxItem({ className, children, checked, ...props }) {
 }
 
 function ContextMenuRadioGroup(props) {
-  return <ContextMenuPrimitive.RadioGroup data-slot="context-menu-radio-group" {...props} />;
+  return (
+    <ContextMenuPrimitive.RadioGroup
+      data-slot="context-menu-radio-group"
+      {...props}
+    />
+  );
 }
 
 function ContextMenuRadioItem({ className, children, ...props }) {

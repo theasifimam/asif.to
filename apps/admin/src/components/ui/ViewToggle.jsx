@@ -17,7 +17,7 @@ export function ViewToggle({
     >
       <button
         type="button"
-        onClick={() => onViewChange("table")}
+        onClick={() => onViewChange("list")}
         className={cn(
           "flex h-full flex-1 sm:flex-initial items-center justify-center gap-1.5 rounded-xl px-3 sm:px-3.5 text-xs font-bold transition-all cursor-pointer",
           view === "table" || view === "list"

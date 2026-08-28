@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { getImageUrl } from "@/lib/config";
 // ASIF_COURSE_LEARNING_FLOW_V1:header-progress-import
 import ContinueCoursePill from "@/components/layout/ContinueCoursePill";
+import SiteAnnouncement from "@/components/layout/SiteAnnouncement";
 
 const LogoutConfirm = dynamic(() => import("./header/LogoutConfirm"), {
   ssr: false,
@@ -457,6 +458,8 @@ export default function Header() {
           </div>
         </div>
       </header>
+
+      <SiteAnnouncement isNavVisible={isNavVisible} />
 
       <LogoutConfirm
         isOpen={isLogoutConfirmOpen}

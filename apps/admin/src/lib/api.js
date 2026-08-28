@@ -568,6 +568,11 @@ export const playgroundSettingsApi = {
   publish: () => apiPost("/playground-settings/publish"),
 };
 
+export const announcementsApi = {
+  get: () => apiGet("/announcements"),
+  save: (data) => apiPut("/announcements", data),
+};
+
 export const activityApi = {
   list: (params = {}) => apiGet(`/activity?${new URLSearchParams(params)}`),
   notifications: (params = {}) =>
@@ -604,6 +609,8 @@ export const assetsApi = {
     }
     return response;
   },
+  transfer: (operation, items, destinationFolderId = null) =>
+    apiPost("/assets/transfer", { operation, items, destinationFolderId }),
   upload: (file, options = {}, onProgress) =>
     new Promise((resolve) => {
       const request = new XMLHttpRequest();

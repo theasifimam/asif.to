@@ -24,6 +24,7 @@ import {
   Image,
   Share2,
   Files,
+  Megaphone,
 } from "lucide-react";
 import AdminGlobalSearch from "@/components/search/AdminGlobalSearch";
 import { useAuth } from "@/contexts/AuthContext";
@@ -176,6 +177,13 @@ const NAV_ITEMS = [
   {
     group: "System Pages",
     items: [
+      {
+        name: "Announcements",
+        href: "/announcements",
+        icon: Megaphone,
+        permission: "settings.manage",
+        description: "Site notices & maintenance",
+      },
       {
         name: "Files",
         href: "/files",
@@ -335,6 +343,18 @@ export default function AdminLayout({ children }) {
   const isFilesRoute = pathname?.startsWith("/files");
   const isFullAppRoute = isMessagesRoute || isFilesRoute;
 
+  const headerDisplayClass = isMessagesRoute
+    ? "hidden"
+    : isFilesRoute
+    ? "hidden md:flex"
+    : "flex";
+
+  const mainPaddingClass = isMessagesRoute
+    ? "pt-0 pb-0 flex flex-col h-full overflow-hidden"
+    : isFilesRoute
+    ? "pt-0 md:pt-16 pb-0 flex flex-col h-full overflow-hidden"
+    : "pt-16 pb-24 lg:pb-8";
+
   return (
     <MessagingProvider>
       <ModuleHistoryTracker />
@@ -354,9 +374,7 @@ export default function AdminLayout({ children }) {
         <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
           {/* Global Minimal Header - Absolute over content for zero layout shift during scroll */}
           <header
-            className={`absolute top-0 left-0 right-0 z-40 flex h-16 shrink-0 items-center justify-between bg-zinc-100 backdrop-blur-xl dark:bg-[#09090b]/85 dark:backdrop-blur-xl px-4 transition-all duration-300 ease-out sm:px-6 md:px-8 lg:px-10 ${
-              isFullAppRoute ? "hidden" : ""
-            } ${
+            className={`absolute top-0 left-0 right-0 z-40 h-16 shrink-0 items-center justify-between bg-zinc-100 backdrop-blur-xl dark:bg-[#09090b]/85 dark:backdrop-blur-xl px-4 transition-all duration-300 ease-out sm:px-6 md:px-8 lg:px-10 ${headerDisplayClass} ${
               isNavVisible
                 ? "translate-y-0 opacity-100"
                 : "-translate-y-full opacity-0 pointer-events-none"
@@ -413,9 +431,7 @@ export default function AdminLayout({ children }) {
           {/* Content Viewport with constant top and bottom padding */}
           <main
             ref={mainRef}
-            className={`min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain scrollbar-none bg-[#f3f4f6] dark:bg-[#09090b] ${
-              !isFullAppRoute ? "pt-16 pb-24 lg:pb-8" : "pt-0 pb-0 flex flex-col h-full"
-            }`}
+            className={`min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain scrollbar-none bg-[#f3f4f6] dark:bg-[#09090b] ${mainPaddingClass}`}
           >
             {canViewPage ? (
               children

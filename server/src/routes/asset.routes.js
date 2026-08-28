@@ -25,6 +25,7 @@ import {
 import { optionalProtect, protect } from "../middlewares/auth.middleware.js";
 import { uploadAssets } from "../middlewares/assetUpload.middleware.js";
 import { requirePermission } from "../utils/permissions.js";
+import { transferAssets } from "../controllers/assetTransfer.controller.js";
 
 const router = Router();
 
@@ -42,6 +43,7 @@ router.post("/folders/:id/trash", requirePermission("assets.manage"), trashAsset
 router.post("/folders/:id/restore", requirePermission("assets.manage"), restoreAssetFolder);
 router.delete("/folders/:id/permanent", requirePermission("assets.delete_permanent"), deleteAssetFolderPermanently);
 router.post("/bulk", requirePermission("assets.manage"), bulkAssetAction);
+router.post("/transfer", requirePermission("assets.manage"), transferAssets);
 router.get("/:id/usages", requirePermission("assets.view"), getAssetUsages);
 router.get("/:id", requirePermission("assets.view"), getAsset);
 router.patch("/:id", requirePermission("assets.manage"), updateAsset);

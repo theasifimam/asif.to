@@ -3,6 +3,7 @@
 import {
   CheckSquare,
   ClipboardPaste,
+  Copy,
   FolderInput,
   FolderOpen,
   FolderPlus,
@@ -13,6 +14,7 @@ import {
   RefreshCw,
   RotateCcw,
   Search,
+  Scissors,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -38,6 +40,8 @@ export default function AssetContextMenu({
   onOpenFolder,
   onCreateFolder,
   onUpload,
+  clipboard,
+  onPasteItems,
   onPaste,
   pasteDisabled = false,
   onRefresh,
@@ -105,6 +109,18 @@ export default function AssetContextMenu({
                     <Pencil /> Rename
                   </ContextMenuItem>
                   <ContextMenuItem
+                    onSelect={() => onAction?.("copy", item, isFolder)}
+                  >
+                    <Copy /> Copy
+                    <span className="ml-auto text-[10px] font-medium text-zinc-400">Ctrl+C</span>
+                  </ContextMenuItem>
+                  <ContextMenuItem
+                    onSelect={() => onAction?.("cut", item, isFolder)}
+                  >
+                    <Scissors /> Cut
+                    <span className="ml-auto text-[10px] font-medium text-zinc-400">Ctrl+X</span>
+                  </ContextMenuItem>
+                  <ContextMenuItem
                     onSelect={() => onAction?.("move", item, isFolder)}
                   >
                     <FolderInput /> Move
@@ -152,6 +168,13 @@ export default function AssetContextMenu({
                 <span className="ml-auto text-[10px] font-medium text-zinc-400">
                   Ctrl+V
                 </span>
+              </ContextMenuItem>
+            )}
+            {!isTrash && canManage && clipboard && onPasteItems && (
+              <ContextMenuItem onSelect={onPasteItems} disabled={pasteDisabled}>
+                <ClipboardPaste className="text-blue-500" />
+                Paste {clipboard.items.length === 1 ? clipboard.items[0].name : `${clipboard.items.length} items`}
+                <span className="ml-auto text-[10px] font-medium text-zinc-400">Ctrl+V</span>
               </ContextMenuItem>
             )}
             {!isTrash && (canManage || canUpload) && <ContextMenuSeparator />}
