@@ -63,9 +63,9 @@ export default function AssetToolbar({
 }) {
   return (
     <>
-      <header className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-zinc-100 p-2.5 sm:p-3 sm:px-5 dark:border-zinc-800/80">
+      <header className="flex shrink-0 items-center justify-between gap-2 border-b border-zinc-100 p-2 sm:p-3 sm:px-5 dark:border-zinc-800/80 overflow-x-auto scrollbar-none">
         {/* Breadcrumbs & Navigation */}
-        <div className="flex items-center gap-1.5 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
           <button
             type="button"
             onClick={() => openFolder(null)}
@@ -74,7 +74,7 @@ export default function AssetToolbar({
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <div className="flex items-center gap-1 overflow-x-auto text-xs font-semibold text-zinc-500 truncate scrollbar-none">
+          <div className="flex items-center gap-1 overflow-x-auto text-xs font-semibold text-zinc-500 whitespace-nowrap scrollbar-none">
             <button
               type="button"
               onClick={() => openFolder(null)}
@@ -109,7 +109,7 @@ export default function AssetToolbar({
         </div>
 
         {/* Action Toolbar */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           {/* Mobile Search Button Toggle */}
           <button
             type="button"

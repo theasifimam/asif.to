@@ -75,7 +75,7 @@ function RichToastCard({
   const mediaSrc = avatar || image;
 
   return (
-    <div className="admin-rich-toast flex w-full items-start gap-3.5 select-none">
+    <div className="admin-rich-toast flex w-full max-w-sm items-start gap-3.5 rounded-2xl border border-zinc-200/90 bg-white p-3.5 text-left shadow-xl shadow-zinc-950/10 backdrop-blur-xl dark:border-zinc-800 dark:bg-[#121215] dark:shadow-black/60 select-none">
       {/* Left Column: Avatar/Image or Colored Icon Badge */}
       {mediaSrc ? (
         <div className="relative shrink-0 mt-0.5">

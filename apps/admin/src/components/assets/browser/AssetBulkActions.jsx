@@ -5,18 +5,26 @@ import { Button } from "@/components/ui/button";
 
 export default function AssetBulkActions({
   selectedIds = [],
+  selectedFolderIds = [],
   setSelectedIds,
+  setSelectedFolderIds,
   scope,
   runBulk,
   user,
   pickerMode = false,
 }) {
-  if (selectedIds.length <= 0 || pickerMode) return null;
+  const totalCount = selectedIds.length + selectedFolderIds.length;
+  if (totalCount <= 0 || pickerMode) return null;
+
+  const clearAll = () => {
+    setSelectedIds([]);
+    setSelectedFolderIds?.([]);
+  };
 
   return (
     <div className="flex flex-wrap items-center gap-2 border-b border-blue-100 bg-blue-50 px-4 py-2.5 dark:border-blue-900/40 dark:bg-blue-950/30">
       <span className="mr-1 text-xs font-black text-blue-700 dark:text-blue-300">
-        {selectedIds.length} selected
+        {totalCount} item{totalCount === 1 ? "" : "s"} selected
       </span>
       {scope === "trash" ? (
         <>
@@ -67,10 +75,10 @@ export default function AssetBulkActions({
       )}
       <button
         type="button"
-        className="ml-auto text-xs font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
-        onClick={() => setSelectedIds([])}
+        className="ml-auto text-xs font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-white cursor-pointer"
+        onClick={clearAll}
       >
-        Clear
+        Clear selection
       </button>
     </div>
   );

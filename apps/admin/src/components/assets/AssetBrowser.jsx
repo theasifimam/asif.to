@@ -154,6 +154,7 @@ export default function AssetBrowser({
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedFolderIds, setSelectedFolderIds] = useState([]);
   const [pickerSelection, setPickerSelection] = useState(null);
   const [inspected, setInspected] = useState(null);
   const [dialog, setDialog] = useState(null);
@@ -173,6 +174,7 @@ export default function AssetBrowser({
     const timer = window.setTimeout(() => {
       setPage(1);
       setSelectedIds([]);
+      setSelectedFolderIds([]);
       setPickerSelection(null);
     }, 0);
     return () => window.clearTimeout(timer);
@@ -791,6 +793,14 @@ export default function AssetBrowser({
   };
 
   const handleAction = async (action, item, isFolder = false) => {
+    if (action === "select") {
+      if (isFolder) {
+        toggleSelectedFolder(item._id);
+      } else {
+        toggleSelected(item._id);
+      }
+      return;
+    }
     if (["copy", "cut", "move"].includes(action)) {
       const items = entriesForItemAction(item, isFolder);
       setInspected(null);
@@ -836,6 +846,14 @@ export default function AssetBrowser({
     });
   };
 
+  const toggleSelectedFolder = useCallback((folderId) => {
+    setSelectedFolderIds((current) =>
+      current.includes(folderId)
+        ? current.filter((id) => id !== folderId)
+        : [...current, folderId],
+    );
+  }, []);
+
   const runDialogAction = async (value) => {
     if (!dialog) return;
     setWorking(true);
@@ -849,14 +867,54 @@ export default function AssetBrowser({
       response = dialog.isFolder
         ? await assetsApi.updateFolder(dialog.item._id, { name: value })
         : await assetsApi.update(dialog.item._id, { name: value });
-    if (dialog.type === "trash")
-      response = dialog.isFolder
-        ? await assetsApi.trashFolder(dialog.item._id)
-        : await assetsApi.bulk("trash", dialog.ids);
-    if (dialog.type === "permanent")
-      response = dialog.isFolder
-        ? await assetsApi.deleteFolderPermanently(dialog.item._id)
-        : await assetsApi.bulk("permanent_delete", dialog.ids);
+    if (dialog.type === "trash") {
+      if (dialog.item) {
+        response = dialog.isFolder
+          ? await assetsApi.trashFolder(dialog.item._id)
+          : await assetsApi.bulk("trash", [dialog.item._id]);
+      } else {
+        const promises = [];
+        if (dialog.folderIds?.length) {
+          promises.push(
+            ...dialog.folderIds.map((id) => assetsApi.trashFolder(id)),
+          );
+        }
+        if (dialog.ids?.length) {
+          promises.push(assetsApi.bulk("trash", dialog.ids));
+        }
+        const results = await Promise.all(promises);
+        const failed = results.find((r) => !r?.success);
+        response = failed || {
+          success: true,
+          data: { message: "Selected items moved to Trash." },
+        };
+      }
+    }
+    if (dialog.type === "permanent") {
+      if (dialog.item) {
+        response = dialog.isFolder
+          ? await assetsApi.deleteFolderPermanently(dialog.item._id)
+          : await assetsApi.bulk("permanent_delete", [dialog.item._id]);
+      } else {
+        const promises = [];
+        if (dialog.folderIds?.length) {
+          promises.push(
+            ...dialog.folderIds.map((id) =>
+              assetsApi.deleteFolderPermanently(id),
+            ),
+          );
+        }
+        if (dialog.ids?.length) {
+          promises.push(assetsApi.bulk("permanent_delete", dialog.ids));
+        }
+        const results = await Promise.all(promises);
+        const failed = results.find((r) => !r?.success);
+        response = failed || {
+          success: true,
+          data: { message: "Selected items permanently deleted." },
+        };
+      }
+    }
     setWorking(false);
     if (!response?.success) {
       const itemError = Array.isArray(response?.data)
@@ -869,11 +927,35 @@ export default function AssetBrowser({
     toast.success(response?.data?.message || "Media Library updated");
     setDialog(null);
     setSelectedIds([]);
+    setSelectedFolderIds([]);
     setInspected(null);
     refresh();
   };
 
   const runBulk = async (action) => {
+    if (action === "restore") {
+      setWorking(true);
+      const promises = [];
+      if (selectedFolderIds.length > 0) {
+        promises.push(
+          ...selectedFolderIds.map((id) => assetsApi.restoreFolder(id)),
+        );
+      }
+      if (selectedIds.length > 0) {
+        promises.push(assetsApi.bulk("restore", selectedIds));
+      }
+      const results = await Promise.all(promises);
+      setWorking(false);
+      const failed = results.find((r) => !r?.success);
+      if (failed)
+        return toast.error(failed?.error || "Unable to restore items");
+      toast.success("Selected items restored");
+      setSelectedIds([]);
+      setSelectedFolderIds([]);
+      refresh();
+      return;
+    }
+
     if (["move", "copy", "cut"].includes(action)) {
       const items = assetEntriesForIds(selectedIds);
       if (action === "move") {
@@ -884,20 +966,41 @@ export default function AssetBrowser({
       return;
     }
     if (action === "trash" || action === "permanent")
-      return setDialog({ type: action, ids: selectedIds, isFolder: false });
+      return setDialog({
+        type: action,
+        ids: selectedIds,
+        folderIds: selectedFolderIds,
+        isFolder: false,
+      });
     const response = await assetsApi.bulk(action, selectedIds);
     if (!response.success)
       return toast.error(response.error || "Unable to update files");
     toast.success("Files updated");
     setSelectedIds([]);
+    setSelectedFolderIds([]);
     refresh();
   };
 
   const folderSectionVisible =
     (scope === "all" || scope === "trash") && !debouncedSearch;
   const selectedAll =
-    assets.length > 0 &&
+    (folders.length > 0 || assets.length > 0) &&
+    (folderSectionVisible
+      ? folders.every((f) => selectedFolderIds.includes(f._id))
+      : true) &&
     assets.every((asset) => selectedIds.includes(asset._id));
+
+  const toggleSelectAll = useCallback(() => {
+    if (selectedAll) {
+      setSelectedIds([]);
+      setSelectedFolderIds([]);
+    } else {
+      setSelectedIds(assets.map((asset) => asset._id));
+      if (folderSectionVisible) {
+        setSelectedFolderIds(folders.map((folder) => folder._id));
+      }
+    }
+  }, [assets, folderSectionVisible, folders, selectedAll]);
   const empty = emptyCopy[scope] || [
     "No matching files",
     "Try another search or filter.",
@@ -1014,7 +1117,9 @@ export default function AssetBrowser({
         {/* Selected Items Bulk Action Bar */}
         <AssetBulkActions
           selectedIds={selectedIds}
+          selectedFolderIds={selectedFolderIds}
           setSelectedIds={setSelectedIds}
+          setSelectedFolderIds={setSelectedFolderIds}
           scope={scope}
           runBulk={runBulk}
           user={user}
@@ -1033,8 +1138,8 @@ export default function AssetBrowser({
           onPaste={pasteFromSystemClipboard}
           pasteDisabled={pasting || transferring}
           onRefresh={refresh}
-          onSelectAll={() => setSelectedIds(assets.map((asset) => asset._id))}
-          hasSelectableItems={assets.length > 0}
+          onSelectAll={toggleSelectAll}
+          hasSelectableItems={assets.length > 0 || folders.length > 0}
           view={view}
           onViewChange={setView}
           disabled={pickerMode || loading}
@@ -1066,93 +1171,69 @@ export default function AssetBrowser({
               </div>
             ) : (
               <>
-                {/* Desktop Table View Skeleton */}
-                <div className="hidden sm:block overflow-x-auto">
-                  <table className="w-full min-w-190 text-left text-xs">
-                    <thead className="border-b border-zinc-100 bg-zinc-50/70 dark:border-zinc-800 dark:bg-zinc-900/50">
-                      <tr>
-                        <th className="w-10 px-4 py-3">
-                          <Skeleton className="h-4 w-4 rounded" />
-                        </th>
-                        <th className="px-3 py-3">
-                          <Skeleton className="h-3 w-16 rounded" />
-                        </th>
-                        <th className="px-3 py-3">
-                          <Skeleton className="h-3 w-12 rounded" />
-                        </th>
-                        <th className="px-3 py-3">
-                          <Skeleton className="h-3 w-20 rounded" />
-                        </th>
-                        <th className="px-3 py-3">
+              <div className="w-full overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="border-b border-zinc-100 bg-zinc-50/70 dark:border-zinc-800 dark:bg-zinc-900/50">
+                    <tr>
+                      <th className="px-3 sm:px-4 py-3">
+                        <Skeleton className="h-3 w-16 rounded" />
+                      </th>
+                      <th className="hidden md:table-cell px-3 py-3">
+                        <Skeleton className="h-3 w-12 rounded" />
+                      </th>
+                      <th className="px-3 py-3">
+                        <Skeleton className="h-3 w-20 rounded" />
+                      </th>
+                      <th className="hidden lg:table-cell px-3 py-3">
+                        <Skeleton className="h-3 w-14 rounded" />
+                      </th>
+                      <th className="hidden xl:table-cell px-3 py-3">
+                        <Skeleton className="h-3 w-20 rounded" />
+                      </th>
+                      <th className="hidden sm:table-cell px-3 py-3">
+                        <Skeleton className="h-3 w-16 rounded" />
+                      </th>
+                      <th className="hidden md:table-cell px-3 py-3">
+                        <Skeleton className="h-3 w-12 rounded" />
+                      </th>
+                      <th className="w-8 sm:w-12" />
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                    {Array.from({ length: 8 }).map((_, index) => (
+                      <tr key={index}>
+                        <td className="px-3 sm:px-4 py-3">
+                          <div className="flex items-center gap-2 sm:gap-3">
+                            <Skeleton className="h-8 w-9 sm:h-10 sm:w-12 rounded-lg shrink-0" />
+                            <Skeleton className="h-4 w-32 sm:w-44 rounded-md" />
+                          </div>
+                        </td>
+                        <td className="hidden md:table-cell px-3 py-3">
                           <Skeleton className="h-3 w-14 rounded" />
-                        </th>
-                        <th className="px-3 py-3">
-                          <Skeleton className="h-3 w-20 rounded" />
-                        </th>
-                        <th className="px-3 py-3">
+                        </td>
+                        <td className="px-2 sm:px-3 py-3">
                           <Skeleton className="h-3 w-16 rounded" />
-                        </th>
-                        <th className="px-3 py-3">
-                          <Skeleton className="h-3 w-12 rounded" />
-                        </th>
-                        <th className="w-12" />
+                        </td>
+                        <td className="hidden lg:table-cell px-3 py-3">
+                          <Skeleton className="h-3 w-14 rounded" />
+                        </td>
+                        <td className="hidden xl:table-cell px-3 py-3">
+                          <Skeleton className="h-3 w-20 rounded" />
+                        </td>
+                        <td className="hidden sm:table-cell px-3 py-3">
+                          <Skeleton className="h-3 w-16 rounded" />
+                        </td>
+                        <td className="hidden md:table-cell px-3 py-3">
+                          <Skeleton className="h-3 w-10 rounded" />
+                        </td>
+                        <td className="w-8 sm:w-12 px-1 sm:px-2 py-3">
+                          <Skeleton className="h-6 w-6 rounded-full" />
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                      {Array.from({ length: 8 }).map((_, index) => (
-                        <tr key={index}>
-                          <td className="px-4 py-3">
-                            <Skeleton className="h-4 w-4 rounded" />
-                          </td>
-                          <td className="px-3 py-3">
-                            <div className="flex items-center gap-3">
-                              <Skeleton className="h-10 w-12 rounded-xl shrink-0" />
-                              <Skeleton className="h-4 w-44 rounded-md" />
-                            </div>
-                          </td>
-                          <td className="px-3 py-3">
-                            <Skeleton className="h-3 w-14 rounded" />
-                          </td>
-                          <td className="px-3 py-3">
-                            <Skeleton className="h-3 w-16 rounded" />
-                          </td>
-                          <td className="px-3 py-3">
-                            <Skeleton className="h-3 w-14 rounded" />
-                          </td>
-                          <td className="px-3 py-3">
-                            <Skeleton className="h-3 w-20 rounded" />
-                          </td>
-                          <td className="px-3 py-3">
-                            <Skeleton className="h-3 w-16 rounded" />
-                          </td>
-                          <td className="px-3 py-3">
-                            <Skeleton className="h-3 w-10 rounded" />
-                          </td>
-                          <td className="px-2 py-3">
-                            <Skeleton className="h-6 w-6 rounded-full" />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Mobile List View Skeleton */}
-                <div className="sm:hidden space-y-2 p-2.5">
-                  {Array.from({ length: 8 }).map((_, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-3 rounded-xl border border-zinc-200/80 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950"
-                    >
-                      <Skeleton className="h-11 w-11 shrink-0 rounded-xl" />
-                      <div className="min-w-0 flex-1 space-y-1.5">
-                        <Skeleton className="h-3.5 w-3/4 rounded-md" />
-                        <Skeleton className="h-2.5 w-1/2 rounded-md" />
-                      </div>
-                      <Skeleton className="h-6 w-6 rounded-full" />
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               </>
             )
           ) : !assets.length && !folders.length ? (
@@ -1189,6 +1270,8 @@ export default function AssetBrowser({
               setPickerSelection={setPickerSelection}
               selectedIds={selectedIds}
               toggleSelected={toggleSelected}
+              selectedFolderIds={selectedFolderIds}
+              toggleSelectedFolder={toggleSelectedFolder}
               setInspected={setInspected}
               accept={accept}
             />
@@ -1211,8 +1294,10 @@ export default function AssetBrowser({
               setPickerSelection={setPickerSelection}
               selectedIds={selectedIds}
               toggleSelected={toggleSelected}
+              selectedFolderIds={selectedFolderIds}
+              toggleSelectedFolder={toggleSelectedFolder}
               selectedAll={selectedAll}
-              setSelectedIds={setSelectedIds}
+              toggleSelectAll={toggleSelectAll}
               setInspected={setInspected}
               accept={accept}
             />
@@ -1261,7 +1346,7 @@ export default function AssetBrowser({
 
       {/* Mobile Floating Action Button (FAB) */}
       {scope !== "trash" && (canUpload || canManage) && !pickerMode && (
-        <div className="fixed bottom-6 right-5 z-40 lg:hidden">
+        <div className="fixed bottom-22 sm:bottom-6 right-5 z-40 lg:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
@@ -1347,9 +1432,11 @@ export default function AssetBrowser({
         onOpenChange={(open) => !open && setDialog(null)}
         title="Move to Trash?"
         description={
-          dialog?.isFolder
-            ? "The folder, nested folders, and active files inside it will move to Trash. Existing public URLs continue to work until permanent deletion."
-            : `${dialog?.ids?.length || 1} selected file${(dialog?.ids?.length || 1) === 1 ? "" : "s"} will be hidden from the active library but remain recoverable.`
+          dialog?.item
+            ? dialog.isFolder
+              ? "The folder, nested folders, and active files inside it will move to Trash. Existing public URLs continue to work until permanent deletion."
+              : "Selected file will be hidden from the active library but remain recoverable."
+            : `${(dialog?.folderIds?.length || 0) + (dialog?.ids?.length || 0)} selected item${(dialog?.folderIds?.length || 0) + (dialog?.ids?.length || 0) === 1 ? "" : "s"} will be hidden from the active library but remain recoverable.`
         }
         confirmLabel="Move to Trash"
         loading={working}
@@ -1359,7 +1446,13 @@ export default function AssetBrowser({
         open={dialog?.type === "permanent"}
         onOpenChange={(open) => !open && setDialog(null)}
         title="Delete permanently?"
-        description="This cannot be undone. Files referenced by published content will be protected and not deleted."
+        description={
+          dialog?.item
+            ? dialog.isFolder
+              ? "This folder and its contents will be permanently deleted. This cannot be undone."
+              : "This file will be permanently deleted. This cannot be undone."
+            : `${(dialog?.folderIds?.length || 0) + (dialog?.ids?.length || 0)} selected item${(dialog?.folderIds?.length || 0) + (dialog?.ids?.length || 0) === 1 ? "" : "s"} will be permanently deleted. This cannot be undone.`
+        }
         confirmLabel="Delete forever"
         destructive
         loading={working}

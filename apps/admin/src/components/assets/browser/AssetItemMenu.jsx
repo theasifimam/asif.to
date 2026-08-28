@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  CheckSquare,
   Copy,
   FolderInput,
   Heart,
@@ -23,6 +24,7 @@ export default function AssetItemMenu({
   item,
   isFolder = false,
   scope,
+  isSelected = false,
   onAction,
 }) {
   const selectAction = (action, folder = isFolder) => (event) => {
@@ -41,7 +43,7 @@ export default function AssetItemMenu({
           onClick={stopItemInteraction}
           onPointerDown={stopItemInteraction}
           onKeyDown={stopItemInteraction}
-          className="rounded-full p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-white"
+          className="rounded-full p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-white cursor-pointer"
         >
           <MoreHorizontal className="h-4 w-4" />
         </button>
@@ -52,6 +54,15 @@ export default function AssetItemMenu({
         onPointerDown={stopItemInteraction}
         onKeyDown={stopItemInteraction}
       >
+        <DropdownMenuItem onSelect={selectAction("select")}>
+          <CheckSquare
+            className={
+              isSelected ? "text-blue-600 dark:text-blue-400" : undefined
+            }
+          />
+          {isSelected ? "Deselect item" : "Select item"}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         {scope === "trash" ? (
           <>
             <DropdownMenuItem

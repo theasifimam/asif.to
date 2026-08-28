@@ -17,7 +17,13 @@ export default function CardFolderItem({
   openFolder,
   handleAction,
   pickerMode = false,
+  selectedIds = [],
+  selectedFolderIds = [],
+  toggleSelectedFolder,
 }) {
+  const selected = selectedFolderIds.includes(folder._id);
+  const isSelectionActive = selectedIds.length > 0 || selectedFolderIds.length > 0;
+
   return (
     <AssetContextMenu
       key={folder._id}
@@ -25,6 +31,7 @@ export default function CardFolderItem({
       isFolder
       scope={scope}
       canManage={canManage}
+      isSelected={selected}
       onAction={handleAction}
       onOpenFolder={openFolder}
       disabled={pickerMode}
@@ -42,15 +49,24 @@ export default function CardFolderItem({
         }}
         onDragLeave={clearDropTarget}
         onDrop={(event) => handleDrop(event, folder._id)}
-        onClick={() => openFolder(folder)}
+        onClick={(event) => {
+          if (!pickerMode && canManage && (isSelectionActive || event.ctrlKey || event.metaKey)) {
+            event.preventDefault();
+            toggleSelectedFolder?.(folder._id);
+            return;
+          }
+          if (scope !== "trash") openFolder(folder);
+        }}
         onKeyDown={(event) => {
-          if (event.key === "Enter") openFolder(folder);
+          if (event.key === "Enter" && scope !== "trash") openFolder(folder);
         }}
         className={cn(
           "group relative cursor-pointer overflow-hidden rounded-xl sm:rounded-xl border bg-white transition-all dark:bg-zinc-950",
-          dragOverTarget === folder._id
-            ? "border-blue-500 bg-blue-50 ring-2 ring-blue-500/20 dark:bg-blue-950/30"
-            : "border-zinc-200/80 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg dark:border-zinc-800",
+          selected
+            ? "border-blue-500 ring-2 ring-blue-500/20 bg-blue-50/20 dark:bg-blue-950/20"
+            : dragOverTarget === folder._id
+              ? "border-blue-500 bg-blue-50 ring-2 ring-blue-500/20 dark:bg-blue-950/30"
+              : "border-zinc-200/80 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg dark:border-zinc-800",
         )}
       >
         <div className="aspect-4/3 flex items-center justify-center overflow-hidden bg-blue-50/50 dark:bg-blue-950/20">
@@ -72,6 +88,7 @@ export default function CardFolderItem({
               item={folder}
               isFolder
               scope={scope}
+              isSelected={selected}
               onAction={handleAction}
             />
           )}

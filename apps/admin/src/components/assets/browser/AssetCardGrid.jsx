@@ -21,11 +21,13 @@ export default function AssetCardGrid({
   setPickerSelection,
   selectedIds = [],
   toggleSelected,
+  selectedFolderIds = [],
+  toggleSelectedFolder,
   setInspected,
   accept,
 }) {
   return (
-    <div className="grid grid-cols-4 gap-3 p-3 sm:gap-3 sm:p-4 sm:grid-cols-5 xl:grid-cols-6">
+    <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-6 gap-2.5 p-2.5 sm:gap-3.5 sm:p-4">
       {/* Folder Cards */}
       {folderSectionVisible &&
         folders.map((folder) => (
@@ -42,6 +44,9 @@ export default function AssetCardGrid({
             openFolder={openFolder}
             handleAction={handleAction}
             pickerMode={pickerMode}
+            selectedIds={selectedIds}
+            selectedFolderIds={selectedFolderIds}
+            toggleSelectedFolder={toggleSelectedFolder}
           />
         ))}
 
@@ -57,6 +62,7 @@ export default function AssetCardGrid({
           pickerSelection={pickerSelection}
           setPickerSelection={setPickerSelection}
           selectedIds={selectedIds}
+          selectedFolderIds={selectedFolderIds}
           toggleSelected={toggleSelected}
           setInspected={setInspected}
           accept={accept}

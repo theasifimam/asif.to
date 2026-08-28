@@ -36,6 +36,7 @@ export default function AssetContextMenu({
   scope = "all",
   canManage = false,
   canUpload = false,
+  isSelected = false,
   onAction,
   onOpenFolder,
   onCreateFolder,
@@ -65,6 +66,20 @@ export default function AssetContextMenu({
         {item ? (
           isTrash ? (
             <>
+              {canManage && (
+                <ContextMenuItem
+                  onSelect={() => onAction?.("select", item, isFolder)}
+                >
+                  <CheckSquare
+                    className={
+                      isSelected
+                        ? "text-blue-600 dark:text-blue-400"
+                        : undefined
+                    }
+                  />
+                  {isSelected ? "Deselect item" : "Select item"}
+                </ContextMenuItem>
+              )}
               {isFolder && (
                 <ContextMenuItem onSelect={() => onOpenFolder?.(item)}>
                   <FolderOpen className="text-blue-500" /> Open
@@ -72,6 +87,7 @@ export default function AssetContextMenu({
               )}
               {canManage && (
                 <>
+                  <ContextMenuSeparator />
                   <ContextMenuItem
                     onSelect={() => onAction?.("restore", item, isFolder)}
                   >
@@ -89,6 +105,20 @@ export default function AssetContextMenu({
             </>
           ) : (
             <>
+              {canManage && (
+                <ContextMenuItem
+                  onSelect={() => onAction?.("select", item, isFolder)}
+                >
+                  <CheckSquare
+                    className={
+                      isSelected
+                        ? "text-blue-600 dark:text-blue-400"
+                        : undefined
+                    }
+                  />
+                  {isSelected ? "Deselect item" : "Select item"}
+                </ContextMenuItem>
+              )}
               {isFolder ? (
                 <ContextMenuItem onSelect={() => onOpenFolder?.(item)}>
                   <FolderOpen className="text-blue-500" /> Open

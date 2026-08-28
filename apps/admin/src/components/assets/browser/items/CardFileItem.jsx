@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Heart } from "lucide-react";
+import { Heart } from "lucide-react";
 import {
   assetAccepts,
   ASSET_TYPE_LABELS,
@@ -21,6 +21,7 @@ export default function CardFileItem({
   pickerSelection,
   setPickerSelection,
   selectedIds = [],
+  selectedFolderIds = [],
   toggleSelected,
   setInspected,
   accept,
@@ -30,6 +31,7 @@ export default function CardFileItem({
     ? pickerSelection?._id === asset._id
     : selectedIds.includes(asset._id);
   const accepted = assetAccepts(asset, accept);
+  const isSelectionActive = selectedIds.length > 0 || selectedFolderIds.length > 0;
 
   return (
     <AssetContextMenu
@@ -37,6 +39,7 @@ export default function CardFileItem({
       item={asset}
       scope={scope}
       canManage={canManage}
+      isSelected={selected}
       onAction={handleAction}
       disabled={pickerMode || !accepted}
     >
@@ -45,37 +48,24 @@ export default function CardFileItem({
         onContextMenu={(event) => event.stopPropagation()}
         draggable={!pickerMode && scope !== "trash" && canManage}
         onDragStart={(event) => handleDragStart(event, asset, "asset")}
-        onClick={() => {
+        onClick={(event) => {
           if (!accepted) return;
+          if (!pickerMode && canManage && (isSelectionActive || event.ctrlKey || event.metaKey)) {
+            event.preventDefault();
+            toggleSelected?.(asset._id);
+            return;
+          }
           if (pickerMode) setPickerSelection(asset);
           else setInspected(asset);
         }}
         className={cn(
           "group relative cursor-pointer overflow-hidden rounded-xl sm:rounded-xl border bg-white transition-all dark:bg-zinc-950",
           selected
-            ? "border-blue-500 ring-2 ring-blue-500/20"
+            ? "border-blue-500 ring-2 ring-blue-500/20 bg-blue-50/20 dark:bg-blue-950/20"
             : "border-zinc-200/80 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg dark:border-zinc-800",
           !accepted && "cursor-not-allowed opacity-40",
         )}
       >
-        {!pickerMode && canManage && (
-          <button
-            type="button"
-            aria-label={`Select ${asset.name}`}
-            onClick={(event) => {
-              event.stopPropagation();
-              toggleSelected(asset._id);
-            }}
-            className={cn(
-              "absolute left-2.5 top-2.5 z-10 flex h-6 w-6 items-center justify-center rounded-full border shadow-sm",
-              selected
-                ? "border-blue-600 bg-blue-600 text-white"
-                : "border-white/80 bg-white/90 text-transparent dark:border-zinc-700 dark:bg-zinc-900",
-            )}
-          >
-            <Check className="h-3.5 w-3.5" />
-          </button>
-        )}
         <div className="aspect-4/3 overflow-hidden bg-zinc-100 dark:bg-zinc-900">
           <AssetThumbnail
             asset={asset}
@@ -97,7 +87,12 @@ export default function CardFileItem({
             />
           </div>
           {!pickerMode && canManage && (
-            <AssetItemMenu item={asset} scope={scope} onAction={handleAction} />
+            <AssetItemMenu
+              item={asset}
+              scope={scope}
+              isSelected={selected}
+              onAction={handleAction}
+            />
           )}
         </div>
         {asset.isFavorite && (
