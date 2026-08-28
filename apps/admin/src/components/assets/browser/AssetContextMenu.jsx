@@ -2,6 +2,7 @@
 
 import {
   CheckSquare,
+  ClipboardPaste,
   FolderInput,
   FolderOpen,
   FolderPlus,
@@ -37,6 +38,8 @@ export default function AssetContextMenu({
   onOpenFolder,
   onCreateFolder,
   onUpload,
+  onPaste,
+  pasteDisabled = false,
   onRefresh,
   onSelectAll,
   hasSelectableItems = false,
@@ -141,6 +144,14 @@ export default function AssetContextMenu({
             {!isTrash && canUpload && (
               <ContextMenuItem onSelect={onUpload}>
                 <Upload className="text-blue-500" /> Upload files
+              </ContextMenuItem>
+            )}
+            {!isTrash && canUpload && onPaste && (
+              <ContextMenuItem onSelect={onPaste} disabled={pasteDisabled}>
+                <ClipboardPaste className="text-violet-500" /> Paste from device
+                <span className="ml-auto text-[10px] font-medium text-zinc-400">
+                  Ctrl+V
+                </span>
               </ContextMenuItem>
             )}
             {!isTrash && (canManage || canUpload) && <ContextMenuSeparator />}

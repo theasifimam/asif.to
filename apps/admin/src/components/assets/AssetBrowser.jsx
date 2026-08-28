@@ -30,6 +30,14 @@ import AssetBulkActions from "./browser/AssetBulkActions";
 import AssetCardGrid from "./browser/AssetCardGrid";
 import AssetContextMenu from "./browser/AssetContextMenu";
 import AssetTableListView from "./browser/AssetTableListView";
+import {
+  childrenFromDirectorySource,
+  fileFromClipboardSource,
+  isDirectorySource,
+  isEditablePasteTarget,
+  sourcesFromClipboardData,
+  sourcesFromNavigatorClipboard,
+} from "./browser/clipboard";
 import { emptyCopy, folderOptions, unwrap } from "./browser/constants";
 
 export default function AssetBrowser({
@@ -66,6 +74,7 @@ export default function AssetBrowser({
   const [dialog, setDialog] = useState(null);
   const [working, setWorking] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [pasting, setPasting] = useState(false);
   const [dragOverTarget, setDragOverTarget] = useState(null);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const scrollContainerRef = useRef(null);
@@ -224,10 +233,10 @@ export default function AssetBrowser({
     };
   }, [currentFolderId]);
 
-  const refresh = () => {
+  const refresh = useCallback(() => {
     setPage(1);
     setRefreshKey((value) => value + 1);
-  };
+  }, []);
   const resetNavigationState = () => {
     setPage(1);
     setSelectedIds([]);
@@ -297,6 +306,177 @@ export default function AssetBrowser({
       description: result?.error || response.error || "Upload failed.",
     });
   };
+
+  const createPastedFolder = useCallback(async (name, parentId) => {
+    const baseName = String(name || "New folder").trim().slice(0, 120) || "New folder";
+
+    for (let attempt = 1; attempt <= 100; attempt += 1) {
+      const suffix = attempt === 1 ? "" : ` (${attempt})`;
+      const candidate = `${baseName.slice(0, 120 - suffix.length)}${suffix}`;
+      const response = await assetsApi.createFolder({
+        name: candidate,
+        parentId,
+      });
+      if (response.success) return unwrap(response, null);
+      if (response.status !== 409) {
+        throw new Error(response.error || `Could not create ${candidate}`);
+      }
+    }
+
+    throw new Error(`Could not create a unique copy of ${baseName}`);
+  }, []);
+
+  const pasteClipboardSources = useCallback(
+    async (sources) => {
+      if (!sources?.length) {
+        toast.error("No files found on the clipboard", {
+          description: "Copy files or a folder from your device, then try again.",
+        });
+        return;
+      }
+      if (scope === "trash") {
+        toast.error("Files cannot be pasted into Trash.");
+        return;
+      }
+      if (!canUpload) {
+        toast.error("You do not have permission to upload files.");
+        return;
+      }
+      if (pasting) return;
+
+      const toastId = "asset-clipboard-paste";
+      const stats = { files: 0, folders: 0, failed: 0 };
+      setPasting(true);
+      toast.loading("Pasting clipboard items…", {
+        id: toastId,
+        description: currentFolderId
+          ? "Recreating items in the current folder."
+          : "Recreating items in All Files.",
+      });
+
+      const pasteSource = async (source, destinationFolderId) => {
+        if (isDirectorySource(source)) {
+          if (!canManage) {
+            stats.failed += 1;
+            return;
+          }
+          try {
+            const folder = await createPastedFolder(
+              source.name,
+              destinationFolderId,
+            );
+            if (!folder?._id) throw new Error("Folder creation failed");
+            stats.folders += 1;
+            const children = await childrenFromDirectorySource(source);
+            for (const child of children) {
+              await pasteSource(child, folder._id);
+            }
+          } catch {
+            stats.failed += 1;
+          }
+          return;
+        }
+
+        try {
+          const file = await fileFromClipboardSource(source);
+          if (!file) throw new Error("Clipboard file is unavailable");
+          const response = await assetsApi.upload(file, {
+            folderId: destinationFolderId,
+            duplicateStrategy: "upload-anyway",
+          });
+          const result = response.data?.results?.[0];
+          if (!response.success || result?.status !== "created") {
+            throw new Error(result?.error || response.error || "Upload failed");
+          }
+          stats.files += 1;
+        } catch {
+          stats.failed += 1;
+        }
+      };
+
+      try {
+        for (const source of sources) {
+          await pasteSource(source, currentFolderId);
+        }
+
+        const recreated = [
+          stats.files && `${stats.files} file${stats.files === 1 ? "" : "s"}`,
+          stats.folders &&
+            `${stats.folders} folder${stats.folders === 1 ? "" : "s"}`,
+        ]
+          .filter(Boolean)
+          .join(" and ");
+
+        if (recreated) {
+          toast.success(`${recreated} pasted`, {
+            id: toastId,
+            description: stats.failed
+              ? `${stats.failed} item${stats.failed === 1 ? "" : "s"} could not be recreated.`
+              : "The clipboard structure was recreated successfully.",
+          });
+          refresh();
+        } else {
+          toast.error("Clipboard items could not be pasted", {
+            id: toastId,
+            description:
+              !canManage && sources.some(isDirectorySource)
+                ? "Folder pasting requires permission to manage folders."
+                : "The browser did not provide readable files.",
+          });
+        }
+      } finally {
+        setPasting(false);
+      }
+    },
+    [
+      canManage,
+      canUpload,
+      createPastedFolder,
+      currentFolderId,
+      pasting,
+      refresh,
+      scope,
+    ],
+  );
+
+  const pasteFromSystemClipboard = useCallback(async () => {
+    try {
+      const sources = await sourcesFromNavigatorClipboard();
+      await pasteClipboardSources(sources);
+    } catch (error) {
+      toast.error("Clipboard access was unavailable", {
+        description:
+          error?.name === "NotAllowedError"
+            ? "Allow clipboard access, or click the Files area and press Ctrl+V."
+            : "Click the Files area and press Ctrl+V to paste device files.",
+      });
+    }
+  }, [pasteClipboardSources]);
+
+  const handleClipboardPaste = useCallback(
+    async (event) => {
+      if (pickerMode || isEditablePasteTarget(event.target)) return;
+      const clipboardData = event.clipboardData;
+      const hasFiles =
+        clipboardData?.files?.length > 0 ||
+        Array.from(clipboardData?.items || []).some(
+          (item) => item.kind === "file",
+        );
+      if (!hasFiles) return;
+
+      event.preventDefault();
+      const sources = await sourcesFromClipboardData(clipboardData);
+      await pasteClipboardSources(sources);
+    },
+    [pasteClipboardSources, pickerMode],
+  );
+
+  useEffect(() => {
+    if (pickerMode) return undefined;
+    const onPaste = (event) => void handleClipboardPaste(event);
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, [handleClipboardPaste, pickerMode]);
 
   const handleDragStart = (event, item, kind) => {
     if (scope === "trash" || !canManage) return;
@@ -569,6 +749,8 @@ export default function AssetBrowser({
           canUpload={canUpload}
           onCreateFolder={() => setDialog({ type: "create-folder" })}
           onUpload={() => setUploadOpen(true)}
+          onPaste={pasteFromSystemClipboard}
+          pasteDisabled={pasting}
           onRefresh={refresh}
           onSelectAll={() => setSelectedIds(assets.map((asset) => asset._id))}
           hasSelectableItems={assets.length > 0}
@@ -583,7 +765,7 @@ export default function AssetBrowser({
               pickerMode && "min-h-0 pb-0",
             )}
             data-scroll-ignore
-            aria-busy={loading || loadingMore}
+            aria-busy={loading || loadingMore || pasting}
           >
           {loading ? (
             view === "card" ? (
