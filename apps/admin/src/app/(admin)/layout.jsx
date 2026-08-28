@@ -133,13 +133,6 @@ const NAV_ITEMS = [
         permission: "articles.create",
         description: "Create, publish & connect accounts",
       },
-      {
-        name: "Files",
-        href: "/files",
-        icon: Files,
-        permission: "assets.view",
-        description: "Reusable media & downloads",
-      },
     ],
   },
   {
@@ -184,6 +177,13 @@ const NAV_ITEMS = [
     group: "System Pages",
     items: [
       {
+        name: "Files",
+        href: "/files",
+        icon: Files,
+        permission: "assets.view",
+        description: "Reusable files, usage & orphans",
+      },
+      {
         name: "SEO Settings",
         href: "/seo-settings",
         icon: SearchCheck,
@@ -203,13 +203,6 @@ const NAV_ITEMS = [
         icon: Info,
         permission: "settings.manage",
         description: "Policies & documentation",
-      },
-      {
-        name: "Media Audit",
-        href: "/media-audit",
-        icon: Image,
-        permission: "settings.manage",
-        description: "Review uploaded and orphaned images",
       },
     ],
   },

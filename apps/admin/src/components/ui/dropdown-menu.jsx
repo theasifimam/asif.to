@@ -25,7 +25,12 @@ function DropdownMenuTrigger({ ...props }) {
   );
 }
 
-function DropdownMenuContent({ className, sideOffset = 4, collisionPadding = 16, ...props }) {
+function DropdownMenuContent({
+  className,
+  sideOffset = 4,
+  collisionPadding = 16,
+  ...props
+}) {
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
@@ -171,13 +176,17 @@ function DropdownMenuSubTrigger({ className, inset, children, ...props }) {
   );
 }
 
-function DropdownMenuSubContent({ className, collisionPadding = 16, ...props }) {
+function DropdownMenuSubContent({
+  className,
+  collisionPadding = 16,
+  ...props
+}) {
   return (
     <DropdownMenuPrimitive.SubContent
       data-slot="dropdown-menu-sub-content"
       collisionPadding={collisionPadding}
       className={cn(
-        "bg-white text-zinc-950 dark:bg-zinc-900 dark:text-zinc-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-[2050] max-h-(--radix-dropdown-menu-content-available-height) min-w-44 origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-2xl border border-zinc-200/80 p-1.5 shadow-[0_18px_50px_-20px_rgba(24,24,27,.4)] dark:border-zinc-800",
+        "bg-white text-zinc-950 dark:bg-zinc-900 dark:text-zinc-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-2050 max-h-(--radix-dropdown-menu-content-available-height) min-w-44 origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-2xl border border-zinc-200/80 p-1.5 shadow-[0_18px_50px_-20px_rgba(24,24,27,.4)] dark:border-zinc-800",
         className,
       )}
       {...props}
