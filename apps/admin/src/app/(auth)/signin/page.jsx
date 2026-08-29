@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   ChevronRight,
-  Mail,
+  User,
   Lock,
   ShieldCheck,
   Eye,
@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 
 export default function SigninPage() {
-  const [email, setEmail] = useState("");
+  const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,16 +22,16 @@ export default function SigninPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      toast.error("Please enter both email and password");
+    if (!emailOrUsername || !password) {
+      toast.error("Please enter both email/username and password");
       return;
     }
     setIsLoading(true);
     try {
-      await login({ email, password });
+      await login({ emailOrUsername, email: emailOrUsername, password });
       toast.success("Signed in successfully");
     } catch (error) {
-      const msg = error?.response?.data?.message || "Invalid email or password";
+      const msg = error?.response?.data?.message || "Invalid credentials";
       toast.error(msg);
     } finally {
       setIsLoading(false);
@@ -62,18 +62,18 @@ export default function SigninPage() {
 
       {/* Signin Form */}
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Email Field */}
+        {/* Email or Username Field */}
         <div className="space-y-1.5">
           <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300 ml-1">
-            Email Address
+            Email or Username
           </label>
           <div className="relative">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
             <input
-              type="email"
-              placeholder="admin@asif.to"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              placeholder="admin@asif.to or username"
+              value={emailOrUsername}
+              onChange={(e) => setEmailOrUsername(e.target.value)}
               required
               className="w-full bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/60 rounded-2xl pl-11 pr-5 py-3.5 text-sm font-medium text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
             />

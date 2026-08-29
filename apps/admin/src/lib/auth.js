@@ -68,6 +68,7 @@ export async function login(credentials) {
   try {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+    const identifier = credentials.emailOrUsername || credentials.email;
     const response = await fetch(`${API_BASE_URL}/auth/admin/signin`, {
       method: "POST",
       headers: {
@@ -75,7 +76,8 @@ export async function login(credentials) {
         "ngrok-skip-browser-warning": "true",
       },
       body: JSON.stringify({
-        emailOrUsername: credentials.email,
+        emailOrUsername: identifier,
+        email: identifier,
         password: credentials.password,
       }),
     });

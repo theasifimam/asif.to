@@ -37,6 +37,7 @@ import socialPostRoutes from "./routes/socialPost.routes.js";
 import socialIntegrationRoutes from "./routes/socialIntegration.routes.js";
 import { initializeMessagingSocket } from "./realtime/messaging.socket.js";
 import { ensureMessagingBootstrap } from "./services/messagingBootstrap.service.js";
+import { startSocialPublishingScheduler } from "./services/socialPublishingScheduler.service.js";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -181,6 +182,7 @@ const startServer = async () => {
   try {
     await connectDB();
     await ensureMessagingBootstrap();
+    startSocialPublishingScheduler();
     const PORT = parseInt(process.env.PORT || "5000", 10);
     const httpServer = createServer(app);
     initializeMessagingSocket(httpServer, allowedOrigins);

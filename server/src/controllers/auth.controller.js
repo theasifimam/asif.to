@@ -398,18 +398,19 @@ export const signin = async (req, res) => {
 // POST /api/v1/auth/admin/signin  (admins/editors/authors only)
 export const adminSignin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, emailOrUsername, password } = req.body;
+    const loginInput = (emailOrUsername || email || "").toLowerCase().trim();
 
-    if (!email || !password) {
+    if (!loginInput || !password) {
       res
         .status(400)
-        .json({ success: false, message: "Email and password are required." });
+        .json({ success: false, message: "Email/Username and password are required." });
       return;
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() }).select(
-      "+password",
-    );
+    const user = await User.findOne({
+      $or: [{ email: loginInput }, { username: loginInput }],
+    }).select("+password");
     if (!user) {
       res.status(401).json({ success: false, message: "Invalid credentials." });
       return;

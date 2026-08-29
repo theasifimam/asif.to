@@ -4,12 +4,13 @@ import SocialPublication from "../models/SocialPublication.js";
 import {
   assetsFromPublication,
   runPublication,
+  syncSocialPostPublicationState,
 } from "../controllers/socialPostPublication.controller.js";
 
 let timer = null;
 let running = false;
 
-async function processDuePublications() {
+export async function processDuePublications() {
   if (running) return;
   running = true;
 
@@ -38,15 +39,12 @@ async function processDuePublications() {
 
         const result = await runPublication({ publication, post, assets });
 
-        if (result.status === "published") {
-          post.status = "published";
-          post.updatedAt = new Date();
-          await post.save();
-        }
+        await syncSocialPostPublicationState(post);
       } catch (error) {
         publication.status = "failed";
         publication.errorMessage = error.message || "Scheduled publishing failed.";
         await publication.save();
+        await syncSocialPostPublicationState(post);
       }
     }
   } catch (error) {
@@ -59,10 +57,16 @@ async function processDuePublications() {
 export function startSocialPublishingScheduler() {
   if (timer) return;
 
-  const intervalMs = Math.max(
-    15000,
-    Number(process.env.SOCIAL_PUBLISH_SCHEDULER_INTERVAL_MS || 60000),
-  );
+  const configuredInterval = Number(process.env.SOCIAL_PUBLISH_SCHEDULER_INTERVAL_MS || 60000);
+  const intervalMs = Number.isFinite(configuredInterval)
+    ? Math.max(15000, configuredInterval)
+    : 60000;
+
+  const staleBefore = new Date(Date.now() - Math.max(intervalMs * 2, 10 * 60 * 1000));
+  SocialPublication.updateMany(
+    { status: "publishing", lastAttemptAt: { $lt: staleBefore } },
+    { $set: { status: "failed", errorMessage: "Publishing was interrupted before completion. Retry manually to avoid a duplicate post." } },
+  ).catch((error) => console.error("[SOCIAL_SCHEDULER] Could not recover interrupted publications:", error));
 
   processDuePublications().catch(() => {});
   timer = setInterval(() => processDuePublications().catch(() => {}), intervalMs);

@@ -12,6 +12,9 @@ const uploadsRoot = path.resolve(__dirname, "../../uploads");
 const PLATFORMS = ["instagram", "facebook", "linkedin"];
 const REPOST_LOCK_MS = 30 * 24 * 60 * 60 * 1000;
 
+const canManageAllPosts = (user) => ["admin", "super_admin"].includes(user?.role);
+const postAccessFilter = (user) => canManageAllPosts(user) ? {} : { createdBy: user._id };
+
 const publicUrl = (relative) =>
   `${(process.env.API_PUBLIC_URL || process.env.API_URL || "http://localhost:5000").replace(/\/$/, "")}/uploads/${relative.replace(/\\/g, "/")}`;
 
@@ -92,9 +95,28 @@ export async function runPublication({ publication, post, assets }) {
   }
 }
 
+export async function syncSocialPostPublicationState(post) {
+  const rows = await SocialPublication.find({ socialPost: post._id })
+    .select("status scheduledAt")
+    .lean();
+  const scheduled = rows
+    .filter((row) => row.status === "scheduled" && row.scheduledAt)
+    .sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt));
+
+  if (scheduled.length || rows.some((row) => row.status === "publishing")) {
+    post.status = "scheduled";
+    post.scheduledAt = scheduled[0]?.scheduledAt || post.scheduledAt;
+  } else {
+    post.status = rows.some((row) => row.status === "published") ? "published" : "ready";
+    post.scheduledAt = null;
+  }
+  post.updatedAt = new Date();
+  await post.save();
+}
+
 export async function uploadSocialPostPublishingAssets(req, res) {
   try {
-    const post = await SocialPost.findOne({ _id: req.params.id, createdBy: req.user._id }).select("_id").lean();
+    const post = await SocialPost.findOne({ _id: req.params.id, ...postAccessFilter(req.user) }).select("_id").lean();
     if (!post) {
       await Promise.all((req.files || []).map((file) => fs.unlink(file.path).catch(() => {})));
       return res.status(404).json({ success: false, message: "Social post not found." });
@@ -150,9 +172,7 @@ export async function publishSocialPost(req, res) {
     }
 
     if (results.some((result) => result.status === "published")) {
-      post.status = "published";
-      post.updatedAt = new Date();
-      await post.save();
+      await syncSocialPostPublicationState(post);
     }
 
     return res.json({ success: true, data: results });
@@ -181,6 +201,11 @@ export async function scheduleSocialPost(req, res) {
 
     const assets = (Array.isArray(req.body?.assets) ? req.body.assets : []).map(assetFrom);
     await assertAssets(assets);
+
+    await SocialPublication.updateMany(
+      { socialPost: post._id, platform: { $in: platforms }, status: "scheduled" },
+      { $set: { status: "cancelled", errorMessage: "Replaced by a newer schedule." } },
+    );
 
     const rows = await SocialPublication.insertMany(
       platforms.map((platform) => ({
@@ -231,7 +256,7 @@ export async function scheduleSocialPost(req, res) {
 
 export async function retrySocialPublication(req, res) {
   try {
-    const post = await SocialPost.findOne({ _id: req.params.id, createdBy: req.user._id });
+    const post = await SocialPost.findOne({ _id: req.params.id, ...postAccessFilter(req.user) });
     if (!post) return res.status(404).json({ success: false, message: "Social post not found." });
 
     const publication = await SocialPublication.findOne({ _id: req.params.publicationId, socialPost: post._id });
@@ -246,9 +271,7 @@ export async function retrySocialPublication(req, res) {
     const result = await runPublication({ publication, post, assets });
 
     if (result.status === "published") {
-      post.status = "published";
-      post.updatedAt = new Date();
-      await post.save();
+      await syncSocialPostPublicationState(post);
     }
 
     return res.json({ success: true, data: result });
@@ -259,6 +282,12 @@ export async function retrySocialPublication(req, res) {
 }
 
 export async function cancelScheduledPublication(req, res) {
+  const post = await SocialPost.findOne({
+    _id: req.params.id,
+    ...postAccessFilter(req.user),
+  });
+  if (!post) return res.status(404).json({ success: false, message: "Social post not found." });
+
   const publication = await SocialPublication.findOneAndUpdate(
     {
       _id: req.params.publicationId,
@@ -272,12 +301,13 @@ export async function cancelScheduledPublication(req, res) {
   if (!publication) {
     return res.status(404).json({ success: false, message: "Scheduled publication not found or already started." });
   }
+  await syncSocialPostPublicationState(post);
 
   return res.json({ success: true, data: { id: publication._id, status: publication.status } });
 }
 
 export async function getSocialPostPublications(req, res) {
-  const post = await SocialPost.findOne({ _id: req.params.id, createdBy: req.user._id }).select("_id");
+  const post = await SocialPost.findOne({ _id: req.params.id, ...postAccessFilter(req.user) }).select("_id");
   if (!post) return res.status(404).json({ success: false, message: "Social post not found." });
 
   const rows = await SocialPublication.find({ socialPost: post._id })

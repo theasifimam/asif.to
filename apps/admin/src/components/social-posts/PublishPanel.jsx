@@ -41,6 +41,11 @@ function defaultCaption(post) {
 
 const fmt = (value, withTime = false) => value ? new Intl.DateTimeFormat(undefined, withTime ? { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" } : { month: "short", day: "numeric", year: "numeric" }).format(new Date(value)) : "";
 
+function toLocalDateTimeValue(date) {
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
+}
+
 export default function PublishPanel({ postId, post, exportRefs }) {
   const [integrations, setIntegrations] = useState([]);
   const [history, setHistory] = useState([]);
@@ -135,7 +140,12 @@ export default function PublishPanel({ postId, post, exportRefs }) {
     try {
       const assets = await uploadAssets();
       setStatusText("Scheduling...");
-      const result = await socialPostsApi.schedule(postId, { platforms, assets, caption, scheduledAt });
+      const result = await socialPostsApi.schedule(postId, {
+        platforms,
+        assets,
+        caption,
+        scheduledAt: new Date(scheduledAt).toISOString(),
+      });
       if (!result?.success) throw new Error(result?.error || "Scheduling failed.");
       await loadState();
       setSelected([]);
@@ -232,6 +242,7 @@ export default function PublishPanel({ postId, post, exportRefs }) {
                   <input
                     type="datetime-local"
                     value={scheduledAt}
+                    min={toLocalDateTimeValue(new Date(Date.now() + 60000))}
                     onChange={(e) => setScheduledAt(e.target.value)}
                     className="h-10 w-full rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-background px-3 text-xs font-medium focus:ring-2 focus:ring-blue-500/20 outline-none"
                   />
@@ -248,19 +259,19 @@ export default function PublishPanel({ postId, post, exportRefs }) {
                         const d = new Date();
                         d.setDate(d.getDate() + 1);
                         d.setHours(18, 0, 0, 0);
-                        setScheduledAt(d.toISOString().slice(0, 16));
+                        setScheduledAt(toLocalDateTimeValue(d));
                       }],
                       ["Next Sat 6 PM", () => {
                         const d = new Date();
                         d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7 || 7));
                         d.setHours(18, 0, 0, 0);
-                        setScheduledAt(d.toISOString().slice(0, 16));
+                        setScheduledAt(toLocalDateTimeValue(d));
                       }],
                       ["In 2 Days", () => {
                         const d = new Date();
                         d.setDate(d.getDate() + 2);
                         d.setHours(18, 0, 0, 0);
-                        setScheduledAt(d.toISOString().slice(0, 16));
+                        setScheduledAt(toLocalDateTimeValue(d));
                       }],
                     ].map(([label, fn]) => (
                       <button

@@ -115,6 +115,8 @@ export default function AssetInspector({
   const [loadingUsage, setLoadingUsage] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showOverlayControls, setShowOverlayControls] = useState(false);
+  const wasDraggingRef = useRef(false);
   const [slideOffset, setSlideOffset] = useState(0);
   const [animateSlide, setAnimateSlide] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -413,6 +415,9 @@ export default function AssetInspector({
 
     setIsDragging(false);
     const offset = gesture.slideOffset || 0;
+    if (Math.abs(offset) > 10) {
+      wasDraggingRef.current = true;
+    }
     if (offset < -60 && nextAsset) {
       navigateTo(nextAsset, "next");
     } else if (offset > 60 && prevAsset) {
@@ -423,6 +428,15 @@ export default function AssetInspector({
       setSlideOffset(0);
       scheduleTransition(() => setIsTransitioning(false), 200);
     }
+  };
+
+  const handleStageClick = (e) => {
+    if (isViewerControl(e.target)) return;
+    if (wasDraggingRef.current) {
+      wasDraggingRef.current = false;
+      return;
+    }
+    setShowFullscreenControls((prev) => !prev);
   };
 
   const handlePointerStart = (event) => {
@@ -583,17 +597,27 @@ export default function AssetInspector({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerEnd}
         onPointerCancel={handlePointerEnd}
-        className="fixed inset-0 z-3500 flex h-screen w-screen items-center justify-center bg-black select-none touch-none"
+        onClick={handleStageClick}
+        className="fixed inset-0 z-3500 flex h-screen w-screen items-center justify-center bg-black select-none touch-none cursor-pointer"
         data-scroll-ignore
       >
         {/* Fullscreen Navigation Chevrons */}
         {prevAsset && (
           <button
             type="button"
-            onClick={() => navigateTo(prevAsset, "prev")}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigateTo(prevAsset, "prev");
+            }}
             disabled={isTransitioning}
-            className="absolute left-4 top-1/2 z-50 -translate-y-1/2 rounded-full border border-white/20 bg-black/60 p-3 text-white backdrop-blur-md hover:bg-black/80 shadow-xl transition-all"
+            className={cn(
+              "absolute left-4 top-1/2 z-50 -translate-y-1/2 rounded-full border border-white/20 bg-black/60 p-3 text-white backdrop-blur-md hover:bg-black/80 shadow-xl transition-all duration-300",
+              showOverlayControls
+                ? "opacity-100 pointer-events-auto scale-100"
+                : "opacity-0 pointer-events-none scale-95",
+            )}
             aria-label="Previous file"
+            title="Previous file"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
@@ -601,10 +625,19 @@ export default function AssetInspector({
         {nextAsset && (
           <button
             type="button"
-            onClick={() => navigateTo(nextAsset, "next")}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigateTo(nextAsset, "next");
+            }}
             disabled={isTransitioning}
-            className="absolute right-4 top-1/2 z-50 -translate-y-1/2 rounded-full border border-white/20 bg-black/60 p-3 text-white backdrop-blur-md hover:bg-black/80 shadow-xl transition-all"
+            className={cn(
+              "absolute right-4 top-1/2 z-50 -translate-y-1/2 rounded-full border border-white/20 bg-black/60 p-3 text-white backdrop-blur-md hover:bg-black/80 shadow-xl transition-all duration-300",
+              showOverlayControls
+                ? "opacity-100 pointer-events-auto scale-100"
+                : "opacity-0 pointer-events-none scale-95",
+            )}
             aria-label="Next file"
+            title="Next file"
           >
             <ChevronRight className="h-6 w-6" />
           </button>
@@ -654,7 +687,13 @@ export default function AssetInspector({
           )}
         </div>
 
-        <div className="pointer-events-none absolute left-4 top-4 z-50 max-w-[calc(100%-10rem)] rounded-2xl border border-white/15 bg-black/55 px-3.5 py-2 text-white shadow-xl backdrop-blur-md">
+        {/* Top File Metadata Badge */}
+        <div
+          className={cn(
+            "pointer-events-none absolute left-4 top-4 z-50 max-w-[calc(100%-10rem)] rounded-2xl border border-white/15 bg-black/55 px-3.5 py-2 text-white shadow-xl backdrop-blur-md transition-all duration-300",
+            showOverlayControls ? "opacity-100" : "opacity-0",
+          )}
+        >
           <p className="truncate text-xs font-bold">{asset.name}</p>
           <p className="mt-0.5 text-[10px] font-semibold text-zinc-300">
             {[positionLabel, formatAssetBytes(asset.size)]
@@ -663,7 +702,15 @@ export default function AssetInspector({
           </p>
         </div>
 
-        <div className="absolute bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 rounded-full border border-white/15 bg-black/60 p-1 text-white shadow-xl backdrop-blur-md">
+        {/* Bottom Zoom & Controls Bar */}
+        <div
+          className={cn(
+            "absolute bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 rounded-full border border-white/15 bg-black/60 p-1 text-white shadow-xl backdrop-blur-md transition-all duration-300",
+            showOverlayControls
+              ? "opacity-100 pointer-events-auto"
+              : "opacity-0 pointer-events-none",
+          )}
+        >
           {asset.category === "image" ? (
             <>
               <button
@@ -702,16 +749,26 @@ export default function AssetInspector({
           )}
         </div>
 
-        {/* Exit Fullscreen Button */}
-        <div className="absolute top-4 right-4 z-50 opacity-80 transition-opacity hover:opacity-100">
+        {/* Exit Fullscreen Icon-Only Button */}
+        <div
+          className={cn(
+            "absolute top-4 right-4 z-50 transition-all duration-300",
+            showOverlayControls
+              ? "opacity-100 pointer-events-auto scale-100"
+              : "opacity-0 pointer-events-none scale-95",
+          )}
+        >
           <button
             type="button"
-            onClick={toggleFullscreen}
-            className="flex items-center gap-2 rounded-full border border-white/20 bg-black/60 px-4 py-2 text-xs font-bold text-white backdrop-blur-md hover:bg-black/80"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFullscreen();
+            }}
+            className="rounded-full border border-white/20 bg-black/60 p-3 text-white backdrop-blur-md hover:bg-black/80 shadow-xl transition-all"
             title="Exit Fullscreen (Esc)"
+            aria-label="Exit Fullscreen"
           >
-            <Minimize2 className="h-4 w-4" />
-            <span>Exit Fullscreen</span>
+            <Minimize2 className="h-5 w-5" />
           </button>
         </div>
       </div>
@@ -905,9 +962,17 @@ export default function AssetInspector({
         {prevAsset && (
           <button
             type="button"
-            onClick={() => navigateTo(prevAsset, "prev")}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigateTo(prevAsset, "prev");
+            }}
             disabled={isTransitioning}
-            className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-zinc-800 bg-zinc-900/80 p-3 text-zinc-300 backdrop-blur-md hover:bg-zinc-800 hover:text-white shadow-xl transition-all disabled:opacity-40"
+            className={cn(
+              "absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-zinc-800 bg-zinc-900/80 p-3 text-zinc-300 backdrop-blur-md hover:bg-zinc-800 hover:text-white shadow-xl transition-all duration-300 disabled:opacity-40",
+              showOverlayControls
+                ? "opacity-100 pointer-events-auto scale-100"
+                : "opacity-0 pointer-events-none scale-95",
+            )}
             aria-label="Previous file (Backward key)"
             title="Previous file (Left Arrow)"
           >
@@ -919,11 +984,17 @@ export default function AssetInspector({
         {nextAsset && (
           <button
             type="button"
-            onClick={() => navigateTo(nextAsset, "next")}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigateTo(nextAsset, "next");
+            }}
             disabled={isTransitioning}
             className={cn(
-              "absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-zinc-800 bg-zinc-900/80 p-3 text-zinc-300 backdrop-blur-md hover:bg-zinc-800 hover:text-white shadow-xl transition-all disabled:opacity-40",
+              "absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full border border-zinc-800 bg-zinc-900/80 p-3 text-zinc-300 backdrop-blur-md hover:bg-zinc-800 hover:text-white shadow-xl transition-all duration-300 disabled:opacity-40",
               showInfo && "sm:right-84",
+              showOverlayControls
+                ? "opacity-100 pointer-events-auto scale-100"
+                : "opacity-0 pointer-events-none scale-95",
             )}
             aria-label="Next file (Forward key)"
             title="Next file (Right Arrow)"
@@ -942,9 +1013,10 @@ export default function AssetInspector({
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerEnd}
           onPointerCancel={handlePointerEnd}
+          onClick={handleStageClick}
           ref={mediaStageRef}
           className={cn(
-            "relative flex flex-1 items-center justify-center p-4 sm:p-8 min-w-0 min-h-0 touch-none overflow-hidden",
+            "relative flex flex-1 items-center justify-center p-4 sm:p-8 min-w-0 min-h-0 touch-none overflow-hidden cursor-pointer",
             zoom > MIN_ZOOM
               ? "cursor-grab active:cursor-grabbing"
               : "cursor-ew-resize",
@@ -1008,7 +1080,14 @@ export default function AssetInspector({
             )}
           </div>
 
-          <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1 rounded-full border border-zinc-700/80 bg-zinc-900/85 p-1 shadow-2xl backdrop-blur-md sm:bottom-5">
+          <div
+            className={cn(
+              "absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1 rounded-full border border-zinc-700/80 bg-zinc-900/85 p-1 shadow-2xl backdrop-blur-md transition-all duration-300 sm:bottom-5",
+              showOverlayControls
+                ? "opacity-100 pointer-events-auto scale-100"
+                : "opacity-0 pointer-events-none scale-95",
+            )}
+          >
             {asset.category === "image" && (
               <>
                 <button
