@@ -3,15 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import {
-  Mail,
-  Activity,
-  Eye,
-  Pencil,
-  Loader2,
-  Users as UsersIcon,
-  Clock,
-} from "lucide-react";
+import { Mail, Activity, Eye, Pencil, Users as UsersIcon, Clock } from "lucide-react";
 import { ROLE_CONFIG, STATUS_CONFIG, initials, fmtDate } from "./types";
 import { Button, Skeleton } from "@/components/ui";
 

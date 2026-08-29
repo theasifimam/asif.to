@@ -10,7 +10,6 @@ import {
   ExternalLink,
   Eye,
   GripVertical,
-  Loader2,
   Plus,
   Search,
   Trash2,

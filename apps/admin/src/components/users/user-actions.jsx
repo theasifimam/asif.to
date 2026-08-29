@@ -1,22 +1,15 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  MoreHorizontal,
-  ShieldAlert,
-  Ban,
-  EyeOff,
-  MessageSquare,
-  Flag,
-  Loader2 } from
-"lucide-react";
+import { MoreHorizontal, ShieldAlert, Ban, EyeOff, MessageSquare, Flag } from "lucide-react";
 import {
   NeoDropdown,
   NeoDropdownItem,
   NeoDropdownLabel,
-  NeoDropdownSeparator } from
-"@/components/ui/neo-dropdown";
+  NeoDropdownSeparator,
+} from "@/components/ui/neo-dropdown";
 import { Button } from "@/components/ui/button";
 import { usersApi } from "@/lib/api";
 import { toast } from "sonner";
@@ -98,7 +91,7 @@ export function UserActions({
                 <NeoDropdownSeparator />
 
                 <NeoDropdownItem
-          icon={loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <EyeOff className="w-4 h-4" />}
+          icon={loading ? <LogoLoader className="w-4 h-4 "  /> : <EyeOff className="w-4 h-4" />}
           onClick={handleShadowRestrictToggle}>
           
                     {isShadowRestricted ? "Disable Shadow Ban" : "Shadow Restrict"}

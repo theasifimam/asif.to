@@ -1,21 +1,11 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  ChevronRight,
-  KanbanSquare,
-  Loader2,
-  Plus,
-  Trash2,
-  ListTodo,
-} from "lucide-react";
+import { ChevronRight, KanbanSquare, Plus, Trash2, ListTodo } from "lucide-react";
 import { kanbanApi } from "@/lib/api";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -265,7 +255,7 @@ export default function QuickPlannerAdd() {
               title="Add task"
             >
               {submitting ? (
-                <Loader2 size={14} className="animate-spin" />
+                <LogoLoader size={14} className=""  />
               ) : (
                 <Plus size={16} />
               )}
@@ -280,14 +270,14 @@ export default function QuickPlannerAdd() {
               Recent Tasks ({tasks.length})
             </span>
             {loadingTasks && (
-              <Loader2 size={11} className="animate-spin text-zinc-400" />
+              <LogoLoader size={11} className=" text-zinc-400"  />
             )}
           </div>
 
           <div className="max-h-52 overflow-y-auto overflow-x-hidden space-y-1.5 pr-1 min-w-0">
             {loadingTasks && tasks.length === 0 ? (
               <div className="flex h-20 items-center justify-center text-xs text-zinc-400">
-                <Loader2 size={16} className="animate-spin mr-2" /> Loading tasks...
+                <LogoLoader size={16} className=" mr-2"  /> Loading tasks...
               </div>
             ) : tasks.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-200 py-6 text-center dark:border-zinc-800">
@@ -332,7 +322,7 @@ export default function QuickPlannerAdd() {
                       title="Delete task"
                     >
                       {deletingId === task._id ? (
-                        <Loader2 size={13} className="animate-spin" />
+                        <LogoLoader size={13} className=""  />
                       ) : (
                         <Trash2 size={13} />
                       )}

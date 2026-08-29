@@ -1,7 +1,8 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import React from "react";
-import { Newspaper, Loader2 } from "lucide-react";
+import { Newspaper } from "lucide-react";
 import ArticleCard from "@/components/articles/ArticleCard";
 
 export default function ProfileArticlesTab({
@@ -11,7 +12,7 @@ export default function ProfileArticlesTab({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+        <LogoLoader className="w-6 h-6  text-blue-500"  />
       </div>
     );
   }

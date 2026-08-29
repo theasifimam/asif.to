@@ -1,8 +1,9 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MessageSquare, Loader2 } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { messagingApi } from "@/lib/api";
 
@@ -38,7 +39,7 @@ export default function DiscussButton({
         className={className}
       >
         {loading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <LogoLoader className="h-4 w-4 "  />
         ) : (
           <MessageSquare className="h-4 w-4" />
         )}

@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronLeft, Loader2, ShieldCheck, RefreshCw } from "lucide-react";
+import LogoLoader from "@/components/ui/LogoLoader";
+import { ChevronLeft, ShieldCheck, RefreshCw } from "lucide-react";
 
 export default function OtpVerificationStep({
   email,
@@ -66,7 +67,7 @@ export default function OtpVerificationStep({
         className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 active:scale-98 cursor-pointer"
       >
         {otpVerifying || suLoading ? (
-          <Loader2 size={16} className="animate-spin" />
+          <LogoLoader size={16} className=""  />
         ) : (
           <>
             <ShieldCheck size={16} /> Verify OTP &amp; Create Account
@@ -83,7 +84,7 @@ export default function OtpVerificationStep({
           disabled={resendCountdown > 0 || otpSending}
           className="flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline disabled:text-zinc-400 dark:disabled:text-zinc-600 disabled:no-underline disabled:cursor-not-allowed transition-colors cursor-pointer"
         >
-          <RefreshCw size={12} className={otpSending ? "animate-spin" : ""} />
+          {otpSending ? <LogoLoader size={12} /> : <RefreshCw size={12} />}
           {resendCountdown > 0
             ? `Resend in ${resendCountdown}s`
             : "Resend Code"}

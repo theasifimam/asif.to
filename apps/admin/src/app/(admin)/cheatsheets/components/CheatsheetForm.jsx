@@ -1,15 +1,22 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getModuleBackUrl } from "@/hooks/useModuleHistory";
-import { ArrowLeft, FileText, Loader2, Save } from "lucide-react";
+import { ArrowLeft, FileText, Save } from "lucide-react";
 import { toast } from "sonner";
 import Editor from "@/components/editor/Editor";
 import AdminFormShell, { formAsideClass, formSectionClass } from "@/components/forms/AdminFormShell";
 import { Button, Input, Label, Textarea } from "@/components/ui";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { coursesApi, cheatsheetsApi } from "@/lib/api";
 import { CanonicalUrlInput } from "@/components/admin";
 
@@ -70,7 +77,7 @@ export default function CheatsheetForm({ cheatsheetId }) {
     setSaving(false);
   };
 
-  if (loading) return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-blue-600" /></div>;
+  if (loading) return <div className="flex min-h-[60vh] items-center justify-center"><LogoLoader className="h-6 w-6  text-blue-600"  /></div>;
 
   return (
     <AdminFormShell

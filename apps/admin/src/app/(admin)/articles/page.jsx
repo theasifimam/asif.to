@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Edit3, FileText, Loader2, Plus, Trash2 } from "lucide-react";
+import { Edit3, FileText, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { articlesApi } from "@/lib/api";
 import AdminFormShell from "@/components/forms/AdminFormShell";

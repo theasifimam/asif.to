@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -10,7 +11,7 @@ import JsonImportPanel from "@/components/social-posts/JsonImportPanel";
 import SocialMediaTabs from "@/components/social-posts/SocialMediaTabs";
 import { AdminEmptyState, AdminPage, AdminPageHeader } from "@/components/admin";
 import { Button } from "@/components/ui/button";
-import { Check, ChevronLeft, FileJson2, PenLine, Sparkles, AlertCircle, Loader2 } from "lucide-react";
+import { Check, ChevronLeft, FileJson2, PenLine, Sparkles, AlertCircle } from "lucide-react";
 
 export default function EditSocialPostPage({ params }) {
   const { id } = use(params);
@@ -67,7 +68,7 @@ export default function EditSocialPostPage({ params }) {
     return (
       <AdminPage size="xl">
         <div className="flex h-64 items-center justify-center rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+          <LogoLoader className="h-6 w-6  text-blue-600"  />
         </div>
       </AdminPage>
     );

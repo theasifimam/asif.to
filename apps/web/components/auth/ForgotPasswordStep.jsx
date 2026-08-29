@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useState } from "react";
 import {
   Mail,
@@ -8,15 +9,11 @@ import {
   EyeOff,
   ChevronLeft,
   CheckCircle2,
-  Loader2,
   KeyRound,
   ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
-import {
-  useSendOtpMutation,
-  useResetPasswordMutation,
-} from "@/lib/api/authApi";
+import { useSendOtpMutation, useResetPasswordMutation } from "@/lib/api/authApi";
 import { inputClass } from "./authConstants";
 
 export default function ForgotPasswordStep({ onBackToSignin }) {
@@ -112,7 +109,7 @@ export default function ForgotPasswordStep({ onBackToSignin }) {
             className="mt-1 w-full bg-blue-600 hover:bg-blue-700 text-white h-11 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 active:scale-98 cursor-pointer"
           >
             {isSending ? (
-              <Loader2 size={16} className="animate-spin" />
+              <LogoLoader size={16} className=""  />
             ) : (
               <>
                 <KeyRound size={16} /> Send Reset Code
@@ -179,7 +176,7 @@ export default function ForgotPasswordStep({ onBackToSignin }) {
             className="mt-1 w-full bg-blue-600 hover:bg-blue-700 text-white h-11 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 active:scale-98 cursor-pointer"
           >
             {isResetting ? (
-              <Loader2 size={16} className="animate-spin" />
+              <LogoLoader size={16} className=""  />
             ) : (
               <>Reset Password</>
             )}

@@ -20,6 +20,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { ViewToggle } from "@/components/ui/ViewToggle";
 import { AdminPagination } from "@/components/admin";
+import LogoLoader from "@/components/ui/LogoLoader";
 
 const formatBytes = (bytes = 0) => {
   if (bytes < 1024) return `${bytes} B`;
@@ -144,7 +145,7 @@ export default function MediaAuditPage() {
           disabled={loading}
           className="rounded-2xl"
         >
-          <RefreshCw className={loading ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
+          {loading ? <LogoLoader className="h-4 w-4" /> : <RefreshCw className="h-4 w-4" />}
           Refresh
         </Button>
       </header>
@@ -257,7 +258,7 @@ export default function MediaAuditPage() {
 
         {loading ? (
           <div className="p-12 text-center text-sm text-zinc-500">
-            <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2 text-blue-500" />
+            <LogoLoader className="mx-auto mb-2 h-6 w-6" />
             Scanning uploads and content references…
           </div>
         ) : paginatedFiles.length === 0 ? (

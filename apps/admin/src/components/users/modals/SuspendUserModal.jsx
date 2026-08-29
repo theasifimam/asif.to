@@ -1,14 +1,21 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useState } from "react";
 import { NeoModal } from "@/components/ui/neo-modal";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { usersApi } from "@/lib/api";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+
 
 
 
@@ -70,7 +77,7 @@ export function SuspendUserModal({ isOpen, onClose, userId, username, onSuccess 
           disabled={loading}
           className="flex-1 rounded-[12px] bg-amber-500 hover:bg-amber-600 text-black font-bold uppercase tracking-wide">
           
-                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Suspend Account"}
+                        {loading ? <LogoLoader className="w-4 h-4 "  /> : "Suspend Account"}
                     </Button>
                 </div>
       }>

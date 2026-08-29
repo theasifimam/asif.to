@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
@@ -11,7 +12,6 @@ import {
   ChevronRight,
   Code2,
   Layers,
-  Loader2,
   RotateCcw,
   Sparkles,
   XCircle,
@@ -20,10 +20,7 @@ import {
 import RevisionFlashcards from "@/components/home/RevisionFlashcards";
 import InteractiveCode from "@/components/interactive-code";
 import { runnableLanguage } from "@/components/interactive-code/CodePlaygroundModal";
-import {
-  useGetQuizQuestionsQuery,
-  useSubmitPracticeQuizMutation,
-} from "@/lib/api/courseApi";
+import { useGetQuizQuestionsQuery, useSubmitPracticeQuizMutation } from "@/lib/api/courseApi";
 
 const FLOW = [
   ["learn", "Learn", BookOpen],
@@ -282,7 +279,7 @@ function KnowledgeQuiz({ courseSlug, chapter, chapterNumber, onComplete }) {
   const [result, setResult] = useState(null);
 
   if (isLoading) {
-    return <div className="grid min-h-40 place-items-center"><Loader2 className="h-6 w-6 animate-spin text-blue-600" /></div>;
+    return <div className="grid min-h-40 place-items-center"><LogoLoader className="h-6 w-6  text-blue-600"  /></div>;
   }
 
   if (!questions.length) {

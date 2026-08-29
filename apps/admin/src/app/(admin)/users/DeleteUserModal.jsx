@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import React from 'react';
 import {
   Dialog,
@@ -7,9 +8,9 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter } from
-"@/components/ui/dialog";
-import { Trash2, Loader2 } from 'lucide-react';
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Trash2 } from 'lucide-react';
 import { User } from './types';
 import { Button } from '@/components/ui';
 
@@ -41,7 +42,7 @@ export function DeleteUserModal({ user, onClose, onDelete, submitting }) {
             variant="destructive"
             className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest bg-red-500 hover:bg-red-600 text-white transition-all disabled:opacity-60 shadow-lg shadow-red-500/20">
             
-                        {submitting ? <Loader2 size={14} className="animate-spin" /> : null}
+                        {submitting ? <LogoLoader size={14} className=""  /> : null}
                         Confirm Delete
                     </Button>
                 </DialogFooter>

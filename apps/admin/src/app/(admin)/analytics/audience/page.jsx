@@ -1,6 +1,7 @@
 "use client";
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useCallback, useEffect, useState } from "react";
-import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw } from "lucide-react";
 import { analyticsApi } from "@/lib/api";
 import AnalyticsShell from "../AnalyticsShell";
 import AnalyticsChart from "../AnalyticsChart";
@@ -68,7 +69,7 @@ export default function AudiencePage() {
       </div>
       {loading && (
         <div className="grid min-h-72 place-items-center">
-          <Loader2 className="animate-spin text-blue-600" />
+          <LogoLoader className=" text-blue-600"  />
         </div>
       )}
       {error && (

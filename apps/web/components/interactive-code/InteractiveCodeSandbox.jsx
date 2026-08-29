@@ -1,8 +1,9 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import dynamic from "next/dynamic";
 import { useEffect } from "react";
-import { Loader2 } from "lucide-react";
+
 import { usePlaygroundControl, languageAllowed, runtimeAllowed } from "@/lib/playground/control";
 
 const SandpackCodeEditor = dynamic(() => import("./SandpackCodeEditor"), { ssr: false, loading: RuntimeLoading });
@@ -11,7 +12,7 @@ const LocalChapterWorkspace = dynamic(() => import("./LocalChapterWorkspace"), {
 const BROWSER_LANGUAGES = new Set(["python", "c", "cpp", "java"]);
 
 function RuntimeLoading() {
-  return <div className="flex min-h-115 items-center justify-center rounded-3xl border border-zinc-800 bg-zinc-950 text-sm font-bold text-zinc-300" role="status"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Loading editor...</div>;
+  return <div className="flex min-h-115 items-center justify-center rounded-3xl border border-zinc-800 bg-zinc-950 text-sm font-bold text-zinc-300" role="status"><LogoLoader className="mr-2 h-4 w-4 "  />Loading editor...</div>;
 }
 
 export default function InteractiveCodeSandbox(props) {

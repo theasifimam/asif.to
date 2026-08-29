@@ -1,12 +1,19 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Loader2, CalendarIcon, Clock } from "lucide-react";
+import { CalendarIcon, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { AutomationService } from "@/lib/automation.service";
 import { toast } from "sonner";
@@ -231,7 +238,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess, accounts }) {
                     <div className="flex justify-end gap-2 pt-2">
                         <Button variant="ghost" onClick={() => setShowConfirmation(false)}>Back</Button>
                         <Button onClick={handleConfirmSubmit} disabled={loading}>
-                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {loading && <LogoLoader className="mr-2 h-4 w-4 "  />}
                             Confirm Schedule
                         </Button>
                     </div>

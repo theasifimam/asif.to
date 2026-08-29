@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import React, { useEffect, useState, useTransition } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useSession, signOut as oauthSignOut } from "next-auth/react";
@@ -16,10 +17,7 @@ import {
   useUpdateAttemptVisibilityMutation,
 } from "@/lib/api/authApi";
 import { useGetArticlesQuery } from "@/lib/api/articlesApi";
-import {
-  useGetMyLibraryQuery,
-  useGetPublicLibraryQuery,
-} from "@/lib/api/libraryApi";
+import { useGetMyLibraryQuery, useGetPublicLibraryQuery } from "@/lib/api/libraryApi";
 import {
   BookMarked,
   Bookmark,
@@ -28,7 +26,6 @@ import {
   BookOpen,
   Newspaper,
   LogOut,
-  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -369,7 +366,7 @@ export default function UserProfileClient({ username }) {
                 className="flex-1 py-3 rounded-full bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-500/25 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isSigningOut ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <LogoLoader className="w-4 h-4 "  />
                 ) : (
                   "Yes, Sign Out"
                 )}

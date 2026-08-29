@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -18,7 +19,6 @@ import {
   ChevronLeft,
   ChevronDown,
   Save,
-  Loader2,
   ShieldCheck,
   Camera,
   Bell,
@@ -26,10 +26,7 @@ import {
   Shield,
 } from "lucide-react";
 import { useAppSelector, useAppDispatch } from "@/lib/store/hooks";
-import {
-  useGetProfileQuery,
-  useUpdateProfileMutation,
-} from "@/lib/api/authApi";
+import { useGetProfileQuery, useUpdateProfileMutation } from "@/lib/api/authApi";
 import { toast } from "sonner";
 import { getImageUrl } from "@/lib/config";
 import { setCredentials, setOAuthCredentials } from "@/lib/store/authSlice";
@@ -206,7 +203,7 @@ export default function ProfileSettingsPage() {
   if (profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
-        <Loader2 className="animate-spin text-blue-600" size={36} />
+        <LogoLoader className=" text-blue-600" size={36}  />
       </div>
     );
   }
@@ -775,7 +772,7 @@ export default function ProfileSettingsPage() {
             >
               {isUpdating ? (
                 <>
-                  <Loader2 className="animate-spin" size={15} />
+                  <LogoLoader className="" size={15}  />
                   <span>Saving...</span>
                 </>
               ) : (

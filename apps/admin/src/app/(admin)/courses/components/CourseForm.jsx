@@ -4,17 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getModuleBackUrl } from "@/hooks/useModuleHistory";
-import {
-  ArrowLeft,
-  BookOpen,
-  ExternalLink,
-  ImagePlus,
-  Loader2,
-  Save,
-  Send,
-  UserPen,
-  X,
-} from "lucide-react";
+import { ArrowLeft, BookOpen, ExternalLink, ImagePlus, Save, Send, UserPen, X } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { Button } from "@/components/ui/button";

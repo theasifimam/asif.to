@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -7,9 +8,9 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter } from
-"@/components/ui/dialog";
-import { Loader2, Key } from 'lucide-react';
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Key } from 'lucide-react';
 import { Input, Button } from '@/components/ui';
 
 
@@ -79,7 +80,7 @@ export function PasswordResetModal({ isOpen, onClose, user, onReset, submitting 
             disabled={submitting || !password || password !== confirm}
             className="flex-1 flex items-center justify-center gap-2 px-6 py-6 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-500 hover:bg-amber-600 text-white transition-all shadow-xl shadow-amber-500/20 disabled:opacity-40">
             
-                        {submitting ? <Loader2 size={16} className="animate-spin" /> : "Confirm Reset"}
+                        {submitting ? <LogoLoader size={16} className=""  /> : "Confirm Reset"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

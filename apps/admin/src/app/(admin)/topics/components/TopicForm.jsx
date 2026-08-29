@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import Link from "next/link";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
@@ -9,7 +10,6 @@ import {
   ArrowLeft,
   ArrowUp,
   Check,
-  Loader2,
   Plus,
   Save,
   Search,
@@ -325,7 +325,7 @@ export default function TopicForm({ topicId = null }) {
   if (loading)
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+        <LogoLoader className="h-6 w-6  text-blue-600"  />
       </div>
     );
 
@@ -471,7 +471,7 @@ export default function TopicForm({ topicId = null }) {
                     Select a course to browse its reusable question library.
                   </p>
                 ) : questionsLoading ? (
-                  <Loader2 className="mx-auto my-6 h-5 w-5 animate-spin text-blue-600" />
+                  <LogoLoader className="mx-auto my-6 h-5 w-5  text-blue-600"  />
                 ) : (
                   questionOptions.map((question) => {
                     const assigned = form.interviewQuestions.some(

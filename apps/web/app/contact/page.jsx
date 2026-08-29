@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useState } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
@@ -9,7 +10,6 @@ import {
   Send,
   CheckCircle2,
   MessageSquare,
-  Loader2,
   Instagram,
   Facebook,
   Linkedin,
@@ -330,7 +330,7 @@ export default function ContactPage() {
                     className="w-full py-3.5 rounded-full bg-blue-600 hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-600/25 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
                   >
                     {isLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <LogoLoader className="w-4 h-4 "  />
                     ) : (
                       <Send className="w-4 h-4" />
                     )}

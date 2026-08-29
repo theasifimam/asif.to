@@ -1,8 +1,9 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import React from 'react';
 import ArticleCard from '@/components/articles/ArticleCard';
-import { Loader2 } from 'lucide-react';
+
 import { format } from 'date-fns';
 
 
@@ -30,7 +31,7 @@ export default function ArticleGrid({
 
             {loading ?
       <div className="flex-1 flex flex-col items-center justify-center py-20 gap-4">
-                    <Loader2 className="animate-spin text-zinc-300" size={40} />
+                    <LogoLoader className=" text-zinc-300" size={40}  />
                     <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-400">Decoding Signals...</span>
                 </div> :
       articles.length > 0 ?

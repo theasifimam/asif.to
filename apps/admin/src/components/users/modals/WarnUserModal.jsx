@@ -1,13 +1,20 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useState } from "react";
 import { NeoModal } from "@/components/ui/neo-modal";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { usersApi } from "@/lib/api";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+
 
 
 
@@ -68,7 +75,7 @@ export function WarnUserModal({ isOpen, onClose, userId, username, onSuccess }) 
           disabled={loading}
           className="flex-1 rounded-[12px] btn-techno-primary font-bold uppercase tracking-wide">
           
-                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send Notice"}
+                        {loading ? <LogoLoader className="w-4 h-4 "  /> : "Send Notice"}
                     </Button>
                 </div>
       }>

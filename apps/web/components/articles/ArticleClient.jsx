@@ -1,18 +1,10 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import React, { useMemo, useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import {
-  Clock,
-  Eye,
-  Share2,
-  Facebook,
-  Instagram,
-  Link2,
-  Check,
-  ArrowLeft,
-} from "lucide-react";
+import { Clock, Eye, Share2, Facebook, Instagram, Link2, Check, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -22,7 +14,7 @@ import {
 } from "@/lib/api/articlesApi";
 import { format } from "date-fns";
 import { getImageUrl } from "@/lib/config";
-import { Loader2 } from "lucide-react";
+
 import hljs from "highlight.js";
 import "highlight.js/styles/atom-one-dark.css";
 import BookmarkButton from "./BookmarkButton";
@@ -119,7 +111,7 @@ export default function ArticleClient({ slug, initialData }) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="animate-spin text-zinc-400" size={40} />
+          <LogoLoader className=" text-zinc-400" size={40}  />
           <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">
             Loading Intelligence Dispatch...
           </span>

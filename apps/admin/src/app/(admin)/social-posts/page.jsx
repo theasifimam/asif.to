@@ -1,18 +1,10 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import {
-  ChevronLeft,
-  Clock,
-  Copy,
-  Edit3,
-  Image as ImageIcon,
-  Loader2,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import { ChevronLeft, Clock, Copy, Edit3, Image as ImageIcon, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { socialPostsApi, coursesApi } from "@/lib/api";
 import SocialMediaTabs from "@/components/social-posts/SocialMediaTabs";
@@ -547,7 +539,7 @@ export default function SocialPostsPage() {
                           title="Duplicate"
                         >
                           {duplicatingId === post._id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <LogoLoader className="h-4 w-4 "  />
                           ) : (
                             <Copy className="h-4 w-4" />
                           )}
@@ -702,7 +694,7 @@ export default function SocialPostsPage() {
                                 title="Duplicate"
                               >
                                 {duplicatingId === post._id ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                  <LogoLoader className="h-4 w-4 "  />
                                 ) : (
                                   <Copy className="h-4 w-4" />
                                 )}

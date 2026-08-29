@@ -3,6 +3,7 @@
 import React, { useEffect, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import LogoLoader from "@/components/ui/LogoLoader";
 
 export default function AuthLayout({ children }) {
   const router = useRouter();
@@ -35,7 +36,7 @@ export default function AuthLayout({ children }) {
     return (
       <div className="fixed inset-0 z-50 bg-zinc-950/40 dark:bg-black/60 backdrop-blur-md flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-zinc-200 dark:border-zinc-800 border-t-blue-600 rounded-full animate-spin"></div>
+          <LogoLoader className="h-10 w-10" />
         </div>
       </div>
     );

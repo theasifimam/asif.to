@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -11,7 +12,6 @@ import {
   Facebook,
   Instagram,
   Linkedin,
-  Loader2,
   RefreshCw,
   ShieldCheck,
   Unplug,
@@ -219,7 +219,7 @@ export default function SocialIntegrationsPage() {
 
       {loading ? (
         <div className="flex h-64 items-center justify-center rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+          <LogoLoader className="h-6 w-6  text-blue-600"  />
         </div>
       ) : (
         <div className="grid gap-4 xl:grid-cols-3">
@@ -302,7 +302,7 @@ export default function SocialIntegrationsPage() {
                           className="flex-1 rounded-xl text-xs font-bold"
                         >
                           {isBusy ? (
-                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                            <LogoLoader className="mr-1.5 h-3.5 w-3.5 "  />
                           ) : (
                             <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
                           )}
@@ -325,7 +325,7 @@ export default function SocialIntegrationsPage() {
                         className="w-full rounded-xl text-xs font-bold shadow-md shadow-blue-500/10"
                       >
                         {isBusy ? (
-                          <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                          <LogoLoader className="mr-1.5 h-3.5 w-3.5 "  />
                         ) : (
                           <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
                         )}

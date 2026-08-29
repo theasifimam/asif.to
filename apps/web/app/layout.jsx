@@ -11,6 +11,7 @@ import FloatingPlayground from "@/components/interactive-code/FloatingPlayground
 import GoogleAnalyticsPageView from "@/components/analytics/GoogleAnalyticsPageView";
 import AuthSessionProvider from "@/components/auth/AuthSessionProvider";
 import AuthBridge from "@/components/auth/AuthBridge";
+import { AuthPromptProvider } from "@/components/auth/AuthPromptProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -93,18 +94,19 @@ export default function RootLayout({ children, modal }) {
           <AuthSessionProvider>
             <ReduxProvider>
               <AuthBridge>
-                <ScrollNavProvider>
-                  <Suspense fallback={null}>
-                    <AnalyticsTracker />
-                  </Suspense>
-                  {gaMeasurementId && (
-                    <>
-                      <Script
-                        src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
-                        strategy="afterInteractive"
-                      />
-                      <Script id="google-analytics" strategy="afterInteractive">
-                        {`
+                <AuthPromptProvider>
+                  <ScrollNavProvider>
+                    <Suspense fallback={null}>
+                      <AnalyticsTracker />
+                    </Suspense>
+                    {gaMeasurementId && (
+                      <>
+                        <Script
+                          src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
+                          strategy="afterInteractive"
+                        />
+                        <Script id="google-analytics" strategy="afterInteractive">
+                          {`
                       if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.endsWith('.local')) {
                         window['ga-disable-${gaMeasurementId}'] = true;
                       }
@@ -116,17 +118,18 @@ export default function RootLayout({ children, modal }) {
                         gtag('config', '${gaMeasurementId}');
                       }
                     `}
-                      </Script>
-                      <Suspense fallback={null}>
-                        <GoogleAnalyticsPageView />
-                      </Suspense>
-                    </>
-                  )}
-                  {children}
-                  {modal}
-                  <FloatingPlayground />
-                  <BottomNav />
-                </ScrollNavProvider>
+                        </Script>
+                        <Suspense fallback={null}>
+                          <GoogleAnalyticsPageView />
+                        </Suspense>
+                      </>
+                    )}
+                    {children}
+                    {modal}
+                    <FloatingPlayground />
+                    <BottomNav />
+                  </ScrollNavProvider>
+                </AuthPromptProvider>
               </AuthBridge>
             </ReduxProvider>
           </AuthSessionProvider>

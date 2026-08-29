@@ -1,13 +1,20 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, Check, Loader2, Save } from "lucide-react";
+import { ArrowLeft, Check, Save } from "lucide-react";
 import { toast } from "sonner";
 import AdminFormShell, { formAsideClass, formSectionClass } from "@/components/forms/AdminFormShell";
 import { Button, Input, Label, Textarea } from "@/components/ui";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { coursesApi, quizApi } from "@/lib/api";
 import { getModuleBackUrl } from "@/hooks/useModuleHistory";
 import LearningMappingFields from "./LearningMappingFields";
@@ -84,7 +91,7 @@ export default function QuestionForm({ questionId }) {
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+        <LogoLoader className="h-6 w-6  text-blue-600"  />
       </div>
     );
   }

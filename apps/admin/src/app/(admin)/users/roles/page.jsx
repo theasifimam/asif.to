@@ -1,15 +1,8 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useMemo, useState } from "react";
-import {
-  Check,
-  ChevronDown,
-  ChevronRight,
-  Loader2,
-  RotateCcw,
-  Save,
-  ShieldCheck,
-} from "lucide-react";
+import { Check, ChevronDown, ChevronRight, RotateCcw, Save, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { AdminContent } from "@/components/admin";
 import { Button } from "@/components/ui/button";
@@ -77,7 +70,7 @@ export default function RolesPage() {
   };
 
   if (isLoading || !currentMatrix) {
-    return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-blue-600" /></div>;
+    return <div className="flex min-h-[60vh] items-center justify-center"><LogoLoader className="h-6 w-6  text-blue-600"  /></div>;
   }
 
   if (isError) {

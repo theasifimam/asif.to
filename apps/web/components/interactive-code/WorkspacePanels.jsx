@@ -1,7 +1,7 @@
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useState } from "react";
 import {
   GripVertical,
-  Loader2,
   ExternalLink,
   AlertTriangle,
   GripHorizontal,
@@ -20,13 +20,11 @@ import {
   Plus,
   Minus,
 } from "lucide-react";
-import {
-  SandpackCodeEditor,
-  SandpackPreview,
-} from "@codesandbox/sandpack-react";
+import { SandpackCodeEditor, SandpackPreview } from "@codesandbox/sandpack-react";
 import FileExplorer from "./FileExplorer";
 import BetterConsole from "./BetterConsole";
 import { executeCurrentFiles } from "./sandpackConfig";
+import { useAuthPrompt } from "@/components/auth/AuthPromptProvider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +36,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function WorkspacePanels({ workspace }) {
+  const { requireAuth } = useAuthPrompt();
   const {
     state: {
       panel,
@@ -84,6 +83,7 @@ export function WorkspacePanels({ workspace }) {
   const handleRun = async () => {
     if (executionEnabled === false) return;
     if (isRunning) return;
+    if (!requireAuth()) return;
     if (consoleFirst) {
       setConsoleOpen(true);
     }
@@ -101,6 +101,16 @@ export function WorkspacePanels({ workspace }) {
     } finally {
       setTimeout(() => setExecuting(false), 500);
     }
+  };
+
+  const handleRunTests = () => {
+    if (executionEnabled === false || !requireAuth()) return;
+    runTests();
+  };
+
+  const handleRunCustom = () => {
+    if (executionEnabled === false || !requireAuth()) return;
+    runCustom();
   };
 
   const handleCopy = async () => {
@@ -274,7 +284,7 @@ export function WorkspacePanels({ workspace }) {
                 aria-live="polite"
               >
                 <span className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-3 py-2 text-xs font-bold text-white shadow-lg">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <LogoLoader className="h-3.5 w-3.5 "  />
                   Updating preview...
                 </span>
               </div>
@@ -437,7 +447,7 @@ export function WorkspacePanels({ workspace }) {
             <h3 className="font-black">Tests</h3>
             <button
               type="button"
-              onClick={runTests}
+              onClick={handleRunTests}
               disabled={executionEnabled === false}
               title={executionEnabled === false ? "Test execution is temporarily disabled" : "Run tests"}
               className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
@@ -492,7 +502,7 @@ export function WorkspacePanels({ workspace }) {
               </label>
               <button
                 type="button"
-                onClick={runCustom}
+                onClick={handleRunCustom}
                 disabled={executionEnabled === false}
                 title={executionEnabled === false ? "Test execution is temporarily disabled" : "Run custom test"}
                 className="mt-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
@@ -531,7 +541,7 @@ export function WorkspacePanels({ workspace }) {
             aria-label={executionEnabled === false ? "Execution temporarily disabled" : "Run code"}
           >
             {isRunning ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <LogoLoader className="h-4 w-4 "  />
             ) : (
               <Play className="h-4 w-4 ml-0.5 fill-current" />
             )}

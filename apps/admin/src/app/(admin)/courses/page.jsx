@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -9,7 +10,6 @@ import {
   FilePenLine,
   FolderOpen,
   Layers,
-  Loader2,
   Pencil,
   Plus,
   Search,
@@ -95,11 +95,7 @@ import {
 import { coursesApi } from "@/lib/api";
 import { getImageUrl } from "@/lib/utils";
 import { ViewToggle } from "@/components/ui/ViewToggle";
-import {
-  AdminPage,
-  AdminPageHeader,
-  AdminPagination,
-} from "@/components/admin";
+import { AdminPage, AdminPageHeader, AdminPagination } from "@/components/admin";
 import { listingReturnTo, useUrlFilters } from "@/hooks/useUrlFilters";
 import { useAuth } from "@/contexts/AuthContext";
 import DeletionDialog from "@/components/shared/DeletionDialog";
@@ -328,7 +324,7 @@ export default function CoursesAdminPage() {
                         title="Toggle status"
                       >
                         {updating === course._id ? (
-                          <Loader2 className="inline h-2.5 w-2.5 animate-spin" />
+                          <LogoLoader className="inline h-2.5 w-2.5 "  />
                         ) : (
                           course.status
                         )}
@@ -525,7 +521,7 @@ export default function CoursesAdminPage() {
                           title="Toggle publishing status"
                         >
                           {updating === course._id ? (
-                            <Loader2 className="mx-auto h-3 w-3 animate-spin" />
+                            <LogoLoader className="mx-auto h-3 w-3 "  />
                           ) : (
                             course.status
                           )}

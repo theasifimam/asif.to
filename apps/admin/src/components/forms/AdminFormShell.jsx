@@ -1,4 +1,5 @@
-import { Loader2 } from "lucide-react";
+
+import LogoLoader from "@/components/ui/LogoLoader";
 import { AdminPage, AdminPageHeader } from "@/components/admin";
 
 export const formSectionClass =
@@ -8,7 +9,7 @@ export const formAsideClass = formSectionClass;
 export function AdminFormLoading() {
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
-      <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
+      <LogoLoader className="h-7 w-7  text-blue-600"  />
     </div>
   );
 }

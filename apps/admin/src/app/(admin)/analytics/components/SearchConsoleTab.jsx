@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { BarChart3, Eye, MousePointerClick, RefreshCw, Search } from "lucide-react";
 import { toast } from "sonner";
 import { analyticsApi } from "@/lib/api";
+import LogoLoader from "@/components/ui/LogoLoader";
 
 import { TrendChart } from "../SimpleAnalyticsCharts";
 import GscReport from "./GscReport";
@@ -97,7 +98,7 @@ export default function SearchConsoleTab({ range }) {
           </div>
 
           <button type="button" onClick={sync} disabled={syncing} className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-blue-600 px-4 text-xs font-black text-white disabled:opacity-50">
-            <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+            {syncing ? <LogoLoader className="h-3.5 w-3.5" /> : <RefreshCw className="h-3.5 w-3.5" />}
             {syncing ? "Syncing" : "Sync Search Console"}
           </button>
         </div>

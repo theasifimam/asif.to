@@ -1,15 +1,8 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useEffect, useMemo, useState } from "react";
-import {
-  AlertTriangle,
-  CheckCircle2,
-  Loader2,
-  MailCheck,
-  ShieldCheck,
-  Trash2,
-  X,
-} from "lucide-react";
+import { AlertTriangle, CheckCircle2, MailCheck, ShieldCheck, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -258,7 +251,7 @@ export default function DeletionDialog({
 
               {busy && !impact ? (
                 <div className="flex h-44 items-center justify-center">
-                  <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                  <LogoLoader className="h-6 w-6  text-blue-600"  />
                 </div>
               ) : impact ? (
                 <div className="space-y-3">
@@ -373,7 +366,7 @@ export default function DeletionDialog({
                     className="bg-rose-600 text-white hover:bg-rose-700"
                   >
                     {busy ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <LogoLoader className="h-4 w-4 "  />
                     ) : (
                       <MailCheck className="h-4 w-4" />
                     )}
@@ -423,7 +416,7 @@ export default function DeletionDialog({
                   disabled={busy || otp.length !== 6}
                   className="bg-rose-600 text-white hover:bg-rose-700"
                 >
-                  {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {busy && <LogoLoader className="h-4 w-4 "  />}
                   Verify & request second approval
                 </Button>
               </div>

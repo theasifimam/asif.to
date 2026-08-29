@@ -1,5 +1,6 @@
+import LogoLoader from "@/components/ui/LogoLoader";
 import React from "react";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -50,7 +51,7 @@ export default function ArticleDeleteDialog({
             className="flex-1 rounded-2xl bg-red-500 hover:bg-red-600 text-white text-[11px] font-black uppercase tracking-widest transition-all h-14 shadow-lg shadow-red-500/20"
           >
             {submitting ? (
-              <Loader2 size={14} className="animate-spin mr-2" />
+              <LogoLoader size={14} className=" mr-2"  />
             ) : null}
             Delete Article
           </Button>

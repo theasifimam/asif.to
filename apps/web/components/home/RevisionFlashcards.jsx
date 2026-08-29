@@ -1,16 +1,10 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import React, { useState } from "react";
 import { useGetFlashcardsQuery } from "@/lib/api/courseApi";
 import { TECH_STACKS } from "@/lib/tutorialData";
-import {
-  RotateCw,
-  ChevronLeft,
-  ChevronRight,
-  Bookmark,
-  CheckCircle2,
-  Loader2,
-} from "lucide-react";
+import { RotateCw, ChevronLeft, ChevronRight, Bookmark, CheckCircle2 } from "lucide-react";
 
 export default function RevisionFlashcards({
   selectedTech,
@@ -35,7 +29,7 @@ export default function RevisionFlashcards({
   if (isLoading) {
     return (
       <div className="w-full my-3 flex items-center justify-center h-36">
-        <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+        <LogoLoader className="w-6 h-6  text-blue-500"  />
       </div>
     );
   }

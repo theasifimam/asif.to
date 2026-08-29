@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -23,7 +24,6 @@ import {
   Lock,
   Edit3,
   ChevronRight,
-  Loader2,
   BookMarked,
 } from "lucide-react";
 import {
@@ -294,7 +294,7 @@ export default function ProfileLibraryTab({
         {/* Knowledge Entries Grid */}
         {isLoading ? (
           <div className="p-12 rounded-3xl bg-zinc-50 dark:bg-zinc-950/60 shadow-xs flex items-center justify-center border border-zinc-100 dark:border-zinc-800">
-            <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+            <LogoLoader className="w-6 h-6  text-blue-500"  />
           </div>
         ) : filteredEntries.length > 0 || filteredBookmarks.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

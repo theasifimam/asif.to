@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
@@ -10,7 +11,6 @@ import {
   ArrowUp,
   BookOpen,
   ExternalLink,
-  Loader2,
   Pencil,
   Plus,
   Search,
@@ -86,11 +86,7 @@ import {
 } from "@/components/ui/select";
 import { chaptersApi, coursesApi, topicCategoriesApi } from "@/lib/api";
 import { ViewToggle } from "@/components/ui/ViewToggle";
-import {
-  AdminPage,
-  AdminPageHeader,
-  AdminPagination,
-} from "@/components/admin";
+import { AdminPage, AdminPageHeader, AdminPagination } from "@/components/admin";
 import { useUrlFilters } from "@/hooks/useUrlFilters";
 import DiscussButton from "@/components/messaging/DiscussButton";
 
@@ -395,7 +391,7 @@ export default function CourseChaptersPage() {
                           title="Toggle status"
                         >
                           {updating === chapter._id ? (
-                            <Loader2 className="inline h-2.5 w-2.5 animate-spin" />
+                            <LogoLoader className="inline h-2.5 w-2.5 "  />
                           ) : (
                             chapter.status
                           )}
@@ -584,7 +580,7 @@ export default function CourseChaptersPage() {
                           title="Toggle publishing status"
                         >
                           {updating === chapter._id ? (
-                            <Loader2 className="mx-auto h-3 w-3 animate-spin" />
+                            <LogoLoader className="mx-auto h-3 w-3 "  />
                           ) : (
                             chapter.status
                           )}

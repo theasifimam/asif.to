@@ -21,6 +21,7 @@ import { getImageUrl } from "@/lib/utils";
 import { getAssetUrl } from "@/lib/assets";
 import AssetPicker from "@/components/assets/AssetPicker";
 import { Button, Input, Label, Textarea } from "@/components/ui";
+import LogoLoader from "@/components/ui/LogoLoader";
 import {
   Select,
   SelectContent,
@@ -196,7 +197,7 @@ export default function ArticleForm({ articleId = null }) {
               onClick={() => persist(form.status)}
               className="w-full sm:w-auto"
             >
-              <RefreshCw className={`mr-2 h-4 w-4 ${saving ? "animate-spin" : ""}`} /> Update
+              {saving ? <LogoLoader className="mr-2 h-4 w-4" /> : <RefreshCw className="mr-2 h-4 w-4" />} Update
             </Button>
           )}
           <Button

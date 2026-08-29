@@ -1,5 +1,6 @@
+import LogoLoader from "@/components/ui/LogoLoader";
 import React from "react";
-import { Loader2, AlertCircle, Send } from "lucide-react";
+import { AlertCircle, Send } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -49,7 +50,7 @@ export function DraftPublishDialog({
             className="flex-1 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-black uppercase tracking-widest transition-all h-14 shadow-lg shadow-emerald-500/20"
           >
             {submitting ? (
-              <Loader2 size={14} className="animate-spin mr-2" />
+              <LogoLoader size={14} className=" mr-2"  />
             ) : null}
             Publish Article
           </Button>
@@ -99,7 +100,7 @@ export function DraftDeleteDialog({
             className="flex-1 rounded-2xl bg-red-500 hover:bg-red-600 text-white text-[11px] font-black uppercase tracking-widest transition-all h-14 shadow-lg shadow-red-500/20"
           >
             {submitting ? (
-              <Loader2 size={14} className="animate-spin mr-2" />
+              <LogoLoader size={14} className=" mr-2"  />
             ) : null}
             Delete Draft
           </Button>

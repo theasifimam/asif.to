@@ -1,8 +1,9 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import React from "react";
 import Link from "next/link";
-import { BookOpen, Bookmark, ChevronRight, Loader2 } from "lucide-react";
+import { BookOpen, Bookmark, ChevronRight } from "lucide-react";
 import ArticleCard from "@/components/articles/ArticleCard";
 import SaveButton from "@/components/articles/SaveButton";
 
@@ -22,7 +23,7 @@ export default function ProfileSavedTab({
 
         {savedItemsLoading ? (
           <div className="p-8 rounded-3xl bg-white dark:bg-zinc-900/90 shadow-sm flex items-center justify-center border border-zinc-100 dark:border-zinc-800">
-            <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+            <LogoLoader className="w-6 h-6  text-blue-500"  />
           </div>
         ) : savedItems.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

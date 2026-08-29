@@ -1,23 +1,13 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getModuleBackUrl } from "@/hooks/useModuleHistory";
-import {
-  ArrowLeft,
-  ExternalLink,
-  Globe,
-  Loader2,
-  Save,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft, ExternalLink, Globe, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import {
-  AdminPage,
-  AdminPageHeader,
-  CanonicalUrlInput,
-} from "@/components/admin";
+import { AdminPage, AdminPageHeader, CanonicalUrlInput } from "@/components/admin";
 import { formSectionClass } from "@/components/forms/AdminFormShell";
 import Editor from "@/components/editor/Editor";
 import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
@@ -203,7 +193,7 @@ export default function CategoryForm({
     return (
       <AdminPage size="lg">
         <div className="flex min-h-[60vh] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <LogoLoader className="h-8 w-8  text-blue-600"  />
         </div>
       </AdminPage>
     );
@@ -256,7 +246,7 @@ export default function CategoryForm({
               className="shadow-lg shadow-blue-500/20"
             >
               {saving ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <LogoLoader className="mr-2 h-4 w-4 "  />
               ) : (
                 <Save className="mr-2 h-4 w-4" />
               )}
@@ -730,7 +720,7 @@ export default function CategoryForm({
             className="shadow-lg shadow-blue-500/20"
           >
             {saving ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <LogoLoader className="mr-2 h-4 w-4 "  />
             ) : (
               <Save className="mr-2 h-4 w-4" />
             )}

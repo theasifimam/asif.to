@@ -7,9 +7,9 @@ import {
   AlertCircle,
   AlertTriangle,
   Info,
-  Loader2,
   X,
 } from "lucide-react";
+import LogoLoader from "@/components/ui/LogoLoader";
 
 /**
  * Variant configuration with distinctive icons and colors
@@ -48,10 +48,10 @@ const VARIANTS = {
     dotColor: "bg-blue-500",
   },
   loading: {
-    icon: Loader2,
+    icon: LogoLoader,
     badgeBg: "bg-blue-500/10 dark:bg-blue-500/15",
     badgeBorder: "border-blue-500/20 dark:border-blue-500/30",
-    iconColor: "text-blue-600 dark:text-blue-400 animate-spin",
+    iconColor: "text-blue-600 dark:text-blue-400",
     glow: "shadow-[0_0_12px_rgba(37,99,235,0.15)]",
     dotColor: "bg-blue-500 animate-pulse",
   },

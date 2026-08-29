@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   DndContext,
@@ -10,22 +11,8 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  horizontalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import {
-  Archive,
-  ChevronDown,
-  Filter,
-  LayoutGrid,
-  Loader2,
-  Plus,
-  Search,
-  Settings2,
-  X,
-} from "lucide-react";
+import { SortableContext, arrayMove, horizontalListSortingStrategy } from "@dnd-kit/sortable";
+import { Archive, ChevronDown, Filter, LayoutGrid, Plus, Search, Settings2, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -41,12 +28,7 @@ import { coursesApi, kanbanApi } from "@/lib/api";
 import PlannerCard from "./PlannerCard";
 import PlannerColumn from "./PlannerColumn";
 import CardDetailDrawer from "./CardDetailDrawer";
-import {
-  CARD_TYPES,
-  PRIORITIES,
-  PRIORITY_WEIGHT,
-  TEMPLATES,
-} from "./planner-constants";
+import { CARD_TYPES, PRIORITIES, PRIORITY_WEIGHT, TEMPLATES } from "./planner-constants";
 
 const unwrap = (response) => response?.data?.data;
 const getColumnId = (card) =>
@@ -702,7 +684,7 @@ export default function PlannerPage() {
   if (loading && !board)
     return (
       <div className="flex h-full items-center justify-center">
-        <Loader2 className="animate-spin text-blue-600" size={30} />
+        <LogoLoader className=" text-blue-600" size={30}  />
       </div>
     );
   return (

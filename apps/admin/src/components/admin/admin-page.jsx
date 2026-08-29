@@ -1,4 +1,5 @@
-import { ChevronLeft, ChevronRight, Loader2, Search } from "lucide-react";
+import LogoLoader from "@/components/ui/LogoLoader";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -134,7 +135,7 @@ export function AdminLoading({ label = "Loading…", className }) {
         className,
       )}
     >
-      <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+      <LogoLoader className="h-5 w-5  text-blue-600"  />
       <span className="sr-only">{label}</span>
     </div>
   );

@@ -4,6 +4,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { setOAuthCredentials } from "@/lib/store/authSlice";
 import { RefreshCw } from "lucide-react";
+import LogoLoader from "@/components/ui/LogoLoader";
 
 export default function AuthBridge({ children }) {
   const { data: session, status } = useSession();
@@ -71,7 +72,7 @@ export default function AuthBridge({ children }) {
   if (!ready)
     return (
       <div className="grid min-h-screen place-items-center bg-zinc-50 dark:bg-zinc-950">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-blue-600" />
+        <LogoLoader className="h-8 w-8" />
       </div>
     );
 

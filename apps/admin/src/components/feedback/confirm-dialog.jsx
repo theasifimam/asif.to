@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import React from 'react';
 import {
   Dialog,
@@ -7,10 +8,10 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle } from
-"@/components/ui/dialog";
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Loader2 } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 
 
 
@@ -79,7 +80,7 @@ export function ConfirmDialog({
             disabled={loading}
             className={`flex flex-1 items-center justify-center gap-2 rounded-full px-6 py-3 text-xs font-bold transition-all ${variantStyles[variant]}`}>
             
-                        {loading ? <Loader2 size={16} className="animate-spin" /> : confirmText}
+                        {loading ? <LogoLoader size={16} className=""  /> : confirmText}
                     </Button>
                 </DialogFooter>
             </DialogContent>

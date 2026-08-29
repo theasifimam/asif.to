@@ -115,7 +115,7 @@ export default function AssetInspector({
   const [loadingUsage, setLoadingUsage] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showOverlayControls, setShowOverlayControls] = useState(false);
+  const [showOverlayControls, setShowOverlayControls] = useState(true);
   const wasDraggingRef = useRef(false);
   const [slideOffset, setSlideOffset] = useState(0);
   const [animateSlide, setAnimateSlide] = useState(true);
@@ -436,7 +436,7 @@ export default function AssetInspector({
       wasDraggingRef.current = false;
       return;
     }
-    setShowFullscreenControls((prev) => !prev);
+    setShowOverlayControls((prev) => !prev);
   };
 
   const handlePointerStart = (event) => {
@@ -783,7 +783,7 @@ export default function AssetInspector({
       data-scroll-ignore
     >
       {/* Top Bar Navigation & Actions */}
-      <header className="flex h-16 shrink-0 items-center justify-between border-b border-zinc-800/80 px-4 sm:px-6 z-20">
+      <header className="absolute inset-x-0 top-0 z-30 flex h-16 items-center justify-between border-b border-zinc-800/80 bg-zinc-950/85 px-4 backdrop-blur-xl sm:px-6">
         {/* File Name & Metadata */}
         <div className="flex items-center gap-3 min-w-0 pr-4">
           <div className="min-w-0">

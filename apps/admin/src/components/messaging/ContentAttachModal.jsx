@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BookMarked,
@@ -7,7 +8,6 @@ import {
   FileText,
   HelpCircle,
   Layers3,
-  Loader2,
   Search,
   StickyNote,
   X,
@@ -133,7 +133,7 @@ export default function ContentAttachModal({ open, onClose, onSelect }) {
         <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
           {loading ? (
             <div className="flex h-48 items-center justify-center gap-2 text-xs font-bold text-zinc-400">
-              <Loader2 className="animate-spin" size={16} />
+              <LogoLoader className="" size={16}  />
               <span>Loading admin content…</span>
             </div>
           ) : filteredItems.length > 0 ? (

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { usersApi } from "@/lib/api";
 import { toast } from "sonner";
-import { Loader2, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 export function BanUserModal({ isOpen, onClose, userId, username, onSuccess }) {
   const [loading, setLoading] = useState(false);

@@ -1,4 +1,5 @@
-import { Loader2 } from "lucide-react";
+
+import LogoLoader from "@/components/ui/LogoLoader";
 import Toolbar from "./Toolbar";
 import { useWorkspace } from "./useWorkspace";
 import { MobileNavigation } from "./MobileNavigation";
@@ -109,7 +110,7 @@ function Workspace(props) {
           aria-live="polite"
         >
           <div className="flex items-center gap-2 rounded-full bg-zinc-900 px-4 py-2 text-sm font-bold text-white shadow-xl">
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <LogoLoader className="h-4 w-4 "  />
             Restoring your code...
           </div>
         </div>

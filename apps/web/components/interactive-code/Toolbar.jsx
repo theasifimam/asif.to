@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Check,
@@ -20,7 +21,6 @@ import {
   FolderTree,
   GripHorizontal,
   GripVertical,
-  Loader2,
   Maximize2,
   Minimize2,
   Minus,
@@ -56,6 +56,7 @@ import {
   VSCODE_LIGHT_THEME,
 } from "./sandpackConfig";
 import { sandpackTemplateFor } from "@/lib/playground/config";
+import { useAuthPrompt } from "@/components/auth/AuthPromptProvider";
 import {
   decodeShareState,
   encodeShareState,
@@ -102,6 +103,7 @@ function Toolbar({
   runtimeAdapter,
   executionEnabled = true,
 }) {
+  const { requireAuth } = useAuthPrompt();
   const { sandpack, listen } = useSandpack();
   const [copied, setCopied] = useState(false);
   const [executing, setExecuting] = useState(false);
@@ -141,6 +143,7 @@ function Toolbar({
   const run = async () => {
     if (!executionEnabled) return;
     if (executing || runtimeAdapter?.status === "loading") return;
+    if (!requireAuth()) return;
     if (runtimeAdapter) {
       onSelect("console");
       runtimeAdapter.run();
@@ -426,7 +429,7 @@ function Toolbar({
             }
           >
             {isRunning ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <LogoLoader className="h-4 w-4 "  />
             ) : (
               <Play className="ml-0.5 h-4 w-4 fill-current" />
             )}
@@ -507,7 +510,7 @@ function Toolbar({
                   }`}
                 >
                   {formatting ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                    <LogoLoader className="h-4 w-4  text-blue-500"  />
                   ) : (
                     <WandSparkles
                       className={`h-4 w-4 shrink-0 ${isDark ? "text-zinc-400!" : "text-zinc-500!"}`}

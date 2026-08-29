@@ -1,7 +1,8 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
+
 import { AdminPagination } from "@/components/admin";
 
 export const unwrap = (response) => response?.data?.data;
@@ -158,7 +159,7 @@ export function ErrorBox({ children }) {
 export function Loading() {
   return (
     <div className="grid min-h-72 place-items-center">
-      <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
+      <LogoLoader className="h-7 w-7  text-blue-600"  />
     </div>
   );
 }

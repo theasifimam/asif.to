@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import React, { useState, useMemo } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -15,7 +16,6 @@ import {
   BookOpen,
   Brain,
   Terminal,
-  Loader2,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -283,7 +283,7 @@ export default function FAQPage() {
           <div className="lg:col-span-9 space-y-1 bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-4xl overflow-hidden">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-20 text-zinc-400">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-500 mb-3" />
+                <LogoLoader className="w-8 h-8  text-blue-500 mb-3"  />
                 <span className="text-xs font-extrabold uppercase tracking-widest">
                   Loading questions...
                 </span>

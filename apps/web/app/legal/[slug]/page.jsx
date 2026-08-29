@@ -7,6 +7,7 @@ import Footer from "@/components/layout/Footer";
 import { useGetPageBySlugQuery } from "@/lib/api/pagesApi";
 import { ShieldCheck, FileText, Cookie, Mail } from "lucide-react";
 import { PrivacyPolicy, TermsOfService } from "@/components/legal/LegalPolicies";
+import LogoLoader from "@/components/ui/LogoLoader";
 
 const LEGAL_FALLBACKS = {
   "privacy-policy": {
@@ -220,7 +221,7 @@ export default function LegalPage() {
       <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
         <Header />
         <main className="flex-1 flex flex-col items-center justify-center">
-          <div className="w-8 h-8 border-3 border-zinc-300 border-t-blue-600 rounded-full animate-spin"></div>
+          <LogoLoader className="h-8 w-8" />
           <span className="mt-3 text-xs font-bold uppercase tracking-widest text-zinc-400">
             Loading Legal Document...
           </span>

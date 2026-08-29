@@ -1,12 +1,13 @@
+import LogoLoader from "@/components/ui/LogoLoader";
 import React from 'react';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button, Input, Textarea } from "@/components/ui";
 
@@ -60,7 +61,7 @@ export function TopicDialog({ isOpen, setIsOpen, title, onConfirm, submitting, f
             onClick={onConfirm}
             disabled={submitting}
             className="w-full py-8 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-black/10 transition-all">
-            {submitting ? <Loader2 size={14} className="animate-spin mr-2" /> : null}
+            {submitting ? <LogoLoader size={14} className=" mr-2"  /> : null}
             Save Topic
           </Button>
         </DialogFooter>
@@ -102,7 +103,7 @@ export function TopicDeleteDialog({
             onClick={handleDelete}
             disabled={submitting}
             className="flex-1 rounded-2xl bg-red-500 hover:bg-red-600 text-white text-[11px] font-black uppercase tracking-widest transition-all h-14 shadow-lg shadow-red-500/20">
-            {submitting ? <Loader2 size={14} className="animate-spin mr-2" /> : null}
+            {submitting ? <LogoLoader size={14} className=" mr-2"  /> : null}
             Delete Topic
           </Button>
         </DialogFooter>

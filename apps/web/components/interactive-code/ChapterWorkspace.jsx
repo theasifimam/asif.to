@@ -1,15 +1,13 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useState } from "react";
-import { Loader2, Play, Terminal } from "lucide-react";
-import {
-  SandpackCodeEditor,
-  SandpackPreview,
-  useSandpack,
-} from "@codesandbox/sandpack-react";
+import { Play, Terminal } from "lucide-react";
+import { SandpackCodeEditor, SandpackPreview, useSandpack } from "@codesandbox/sandpack-react";
 
 import BetterConsole from "./BetterConsole";
 import { executeCurrentFiles } from "./sandpackConfig";
+import { useAuthPrompt } from "@/components/auth/AuthPromptProvider";
 
 const CONSOLE_ONLY = new Set(["javascript", "typescript"]);
 
@@ -19,12 +17,14 @@ export default function ChapterWorkspace({
   executionEnabled = true,
 }) {
   const { sandpack } = useSandpack();
+  const { requireAuth } = useAuthPrompt();
   const [running, setRunning] = useState(false);
   const [consoleOpen, setConsoleOpen] = useState(false);
   const consoleOnly = CONSOLE_ONLY.has(language);
 
   const run = async () => {
     if (!executionEnabled || running) return;
+    if (!requireAuth()) return;
     setRunning(true);
     try {
       await executeCurrentFiles(sandpack);
@@ -51,7 +51,7 @@ export default function ChapterWorkspace({
           className="inline-flex shrink-0 items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-xs font-black hover:bg-blue-500 disabled:opacity-50"
         >
           {running ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <LogoLoader className="h-4 w-4 "  />
           ) : (
             <Play className="h-4 w-4 fill-current" />
           )}

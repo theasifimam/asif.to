@@ -1,6 +1,7 @@
+import LogoLoader from "@/components/ui/LogoLoader";
 import React from "react";
 import { motion } from "framer-motion";
-import { Hash, Loader2, Edit3, Trash2 } from "lucide-react";
+import { Hash, Edit3, Trash2 } from "lucide-react";
 import { Button, Badge, Skeleton, Card } from "@/components/ui";
 
 const TREND_COLORS = {
@@ -21,7 +22,7 @@ export default function TopicGrid({
     <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
       {loading ? (
         <div className="col-span-full py-20 flex flex-col items-center justify-center gap-4">
-          <Loader2 className="animate-spin text-zinc-300" size={32} />
+          <LogoLoader className=" text-zinc-300" size={32}  />
           <Skeleton className="h-4 w-48 rounded-full" />
         </div>
       ) : filteredTopics.length === 0 ? (

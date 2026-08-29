@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
@@ -14,7 +15,6 @@ import {
   Lock,
   Eye,
   EyeOff,
-  Loader2,
   Send,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -293,7 +293,7 @@ export default function AccountManagementSettings({ user }) {
                   >
                     {sendingOtp ? (
                       <>
-                        <Loader2 className="animate-spin w-3 h-3" />
+                        <LogoLoader className=" w-3 h-3"  />
                         <span>Sending...</span>
                       </>
                     ) : otpCountdown > 0 ? (
@@ -346,7 +346,7 @@ export default function AccountManagementSettings({ user }) {
               >
                 {busy ? (
                   <>
-                    <Loader2 className="animate-spin w-3.5 h-3.5" />
+                    <LogoLoader className=" w-3.5 h-3.5"  />
                     <span>Processing…</span>
                   </>
                 ) : action === "delete" ? (

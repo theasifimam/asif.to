@@ -1,8 +1,8 @@
 "use client";
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useEffect, useMemo, useState, useDeferredValue } from "react";
 import {
   Search,
-  LoaderCircle,
   X,
   Sparkles,
   ArrowRight,
@@ -250,7 +250,7 @@ export default function SearchPageClient() {
       <div className="mt-2" aria-live="polite">
         {loading ? (
           <div className="flex flex-col items-center justify-center gap-3 py-24 rounded-4xl bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/60 dark:border-zinc-800/60 shadow-lg text-sm text-zinc-500">
-            <LoaderCircle className="h-6 w-6 animate-spin text-blue-500" />
+            <LogoLoader className="h-6 w-6  text-blue-500"  />
             <span className="font-semibold">Loading search index…</span>
           </div>
         ) : error ? (

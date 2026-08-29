@@ -1,12 +1,14 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useState } from "react";
-import { Loader2, Play, Terminal } from "lucide-react";
+import { Play, Terminal } from "lucide-react";
 import hljs from "highlight.js/lib/core";
 import javascript from "highlight.js/lib/languages/javascript";
 import typescript from "highlight.js/lib/languages/typescript";
 import xml from "highlight.js/lib/languages/xml";
 import css from "highlight.js/lib/languages/css";
+import { useAuthPrompt } from "@/components/auth/AuthPromptProvider";
 
 hljs.registerLanguage("javascript", javascript);
 hljs.registerLanguage("typescript", typescript);
@@ -67,6 +69,7 @@ export default function LocalChapterWorkspace({
   title,
   code = "",
 }) {
+  const { requireAuth } = useAuthPrompt();
   const [source, setSource] = useState(code);
   const [output, setOutput] = useState(
     "Press Run to execute this code in your browser.",
@@ -76,6 +79,7 @@ export default function LocalChapterWorkspace({
   const uiOutput = ["react", "nextjs"].includes(language);
 
   const run = () => {
+    if (!requireAuth()) return;
     setIsOutputOpen(true);
     if (uiOutput) {
       setOutput(renderReactMarkup(source));
@@ -165,7 +169,7 @@ export default function LocalChapterWorkspace({
             className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-xs font-black hover:bg-blue-500 disabled:opacity-50 text-white"
           >
             {running ? (
-              <Loader2 className="h-4 w-4 animate-spin" color={"#ffffff"} />
+              <LogoLoader className="h-4 w-4 " color={"#ffffff"}  />
             ) : (
               <Play className="h-4 w-4" color={"#ffffff"} />
             )}{" "}

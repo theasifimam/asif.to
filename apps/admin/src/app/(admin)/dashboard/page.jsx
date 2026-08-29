@@ -22,6 +22,7 @@ import { useGetDashboardStatsQuery } from "@/redux/services/dashboardApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasPermission } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
+import LogoLoader from "@/components/ui/LogoLoader";
 import { kanbanApi } from "@/lib/api";
 
 const ICON_MAP = {
@@ -142,7 +143,7 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center gap-6">
-        <div className="w-12 h-12 border-4 border-zinc-200 dark:border-zinc-800 border-t-blue-600 rounded-full animate-spin"></div>
+        <LogoLoader className="h-12 w-12" />
         <span className="text-xs font-extrabold uppercase tracking-widest text-zinc-500">
           Loading Course Analytics...
         </span>
@@ -298,7 +299,7 @@ export default function DashboardPage() {
 
         {plannerLoading ? (
           <div className="flex items-center gap-1.5 text-xs text-zinc-400 font-semibold py-2">
-            <span className="w-3.5 h-3.5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            <LogoLoader className="h-3.5 w-3.5" />
             Fetching planner tasks...
           </div>
         ) : plannerTasks.length > 0 ? (

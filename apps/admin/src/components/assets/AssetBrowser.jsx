@@ -9,6 +9,7 @@ import { useUrlFilters } from "@/hooks/useUrlFilters";
 import { useAuth } from "@/contexts/AuthContext";
 import { AdminEmptyState } from "@/components/admin";
 import { Button } from "@/components/ui/button";
+import LogoLoader from "@/components/ui/LogoLoader";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
@@ -1310,7 +1311,7 @@ export default function AssetBrowser({
           >
             {loadingMore ? (
               <span className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500">
-                <RefreshCw className="h-3.5 w-3.5 animate-spin text-blue-600" />{" "}
+                <LogoLoader className="h-3.5 w-3.5" />{" "}
                 Loading more files…
               </span>
             ) : assets.length > 0 && pagination.page < pagination.pages ? (

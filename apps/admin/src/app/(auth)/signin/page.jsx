@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import LogoLoader from "@/components/ui/LogoLoader";
 
 export default function SigninPage() {
   const [emailOrUsername, setEmailOrUsername] = useState("");
@@ -125,7 +126,7 @@ export default function SigninPage() {
         >
           {isLoading ? (
             <span className="flex items-center gap-2">
-              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <LogoLoader className="h-4 w-4" />
               Signing in...
             </span>
           ) : (

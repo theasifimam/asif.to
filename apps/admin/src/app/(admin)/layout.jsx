@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useSyncExternalStore } from "react";
+import LogoLoader from "@/components/ui/LogoLoader";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -315,7 +316,7 @@ export default function AdminLayout({ children }) {
     return (
       <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-foreground flex items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-zinc-200 dark:border-zinc-800 border-t-blue-600 rounded-full animate-spin"></div>
+          <LogoLoader className="h-12 w-12" />
           <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">
             Loading Admin Panel...
           </span>

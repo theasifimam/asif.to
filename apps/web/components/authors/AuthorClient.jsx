@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import Image from "next/image";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -11,7 +12,6 @@ import {
   Linkedin,
   Globe,
   Newspaper,
-  Loader2,
   UserCheck,
   Mail,
   Github,
@@ -39,7 +39,7 @@ export default function AuthorClient({ username }) {
   if (profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="animate-spin text-zinc-400" size={32} />
+        <LogoLoader className=" text-zinc-400" size={32}  />
       </div>
     );
   }
@@ -238,7 +238,7 @@ export default function AuthorClient({ username }) {
 
             {articlesLoading ? (
               <div className="py-16 flex justify-center">
-                <Loader2 className="animate-spin text-zinc-400" size={32} />
+                <LogoLoader className=" text-zinc-400" size={32}  />
               </div>
             ) : articles.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">

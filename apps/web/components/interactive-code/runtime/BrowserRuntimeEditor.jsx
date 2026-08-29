@@ -1,11 +1,11 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Code2,
   FileCode2,
   FolderTree,
-  Loader2,
   Maximize2,
   Minimize2,
   PanelLeftClose,
@@ -20,13 +20,10 @@ import {
 } from "lucide-react";
 import { storageKey } from "@/lib/playground/client";
 import { BROWSER_RUNTIME_CONFIG, initialRuntimeCode } from "./runtimeConfig";
-import {
-  SandpackCodeEditor,
-  SandpackProvider,
-  useSandpack,
-} from "@codesandbox/sandpack-react";
+import { SandpackCodeEditor, SandpackProvider, useSandpack } from "@codesandbox/sandpack-react";
 import { VSCODE_DARK_THEME } from "../sandpackConfig";
 import Workspace from "../Workspace";
+import { useAuthPrompt } from "@/components/auth/AuthPromptProvider";
 
 function formatBytes(value) {
   if (!Number.isFinite(value) || value <= 0) return "size unavailable";
@@ -55,6 +52,7 @@ function BrowserRuntimeWorkspace({
   executionEnabled = true,
   compact = false,
 }) {
+  const { requireAuth } = useAuthPrompt();
   const config = BROWSER_RUNTIME_CONFIG[language];
   const { sandpack } = useSandpack();
   const activeFile = sandpack.activeFile || config.file;
@@ -140,6 +138,7 @@ function BrowserRuntimeWorkspace({
 
   const run = useCallback(() => {
     if (!executionEnabled) return;
+    if (!requireAuth()) return;
     setConsoleOpen(true);
     clearTimeout(watchdogRef.current);
     setOutput("");
@@ -203,6 +202,7 @@ function BrowserRuntimeWorkspace({
     sandpack.files,
     activeFile,
     executionEnabled,
+    requireAuth,
   ]);
 
   useEffect(() => {
@@ -280,7 +280,7 @@ function BrowserRuntimeWorkspace({
         {status === "loading" && (
           <div className="absolute inset-0 grid place-items-center bg-zinc-950/90 p-6 text-center">
             <div className="w-full max-w-sm">
-              <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-400" />
+              <LogoLoader className="mx-auto h-6 w-6  text-blue-400"  />
               <p className="mt-3 font-sans text-sm font-bold">{statusText}</p>
               {progress && (
                 <>
@@ -345,7 +345,7 @@ function BrowserRuntimeWorkspace({
               className="inline-flex shrink-0 items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-xs font-black hover:bg-blue-500 disabled:opacity-50"
             >
               {status === "loading" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <LogoLoader className="h-4 w-4 "  />
               ) : (
                 <Play className="h-4 w-4 fill-current" />
               )}
@@ -499,7 +499,7 @@ function BrowserRuntimeWorkspace({
             title={!executionEnabled ? "Execution is temporarily disabled" : "Run (Ctrl/Cmd + Enter)"}
           >
             {status === "loading" ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <LogoLoader className="h-4 w-4 "  />
             ) : (
               <Play className="h-4 w-4 fill-current" />
             )}
@@ -575,7 +575,7 @@ function BrowserRuntimeWorkspace({
             {status === "loading" && (
               <div className="absolute inset-0 grid place-items-center bg-zinc-950/90 p-6 text-center">
                 <div className="w-full max-w-sm">
-                  <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-400" />
+                  <LogoLoader className="mx-auto h-6 w-6  text-blue-400"  />
                   <p className="mt-3 text-sm font-bold">{statusText}</p>
                   {progress && (
                     <>

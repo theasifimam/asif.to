@@ -1,7 +1,8 @@
+import LogoLoader from "@/components/ui/LogoLoader";
 import React from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, BarChart3, Edit3, Trash2, ArrowUpRight, FileText, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, BarChart3, Edit3, Trash2, ArrowUpRight, FileText } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Button, Badge } from "@/components/ui";
 
@@ -94,7 +95,7 @@ export default function ArticleListView({
                     }`}
                     title={isVisibleOnWeb ? "Article is Visible on website. Click to hide." : "Article is Hidden from website. Click to show."}>
                     {togglingId === item._id ? (
-                      <Loader2 size={13} className="animate-spin" />
+                      <LogoLoader size={13} className=""  />
                     ) : isVisibleOnWeb ? (
                       <Eye size={13} className="text-emerald-500" />
                     ) : (

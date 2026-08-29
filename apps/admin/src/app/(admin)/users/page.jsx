@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { Download, RefreshCw, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui";
+import LogoLoader from "@/components/ui/LogoLoader";
 import {
   Select,
   SelectContent,
@@ -149,7 +150,7 @@ export default function UsersPage() {
             title="Refresh users"
             className="flex-1 sm:flex-initial"
           >
-            <RefreshCw className={loading ? "animate-spin" : ""} size={16} />
+            {loading ? <LogoLoader size={16} /> : <RefreshCw size={16} />}
           </Button>
           {hasPermission(currentUser, "invitations.manage") && (
             <Button

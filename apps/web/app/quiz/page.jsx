@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import React, { useState } from "react";
 // ASIF_COURSE_LEARNING_FLOW_V1:quiz-imports
 import { useSearchParams } from "next/navigation";
@@ -24,7 +25,6 @@ import {
   Award,
   ChevronRight,
   Sparkles,
-  Loader2,
   GraduationCap,
 } from "lucide-react";
 
@@ -135,7 +135,7 @@ export default function QuizPage() {
       <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 pb-24 sm:pb-12">
         <Header />
         <main className="flex-1 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+          <LogoLoader className="w-8 h-8  text-blue-500"  />
         </main>
         <Footer />
       </div>

@@ -1,7 +1,8 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import React from 'react';
-import { Search as SearchIcon, SlidersHorizontal, Loader2 } from 'lucide-react';
+import { Search as SearchIcon, SlidersHorizontal } from 'lucide-react';
 import CategoryTabs from '@/components/articles/CategoryTabs';
 
 
@@ -43,7 +44,7 @@ export default function SearchFilters({
             {/* Category Tabs */}
             {topicsLoading ?
       <div className="flex items-center gap-4 py-8">
-                    <Loader2 className="animate-spin text-zinc-400" size={20} />
+                    <LogoLoader className=" text-zinc-400" size={20}  />
                     <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Retrieving Topics...</span>
                 </div> :
 

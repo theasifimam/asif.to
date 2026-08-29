@@ -1,15 +1,8 @@
+import LogoLoader from "@/components/ui/LogoLoader";
 import React from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  FileEdit,
-  Trash2,
-  Clock,
-  FileText,
-  Loader2,
-  Send,
-  EyeOff,
-} from "lucide-react";
+import { FileEdit, Trash2, Clock, FileText, Send, EyeOff } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Button, Card } from "@/components/ui";
 
@@ -126,7 +119,7 @@ export default function DraftCardView({
                     title="Draft is hidden from website. Click to publish."
                   >
                     {togglingId === draft._id ? (
-                      <Loader2 size={12} className="animate-spin" />
+                      <LogoLoader size={12} className=""  />
                     ) : (
                       <EyeOff size={12} />
                     )}

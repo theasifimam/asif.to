@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
@@ -12,7 +13,6 @@ import {
   History,
   Instagram,
   Linkedin,
-  Loader2,
   RefreshCw,
   Send,
   Settings2,
@@ -302,7 +302,7 @@ export default function PublishPanel({ postId, post, exportRefs }) {
                     disabled={!scheduledAt || !selected.length || publishing}
                     className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-xl bg-blue-600 px-3 text-[11px] font-bold text-white hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
                   >
-                    {publishing ? <Loader2 size={12} className="animate-spin" /> : <Clock size={12} />}
+                    {publishing ? <LogoLoader size={12} className=""  /> : <Clock size={12} />}
                     Confirm Schedule
                   </button>
                 </div>
@@ -396,7 +396,7 @@ export default function PublishPanel({ postId, post, exportRefs }) {
                         disabled={publishing}
                         className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-xl bg-rose-600 text-[10px] font-bold text-white hover:bg-rose-700 disabled:opacity-50 cursor-pointer"
                       >
-                        {busyPlatform === platform ? <Loader2 size={11} className="animate-spin" /> : <RefreshCw size={11} />}
+                        {busyPlatform === platform ? <LogoLoader size={11} className=""  /> : <RefreshCw size={11} />}
                         Retry {meta.label}
                       </button>
                     </>
@@ -495,7 +495,7 @@ export default function PublishPanel({ postId, post, exportRefs }) {
                   disabled={publishing || !selected.length}
                   className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white hover:bg-blue-700 disabled:opacity-45 transition-all shadow-sm cursor-pointer"
                 >
-                  {publishing ? <Loader2 size={14} className="animate-spin" /> : <Clock size={14} />}
+                  {publishing ? <LogoLoader size={14} className=""  /> : <Clock size={14} />}
                   Schedule Selected
                 </button>
               ) : (
@@ -504,7 +504,7 @@ export default function PublishPanel({ postId, post, exportRefs }) {
                   disabled={publishing || !selected.length}
                   className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white hover:bg-blue-700 disabled:opacity-45 transition-all shadow-sm cursor-pointer"
                 >
-                  {publishing ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                  {publishing ? <LogoLoader size={14} className=""  /> : <Send size={14} />}
                   Publish Now
                 </button>
               )

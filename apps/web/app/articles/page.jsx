@@ -1,11 +1,12 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import Header from "@/components/layout/Header";
 import Link from "next/link";
 import Footer from "@/components/layout/Footer";
 import ArticleCard from "@/components/articles/ArticleCard";
 import { useGetArticlesQuery } from "@/lib/api/articlesApi";
-import { Loader2, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { format } from "date-fns";
 
 export default function ArticlesPage() {
@@ -16,7 +17,7 @@ export default function ArticlesPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="animate-spin text-zinc-400" size={40} />
+          <LogoLoader className=" text-zinc-400" size={40}  />
           <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">
             Synchronizing Archive Dispatches...
           </span>

@@ -1,7 +1,8 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useCallback, useRef, useState } from "react";
-import { AlertCircle, CheckCircle2, Copy, Loader2, UploadCloud, X } from "lucide-react";
+import { AlertCircle, CheckCircle2, Copy, UploadCloud, X } from "lucide-react";
 import { assetsApi } from "@/lib/api";
 import { formatAssetBytes } from "@/lib/assets";
 import { Button } from "@/components/ui/button";
@@ -83,7 +84,7 @@ export default function AssetUploadPanel({ folderId, onUploaded, compact = false
             <div key={item.id} className="rounded-2xl border border-zinc-200/80 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950">
               <div className="flex items-start gap-3">
                 <div className="mt-0.5 text-zinc-400">
-                  {item.status === "uploading" || item.status === "queued" ? <Loader2 className="h-4 w-4 animate-spin text-blue-500" /> : item.status === "success" ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : item.status === "duplicate" ? <Copy className="h-4 w-4 text-amber-500" /> : <AlertCircle className="h-4 w-4 text-red-500" />}
+                  {item.status === "uploading" || item.status === "queued" ? <LogoLoader className="h-4 w-4  text-blue-500"  /> : item.status === "success" ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : item.status === "duplicate" ? <Copy className="h-4 w-4 text-amber-500" /> : <AlertCircle className="h-4 w-4 text-red-500" />}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-bold text-zinc-900 dark:text-white">{item.file.name}</p>

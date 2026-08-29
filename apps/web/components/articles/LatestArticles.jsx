@@ -1,8 +1,9 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, Clock, Loader2, FileText } from "lucide-react";
+import { ArrowRight, Clock, FileText } from "lucide-react";
 import { useGetArticlesQuery, Article } from "@/lib/api/articlesApi";
 import { formatDistanceToNow } from "date-fns";
 import { getImageUrl } from "@/lib/config";
@@ -16,7 +17,7 @@ export default function LatestArticles() {
   if (isLoading) {
     return (
       <div className="py-20 flex flex-col items-center justify-center gap-4">
-        <Loader2 className="animate-spin text-zinc-300" size={32} />
+        <LogoLoader className=" text-zinc-300" size={32}  />
         <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400">
           Loading Latest Dispatches...
         </span>

@@ -1,6 +1,7 @@
 "use client";
 
-import { User, AtSign, Mail, Lock, Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
+import LogoLoader from "@/components/ui/LogoLoader";
+import { User, AtSign, Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { inputClass } from "./authConstants";
 
 export default function SignUpFormStep({
@@ -83,10 +84,10 @@ export default function SignUpFormStep({
                 className="absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-500 shrink-0"
               />
               {isCheckingUsername && username.length >= 3 && (
-                <Loader2
+                <LogoLoader
                   size={14}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-blue-500 animate-spin"
-                />
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-blue-500 "
+                 />
               )}
             </div>
             {username.length >= 3 &&
@@ -179,7 +180,7 @@ export default function SignUpFormStep({
           className="mt-1 w-full bg-blue-600 hover:bg-blue-700 text-white h-11 rounded-full font-bold text-xs uppercase tracking-widest shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 active:scale-98 cursor-pointer"
         >
           {otpSending ? (
-            <Loader2 size={16} className="animate-spin" />
+            <LogoLoader size={16} className=""  />
           ) : (
             <>
               Send Verification OTP <Mail size={14} />

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Edit3, FilePlus2, Loader2, Plus, Trash2 } from "lucide-react";
+import { Edit3, FilePlus2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   chaptersApi,

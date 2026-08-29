@@ -1,14 +1,12 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import React from "react";
-import { Bookmark, BookmarkCheck, Loader2 } from "lucide-react";
+import { Bookmark, BookmarkCheck } from "lucide-react";
 import { useAppSelector } from "@/lib/store/hooks";
-import {
-  useToggleSavedItemMutation,
-  useGetMySavedItemsQuery,
-} from "@/lib/api/authApi";
+import { useToggleSavedItemMutation, useGetMySavedItemsQuery } from "@/lib/api/authApi";
 import { toast } from "sonner";
-import AuthModal from "@/components/auth/AuthModal";
+import { useAuthPrompt } from "@/components/auth/AuthPromptProvider";
 
 /**
  * SaveButton — reusable bookmark/save toggle for any content type.
@@ -27,7 +25,7 @@ export default function SaveButton({
   className = "",
 }) {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
-  const [isAuthOpen, setIsAuthOpen] = React.useState(false);
+  const { requireAuth } = useAuthPrompt();
   const pendingSave = React.useRef(false);
   const [toggleSaved, { isLoading: isToggling }] = useToggleSavedItemMutation();
 
@@ -50,7 +48,7 @@ export default function SaveButton({
 
     if (!isAuthenticated) {
       pendingSave.current = true;
-      setIsAuthOpen(true);
+      requireAuth();
       return;
     }
 
@@ -84,7 +82,7 @@ export default function SaveButton({
   const btnSize =
     size === "sm" ? "px-2.5 py-1.5 text-[10px]" : "px-3.5 py-2 text-xs";
 
-  return (<>
+  return (
     <button
       onClick={handleToggle}
       disabled={isToggling}
@@ -99,7 +97,7 @@ export default function SaveButton({
     >
       <div className={`rounded-full flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform ${isSaved ? "bg-white/20 text-white" : "bg-blue-500/10 text-blue-600 dark:text-blue-400 p-1"}`}>
         {isToggling ? (
-          <Loader2 className={`${iconSize} animate-spin`} />
+          <LogoLoader className={`${iconSize} `}  />
         ) : isSaved ? (
           <BookmarkCheck className={`${iconSize}`} />
         ) : (
@@ -110,6 +108,5 @@ export default function SaveButton({
         <span>{isSaved ? "Saved" : label || "Save"}</span>
       )}
     </button>
-    <AuthModal isOpen={isAuthOpen} onOpenChange={setIsAuthOpen} defaultTab="signup" />
-  </>);
+  );
 }

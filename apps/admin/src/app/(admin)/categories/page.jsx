@@ -11,7 +11,6 @@ import {
   FolderTree,
   Globe,
   GripVertical,
-  Loader2,
   Plus,
   Search,
   Trash2,

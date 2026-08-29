@@ -1,5 +1,6 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSelector } from "react-redux";
@@ -11,7 +12,6 @@ import {
   ChevronRight,
   Hammer,
   Layers,
-  Loader2,
   RotateCcw,
   XCircle,
 } from "lucide-react";
@@ -140,7 +140,7 @@ export default function ChapterActivityClient({
       <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
         <Header />
         <div className="grid min-h-[70vh] place-items-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <LogoLoader className="h-8 w-8  text-blue-600"  />
         </div>
       </div>
     );
@@ -378,7 +378,7 @@ function Practice({ courseSlug, chapter, onComplete }) {
   if (isLoading) {
     return (
       <div className="grid min-h-56 place-items-center rounded-4xl bg-white dark:bg-zinc-900">
-        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+        <LogoLoader className="h-6 w-6  text-blue-600"  />
       </div>
     );
   }

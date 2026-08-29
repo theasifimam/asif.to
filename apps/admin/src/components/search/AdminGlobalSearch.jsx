@@ -1,4 +1,5 @@
 "use client";
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
@@ -8,7 +9,6 @@ import {
   FileText,
   HelpCircle,
   Layers3,
-  LoaderCircle,
   Search,
   StickyNote,
   X,
@@ -267,7 +267,7 @@ export default function AdminGlobalSearch() {
                 >
                   {loading ? (
                     <div className="flex items-center justify-center gap-2 py-12 rounded-3xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl shadow-lg border border-zinc-200/80 dark:border-zinc-800/80 text-sm text-zinc-500">
-                      <LoaderCircle className="h-5 w-5 animate-spin text-blue-500" />{" "}
+                      <LogoLoader className="h-5 w-5  text-blue-500"  />{" "}
                       Loading content…
                     </div>
                   ) : error ? (

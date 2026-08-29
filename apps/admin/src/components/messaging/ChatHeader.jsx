@@ -3,6 +3,7 @@
 import { ArrowLeft, Hash, Link2, RefreshCw, UserRound } from "lucide-react";
 import { avatarUrl, conversationName, otherMember } from "./messaging-utils";
 import { useMessaging } from "@/contexts/MessagingContext";
+import LogoLoader from "@/components/ui/LogoLoader";
 
 function HeaderAvatar({ user, online = false }) {
   const source = avatarUrl(user?.avatar);
@@ -137,7 +138,7 @@ export default function ChatHeader({
 
       {status !== "connected" && (
         <span className="flex items-center gap-1.5 text-xs font-bold text-amber-600">
-          <RefreshCw className="animate-spin" size={13} /> Reconnecting…
+          <LogoLoader size={13} /> Reconnecting…
         </span>
       )}
     </header>

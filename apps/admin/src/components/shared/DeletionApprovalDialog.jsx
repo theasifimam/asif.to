@@ -1,13 +1,8 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import { useEffect, useState } from "react";
-import {
-  AlertTriangle,
-  CheckCircle2,
-  Loader2,
-  ShieldCheck,
-  X,
-} from "lucide-react";
+import { AlertTriangle, CheckCircle2, ShieldCheck, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -189,7 +184,7 @@ export default function DeletionApprovalDialog({ onDeleted }) {
         <div className="space-y-5 p-5 sm:p-6">
           {busy && !request ? (
             <div className="flex h-44 items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+              <LogoLoader className="h-6 w-6  text-blue-600"  />
             </div>
           ) : request ? (
             <>
@@ -290,7 +285,7 @@ export default function DeletionApprovalDialog({ onDeleted }) {
                     className="bg-rose-600 text-white hover:bg-rose-700"
                   >
                     {busy ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <LogoLoader className="h-4 w-4 "  />
                     ) : (
                       <ShieldCheck className="h-4 w-4" />
                     )}
@@ -332,7 +327,7 @@ export default function DeletionApprovalDialog({ onDeleted }) {
                       disabled={busy || otp.length !== 6}
                       className="bg-rose-600 text-white hover:bg-rose-700"
                     >
-                      {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+                      {busy && <LogoLoader className="h-4 w-4 "  />}
                       Approve & permanently delete
                     </Button>
                   </div>

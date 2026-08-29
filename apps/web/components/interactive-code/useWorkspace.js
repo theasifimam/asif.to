@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSandpack } from "@codesandbox/sandpack-react";
 import { executeCurrentFiles } from "./sandpackConfig";
+import { useAuthPrompt } from "@/components/auth/AuthPromptProvider";
 import {
   decodeShareState,
   encodeShareState,
@@ -21,6 +22,7 @@ export function useWorkspace({
   runtimeAdapter = null,
   executionEnabled = true,
 }) {
+  const { requireAuth } = useAuthPrompt();
   const [panel, setPanel] = useState("code");
   const [split, setSplit] = useState(50);
   const [outputSplit, setOutputSplit] = useState(68);
@@ -280,6 +282,7 @@ export function useWorkspace({
       if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
         event.preventDefault();
         if (!executionEnabled) return;
+        if (!requireAuth()) return;
         if (consoleFirst) {
           setConsoleOpen(true);
         }
@@ -303,7 +306,7 @@ export function useWorkspace({
     };
     window.addEventListener("keydown", runShortcut);
     return () => window.removeEventListener("keydown", runShortcut);
-  }, [consoleFirst, executionEnabled, formatActive, runtimeAdapter, sandpack]);
+  }, [consoleFirst, executionEnabled, formatActive, requireAuth, runtimeAdapter, sandpack]);
 
   const toggleFullscreen = async () => {
     if (document.fullscreenElement) {

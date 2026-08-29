@@ -1,7 +1,8 @@
 "use client";
 
+import LogoLoader from "@/components/ui/LogoLoader";
 import React, { useState } from 'react';
-import { ChevronRight, Loader2, FileText } from 'lucide-react';
+import { ChevronRight, FileText } from 'lucide-react';
 import { useGetArticlesQuery, Article } from '@/lib/api/articlesApi';
 import Link from 'next/link';
 import { getImageUrl } from '@/lib/config';
@@ -33,7 +34,7 @@ export default function DiscoveryFeed() {
   if (isLoading) {
     return (
       <section className="md:hidden mb-12 overflow-hidden flex flex-col items-center justify-center p-20 gap-4">
-        <Loader2 className="animate-spin text-zinc-300" size={24} />
+        <LogoLoader className=" text-zinc-300" size={24}  />
         <span className="text-[8px] font-black uppercase tracking-[0.4em] text-zinc-400">Synchronizing Signals...</span>
       </section>);
 
