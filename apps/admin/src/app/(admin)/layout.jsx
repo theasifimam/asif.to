@@ -53,6 +53,7 @@ import {
 import NotificationCenter from "@/components/navigation/NotificationCenter";
 import MessageHeaderButton from "@/components/navigation/MessageHeaderButton";
 import QuickPlannerAdd from "@/components/navigation/QuickPlannerAdd";
+import NotesQuickAccess from "@/components/navigation/NotesQuickAccess";
 import { MessagingProvider } from "@/contexts/MessagingContext";
 import { FloatingChatDock } from "@/components/messaging";
 import { ModuleHistoryTracker } from "@/hooks/useModuleHistory";
@@ -405,6 +406,8 @@ export default function AdminLayout({ children }) {
 
             <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
               {hasPermission(user, "planner.view") && <QuickPlannerAdd />}
+
+              <NotesQuickAccess />
 
               {/* Utility Icon Actions - Hidden on smaller devices */}
               <div className="hidden sm:block">

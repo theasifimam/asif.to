@@ -26,7 +26,7 @@ const assetSchema = new Schema(
     extension: { type: String, required: true, trim: true, lowercase: true },
     category: {
       type: String,
-      enum: ["image", "video", "document", "code_archive", "other"],
+      enum: ["image", "video", "audio", "document", "code_archive", "other"],
       required: true,
     },
     size: { type: Number, required: true, min: 0 },

@@ -210,6 +210,15 @@ export const mediaAuditApi = {
   deleteOrphan: (path) => apiDelete("/media-audit/file", { path }),
 };
 
+export const notesApi = {
+  list: (params = {}) =>
+    apiGet(`/notes?${new URLSearchParams(params).toString()}`),
+  get: (id) => apiGet(`/notes/${id}`),
+  create: (data = {}) => apiPost("/notes", data),
+  update: (id, data) => apiPatch(`/notes/${id}`, data),
+  delete: (id) => apiDelete(`/notes/${id}`),
+};
+
 /**
  * Users Management
  */

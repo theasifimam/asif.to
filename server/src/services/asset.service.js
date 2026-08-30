@@ -9,7 +9,8 @@ import storage, { getStorageProvider } from "./storage/index.js";
 import { describeAssetFile, sanitizeAssetName } from "../utils/assetFiles.js";
 
 const inlinePreviewExtensions = new Set([
-  ".jpg", ".jpeg", ".png", ".webp", ".avif", ".gif", ".mp4", ".webm", ".mov", ".pdf",
+  ".jpg", ".jpeg", ".png", ".webp", ".avif", ".gif", ".mp4", ".m4v", ".webm", ".mov", ".ogv",
+  ".mp3", ".m4a", ".aac", ".wav", ".ogg", ".oga", ".opus", ".weba", ".flac", ".pdf",
 ]);
 
 export function assetResponse(asset) {

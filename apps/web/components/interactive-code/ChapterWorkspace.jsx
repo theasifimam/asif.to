@@ -3,7 +3,11 @@
 import LogoLoader from "@/components/ui/LogoLoader";
 import { useState } from "react";
 import { Play, Terminal } from "lucide-react";
-import { SandpackCodeEditor, SandpackPreview, useSandpack } from "@codesandbox/sandpack-react";
+import {
+  SandpackCodeEditor,
+  SandpackPreview,
+  useSandpack,
+} from "@codesandbox/sandpack-react";
 
 import BetterConsole from "./BetterConsole";
 import { executeCurrentFiles } from "./sandpackConfig";
@@ -38,7 +42,7 @@ export default function ChapterWorkspace({
       <header className="flex items-center justify-between gap-3 border-b border-zinc-800 px-4 py-3">
         <div className="min-w-0">
           <p className="text-[10px] font-black uppercase tracking-[0.15em] text-emerald-400">
-            Try it yourself
+            Try it
           </p>
           <h3 className="mt-0.5 truncate text-sm font-bold">
             {title || "Code example"}
@@ -51,7 +55,7 @@ export default function ChapterWorkspace({
           className="inline-flex shrink-0 items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-xs font-black hover:bg-blue-500 disabled:opacity-50"
         >
           {running ? (
-            <LogoLoader className="h-4 w-4 "  />
+            <LogoLoader className="h-4 w-4 " />
           ) : (
             <Play className="h-4 w-4 fill-current" />
           )}
@@ -75,7 +79,10 @@ export default function ChapterWorkspace({
 
         {consoleOnly ? (
           <div className="h-44">
-            <div className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0" aria-hidden="true">
+            <div
+              className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0"
+              aria-hidden="true"
+            >
               <SandpackPreview
                 showNavigator={false}
                 showOpenInCodeSandbox={false}

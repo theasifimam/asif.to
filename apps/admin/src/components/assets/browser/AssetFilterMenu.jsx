@@ -137,6 +137,14 @@ export default function AssetFilterMenu({
                 }}
               />
               <OptionItem
+                label="Audio"
+                active={scope === "audio"}
+                onClick={() => {
+                  setScope("audio");
+                  onScopeChange?.();
+                }}
+              />
+              <OptionItem
                 label="Documents"
                 active={scope === "documents"}
                 onClick={() => {

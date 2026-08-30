@@ -147,7 +147,7 @@ export default function LocalChapterWorkspace({
       <header className="flex items-center justify-between px-4 py-3">
         <div className="min-w-0">
           <p className="text-[10px] font-black uppercase tracking-[0.15em] text-emerald-400">
-            Try it yourself · browser runtime
+            Try it
           </p>
           <h3 className="mt-0.5 truncate text-sm font-bold">
             {title || "Code example"}
@@ -160,7 +160,7 @@ export default function LocalChapterWorkspace({
             className="inline-flex items-center gap-2 rounded-full border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 px-4 py-2 text-xs font-bold text-zinc-700 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700"
           >
             <Terminal className="h-4 w-4" color={"#a8a8a8ff"} />
-            {isOutputOpen ? "Hide Output" : "Show Output"}
+            {isOutputOpen ? "Hide" : "Output"}
           </button>
           <button
             type="button"
@@ -169,7 +169,7 @@ export default function LocalChapterWorkspace({
             className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-xs font-black hover:bg-blue-500 disabled:opacity-50 text-white"
           >
             {running ? (
-              <LogoLoader className="h-4 w-4 " color={"#ffffff"}  />
+              <LogoLoader className="h-4 w-4 " color={"#ffffff"} />
             ) : (
               <Play className="h-4 w-4" color={"#ffffff"} />
             )}{" "}

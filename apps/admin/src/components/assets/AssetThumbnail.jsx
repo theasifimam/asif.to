@@ -1,6 +1,6 @@
 "use client";
 
-import { Archive, Code2, File, FileSpreadsheet, FileText, Film, Image as ImageIcon } from "lucide-react";
+import { Archive, AudioLines, Code2, File, FileSpreadsheet, FileText, Film, Image as ImageIcon } from "lucide-react";
 import { getAssetUrl } from "@/lib/assets";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +10,8 @@ export function AssetTypeIcon({ asset, className }) {
     ? ImageIcon
     : asset?.category === "video"
       ? Film
+      : asset?.category === "audio"
+        ? AudioLines
       : asset?.category === "code_archive"
         ? extension === ".zip" ? Archive : Code2
         : [".csv", ".xls", ".xlsx"].includes(extension)

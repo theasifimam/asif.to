@@ -20,7 +20,11 @@ import {
 } from "lucide-react";
 import { storageKey } from "@/lib/playground/client";
 import { BROWSER_RUNTIME_CONFIG, initialRuntimeCode } from "./runtimeConfig";
-import { SandpackCodeEditor, SandpackProvider, useSandpack } from "@codesandbox/sandpack-react";
+import {
+  SandpackCodeEditor,
+  SandpackProvider,
+  useSandpack,
+} from "@codesandbox/sandpack-react";
 import { VSCODE_DARK_THEME } from "../sandpackConfig";
 import Workspace from "../Workspace";
 import { useAuthPrompt } from "@/components/auth/AuthPromptProvider";
@@ -56,7 +60,8 @@ function BrowserRuntimeWorkspace({
   const config = BROWSER_RUNTIME_CONFIG[language];
   const { sandpack } = useSandpack();
   const activeFile = sandpack.activeFile || config.file;
-  const source = sandpack.files[activeFile]?.code || sandpack.files[config.file]?.code || "";
+  const source =
+    sandpack.files[activeFile]?.code || sandpack.files[config.file]?.code || "";
   const [output, setOutput] = useState("");
   const [error, setError] = useState("");
   const [status, setStatus] = useState("idle");
@@ -79,16 +84,11 @@ function BrowserRuntimeWorkspace({
     config.file,
   );
 
-
-
   const finish = useCallback((message) => {
     if (message.type === "ready") {
       javaReadyRef.current = true;
       if (pendingJavaRef.current && javaRef.current?.contentWindow)
-        javaRef.current.contentWindow.postMessage(
-          pendingJavaRef.current,
-          "*",
-        );
+        javaRef.current.contentWindow.postMessage(pendingJavaRef.current, "*");
       return;
     }
     if (message.type === "status") {
@@ -180,12 +180,12 @@ function BrowserRuntimeWorkspace({
       }
       return;
     }
-    const payload = { 
-      type: "run", 
-      language, 
+    const payload = {
+      type: "run",
+      language,
       code: source,
       files: sandpack.files,
-      entry: activeFile
+      entry: activeFile,
     };
     if (["c", "cpp"].includes(language)) {
       payload.input = window.prompt("Program input (optional):") || "";
@@ -280,7 +280,7 @@ function BrowserRuntimeWorkspace({
         {status === "loading" && (
           <div className="absolute inset-0 grid place-items-center bg-zinc-950/90 p-6 text-center">
             <div className="w-full max-w-sm">
-              <LogoLoader className="mx-auto h-6 w-6  text-blue-400"  />
+              <LogoLoader className="mx-auto h-6 w-6  text-blue-400" />
               <p className="mt-3 font-sans text-sm font-bold">{statusText}</p>
               {progress && (
                 <>
@@ -332,7 +332,7 @@ function BrowserRuntimeWorkspace({
           <header className="flex items-center justify-between gap-3 border-b border-zinc-800 px-4 py-3">
             <div className="min-w-0">
               <p className="text-[10px] font-black uppercase tracking-[0.15em] text-emerald-400">
-                Try it yourself
+                Try it
               </p>
               <h3 className="mt-0.5 truncate text-sm font-bold">
                 {title || `${config.label} example`}
@@ -345,7 +345,7 @@ function BrowserRuntimeWorkspace({
               className="inline-flex shrink-0 items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-xs font-black hover:bg-blue-500 disabled:opacity-50"
             >
               {status === "loading" ? (
-                <LogoLoader className="h-4 w-4 "  />
+                <LogoLoader className="h-4 w-4 " />
               ) : (
                 <Play className="h-4 w-4 fill-current" />
               )}
@@ -496,10 +496,14 @@ function BrowserRuntimeWorkspace({
             onClick={run}
             disabled={!executionEnabled || status === "loading"}
             className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-3 py-2 text-xs font-black hover:bg-blue-500 disabled:cursor-wait disabled:opacity-60"
-            title={!executionEnabled ? "Execution is temporarily disabled" : "Run (Ctrl/Cmd + Enter)"}
+            title={
+              !executionEnabled
+                ? "Execution is temporarily disabled"
+                : "Run (Ctrl/Cmd + Enter)"
+            }
           >
             {status === "loading" ? (
-              <LogoLoader className="h-4 w-4 "  />
+              <LogoLoader className="h-4 w-4 " />
             ) : (
               <Play className="h-4 w-4 fill-current" />
             )}
@@ -507,7 +511,9 @@ function BrowserRuntimeWorkspace({
           </button>
         </div>
       </header>
-      <div className={`grid h-[calc(100%-84px)] min-h-0 ${consoleOpen ? "grid-rows-2 lg:grid-cols-2 lg:grid-rows-1" : "grid-cols-1"}`}>
+      <div
+        className={`grid h-[calc(100%-84px)] min-h-0 ${consoleOpen ? "grid-rows-2 lg:grid-cols-2 lg:grid-rows-1" : "grid-cols-1"}`}
+      >
         <div
           className={`relative min-h-0 border-b border-zinc-800 lg:border-b-0 lg:border-r ${explorerOpen ? "lg:grid lg:grid-cols-[190px_minmax(0,1fr)]" : ""}`}
         >
@@ -575,7 +581,7 @@ function BrowserRuntimeWorkspace({
             {status === "loading" && (
               <div className="absolute inset-0 grid place-items-center bg-zinc-950/90 p-6 text-center">
                 <div className="w-full max-w-sm">
-                  <LogoLoader className="mx-auto h-6 w-6  text-blue-400"  />
+                  <LogoLoader className="mx-auto h-6 w-6  text-blue-400" />
                   <p className="mt-3 text-sm font-bold">{statusText}</p>
                   {progress && (
                     <>

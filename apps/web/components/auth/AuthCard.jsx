@@ -293,34 +293,40 @@ export default function AuthCard({
   const isBusy = siLoading || suLoading || otpSending;
 
   return (
-    <div className="relative w-full max-w-110 bg-white dark:bg-zinc-900 border border-white dark:border-zinc-800 rounded-4xl sm:rounded-4xl shadow-2xl shadow-zinc-950/20 dark:shadow-black/60 flex flex-col overflow-hidden max-h-[85vh] sm:max-h-[88vh]">
+    <div className="relative w-full max-w-110 bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden max-h-[85vh] sm:max-h-[88vh]">
+      {/* Subtle Accent Glow (inside solid card) */}
+      <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+
       {/* OAuth error banner */}
       {oauthError && (
-        <div className="flex items-start gap-2.5 bg-red-50 dark:bg-red-950/40 border-b border-red-200 dark:border-red-900 px-5 py-3">
-          <AlertCircle size={15} className="shrink-0 text-red-500 mt-0.5" />
-          <p className="flex-1 text-xs font-semibold text-red-700 dark:text-red-400 leading-snug">
+        <div className="relative z-20 flex items-start gap-2.5 bg-rose-50 dark:bg-rose-950/50 border-b border-rose-200 dark:border-rose-900 px-5 py-3">
+          <AlertCircle size={15} className="shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
+          <p className="flex-1 text-xs font-semibold text-rose-800 dark:text-rose-300 leading-snug">
             {oauthError}
           </p>
           <button
             type="button"
             onClick={() => setOauthError(null)}
             aria-label="Dismiss error"
-            className="shrink-0 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors cursor-pointer"
+            className="shrink-0 text-rose-400 hover:text-rose-600 dark:hover:text-rose-300 transition-colors cursor-pointer"
           >
             <X size={13} />
           </button>
         </div>
       )}
       {/* Header Bar - Fixed Branding & Title */}
-      <div className="flex flex-col px-6 sm:px-8 pt-5 sm:pt-6 pb-3 border-b border-zinc-200 dark:border-zinc-800 shrink-0 bg-white dark:bg-zinc-900">
+      <div className="relative z-10 flex flex-col px-6 sm:px-8 pt-6 pb-4 border-b border-zinc-100 dark:border-zinc-800/80 shrink-0 bg-white dark:bg-zinc-900">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <img
-              src="/logo.png"
-              alt="asif.to"
-              className="w-7 h-7 rounded-xl object-contain shrink-0"
-            />
-            <span className="font-outfit font-black text-lg tracking-tight text-foreground">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-md shadow-blue-500/20">
+              <img
+                src="/logo.png"
+                alt="asif.to"
+                className="w-5 h-5 object-contain invert brightness-200"
+              />
+            </div>
+            <span className="font-outfit font-black text-xl tracking-tight text-zinc-950 dark:text-white">
               asif<span className="text-blue-600 dark:text-blue-400">.to</span>
             </span>
           </Link>
@@ -329,22 +335,22 @@ export default function AuthCard({
             <button
               onClick={onClose}
               aria-label="Close modal"
-              className="p-1.5 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/80 rounded-full transition-colors text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer"
+              className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer"
             >
-              <X size={16} />
+              <X size={18} />
             </button>
           )}
         </div>
 
-        <div className="mt-2.5">
-          <h2 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+        <div className="mt-3">
+          <h2 className="text-xl sm:text-2xl font-black font-outfit text-zinc-950 dark:text-white tracking-tight">
             {isForgotPassword
               ? "Reset Password"
               : activeTab === "signup"
                 ? "Create Account"
                 : "Welcome Back"}
           </h2>
-          <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mt-0.5">
+          <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 mt-0.5">
             {isForgotPassword
               ? "Enter your email to receive a reset code"
               : activeTab === "signup"
@@ -355,7 +361,7 @@ export default function AuthCard({
       </div>
 
       {/* Main Content Area - Scrollable Body */}
-      <div className="flex-1 overflow-y-auto px-6 sm:px-8 py-4 scrollbar-none">
+      <div className="relative z-10 flex-1 overflow-y-auto px-6 sm:px-8 py-5 scrollbar-none bg-white dark:bg-zinc-900">
         <AnimatePresence mode="wait">
           {isForgotPassword ? (
             <motion.div

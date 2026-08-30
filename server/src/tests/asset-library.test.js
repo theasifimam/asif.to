@@ -13,6 +13,7 @@ test("asset metadata remains separate from binary file contents", () => {
   assert.equal(Asset.schema.path("folderId").options.ref, "AssetFolder");
   assert.equal(Asset.schema.path("buffer"), undefined);
   assert.deepEqual(Asset.schema.path("status").enumValues, ["active", "trashed"]);
+  assert.ok(Asset.schema.path("category").enumValues.includes("audio"));
 });
 
 test("asset library has indexes for listing, checksums, folder names, and usages", () => {
@@ -32,6 +33,23 @@ test("file validation uses content signatures instead of browser MIME alone", ()
     () => describeAssetFile({ originalname: "cover.png", mimetype: "image/png", buffer: Buffer.from("not an image") }),
     /do not match/,
   );
+});
+
+test("audio and video uploads are categorized from validated file signatures", () => {
+  const mp3 = describeAssetFile({
+    originalname: "lesson.mp3",
+    mimetype: "application/octet-stream",
+    buffer: Buffer.from("ID3\u0004\u0000\u0000"),
+  });
+  const mp4 = describeAssetFile({
+    originalname: "demo.m4v",
+    mimetype: "application/octet-stream",
+    buffer: Buffer.from("\u0000\u0000\u0000\u0018ftypmp42"),
+  });
+  assert.equal(mp3.category, "audio");
+  assert.equal(mp3.mimeType, "audio/mpeg");
+  assert.equal(mp4.category, "video");
+  assert.equal(mp4.mimeType, "video/x-m4v");
 });
 
 test("unsafe SVG content and path-like filenames are rejected or sanitized", () => {

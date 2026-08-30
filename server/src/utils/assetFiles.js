@@ -9,8 +9,19 @@ const TYPES = Object.freeze({
   ".gif": ["image/gif", "image"],
   ".svg": ["image/svg+xml", "image"],
   ".mp4": ["video/mp4", "video"],
+  ".m4v": ["video/x-m4v", "video"],
   ".mov": ["video/quicktime", "video"],
   ".webm": ["video/webm", "video"],
+  ".ogv": ["video/ogg", "video"],
+  ".mp3": ["audio/mpeg", "audio"],
+  ".m4a": ["audio/mp4", "audio"],
+  ".aac": ["audio/aac", "audio"],
+  ".wav": ["audio/wav", "audio"],
+  ".ogg": ["audio/ogg", "audio"],
+  ".oga": ["audio/ogg", "audio"],
+  ".opus": ["audio/ogg", "audio"],
+  ".weba": ["audio/webm", "audio"],
+  ".flac": ["audio/flac", "audio"],
   ".pdf": ["application/pdf", "document"],
   ".txt": ["text/plain", "document"],
   ".csv": ["text/csv", "document"],
@@ -58,8 +69,13 @@ function hasExpectedSignature(extension, buffer) {
   if (extension === ".pdf") return buffer.subarray(0, 5).toString() === "%PDF-";
   if ([".zip", ".docx", ".xlsx"].includes(extension)) return isZip(buffer);
   if ([".doc", ".xls"].includes(extension)) return isCompoundDocument(buffer);
-  if ([".mp4", ".mov"].includes(extension)) return buffer.subarray(4, 8).toString() === "ftyp";
-  if (extension === ".webm") return starts(buffer, [0x1a, 0x45, 0xdf, 0xa3]);
+  if ([".mp4", ".m4v", ".mov", ".m4a"].includes(extension)) return buffer.subarray(4, 8).toString() === "ftyp";
+  if ([".webm", ".weba"].includes(extension)) return starts(buffer, [0x1a, 0x45, 0xdf, 0xa3]);
+  if ([".ogg", ".oga", ".opus", ".ogv"].includes(extension)) return buffer.subarray(0, 4).toString() === "OggS";
+  if (extension === ".mp3") return buffer.subarray(0, 3).toString() === "ID3" || (buffer[0] === 0xff && (buffer[1] & 0xe0) === 0xe0);
+  if (extension === ".aac") return buffer[0] === 0xff && (buffer[1] & 0xf6) === 0xf0;
+  if (extension === ".wav") return buffer.subarray(0, 4).toString() === "RIFF" && buffer.subarray(8, 12).toString() === "WAVE";
+  if (extension === ".flac") return buffer.subarray(0, 4).toString() === "fLaC";
   return false;
 }
 

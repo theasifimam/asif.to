@@ -35,6 +35,7 @@ import {
 import { cn } from "@/lib/utils";
 import { hasPermission } from "@/lib/permissions";
 import AssetThumbnail from "./AssetThumbnail";
+import MediaPlayer from "./MediaPlayer";
 
 function Detail({ label, children }) {
   return (
@@ -50,6 +51,12 @@ function Detail({ label, children }) {
 const SLIDE_DURATION = 260;
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
+const PREVIEWABLE_DOCUMENT_EXTENSIONS = new Set([
+  ".pdf",
+  ".txt",
+  ".csv",
+  ".json",
+]);
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -92,7 +99,7 @@ function constrainImagePan(pan, zoom, surface, asset) {
 function isViewerControl(target) {
   return Boolean(
     target?.closest?.(
-      "button, a, input, textarea, select, video, iframe, [role='menu'], [role='menuitem']",
+      "[data-media-player], button, a, input, textarea, select, audio, video, iframe, [role='menu'], [role='menuitem']",
     ),
   );
 }
@@ -128,6 +135,10 @@ export default function AssetInspector({
 
   const publicUrl = getAssetUrl(asset);
   const downloadUrl = getAssetUrl(asset, { download: true });
+  const canPreviewDocument =
+    asset.category === "document" &&
+    PREVIEWABLE_DOCUMENT_EXTENSIONS.has(asset.extension) &&
+    publicUrl;
   const canManage = hasPermission(user, "assets.manage");
   const canPermanentlyDelete = hasPermission(user, "assets.delete_permanent");
 
@@ -221,7 +232,7 @@ export default function AssetInspector({
 
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(Boolean(document.fullscreenElement));
+      setIsFullscreen(document.fullscreenElement === containerRef.current);
     };
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () =>
@@ -434,6 +445,10 @@ export default function AssetInspector({
     if (isViewerControl(e.target)) return;
     if (wasDraggingRef.current) {
       wasDraggingRef.current = false;
+      return;
+    }
+    if (showInfo) {
+      setShowInfo(false);
       return;
     }
     setShowOverlayControls((prev) => !prev);
@@ -667,13 +682,23 @@ export default function AssetInspector({
               }}
             />
           ) : asset.category === "video" && publicUrl ? (
-            <video
+            <MediaPlayer
+              key={asset._id}
               src={publicUrl}
-              controls
+              type="video"
+              title={asset.name}
               autoPlay
-              className="h-full w-full object-contain"
+              fill
             />
-          ) : asset.extension === ".pdf" && publicUrl ? (
+          ) : asset.category === "audio" && publicUrl ? (
+            <MediaPlayer
+              key={asset._id}
+              src={publicUrl}
+              type="audio"
+              title={asset.name}
+              autoPlay
+            />
+          ) : canPreviewDocument ? (
             <iframe
               title={`Preview ${asset.name}`}
               src={publicUrl}
@@ -1023,7 +1048,11 @@ export default function AssetInspector({
           )}
         >
           <div
-            className="flex items-center justify-center max-h-full max-w-full"
+            className={cn(
+              "flex items-center justify-center max-h-full max-w-full",
+              (canPreviewDocument || ["video", "audio"].includes(asset.category)) &&
+                "h-full w-full",
+            )}
             onDoubleClick={toggleImageZoom}
             style={{
               transform: `translateX(${slideOffset}px)`,
@@ -1045,13 +1074,22 @@ export default function AssetInspector({
                 }}
               />
             ) : asset.category === "video" && publicUrl ? (
-              <video
+              <MediaPlayer
+                key={asset._id}
                 src={publicUrl}
-                controls
+                type="video"
+                title={asset.name}
                 autoPlay
-                className="max-h-full max-w-full rounded-2xl object-contain shadow-2xl"
               />
-            ) : asset.extension === ".pdf" && publicUrl ? (
+            ) : asset.category === "audio" && publicUrl ? (
+              <MediaPlayer
+                key={asset._id}
+                src={publicUrl}
+                type="audio"
+                title={asset.name}
+                autoPlay
+              />
+            ) : canPreviewDocument ? (
               <iframe
                 title={`Preview ${asset.name}`}
                 src={publicUrl}
@@ -1132,9 +1170,20 @@ export default function AssetInspector({
         {/* Sliding Details Drawer */}
         {showInfo && (
           <aside className="absolute inset-y-0 right-0 z-30 w-full max-w-80 shrink-0 overflow-y-auto border-l border-zinc-800/80 bg-zinc-900/95 p-5 shadow-2xl backdrop-blur-md transition-all sm:static sm:shadow-none">
-            <h3 className="text-xs font-black uppercase tracking-wider text-blue-400 mb-3">
-              File Information
-            </h3>
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <h3 className="text-xs font-black uppercase tracking-wider text-blue-400">
+                File Information
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowInfo(false)}
+                className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors"
+                aria-label="Close details"
+                title="Close detail panel"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
             <dl className="divide-y divide-zinc-800 text-xs">
               <Detail label="Original name">{asset.originalName}</Detail>
               <Detail label="Type">

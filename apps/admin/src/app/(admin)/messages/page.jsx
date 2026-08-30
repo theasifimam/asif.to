@@ -437,23 +437,21 @@ export default function MessagesPage() {
   const deliver = async (text, clientId, options) => {
     if (socket?.connected) {
       return new Promise((resolve) =>
-        socket
-          .timeout(10_000)
-          .emit(
-            "message:send",
-            {
-              conversationId: selected._id,
-              content: text,
-              clientId,
-              ...options,
-            },
-            (timeoutError, response) =>
-              resolve(
-                timeoutError
-                  ? { success: false, message: "Delivery timed out." }
-                  : response,
-              ),
-          ),
+        socket.timeout(10_000).emit(
+          "message:send",
+          {
+            conversationId: selected._id,
+            content: text,
+            clientId,
+            ...options,
+          },
+          (timeoutError, response) =>
+            resolve(
+              timeoutError
+                ? { success: false, message: "Delivery timed out." }
+                : response,
+            ),
+        ),
       );
     }
     const result = await messagingApi.send(
@@ -545,9 +543,7 @@ export default function MessagesPage() {
     }
 
     setMessages((items) =>
-      items.map((item) =>
-        item.clientId === clientId ? result.message : item,
-      ),
+      items.map((item) => (item.clientId === clientId ? result.message : item)),
     );
   };
 
@@ -555,10 +551,8 @@ export default function MessagesPage() {
     if (!files?.length || !selected?._id) return;
     const array = Array.from(files);
     setUploadProgress(10);
-    const result = await messagingApi.upload(
-      selected._id,
-      array,
-      (progress) => setUploadProgress(progress),
+    const result = await messagingApi.upload(selected._id, array, (progress) =>
+      setUploadProgress(progress),
     );
     setUploadProgress(0);
     if (result.success) {
@@ -735,12 +729,9 @@ export default function MessagesPage() {
                           5 * 60 * 1000,
                       );
 
-                      const isFirst =
-                        !isSameSenderAsPrev && isSameSenderAsNext;
-                      const isMiddle =
-                        isSameSenderAsPrev && isSameSenderAsNext;
-                      const isLast =
-                        isSameSenderAsPrev && !isSameSenderAsNext;
+                      const isFirst = !isSameSenderAsPrev && isSameSenderAsNext;
+                      const isMiddle = isSameSenderAsPrev && isSameSenderAsNext;
+                      const isLast = isSameSenderAsPrev && !isSameSenderAsNext;
                       const isSingle =
                         !isSameSenderAsPrev && !isSameSenderAsNext;
 

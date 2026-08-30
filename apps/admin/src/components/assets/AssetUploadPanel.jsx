@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
-const inputAccept = ".jpg,.jpeg,.png,.webp,.avif,.gif,.svg,.mp4,.mov,.webm,.pdf,.txt,.csv,.json,.doc,.docx,.xls,.xlsx,.js,.jsx,.ts,.tsx,.py,.java,.cpp,.html,.css,.md,.zip";
+const inputAccept = ".jpg,.jpeg,.png,.webp,.avif,.gif,.svg,.mp4,.m4v,.mov,.webm,.ogv,.mp3,.m4a,.aac,.wav,.ogg,.oga,.opus,.weba,.flac,.pdf,.txt,.csv,.json,.doc,.docx,.xls,.xlsx,.js,.jsx,.ts,.tsx,.py,.java,.cpp,.html,.css,.md,.zip";
 
 export default function AssetUploadPanel({ folderId, onUploaded, compact = false }) {
   const inputRef = useRef(null);

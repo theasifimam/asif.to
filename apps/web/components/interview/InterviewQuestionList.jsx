@@ -107,27 +107,27 @@ export default function InterviewQuestionList({
             <article
               id={`question-${number}`}
               key={item._id}
-              className="w-full min-w-0 max-w-full scroll-mt-36 py-7 sm:scroll-mt-24 sm:py-9"
+              className="w-full min-w-0 max-w-full scroll-mt-36 my-4 p-5 sm:p-7 rounded-[2rem] sm:rounded-[2.5rem] border border-orange-500/20 bg-gradient-to-br from-orange-500/5 via-amber-500/5 to-white dark:to-zinc-900/90 shadow-xs hover:shadow-md transition-all"
             >
               {/* Question Header */}
               <div className="flex items-start gap-3 sm:gap-4">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-xs font-black text-white shadow-xs shadow-orange-500/20 sm:h-9 sm:w-9 sm:text-sm">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-orange-500 text-xs font-black text-white shadow-md shadow-orange-500/20 sm:h-10 sm:w-10 sm:text-sm">
                   {number}
                 </span>
 
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span
-                      className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold capitalize ${difficultyStyles[item.difficulty] || difficultyStyles.medium}`}
+                      className={`rounded-full px-2.5 py-0.5 text-[10.5px] font-black uppercase tracking-wider ${difficultyStyles[item.difficulty] || difficultyStyles.medium}`}
                     >
                       {item.difficulty}
                     </span>
-                    <span className="text-xs font-semibold capitalize text-zinc-400">
+                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
                       {item.questionType}
                     </span>
                   </div>
 
-                  <h2 className="mt-2 text-base font-black leading-snug tracking-tight text-foreground sm:text-xl md:text-2xl">
+                  <h2 className="mt-2 text-base font-black font-outfit leading-snug tracking-tight text-zinc-950 dark:text-white sm:text-xl md:text-2xl">
                     {questionPageHref(item) ? (
                       <Link
                         href={questionPageHref(item)}
@@ -140,7 +140,7 @@ export default function InterviewQuestionList({
                     )}
                   </h2>
 
-                  <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
                     <SaveButton
                       itemId={item._id}
                       itemType="interview_question"
@@ -150,17 +150,17 @@ export default function InterviewQuestionList({
                     <button
                       type="button"
                       onClick={() => toggleQuestion(item._id)}
-                      className="inline-flex items-center gap-1 rounded-full bg-orange-500/10 px-2.5 py-0.5 text-xs font-bold text-orange-700 transition hover:bg-orange-500/20 dark:text-orange-300 sm:hidden"
+                      className="inline-flex items-center gap-1 rounded-full bg-orange-500/10 px-3 py-1 text-xs font-bold text-orange-700 transition hover:bg-orange-500/20 dark:text-orange-300 sm:hidden"
                       aria-expanded={!collapsed}
                     >
                       {collapsed ? (
                         <>
-                          <Eye className="h-3 w-3" />
+                          <Eye className="h-3.5 w-3.5" />
                           <span>Show answer</span>
                         </>
                       ) : (
                         <>
-                          <EyeOff className="h-3 w-3" />
+                          <EyeOff className="h-3.5 w-3.5" />
                           <span>Hide answer</span>
                         </>
                       )}
@@ -169,8 +169,8 @@ export default function InterviewQuestionList({
                 </div>
               </div>
 
-              {/* Answer Section on Plain Background with Left Accent Border */}
-              <div className="mt-5 min-w-0 max-w-full border-l-4 border-orange-500 pl-3 sm:ml-12 sm:pl-5">
+              {/* Answer Section with Left Accent Border */}
+              <div className="mt-5 min-w-0 max-w-full border-l-4 border-orange-500 pl-3 sm:ml-13 sm:pl-5">
                 {/* Accordion Toggle Header */}
                 <button
                   type="button"
@@ -198,7 +198,7 @@ export default function InterviewQuestionList({
                 {/* Collapsible Content */}
                 {!collapsed ? (
                   <div className="mt-3.5 space-y-4 pt-1">
-                    <div className="min-w-0 max-w-full text-justify text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 sm:text-[15px] sm:leading-7">
+                    <div className="min-w-0 max-w-full text-justify text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 sm:text-[15px] sm:leading-7 font-medium">
                       <InterviewAnswer content={item.answer} />
                     </div>
 
@@ -208,7 +208,7 @@ export default function InterviewQuestionList({
                           <Code2 className="h-3.5 w-3.5 text-orange-500" /> Code
                           example
                         </p>
-                        <div className="overflow-x-auto rounded-2xl bg-zinc-950 p-3.5 text-xs leading-5 text-zinc-100 shadow-inner sm:p-4 sm:text-sm sm:leading-6">
+                        <div className="overflow-x-auto rounded-2xl bg-zinc-950 p-4 text-xs leading-6 text-zinc-100 shadow-inner sm:text-sm">
                           <pre className="font-mono">
                             <code>{item.codeExample}</code>
                           </pre>
@@ -224,7 +224,7 @@ export default function InterviewQuestionList({
                     )}
 
                     {(item.followUps || []).length > 0 && (
-                      <div className="mt-4 rounded-2xl bg-blue-50/80 p-3.5 dark:bg-blue-500/10 sm:p-4">
+                      <div className="mt-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 p-4">
                         <p className="text-xs font-black uppercase tracking-wide text-blue-700 dark:text-blue-300">
                           Likely follow-up questions
                         </p>
@@ -258,7 +258,7 @@ export default function InterviewQuestionList({
                         {item.tags.map((tag) => (
                           <span
                             key={tag}
-                            className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-semibold text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+                            className="inline-flex items-center gap-1 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200/60 dark:border-zinc-700/60 px-2.5 py-0.5 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400"
                           >
                             <Tag className="h-3 w-3" /> {tag}
                           </span>
@@ -270,7 +270,7 @@ export default function InterviewQuestionList({
                   <button
                     type="button"
                     onClick={() => toggleQuestion(item._id)}
-                    className="mt-2.5 inline-flex items-center gap-2 rounded-xl bg-orange-500/10 px-3 py-1.5 text-xs font-bold text-orange-700 transition hover:bg-orange-500/20 dark:text-orange-300"
+                    className="mt-2.5 inline-flex items-center gap-2 rounded-full bg-orange-500/10 px-3.5 py-1.5 text-xs font-bold text-orange-700 transition hover:bg-orange-500/20 dark:text-orange-300"
                   >
                     <Eye className="h-3.5 w-3.5" />
                     <span>Tap to reveal answer & code</span>

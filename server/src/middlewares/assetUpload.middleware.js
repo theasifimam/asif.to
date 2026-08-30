@@ -1,7 +1,7 @@
 import multer from "multer";
 
 const maxFileSizeMb = Math.min(
-  Math.max(Number.parseInt(process.env.ASSET_MAX_FILE_SIZE_MB || "25", 10), 1),
+  Math.max(Number.parseInt(process.env.ASSET_MAX_FILE_SIZE_MB || "100", 10), 1),
   100,
 );
 

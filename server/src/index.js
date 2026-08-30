@@ -31,6 +31,7 @@ import messagingRoutes from "./routes/messaging.routes.js";
 import mediaAuditRoutes from "./routes/mediaAudit.routes.js";
 import relatedContentRoutes from "./routes/relatedContent.routes.js";
 import assetRoutes from "./routes/asset.routes.js";
+import personalNoteRoutes from "./routes/personalNote.routes.js";
 // ASIF_LEARNING_JOURNEY_V1:server-import
 
 import socialPostRoutes from "./routes/socialPost.routes.js";
@@ -128,6 +129,7 @@ app.use("/api/v1/messaging", messagingRoutes);
 app.use("/api/v1/media-audit", mediaAuditRoutes);
 app.use("/api/v1/related-content", relatedContentRoutes);
 app.use("/api/v1/assets", assetRoutes);
+app.use("/api/v1/notes", personalNoteRoutes);
 // ASIF_LEARNING_JOURNEY_V1:server-mount
 
 app.use("/api/v1/social-posts", socialPostRoutes);
@@ -135,7 +137,7 @@ app.use("/api/v1/social-integrations", socialIntegrationRoutes);
 app.use("/api/v1/deletion-requests", deletionRoutes);
 
 // ─── 404 Handler ───────────────────────────────────────────────────────────
-app.use((error, _req, res, next) => {
+app.use((error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     const isTooLarge = error.code === "LIMIT_FILE_SIZE";
     const isMessageAttachment = error.field === "files";
@@ -144,7 +146,7 @@ app.use((error, _req, res, next) => {
       success: false,
       code: error.code,
       message: isTooLarge && isAssetUpload
-        ? `Media Library files can be up to ${process.env.ASSET_MAX_FILE_SIZE_MB || 25} MB each.`
+        ? `Media Library files can be up to ${process.env.ASSET_MAX_FILE_SIZE_MB || 100} MB each.`
         : isTooLarge && isMessageAttachment
         ? "Message attachments can be up to 10 MB each."
         : isTooLarge

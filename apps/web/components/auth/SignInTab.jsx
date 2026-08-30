@@ -22,9 +22,9 @@ export default function SignInTab({
   return (
     <div className="flex flex-col gap-3.5">
       {/* Primary Email & Password Form */}
-      <form onSubmit={handleSignin} className="flex flex-col gap-3">
+      <form onSubmit={handleSignin} className="flex flex-col gap-3.5">
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs pl-3 text-foreground bold tracking-wider">
+          <label className="text-xs pl-1 text-zinc-700 dark:text-zinc-300 font-bold uppercase tracking-wider">
             Email or Username
           </label>
           <div className="relative">
@@ -45,13 +45,13 @@ export default function SignInTab({
 
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between ml-1">
-            <label className="text-xs pl-3 text-foreground bold tracking-wider">
+            <label className="text-xs text-zinc-700 dark:text-zinc-300 font-bold uppercase tracking-wider">
               Password
             </label>
             <button
               type="button"
               onClick={onForgotPassword}
-              className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
+              className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
             >
               Forgot Password?
             </button>
@@ -83,7 +83,7 @@ export default function SignInTab({
           type="submit"
           loading={isLoading}
           disabled={isBusy}
-          className="mt-1 w-full uppercase tracking-widest text-xs h-11"
+          className="mt-1 w-full rounded-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs h-11 shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
         >
           <span>Sign In to Account</span>
           <ArrowRight size={14} />
@@ -95,7 +95,7 @@ export default function SignInTab({
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-zinc-200/80 dark:border-zinc-800" />
         </div>
-        <span className="relative bg-white dark:bg-zinc-900 px-3 text-[10px] font-black uppercase tracking-wider text-zinc-400">
+        <span className="relative bg-zinc-50 dark:bg-zinc-900 px-3 text-[10px] font-black uppercase tracking-wider text-zinc-400 rounded-full">
           or continue with
         </span>
       </div>

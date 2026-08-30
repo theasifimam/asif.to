@@ -229,6 +229,7 @@ export default function AssetBrowser({
     if (debouncedSearch) params.search = debouncedSearch;
     if (scope === "images") params.type = "image";
     if (scope === "videos") params.type = "video";
+    if (scope === "audio") params.type = "audio";
     if (scope === "documents") params.type = "document";
     if (scope === "code") params.type = "code_archive";
     if (scope === "favorites") params.favorite = "true";

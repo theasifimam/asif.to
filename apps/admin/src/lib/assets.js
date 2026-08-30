@@ -38,6 +38,7 @@ export function assetAccepts(asset, accept = "") {
 export const ASSET_TYPE_LABELS = Object.freeze({
   image: "Image",
   video: "Video",
+  audio: "Audio",
   document: "Document",
   code_archive: "Code / Archive",
   other: "Other",

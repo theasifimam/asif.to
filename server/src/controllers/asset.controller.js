@@ -18,6 +18,8 @@ const categoryAliases = Object.freeze({
   image: "image",
   videos: "video",
   video: "video",
+  audio: "audio",
+  audios: "audio",
   documents: "document",
   document: "document",
   code: "code_archive",
@@ -313,7 +315,9 @@ export async function serveAssetContent(req, res) {
     }
     const provider = getStorageProvider(asset.storageProvider);
     const absolute = provider.getAbsolutePath(asset.storageKey);
-    const forceDownload = req.query.download === "1" || !["image", "video"].includes(asset.category) || asset.extension === ".svg";
+    const previewableDocument = [".pdf", ".txt", ".csv", ".json"].includes(asset.extension);
+    const previewableCategory = ["image", "video", "audio"].includes(asset.category);
+    const forceDownload = req.query.download === "1" || (!previewableCategory && !previewableDocument) || asset.extension === ".svg";
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("Cache-Control", asset.visibility === "public" ? "public, max-age=3600" : "private, no-store");
     if (forceDownload) return res.download(absolute, safeDownloadName(asset));

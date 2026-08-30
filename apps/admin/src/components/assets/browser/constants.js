@@ -18,6 +18,7 @@ export const SCOPE_LABELS = {
   all: "All Files",
   images: "Images",
   videos: "Videos",
+  audio: "Audio",
   documents: "Documents",
   code: "Code & Archives",
   recent: "Recent",
