@@ -5,7 +5,6 @@ import { Hash, Link2, UserRound } from "lucide-react";
 import {
   avatarUrl,
   conversationName,
-  formatTime,
   otherMember,
   parseContentCards,
 } from "./messaging-utils";
@@ -111,15 +110,6 @@ export default function ConversationRow({
               ? conversation.entityTitle
               : conversationName(conversation, userId)}
           </p>
-          <span
-            className={`ml-auto shrink-0 text-xs font-semibold ${
-              hasUnread
-                ? "text-blue-600 dark:text-blue-400"
-                : "text-zinc-400 dark:text-zinc-500"
-            }`}
-          >
-            {formatTime(conversation.lastMessageAt)}
-          </span>
         </div>
 
         <div className="mt-0.5 flex items-center gap-2">

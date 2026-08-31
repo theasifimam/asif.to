@@ -56,7 +56,8 @@ export default function AccountManagementSettings({ user }) {
     try {
       const res = await sendOtp({
         email: user.email,
-        name: user.fullName || user.username,
+        fullName: user.fullName || user.username,
+        purpose: "account-security",
       }).unwrap();
       if (res.success) {
         toast.success(`Verification code sent to ${user.email}`);
@@ -83,7 +84,7 @@ export default function AccountManagementSettings({ user }) {
         "Please enter the 6-digit verification code sent to your email.",
       );
     }
-    if (user?.provider === "credentials" && !password.trim()) {
+    if (user?.hasPassword && !password.trim()) {
       return toast.error("Please enter your current account password.");
     }
 
@@ -120,7 +121,7 @@ export default function AccountManagementSettings({ user }) {
   const isFormValid =
     confirmation.trim() === expected &&
     otp.trim().length === 6 &&
-    (user?.provider !== "credentials" || password.trim().length > 0);
+    (!user?.hasPassword || password.trim().length > 0);
 
   return (
     <div className="space-y-6">
@@ -144,7 +145,7 @@ export default function AccountManagementSettings({ user }) {
             value={
               user?.provider === "credentials"
                 ? "Email and password"
-                : user?.provider || "—"
+                : `${user?.provider || "OAuth"}${user?.hasPassword ? " + password" : ""}`
             }
             capitalize
           />
@@ -154,14 +155,13 @@ export default function AccountManagementSettings({ user }) {
           />
         </dl>
         <div className="mt-5 flex flex-wrap gap-3">
-          {user?.provider === "credentials" && (
-            <Link
-              href="/forgot-password"
-              className="inline-flex h-10 items-center gap-2 rounded-xl border border-zinc-200 px-4 text-xs font-bold hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800 transition-colors"
-            >
-              <KeyRound size={15} /> Change password
-            </Link>
-          )}
+          <Link
+            href="/forgot-password"
+            className="inline-flex h-10 items-center gap-2 rounded-xl border border-zinc-200 px-4 text-xs font-bold hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800 transition-colors"
+          >
+            <KeyRound size={15} />
+            {user?.hasPassword ? "Change password" : "Set a password"}
+          </Link>
           <button
             type="button"
             onClick={finishSession}
@@ -250,7 +250,7 @@ export default function AccountManagementSettings({ user }) {
               </div>
 
               {/* Step 2: Password (if credentials account) */}
-              {user?.provider === "credentials" && (
+              {user?.hasPassword && (
                 <div className="space-y-1.5">
                   <label className="block text-[11px] font-bold text-zinc-600 dark:text-zinc-300">
                     2. Current Account Password
@@ -282,7 +282,7 @@ export default function AccountManagementSettings({ user }) {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="block text-[11px] font-bold text-zinc-600 dark:text-zinc-300">
-                    {user?.provider === "credentials" ? "3." : "2."} Email
+                    {user?.hasPassword ? "3." : "2."} Email
                     Verification OTP
                   </label>
                   <button

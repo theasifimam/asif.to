@@ -697,6 +697,7 @@ export default function AssetInspector({
               type="audio"
               title={asset.name}
               autoPlay
+              fill
             />
           ) : canPreviewDocument ? (
             <iframe
@@ -1088,6 +1089,7 @@ export default function AssetInspector({
                 type="audio"
                 title={asset.name}
                 autoPlay
+                fill
               />
             ) : canPreviewDocument ? (
               <iframe

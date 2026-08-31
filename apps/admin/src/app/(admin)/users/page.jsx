@@ -22,6 +22,7 @@ import {
 import {
   useGetUsersQuery,
   useCreateInvitationMutation,
+  useDeleteUserMutation,
   useUpdateUserMutation,
 } from "@/redux/services/userApi";
 import { UserTable } from "./UserTable";
@@ -39,6 +40,9 @@ const EditUserModal = dynamic(() =>
 const AddUserModal = dynamic(() =>
   import("./AddUserModal").then((module) => module.AddUserModal),
 );
+const DeleteUserModal = dynamic(() =>
+  import("./DeleteUserModal").then((module) => module.DeleteUserModal),
+);
 
 export default function UsersPage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -54,6 +58,7 @@ export default function UsersPage() {
   const setViewMode = (v) =>
     setUrlFilters((current) => ({ ...current, view: v }));
   const [editingUser, setEditingUser] = useState(null);
+  const [deletingUser, setDeletingUser] = useState(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const { user: currentUser } = useAuth();
   const deferredSearch = useDebouncedValue(search);
@@ -73,6 +78,7 @@ export default function UsersPage() {
   });
   const users = response?.data?.users || [];
   const [updateUser, { isLoading: updating }] = useUpdateUserMutation();
+  const [deleteUser, { isLoading: deleting }] = useDeleteUserMutation();
   const [createInvitation, { isLoading: inviting }] =
     useCreateInvitationMutation();
   const pagination = response?.data?.pagination || {
@@ -124,6 +130,16 @@ export default function UsersPage() {
     } catch (error) {
       toast.error(error.data?.message || "Unable to invite user");
       throw error;
+    }
+  };
+
+  const handleDelete = async (id, reason) => {
+    try {
+      const result = await deleteUser({ id, reason }).unwrap();
+      toast.success(result.message || "User deleted");
+      setDeletingUser(null);
+    } catch (error) {
+      toast.error(error.data?.message || "Unable to delete user");
     }
   };
 
@@ -243,7 +259,10 @@ export default function UsersPage() {
           loading={loading}
           viewMode={viewMode}
           onUpdate={setEditingUser}
+          onDelete={setDeletingUser}
           canUpdate={hasPermission(currentUser, "users.edit")}
+          canDelete={hasPermission(currentUser, "users.delete")}
+          currentUserId={currentUser?._id}
           limit={limit}
         />
         <AdminPagination
@@ -274,6 +293,13 @@ export default function UsersPage() {
         onClose={() => setIsAddOpen(false)}
         onAdd={handleInvite}
         submitting={inviting}
+      />
+      <DeleteUserModal
+        key={deletingUser?._id || "closed"}
+        user={deletingUser}
+        onClose={() => setDeletingUser(null)}
+        onDelete={handleDelete}
+        submitting={deleting}
       />
     </UserModuleShell>
   );

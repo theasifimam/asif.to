@@ -81,12 +81,12 @@ export default function ProfileClearanceSidebar({
             <Button
               variant="outline"
               onClick={() => setIsPwOpen(true)}
-              disabled={user.provider !== "credentials"}
+              disabled={!user.hasPassword}
               className="w-full h-10 rounded-full border-zinc-200/80 dark:border-zinc-800 gap-2 font-bold uppercase tracking-wider text-[10px] hover:bg-zinc-50 dark:hover:bg-zinc-900 bg-white dark:bg-transparent shadow-2xs transition-all cursor-pointer"
             >
               <Key size={13} />
-              {user.provider !== "credentials"
-                ? "Managed by OAuth provider"
+              {!user.hasPassword
+                ? "No password set"
                 : isOwnProfile
                   ? "Change My Password"
                   : "Reset password"}
@@ -194,7 +194,7 @@ export default function ProfileClearanceSidebar({
                   setConfirmAction({
                     type: "delete",
                     isOpen: true,
-                    title: "Deactivate this account?",
+                    title: "Delete this user?",
                     description:
                       "The user will lose access, while published content and attribution are preserved.",
                     variant: "destructive",
@@ -204,7 +204,7 @@ export default function ProfileClearanceSidebar({
                 className="w-full h-10 rounded-full gap-2 font-black uppercase tracking-wider text-[10px] text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 cursor-pointer"
               >
                 <Trash2 size={13} />
-                Deactivate account
+                Delete user
               </Button>
             </>
           )}

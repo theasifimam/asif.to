@@ -14,7 +14,6 @@ import MessageText from "./MessageText";
 import ContentMessageCard from "./ContentMessageCard";
 import {
   avatarUrl,
-  formatTime,
   getBubbleRadius,
   idOf,
   parseContentCards,
@@ -407,14 +406,14 @@ export default function MessageBubble({
             </div>
           )}
 
-          {/* Time & Read/Delivery indicators below bubble */}
-          <div
-            className={`mt-1 flex items-center gap-1.5 px-2 text-xs text-zinc-400 dark:text-zinc-500 font-medium ${
-              mine ? "justify-end" : "justify-start"
-            }`}
-          >
-            <span>{formatTime(message.createdAt)}</span>
-          </div>
+          {/* Status indicators below bubble (time hidden) */}
+          {(message.pin || message.pending || message.failed) && (
+            <div
+              className={`mt-1 flex items-center gap-1.5 px-2 text-xs text-zinc-400 dark:text-zinc-500 font-medium ${
+                mine ? "justify-end" : "justify-start"
+              }`}
+            />
+          )}
         </div>
       </div>
     </div>

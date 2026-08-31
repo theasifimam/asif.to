@@ -1,10 +1,10 @@
 "use client";
 
 import LogoLoader from "@/components/ui/LogoLoader";
-import React, { useState } from "react";
-import { useGetFlashcardsQuery } from "@/lib/api/courseApi";
+import React, { useMemo, useState } from "react";
+import { useGetCoursesQuery, useGetFlashcardsQuery } from "@/lib/api/courseApi";
 import { TECH_STACKS } from "@/lib/tutorialData";
-import { RotateCw, ChevronLeft, ChevronRight, Bookmark, CheckCircle2 } from "lucide-react";
+import { RotateCw, ChevronLeft, ChevronRight, Bookmark, CheckCircle2, Layers } from "lucide-react";
 
 export default function RevisionFlashcards({
   selectedTech,
@@ -12,36 +12,36 @@ export default function RevisionFlashcards({
   onDeckComplete,
   embedded = false,
 }) {
-  // ASIF_COURSE_LEARNING_FLOW_V1:revision-component-props
-  const { data, isLoading } = useGetFlashcardsQuery(
-    // ASIF_COURSE_LEARNING_FLOW_V1:revision-query
-    { ...(selectedTech ? { courseId: selectedTech } : {}), ...(selectedChapterId ? { chapterId: selectedChapterId } : {}), limit: 100 },
-  );
+  const [activeCourseId, setActiveCourseId] = useState(selectedTech || "");
+  const { data: coursesData } = useGetCoursesQuery();
+  const courses = coursesData?.data || [];
+
+  const effectiveCourse = activeCourseId || selectedTech || "";
+
+  const queryParams = useMemo(() => {
+    return {
+      ...(effectiveCourse ? { courseId: effectiveCourse } : {}),
+      ...(selectedChapterId ? { chapterId: selectedChapterId } : {}),
+      limit: 100,
+    };
+  }, [effectiveCourse, selectedChapterId]);
+
+  const { data, isLoading } = useGetFlashcardsQuery(queryParams);
 
   const allCards = data?.data || [];
-  // ASIF_COURSE_LEARNING_FLOW_V1:server-filtered-cards
   const filteredCards = allCards;
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [savedIds, setSavedIds] = useState([]);
 
-  if (isLoading) {
-    return (
-      <div className="w-full my-3 flex items-center justify-center h-36">
-        <LogoLoader className="w-6 h-6  text-blue-500"  />
-      </div>
-    );
-  }
-
-  if (filteredCards.length === 0) return null;
-
-  const card = filteredCards[currentIndex % filteredCards.length];
-  const tech = TECH_STACKS.find((t) => t.id === card.techId);
-  const cardId = card._id || card.id;
+  const handleSelectCourse = (courseKey) => {
+    setActiveCourseId(courseKey);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+  };
 
   const handleNext = () => {
-    // ASIF_COURSE_LEARNING_FLOW_V1:revision-complete
     if (currentIndex + 1 >= filteredCards.length) onDeckComplete?.();
     setIsFlipped(false);
     setCurrentIndex((prev) => (prev + 1) % filteredCards.length);
@@ -56,6 +56,9 @@ export default function RevisionFlashcards({
 
   const toggleSave = (e) => {
     e.stopPropagation();
+    const card = filteredCards[currentIndex % filteredCards.length];
+    if (!card) return;
+    const cardId = card._id || card.id;
     setSavedIds((prev) =>
       prev.includes(cardId)
         ? prev.filter((id) => id !== cardId)
@@ -63,10 +66,92 @@ export default function RevisionFlashcards({
     );
   };
 
+  const courseOptions = useMemo(() => {
+    if (courses.length > 0) {
+      return courses.map((c) => ({
+        key: c.techId || c.slug || c._id,
+        label: c.title ? c.title.split(":")[0] : c.name,
+      }));
+    }
+    return TECH_STACKS.map((t) => ({ key: t.id, label: t.name }));
+  }, [courses]);
+
+  const renderCourseSelector = () => (
+    <div className="mb-3.5 flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none">
+      <span className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-zinc-400 shrink-0 mr-1">
+        <Layers className="w-3.5 h-3.5 text-blue-500" />
+        Choose Course:
+      </span>
+      <button
+        type="button"
+        onClick={() => handleSelectCourse("")}
+        className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+          !effectiveCourse
+            ? "bg-blue-600 text-white shadow-xs"
+            : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:text-foreground border border-zinc-200 dark:border-zinc-700"
+        }`}
+      >
+        All Courses
+      </button>
+      {courseOptions.map((option) => {
+        const isActive =
+          effectiveCourse.toLowerCase() === option.key.toLowerCase();
+        return (
+          <button
+            key={option.key}
+            type="button"
+            onClick={() => handleSelectCourse(option.key)}
+            className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+              isActive
+                ? "bg-blue-600 text-white shadow-xs"
+                : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:text-foreground border border-zinc-200 dark:border-zinc-700"
+            }`}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="w-full my-3 flex flex-col items-center justify-center min-h-36 gap-2">
+        <LogoLoader className="w-6 h-6 text-blue-500" />
+        <span className="text-xs text-zinc-400 font-medium">Loading flashcards…</span>
+      </div>
+    );
+  }
+
+  if (filteredCards.length === 0) {
+    return (
+      <div className="w-full my-4 p-5 sm:p-7 rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs">
+        {renderCourseSelector()}
+        <div className="py-8 text-center space-y-3">
+          <p className="text-sm font-bold text-zinc-600 dark:text-zinc-400">
+            No flashcards found for this course selection.
+          </p>
+          <button
+            type="button"
+            onClick={() => handleSelectCourse("")}
+            className="px-4 py-2 rounded-full bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition-all shadow-xs cursor-pointer"
+          >
+            Practice All Courses Flashcards
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const card = filteredCards[currentIndex % filteredCards.length];
+  const tech = TECH_STACKS.find((t) => t.id === card.techId);
+  const cardId = card._id || card.id;
   const isSaved = savedIds.includes(cardId);
 
   const renderCardBody = () => (
     <div className="w-full min-w-0 space-y-3">
+      {renderCourseSelector()}
+
       {!embedded && (
         <div className="flex items-center justify-between mb-3 gap-2">
           <div className="min-w-0">
@@ -173,20 +258,20 @@ export default function RevisionFlashcards({
       <div className="flex items-center justify-between mt-3.5 gap-2">
         <button
           onClick={handlePrev}
-          className="h-10 inline-flex items-center gap-1 px-3.5 rounded-full bg-white dark:bg-zinc-900 text-xs font-bold hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all shadow-xs shrink-0"
+          className="h-10 inline-flex items-center gap-1 px-3.5 rounded-full bg-white dark:bg-zinc-900 text-xs font-bold hover:bg-zinc-100 dark:hover:bg-zinc-800 active:scale-95 transition-all shadow-xs shrink-0 cursor-pointer"
         >
           <ChevronLeft className="w-4 h-4" />
           <span>Prev</span>
         </button>
         <button
           onClick={() => setIsFlipped(!isFlipped)}
-          className="text-xs text-zinc-500 dark:text-zinc-400 hover:text-foreground font-semibold truncate"
+          className="text-xs text-zinc-500 dark:text-zinc-400 hover:text-foreground font-semibold truncate cursor-pointer"
         >
           {isFlipped ? "Show Question" : "Reveal Answer"}
         </button>
         <button
           onClick={handleNext}
-          className="h-10 inline-flex items-center gap-1 px-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold active:scale-95 transition-all shadow-md shadow-blue-500/25 shrink-0"
+          className="h-10 inline-flex items-center gap-1 px-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold active:scale-95 transition-all shadow-md shadow-blue-500/25 shrink-0 cursor-pointer"
         >
           <span>Next</span>
           <ChevronRight className="w-4 h-4" />

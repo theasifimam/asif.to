@@ -272,11 +272,11 @@ export default function MediaPlayer({
       onMouseLeave={() => isVideo && playing && setControlsVisible(false)}
       className={cn(
         "relative isolate overflow-hidden bg-zinc-950 shadow-2xl outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
-        isVideo
-          ? fill
-            ? "h-full w-full"
-            : "h-full w-full max-w-6xl rounded-2xl"
-          : "flex w-full max-w-2xl flex-col items-center gap-6 rounded-3xl border border-zinc-800/80 p-8 sm:p-12",
+        fill
+          ? "h-full w-full flex flex-col justify-between items-center"
+          : isVideo
+            ? "h-full w-full max-w-6xl rounded-2xl"
+            : "flex w-full max-w-2xl flex-col items-center gap-6 rounded-3xl border border-zinc-800/80 p-8 sm:p-12",
         className,
       )}
       aria-label={`${type} player for ${title}`}
@@ -330,14 +330,17 @@ export default function MediaPlayer({
           {controls}
         </>
       ) : (
-        <>
-          <div className="flex h-32 w-32 items-center justify-center rounded-full border border-blue-400/20 bg-blue-500/10 sm:h-44 sm:w-44">
-            <AudioLines className={cn("h-16 w-16 text-blue-400 sm:h-20 sm:w-20", playing && "animate-pulse")} />
+        <div className="flex h-full w-full flex-col items-center justify-between gap-6 p-6 sm:p-10 md:p-12">
+          <div className="my-auto flex flex-col items-center gap-5 text-center text-white">
+            <div className="flex h-36 w-36 items-center justify-center rounded-full border border-blue-400/20 bg-blue-500/10 shadow-2xl sm:h-52 sm:w-52">
+              <AudioLines className={cn("h-16 w-16 text-blue-400 sm:h-24 sm:w-24", playing && "animate-pulse")} />
+            </div>
+            <div className="max-w-xl space-y-1 px-4">
+              <p className="truncate text-base font-black sm:text-xl">{title}</p>
+              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest">Audio player</p>
+            </div>
           </div>
-          <div className="w-full text-center text-white">
-            <p className="truncate text-sm font-black">{title}</p>
-            <p className="mt-1 text-xs font-medium text-zinc-400">Audio player</p>
-          </div>
+
           <audio
             ref={mediaRef}
             src={src}
@@ -363,8 +366,10 @@ export default function MediaPlayer({
             onRateChange={(event) => setPlaybackRate(event.currentTarget.playbackRate)}
             onError={() => setError("This audio file cannot be played by your browser.")}
           />
-          {controls}
-        </>
+          <div className="w-full shrink-0">
+            {controls}
+          </div>
+        </div>
       )}
 
       {error && (

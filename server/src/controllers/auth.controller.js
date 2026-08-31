@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { getPermissionsForRole } from "../utils/permissions.js";
+import { canRecreateDeletedAccount } from "../utils/accountLifecycle.js";
 
 import { sendWelcomeEmail } from "../services/email.service.js";
 import { verifyAndConsumeOtp } from "./otp.controller.js";
@@ -122,20 +123,50 @@ export const upsertOAuthUser = async (req, res) => {
 
     // Soft-deleted: allow restore within 30-day grace window
     if (user.deletedAt) {
-      const daysSince =
-        (Date.now() - new Date(user.deletedAt).getTime()) / 86_400_000;
-      if (daysSince > 30)
+      if (canRecreateDeletedAccount(user)) {
+        if (!emailVerified) {
+          return res.status(403).json({
+            success: false,
+            message:
+              "The provider must verify this email before the account can be recreated.",
+          });
+        }
+        user.role = "reader";
+        user.status = "active";
+        user.statusReason = undefined;
+        user.statusChangedAt = new Date();
+        user.statusChangedBy = undefined;
+        user.deletedAt = null;
+        user.deletedBy = null;
+        user.sessionsRevokedAt = undefined;
+        user.suspensionExpiresAt = undefined;
+        user.provider = provider;
+        user.providerAccountId = String(providerAccountId);
+        user.oauthAccounts = [
+          { provider, providerAccountId: String(providerAccountId) },
+        ];
+        user.isVerified = true;
+      } else if (user.deletedBy && String(user.deletedBy) !== String(user._id)) {
         return res.status(403).json({
           success: false,
-          message:
-            "This account was permanently deleted and can no longer be recovered.",
+          message: "This account cannot be recreated.",
         });
-      // Within grace period — restore
-      user.deletedAt = null;
-      user.deletedBy = null;
-      user.status = "active";
-      user.statusReason = "Restored by owner within 30-day grace period (OAuth)";
-      user.statusChangedAt = new Date();
+      } else {
+        const daysSince =
+          (Date.now() - new Date(user.deletedAt).getTime()) / 86_400_000;
+        if (daysSince > 30)
+          return res.status(403).json({
+            success: false,
+            message:
+              "This account was permanently deleted and can no longer be recovered.",
+          });
+        // Within grace period — restore
+        user.deletedAt = null;
+        user.deletedBy = null;
+        user.status = "active";
+        user.statusReason = "Restored by owner within 30-day grace period (OAuth)";
+        user.statusChangedAt = new Date();
+      }
     } else if (user.status === "deactivated") {
       // Deactivated: let the user back in — this is a self-service reactivation
       user.status = "active";
@@ -187,7 +218,7 @@ export const issueOAuthSession = async (req, res) => {
       });
     }
     const user = await User.findById(req.body?.userId).select(
-      "fullName username email avatar role status provider createdAt sessionsRevokedAt",
+      "+password fullName username email avatar role status provider createdAt sessionsRevokedAt",
     );
     // By the time this runs, upsertOAuthUser has already reactivated the account if applicable.
     // Only hard-block admin-imposed statuses.
@@ -213,9 +244,12 @@ export const issueOAuthSession = async (req, res) => {
         message: "This session has been revoked. Please sign in again.",
       });
     }
+    const rawUser = user.toObject();
+    const { password: _, ...userData } = rawUser;
+    userData.hasPassword = Boolean(rawUser.password);
     return res.json({
       success: true,
-      data: { token: signToken(String(user._id)), user },
+      data: { token: signToken(String(user._id)), user: userData },
     });
   } catch (error) {
     console.error("[AUTH] OAuth session issue failed:", error?.message);
@@ -236,8 +270,11 @@ const sendTokenResponse = async (res, statusCode, user, token) => {
 
   res.cookie("token", token, cookieOptions);
 
-  // Remove password before sending
-  const { password: _, ...userData } = user.toObject ? user.toObject() : user;
+  // Expose only whether a local credential exists. OAuth users can add a
+  // password later without changing or unlinking their OAuth provider.
+  const rawUser = user.toObject ? user.toObject() : user;
+  const { password: _, ...userData } = rawUser;
+  userData.hasPassword = Boolean(user.password || rawUser.password);
   userData.permissions = await getPermissionsForRole(userData.role);
 
   res.status(statusCode).json({
@@ -254,8 +291,9 @@ const sendTokenResponse = async (res, statusCode, user, token) => {
 // POST /api/v1/auth/signup
 export const signup = async (req, res) => {
   try {
-    const { fullName, username, email, password, role, otp } = req.body;
+    const { fullName, username, email, password, otp } = req.body;
     const normalizedEmail = email?.toLowerCase().trim();
+    const normalizedUsername = username?.toLowerCase().trim();
 
     if (!fullName || !username || !normalizedEmail || !password || !otp) {
       res.status(400).json({
@@ -265,34 +303,72 @@ export const signup = async (req, res) => {
       return;
     }
 
-    const existingUser = await User.findOne({
-      $or: [
-        { email: normalizedEmail },
-        { username: username.toLowerCase().trim() },
-      ],
-    });
-    if (existingUser) {
-      const field = existingUser.email === email ? "email" : "username";
-      res
-        .status(409)
-        .json({ success: false, message: `This ${field} is already in use.` });
-      return;
+    const [emailOwner, usernameOwner] = await Promise.all([
+      User.findOne({ email: normalizedEmail }),
+      User.findOne({ username: normalizedUsername }),
+    ]);
+    const recreatingAccount = canRecreateDeletedAccount(emailOwner);
+
+    if (emailOwner?.status === "banned") {
+      return res.status(403).json({
+        success: false,
+        message: "This account has been banned and cannot be recreated.",
+      });
+    }
+    if (emailOwner && !recreatingAccount) {
+      return res.status(409).json({
+        success: false,
+        message: "This email is already in use.",
+      });
+    }
+    if (
+      usernameOwner &&
+      String(usernameOwner._id) !== String(emailOwner?._id)
+    ) {
+      return res.status(409).json({
+        success: false,
+        message: "This username is already in use.",
+      });
     }
 
-    const otpResult = verifyAndConsumeOtp(normalizedEmail, otp);
+    const otpResult = verifyAndConsumeOtp(normalizedEmail, otp, "signup");
     if (!otpResult.success) {
       res.status(400).json({ success: false, message: otpResult.message });
       return;
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
-    const newUser = await User.create({
-      fullName,
-      username: username.toLowerCase().trim(),
-      email: normalizedEmail,
-      password: hashedPassword,
-      role: role || "reader",
-    });
+    let newUser;
+    if (recreatingAccount) {
+      newUser = emailOwner;
+      newUser.fullName = fullName;
+      newUser.username = normalizedUsername;
+      newUser.password = hashedPassword;
+      newUser.role = "reader";
+      newUser.status = "active";
+      newUser.statusReason = undefined;
+      newUser.statusChangedAt = new Date();
+      newUser.statusChangedBy = undefined;
+      newUser.deletedAt = null;
+      newUser.deletedBy = null;
+      newUser.sessionsRevokedAt = undefined;
+      newUser.suspensionExpiresAt = undefined;
+      newUser.provider = "credentials";
+      newUser.providerAccountId = null;
+      newUser.oauthAccounts = [];
+      newUser.isVerified = true;
+      newUser.lastLogin = new Date();
+      await newUser.save();
+    } else {
+      newUser = await User.create({
+        fullName,
+        username: normalizedUsername,
+        email: normalizedEmail,
+        password: hashedPassword,
+        role: "reader",
+        isVerified: true,
+      });
+    }
 
     const token = signToken(String(newUser._id));
 
@@ -360,6 +436,13 @@ export const signin = async (req, res) => {
 
     // Soft-deleted: allow restore within 30-day grace window
     if (user.deletedAt) {
+      if (user.deletedBy && String(user.deletedBy) !== String(user._id)) {
+        res.status(403).json({
+          success: false,
+          message: "This account was deleted by an administrator.",
+        });
+        return;
+      }
       const daysSince =
         (Date.now() - new Date(user.deletedAt).getTime()) / 86_400_000;
       if (daysSince > 30) {
@@ -455,16 +538,19 @@ export const adminSignin = async (req, res) => {
 // GET /api/v1/auth/me
 export const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id).select("+password");
     if (!user) {
       res.status(404).json({ success: false, message: "User not found." });
       return;
     }
+    const rawUser = user.toObject();
+    const { password: _, ...userData } = rawUser;
+    userData.hasPassword = Boolean(rawUser.password);
     res.status(200).json({
       success: true,
       data: {
         user: {
-          ...user.toObject(),
+          ...userData,
           permissions: req.user.effectivePermissions || [],
         },
       },
@@ -489,10 +575,10 @@ export const updatePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
-    if (!currentPassword || !newPassword) {
+    if (!newPassword) {
       res.status(400).json({
         success: false,
-        message: "Current and new passwords are required.",
+        message: "A new password is required.",
       });
       return;
     }
@@ -503,21 +589,32 @@ export const updatePassword = async (req, res) => {
       return;
     }
 
-    if (!user.password) {
-      res.status(400).json({
-        success: false,
-        message:
-          "This account uses OAuth sign in and does not have a password yet.",
-      });
-      return;
-    }
-
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) {
-      res
-        .status(401)
-        .json({ success: false, message: "Current password is incorrect." });
-      return;
+    if (user.password) {
+      if (!currentPassword) {
+        return res.status(400).json({
+          success: false,
+          message: "Your current password is required.",
+        });
+      }
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(401).json({
+          success: false,
+          message: "Current password is incorrect.",
+        });
+      }
+    } else {
+      const otpResult = verifyAndConsumeOtp(
+        user.email,
+        req.body.otp,
+        "forgot-password",
+      );
+      if (!otpResult.success) {
+        return res.status(400).json({
+          success: false,
+          message: otpResult.message,
+        });
+      }
     }
 
     if (newPassword.length < 8) {
@@ -580,21 +677,59 @@ export const resetPassword = async (req, res) => {
       return;
     }
 
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user) {
+      res.status(404).json({ success: false, message: "User not found." });
+      return;
+    }
+    if (["suspended", "banned"].includes(user.status)) {
+      return res.status(403).json({
+        success: false,
+        message: "This account is unavailable.",
+      });
+    }
+    if (
+      user.deletedAt &&
+      user.deletedBy &&
+      String(user.deletedBy) !== String(user._id)
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "This account was deleted by an administrator.",
+      });
+    }
+
     // Verify OTP using the helper function
-    const otpResult = verifyAndConsumeOtp(email, otp);
+    const otpResult = verifyAndConsumeOtp(email, otp, "forgot-password");
     if (!otpResult.success) {
       res.status(400).json({ success: false, message: otpResult.message });
       return;
     }
 
-    // Find the user and update the password
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
-      res.status(404).json({ success: false, message: "User not found." });
-      return;
+    if (user.deletedAt) {
+      const daysSince =
+        (Date.now() - new Date(user.deletedAt).getTime()) / 86_400_000;
+      if (daysSince > 30) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "This account was permanently deleted and can no longer be recovered.",
+        });
+      }
+      user.deletedAt = null;
+      user.deletedBy = null;
+      user.status = "active";
+      user.statusReason = "Restored by owner during password reset";
+      user.statusChangedAt = new Date();
+    } else if (user.status === "deactivated") {
+      user.status = "active";
+      user.statusReason = "Reactivated by owner during password reset";
+      user.statusChangedAt = new Date();
     }
 
     user.password = await bcrypt.hash(newPassword, 12);
+    user.lastLogin = new Date();
     await user.save({ validateBeforeSave: false });
 
     // Optionally sign them in

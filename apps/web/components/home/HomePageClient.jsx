@@ -65,7 +65,7 @@ function SafeCourseCover({ thumbnail, title, techName, slug }) {
   return (
     <Link
       href={`/courses/${slug}`}
-      className="relative mb-3 flex w-full flex-col items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/15 via-indigo-500/10 to-violet-500/15 dark:from-blue-900/30 dark:via-zinc-850 dark:to-indigo-950/40 aspect-[2.1/1] border border-zinc-200/70 dark:border-zinc-800 transition-all group-hover:border-blue-500/40 p-3"
+      className="relative mb-3 flex w-full flex-col items-center justify-center overflow-hidden rounded-2xl bg-linear-to-br from-blue-500/15 via-indigo-500/10 to-violet-500/15 dark:from-blue-900/30 dark:via-zinc-850 dark:to-indigo-950/40 aspect-[2.1/1] border border-zinc-200/70 dark:border-zinc-800 transition-all group-hover:border-blue-500/40 p-3"
     >
       <div className="relative z-10 flex items-center gap-2.5 w-full">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white dark:bg-zinc-800 shadow-xs border border-zinc-200/80 dark:border-zinc-700/80 group-hover:scale-105 group-hover:border-blue-500 transition-all">
@@ -88,7 +88,7 @@ function SafeTopicCover({ image, title, topicType, courseTitle }) {
   const [hasError, setHasError] = useState(false);
 
   return (
-    <div className="relative w-full aspect-[2.2/1] overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600/20 via-teal-600/10 to-zinc-900 dark:from-emerald-950 dark:via-zinc-900 dark:to-zinc-950 border border-zinc-200/60 dark:border-zinc-800 flex items-center justify-between p-3.5">
+    <div className="relative w-full aspect-[2.2/1] overflow-hidden rounded-2xl bg-linear-to-br from-emerald-600/20 via-teal-600/10 to-zinc-900 dark:from-emerald-950 dark:via-zinc-900 dark:to-zinc-950 border border-zinc-200/60 dark:border-zinc-800 flex items-center justify-between p-3.5">
       {image && !hasError ? (
         <>
           <Image
@@ -99,7 +99,7 @@ function SafeTopicCover({ image, title, topicType, courseTitle }) {
             onError={() => setHasError(true)}
             unoptimized
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
         </>
       ) : (
         <Layers3 className="w-20 h-20 text-emerald-500/15 absolute -right-2 -bottom-2 pointer-events-none" />
@@ -111,7 +111,7 @@ function SafeTopicCover({ image, title, topicType, courseTitle }) {
           {topicType === "interview" ? "Interview Q&A" : "Guide"}
         </span>
         {courseTitle && (
-          <span className="rounded-full bg-black/60 backdrop-blur-md px-2.5 py-1 text-[9px] font-bold text-white/90 border border-white/20 truncate max-w-[140px] xs:max-w-[180px]">
+          <span className="rounded-full bg-black/60 backdrop-blur-md px-2.5 py-1 text-[9px] font-bold text-white/90 border border-white/20 truncate max-w-35 xs:max-w-[180px]">
             {courseTitle}
           </span>
         )}
@@ -124,7 +124,7 @@ function SafeArticleCover({ image, title, categoryName }) {
   const [hasError, setHasError] = useState(false);
 
   return (
-    <div className="relative w-full aspect-[2.2/1] overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600/20 via-purple-900/15 to-zinc-950 border border-zinc-200/60 dark:border-zinc-800 flex items-center justify-between p-3.5">
+    <div className="relative w-full aspect-[2.2/1] overflow-hidden rounded-2xl bg-linear-to-br from-purple-600/20 via-purple-900/15 to-zinc-950 border border-zinc-200/60 dark:border-zinc-800 flex items-center justify-between p-3.5">
       {image && !hasError ? (
         <>
           <Image
@@ -135,7 +135,7 @@ function SafeArticleCover({ image, title, categoryName }) {
             onError={() => setHasError(true)}
             unoptimized
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
         </>
       ) : (
         <FileText className="w-20 h-20 text-purple-500/15 absolute -right-2 -bottom-2 pointer-events-none" />
@@ -158,7 +158,8 @@ const FEATURES = [
       "Write, edit and run HTML, CSS, JavaScript, React and Next.js code instantly.",
     href: "/run",
     icon: Code2,
-    accent: "text-blue-600 bg-blue-500/10 dark:text-blue-400 border-blue-500/20",
+    accent:
+      "text-blue-600 bg-blue-500/10 dark:text-blue-400 border-blue-500/20",
   },
   {
     title: "Revision Flashcards",
@@ -166,7 +167,8 @@ const FEATURES = [
       "Review important concepts quickly with focused, swipeable revision cards.",
     href: "/revision",
     icon: Layers,
-    accent: "text-indigo-600 bg-indigo-500/10 dark:text-indigo-400 border-indigo-500/20",
+    accent:
+      "text-indigo-600 bg-indigo-500/10 dark:text-indigo-400 border-indigo-500/20",
   },
   {
     title: "Practice Quizzes",
@@ -174,7 +176,8 @@ const FEATURES = [
       "Check your understanding and find concepts that need another revision.",
     href: "/quiz",
     icon: HelpCircle,
-    accent: "text-purple-600 bg-purple-500/10 dark:text-purple-400 border-purple-500/20",
+    accent:
+      "text-purple-600 bg-purple-500/10 dark:text-purple-400 border-purple-500/20",
   },
   {
     title: "Course Exams",
@@ -182,7 +185,8 @@ const FEATURES = [
       "Test complete-course knowledge and use your result to showcase expertise.",
     href: "#course-exams",
     icon: Trophy,
-    accent: "text-amber-600 bg-amber-500/10 dark:text-amber-400 border-amber-500/20",
+    accent:
+      "text-amber-600 bg-amber-500/10 dark:text-amber-400 border-amber-500/20",
   },
   {
     title: "Interview Preparation",
@@ -190,7 +194,8 @@ const FEATURES = [
       "Practice categorized questions with detailed, interview-ready answers.",
     href: "#interview-prep",
     icon: MessageSquareText,
-    accent: "text-orange-600 bg-orange-500/10 dark:text-orange-400 border-orange-500/20",
+    accent:
+      "text-orange-600 bg-orange-500/10 dark:text-orange-400 border-orange-500/20",
   },
   {
     title: "Developer Cheatsheets",
@@ -198,7 +203,8 @@ const FEATURES = [
       "Keep syntax, commands and commonly used patterns within quick reach.",
     href: "/cheatsheets",
     icon: FileCode,
-    accent: "text-emerald-600 bg-emerald-500/10 dark:text-emerald-400 border-emerald-500/20",
+    accent:
+      "text-emerald-600 bg-emerald-500/10 dark:text-emerald-400 border-emerald-500/20",
   },
 ];
 
@@ -230,62 +236,12 @@ function getArticleHref(article) {
   return `/articles/${encodeURIComponent(slug)}-${encodeURIComponent(article._id || article.id)}`;
 }
 
-const getTechColorClasses = (techId) => {
-  const colors = {
-    reactjs: {
-      card: "border-blue-200/80 dark:border-blue-900/60 hover:border-blue-400 dark:hover:border-blue-700 hover:shadow-blue-500/10",
-      btn: "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/25",
-      badge: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
-    },
-    nextjs: {
-      card: "border-amber-200/80 dark:border-amber-900/60 hover:border-amber-400 dark:hover:border-amber-700 hover:shadow-amber-500/10",
-      btn: "bg-amber-600 hover:bg-amber-700 text-white shadow-amber-500/25",
-      badge: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
-    },
-    javascript: {
-      card: "border-emerald-200/80 dark:border-emerald-900/60 hover:border-emerald-400 dark:hover:border-emerald-700 hover:shadow-emerald-500/10",
-      btn: "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/25",
-      badge: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
-    },
-    css: {
-      card: "border-purple-200/80 dark:border-purple-900/60 hover:border-purple-400 dark:hover:border-purple-700 hover:shadow-purple-500/10",
-      btn: "bg-purple-600 hover:bg-purple-700 text-white shadow-purple-500/25",
-      badge: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
-    },
-    typescript: {
-      card: "border-teal-200/80 dark:border-teal-900/60 hover:border-teal-400 dark:hover:border-teal-700 hover:shadow-teal-500/10",
-      btn: "bg-teal-600 hover:bg-teal-700 text-white shadow-teal-500/25",
-      badge: "bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20",
-    },
-    nodejs: {
-      card: "border-green-200/80 dark:border-green-900/60 hover:border-green-400 dark:hover:border-green-700 hover:shadow-green-500/10",
-      btn: "bg-green-600 hover:bg-green-700 text-white shadow-green-500/25",
-      badge: "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20",
-    },
-    mongodb: {
-      card: "border-emerald-200/80 dark:border-emerald-900/60 hover:border-emerald-400 dark:hover:border-emerald-700 hover:shadow-emerald-500/10",
-      btn: "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/25",
-      badge: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
-    },
-    expressjs: {
-      card: "border-zinc-300/80 dark:border-zinc-700/60 hover:border-zinc-400 dark:hover:border-zinc-600 hover:shadow-zinc-500/10",
-      btn: "bg-zinc-800 hover:bg-zinc-900 text-white shadow-zinc-500/25",
-      badge: "bg-zinc-500/10 text-zinc-700 dark:text-zinc-300 border-zinc-500/20",
-    },
-    tailwindcss: {
-      card: "border-sky-200/80 dark:border-sky-900/60 hover:border-sky-400 dark:hover:border-sky-700 hover:shadow-sky-500/10",
-      btn: "bg-sky-500 hover:bg-sky-600 text-white shadow-sky-500/25",
-      badge: "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20",
-    },
+const getTechColorClasses = () => {
+  return {
+    card: "border-blue-200/80 dark:border-blue-900/60 hover:border-blue-400 dark:hover:border-blue-700 hover:shadow-blue-500/10",
+    btn: "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/25",
+    badge: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
   };
-
-  return (
-    colors[techId] || {
-      card: "border-zinc-200/80 dark:border-zinc-800/80 hover:border-blue-400 dark:hover:border-blue-700 hover:shadow-md",
-      btn: "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/25",
-      badge: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
-    }
-  );
 };
 
 export default function HomePageClient({
@@ -401,7 +357,7 @@ export default function HomePageClient({
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-3.5 sm:px-6 pt-20 sm:pt-24 flex flex-col gap-8 sm:gap-14 min-w-0">
         {/* 1. HERO BANNER - DRIBBBLE BENTO CARD DESIGN */}
-        <section className="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-zinc-950 text-white p-5 xs:p-6 sm:p-9 shadow-xl border border-zinc-800 min-w-0">
+        <section className="relative overflow-hidden rounded-4xl sm:rounded-[2.5rem] bg-zinc-950 text-white p-5 xs:p-6 sm:p-9 shadow-xl border border-zinc-800 min-w-0">
           {/* Subtle Ambient Radial Glows */}
           <div className="absolute -right-12 -top-12 w-80 h-80 rounded-full bg-blue-600/15 blur-3xl pointer-events-none" />
           <div className="absolute -left-12 -bottom-12 w-80 h-80 rounded-full bg-indigo-600/15 blur-3xl pointer-events-none" />
@@ -589,7 +545,7 @@ export default function HomePageClient({
               return (
                 <article
                   key={course._id || course.id}
-                  className={`group flex w-[270px] xs:w-[300px] sm:w-[330px] md:w-[350px] shrink-0 snap-start flex-col justify-between rounded-[2rem] sm:rounded-[2.5rem] border bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-md ${techColors.card}`}
+                  className={`group flex w-67.5 xs:w-[300px] sm:w-82.5 md:w-87.5 shrink-0 snap-start flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border bg-linear-to-br from-blue-500/10 via-indigo-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-md ${techColors.card}`}
                 >
                   <div>
                     <SafeCourseCover
@@ -644,7 +600,7 @@ export default function HomePageClient({
             })}
 
             {/* Catalog Bento Card */}
-            <article className="group relative flex w-[270px] xs:w-[300px] sm:w-[330px] md:w-[350px] shrink-0 snap-start flex-col justify-between overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] border border-blue-500/25 dark:border-blue-500/20 bg-gradient-to-br from-blue-600/10 via-indigo-600/10 to-violet-600/10 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-blue-500/50 transition-all duration-300">
+            <article className="group relative flex w-67.5 xs:w-[300px] sm:w-82.5 md:w-87.5 shrink-0 snap-start flex-col justify-between overflow-hidden rounded-4xl sm:rounded-[2.5rem] border border-blue-500/25 dark:border-blue-500/20 bg-linear-to-br from-blue-600/10 via-indigo-600/10 to-violet-600/10 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-blue-500/50 transition-all duration-300">
               <div className="flex flex-col">
                 <div className="mb-3.5 flex items-center justify-between">
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-md shadow-blue-500/20">
@@ -715,7 +671,7 @@ export default function HomePageClient({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 min-w-0">
             {/* Top Row: Playground Hero Bento Card (Spans 2 columns on desktop) */}
-            <div className="sm:col-span-2 lg:col-span-2 flex flex-col justify-between overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-zinc-950 text-white p-5 sm:p-6 border border-zinc-800 shadow-xl min-w-0">
+            <div className="sm:col-span-2 lg:col-span-2 flex flex-col justify-between overflow-hidden rounded-4xl sm:rounded-[2.5rem] bg-zinc-950 text-white p-5 sm:p-6 border border-zinc-800 shadow-xl min-w-0">
               <div>
                 <div className="flex items-center justify-between">
                   <div className="inline-flex items-center gap-1.5 text-blue-400">
@@ -735,8 +691,8 @@ export default function HomePageClient({
                   <span className="text-blue-400">Run it live.</span>
                 </h3>
                 <p className="mt-1 text-xs leading-relaxed font-medium text-zinc-400">
-                  Experiment instantly with HTML, CSS, JS, React and Next.js right
-                  inside your browser with zero configuration.
+                  Experiment instantly with HTML, CSS, JS, React and Next.js
+                  right inside your browser with zero configuration.
                 </p>
 
                 {/* Code Editor Preview Window */}
@@ -746,19 +702,52 @@ export default function HomePageClient({
                       <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block" />
                       <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block" />
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
-                      <span className="ml-2 font-bold text-zinc-300 bg-zinc-800 px-2 py-0.5 rounded-md text-[9.5px]">App.jsx</span>
+                      <span className="ml-2 font-bold text-zinc-300 bg-zinc-800 px-2 py-0.5 rounded-md text-[9.5px]">
+                        App.jsx
+                      </span>
                     </div>
-                    <span className="text-blue-400 text-[10px] font-bold">React 18</span>
+                    <span className="text-blue-400 text-[10px] font-bold">
+                      React 18
+                    </span>
                   </div>
 
                   <div className="p-3 text-zinc-300 space-y-1 text-[10.5px] leading-relaxed">
-                    <div><span className="text-purple-400 font-bold">import</span> <span className="text-blue-300">React</span>, {"{"} <span className="text-amber-300">useState</span> {"}"} <span className="text-purple-400 font-bold">from</span> <span className="text-emerald-300">'react'</span>;</div>
-                    <div><span className="text-purple-400 font-bold">export default function</span> <span className="text-amber-300">Counter</span>() {"{"}</div>
-                    <div className="pl-3"><span className="text-purple-400 font-bold">const</span> [<span className="text-blue-300">count</span>, <span className="text-blue-300">setCount</span>] = <span className="text-amber-300">useState</span>(<span className="text-orange-300">0</span>);</div>
-                    <div className="pl-3"><span className="text-purple-400 font-bold">return</span> (</div>
-                    <div className="pl-6 text-zinc-400">&lt;<span className="text-blue-400">button</span> <span className="text-teal-300">onClick</span>={"{"}() =&gt; <span className="text-blue-300">setCount</span>(c =&gt; c + 1){"}"}&gt;</div>
-                    <div className="pl-9 text-emerald-300">Clicked {"{"}count{"}"} times ✨</div>
-                    <div className="pl-6 text-zinc-400">&lt;/<span className="text-blue-400">button</span>&gt;</div>
+                    <div>
+                      <span className="text-purple-400 font-bold">import</span>{" "}
+                      <span className="text-blue-300">React</span>, {"{"}{" "}
+                      <span className="text-amber-300">useState</span> {"}"}{" "}
+                      <span className="text-purple-400 font-bold">from</span>{" "}
+                      <span className="text-emerald-300">'react'</span>;
+                    </div>
+                    <div>
+                      <span className="text-purple-400 font-bold">
+                        export default function
+                      </span>{" "}
+                      <span className="text-amber-300">Counter</span>() {"{"}
+                    </div>
+                    <div className="pl-3">
+                      <span className="text-purple-400 font-bold">const</span> [
+                      <span className="text-blue-300">count</span>,{" "}
+                      <span className="text-blue-300">setCount</span>] ={" "}
+                      <span className="text-amber-300">useState</span>(
+                      <span className="text-orange-300">0</span>);
+                    </div>
+                    <div className="pl-3">
+                      <span className="text-purple-400 font-bold">return</span>{" "}
+                      (
+                    </div>
+                    <div className="pl-6 text-zinc-400">
+                      &lt;<span className="text-blue-400">button</span>{" "}
+                      <span className="text-teal-300">onClick</span>={"{"}()
+                      =&gt; <span className="text-blue-300">setCount</span>(c
+                      =&gt; c + 1){"}"}&gt;
+                    </div>
+                    <div className="pl-9 text-emerald-300">
+                      Clicked {"{"}count{"}"} times ✨
+                    </div>
+                    <div className="pl-6 text-zinc-400">
+                      &lt;/<span className="text-blue-400">button</span>&gt;
+                    </div>
                     <div className="pl-3">);</div>
                     <div>{"}"}</div>
                   </div>
@@ -772,9 +761,15 @@ export default function HomePageClient({
                 </div>
 
                 <div className="mt-3 flex flex-wrap gap-1.5">
-                  <span className="rounded-full bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 text-[9.5px] font-bold text-blue-300">⚡ Instant React & JS</span>
-                  <span className="rounded-full bg-purple-500/10 border border-purple-500/20 px-2.5 py-0.5 text-[9.5px] font-bold text-purple-300">🔥 Zero Setup</span>
-                  <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-[9.5px] font-bold text-emerald-300">🚀 Multi-language</span>
+                  <span className="rounded-full bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 text-[9.5px] font-bold text-blue-300">
+                    ⚡ Instant React & JS
+                  </span>
+                  <span className="rounded-full bg-purple-500/10 border border-purple-500/20 px-2.5 py-0.5 text-[9.5px] font-bold text-purple-300">
+                    🔥 Zero Setup
+                  </span>
+                  <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-[9.5px] font-bold text-emerald-300">
+                    🚀 Multi-language
+                  </span>
                 </div>
               </div>
 
@@ -782,14 +777,15 @@ export default function HomePageClient({
                 href="/run"
                 className="mt-4 h-10 sm:h-11 w-full inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 text-white hover:bg-blue-500 text-xs font-black shadow-md transition-all active:scale-95"
               >
-                <Play className="w-3.5 h-3.5 fill-current" /> Open Code Playground
+                <Play className="w-3.5 h-3.5 fill-current" /> Open Code
+                Playground
               </Link>
             </div>
 
             {/* Feature 1: Revision Flashcards */}
             <Link
               href="/revision"
-              className="group flex flex-col justify-between rounded-[2rem] sm:rounded-[2.5rem] border border-indigo-500/20 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-indigo-500/40 transition-all min-w-0"
+              className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-indigo-500/20 bg-linear-to-br from-indigo-500/10 via-purple-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-indigo-500/40 transition-all min-w-0"
             >
               <div>
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 group-hover:scale-105 transition-transform">
@@ -799,7 +795,8 @@ export default function HomePageClient({
                   Revision Flashcards
                 </h3>
                 <p className="mt-1.5 text-xs leading-relaxed font-medium text-zinc-500 dark:text-zinc-400">
-                  Review important concepts quickly with focused, swipeable revision decks.
+                  Review important concepts quickly with focused, swipeable
+                  revision decks.
                 </p>
               </div>
               <div className="mt-5 pt-3 border-t border-indigo-500/15 flex items-center justify-between text-xs font-black text-indigo-600 dark:text-indigo-400">
@@ -811,7 +808,7 @@ export default function HomePageClient({
             {/* Feature 2: Interview Preparation */}
             <Link
               href="#interview-prep"
-              className="group flex flex-col justify-between rounded-[2rem] sm:rounded-[2.5rem] border border-orange-500/20 bg-gradient-to-br from-orange-500/10 via-amber-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-orange-500/40 transition-all min-w-0"
+              className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-orange-500/20 bg-linear-to-br from-orange-500/10 via-amber-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-orange-500/40 transition-all min-w-0"
             >
               <div>
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/20 group-hover:scale-105 transition-transform">
@@ -821,7 +818,8 @@ export default function HomePageClient({
                   Interview Preparation
                 </h3>
                 <p className="mt-1.5 text-xs leading-relaxed font-medium text-zinc-500 dark:text-zinc-400">
-                  Practice categorized questions with detailed, interview-ready answers.
+                  Practice categorized questions with detailed, interview-ready
+                  answers.
                 </p>
               </div>
               <div className="mt-5 pt-3 border-t border-orange-500/15 flex items-center justify-between text-xs font-black text-orange-600 dark:text-orange-400">
@@ -833,7 +831,7 @@ export default function HomePageClient({
             {/* Feature 3: Practice Quizzes */}
             <Link
               href="/quiz"
-              className="group flex flex-col justify-between rounded-[2rem] sm:rounded-[2.5rem] border border-purple-500/20 bg-gradient-to-br from-purple-500/10 via-fuchsia-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-purple-500/40 transition-all min-w-0"
+              className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-purple-500/20 bg-linear-to-br from-purple-500/10 via-fuchsia-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-purple-500/40 transition-all min-w-0"
             >
               <div>
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20 group-hover:scale-105 transition-transform">
@@ -843,7 +841,8 @@ export default function HomePageClient({
                   Practice Quizzes
                 </h3>
                 <p className="mt-1.5 text-xs leading-relaxed font-medium text-zinc-500 dark:text-zinc-400">
-                  Check your understanding and find concepts that need another revision.
+                  Check your understanding and find concepts that need another
+                  revision.
                 </p>
               </div>
               <div className="mt-5 pt-3 border-t border-purple-500/15 flex items-center justify-between text-xs font-black text-purple-600 dark:text-purple-400">
@@ -855,7 +854,7 @@ export default function HomePageClient({
             {/* Feature 4: Developer Cheatsheets */}
             <Link
               href="/cheatsheets"
-              className="group flex flex-col justify-between rounded-[2rem] sm:rounded-[2.5rem] border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-emerald-500/40 transition-all min-w-0"
+              className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-emerald-500/20 bg-linear-to-br from-emerald-500/10 via-teal-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-emerald-500/40 transition-all min-w-0"
             >
               <div>
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 group-hover:scale-105 transition-transform">
@@ -865,7 +864,8 @@ export default function HomePageClient({
                   Developer Cheatsheets
                 </h3>
                 <p className="mt-1.5 text-xs leading-relaxed font-medium text-zinc-500 dark:text-zinc-400">
-                  Keep syntax, commands and commonly used patterns within quick reach.
+                  Keep syntax, commands and commonly used patterns within quick
+                  reach.
                 </p>
               </div>
               <div className="mt-5 pt-3 border-t border-emerald-500/15 flex items-center justify-between text-xs font-black text-emerald-600 dark:text-emerald-400">
@@ -904,7 +904,7 @@ export default function HomePageClient({
                   <Link
                     key={topic._id || topic.slug}
                     href={topicUrl}
-                    className="group flex flex-col justify-between rounded-[2rem] sm:rounded-[2.5rem] border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-emerald-500/40 transition-all min-w-0 overflow-hidden"
+                    className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-emerald-500/20 bg-linear-to-br from-emerald-500/10 via-teal-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-emerald-500/40 transition-all min-w-0 overflow-hidden"
                   >
                     <div>
                       {/* Top Row: Icon Glow Badge + Category/Course Badges */}

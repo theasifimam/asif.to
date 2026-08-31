@@ -10,14 +10,14 @@ import {
   updateQuizQuestion,
   deleteQuizQuestion,
 } from "../controllers/quiz.controller.js";
-import { protect } from "../middlewares/auth.middleware.js";
+import { optionalProtect, protect } from "../middlewares/auth.middleware.js";
 import { requirePermission } from "../utils/permissions.js";
 
 const router = Router();
 
 // Public
 router.get("/", getQuizQuestions);
-router.get("/exam/:courseSlug", getCourseExam);
+router.get("/exam/:courseSlug", optionalProtect, getCourseExam);
 router.post("/exam/:courseSlug/submit", protect, submitCourseExam);
 router.post("/practice/submit", protect, submitPracticeQuiz);
 

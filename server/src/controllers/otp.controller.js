@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { sendOtpEmail } from "../services/email.service.js";
 import User from "../models/User.js";
+import { canRecreateDeletedAccount } from "../utils/accountLifecycle.js";
 
 // ─── Simple in-memory OTP store: { email → { otp, expiresAt, attempts } } ──
 // In production replace with Redis
@@ -17,7 +18,7 @@ const generateOtp = () => String(crypto.randomInt(100000, 999999));
 export const sendOtp = async (req, res) => {
   let normalizedEmail;
   try {
-    const { email, fullName, purpose } = req.body;
+    const { email, fullName, purpose = "verification" } = req.body;
 
     if (!email) {
       res.status(400).json({ success: false, message: "Email is required." });
@@ -26,20 +27,38 @@ export const sendOtp = async (req, res) => {
 
     normalizedEmail = email.toLowerCase().trim();
 
+    const allowedPurposes = [
+      "verification",
+      "signup",
+      "signin",
+      "forgot-password",
+      "account-security",
+    ];
+    if (!allowedPurposes.includes(purpose)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid verification code purpose.",
+      });
+    }
+
     let targetUser = null;
 
     // For signup: ensure email is NOT already taken
     if (purpose === "signup") {
       const existingUser = await User.findOne({ email: normalizedEmail });
-      if (existingUser) {
-        res
-          .status(409)
-          .json({
-            success: false,
-            message: "An account with this email already exists.",
-          });
-        return;
+      if (existingUser?.status === "banned") {
+        return res.status(403).json({
+          success: false,
+          message: "This account has been banned and cannot be recreated.",
+        });
       }
+      if (existingUser && !canRecreateDeletedAccount(existingUser)) {
+        return res.status(409).json({
+          success: false,
+          message: "An account with this email already exists.",
+        });
+      }
+      targetUser = existingUser;
     }
 
     // For signin or forgot-password: ensure account exists
@@ -53,6 +72,33 @@ export const sendOtp = async (req, res) => {
             message: "No account found with this email.",
           });
         return;
+      }
+      if (["suspended", "banned"].includes(targetUser.status)) {
+        return res.status(403).json({
+          success: false,
+          message: "This account is unavailable.",
+        });
+      }
+      if (
+        targetUser.deletedAt &&
+        targetUser.deletedBy &&
+        String(targetUser.deletedBy) !== String(targetUser._id)
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: "This account was deleted by an administrator.",
+        });
+      }
+      if (
+        targetUser.deletedAt &&
+        Date.now() - new Date(targetUser.deletedAt).getTime() >
+          30 * 86_400_000
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "This account was permanently deleted and can no longer be recovered.",
+        });
       }
     }
 
@@ -71,6 +117,7 @@ export const sendOtp = async (req, res) => {
     const otp = generateOtp();
     otpStore.set(normalizedEmail, {
       otp,
+      purpose,
       expiresAt: Date.now() + EXPIRY_MS,
       attempts: 0,
     });
@@ -80,10 +127,9 @@ export const sendOtp = async (req, res) => {
       targetUser?.fullName ||
       normalizedEmail.split("@")[0];
 
-    sendOtpEmail(normalizedEmail, name, otp, purpose).catch((error) => {
-      console.error("[OTP] Background sendOtpEmail error:", error);
-      otpStore.delete(normalizedEmail);
-    });
+    // Do not tell the client that the code was sent until SMTP has accepted it.
+    // This also lets the UI surface configuration and provider failures.
+    await sendOtpEmail(normalizedEmail, name, otp, purpose);
 
     res
       .status(200)
@@ -98,7 +144,7 @@ export const sendOtp = async (req, res) => {
       success: false,
       message: error?.message?.includes("Email delivery is not configured")
         ? "Email delivery service is not configured on the server."
-        : error?.message || "Failed to send verification email. Please try again shortly.",
+        : "Verification email could not be delivered. Please try again shortly.",
     });
   }
 };
@@ -171,27 +217,35 @@ export const verifyOtp = async (req, res) => {
   }
 };
 
-export const verifyAndConsumeOtp = (email, otp) => {
+export const verifyAndConsumeOtp = (email, otp, expectedPurpose) => {
   if (!email || !otp)
     return { success: false, message: "Email and OTP are required." };
 
-  const entry = otpStore.get(email.toLowerCase());
+  const normalizedEmail = email.toLowerCase().trim();
+  const entry = otpStore.get(normalizedEmail);
   if (!entry)
     return {
       success: false,
       message: "No verification code found. Please request a new one.",
     };
   if (Date.now() > entry.expiresAt) {
-    otpStore.delete(email.toLowerCase());
+    otpStore.delete(normalizedEmail);
     return {
       success: false,
       message: "Verification code has expired. Please request a new one.",
     };
   }
 
+  if (expectedPurpose && entry.purpose !== expectedPurpose) {
+    return {
+      success: false,
+      message: "This verification code was issued for a different action. Please request a new code.",
+    };
+  }
+
   entry.attempts++;
   if (entry.attempts > MAX_ATTEMPTS) {
-    otpStore.delete(email.toLowerCase());
+    otpStore.delete(normalizedEmail);
     return {
       success: false,
       message: "Too many failed attempts. Please request a new code.",
@@ -206,6 +260,6 @@ export const verifyAndConsumeOtp = (email, otp) => {
   }
 
   // Valid — remove from store
-  otpStore.delete(email.toLowerCase());
+  otpStore.delete(normalizedEmail);
   return { success: true };
 };

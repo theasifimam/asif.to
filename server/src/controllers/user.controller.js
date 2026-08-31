@@ -374,12 +374,12 @@ export const resetUserPassword = async (req, res) => {
       return;
     }
 
-    const existingUser = await User.findById(req.params.id);
-    if (existingUser && existingUser.provider !== "credentials") {
+    const existingUser = await User.findById(req.params.id).select("+password");
+    if (existingUser && !existingUser.password) {
       return res.status(400).json({
         success: false,
         message:
-          "OAuth accounts must manage credentials through their provider.",
+          "This user has not set a password yet. They must verify their email and set the first password themselves.",
       });
     }
     const hashedPassword = await bcrypt.hash(newPassword, 12);
@@ -438,7 +438,7 @@ export const deleteUser = async (req, res) => {
 export const getMyProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id)
-      .select("-password")
+      .select("+password")
       .populate("completedCourses", "title slug thumbnail")
       .populate("certificates.courseId", "title slug thumbnail")
       .populate("quizAttempts.courseId", "title slug thumbnail")
@@ -450,7 +450,10 @@ export const getMyProfile = async (req, res) => {
       res.status(404).json({ success: false, message: "User not found." });
       return;
     }
-    res.status(200).json({ success: true, data: { user } });
+    const rawUser = user.toObject();
+    const { password: _, ...userData } = rawUser;
+    userData.hasPassword = Boolean(rawUser.password);
+    res.status(200).json({ success: true, data: { user: userData } });
   } catch (error) {
     console.error("[USERS] GetMyProfile error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -592,7 +595,11 @@ export const deactivateMyAccount = async (req, res) => {
         message: "A 6-digit email verification code is required to deactivate your account.",
       });
     }
-    const otpResult = verifyAndConsumeOtp(req.user.email, otp);
+    const otpResult = verifyAndConsumeOtp(
+      req.user.email,
+      otp,
+      "account-security",
+    );
     if (!otpResult.success) {
       return res.status(400).json({
         success: false,
@@ -683,7 +690,11 @@ export const deleteMyAccount = async (req, res) => {
         message: "A 6-digit email verification code is required to delete your account.",
       });
     }
-    const otpResult = verifyAndConsumeOtp(req.user.email, otp);
+    const otpResult = verifyAndConsumeOtp(
+      req.user.email,
+      otp,
+      "account-security",
+    );
     if (!otpResult.success) {
       return res.status(400).json({
         success: false,

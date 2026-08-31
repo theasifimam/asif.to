@@ -169,6 +169,12 @@ const userSchema = new Schema(
           default: "private",
         },
         certificateId: String,
+        questionIds: [
+          {
+            type: Schema.Types.ObjectId,
+            ref: "Question",
+          },
+        ],
         attemptedAt: { type: Date, default: Date.now },
       },
     ],

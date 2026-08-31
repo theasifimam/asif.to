@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Mail, Activity, Eye, Pencil, Users as UsersIcon, Clock } from "lucide-react";
+import { Mail, Activity, Eye, Pencil, Trash2, Users as UsersIcon, Clock } from "lucide-react";
 import { ROLE_CONFIG, STATUS_CONFIG, initials, fmtDate } from "./types";
 import { Button, Skeleton } from "@/components/ui";
 
@@ -116,7 +116,10 @@ function UserTableComponent({
   loading,
   viewMode = "table",
   onUpdate,
+  onDelete,
   canUpdate = false,
+  canDelete = false,
+  currentUserId,
   limit = 10,
 }) {
   const router = useRouter();
@@ -215,7 +218,7 @@ function UserTableComponent({
                         </div>
                       </div>
                     </div>
-                    <div className="mt-4 grid grid-cols-2 gap-2">
+                    <div className="mt-4 flex flex-wrap gap-2">
                       <Button
                         variant="outline"
                         size="sm"
@@ -237,6 +240,19 @@ function UserTableComponent({
                           className="rounded-xl"
                         >
                           <Pencil className="mr-2 h-3.5 w-3.5" /> Edit user
+                        </Button>
+                      )}
+                      {canDelete && String(user._id) !== String(currentUserId) && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onDelete?.(user);
+                          }}
+                          className="rounded-xl"
+                        >
+                          <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
                         </Button>
                       )}
                     </div>
@@ -324,7 +340,7 @@ function UserTableComponent({
                       </span>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+                  <div className="flex flex-wrap gap-2 border-t border-zinc-100 pt-3 dark:border-zinc-800">
                     <Button
                       variant="outline"
                       size="sm"
@@ -346,6 +362,19 @@ function UserTableComponent({
                         className="rounded-xl"
                       >
                         <Pencil className="mr-2 h-3.5 w-3.5" /> Edit
+                      </Button>
+                    )}
+                    {canDelete && String(user._id) !== String(currentUserId) && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onDelete?.(user);
+                        }}
+                        className="rounded-xl"
+                      >
+                        <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
                       </Button>
                     )}
                   </div>
@@ -477,6 +506,19 @@ function UserTableComponent({
                               className="h-8 rounded-full px-3 text-xs font-bold border-zinc-200/80 dark:border-zinc-800"
                             >
                               <Pencil className="mr-1.5 h-3.5 w-3.5" /> Edit
+                            </Button>
+                          )}
+                          {canDelete && String(user._id) !== String(currentUserId) && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                onDelete?.(user);
+                              }}
+                              className="h-8 rounded-full px-3 text-xs font-bold text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-950/40"
+                            >
+                              <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
                             </Button>
                           )}
                         </div>

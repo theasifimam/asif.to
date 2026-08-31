@@ -65,14 +65,14 @@ export default function NoteCard({
               previewItems.map((item) => (
                 <div
                   key={item.id}
-                  className={`flex items-center gap-2 text-xs ${
+                  className={`flex items-start gap-2 text-xs ${
                     item.completed
                       ? "text-zinc-400 line-through dark:text-zinc-600"
                       : "text-zinc-600 dark:text-zinc-300"
                   }`}
                 >
                   <span
-                    className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-sm border ${
+                    className={`mt-0.5 flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-sm border ${
                       item.completed
                         ? "border-blue-500 bg-blue-500 text-white"
                         : "border-zinc-300 dark:border-zinc-700"
@@ -80,7 +80,9 @@ export default function NoteCard({
                   >
                     {item.completed && <Check className="h-2.5 w-2.5" />}
                   </span>
-                  <span className="truncate">{item.text || "Empty item"}</span>
+                  <span className="min-w-0 flex-1 whitespace-normal break-words leading-4">
+                    {item.text || "Empty item"}
+                  </span>
                 </div>
               ))
             ) : (

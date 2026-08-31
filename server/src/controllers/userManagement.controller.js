@@ -128,7 +128,7 @@ export const getManagedUser = async (req, res) => {
         .json({ success: false, message: "Invalid user ID." });
     const [user, content, recentArticles, notes, audit] = await Promise.all([
       User.findById(req.params.id)
-        .select("-password -oauthAccounts.providerAccountId")
+        .select("+password -oauthAccounts.providerAccountId")
         .lean(),
       Article.aggregate([
         { $match: { author: new mongoose.Types.ObjectId(req.params.id) } },
@@ -161,9 +161,11 @@ export const getManagedUser = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: "User not found." });
+    const { password: _, ...safeUser } = user;
+    safeUser.hasPassword = Boolean(user.password);
     res.json({
       success: true,
-      data: { user, content, recentArticles, notes, audit },
+      data: { user: safeUser, content, recentArticles, notes, audit },
     });
   } catch (error) {
     console.error("[USERS] Detail error:", error.message);
@@ -292,7 +294,11 @@ export const softDeleteUser = async (req, res) => {
     return res
       .status(denied.status)
       .json({ success: false, message: denied.message });
-  target.status = "deactivated";
+  const wasBanned = target.status === "banned";
+  target.status = wasBanned ? "banned" : "deactivated";
+  target.statusReason = reason;
+  target.statusChangedAt = new Date();
+  target.statusChangedBy = req.user._id;
   target.deletedAt = new Date();
   target.deletedBy = req.user._id;
   target.sessionsRevokedAt = new Date();

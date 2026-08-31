@@ -87,6 +87,60 @@ const buildQuestionPayload = async (body) => {
   };
 };
 
+export const normalizeExamQuestionText = (value = "") =>
+  String(value).trim().replace(/\s+/g, " ").toLowerCase();
+
+const normalizedQuestionExpression = {
+  $toLower: {
+    $trim: {
+      input: {
+        $regexReplace: {
+          input: "$question",
+          regex: /\s+/,
+          replacement: " ",
+        },
+      },
+    },
+  },
+};
+
+const sampleUniqueExamQuestions = (match, size, excludedTexts = []) =>
+  QuizQuestion.aggregate([
+    { $match: match },
+    { $set: { _normalizedQuestion: normalizedQuestionExpression } },
+    ...(excludedTexts.length
+      ? [{ $match: { _normalizedQuestion: { $nin: excludedTexts } } }]
+      : []),
+    { $sort: { _id: 1 } },
+    {
+      $group: {
+        _id: "$_normalizedQuestion",
+        question: { $first: "$$ROOT" },
+      },
+    },
+    { $replaceWith: "$question" },
+    { $sample: { size } },
+    { $unset: "_normalizedQuestion" },
+  ]);
+
+const getCourseLearningQuestionIds = async (courseId) => {
+  const [practiceQuestionIds, revisionQuestionIds] = await Promise.all([
+    Chapter.distinct("learningActivities.practiceQuestions", {
+      course: courseId,
+    }),
+    Chapter.distinct("learningActivities.revisionQuestions", {
+      course: courseId,
+    }),
+  ]);
+  return [
+    ...new Set(
+      [...practiceQuestionIds, ...revisionQuestionIds]
+        .filter((id) => mongoose.isValidObjectId(id))
+        .map(String),
+    ),
+  ].map((id) => new mongoose.Types.ObjectId(id));
+};
+
 /** GET /api/v1/quiz — public practice questions filtered by course. */
 // ASIF_QUESTION_LEARNING_MAPPING_V1:public-query
 export const getQuizQuestions = async (req, res) => {
@@ -234,11 +288,57 @@ export const getCourseExam = async (req, res) => {
       status: "published",
       courses: course._id,
       quizEnabled: { $ne: false },
+      question: { $not: /^\s*\[Practice(?: Quiz)?\]/i },
+      tag: { $not: /(^|:)practice(:|$)/i },
+      "options.3": { $exists: true },
+      "options.4": { $exists: false },
+      correctIndex: { $in: [0, 1, 2, 3] },
     };
-    const questions = await QuizQuestion.aggregate([
-      { $match: match },
-      { $sample: { size: questionCount } },
-    ]);
+
+    const excludedLearningIds = await getCourseLearningQuestionIds(course._id);
+    if (excludedLearningIds.length) {
+      match._id = { $nin: excludedLearningIds };
+    }
+
+    const seenQuestionIds = [
+      ...new Set(
+        (req.user?.quizAttempts || [])
+          .filter(
+            (attempt) =>
+              attempt.kind === "final_exam" &&
+              String(attempt.courseId) === String(course._id),
+          )
+          .flatMap((attempt) => attempt.questionIds || [])
+          .map(String),
+      ),
+    ];
+    const seenQuestions = seenQuestionIds.length
+      ? await QuizQuestion.find({ _id: { $in: seenQuestionIds } })
+          .select("question")
+          .lean()
+      : [];
+    const seenTexts = [
+      ...new Set(
+        seenQuestions.map((item) => normalizeExamQuestionText(item.question)),
+      ),
+    ];
+
+    let questions = await sampleUniqueExamQuestions(
+      match,
+      questionCount,
+      seenTexts,
+    );
+    if (questions.length < questionCount) {
+      const selectedTexts = questions.map((item) =>
+        normalizeExamQuestionText(item.question),
+      );
+      const fallback = await sampleUniqueExamQuestions(
+        match,
+        questionCount - questions.length,
+        selectedTexts,
+      );
+      questions = [...questions, ...fallback];
+    }
 
     if (!questions.length)
       return res.status(404).json({
@@ -295,19 +395,36 @@ export const submitCourseExam = async (req, res) => {
         message: "A complete exam submission is required.",
       });
 
+    const excludedLearningIds = await getCourseLearningQuestionIds(course._id);
     const questions = await QuizQuestion.find({
       _id: { $in: questionIds },
       type: "quiz",
       status: "published",
       courses: course._id,
+      quizEnabled: { $ne: false },
+      question: { $not: /^\s*\[Practice(?: Quiz)?\]/i },
+      tag: { $not: /(^|:)practice(:|$)/i },
+      ...(excludedLearningIds.length
+        ? { _id: { $in: questionIds, $nin: excludedLearningIds } }
+        : {}),
     })
-      .select("_id correctIndex")
+      .select("_id question correctIndex")
       .lean();
     if (questions.length !== questionIds.length)
       return res.status(400).json({
         success: false,
         message: "One or more submitted questions are invalid.",
       });
+    if (
+      new Set(
+        questions.map((item) => normalizeExamQuestionText(item.question)),
+      ).size !== questions.length
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Duplicate questions are not allowed in an exam submission.",
+      });
+    }
     const correct = new Map(
       questions.map((item) => [String(item._id), item.correctIndex]),
     );
@@ -334,6 +451,7 @@ export const submitCourseExam = async (req, res) => {
         : "manual",
       visibility: "private",
       certificateId,
+      questionIds,
     };
     const update = { $push: { quizAttempts: attempt } };
     if (passed) {

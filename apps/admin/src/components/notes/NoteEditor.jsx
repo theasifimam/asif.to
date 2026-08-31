@@ -15,6 +15,12 @@ import {
 } from "lucide-react";
 import { getNoteColor, NOTE_COLORS } from "./note-colors";
 
+const resizeChecklistTextarea = (element) => {
+  if (!element) return;
+  element.style.height = "auto";
+  element.style.height = `${element.scrollHeight}px`;
+};
+
 export default function NoteEditor({
   note,
   saveState,
@@ -74,8 +80,55 @@ export default function NoteEditor({
     }
   };
 
+  const pasteItems = (event, item) => {
+    const pastedText = event.clipboardData.getData("text");
+    if (!/[\r\n]/.test(pastedText)) return;
+
+    event.preventDefault();
+    const lines = pastedText
+      .replace(/\r\n?/g, "\n")
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+    if (!lines.length) return;
+
+    const current = note.checklist || [];
+    const itemIndex = current.findIndex((entry) => entry.id === item.id);
+    if (itemIndex < 0) return;
+
+    const selectionStart = event.currentTarget.selectionStart ?? item.text.length;
+    const selectionEnd = event.currentTarget.selectionEnd ?? selectionStart;
+    const beforeSelection = item.text.slice(0, selectionStart);
+    const afterSelection = item.text.slice(selectionEnd);
+    const availableNewItems = Math.max(0, 200 - current.length);
+    const acceptedLines = lines.slice(0, availableNewItems + 1);
+    const pastedItems = acceptedLines.map((text, index) => ({
+      id: index === 0 ? item.id : crypto.randomUUID(),
+      text: String(
+        `${index === 0 ? beforeSelection : ""}${text}${
+          index === acceptedLines.length - 1 ? afterSelection : ""
+        }`,
+      ).slice(0, 1000),
+      completed: index === 0 ? item.completed : false,
+    }));
+    const next = [
+      ...current.slice(0, itemIndex),
+      ...pastedItems,
+      ...current.slice(itemIndex + 1),
+    ];
+    updateChecklist(next);
+
+    const focusId = pastedItems.at(-1)?.id;
+    requestAnimationFrame(() => {
+      const textarea = itemRefs.current.get(focusId);
+      textarea?.focus();
+      textarea?.setSelectionRange(textarea.value.length, textarea.value.length);
+      resizeChecklistTextarea(textarea);
+    });
+  };
+
   const renderItem = (item) => (
-    <div key={item.id} className="group flex items-center gap-2.5 py-1">
+    <div key={item.id} className="group flex items-start gap-2.5 py-1">
       <button
         type="button"
         onClick={() =>
@@ -88,7 +141,7 @@ export default function NoteEditor({
             true,
           )
         }
-        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition ${
+        className={`mt-2 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition ${
           item.completed
             ? "border-blue-600 bg-blue-600 text-white"
             : "border-zinc-300 bg-white hover:border-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
@@ -97,22 +150,27 @@ export default function NoteEditor({
       >
         {item.completed && <Check className="h-3.5 w-3.5" />}
       </button>
-      <input
+      <textarea
         ref={(node) => {
-          if (node) itemRefs.current.set(item.id, node);
-          else itemRefs.current.delete(item.id);
+          if (node) {
+            itemRefs.current.set(item.id, node);
+            resizeChecklistTextarea(node);
+          } else itemRefs.current.delete(item.id);
         }}
         value={item.text}
+        rows={1}
         maxLength={1000}
-        onChange={(event) =>
+        onChange={(event) => {
+          resizeChecklistTextarea(event.currentTarget);
           updateChecklist(
             note.checklist.map((entry) =>
               entry.id === item.id
                 ? { ...entry, text: event.target.value }
                 : entry,
             ),
-          )
-        }
+          );
+        }}
+        onPaste={(event) => pasteItems(event, item)}
         onKeyDown={(event) => {
           if (event.key === "Enter") {
             event.preventDefault();
@@ -123,7 +181,7 @@ export default function NoteEditor({
           }
         }}
         placeholder="Checklist item"
-        className={`min-w-0 flex-1 border-0 bg-transparent py-2 text-sm outline-none placeholder:text-zinc-400 ${
+        className={`min-h-9 min-w-0 flex-1 resize-none overflow-hidden whitespace-pre-wrap break-words border-0 bg-transparent py-2 text-sm leading-5 outline-none placeholder:text-zinc-400 ${
           item.completed
             ? "text-zinc-400 line-through dark:text-zinc-600"
             : "text-zinc-800 dark:text-zinc-200"
@@ -132,7 +190,7 @@ export default function NoteEditor({
       <button
         type="button"
         onClick={() => removeItem(item.id)}
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-zinc-300 opacity-100 transition hover:bg-zinc-100 hover:text-rose-600 focus:opacity-100 dark:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-rose-400 sm:opacity-0 sm:group-hover:opacity-100"
+        className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-zinc-300 opacity-100 transition hover:bg-zinc-100 hover:text-rose-600 focus:opacity-100 dark:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-rose-400 sm:opacity-0 sm:group-hover:opacity-100"
         aria-label="Delete checklist item"
       >
         <X className="h-3.5 w-3.5" />

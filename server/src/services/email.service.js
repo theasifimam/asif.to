@@ -208,25 +208,36 @@ export const sendOtpEmail = async (to, fullName, otp, purpose = "verification") 
   const safeName = escapeHtml(fullName || "there");
   const safeOtp = escapeHtml(otp);
   const isReset = purpose === "forgot-password" || purpose === "reset-password";
+  const isSecurity = purpose === "account-security";
 
   const subject = isReset
     ? `${otp} - Your asif.to password reset code`
-    : `${otp} - Your asif.to verification code`;
-  const eyebrow = isReset ? "Password reset" : "Account verification";
+    : isSecurity
+      ? `${otp} - Your asif.to account security code`
+      : `${otp} - Your asif.to verification code`;
+  const eyebrow = isReset
+    ? "Password reset"
+    : isSecurity
+      ? "Account security"
+      : "Account verification";
   const title = isReset
     ? `Reset your password, ${fullName || "there"}`
-    : `Confirm your email, ${fullName || "there"}`;
+    : isSecurity
+      ? `Confirm this account action, ${fullName || "there"}`
+      : `Confirm your email, ${fullName || "there"}`;
   const intro = isReset
     ? `Hi ${safeName}, use the secure code below to reset your asif.to account password. It is valid for the next 10 minutes.`
-    : `Hi ${safeName}, use the secure code below to finish setting up your account. It is valid for the next 10 minutes.`;
+    : isSecurity
+      ? `Hi ${safeName}, use the secure code below to confirm the account security action you requested. It is valid for the next 10 minutes.`
+      : `Hi ${safeName}, use the secure code below to finish setting up your account. It is valid for the next 10 minutes.`;
 
-  await getTransporter().sendMail({
+  const delivery = await getTransporter().sendMail({
     from,
     to,
     subject,
-    text: `Hi ${fullName || "there"},\n\nYour asif.to ${isReset ? "password reset" : "verification"} code is ${otp}. It expires in 10 minutes.\n\nIf you did not request this code, you can safely ignore this email.\n\nasif.to`,
+    text: `Hi ${fullName || "there"},\n\nYour asif.to ${isReset ? "password reset" : isSecurity ? "account security" : "verification"} code is ${otp}. It expires in 10 minutes.\n\nIf you did not request this code, you can safely ignore this email.\n\nasif.to`,
     html: renderEmailLayout({
-      preheader: `${otp} is your asif.to ${isReset ? "password reset" : "verification"} code. It expires in 10 minutes.`,
+      preheader: `${otp} is your asif.to ${isReset ? "password reset" : isSecurity ? "account security" : "verification"} code. It expires in 10 minutes.`,
       eyebrow,
       title,
       intro,
@@ -234,7 +245,7 @@ export const sendOtpEmail = async (to, fullName, otp, purpose = "verification") 
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;background:${BRAND.primaryContainer};border:1px solid ${BRAND.primaryContainerBorder};border-radius:20px;">
           <tr>
             <td align="center" style="padding:26px 18px 28px;">
-              <p style="margin:0 0 8px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:10px;font-weight:800;line-height:16px;color:${BRAND.primaryDark};text-transform:uppercase;letter-spacing:1px;">${isReset ? "Password Reset OTP" : "One-Time Verification Code"}</p>
+              <p style="margin:0 0 8px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:10px;font-weight:800;line-height:16px;color:${BRAND.primaryDark};text-transform:uppercase;letter-spacing:1px;">${isReset ? "Password Reset OTP" : isSecurity ? "Account Security OTP" : "One-Time Verification Code"}</p>
               <div class="otp-code" style="font-family:'JetBrains Mono','Courier New',monospace;font-size:40px;font-weight:800;line-height:46px;letter-spacing:9px;color:${BRAND.primaryContainerInk};white-space:nowrap;">${safeOtp}</div>
             </td>
           </tr>
@@ -247,6 +258,10 @@ export const sendOtpEmail = async (to, fullName, otp, purpose = "verification") 
         <p style="margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;line-height:19px;color:${BRAND.subtle};">Sent automatically by <strong style="color:${BRAND.muted};">noreply@asif.to</strong>. Please do not reply to this message.</p>`,
     }),
   });
+
+  if (!delivery?.accepted?.length) {
+    throw new Error("The email provider did not accept the recipient.");
+  }
 };
 
 /**

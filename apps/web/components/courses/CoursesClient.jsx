@@ -11,92 +11,34 @@ import {
   Search,
   Sparkles,
   CheckCircle2,
-  Clock,
+  HelpCircle,
 } from "lucide-react";
 import { TECH_STACKS } from "@/lib/tutorialData";
 import { getImageUrl } from "@/lib/config";
 
+const DEFAULT_THEME = {
+  cardBg:
+    "bg-blue-50/75 dark:bg-blue-950/25 hover:bg-blue-50 dark:hover:bg-blue-950/40",
+  border:
+    "border-blue-200/80 dark:border-blue-900/50 hover:border-blue-400 dark:hover:border-blue-500",
+  badgeBg:
+    "bg-blue-100/90 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-200/80 dark:border-blue-800/50",
+  titleHover: "group-hover:text-blue-600 dark:group-hover:text-blue-400",
+  btn: "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20",
+  iconColor: "text-blue-600 dark:text-blue-400",
+};
+
 const TECH_THEMES = {
-  reactjs: {
-    cardBg: "bg-sky-50/75 dark:bg-sky-950/25 hover:bg-sky-50 dark:hover:bg-sky-950/40",
-    border: "border-sky-200/80 dark:border-sky-900/50 hover:border-sky-400 dark:hover:border-sky-500",
-    badgeBg: "bg-sky-100/90 dark:bg-sky-500/20 text-sky-700 dark:text-sky-300 border-sky-200/80 dark:border-sky-800/50",
-    titleHover: "group-hover:text-sky-600 dark:group-hover:text-sky-400",
-    btn: "bg-sky-600 hover:bg-sky-700 text-white shadow-sky-500/20",
-    iconColor: "text-sky-600 dark:text-sky-400",
-  },
-  nextjs: {
-    cardBg: "bg-zinc-50/75 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800/50",
-    border: "border-zinc-200/80 dark:border-zinc-700/50 hover:border-zinc-400 dark:hover:border-zinc-500",
-    badgeBg: "bg-zinc-200/90 dark:bg-zinc-700/50 text-zinc-800 dark:text-zinc-300 border-zinc-300/80 dark:border-zinc-600/50",
-    titleHover: "group-hover:text-zinc-800 dark:group-hover:text-zinc-300",
-    btn: "bg-zinc-800 hover:bg-zinc-900 text-white shadow-zinc-500/20 dark:bg-zinc-200 dark:hover:bg-zinc-300 dark:text-zinc-900",
-    iconColor: "text-zinc-700 dark:text-zinc-400",
-  },
-  javascript: {
-    cardBg: "bg-amber-50/75 dark:bg-amber-950/25 hover:bg-amber-50 dark:hover:bg-amber-950/40",
-    border: "border-amber-200/80 dark:border-amber-900/50 hover:border-amber-400 dark:hover:border-amber-500",
-    badgeBg: "bg-amber-100/90 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-200/80 dark:border-amber-800/50",
-    titleHover: "group-hover:text-amber-600 dark:group-hover:text-amber-400",
-    btn: "bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/20",
-    iconColor: "text-amber-600 dark:text-amber-400",
-  },
-  typescript: {
-    cardBg: "bg-blue-50/75 dark:bg-blue-950/25 hover:bg-blue-50 dark:hover:bg-blue-950/40",
-    border: "border-blue-200/80 dark:border-blue-900/50 hover:border-blue-400 dark:hover:border-blue-500",
-    badgeBg: "bg-blue-100/90 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-200/80 dark:border-blue-800/50",
-    titleHover: "group-hover:text-blue-600 dark:group-hover:text-blue-400",
-    btn: "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20",
-    iconColor: "text-blue-600 dark:text-blue-400",
-  },
-  css: {
-    cardBg: "bg-indigo-50/75 dark:bg-indigo-950/25 hover:bg-indigo-50 dark:hover:bg-indigo-950/40",
-    border: "border-indigo-200/80 dark:border-indigo-900/50 hover:border-indigo-400 dark:hover:border-indigo-500",
-    badgeBg: "bg-indigo-100/90 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border-indigo-200/80 dark:border-indigo-800/50",
-    titleHover: "group-hover:text-indigo-600 dark:group-hover:text-indigo-400",
-    btn: "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20",
-    iconColor: "text-indigo-600 dark:text-indigo-400",
-  },
-  nodejs: {
-    cardBg: "bg-emerald-50/75 dark:bg-emerald-950/25 hover:bg-emerald-50 dark:hover:bg-emerald-950/40",
-    border: "border-emerald-200/80 dark:border-emerald-900/50 hover:border-emerald-400 dark:hover:border-emerald-500",
-    badgeBg: "bg-emerald-100/90 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/50",
-    titleHover: "group-hover:text-emerald-600 dark:group-hover:text-emerald-400",
-    btn: "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20",
-    iconColor: "text-emerald-600 dark:text-emerald-400",
-  },
-  mongodb: {
-    cardBg: "bg-emerald-50/75 dark:bg-emerald-950/25 hover:bg-emerald-50 dark:hover:bg-emerald-950/40",
-    border: "border-emerald-200/80 dark:border-emerald-900/50 hover:border-emerald-400 dark:hover:border-emerald-500",
-    badgeBg: "bg-emerald-100/90 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-200/80 dark:border-emerald-800/50",
-    titleHover: "group-hover:text-emerald-600 dark:group-hover:text-emerald-400",
-    btn: "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20",
-    iconColor: "text-emerald-600 dark:text-emerald-400",
-  },
-  expressjs: {
-    cardBg: "bg-zinc-50/75 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800/50",
-    border: "border-zinc-200/80 dark:border-zinc-700/50 hover:border-zinc-400 dark:hover:border-zinc-500",
-    badgeBg: "bg-zinc-200/90 dark:bg-zinc-700/50 text-zinc-800 dark:text-zinc-300 border-zinc-300/80 dark:border-zinc-600/50",
-    titleHover: "group-hover:text-zinc-800 dark:group-hover:text-zinc-300",
-    btn: "bg-zinc-700 hover:bg-zinc-800 text-white shadow-zinc-500/20",
-    iconColor: "text-zinc-700 dark:text-zinc-400",
-  },
-  tailwindcss: {
-    cardBg: "bg-sky-50/75 dark:bg-sky-950/25 hover:bg-sky-50 dark:hover:bg-sky-950/40",
-    border: "border-sky-200/80 dark:border-sky-900/50 hover:border-sky-400 dark:hover:border-sky-500",
-    badgeBg: "bg-sky-100/90 dark:bg-sky-500/20 text-sky-700 dark:text-sky-300 border-sky-200/80 dark:border-sky-800/50",
-    titleHover: "group-hover:text-sky-600 dark:group-hover:text-sky-400",
-    btn: "bg-sky-500 hover:bg-sky-600 text-white shadow-sky-500/20",
-    iconColor: "text-sky-600 dark:text-sky-400",
-  },
-  default: {
-    cardBg: "bg-blue-50/75 dark:bg-blue-950/25 hover:bg-blue-50 dark:hover:bg-blue-950/40",
-    border: "border-blue-200/80 dark:border-blue-900/50 hover:border-blue-400 dark:hover:border-blue-500",
-    badgeBg: "bg-blue-100/90 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-200/80 dark:border-blue-800/50",
-    titleHover: "group-hover:text-blue-600 dark:group-hover:text-blue-400",
-    btn: "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20",
-    iconColor: "text-blue-600 dark:text-blue-400",
-  },
+  reactjs: DEFAULT_THEME,
+  nextjs: DEFAULT_THEME,
+  javascript: DEFAULT_THEME,
+  typescript: DEFAULT_THEME,
+  css: DEFAULT_THEME,
+  nodejs: DEFAULT_THEME,
+  mongodb: DEFAULT_THEME,
+  expressjs: DEFAULT_THEME,
+  tailwindcss: DEFAULT_THEME,
+  default: DEFAULT_THEME,
 };
 
 function getCardTheme(course) {
@@ -142,11 +84,36 @@ export default function CoursesClient({ initialCourses = [] }) {
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 pb-24 pt-24 sm:px-6 md:px-8">
-      <nav className="mb-7 flex items-center gap-2 text-xs font-bold text-zinc-400">
-        <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+      <nav className="mb-4 flex items-center gap-2 text-xs font-bold text-zinc-400">
+        <Link href="/" className="hover:text-blue-600 transition-colors">
+          Home
+        </Link>
         <span>/</span>
         <span className="text-zinc-700 dark:text-zinc-200">Courses</span>
       </nav>
+
+      {/* Top Mode Switcher Bar */}
+      <div className="mb-7 flex flex-wrap items-center justify-center sm:justify-start gap-2 p-1.5 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-xs w-fit">
+        <div className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-blue-600 text-white shadow-md shadow-blue-500/20">
+          <BookOpen className="w-4 h-4" />
+          <span>Courses</span>
+        </div>
+        <Link
+          href="/revision"
+          className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+        >
+          <Layers className="w-4 h-4 text-purple-500" />
+          <span>Flashcards Deck</span>
+        </Link>
+        <Link
+          href="/quiz"
+          className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+        >
+          <HelpCircle className="w-4 h-4 text-emerald-500" />
+          <span>Practice Quiz</span>
+        </Link>
+      </div>
+
       {/* Hero Banner Section */}
       <section className="rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 p-6 sm:p-10 shadow-xs">
         <div className="max-w-3xl">
@@ -238,7 +205,7 @@ export default function CoursesClient({ initialCourses = [] }) {
               return (
                 <article
                   key={course._id || course.id || slug}
-                  className={`group relative flex flex-col justify-between overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] border bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md transition-all hover:-translate-y-0.5 ${theme.border}`}
+                  className={`group relative flex flex-col justify-between overflow-hidden rounded-4xl sm:rounded-[2.5rem] border bg-linear-to-br from-blue-500/10 via-indigo-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md transition-all hover:-translate-y-0.5 ${theme.border}`}
                 >
                   {/* Card Top Info */}
                   <div>
@@ -258,7 +225,7 @@ export default function CoursesClient({ initialCourses = [] }) {
                     ) : (
                       <Link
                         href={`/courses/${slug}`}
-                        className="relative mb-3.5 flex w-full flex-col items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/10 via-cyan-500/5 to-white dark:to-zinc-900 aspect-[2.1/1] border border-blue-500/20 transition-all group-hover:border-blue-500/40"
+                        className="relative mb-3.5 flex w-full flex-col items-center justify-center overflow-hidden rounded-2xl bg-linear-to-br from-blue-500/10 via-cyan-500/5 to-white dark:to-zinc-900 aspect-[2.1/1] border border-blue-500/20 transition-all group-hover:border-blue-500/40"
                       >
                         <div className="relative z-10 flex flex-col items-center gap-1.5 p-3 text-center">
                           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 group-hover:scale-105 transition-transform">

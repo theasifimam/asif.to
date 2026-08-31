@@ -51,13 +51,16 @@ const PHASE_EXAM = "exam"; // active exam
 const PHASE_RESULT = "result"; // result screen
 
 export default function FinalExamClient({ courseId, course }) {
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { user, isAuthenticated, isInitialized } = useSelector(
+    (state) => state.auth,
+  );
   const {
     data: examResponse,
     isLoading,
     isError,
     error,
-  } = useGetCourseExamQuery(courseId);
+    refetch,
+  } = useGetCourseExamQuery(courseId, { skip: !isInitialized });
   const exam = examResponse?.data;
   const questions = useMemo(() => exam?.questions || [], [exam?.questions]);
   const settings = exam?.settings || {};
@@ -163,7 +166,7 @@ export default function FinalExamClient({ courseId, course }) {
     submitExam(answers, "timeout");
   }, [answers, submitExam]);
 
-  const handleRetry = () => {
+  const handleRetry = async () => {
     const lastAttempt = getExamCooldown(courseId);
     if (lastAttempt) {
       const hoursSince = (Date.now() - lastAttempt.getTime()) / 3600000;
@@ -175,6 +178,7 @@ export default function FinalExamClient({ courseId, course }) {
     }
     setCooldownRemaining(0);
     clearExamSession(courseId);
+    await refetch();
     setPhase(PHASE_INTRO);
   };
 
@@ -193,7 +197,7 @@ export default function FinalExamClient({ courseId, course }) {
     ? (answeredCount / totalQuestions) * 100
     : 0;
 
-  if (isLoading) {
+  if (!isInitialized || isLoading) {
     return (
       <div className="min-h-[40vh] flex items-center justify-center text-sm font-bold text-zinc-500">
         Loading exam...

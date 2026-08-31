@@ -95,7 +95,7 @@ export default function UserProfilePage() {
           return;
         }
         await deleteUser({ id, reason }).unwrap();
-        toast.success("User account deactivated");
+        toast.success("User deleted from active users");
         router.push("/users");
         return;
       } else if (type === "role") {
