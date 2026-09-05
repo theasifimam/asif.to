@@ -12,6 +12,7 @@ import GoogleAnalyticsPageView from "@/components/analytics/GoogleAnalyticsPageV
 import AuthSessionProvider from "@/components/auth/AuthSessionProvider";
 import AuthBridge from "@/components/auth/AuthBridge";
 import { AuthPromptProvider } from "@/components/auth/AuthPromptProvider";
+import AdSenseProvider from "@/components/ads/AdSenseProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -85,6 +86,7 @@ export default function RootLayout({ children, modal }) {
       <body
         className={`${inter.variable} ${outfit.variable} antialiased selection:bg-blue-500 selection:text-white bg-zinc-50 dark:bg-zinc-950 text-foreground`}
       >
+        <AdSenseProvider />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

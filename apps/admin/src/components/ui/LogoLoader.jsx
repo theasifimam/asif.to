@@ -28,7 +28,7 @@ export default function LogoLoader({ className, size, label = "Loading" }) {
               stroke="white"
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth="54"
+              strokeWidth="90"
             />
           </mask>
           <filter id={`${maskId}-muted`}>

@@ -1,6 +1,7 @@
 # Web component structure
 
 - `analytics/` — browser analytics and page-view tracking
+- `ads/` — opt-in AdSense loading and reusable monetization slots
 - `articles/` — article cards, readers, saving, bookmarking, and markdown
 - `auth/` — sign-in, sign-up, OAuth, sessions, and account controls
 - `authors/` — public author and user profile experiences
