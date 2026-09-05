@@ -15,6 +15,7 @@ export default function ChapterDocumentCard({
   isSimplePoints,
   parsedBlocks,
   fontBodyClass,
+  middleAd,
 }) {
   return (
     <div
@@ -39,6 +40,7 @@ export default function ChapterDocumentCard({
         isSimplePoints={isSimplePoints}
         parsedBlocks={parsedBlocks}
         fontBodyClass={fontBodyClass}
+        middleAd={middleAd}
       />
     </div>
   );

@@ -49,19 +49,6 @@ export const ADS_CONFIG = Object.freeze({
     "interview-question",
   ]),
 
-  // Slot IDs remain empty until AdSense ad units are created.
-  placements: Object.freeze({
-    ARTICLE_MIDDLE: process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE_MIDDLE || null,
-    ARTICLE_BOTTOM: process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE_BOTTOM || null,
-    COURSE_MIDDLE: process.env.NEXT_PUBLIC_ADSENSE_SLOT_COURSE_MIDDLE || null,
-    COURSE_BOTTOM: process.env.NEXT_PUBLIC_ADSENSE_SLOT_COURSE_BOTTOM || null,
-    CHEATSHEET_BOTTOM:
-      process.env.NEXT_PUBLIC_ADSENSE_SLOT_CHEATSHEET_BOTTOM || null,
-    INTERVIEW_BOTTOM:
-      process.env.NEXT_PUBLIC_ADSENSE_SLOT_INTERVIEW_BOTTOM || null,
-    SIDEBAR: process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR || null,
-  }),
-
   limits: Object.freeze({
     article: 3,
     "course-chapter": 3,

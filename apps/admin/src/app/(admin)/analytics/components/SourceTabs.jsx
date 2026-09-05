@@ -25,7 +25,7 @@ export const SOURCES = [
 
 export function SourceTabs({ value, onChange }) {
   return (
-    <div className="flex w-fit items-center gap-1.5 p-1 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 overflow-x-auto">
+    <div className="inline-flex max-w-full items-center gap-1.5 p-1 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 overflow-x-auto custom-scrollbar">
       {SOURCES.map((item) => {
         const Icon = item.icon;
         const active = value === item.value;

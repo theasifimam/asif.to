@@ -132,16 +132,16 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-[#0A66C2] hover:text-white transition-all shadow-xs"
-                    title="LinkedIn @theasifto"
+                    title="LinkedIn @asif.to"
                   >
                     <Linkedin className="w-4 h-4" />
                   </a>
                   <a
-                    href="https://wa.me/theasifto"
+                    href="https://wa.me/asif.to"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-[#25D366] hover:text-white transition-all shadow-xs"
-                    title="WhatsApp @theasifto"
+                    title="WhatsApp asif.to"
                   >
                     <WhatsAppIcon className="w-4 h-4" />
                   </a>
@@ -262,7 +262,7 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
                     <span>Facebook</span>
                   </a>
                   <a
-                    href="https://linkedin.com/in/theasifto"
+                    href="https://linkedin.com/company/asif.to"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
@@ -271,7 +271,7 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
                     <span>LinkedIn</span>
                   </a>
                   <a
-                    href="https://wa.me/theasifto"
+                    href="https://wa.me/asif.to"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 hover:text-emerald-500 transition-colors"

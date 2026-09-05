@@ -357,7 +357,7 @@ function BrowserRuntimeWorkspace({
               showTabs={false}
               showLineNumbers
               wrapContent
-              style={{ height: 260, fontSize: 14 }}
+              style={{ minHeight: 120, height: "auto", fontSize: 14 }}
             />
           </div>
           <div className="h-44 border-t border-zinc-800">{runtimeOutput}</div>

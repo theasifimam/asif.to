@@ -26,6 +26,8 @@ export const PERMISSION_CATALOG = Object.freeze([
   ["messages.pin", "Pin important channel messages", "Team messaging"],
   ["messages.moderate", "Moderate team messages", "Team messaging"],
   ["analytics.view", "View analytics", "Administration"],
+  ["monetization.view", "View monetization controls and reporting", "Administration"],
+  ["monetization.manage", "Manage monetization settings and placements", "Administration"],
   ["seo.view", "View and manage SEO", "Administration"],
   ["users.view", "View users", "User management"],
   ["users.create", "Create users", "User management"],
@@ -49,7 +51,7 @@ export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({
   author: [
     "content.read", "articles.create", "articles.edit_own", "analytics.view",
     "topics.view", "interview_questions.view", "courses.view",
-    "cheatsheets.view", "question_bank.view", "messages.view", "messages.send", "messages.attach",
+    "cheatsheets.view", "question_bank.view", "monetization.view", "messages.view", "messages.send", "messages.attach",
     "assets.view", "assets.upload",
   ],
   editor: [
@@ -58,7 +60,7 @@ export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({
     "interview_questions.view", "interview_questions.manage", "courses.view",
     "courses.manage", "cheatsheets.view", "cheatsheets.manage",
     "question_bank.view", "question_bank.manage", "planner.view",
-    "planner.manage", "analytics.view", "seo.view", "users.view",
+    "planner.manage", "analytics.view", "monetization.view", "seo.view", "users.view",
     "messages.view", "messages.send", "messages.attach", "messages.pin",
     "assets.view", "assets.upload", "assets.manage",
   ],

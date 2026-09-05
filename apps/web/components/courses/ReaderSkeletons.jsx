@@ -51,51 +51,69 @@ export function CheatsheetReaderSkeleton() {
 export function ChapterReaderSkeleton() {
   return (
     <div
-      className="min-h-screen bg-zinc-50 dark:bg-zinc-950"
+      className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950"
       role="status"
       aria-label="Loading lesson"
     >
       <Header />
-      <main className="mx-auto w-full max-w-7xl px-3 pb-24 pt-20 sm:px-6 sm:pt-24 lg:px-8">
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <SkeletonBlock className="h-4 w-32 rounded-full" />
-          <SkeletonBlock className="h-9 w-28 rounded-full" />
-        </div>
-        <div className="grid items-start gap-6 lg:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)]">
-          <section className="min-w-0 space-y-6">
-            <SkeletonBlock className="h-24 w-full rounded-2xl sm:h-32 sm:rounded-3xl" />
-            <div className="space-y-5 py-2 sm:py-10">
-              <SkeletonBlock className="h-9 w-3/4" />
-              {["w-full", "w-11/12", "w-full", "w-4/5", "w-full"].map(
-                (width, index) => (
-                  <SkeletonBlock key={index} className={`h-5 ${width}`} />
-                ),
-              )}
-              <SkeletonBlock className="h-40 w-full rounded-2xl" />
-              <SkeletonBlock className="h-8 w-1/2" />
-              {["w-full", "w-5/6", "w-full", "w-3/4"].map((width, index) => (
-                <SkeletonBlock key={index} className={`h-5 ${width}`} />
-              ))}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 pt-36 sm:pt-40 lg:pt-28 flex flex-col gap-3 sm:gap-6 pb-32 sm:pb-16">
+
+        {/* Header Skeleton */}
+        <div className="flex flex-col gap-3 p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60">
+          <div className="flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
+            <div className="flex items-center gap-2">
+              <SkeletonBlock className="h-8 w-8 rounded-full" />
+              <SkeletonBlock className="h-5 w-48 rounded-md hidden sm:block" />
             </div>
+            <div className="flex items-center gap-3">
+              <SkeletonBlock className="h-4 w-32 rounded-md" />
+              <SkeletonBlock className="hidden lg:block h-8 w-36 rounded-full" />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 relative">
+          <section className="flex flex-col gap-3 lg:col-span-8 xl:col-span-9 transition-all duration-300">
+
+             {/* Top Quick Navigation Skeleton */}
+             <SkeletonBlock className="h-12 w-full rounded-2xl" />
+
+             {/* Main Document Card Skeleton */}
+             <div className="flex flex-col gap-4 py-2 sm:gap-6 sm:py-10">
+               <SkeletonBlock className="h-10 w-3/4" />
+               {["w-full", "w-11/12", "w-full", "w-4/5", "w-full"].map((width, index) => (
+                  <SkeletonBlock key={index} className={`h-5 ${width}`} />
+               ))}
+               <SkeletonBlock className="h-40 w-full rounded-2xl mt-4" />
+               <SkeletonBlock className="h-8 w-1/2 mt-4" />
+               {["w-full", "w-5/6", "w-full", "w-3/4"].map((width, index) => (
+                 <SkeletonBlock key={index} className={`h-5 ${width}`} />
+               ))}
+             </div>
           </section>
 
-          <aside className="hidden space-y-4 lg:block">
-            <SkeletonBlock className="h-8 w-3/5" />
-            {[
-              "w-full",
-              "w-11/12",
-              "w-full",
-              "w-4/5",
-              "w-full",
-              "w-10/12",
-              "w-full",
-            ].map((width, index) => (
-              <SkeletonBlock key={index} className={`h-12 ${width}`} />
-            ))}
+          <aside className="hidden lg:block lg:col-span-4 xl:col-span-3 z-30">
+            <div className="h-[calc(100vh-7.5rem)] flex flex-col gap-3 p-4 rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60">
+                <SkeletonBlock className="h-6 w-1/2 mb-2" />
+                <SkeletonBlock className="h-8 w-full mb-4 rounded-xl" />
+                <div className="space-y-2">
+                  {[
+                    "w-full",
+                    "w-11/12",
+                    "w-full",
+                    "w-4/5",
+                    "w-full",
+                    "w-10/12",
+                    "w-full",
+                  ].map((width, index) => (
+                    <SkeletonBlock key={index} className={`h-12 rounded-2xl ${width}`} />
+                  ))}
+                </div>
+             </div>
           </aside>
         </div>
       </main>
-      <Footer />
+      <Footer containerWidth="max-w-7xl" />
     </div>
   );
 }

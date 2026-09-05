@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Copy, Code, Maximize2, Minimize2, Play } from "lucide-react";
 import CodePlaygroundModal from "@/components/interactive-code/CodePlaygroundModal";
-import hljs from "highlight.js";
+import hljs from "highlight.js/lib/common";
 import "highlight.js/styles/github.css";
 
 export default function CodeSnippetViewer({
@@ -78,6 +78,7 @@ export default function CodeSnippetViewer({
             {showPlay && (
               <button
                 type="button"
+                data-code-play="true"
                 onClick={() => setPlaygroundOpen(true)}
                 className="flex items-center gap-1.5 rounded-full bg-blue-600 hover:bg-blue-500 px-3 py-1 text-[11px] font-bold text-white transition-all active:scale-95 cursor-pointer shadow-xs"
                 title="Run and edit this code"
@@ -132,13 +133,15 @@ export default function CodeSnippetViewer({
           </pre>
         </div>
       </div>
-      <CodePlaygroundModal
-        open={playgroundOpen}
-        onClose={() => setPlaygroundOpen(false)}
-        code={code}
-        language={language}
-        title={title}
-      />
+      {showPlay && (
+        <CodePlaygroundModal
+          open={playgroundOpen}
+          onClose={() => setPlaygroundOpen(false)}
+          code={code}
+          language={language}
+          title={title}
+        />
+      )}
     </>
   );
 }

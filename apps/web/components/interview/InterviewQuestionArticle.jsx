@@ -18,6 +18,7 @@ import {
 } from "@/lib/publicContent";
 import { absoluteUrl, getSiteUrl, jsonLd } from "@/lib/seo";
 import { notFound } from "next/navigation";
+import { InterviewQuestionAd } from "@/components/ads/SemanticAds";
 
 export async function buildInterviewQuestionMetadata(courseSlug, questionSlug) {
   const data = await getPublicInterviewQuestion(courseSlug, questionSlug);
@@ -82,6 +83,11 @@ export default async function InterviewQuestionArticle({
     courseSlug: course.slug,
     techId: course.techId,
   });
+  const wordCount = [question.question, question.answer, question.codeExample]
+    .filter(Boolean)
+    .join(" ")
+    .split(/\s+/)
+    .filter(Boolean).length;
 
   const structured = {
     "@context": "https://schema.org",
@@ -179,6 +185,7 @@ export default async function InterviewQuestionArticle({
                 answer={question.answer}
                 codeExample={question.codeExample}
               />
+              <InterviewQuestionAd wordCount={wordCount} />
               <div className="mt-8">
                 <AuthorIdentityCard
                   author={question.author || course?.author}

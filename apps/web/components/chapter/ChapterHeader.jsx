@@ -17,7 +17,7 @@ export default function ChapterHeader({
   setIsSidebarOpen,
 }) {
   return (
-    <div className="flex flex-col gap-3 p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 transition-all">
+    <div className="flex flex-col gap-3 p-3.5 sm:p-4 rounded-3xl bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 transition-all">
       {/* Breadcrumb & Top Actions Bar */}
       <div className="flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
         {/* Left: Back Link & Breadcrumbs */}

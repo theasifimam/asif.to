@@ -13,6 +13,8 @@ import AuthSessionProvider from "@/components/auth/AuthSessionProvider";
 import AuthBridge from "@/components/auth/AuthBridge";
 import { AuthPromptProvider } from "@/components/auth/AuthPromptProvider";
 import AdSenseProvider from "@/components/ads/AdSenseProvider";
+import MonetizationProvider from "@/components/ads/MonetizationProvider";
+import { getRuntimeMonetizationConfig } from "@/lib/ads/runtimeConfig";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -78,37 +80,42 @@ export const viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({ children, modal }) {
+export default async function RootLayout({ children, modal }) {
   const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+  const monetizationConfig = await getRuntimeMonetizationConfig();
 
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${inter.variable} ${outfit.variable} antialiased selection:bg-blue-500 selection:text-white bg-zinc-50 dark:bg-zinc-950 text-foreground`}
       >
-        <AdSenseProvider />
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <AuthSessionProvider>
-            <ReduxProvider>
-              <AuthBridge>
-                <AuthPromptProvider>
-                  <ScrollNavProvider>
-                    <Suspense fallback={null}>
-                      <AnalyticsTracker />
-                    </Suspense>
-                    {gaMeasurementId && (
-                      <>
-                        <Script
-                          src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
-                          strategy="afterInteractive"
-                        />
-                        <Script id="google-analytics" strategy="afterInteractive">
-                          {`
+        <MonetizationProvider config={monetizationConfig}>
+          <AdSenseProvider />
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <AuthSessionProvider>
+              <ReduxProvider>
+                <AuthBridge>
+                  <AuthPromptProvider>
+                    <ScrollNavProvider>
+                      <Suspense fallback={null}>
+                        <AnalyticsTracker />
+                      </Suspense>
+                      {gaMeasurementId && (
+                        <>
+                          <Script
+                            src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
+                            strategy="afterInteractive"
+                          />
+                          <Script
+                            id="google-analytics"
+                            strategy="afterInteractive"
+                          >
+                            {`
                       if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.endsWith('.local')) {
                         window['ga-disable-${gaMeasurementId}'] = true;
                       }
@@ -120,22 +127,23 @@ export default function RootLayout({ children, modal }) {
                         gtag('config', '${gaMeasurementId}');
                       }
                     `}
-                        </Script>
-                        <Suspense fallback={null}>
-                          <GoogleAnalyticsPageView />
-                        </Suspense>
-                      </>
-                    )}
-                    {children}
-                    {modal}
-                    <FloatingPlayground />
-                    <BottomNav />
-                  </ScrollNavProvider>
-                </AuthPromptProvider>
-              </AuthBridge>
-            </ReduxProvider>
-          </AuthSessionProvider>
-        </ThemeProvider>
+                          </Script>
+                          <Suspense fallback={null}>
+                            <GoogleAnalyticsPageView />
+                          </Suspense>
+                        </>
+                      )}
+                      {children}
+                      {modal}
+                      <FloatingPlayground />
+                      <BottomNav />
+                    </ScrollNavProvider>
+                  </AuthPromptProvider>
+                </AuthBridge>
+              </ReduxProvider>
+            </AuthSessionProvider>
+          </ThemeProvider>
+        </MonetizationProvider>
       </body>
     </html>
   );

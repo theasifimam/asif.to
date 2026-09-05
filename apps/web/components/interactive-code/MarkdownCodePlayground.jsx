@@ -16,40 +16,35 @@ function codeLanguage(codeElement) {
 
 function playgroundDirective(pre) {
   const code = pre.querySelector("code");
-  const metadata = [
-    pre.dataset.meta,
-    code?.dataset?.meta,
-    pre.className,
-    code?.className,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const languageClass = [...(code?.classList || [])].find((name) =>
+    name.startsWith("language-"),
+  );
+  const hasPlayToken = (value) =>
+    String(value || "")
+      .trim()
+      .split(/\s+/)
+      .some((token) => token.toLowerCase() === "play");
+
+  // Markdown renderers preserve the text after the language as data-meta.
   if (
-    /(?:^|\s)(?:no-play|static)(?:\s|$)/i.test(metadata) ||
-    /-(?:no-play|static)(?:\s|$)/i.test(metadata)
-  )
-    return false;
-  if (/(?:^|\s)play(?:\s|$)/i.test(metadata) || /-play(?:\s|$)/i.test(metadata))
-    return true;
-  let sibling = pre.previousSibling;
-  for (
-    let index = 0;
-    sibling && index < 4;
-    index += 1, sibling = sibling.previousSibling
+    languageClass &&
+    [pre.dataset.meta, code?.dataset?.meta].some(hasPlayToken)
   ) {
-    if (
-      sibling.nodeType === Node.COMMENT_NODE &&
-      /asif\s*:\s*no-play/i.test(sibling.textContent || "")
-    )
-      return false;
-    if (
-      sibling.nodeType === Node.COMMENT_NODE &&
-      /asif\s*:\s*play/i.test(sibling.textContent || "")
-    )
-      return true;
-    if (sibling.nodeType === Node.ELEMENT_NODE) break;
+    return true;
   }
-  return false;
+
+  const metadataSources = [pre.className, code?.className].filter(Boolean);
+
+  return metadataSources.some((metadata) => {
+    const tokens = String(metadata).trim().split(/\s+/).filter(Boolean);
+    const languageIndex = tokens.findIndex((token) =>
+      token.toLowerCase().startsWith("language-"),
+    );
+    const firstMetadataIndex = languageIndex >= 0 ? languageIndex : 0;
+    return tokens
+      .slice(firstMetadataIndex + 1)
+      .some((token) => token.toLowerCase() === "play");
+  });
 }
 
 export default function MarkdownCodePlayground({

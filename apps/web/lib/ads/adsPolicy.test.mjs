@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { resolveAdsRuntimeState } from "../../config/ads.mjs";
+import { createAdsPolicyConfig } from "./runtimePolicy.mjs";
 import { getMaxAdsForContent } from "./getMaxAdsForContent.mjs";
 import {
   isExcludedAdRoute,
@@ -14,7 +15,9 @@ const config = {
   excludedRoutes: [
     "/admin",
     "/login",
+    "/register",
     "/practice",
+    "/playground",
     "/notes",
     "/search",
   ],
@@ -79,6 +82,10 @@ test("excluded and nested settings routes are blocked", () => {
     "/practice",
     "/practice/javascript",
     "/login",
+    "/register",
+    "/notes",
+    "/playground",
+    "/search",
     "/asif/settings",
   ]) {
     assert.equal(isExcludedAdRoute(pathname, config), true, pathname);
@@ -89,6 +96,82 @@ test("global disabled and missing-client states block ads", () => {
   const page = { pathname: "/articles/example", pageType: "article", contentLength: 900 };
   assert.equal(shouldShowAds(page, { ...config, enabled: false }), false);
   assert.equal(shouldShowAds(page, { ...config, clientId: "" }), false);
+});
+
+test("database, content-type, and placement switches all gate eligibility", () => {
+  const staticConfig = { ...config, enabled: true, clientId: "ca-pub-test" };
+  const runtime = {
+    environmentMasterEnabled: true,
+    adsEnabled: true,
+    clientId: "ca-pub-test",
+    contentTypes: { article: true },
+    contentRules: { thresholds: config.contentThresholds, safetyDistancePx: 240 },
+    placements: [
+      {
+        key: "ARTICLE_BOTTOM",
+        enabled: true,
+        slotId: "1234567890",
+        pageType: "article",
+        minWordCount: 400,
+      },
+    ],
+  };
+  const page = {
+    pathname: "/articles/example",
+    pageType: "article",
+    contentLength: 900,
+    placementKey: "ARTICLE_BOTTOM",
+  };
+
+  assert.equal(
+    shouldShowAds(page, createAdsPolicyConfig(runtime, staticConfig)),
+    true,
+  );
+  assert.equal(
+    shouldShowAds(
+      page,
+      createAdsPolicyConfig({ ...runtime, adsEnabled: false }, staticConfig),
+    ),
+    false,
+  );
+  assert.equal(
+    shouldShowAds(
+      page,
+      createAdsPolicyConfig(
+        { ...runtime, contentTypes: { article: false } },
+        staticConfig,
+      ),
+    ),
+    false,
+  );
+  assert.equal(
+    shouldShowAds(
+      page,
+      createAdsPolicyConfig(
+        {
+          ...runtime,
+          placements: [{ ...runtime.placements[0], enabled: false }],
+        },
+        staticConfig,
+      ),
+    ),
+    false,
+  );
+  assert.equal(
+    shouldShowAds(
+      page,
+      createAdsPolicyConfig(
+        {
+          ...runtime,
+          placements: [
+            { ...runtime.placements[0], implementationStatus: "reserved" },
+          ],
+        },
+        staticConfig,
+      ),
+    ),
+    false,
+  );
 });
 
 test("page type, content density, premium, and explicit consent are enforced", () => {

@@ -379,11 +379,7 @@ export default function ChapterFormPage() {
                 <code className="rounded bg-zinc-100 px-1.5 py-0.5 dark:bg-zinc-900">
                   ```javascript play
                 </code>
-                . Use{" "}
-                <code className="rounded bg-zinc-100 px-1.5 py-0.5 dark:bg-zinc-900">
-                  interactive
-                </code>{" "}
-                to embed the full editor.
+                .
               </p>
             </div>
             <div className="space-y-2">

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { parseCodeFenceMeta } from "@/lib/chapter/codeFence.mjs";
 
 /** Parse markdown text into structured content blocks (Headings, Paragraphs, Images, Code Blocks, Dividers) */
 export function parseContentBlocks(contentArray, techName) {
@@ -25,16 +26,14 @@ export function parseContentBlocks(contentArray, techName) {
       const firstLineEnd = trimmed.indexOf("\n");
       let lang = "javascript";
       let code = "";
-      let interactive = false;
       let showPlay = false;
 
       if (firstLineEnd !== -1) {
         const fenceMeta = trimmed.slice(3, firstLineEnd).trim() || "javascript";
-        const [parsedLang, ...flags] = fenceMeta.split(/\s+/);
-        lang = parsedLang;
+        const parsedMeta = parseCodeFenceMeta(fenceMeta);
+        lang = parsedMeta.language;
         code = trimmed.slice(firstLineEnd + 1, -3).trim();
-        interactive = flags.includes("interactive");
-        showPlay = flags.includes("play");
+        showPlay = parsedMeta.showPlay;
       } else {
         code = trimmed.slice(3, -3).trim();
       }
@@ -51,7 +50,6 @@ export function parseContentBlocks(contentArray, techName) {
         code,
         lang,
         title: snippetTitle,
-        interactive: Boolean(interactive),
         showPlay,
       });
       return;

@@ -23,6 +23,7 @@ import { useTheme } from "next-themes";
 import AuthorIdentityCard from "../authors/AuthorIdentityCard";
 import ChapterBlocksRenderer from "@/components/chapter/ChapterBlocksRenderer";
 import { parseContentBlocks } from "@/components/chapter/chapterUtils";
+import { ArticleAd } from "@/components/ads/SemanticAds";
 
 const WhatsAppIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -60,6 +61,11 @@ export default function ArticleClient({ slug, initialData }) {
     () => parseContentBlocks(article?.content, article?.topic?.[0]?.name || "Article"),
     [article?.content, article?.topic]
   );
+  const articleWordCount = (Array.isArray(article?.content)
+    ? article.content.join(" ")
+    : String(article?.content || ""))
+    .split(/\s+/)
+    .filter(Boolean).length;
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   const shareTitle =
@@ -233,7 +239,10 @@ export default function ArticleClient({ slug, initialData }) {
             chapter={article}
             parsedBlocks={parsedBlocks}
             fontBodyClass="text-base sm:text-lg md:text-xl font-medium"
+            middleAd={<ArticleAd position="middle" wordCount={articleWordCount} />}
           />
+
+          <ArticleAd position="bottom" wordCount={articleWordCount} />
 
           <AuthorIdentityCard
             author={article.author}

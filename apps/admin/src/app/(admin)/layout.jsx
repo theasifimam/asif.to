@@ -26,6 +26,7 @@ import {
   Share2,
   Files,
   Megaphone,
+  BadgeDollarSign,
 } from "lucide-react";
 import AdminGlobalSearch from "@/components/search/AdminGlobalSearch";
 import { useAuth } from "@/contexts/AuthContext";
@@ -88,6 +89,13 @@ const NAV_ITEMS = [
         icon: ChartNoAxesCombined,
         permission: "analytics.view",
         description: "GA4, Search & insights",
+      },
+      {
+        name: "Monetization",
+        href: "/monetization",
+        icon: BadgeDollarSign,
+        permission: "monetization.view",
+        description: "Ads, placements & revenue",
       },
     ],
   },

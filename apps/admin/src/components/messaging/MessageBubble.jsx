@@ -100,12 +100,13 @@ export default function MessageBubble({
     return acc;
   }, {});
 
-  const bubbleRadius = getBubbleRadius(mine, {
+  const bubbleRadius = getBubbleRadius(
+    mine,
     isFirst,
     isMiddle,
     isLast,
     isSingle,
-  });
+  );
 
   // Extract text and inline cards
   const { text: displayText, cards: parsedCards } = useMemo(

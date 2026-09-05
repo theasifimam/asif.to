@@ -68,7 +68,7 @@ export default function ChapterWorkspace({
           showTabs={false}
           showLineNumbers
           wrapContent
-          style={{ height: 260, fontSize: 14 }}
+          style={{ minHeight: 120, height: "auto", fontSize: 14 }}
         />
       </div>
 

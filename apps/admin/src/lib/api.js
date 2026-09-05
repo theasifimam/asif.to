@@ -566,6 +566,20 @@ export const analyticsApi = {
   realtime: () => apiGet("/analytics/ga4/realtime"),
 };
 
+export const monetizationApi = {
+  settings: () => apiGet("/monetization/settings"),
+  updateSettings: (data) => apiPatch("/monetization/settings", data),
+  placements: () => apiGet("/monetization/placements"),
+  updatePlacement: (key, data) =>
+    apiPatch(`/monetization/placements/${encodeURIComponent(key)}`, data),
+  overview: (params) =>
+    apiGet(`/monetization/overview?${new URLSearchParams(params)}`),
+  performance: (params) =>
+    apiGet(`/monetization/performance?${new URLSearchParams(params)}`),
+  recommendations: (params) =>
+    apiGet(`/monetization/recommendations?${new URLSearchParams(params)}`),
+};
+
 export const seoSettingsApi = {
   list: () => apiGet("/seo-settings"),
   save: (data) => apiPut("/seo-settings", data),

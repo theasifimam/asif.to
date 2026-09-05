@@ -13,6 +13,7 @@ import ChapterShareSection from "@/components/chapter/ChapterShareSection";
 import ChapterDocumentCard from "@/components/chapter/ChapterDocumentCard";
 import StandaloneCodeSnippets from "@/components/chapter/StandaloneCodeSnippets";
 import { parseContentBlocks } from "@/components/chapter/chapterUtils";
+import { CourseAd } from "@/components/ads/SemanticAds";
 import { useGetChapterBySlugQuery } from "@/lib/api/courseApi";
 import { TECH_STACKS } from "@/lib/tutorialData";
 import { AlertCircle } from "lucide-react";
@@ -57,18 +58,24 @@ export default function ChapterClient({
     (c) => c.slug === chapter?.slug,
   );
 
-// ASIF_COURSE_LEARNING_FLOW_V1:chapter-position-progress
-const positionPercentage = allChapters.length
-  ? Math.round(((currentChapterIndex + 1) / allChapters.length) * 100)
-  : 0;
-const progressChapters = useMemo(() => {
-  if (!chapter) return allChapters;
-  return allChapters.map((item) => String(item._id) === String(chapter._id) ? { ...item, ...chapter } : item);
-}, [allChapters, chapter]);
-const courseProgress = useCourseProgress(activeCourseSlug, progressChapters);
-const currentProgress = chapter?._id ? courseProgress.chapterMap?.[String(chapter._id)] : null;
-const completedChapters = courseProgress.completedChapters || [];
-const progressPercentage = courseProgress.loading ? positionPercentage : courseProgress.overallProgress;
+  // ASIF_COURSE_LEARNING_FLOW_V1:chapter-position-progress
+  const positionPercentage = allChapters.length
+    ? Math.round(((currentChapterIndex + 1) / allChapters.length) * 100)
+    : 0;
+  const progressChapters = useMemo(() => {
+    if (!chapter) return allChapters;
+    return allChapters.map((item) =>
+      String(item._id) === String(chapter._id) ? { ...item, ...chapter } : item,
+    );
+  }, [allChapters, chapter]);
+  const courseProgress = useCourseProgress(activeCourseSlug, progressChapters);
+  const currentProgress = chapter?._id
+    ? courseProgress.chapterMap?.[String(chapter._id)]
+    : null;
+  const completedChapters = courseProgress.completedChapters || [];
+  const progressPercentage = courseProgress.loading
+    ? positionPercentage
+    : courseProgress.overallProgress;
 
   const activeItemRef = useRef(null);
 
@@ -78,17 +85,16 @@ const progressPercentage = courseProgress.loading ? positionPercentage : courseP
     [chapter?.content, tech?.name],
   );
 
-  // Calculate estimated reading time
-  const estimatedReadingTime = useMemo(() => {
+  const wordCount = useMemo(() => {
     let text = "";
     if (Array.isArray(chapter?.content)) {
       text = chapter.content.join(" ");
     } else if (chapter?.content) {
       text = String(chapter.content);
     }
-    const wordCount = text.split(/\s+/).filter(Boolean).length;
-    return Math.max(1, Math.ceil(wordCount / 180));
+    return text.split(/\s+/).filter(Boolean).length;
   }, [chapter]);
+  const estimatedReadingTime = Math.max(1, Math.ceil(wordCount / 180));
 
   useEffect(() => {
     if (activeItemRef.current) {
@@ -149,12 +155,15 @@ const progressPercentage = courseProgress.loading ? positionPercentage : courseP
         item.length < 300 && !item.includes("#") && !item.includes("```"),
     );
 
-
-// ASIF_COURSE_LEARNING_FLOW_V1:chapter-completion-handler
-const isCurrentCompleted = Boolean(currentProgress?.stages?.learn?.completed) || completedChapters.includes(chapter?.slug);
-const toggleChapterComplete = async () => {
-  await courseProgress.markStage(chapter, "learn", { completed: !isCurrentCompleted });
-};
+  // ASIF_COURSE_LEARNING_FLOW_V1:chapter-completion-handler
+  const isCurrentCompleted =
+    Boolean(currentProgress?.stages?.learn?.completed) ||
+    completedChapters.includes(chapter?.slug);
+  const toggleChapterComplete = async () => {
+    await courseProgress.markStage(chapter, "learn", {
+      completed: !isCurrentCompleted,
+    });
+  };
 
   // Font size multiplier classes
   const fontBodyClass =
@@ -218,12 +227,13 @@ const toggleChapterComplete = async () => {
               isSimplePoints={isSimplePoints}
               parsedBlocks={parsedBlocks}
               fontBodyClass={fontBodyClass}
+              middleAd={<CourseAd position="middle" wordCount={wordCount} />}
             />
+            <CourseAd position="bottom" wordCount={wordCount} />
             {/* Standalone Code Examples */}
             <StandaloneCodeSnippets
               standaloneSnippets={standaloneSnippets}
               techName={tech?.name}
-              chapterSlug={chapter.slug}
             />
             {/* Contextual learning activities */}
             <ChapterLearningLoop

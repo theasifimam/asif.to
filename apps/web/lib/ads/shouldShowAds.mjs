@@ -1,5 +1,13 @@
 import { ADS_CONFIG } from "../../config/ads.mjs";
 import { getMaxAdsForContent } from "./getMaxAdsForContent.mjs";
+import { findRuntimePlacement } from "./runtimePolicy.mjs";
+
+const CONTENT_TYPE_KEYS = {
+  article: "article",
+  "course-chapter": "course",
+  cheatsheet: "cheatsheet",
+  "interview-question": "interview",
+};
 
 export function normalizePathname(pathname) {
   const withoutQuery = String(pathname || "/").split(/[?#]/, 1)[0];
@@ -21,7 +29,9 @@ export function matchesRoutePrefix(pathname, routePrefix) {
 export function isExcludedAdRoute(pathname, config = ADS_CONFIG) {
   const path = normalizePathname(pathname);
 
-  if (config.excludedRoutes.some((prefix) => matchesRoutePrefix(path, prefix))) {
+  if (
+    config.excludedRoutes.some((prefix) => matchesRoutePrefix(path, prefix))
+  ) {
     return true;
   }
 
@@ -39,6 +49,8 @@ export function shouldShowAds(
     pathname,
     pageType,
     contentLength,
+    placementKey,
+    occurrenceIndex = 1,
     isPremium,
     hasAdConsent,
   },
@@ -50,11 +62,27 @@ export function shouldShowAds(
 
   const normalizedPageType = String(pageType || "").toLowerCase();
   if (!config.monetizablePageTypes.includes(normalizedPageType)) return false;
+  const contentTypeKey = CONTENT_TYPE_KEYS[normalizedPageType];
+  if (contentTypeKey && config.contentTypes?.[contentTypeKey] === false)
+    return false;
 
-  return (
-    getMaxAdsForContent(
-      { pageType: normalizedPageType, wordCount: contentLength },
-      config,
-    ) > 0
+  if (placementKey) {
+    const placement = findRuntimePlacement(config, placementKey);
+    if (
+      !placement ||
+      !placement.enabled ||
+      placement.implementationStatus === "reserved" ||
+      !placement.slotId ||
+      placement.pageType !== normalizedPageType ||
+      Number(contentLength) < Number(placement.minWordCount || 0)
+    ) {
+      return false;
+    }
+  }
+
+  const maxAds = getMaxAdsForContent(
+    { pageType: normalizedPageType, wordCount: contentLength },
+    config,
   );
+  return maxAds >= Math.max(1, Number(occurrenceIndex) || 1);
 }
