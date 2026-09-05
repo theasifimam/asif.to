@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test --test-isolation=none lib/ads/adsPolicy.test.mjs lib/chapter/codeFence.test.mjs"
+    "test": "node --test --test-isolation=none lib/ads/adsPolicy.test.mjs lib/chapter/codeFence.test.mjs lib/chapter/markdownInline.test.mjs"
   },
   "dependencies": {
     "@codesandbox/sandpack-react": "^2.20.0",

@@ -97,11 +97,27 @@ export default function ChapterClient({
   const estimatedReadingTime = Math.max(1, Math.ceil(wordCount / 180));
 
   useEffect(() => {
+    // Ensure the page always opens at the top
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+
+    // Scroll only the sidebar's internal list container without moving the window
     if (activeItemRef.current) {
-      activeItemRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-      });
+      const el = activeItemRef.current;
+      const container = el.closest(".overflow-y-auto");
+      if (container) {
+        const elTop = el.offsetTop;
+        const containerHeight = container.clientHeight;
+        const containerScroll = container.scrollTop;
+        if (
+          elTop < containerScroll ||
+          elTop + el.clientHeight > containerScroll + containerHeight
+        ) {
+          container.scrollTo({
+            top: Math.max(0, elTop - containerHeight / 2 + el.clientHeight / 2),
+            behavior: "smooth",
+          });
+        }
+      }
     }
   }, [chapterId, allChapters]);
 

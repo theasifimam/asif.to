@@ -26,12 +26,20 @@ export const PRIORITY_WEIGHT = {
   None: 4,
 };
 export const PRIORITY_STYLE = {
-  Urgent: "bg-red-500 text-white",
-  High: "bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300",
+  Urgent:
+    "bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/25",
+  High: "bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/20",
   Medium:
-    "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
-  Low: "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300",
-  None: "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400",
+    "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/20",
+  Low: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20",
+  None: "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-700/60",
+};
+export const PRIORITY_DOT = {
+  Urgent: "bg-rose-500",
+  High: "bg-rose-500",
+  Medium: "bg-amber-500",
+  Low: "bg-emerald-500",
+  None: "bg-zinc-400",
 };
 export const TEMPLATES = {
   Article: {

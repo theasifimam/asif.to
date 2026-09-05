@@ -38,6 +38,7 @@ import {
   CARD_TYPES,
   CONTENT_TYPES,
   PRIORITIES,
+  PRIORITY_DOT,
   PRIORITY_STYLE,
 } from "./planner-constants";
 import Editor, { MarkdownPreview } from "@/components/editor/Editor";
@@ -194,10 +195,10 @@ export default function CardDetailDrawer({
     >
       <aside className="h-full w-full max-w-full sm:max-w-2xl overflow-y-auto border-l border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-950">
         {/* Sticky Header Bar */}
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-zinc-200/80 bg-white/95 px-4 py-3 sm:px-6 backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-950/95">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-zinc-200/80 bg-white/90 px-4 py-3 sm:px-6 backdrop-blur-xl dark:border-zinc-800/80 dark:bg-zinc-950/90">
           <div className="flex items-center gap-2">
             {/* Category Selector Tabs */}
-            <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200/70 dark:border-zinc-800">
+            <div className="flex items-center gap-1 bg-zinc-100/90 dark:bg-zinc-900/90 p-1 rounded-full border border-zinc-200/70 dark:border-zinc-800 shadow-xs">
               {CATEGORIES.map((cat) => {
                 const Icon = cat.icon;
                 const active = currentCategory === cat.id;
@@ -206,7 +207,7 @@ export default function CardDetailDrawer({
                     key={cat.id}
                     type="button"
                     onClick={() => handleCategoryChange(cat.id)}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer active:scale-95 ${
                       active
                         ? "bg-white text-blue-600 shadow-xs dark:bg-zinc-800 dark:text-blue-400"
                         : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
@@ -214,7 +215,7 @@ export default function CardDetailDrawer({
                     title={`Change task category to ${cat.label}`}
                   >
                     <Icon size={13} />
-                    <span className="hidden sm:inline">{cat.label}</span>
+                    <span className="hidden sm:inline font-outfit">{cat.label}</span>
                   </button>
                 );
               })}
@@ -227,7 +228,7 @@ export default function CardDetailDrawer({
                 <Button
                   size="sm"
                   onClick={() => switchMode("edit")}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-9 px-3.5 text-xs rounded-xl shadow-xs"
+                  className="bg-blue-600 hover:bg-blue-500 text-white font-bold h-9 px-4 text-xs rounded-full shadow-xs active:scale-95 transition-all cursor-pointer"
                 >
                   <Edit3 size={14} className="mr-1.5" />
                   Update Task
@@ -242,7 +243,7 @@ export default function CardDetailDrawer({
                     setDraft(card || {});
                     switchMode("view");
                   }}
-                  className="h-9 text-xs rounded-xl"
+                  className="h-9 text-xs font-bold rounded-full border-zinc-200/80 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 active:scale-95 transition-all cursor-pointer"
                 >
                   <RotateCcw size={14} className="mr-1" /> Cancel
                 </Button>
@@ -250,7 +251,7 @@ export default function CardDetailDrawer({
                   size="sm"
                   onClick={save}
                   disabled={saving || !draft.title?.trim()}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-9 px-3.5 text-xs rounded-xl shadow-xs"
+                  className="bg-blue-600 hover:bg-blue-500 text-white font-bold h-9 px-4 text-xs rounded-full shadow-xs active:scale-95 transition-all cursor-pointer"
                 >
                   <Save size={14} className="mr-1.5" />
                   {saving ? "Saving..." : "Save Changes"}
@@ -261,7 +262,7 @@ export default function CardDetailDrawer({
                 size="sm"
                 onClick={save}
                 disabled={saving || !draft.title?.trim()}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-9 px-3.5 text-xs rounded-xl shadow-xs"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-9 px-4 text-xs rounded-full shadow-xs active:scale-95 transition-all cursor-pointer"
               >
                 <Plus size={14} className="mr-1.5" />
                 {saving ? "Creating..." : "Create Task"}
@@ -270,7 +271,7 @@ export default function CardDetailDrawer({
 
             <button
               onClick={onClose}
-              className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-500 dark:hover:bg-zinc-900 dark:hover:text-zinc-100 cursor-pointer transition-colors"
+              className="rounded-full p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-500 dark:hover:bg-zinc-900 dark:hover:text-zinc-100 cursor-pointer transition-colors"
               aria-label="Close drawer"
             >
               <X size={18} />
@@ -285,15 +286,15 @@ export default function CardDetailDrawer({
             {/* Title */}
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                <span className="rounded-full bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
                   {currentCategory}
                 </span>
                 <span className="text-xs text-zinc-400">•</span>
-                <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
                   {draft.type || "Task"}
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-zinc-100 leading-tight">
+              <h1 className="font-outfit text-2xl sm:text-3xl font-black text-zinc-950 dark:text-white leading-tight">
                 {draft.title || "Untitled Task"}
               </h1>
             </div>
@@ -305,7 +306,7 @@ export default function CardDetailDrawer({
                 <span className="font-bold text-zinc-400 dark:text-zinc-500">
                   Status:
                 </span>
-                <span className="flex items-center gap-1.5 font-extrabold text-zinc-800 dark:text-zinc-200">
+                <span className="flex items-center gap-1.5 font-black font-outfit text-zinc-800 dark:text-zinc-200">
                   {currentColumn?.color && (
                     <span
                       className="h-2.5 w-2.5 rounded-full shrink-0"
@@ -322,11 +323,12 @@ export default function CardDetailDrawer({
                   Priority:
                 </span>
                 <span
-                  className={`rounded-md px-2 py-0.5 text-[11px] font-bold ${
+                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-wider ${
                     PRIORITY_STYLE[draft.priority] ||
-                    "text-zinc-600 bg-zinc-200"
+                    "text-zinc-600 bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-400"
                   }`}
                 >
+                  <span className={`h-1 w-1 rounded-full shrink-0 ${PRIORITY_DOT[draft.priority] || "bg-zinc-400"}`} />
                   {draft.priority || "None"}
                 </span>
               </div>
@@ -499,15 +501,17 @@ export default function CardDetailDrawer({
                   variant="outline"
                   size="sm"
                   onClick={() => onDuplicate(draft)}
+                  className="rounded-full h-8 text-xs font-bold border-zinc-200/80 dark:border-zinc-800 active:scale-95 transition-all cursor-pointer"
                 >
-                  <Copy size={14} /> Duplicate
+                  <Copy size={13} /> Duplicate
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => onArchive(draft)}
+                  className="rounded-full h-8 text-xs font-bold border-zinc-200/80 dark:border-zinc-800 active:scale-95 transition-all cursor-pointer"
                 >
-                  <Archive size={14} /> Archive
+                  <Archive size={13} /> Archive
                 </Button>
               </div>
 
@@ -515,10 +519,10 @@ export default function CardDetailDrawer({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-red-200/80 text-red-600 hover:bg-red-50 hover:border-red-300 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/40"
+                  className="rounded-full h-8 text-xs font-bold border-rose-200/80 text-rose-600 hover:bg-rose-50 hover:border-rose-300 dark:border-rose-900/50 dark:text-rose-400 dark:hover:bg-rose-950/40 active:scale-95 transition-all cursor-pointer"
                   onClick={() => onDelete(draft)}
                 >
-                  <Trash2 size={14} /> Delete
+                  <Trash2 size={13} /> Delete
                 </Button>
               )}
             </div>

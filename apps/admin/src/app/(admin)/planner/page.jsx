@@ -28,7 +28,14 @@ import { coursesApi, kanbanApi } from "@/lib/api";
 import PlannerCard from "./PlannerCard";
 import PlannerColumn from "./PlannerColumn";
 import CardDetailDrawer from "./CardDetailDrawer";
-import { CARD_TYPES, PRIORITIES, PRIORITY_WEIGHT, TEMPLATES } from "./planner-constants";
+import {
+  CARD_TYPES,
+  PRIORITIES,
+  PRIORITY_DOT,
+  PRIORITY_STYLE,
+  PRIORITY_WEIGHT,
+  TEMPLATES,
+} from "./planner-constants";
 
 const unwrap = (response) => response?.data?.data;
 const getColumnId = (card) =>
@@ -689,22 +696,26 @@ export default function PlannerPage() {
     );
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-zinc-100 dark:bg-zinc-950">
-      <div className="shrink-0 border-b border-zinc-200 bg-zinc-100 py-1.5 px-4 dark:border-zinc-800 dark:bg-zinc-950 md:px-6">
-        <div className="flex flex-col gap-1.5 sm:gap-2.5 xl:flex-row xl:items-center xl:justify-between">
+      <div className="shrink-0 border-b border-zinc-200/80 bg-white/70 dark:bg-zinc-950/80 backdrop-blur-md py-2 px-4 dark:border-zinc-800 md:px-6 transition-colors">
+        <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex items-center justify-between gap-2 min-w-0">
             <div className="flex min-w-0 items-center gap-2">
               <div className="min-w-0 flex-1">
-                <div className="flex items-center min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-[9.5px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 shrink-0 shadow-xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                    Workspace
+                  </span>
                   <Select value={boardId} onValueChange={setBoardId}>
-                    <SelectTrigger className="h-auto p-0 border-0 bg-transparent text-base sm:text-xl font-black shadow-none focus-visible:ring-0 [&_svg]:size-4 hover:opacity-80">
+                    <SelectTrigger className="h-auto p-0 border-0 bg-transparent text-base sm:text-xl font-black font-outfit tracking-tight shadow-none focus-visible:ring-0 [&_svg]:size-4 hover:opacity-80">
                       <SelectValue placeholder="Select board" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-1">
                       {boards.map((item) => (
                         <SelectItem
                           key={item._id}
                           value={item._id}
-                          className="font-bold"
+                          className="rounded-xl font-bold font-outfit text-sm"
                         >
                           {item.name}
                         </SelectItem>
@@ -719,61 +730,62 @@ export default function PlannerPage() {
           <div className="flex flex-wrap items-center gap-2">
             <form
               onSubmit={submitQuick}
-              className="flex min-w-full sm:min-w-60 flex-1 items-center rounded-2xl bg-white px-3 dark:bg-zinc-900 xl:w-80 border border-zinc-200 dark:border-zinc-800"
+              className="flex min-w-full sm:min-w-64 flex-1 items-center rounded-full bg-white dark:bg-zinc-900 px-3.5 xl:w-80 border border-zinc-200/80 dark:border-zinc-800 shadow-xs focus-within:border-blue-500/50 focus-within:ring-2 focus-within:ring-blue-500/15 transition-all"
             >
-              <Plus size={16} className="text-blue-600 shrink-0" />
+              <Plus size={15} className="text-blue-600 dark:text-blue-400 shrink-0" />
               <input
                 id="planner-quick-title"
                 value={quickTitle}
                 onChange={(e) => setQuickTitle(e.target.value)}
                 placeholder="Quick add card… (N)"
-                className="h-9 sm:h-11 min-w-0 flex-1 px-2 text-xs sm:text-sm outline-none"
+                className="h-9 sm:h-10 min-w-0 flex-1 px-2.5 text-xs sm:text-sm font-medium outline-none bg-transparent placeholder:text-zinc-400"
               />
-              <button className="text-[10px] font-bold text-zinc-400 shrink-0">
+              <kbd className="hidden sm:inline-block px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-[9px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500 shrink-0 border border-zinc-200/60 dark:border-zinc-700/60">
                 ENTER
-              </button>
+              </kbd>
             </form>
 
             <div className="hidden md:flex items-center gap-2 flex-wrap">
               <Select onValueChange={(value) => createFromType(value)}>
-                <SelectTrigger className="h-9 sm:h-10 w-40 text-xs rounded-xl border border-zinc-200 bg-white px-3 font-semibold dark:border-zinc-700 dark:bg-zinc-950">
-                  <Plus size={14} className="mr-1.5 inline-block text-blue-600 shrink-0" />
+                <SelectTrigger className="h-9 sm:h-10 rounded-full border border-zinc-200/80 bg-white px-3.5 text-xs font-bold dark:border-zinc-800 dark:bg-zinc-900 shadow-xs hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition-all active:scale-95 cursor-pointer">
+                  <Plus size={14} className="mr-1.5 inline-block text-blue-600 dark:text-blue-400 shrink-0" />
                   <SelectValue placeholder="Add Task Type" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="SEO">SEO</SelectItem>
-                  <SelectItem value="Development">Development</SelectItem>
-                  <SelectItem value="Content">Content</SelectItem>
+                <SelectContent className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-1">
+                  <SelectItem value="SEO" className="rounded-xl font-medium text-xs">SEO</SelectItem>
+                  <SelectItem value="Development" className="rounded-xl font-medium text-xs">Development</SelectItem>
+                  <SelectItem value="Content" className="rounded-xl font-medium text-xs">Content</SelectItem>
                 </SelectContent>
               </Select>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={addColumn}
-                className="h-9 sm:h-10 text-xs"
+                className="h-9 sm:h-10 rounded-full text-xs font-bold border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs hover:bg-zinc-50 dark:hover:bg-zinc-800/80 active:scale-95 transition-all cursor-pointer"
               >
-                <Plus size={15} /> Column
+                <Plus size={14} className="text-blue-600 dark:text-blue-400" />
+                <span>Column</span>
               </Button>
               <div className="group relative">
-                <Button variant="outline" size="sm" className="h-9 sm:h-10">
+                <Button variant="outline" size="sm" className="h-9 sm:h-10 w-9 sm:w-10 rounded-full p-0 border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs active:scale-95 transition-all cursor-pointer">
                   <Settings2 size={15} />
                 </Button>
-                <div className="invisible absolute right-0 top-full mt-1.5 z-40 w-40 rounded-2xl border border-zinc-200 bg-white p-1 opacity-0 shadow-xl group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100 dark:border-zinc-800 dark:bg-zinc-950 before:absolute before:inset-x-0 before:-top-2 before:h-2 before:content-['']">
+                <div className="invisible absolute right-0 top-full mt-1.5 z-40 w-44 rounded-2xl border border-zinc-200 bg-white p-1 opacity-0 shadow-xl group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100 dark:border-zinc-800 dark:bg-zinc-950 before:absolute before:inset-x-0 before:-top-2 before:h-2 before:content-[''] transition-all">
                   <button
                     onClick={renameBoard}
-                    className="w-full rounded-xl px-3 py-2 text-left text-xs hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                    className="w-full rounded-xl px-3 py-2 text-left text-xs font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
                   >
                     Rename board
                   </button>
                   <button
                     onClick={addBoard}
-                    className="w-full rounded-xl px-3 py-2 text-left text-xs hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                    className="w-full rounded-xl px-3 py-2 text-left text-xs font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
                   >
                     Create board
                   </button>
                   <button
                     onClick={archiveBoard}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
                   >
                     <Archive size={13} /> Archive board
                   </button>
@@ -787,7 +799,7 @@ export default function PlannerPage() {
                         <button
                           key={col._id}
                           onClick={() => unarchiveColumn(col)}
-                          className="w-full rounded-xl px-3 py-1.5 text-left text-[11px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 flex items-center justify-between gap-2"
+                          className="w-full rounded-xl px-3 py-1.5 text-left text-[11px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 flex items-center justify-between gap-2 transition-colors"
                         >
                           <span className="truncate">{col.name}</span>
                           <span className="text-[10px] text-blue-600 font-bold shrink-0">
@@ -803,25 +815,26 @@ export default function PlannerPage() {
           </div>
         </div>
 
-        <div className="hidden md:flex mt-2 sm:mt-3.5 flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-          <div className="hidden items-center overflow-x-auto gap-1 rounded-2xl bg-zinc-100 p-1 dark:bg-zinc-900 scrollbar-none sm:grid sm:grid-cols-5">
+        <div className="hidden md:flex mt-2.5 sm:mt-3 flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="hidden items-center overflow-x-auto gap-1.5 rounded-2xl bg-zinc-100/80 dark:bg-zinc-900/60 p-1 border border-zinc-200/60 dark:border-zinc-800/80 scrollbar-none sm:grid sm:grid-cols-5">
             {[
-              ["Total", stats.total],
-              ["Planned", stats.planned],
-              ["In progress", stats.progress],
-              ["Overdue", stats.overdue],
-              ["Done", stats.done],
-            ].map(([name, value]) => (
+              { name: "Total", value: stats.total, dot: "bg-blue-500", text: "text-blue-600 dark:text-blue-400", borderHover: "hover:border-blue-500/40" },
+              { name: "Planned", value: stats.planned, dot: "bg-sky-500", text: "text-sky-600 dark:text-sky-400", borderHover: "hover:border-sky-500/40" },
+              { name: "In progress", value: stats.progress, dot: "bg-amber-500", text: "text-amber-600 dark:text-amber-400", borderHover: "hover:border-amber-500/40" },
+              { name: "Overdue", value: stats.overdue, dot: "bg-rose-500", text: stats.overdue ? "text-rose-600 dark:text-rose-400" : "text-zinc-500 dark:text-zinc-400", borderHover: "hover:border-rose-500/40" },
+              { name: "Done", value: stats.done, dot: "bg-emerald-500", text: "text-emerald-600 dark:text-emerald-400", borderHover: "hover:border-emerald-500/40" },
+            ].map(({ name, value, dot, text, borderHover }) => (
               <div
                 key={name}
-                className="min-w-16 flex-1 rounded-xl bg-white px-2.5 py-1.5 sm:px-3 sm:py-2 text-center dark:bg-zinc-950 shrink-0 sm:shrink"
+                className={`min-w-16 flex-1 rounded-xl bg-white dark:bg-zinc-950/80 px-3 py-1.5 sm:py-2 text-center border border-zinc-200/60 dark:border-zinc-800/80 shadow-xs transition-all ${borderHover} shrink-0 sm:shrink`}
               >
-                <p
-                  className={`text-sm sm:text-base font-black ${name === "Overdue" && value ? "text-red-600" : ""}`}
-                >
-                  {value}
-                </p>
-                <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-wide text-zinc-400 truncate">
+                <div className="flex items-center justify-center gap-1.5">
+                  <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
+                  <p className={`text-sm sm:text-base font-black font-outfit ${text}`}>
+                    {value}
+                  </p>
+                </div>
+                <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500 truncate mt-0.5">
                   {name}
                 </p>
               </div>
@@ -829,7 +842,7 @@ export default function PlannerPage() {
           </div>
 
           <div className="flex min-w-0 flex-1 items-center gap-2 lg:max-w-2xl">
-            <div className="flex h-9 sm:h-11 min-w-0 flex-1 items-center rounded-2xl border border-zinc-200 bg-white px-3 dark:border-zinc-800 dark:bg-zinc-950">
+            <div className="flex h-9 sm:h-11 min-w-0 flex-1 items-center rounded-full border border-zinc-200/80 bg-white px-3.5 dark:border-zinc-800 dark:bg-zinc-900 shadow-xs focus-within:border-blue-500/50 focus-within:ring-2 focus-within:ring-blue-500/15 transition-all">
               <Search size={14} className="text-zinc-400 shrink-0" />
               <input
                 ref={searchRef}
@@ -841,13 +854,14 @@ export default function PlannerPage() {
                   }))
                 }
                 placeholder="Search every card… /"
-                className="min-w-0 flex-1 bg-transparent px-2 text-xs sm:text-sm outline-none"
+                className="min-w-0 flex-1 bg-transparent px-2.5 text-xs sm:text-sm font-medium outline-none placeholder:text-zinc-400"
               />
               {filters.search && (
                 <button
                   onClick={() =>
                     setFilters((current) => ({ ...current, search: "" }))
                   }
+                  className="p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 cursor-pointer"
                 >
                   <X size={14} />
                 </button>
@@ -857,15 +871,20 @@ export default function PlannerPage() {
               variant={filtersOpen ? "default" : "outline"}
               size="sm"
               onClick={() => setFiltersOpen(!filtersOpen)}
-              className="h-9 sm:h-11 text-xs"
+              className={`h-9 sm:h-11 rounded-full text-xs font-bold gap-1.5 transition-all active:scale-95 shadow-xs cursor-pointer ${
+                filtersOpen
+                  ? "bg-blue-600 hover:bg-blue-500 text-white"
+                  : "border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800/80"
+              }`}
             >
-              <Filter size={14} /> Filters
+              <Filter size={13} />
+              <span>Filters</span>
             </Button>
           </div>
         </div>
 
         {filtersOpen && (
-          <div className="hidden md:flex mt-3 flex-wrap gap-2 rounded-2xl border border-zinc-200 bg-zinc-50 p-2.5 sm:p-3 dark:border-zinc-800 dark:bg-zinc-900/50">
+          <div className="hidden md:flex mt-3 flex-wrap gap-2 rounded-2xl border border-zinc-200/80 bg-white dark:bg-zinc-900/90 p-3 shadow-sm dark:border-zinc-800 transition-all">
             {[
               ["type", "All types", CARD_TYPES],
               ["priority", "All priorities", PRIORITIES],
@@ -915,18 +934,19 @@ export default function PlannerPage() {
                 >
                   <SelectTrigger
                     size="sm"
-                    className="h-9 w-full rounded-xl border border-zinc-200 bg-white px-2.5 text-xs font-semibold dark:border-zinc-700 dark:bg-zinc-950"
+                    className="h-9 w-full rounded-full border border-zinc-200/80 bg-zinc-50/80 px-3 text-xs font-semibold dark:border-zinc-800 dark:bg-zinc-950 shadow-xs"
                   >
                     <SelectValue placeholder={all} />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={key === "sort" ? "position" : "all"}>
+                  <SelectContent className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-1">
+                    <SelectItem value={key === "sort" ? "position" : "all"} className="rounded-xl font-medium text-xs">
                       {all}
                     </SelectItem>
                     {options.map((option) => (
                       <SelectItem
                         key={option.value || option}
                         value={option.value || option}
+                        className="rounded-xl font-medium text-xs"
                       >
                         {option.label || option}
                       </SelectItem>
@@ -937,7 +957,7 @@ export default function PlannerPage() {
             ))}
             <button
               onClick={clearFilters}
-              className="px-2 text-xs font-bold text-zinc-500 hover:text-red-600 cursor-pointer"
+              className="px-3 py-1.5 text-xs font-bold text-zinc-500 hover:text-rose-600 dark:hover:text-rose-400 cursor-pointer transition-colors"
             >
               Clear
             </button>
@@ -948,12 +968,12 @@ export default function PlannerPage() {
       <div className="min-h-0 flex-1 overflow-y-auto p-3 md:hidden">
         <div className="mb-2 flex items-center justify-between px-1">
           <div>
-            <h2 className="text-sm font-black">Tasks</h2>
+            <h2 className="font-outfit text-sm font-black">Tasks</h2>
             <p className="text-[10px] text-zinc-500">
               Check a task to move it to Done. Tap its title for details.
             </p>
           </div>
-          <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-zinc-500 shadow-xs dark:bg-zinc-900">
+          <span className="rounded-full bg-white px-2.5 py-0.5 text-[10px] font-black text-zinc-600 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-800 shadow-xs dark:bg-zinc-900">
             {visibleCards.length}
           </span>
         </div>
@@ -973,19 +993,19 @@ export default function PlannerPage() {
               return (
                 <div
                   key={card._id}
-                  className={`flex items-start gap-3 rounded-2xl border bg-white p-3 shadow-xs dark:bg-zinc-900 ${
+                  className={`flex items-start gap-3 rounded-2xl border p-3.5 shadow-xs transition-all ${
                     completed
-                      ? "border-emerald-200 opacity-65 dark:border-emerald-900"
-                      : "border-zinc-200 dark:border-zinc-800"
+                      ? "bg-zinc-50/60 dark:bg-zinc-950/40 border-emerald-500/20 opacity-75"
+                      : "bg-white dark:bg-zinc-900/95 border-zinc-200/80 dark:border-zinc-800 hover:border-blue-500/40"
                   }`}
                 >
                   <button
                     type="button"
                     onClick={() => toggleTodoDone(card)}
-                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
+                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all cursor-pointer ${
                       completed
                         ? "border-emerald-500 bg-emerald-500 text-white"
-                        : "border-zinc-300 dark:border-zinc-600"
+                        : "border-zinc-300 dark:border-zinc-600 hover:border-emerald-500"
                     }`}
                     aria-label={completed ? "Mark task open" : "Mark task done"}
                   >
@@ -995,29 +1015,30 @@ export default function PlannerPage() {
                   <button
                     type="button"
                     onClick={() => openCardModal(card, "view")}
-                    className="min-w-0 flex-1 text-left"
+                    className="min-w-0 flex-1 text-left cursor-pointer"
                   >
                     <div
-                      className={`text-sm font-bold leading-5 ${
-                        completed ? "line-through text-zinc-400" : ""
+                      className={`font-outfit text-sm font-extrabold leading-snug ${
+                        completed ? "line-through text-zinc-400 dark:text-zinc-500" : "text-zinc-900 dark:text-zinc-100"
                       }`}
                     >
                       {card.title}
                     </div>
 
-                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                      <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-bold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-zinc-100 dark:bg-zinc-800/80 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-zinc-600 dark:text-zinc-400 border border-zinc-200/60 dark:border-zinc-700/60">
                         {card.type || "Task"}
                       </span>
 
                       {column?.name && (
-                        <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[9px] font-semibold text-zinc-500 dark:bg-zinc-800">
+                        <span className="rounded-full bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 text-[9px] font-bold text-zinc-500 dark:text-zinc-400">
                           {column.name}
                         </span>
                       )}
 
                       {card.priority && card.priority !== "None" && (
-                        <span className="text-[9px] font-semibold text-zinc-400">
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${PRIORITY_STYLE[card.priority]}`}>
+                          <span className={`h-1 w-1 rounded-full shrink-0 ${PRIORITY_DOT[card.priority] || "bg-zinc-400"}`} />
                           {card.priority}
                         </span>
                       )}
@@ -1044,7 +1065,7 @@ export default function PlannerPage() {
         onDragEnd={dragEnd}
       >
         {/* Mobile Column Select Tab Bar */}
-        <div className="hidden border-b border-zinc-200 bg-white p-2.5 dark:border-zinc-800 dark:bg-zinc-950 overflow-x-auto gap-2 shrink-0 scrollbar-none">
+        <div className="hidden border-b border-zinc-200/80 bg-white/80 backdrop-blur-md p-2.5 dark:border-zinc-800 dark:bg-zinc-950/80 overflow-x-auto gap-2 shrink-0 scrollbar-none">
           {columns.map((col) => {
             const colCardsCount = visibleCards.filter(
               (card) => getColumnId(card) === col._id,
@@ -1054,22 +1075,22 @@ export default function PlannerPage() {
               <button
                 key={col._id}
                 onClick={() => scrollToColumn(col._id)}
-                className={`flex items-center gap-1.5 rounded-2xl px-4 py-2 text-xs font-black transition shrink-0 ${
+                className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-black transition-all shrink-0 active:scale-95 cursor-pointer ${
                   isActive
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/10"
-                    : "bg-zinc-100 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+                    ? "bg-blue-600 text-white shadow-xs shadow-blue-500/20"
+                    : "bg-zinc-100/90 text-zinc-600 dark:bg-zinc-900/90 dark:text-zinc-400 hover:bg-zinc-200/70 dark:hover:bg-zinc-800"
                 }`}
               >
                 <span
-                  className="h-2 w-2 rounded-full shrink-0"
+                  className="h-2 w-2 rounded-full shrink-0 ring-1 ring-white/50"
                   style={{ backgroundColor: col.color }}
                 />
-                <span className="truncate max-w-30">{col.name}</span>
+                <span className="truncate max-w-30 font-outfit">{col.name}</span>
                 <span
-                  className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold ${
+                  className={`rounded-full px-2 py-0.5 text-[9.5px] font-black ${
                     isActive
                       ? "bg-white/20 text-white"
-                      : "bg-zinc-200 text-zinc-500 dark:bg-zinc-800"
+                      : "bg-zinc-200/80 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
                   }`}
                 >
                   {colCardsCount}
