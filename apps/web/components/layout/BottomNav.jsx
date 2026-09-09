@@ -15,6 +15,7 @@ import {
   HelpCircle,
   ChevronRight,
   LogOut,
+  BriefcaseBusiness,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
@@ -29,6 +30,14 @@ import LogoutConfirm from "./header/LogoutConfirm";
 import { toast } from "sonner";
 
 const MENU_SECTIONS = [
+  {
+    title: "UAE Jobs",
+    description: "Search reviewed jobs across the Emirates",
+    href: "/jobs",
+    icon: BriefcaseBusiness,
+    badge: "Careers",
+    color: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+  },
   {
     title: "Courses & Tutorials",
     description: "Step-by-step full-stack learning tracks",

@@ -36,6 +36,7 @@ const userSchema = new Schema(
             "privacy",
             "revision",
             "exams",
+            "jobs",
             "home",
           ];
           return !reserved.includes(v.toLowerCase());

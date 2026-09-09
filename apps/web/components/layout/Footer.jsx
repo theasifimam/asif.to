@@ -190,6 +190,12 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
                     Practice Quiz
                   </Link>
                   <Link
+                    href="/jobs"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    UAE Jobs
+                  </Link>
+                  <Link
                     href="/bookmarks"
                     className="hover:text-foreground transition-colors"
                   >

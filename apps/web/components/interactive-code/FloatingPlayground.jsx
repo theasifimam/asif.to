@@ -1,9 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Code2 } from "lucide-react";
 
 export default function FloatingPlayground() {
+  const pathname = usePathname();
+
+  if (pathname?.startsWith("/jobs")) {
+    return null;
+  }
+
   return (
     <Link
       href="/run"

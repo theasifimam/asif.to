@@ -33,6 +33,7 @@ import relatedContentRoutes from "./routes/relatedContent.routes.js";
 import assetRoutes from "./routes/asset.routes.js";
 import personalNoteRoutes from "./routes/personalNote.routes.js";
 import monetizationRoutes from "./routes/monetization.routes.js";
+import jobRoutes from "./routes/job.routes.js";
 // ASIF_LEARNING_JOURNEY_V1:server-import
 
 import socialPostRoutes from "./routes/socialPost.routes.js";
@@ -40,6 +41,7 @@ import socialIntegrationRoutes from "./routes/socialIntegration.routes.js";
 import { initializeMessagingSocket } from "./realtime/messaging.socket.js";
 import { ensureMessagingBootstrap } from "./services/messagingBootstrap.service.js";
 import { startSocialPublishingScheduler } from "./services/socialPublishingScheduler.service.js";
+import { startJobScheduler } from "./services/jobs/jobScheduler.service.js";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -132,6 +134,7 @@ app.use("/api/v1/related-content", relatedContentRoutes);
 app.use("/api/v1/assets", assetRoutes);
 app.use("/api/v1/notes", personalNoteRoutes);
 app.use("/api/v1/monetization", monetizationRoutes);
+app.use("/api/v1/jobs", jobRoutes);
 // ASIF_LEARNING_JOURNEY_V1:server-mount
 
 app.use("/api/v1/social-posts", socialPostRoutes);
@@ -187,6 +190,7 @@ const startServer = async () => {
     await connectDB();
     await ensureMessagingBootstrap();
     startSocialPublishingScheduler();
+    startJobScheduler();
     const PORT = parseInt(process.env.PORT || "5000", 10);
     const httpServer = createServer(app);
     initializeMessagingSocket(httpServer, allowedOrigins);

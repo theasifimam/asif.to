@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -24,8 +25,25 @@ const PRESETS = [
 ];
 
 export default function AnalyticsPage() {
-  const [source, setSource] = useState("first-party");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const sourceParam = searchParams.get("source");
+
+  const [source, setSource] = useState(sourceParam || "first-party");
   const [days, setDays] = useState(28);
+
+  useEffect(() => {
+    if (sourceParam && ["first-party", "ga4", "gsc"].includes(sourceParam)) {
+      setSource(sourceParam);
+    }
+  }, [sourceParam]);
+
+  const handleSourceChange = (newSource) => {
+    setSource(newSource);
+    router.replace(`${pathname}?source=${newSource}`);
+  };
+
   const range = useMemo(() => dateRange(days), [days]);
   const active = SOURCES.find((item) => item.value === source);
 
@@ -58,7 +76,7 @@ export default function AnalyticsPage() {
         </Select>
       </header>
 
-      <SourceTabs value={source} onChange={setSource} />
+      <SourceTabs value={source} onChange={handleSourceChange} />
 
       <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold text-zinc-400">
         <span>

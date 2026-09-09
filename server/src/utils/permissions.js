@@ -44,6 +44,11 @@ export const PERMISSION_CATALOG = Object.freeze([
   ["assets.upload", "Upload files to the media library", "Media library"],
   ["assets.manage", "Organize and edit media library files", "Media library"],
   ["assets.delete_permanent", "Permanently delete media library files", "Media library"],
+  ["jobs.view", "View jobs administration", "Jobs"],
+  ["jobs.manage", "Create and edit jobs and companies", "Jobs"],
+  ["jobs.delete", "Delete jobs", "Jobs"],
+  ["job_sources.manage", "Manage and synchronize job sources", "Jobs"],
+  ["job_applications.review", "Review internal job applications", "Jobs"],
 ]);
 
 export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({
@@ -62,7 +67,7 @@ export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({
     "question_bank.view", "question_bank.manage", "planner.view",
     "planner.manage", "analytics.view", "monetization.view", "seo.view", "users.view",
     "messages.view", "messages.send", "messages.attach", "messages.pin",
-    "assets.view", "assets.upload", "assets.manage",
+    "assets.view", "assets.upload", "assets.manage", "jobs.view", "jobs.manage", "job_applications.review",
   ],
   admin: PERMISSION_CATALOG.map(([key]) => key).filter(
     (key) => !["roles.manage", "settings.manage", "assets.delete_permanent"].includes(key),

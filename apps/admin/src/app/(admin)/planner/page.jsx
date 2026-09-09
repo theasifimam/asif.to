@@ -278,11 +278,23 @@ export default function PlannerPage() {
     const now = new Date();
     const week = new Date(now);
     week.setDate(now.getDate() + 7);
+    const categoryParam = searchParams.get("category");
     const filtered = cards.filter((card) => {
       const text =
         `${card.title} ${card.description || ""} ${card.seo?.primaryKeyword || ""} ${card.labels?.map((label) => label.name).join(" ")}`.toLowerCase();
       const due = card.dueDate ? new Date(card.dueDate) : null;
+
+      let matchCat = true;
+      if (categoryParam === "Development") {
+        matchCat = ["Feature", "Bug", "Improvement", "Idea", "Task", "Development"].includes(card.type);
+      } else if (categoryParam === "SEO") {
+        matchCat = card.type === "SEO" || Boolean(card.seo?.primaryKeyword);
+      } else if (categoryParam === "Content") {
+        matchCat = ["Course", "Chapter", "Article", "Tutorial", "Content"].includes(card.type);
+      }
+
       return (
+        matchCat &&
         (!filters.search || text.includes(filters.search.toLowerCase())) &&
         (filters.type === "all" || card.type === filters.type) &&
         (filters.priority === "all" || card.priority === filters.priority) &&

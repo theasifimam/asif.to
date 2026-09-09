@@ -15,6 +15,7 @@ import {
   Code2,
   Sparkles,
   ArrowRight,
+  BriefcaseBusiness,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { clearCredentials } from "@/lib/store/authSlice";
@@ -109,6 +110,7 @@ export default function Header() {
     pathname.startsWith("/play");
 
   const isLibraryActive = pathname.startsWith("/library");
+  const isJobsActive = pathname.startsWith("/jobs");
 
   // Align Header with 7xl layout across all pages
   const containerMaxWidth = "max-w-7xl";
@@ -392,6 +394,19 @@ export default function Header() {
                 </div>
               )}
             </div>
+
+            {/* My Library Direct Link */}
+            <Link
+              href="/jobs"
+              className={`flex h-10 items-center gap-1.5 px-4 rounded-full transition-all ${
+                isJobsActive
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "text-zinc-600 dark:text-zinc-300 hover:text-foreground hover:bg-zinc-200/60 dark:hover:bg-zinc-700/60"
+              }`}
+            >
+              <BriefcaseBusiness className="w-3.5 h-3.5" />
+              <span>Jobs</span>
+            </Link>
 
             {/* My Library Direct Link */}
             <Link

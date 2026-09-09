@@ -25,15 +25,19 @@ export default function Sidebar({
       transition={{ type: "spring", stiffness: 320, damping: 32 }}
       className="z-45 hidden h-dvh  max-w-[calc(100vw-1rem)] shrink-0 flex-col lg:flex relative"
     >
-      {/* Single Dedicated Floating Collapse/Expand Button */}
+      {/* Dedicated Floating Collapse/Expand Button */}
       <button
         type="button"
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute top-10 -right-5.5 z-50 h-12 w-12 rounded-full border border-zinc-200/90 bg-white flex items-center justify-center text-zinc-500 hover:text-zinc-950 hover:bg-zinc-50 hover:border-zinc-300 dark:border-zinc-800 dark:bg-[#18181b] dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800 transition-all cursor-pointer"
+        className="absolute top-6.5 -right-3.5 z-50 h-7 w-7 rounded-full border border-zinc-200/90 bg-white flex items-center justify-center text-zinc-500 hover:text-zinc-950 hover:bg-zinc-50 hover:border-zinc-300 dark:border-zinc-700/80 dark:bg-[#1e1e24] dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800 shadow-sm transition-all cursor-pointer"
         title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
-        {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+        {isCollapsed ? (
+          <ChevronRight size={13} strokeWidth={2.5} />
+        ) : (
+          <ChevronLeft size={13} strokeWidth={2.5} />
+        )}
       </button>
 
       {/* Main Floating Squircle Card Container */}

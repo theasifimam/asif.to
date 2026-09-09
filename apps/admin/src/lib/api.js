@@ -596,6 +596,29 @@ export const announcementsApi = {
   save: (data) => apiPut("/announcements", data),
 };
 
+/** UAE Jobs management */
+export const jobsApi = {
+  dashboard: () => apiGet("/jobs/admin/dashboard"),
+  list: (params = {}) => apiGet(`/jobs/admin/jobs?${new URLSearchParams(params)}`),
+  get: (id) => apiGet(`/jobs/admin/jobs/${id}`),
+  create: (data) => apiPost("/jobs/admin/jobs", data),
+  update: (id, data) => apiPatch(`/jobs/admin/jobs/${id}`, data),
+  bulk: (action, ids) => apiPost("/jobs/admin/jobs/bulk/actions", { action, ids }),
+  delete: (id) => apiDelete(`/jobs/admin/jobs/${id}`),
+  companies: (params = {}) => apiGet(`/jobs/admin/companies?${new URLSearchParams(params)}`),
+  createCompany: (data) => apiPost("/jobs/admin/companies", data),
+  updateCompany: (id, data) => apiPatch(`/jobs/admin/companies/${id}`, data),
+  sources: () => apiGet("/jobs/admin/sources"),
+  createSource: (data) => apiPost("/jobs/admin/sources", data),
+  updateSource: (id, data) => apiPatch(`/jobs/admin/sources/${id}`, data),
+  testSource: (id) => apiPost(`/jobs/admin/sources/${id}/test`),
+  syncSource: (id) => apiPost(`/jobs/admin/sources/${id}/sync`),
+  sourceLogs: (id) => apiGet(`/jobs/admin/sources/${id}/logs`),
+  applications: (params = {}) => apiGet(`/jobs/admin/applications?${new URLSearchParams(params)}`),
+  updateApplication: (id, status) => apiPatch(`/jobs/admin/applications/${id}`, { status }),
+  resumeUrl: (id) => buildUrl(`/jobs/admin/applications/${id}/resume`),
+};
+
 export const activityApi = {
   list: (params = {}) => apiGet(`/activity?${new URLSearchParams(params)}`),
   notifications: (params = {}) =>

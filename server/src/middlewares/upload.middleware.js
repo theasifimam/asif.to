@@ -89,6 +89,48 @@ export async function validateMessageAttachment(file) {
 
 export const getPrivateMessageAttachmentPath = (storageKey) => path.join(privateMessageDirectory, path.basename(storageKey));
 
+const privateResumeDirectory = path.resolve("private_uploads/job-resumes");
+const resumeMimeTypes = new Set([
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+]);
+
+export const uploadJobResume = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, callback) => {
+      ensureDirectory(privateResumeDirectory);
+      callback(null, privateResumeDirectory);
+    },
+    filename: (_req, _file, callback) => callback(null, crypto.randomUUID()),
+  }),
+  fileFilter: (_req, file, callback) => {
+    if (resumeMimeTypes.has(file.mimetype)) return callback(null, true);
+    const error = new Error("CVs must be PDF, DOC, or DOCX files.");
+    error.code = "INVALID_ATTACHMENT_TYPE";
+    return callback(error, false);
+  },
+  limits: { fileSize: 8 * 1024 * 1024, files: 1 },
+});
+
+export async function validateJobResume(file) {
+  const buffer = await fs.promises.readFile(file.path);
+  const valid =
+    (file.mimetype === "application/pdf" && buffer.subarray(0, 5).toString() === "%PDF-") ||
+    (file.mimetype === "application/msword" && starts(buffer, [0xd0, 0xcf, 0x11, 0xe0])) ||
+    (file.mimetype === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" && starts(buffer, [0x50, 0x4b, 0x03, 0x04]));
+  if (!valid) {
+    await fs.promises.unlink(file.path).catch(() => {});
+    const error = new Error("The CV contents do not match the declared file type.");
+    error.code = "INVALID_ATTACHMENT_CONTENT";
+    throw error;
+  }
+  return file;
+}
+
+export const getPrivateJobResumePath = (storageKey) =>
+  path.join(privateResumeDirectory, path.basename(storageKey));
+
 const compressUploadedImage =
   ({ width, height, fit, quality }) =>
   async (req, _res, next) => {

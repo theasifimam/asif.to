@@ -27,6 +27,10 @@ import {
   Files,
   Megaphone,
   BadgeDollarSign,
+  BriefcaseBusiness,
+  DatabaseZap,
+  UserRoundSearch,
+  Building2,
 } from "lucide-react";
 import AdminGlobalSearch from "@/components/search/AdminGlobalSearch";
 import { useAuth } from "@/contexts/AuthContext";
@@ -75,6 +79,12 @@ const NAV_ITEMS = [
         icon: KanbanSquare,
         permission: "planner.view",
         description: "Kanban boards & tasks",
+        children: [
+          { name: "All Tasks", href: "/planner" },
+          { name: "Development", href: "/planner?category=Development" },
+          { name: "SEO", href: "/planner?category=SEO" },
+          { name: "Content", href: "/planner?category=Content" },
+        ],
       },
       {
         name: "Activity",
@@ -89,6 +99,11 @@ const NAV_ITEMS = [
         icon: ChartNoAxesCombined,
         permission: "analytics.view",
         description: "GA4, Search & insights",
+        children: [
+          { name: "Captured Data", href: "/analytics?source=first-party" },
+          { name: "Google Analytics 4", href: "/analytics?source=ga4" },
+          { name: "Search Console", href: "/analytics?source=gsc" },
+        ],
       },
       {
         name: "Monetization",
@@ -96,6 +111,15 @@ const NAV_ITEMS = [
         icon: BadgeDollarSign,
         permission: "monetization.view",
         description: "Ads, placements & revenue",
+        badge: { text: "3", variant: "amber" },
+        children: [
+          { name: "Overview", href: "/monetization" },
+          { name: "Ad Controls", href: "/monetization/ad-controls" },
+          { name: "Placements", href: "/monetization/placements" },
+          { name: "Performance", href: "/monetization/performance" },
+          { name: "Recommendations", href: "/monetization/recommendations" },
+          { name: "Settings", href: "/monetization/settings" },
+        ],
       },
     ],
   },
@@ -103,11 +127,18 @@ const NAV_ITEMS = [
     group: "Content",
     items: [
       {
-        name: "All Articles",
+        name: "Articles",
         href: "/articles/published",
         icon: BookOpen,
         permission: "articles.create",
         description: "Manage & publish articles",
+        badge: { text: "8", variant: "emerald" },
+        action: { href: "/articles/new", title: "New Article" },
+        children: [
+          { name: "Published", href: "/articles/published" },
+          { name: "Drafts", href: "/articles/drafts" },
+          { name: "Create New", href: "/articles/new" },
+        ],
       },
       {
         name: "Topics",
@@ -115,6 +146,11 @@ const NAV_ITEMS = [
         icon: Hash,
         permission: "topics.view",
         description: "Curriculum topics & order",
+        action: { href: "/topics/new", title: "New Topic" },
+        children: [
+          { name: "All Topics", href: "/topics" },
+          { name: "Create Topic", href: "/topics/new" },
+        ],
       },
       {
         name: "Interview Questions",
@@ -122,6 +158,11 @@ const NAV_ITEMS = [
         icon: MessageSquare,
         permission: "interview_questions.view",
         description: "Q&A bank & solutions",
+        action: { href: "/interview-questions/new", title: "New Question" },
+        children: [
+          { name: "All Questions", href: "/interview-questions" },
+          { name: "Create Question", href: "/interview-questions/new" },
+        ],
       },
       {
         name: "Courses",
@@ -129,6 +170,11 @@ const NAV_ITEMS = [
         icon: GraduationCap,
         permission: "courses.view",
         description: "Courses, chapters & lessons",
+        action: { href: "/courses/new", title: "New Course" },
+        children: [
+          { name: "All Courses", href: "/courses" },
+          { name: "Create Course", href: "/courses/new" },
+        ],
       },
       {
         name: "Categories",
@@ -136,6 +182,11 @@ const NAV_ITEMS = [
         icon: FolderTree,
         permission: "topics.view",
         description: "Taxonomy & hierarchy",
+        action: { href: "/categories/new", title: "New Category" },
+        children: [
+          { name: "All Categories", href: "/categories" },
+          { name: "Create Category", href: "/categories/new" },
+        ],
       },
       {
         name: "Social Media",
@@ -143,6 +194,12 @@ const NAV_ITEMS = [
         icon: Image,
         permission: "articles.create",
         description: "Create, publish & connect accounts",
+        action: { href: "/social-posts/new", title: "New Post" },
+        children: [
+          { name: "All Posts", href: "/social-posts" },
+          { name: "Create Post", href: "/social-posts/new" },
+          { name: "Connected Accounts", href: "/social-integrations" },
+        ],
       },
     ],
   },
@@ -155,6 +212,11 @@ const NAV_ITEMS = [
         icon: FileCode,
         permission: "cheatsheets.view",
         description: "Developer quick sheets",
+        action: { href: "/cheatsheets/new", title: "New Cheatsheet" },
+        children: [
+          { name: "All Cheatsheets", href: "/cheatsheets" },
+          { name: "Create Cheatsheet", href: "/cheatsheets/new" },
+        ],
       },
       {
         name: "Question Bank",
@@ -162,6 +224,44 @@ const NAV_ITEMS = [
         icon: Clipboard,
         permission: "question_bank.view",
         description: "Quizzes & assessments",
+        action: { href: "/quiz/new", title: "New Quiz" },
+        children: [
+          { name: "All Quizzes", href: "/quiz" },
+          { name: "Create Quiz", href: "/quiz/new" },
+        ],
+      },
+    ],
+  },
+  {
+    group: "Jobs",
+    items: [
+      {
+        name: "Jobs Dashboard",
+        href: "/jobs",
+        icon: BriefcaseBusiness,
+        permission: "jobs.view",
+        description: "UAE jobs, companies & performance",
+      },
+      {
+        name: "Job Sources",
+        href: "/jobs/sources",
+        icon: DatabaseZap,
+        permission: "job_sources.manage",
+        description: "Imports, syncs & source health",
+      },
+      {
+        name: "Companies",
+        href: "/jobs/companies",
+        icon: Building2,
+        permission: "jobs.view",
+        description: "Employer profiles & open jobs",
+      },
+      {
+        name: "Applications",
+        href: "/jobs/applications",
+        icon: UserRoundSearch,
+        permission: "job_applications.review",
+        description: "Direct applications & apply clicks",
       },
     ],
   },
@@ -174,6 +274,12 @@ const NAV_ITEMS = [
         icon: Users,
         permission: "users.view",
         description: "Accounts, roles & invites",
+        children: [
+          { name: "All Users", href: "/users" },
+          { name: "Invitations", href: "/users/invitations", permission: "invitations.manage" },
+          { name: "Roles & Permissions", href: "/users/roles", permission: "roles.manage" },
+          { name: "Activity Logs", href: "/users/activity", permission: "users.edit" },
+        ],
       },
       {
         name: "Messages",
@@ -342,10 +448,22 @@ export default function AdminLayout({ children }) {
       : null;
   const visibleNavItems = NAV_ITEMS.map((group) => ({
     ...group,
-    items: group.items.filter(
-      (item) =>
-        hasPermission(user, item.permission) && canAccessPath(user, item.href),
-    ),
+    items: group.items
+      .filter(
+        (item) =>
+          hasPermission(user, item.permission) &&
+          canAccessPath(user, item.href?.split("?")[0]),
+      )
+      .map((item) => ({
+        ...item,
+        children: item.children
+          ? item.children.filter(
+              (child) =>
+                hasPermission(user, child.permission || item.permission) &&
+                canAccessPath(user, child.href?.split("?")[0]),
+            )
+          : undefined,
+      })),
   })).filter((group) => group.items.length > 0);
   const requiredPermission = permissionForPath(pathname);
   const canViewPage = hasPermission(user, requiredPermission);

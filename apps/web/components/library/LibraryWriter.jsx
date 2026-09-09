@@ -27,5 +27,199 @@ export default function LibraryWriter({ entryId = null, initialType = "note" }) 
   const saveEntry = async (publishConfirmed = false) => { setSaving(true); try { if (entryId) await updateEntry({ id: entryId, ...form, type, publishConfirmed }).unwrap(); else await createEntry({ ...form, type, publishConfirmed }).unwrap(); toast.success(entryId ? "Knowledge updated" : "Saved privately in your library"); router.push("/library"); } catch (error) { toast.error(error?.data?.message || "Unable to save this knowledge"); } finally { setSaving(false); } };
   const submit = async (event) => { event.preventDefault(); if (form.visibility === "public") { setShowPublishConfirm(true); return; } await saveEntry(false); };
   if (isLoading && entryId) return <><Header/><main className="mx-auto max-w-5xl px-4 pt-32 text-zinc-500">Loading your writing space…</main></>;
-  return <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950"><Header/><main className="mx-auto max-w-6xl px-4 pb-20 pt-24 sm:px-6"><div className="mb-6 flex items-center justify-between gap-3"><Button type="button" variant="ghost" onClick={() => router.push("/library")}><ArrowLeft size={17}/>Back to library</Button><div className="flex items-center gap-2 text-xs font-semibold text-zinc-500"><Lock size={14} className="text-emerald-600"/>Saved privately by default</div></div><form onSubmit={submit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]"><section className="min-w-0 rounded-[2rem] bg-white p-5 shadow-sm dark:bg-zinc-900 sm:p-8"><div className="mb-6"><p className="text-xs font-black uppercase tracking-widest text-blue-600">{entryId ? "Edit knowledge" : "New knowledge"}</p><h1 className="mt-2 text-3xl font-black tracking-tight">Write something your future self will thank you for.</h1><p className="mt-2 text-sm text-zinc-500">Use the guide as a starting point. Edit, remove, or rearrange anything.</p></div><div className="space-y-2"><Label htmlFor="library-title">Title</Label><Input id="library-title" required value={form.title} onChange={(event) => update("title", event.target.value)} placeholder="e.g. Fixing hydration mismatch in Next.js" /></div><div className="mt-6"><LibraryEditor value={form.content} onChange={(value) => update("content", value)} placeholder="Start writing your knowledge…" /></div></section><aside className="space-y-4"><div className="rounded-3xl bg-white p-5 shadow-sm dark:bg-zinc-900"><div className="space-y-2"><Label htmlFor="library-type">Content type</Label><select id="library-type" value={type} onChange={(event) => chooseType(event.target.value)} className="h-11 w-full rounded-2xl border border-zinc-200 bg-white px-4 text-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100">{TYPES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></div><div className="mt-4 space-y-2"><Label htmlFor="library-tags">Tags</Label><Input id="library-tags" value={form.tags} onChange={(event) => update("tags", event.target.value)} placeholder="react, debugging, nextjs" /><p className="text-xs text-zinc-400">Separate tags with commas.</p></div></div><div className="rounded-3xl bg-white p-5 shadow-sm dark:bg-zinc-900"><Label htmlFor="library-visibility">Visibility</Label><select id="library-visibility" value={form.visibility} onChange={(event) => update("visibility", event.target.value)} className="mt-2 h-11 w-full rounded-2xl border border-zinc-200 bg-white px-4 text-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"><option value="private">Private — only you</option><option value="unlisted">Unlisted — not indexed</option><option value="public">Public — shareable and indexable</option></select><p className="mt-2 text-xs leading-5 text-zinc-500">Private content never appears in public APIs, search, metadata, feeds, or sitemap.</p></div><div className="rounded-3xl bg-white p-5 shadow-sm dark:bg-zinc-900"><button type="button" onClick={() => setShowSeo((open) => !open)} className="flex w-full items-center justify-between text-left text-sm font-bold">Optional SEO settings<ChevronDown size={16} className={showSeo ? "rotate-180" : ""}/></button>{showSeo && <div className="mt-4 space-y-3"><p className="text-xs leading-5 text-zinc-500">Only public entries may be indexed. Defaults are generated automatically.</p><Input value={form.seoTitle} onChange={(event) => update("seoTitle", event.target.value)} placeholder="SEO title"/><Textarea rows={3} value={form.seoDescription} onChange={(event) => update("seoDescription", event.target.value)} placeholder="Meta description"/><Input value={form.canonicalUrl} onChange={(event) => update("canonicalUrl", event.target.value)} placeholder="Canonical URL (optional)"/></div>}</div><Button type="submit" className="w-full" disabled={saving || createState.isLoading || updateState.isLoading}><Save size={16}/>{entryId ? "Save changes" : "Save privately"}</Button></aside></form></main><Footer/>{showPublishConfirm && <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"><div role="dialog" aria-modal="true" aria-labelledby="publish-warning-title" className="w-full max-w-md rounded-[2.5rem] bg-white p-6 text-center shadow-2xl dark:bg-zinc-900 sm:p-8"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400"><ShieldAlert size={28}/></div><h2 id="publish-warning-title" className="mt-4 text-xl font-black">Make this public?</h2><p className="mt-3 text-sm leading-6 text-zinc-500">Anyone on the internet may be able to view, share, copy and index this content.</p><div className="mt-4 rounded-2xl bg-amber-50 p-4 text-left text-xs font-medium leading-5 text-amber-900 dark:bg-amber-500/10 dark:text-amber-200">Make sure it does not contain passwords, API keys, private URLs, personal information, client data or confidential code.</div><div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row"><Button type="button" variant="outline" className="flex-1" onClick={() => setShowPublishConfirm(false)} disabled={saving}>Keep private</Button><Button type="button" className="flex-1 bg-amber-600 hover:bg-amber-700" onClick={() => { setShowPublishConfirm(false); saveEntry(true); }} disabled={saving}>{saving ? "Publishing…" : "Yes, publish"}</Button></div><button type="button" onClick={() => setShowPublishConfirm(false)} className="absolute" aria-label="Close"><X className="sr-only"/></button></div></div>}</div>;
+  return (
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+      <Header />
+      <main className="mx-auto max-w-6xl px-4 pb-20 pt-24 sm:px-6">
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <Button type="button" variant="ghost" onClick={() => router.push("/library")}>
+            <ArrowLeft size={17} />Back to library
+          </Button>
+          <div className="flex items-center gap-2 text-xs font-semibold text-zinc-500">
+            <Lock size={14} className="text-emerald-600" />Saved privately by default
+          </div>
+        </div>
+        <form onSubmit={submit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+          <section className="min-w-0 rounded-[2rem] bg-white p-5 shadow-sm dark:bg-zinc-900 sm:p-8">
+            <div className="mb-6">
+              <p className="text-xs font-black uppercase tracking-widest text-blue-600">
+                {entryId ? "Edit knowledge" : "New knowledge"}
+              </p>
+              <h1 className="mt-2 text-3xl font-black tracking-tight">
+                Write something your future self will thank you for.
+              </h1>
+              <p className="mt-2 text-sm text-zinc-500">
+                Use the guide as a starting point. Edit, remove, or rearrange anything.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="library-title">Title</Label>
+              <Input
+                id="library-title"
+                required
+                value={form.title}
+                onChange={(event) => update("title", event.target.value)}
+                placeholder="e.g. Fixing hydration mismatch in Next.js"
+              />
+            </div>
+            <div className="mt-6">
+              <LibraryEditor
+                value={form.content}
+                onChange={(value) => update("content", value)}
+                placeholder="Start writing your knowledge…"
+              />
+            </div>
+          </section>
+          <aside className="space-y-4">
+            <div className="rounded-3xl bg-white p-5 shadow-sm dark:bg-zinc-900">
+              <div className="space-y-2">
+                <Label htmlFor="library-type">Content type</Label>
+                <select
+                  id="library-type"
+                  value={type}
+                  onChange={(event) => chooseType(event.target.value)}
+                  className="h-11 w-full rounded-2xl border border-zinc-200 bg-white px-4 text-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+                >
+                  {TYPES.map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="mt-4 space-y-2">
+                <Label htmlFor="library-tags">Tags</Label>
+                <Input
+                  id="library-tags"
+                  value={form.tags}
+                  onChange={(event) => update("tags", event.target.value)}
+                  placeholder="react, debugging, nextjs"
+                />
+                <p className="text-xs text-zinc-400">Separate tags with commas.</p>
+              </div>
+            </div>
+            <div className="rounded-3xl bg-white p-5 shadow-sm dark:bg-zinc-900">
+              <Label htmlFor="library-visibility">Visibility</Label>
+              <select
+                id="library-visibility"
+                value={form.visibility}
+                onChange={(event) => update("visibility", event.target.value)}
+                className="mt-2 h-11 w-full rounded-2xl border border-zinc-200 bg-white px-4 text-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+              >
+                <option value="private">Private — only you</option>
+                <option value="unlisted">Unlisted — not indexed</option>
+                <option value="public">Public — shareable and indexable</option>
+              </select>
+              <p className="mt-2 text-xs leading-5 text-zinc-500">
+                Private content never appears in public APIs, search, metadata, feeds, or sitemap.
+              </p>
+            </div>
+            <div className="rounded-3xl bg-white p-5 shadow-sm dark:bg-zinc-900">
+              <button
+                type="button"
+                onClick={() => setShowSeo((open) => !open)}
+                className="flex w-full items-center justify-between text-left text-sm font-bold"
+              >
+                Optional SEO settings
+                <ChevronDown size={16} className={showSeo ? "rotate-180" : ""} />
+              </button>
+              {showSeo && (
+                <div className="mt-4 space-y-3">
+                  <p className="text-xs leading-5 text-zinc-500">
+                    Only public entries may be indexed. Defaults are generated automatically.
+                  </p>
+                  <Input
+                    value={form.seoTitle}
+                    onChange={(event) => update("seoTitle", event.target.value)}
+                    placeholder="SEO title"
+                  />
+                  <Textarea
+                    rows={3}
+                    value={form.seoDescription}
+                    onChange={(event) => update("seoDescription", event.target.value)}
+                    placeholder="Meta description"
+                  />
+                  <Input
+                    value={form.canonicalUrl}
+                    onChange={(event) => update("canonicalUrl", event.target.value)}
+                    placeholder="Canonical URL (optional)"
+                  />
+                </div>
+              )}
+            </div>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={saving || createState.isLoading || updateState.isLoading}
+            >
+              <Save size={16} />
+              {entryId ? "Save changes" : "Save privately"}
+            </Button>
+          </aside>
+        </form>
+      </main>
+      <Footer />
+      {showPublishConfirm && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="publish-warning-title"
+            className="relative w-full max-w-[440px] overflow-hidden rounded-[28px] border border-zinc-800/80 bg-zinc-950 p-7 text-left text-zinc-100 shadow-2xl sm:p-8"
+          >
+            <button
+              type="button"
+              onClick={() => setShowPublishConfirm(false)}
+              className="absolute right-5 top-5 rounded-full p-2 text-zinc-500 hover:bg-zinc-900 hover:text-white transition-colors"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900 text-amber-400 mb-5">
+              <ShieldAlert className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-amber-500">
+                Publish confirmation
+              </p>
+              <h2
+                id="publish-warning-title"
+                className="mt-1 font-outfit text-2xl font-black tracking-tight text-white"
+              >
+                Make this public?
+              </h2>
+              <p className="mt-1.5 text-xs font-medium leading-relaxed text-zinc-400">
+                Anyone on the internet will be able to view, share, copy and index this content.
+              </p>
+            </div>
+            <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-3.5 text-xs font-medium leading-5 text-zinc-400">
+              Make sure it does not contain passwords, API keys, private URLs, personal information, client data or confidential code.
+            </div>
+            <div className="mt-8 flex items-center justify-end gap-3 pt-3 border-t border-zinc-800/80">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setShowPublishConfirm(false)}
+                disabled={saving}
+                className="rounded-full px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  setShowPublishConfirm(false);
+                  saveEntry(true);
+                }}
+                disabled={saving}
+                className="rounded-full bg-white px-6 py-2.5 text-xs font-bold text-zinc-950 transition-all shadow-sm hover:bg-zinc-200 disabled:opacity-50"
+              >
+                {saving ? "Publishing…" : "Yes, publish"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

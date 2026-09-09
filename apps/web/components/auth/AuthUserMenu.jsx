@@ -13,6 +13,7 @@ import {
   LogOut,
   Settings,
   UserRound,
+  BriefcaseBusiness,
 } from "lucide-react";
 
 export default function AuthUserMenu({ user }) {
@@ -65,6 +66,9 @@ export default function AuthUserMenu({ user }) {
           </MenuLink>
           <MenuLink href="/bookmarks" icon={Bookmark}>
             Bookmarks
+          </MenuLink>
+          <MenuLink href="/jobs/my" icon={BriefcaseBusiness}>
+            My Jobs
           </MenuLink>
           <button
             role="menuitem"

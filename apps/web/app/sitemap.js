@@ -2,6 +2,11 @@ export const revalidate = 3600; // revalidate every hour
 
 const STATIC_ROUTES = [
   {
+    path: "/jobs",
+    priority: 0.9,
+    changeFrequency: "daily",
+  },
+  {
     path: "/courses",
     priority: 0.9,
     changeFrequency: "daily",
@@ -204,6 +209,27 @@ export default async function sitemap() {
         });
       }
     }
+  }
+
+  // Jobs only exposes inventory-backed location/category pages, preventing thin sitemap URLs.
+  const jobsIndex = await fetchApi("/jobs/sitemap");
+  if (jobsIndex) {
+    for (const job of jobsIndex.jobs || []) {
+      const url = `${siteUrl}/jobs/${job.slug}`;
+      if (!existingUrls.has(url)) {
+        existingUrls.add(url);
+        dynamicEntries.push({ url, lastModified: job.updatedAt ? new Date(job.updatedAt) : undefined, changeFrequency: "daily", priority: 0.8 });
+      }
+    }
+    for (const company of jobsIndex.companies || []) {
+      const url = `${siteUrl}/jobs/company/${company.slug}`;
+      if (!existingUrls.has(url)) {
+        existingUrls.add(url);
+        dynamicEntries.push({ url, lastModified: company.updatedAt ? new Date(company.updatedAt) : undefined, changeFrequency: "weekly", priority: 0.7 });
+      }
+    }
+    for (const location of jobsIndex.locations || []) dynamicEntries.push({ url: `${siteUrl}/jobs/location/${location}`, changeFrequency: "daily", priority: 0.7 });
+    for (const category of jobsIndex.categories || []) dynamicEntries.push({ url: `${siteUrl}/jobs/category/${category}`, changeFrequency: "daily", priority: 0.7 });
   }
 
   const { TECHNOLOGIES } = await import("@/lib/playground/config");

@@ -164,7 +164,7 @@ export default function ChapterBlocksRenderer({
           if (block.type === "list") {
             const listItems = block.text.split("\n").filter((l) => l.trim());
             return (
-              <ul key={idx} className="space-y-3 my-5 pl-1">
+              <ul key={idx} className="space-y-1.5 my-4 pl-1">
                 {listItems.map((li, i) => {
                   const isOrdered = /^\d+\.\s/.test(li.trim());
                   const content = li.trim().replace(/^([-*]|\d+\.)\s+/, "");

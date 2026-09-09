@@ -150,7 +150,13 @@ export default function MobileBottomNavbar({
                       item.name === "My Profile" && user?._id
                         ? `/users/${user._id}`
                         : item.href;
-                    const isActive = checkIsActive(targetHref);
+                    const isActive =
+                      checkIsActive(targetHref) ||
+                      Boolean(
+                        item.children?.some((child) =>
+                          checkIsActive(child.href)
+                        )
+                      );
                     const Icon = item.icon;
 
                     return (

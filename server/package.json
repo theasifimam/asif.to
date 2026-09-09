@@ -24,7 +24,12 @@
     "seed:dsa": "node src/scripts/seed_dsa_course.js",
     "repair:social-posts": "node src/scripts/seedReactTutorials.js",
     "export:quiz": "node src/scripts/export-course-quiz-data.js",
-    "assets:index": "node src/scripts/index-existing-assets.js"
+    "assets:index": "node src/scripts/index-existing-assets.js",
+    "seed:jobs-demo": "node src/scripts/seed-demo-jobs.js",
+    "migrate:jobs": "node src/scripts/migrate-jobs.js",
+    "seed:job-sources": "node src/scripts/seed-job-sources.js",
+    "verify:job-sources": "node src/scripts/verify-job-sources.js",
+    "report:job-sources": "node src/scripts/verify-job-sources.js --report-only"
   },
   "keywords": [],
   "author": "",

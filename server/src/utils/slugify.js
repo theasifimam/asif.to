@@ -1,5 +1,5 @@
 export const slugify = (text) => {
-  return text.
+  return String(text ?? "").
   toString().
   toLowerCase().
   trim().
