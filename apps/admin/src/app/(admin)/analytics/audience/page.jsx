@@ -69,7 +69,7 @@ export default function AudiencePage() {
       </div>
       {loading && (
         <div className="grid min-h-72 place-items-center">
-          <LogoLoader className=" text-blue-600"  />
+          <LogoLoader className="h-12 w-12 text-blue-600" />
         </div>
       )}
       {error && (

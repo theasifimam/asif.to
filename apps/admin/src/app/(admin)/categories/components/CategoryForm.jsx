@@ -193,7 +193,7 @@ export default function CategoryForm({
     return (
       <AdminPage size="lg">
         <div className="flex min-h-[60vh] items-center justify-center">
-          <LogoLoader className="h-8 w-8  text-blue-600"  />
+          <LogoLoader className="h-12 w-12 text-blue-600" />
         </div>
       </AdminPage>
     );

@@ -39,7 +39,7 @@ export default function AuthorClient({ username }) {
   if (profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <LogoLoader className=" text-zinc-400" size={32}  />
+        <LogoLoader className="h-14 w-14 sm:h-16 sm:w-16 text-blue-600 dark:text-blue-500" />
       </div>
     );
   }
@@ -238,7 +238,7 @@ export default function AuthorClient({ username }) {
 
             {articlesLoading ? (
               <div className="py-16 flex justify-center">
-                <LogoLoader className=" text-zinc-400" size={32}  />
+                <LogoLoader className="h-10 w-10 text-blue-600 dark:text-blue-500" />
               </div>
             ) : articles.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">

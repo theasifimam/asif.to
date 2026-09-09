@@ -117,7 +117,7 @@ export default function ArticleClient({ slug, initialData }) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <LogoLoader className=" text-zinc-400" size={40}  />
+          <LogoLoader className="h-14 w-14 sm:h-16 sm:w-16 text-blue-600 dark:text-blue-500" />
           <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">
             Loading Intelligence Dispatch...
           </span>

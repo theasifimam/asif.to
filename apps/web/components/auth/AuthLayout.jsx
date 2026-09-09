@@ -36,7 +36,7 @@ export default function AuthLayout({ children }) {
     return (
       <div className="fixed inset-0 z-50 bg-zinc-950/40 dark:bg-black/60 backdrop-blur-md flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <LogoLoader className="h-10 w-10" />
+          <LogoLoader className="h-16 w-16" />
         </div>
       </div>
     );

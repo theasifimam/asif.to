@@ -4,7 +4,7 @@ import LogoLoader from "@/components/ui/LogoLoader";
 import React from "react";
 import Link from "next/link";
 import { ArrowRight, Clock, FileText } from "lucide-react";
-import { useGetArticlesQuery, Article } from "@/lib/api/articlesApi";
+import { useGetArticlesQuery } from "@/lib/api/articlesApi";
 import { formatDistanceToNow } from "date-fns";
 import { getImageUrl } from "@/lib/config";
 import ArticleCard from "./ArticleCard";
@@ -17,7 +17,7 @@ export default function LatestArticles() {
   if (isLoading) {
     return (
       <div className="py-20 flex flex-col items-center justify-center gap-4">
-        <LogoLoader className=" text-zinc-300" size={32}  />
+        <LogoLoader className="h-12 w-12 sm:h-14 sm:w-14 text-blue-600 dark:text-blue-500" />
         <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400">
           Loading Latest Dispatches...
         </span>

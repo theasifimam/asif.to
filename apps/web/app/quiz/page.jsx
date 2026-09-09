@@ -186,7 +186,7 @@ export default function QuizPage() {
       <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 pb-24 sm:pb-12">
         <Header />
         <main className="flex-1 flex items-center justify-center">
-          <LogoLoader className="w-8 h-8 text-blue-500" />
+          <LogoLoader className="w-14 h-14 sm:w-16 sm:h-16 text-blue-500" />
         </main>
         <Footer />
       </div>

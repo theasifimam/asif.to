@@ -221,8 +221,8 @@ export default function LegalPage() {
       <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
         <Header />
         <main className="flex-1 flex flex-col items-center justify-center">
-          <LogoLoader className="h-8 w-8" />
-          <span className="mt-3 text-xs font-bold uppercase tracking-widest text-zinc-400">
+          <LogoLoader className="h-14 w-14 sm:h-16 sm:w-16" />
+          <span className="mt-4 text-xs font-bold uppercase tracking-widest text-zinc-400">
             Loading Legal Document...
           </span>
         </main>

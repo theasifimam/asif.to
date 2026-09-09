@@ -279,7 +279,7 @@ function KnowledgeQuiz({ courseSlug, chapter, chapterNumber, onComplete }) {
   const [result, setResult] = useState(null);
 
   if (isLoading) {
-    return <div className="grid min-h-40 place-items-center"><LogoLoader className="h-6 w-6  text-blue-600"  /></div>;
+    return <div className="grid min-h-40 place-items-center"><LogoLoader className="h-10 w-10 text-blue-600" /></div>;
   }
 
   if (!questions.length) {

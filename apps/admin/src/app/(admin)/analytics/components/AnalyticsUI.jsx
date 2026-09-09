@@ -20,7 +20,8 @@ export function dateRange(days) {
 export const n = (value) => Math.round(Number(value) || 0).toLocaleString();
 export const one = (value) => (Number(value) || 0).toFixed(1);
 export const pct = (value) => `${(Number(value) || 0).toFixed(1)}%`;
-export const ratioPct = (value) => `${((Number(value) || 0) * 100).toFixed(1)}%`;
+export const ratioPct = (value) =>
+  `${((Number(value) || 0) * 100).toFixed(1)}%`;
 
 export function seconds(value) {
   const amount = Math.max(0, Number(value) || 0);
@@ -104,7 +105,7 @@ export function Section({
   className = "",
 }) {
   return (
-    <section className={`flex flex-col space-y-4 h-full ${className}`}>
+    <section className={`flex flex-col gap-4 h-full ${className}`}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between min-h-11">
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.18em] text-blue-600 dark:text-blue-400">
@@ -121,7 +122,7 @@ export function Section({
         </div>
         {action}
       </div>
-      <div className="flex-1 flex flex-col min-w-0">{children}</div>
+      <div className="flex-1 flex flex-col min-w-0 gap-4">{children}</div>
     </section>
   );
 }
@@ -159,7 +160,7 @@ export function ErrorBox({ children }) {
 export function Loading() {
   return (
     <div className="grid min-h-72 place-items-center">
-      <LogoLoader className="h-7 w-7  text-blue-600"  />
+      <LogoLoader className="h-12 w-12 text-blue-600" />
     </div>
   );
 }
@@ -174,8 +175,12 @@ export function Quality({ data }) {
           <div className="text-[9px] font-black uppercase tracking-wider text-zinc-400">
             {key.replace(/([A-Z])/g, " $1")}
           </div>
-          <div className="mt-1 break-words font-semibold text-zinc-700 dark:text-zinc-300">
-            {typeof value === "boolean" ? (value ? "Yes" : "No") : String(value)}
+          <div className="mt-1 wrap-break-word font-semibold text-zinc-700 dark:text-zinc-300">
+            {typeof value === "boolean"
+              ? value
+                ? "Yes"
+                : "No"
+              : String(value)}
           </div>
         </div>
       ))}
@@ -240,7 +245,7 @@ export function ClientTable({
                     >
                       {column.render
                         ? column.render(row)
-                        : row[column.key] ?? "—"}
+                        : (row[column.key] ?? "—")}
                     </td>
                   ))}
                 </tr>

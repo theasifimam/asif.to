@@ -40,7 +40,7 @@ export default function LibraryWriter({ entryId = null, initialType = "note" }) 
           </div>
         </div>
         <form onSubmit={submit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <section className="min-w-0 rounded-[2rem] bg-white p-5 shadow-sm dark:bg-zinc-900 sm:p-8">
+          <section className="min-w-0 rounded-4xl bg-white p-5 shadow-sm dark:bg-zinc-900 sm:p-8">
             <div className="mb-6">
               <p className="text-xs font-black uppercase tracking-widest text-blue-600">
                 {entryId ? "Edit knowledge" : "New knowledge"}
@@ -160,12 +160,12 @@ export default function LibraryWriter({ entryId = null, initialType = "note" }) 
       </main>
       <Footer />
       {showPublishConfirm && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
+        <div className="fixed inset-0 z-80 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="publish-warning-title"
-            className="relative w-full max-w-[440px] overflow-hidden rounded-[28px] border border-zinc-800/80 bg-zinc-950 p-7 text-left text-zinc-100 shadow-2xl sm:p-8"
+            className="relative w-full max-w-110 overflow-hidden rounded-[28px] border border-zinc-800/80 bg-zinc-950 p-7 text-left text-zinc-100 shadow-2xl sm:p-8"
           >
             <button
               type="button"

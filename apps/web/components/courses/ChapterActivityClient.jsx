@@ -158,7 +158,7 @@ export default function ChapterActivityClient({
       <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
         <Header />
         <div className="grid min-h-[70vh] place-items-center">
-          <LogoLoader className="h-8 w-8  text-blue-600"  />
+          <LogoLoader className="h-14 w-14 sm:h-16 sm:w-16 text-blue-600" />
         </div>
       </div>
     );

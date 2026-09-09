@@ -22,8 +22,8 @@ export default function ProfileSavedTab({
         </h3>
 
         {savedItemsLoading ? (
-          <div className="p-8 rounded-3xl bg-white dark:bg-zinc-900/90 shadow-sm flex items-center justify-center border border-zinc-100 dark:border-zinc-800">
-            <LogoLoader className="w-6 h-6  text-blue-500"  />
+          <div className="p-12 rounded-3xl bg-white dark:bg-zinc-900/90 shadow-sm flex items-center justify-center border border-zinc-100 dark:border-zinc-800">
+            <LogoLoader className="h-12 w-12 text-blue-600 dark:text-blue-500" />
           </div>
         ) : savedItems.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

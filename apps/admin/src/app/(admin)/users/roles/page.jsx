@@ -70,7 +70,7 @@ export default function RolesPage() {
   };
 
   if (isLoading || !currentMatrix) {
-    return <div className="flex min-h-[60vh] items-center justify-center"><LogoLoader className="h-6 w-6  text-blue-600"  /></div>;
+    return <div className="flex min-h-[60vh] items-center justify-center"><LogoLoader className="h-12 w-12 text-blue-600" /></div>;
   }
 
   if (isError) {

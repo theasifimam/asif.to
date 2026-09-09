@@ -12,7 +12,7 @@ export default function ProfileArticlesTab({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <LogoLoader className="w-6 h-6  text-blue-500"  />
+        <LogoLoader className="h-12 w-12 text-blue-600 dark:text-blue-500" />
       </div>
     );
   }

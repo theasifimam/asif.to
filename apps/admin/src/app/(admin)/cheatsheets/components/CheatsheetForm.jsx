@@ -77,7 +77,7 @@ export default function CheatsheetForm({ cheatsheetId }) {
     setSaving(false);
   };
 
-  if (loading) return <div className="flex min-h-[60vh] items-center justify-center"><LogoLoader className="h-6 w-6  text-blue-600"  /></div>;
+  if (loading) return <div className="flex min-h-[60vh] items-center justify-center"><LogoLoader className="h-12 w-12 text-blue-600" /></div>;
 
   return (
     <AdminFormShell

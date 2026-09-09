@@ -283,7 +283,7 @@ export default function FAQPage() {
           <div className="lg:col-span-9 space-y-1 bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-4xl overflow-hidden">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-20 text-zinc-400">
-                <LogoLoader className="w-8 h-8  text-blue-500 mb-3"  />
+                <LogoLoader className="w-14 h-14 sm:w-16 sm:h-16 text-blue-600 dark:text-blue-500 mb-4" />
                 <span className="text-xs font-extrabold uppercase tracking-widest">
                   Loading questions...
                 </span>

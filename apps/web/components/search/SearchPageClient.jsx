@@ -250,7 +250,7 @@ export default function SearchPageClient() {
       <div className="mt-2" aria-live="polite">
         {loading ? (
           <div className="flex flex-col items-center justify-center gap-3 py-24 rounded-4xl bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200/60 dark:border-zinc-800/60 shadow-lg text-sm text-zinc-500">
-            <LogoLoader className="h-6 w-6  text-blue-500"  />
+            <LogoLoader className="h-12 w-12 sm:h-14 sm:w-14 text-blue-600 dark:text-blue-500" />
             <span className="font-semibold">Loading search index…</span>
           </div>
         ) : error ? (

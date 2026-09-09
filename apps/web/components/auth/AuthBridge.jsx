@@ -72,7 +72,7 @@ export default function AuthBridge({ children }) {
   if (!ready)
     return (
       <div className="grid min-h-screen place-items-center bg-zinc-50 dark:bg-zinc-950">
-        <LogoLoader className="h-8 w-8" />
+        <LogoLoader className="h-16 w-16 sm:h-20 sm:w-20" />
       </div>
     );
 

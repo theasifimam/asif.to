@@ -219,7 +219,7 @@ export default function SocialIntegrationsPage() {
 
       {loading ? (
         <div className="flex h-64 items-center justify-center rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white dark:border-zinc-800/60 dark:bg-zinc-950">
-          <LogoLoader className="h-6 w-6  text-blue-600"  />
+          <LogoLoader className="h-12 w-12 text-blue-600" />
         </div>
       ) : (
         <div className="grid gap-4 xl:grid-cols-3">

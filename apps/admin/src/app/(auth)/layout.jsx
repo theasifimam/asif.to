@@ -33,7 +33,7 @@ export default function AuthLayout({ children }) {
     return (
       <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-foreground flex items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-4">
-          <LogoLoader className="h-12 w-12" />
+          <LogoLoader className="h-16 w-16 sm:h-20 sm:w-20" />
           <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">
             Checking session...
           </span>
