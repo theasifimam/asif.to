@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   adminBulkJobs, adminCreateCompany, adminCreateJob, adminCreateSource, adminDashboard, adminDeleteJob,
-  adminDownloadResume, adminGetJob, adminListApplications, adminListCompanies, adminListJobs, adminListSourceLogs, adminListSources,
+  adminDownloadResume, adminGetCompany, adminGetJob, adminGetSource, adminListApplications, adminListCompanies, adminListJobs, adminListSourceLogs, adminListSources,
   adminSyncSource, adminTestSource, adminUpdateApplication, adminUpdateCompany, adminUpdateJob, adminUpdateSource, externalApply,
   getJobsSitemap, getMyJobApplications, getMySavedJobs, getPublicCompany, getPublicJob, getPublicTaxonomy,
   internalApply, listPublicJobs, recordJobEvent, toggleSavedJob,
@@ -36,10 +36,12 @@ router.post("/admin/jobs/bulk/actions", protect, requirePermission("jobs.manage"
 router.delete("/admin/jobs/:id", protect, requirePermission("jobs.delete"), adminDeleteJob);
 
 router.get("/admin/companies", protect, requirePermission("jobs.view"), adminListCompanies);
+router.get("/admin/companies/:id", protect, requirePermission("jobs.view"), adminGetCompany);
 router.post("/admin/companies", protect, requirePermission("jobs.manage"), adminCreateCompany);
 router.patch("/admin/companies/:id", protect, requirePermission("jobs.manage"), adminUpdateCompany);
 
 router.get("/admin/sources", protect, requirePermission("job_sources.manage"), adminListSources);
+router.get("/admin/sources/:id", protect, requirePermission("job_sources.manage"), adminGetSource);
 router.post("/admin/sources", protect, requirePermission("job_sources.manage"), adminCreateSource);
 router.patch("/admin/sources/:id", protect, requirePermission("job_sources.manage"), adminUpdateSource);
 router.post("/admin/sources/:id/test", protect, requirePermission("job_sources.manage"), jobRateLimit({ windowMs: 60_000, max: 10 }), adminTestSource);

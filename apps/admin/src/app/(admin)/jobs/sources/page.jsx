@@ -1,44 +1,26 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
   AlertTriangle,
   CheckCircle2,
   ChevronDown,
   DatabaseZap,
+  ExternalLink,
   Pencil,
   Play,
   Plus,
   RefreshCw,
   Search,
-  X,
 } from "lucide-react";
 import { jobsApi } from "@/lib/api";
 import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { AdminLoading, AdminPage, AdminPageHeader } from "@/components/admin";
+import { ViewToggle } from "@/components/ui/ViewToggle";
 
-const empty = {
-  name: "",
-  slug: "",
-  type: "api",
-  providerOrganizationId: "",
-  providerRegion: "global",
-  baseUrl: "",
-  careersUrl: "",
-  endpointUrl: "",
-  jobsPath: "",
-  credentialEnvKey: "",
-  syncFrequency: "daily",
-  syncIntervalHours: 12,
-  qualityThreshold: 90,
-  enabled: true,
-  autoPublish: false,
-  trusted: false,
-  fieldMapping: "{}",
-};
 const types = [
   "manual",
   "employer-career-page",
@@ -54,9 +36,6 @@ const types = [
 export default function JobSourcesPage() {
   const [sources, setSources] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState(empty);
-  const [saving, setSaving] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [busy, setBusy] = useState({});
   const [logs, setLogs] = useState({});
@@ -64,6 +43,8 @@ export default function JobSourcesPage() {
   const [search, setSearch] = useState("");
   const [provider, setProvider] = useState("all");
   const [sourceState, setSourceState] = useState("all");
+  const [viewMode, setViewMode] = useState("card");
+
   const load = async ({ initial = false } = {}) => {
     if (initial) setLoading(true);
     else setRefreshing(true);
@@ -74,6 +55,7 @@ export default function JobSourcesPage() {
       return toast.error(result.error || "Unable to load sources");
     setSources(result.data?.data || []);
   };
+
   useEffect(() => {
     let active = true;
     jobsApi.sources().then((result) => {
@@ -87,16 +69,21 @@ export default function JobSourcesPage() {
       active = false;
     };
   }, []);
+
   const patchSource = (source) => {
     if (!source?._id) return;
-    setSources((current) => current.map((item) => item._id === source._id ? source : item));
+    setSources((current) =>
+      current.map((item) => (item._id === source._id ? source : item)),
+    );
   };
+
   const refreshSource = async (id) => {
     const result = await jobsApi.sources();
     if (!result.success) return;
     const source = (result.data?.data || []).find((item) => item._id === id);
     patchSource(source);
   };
+
   const setSourceBusy = (id, action = null) => {
     setBusy((current) => {
       const next = { ...current };
@@ -105,63 +92,64 @@ export default function JobSourcesPage() {
       return next;
     });
   };
-  const counts = useMemo(() => ({
-    total: sources.length,
-    enabled: sources.filter((source) => source.enabled).length,
-    verified: sources.filter((source) => source.verificationStatus === "Verified").length,
-    attention: sources.filter((source) => source.syncStatus === "failed" || source.lastError).length,
-    uaeJobs: sources.reduce((total, source) => total + (source.verifiedUaeJobsFound || 0), 0),
-  }), [sources]);
+
+  const counts = useMemo(
+    () => ({
+      total: sources.length,
+      enabled: sources.filter((source) => source.enabled).length,
+      verified: sources.filter(
+        (source) => source.verificationStatus === "Verified",
+      ).length,
+      attention: sources.filter(
+        (source) => source.syncStatus === "failed" || source.lastError,
+      ).length,
+      uaeJobs: sources.reduce(
+        (total, source) => total + (source.verifiedUaeJobsFound || 0),
+        0,
+      ),
+    }),
+    [sources],
+  );
+
   const visibleSources = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return sources.filter((source) => {
-      if (provider !== "all" && source.type !== provider) return false;
-      if (sourceState === "enabled" && !source.enabled) return false;
-      if (sourceState === "disabled" && source.enabled) return false;
-      if (sourceState === "attention" && source.syncStatus !== "failed" && !source.lastError) return false;
-      if (sourceState === "unverified" && source.verificationStatus === "Verified") return false;
-      return !term || [source.name, source.type, source.providerOrganizationId, source.verificationStatus]
-        .some((value) => String(value || "").toLowerCase().includes(term));
-    }).sort((left, right) => Number(right.enabled) - Number(left.enabled) || left.name.localeCompare(right.name));
+    return sources
+      .filter((source) => {
+        if (provider !== "all" && source.type !== provider) return false;
+        if (sourceState === "enabled" && !source.enabled) return false;
+        if (sourceState === "disabled" && source.enabled) return false;
+        if (
+          sourceState === "attention" &&
+          source.syncStatus !== "failed" &&
+          !source.lastError
+        )
+          return false;
+        if (
+          sourceState === "unverified" &&
+          source.verificationStatus === "Verified"
+        )
+          return false;
+        return (
+          !term ||
+          [
+            source.name,
+            source.type,
+            source.providerOrganizationId,
+            source.verificationStatus,
+          ].some((value) =>
+            String(value || "")
+              .toLowerCase()
+              .includes(term),
+          )
+        );
+      })
+      .sort(
+        (left, right) =>
+          Number(right.enabled) - Number(left.enabled) ||
+          left.name.localeCompare(right.name),
+      );
   }, [provider, search, sourceState, sources]);
-  const open = (source = null) => {
-    setEditing(source?._id || "new");
-    setForm(
-      source
-        ? {
-            ...empty,
-            ...source,
-            fieldMapping: JSON.stringify(source.fieldMapping || {}, null, 2),
-          }
-        : empty,
-    );
-  };
-  const save = async (event) => {
-    event.preventDefault();
-    let fieldMapping;
-    try {
-      fieldMapping = JSON.parse(form.fieldMapping || "{}");
-    } catch {
-      return toast.error("Field mapping must be valid JSON");
-    }
-    setSaving(true);
-    const payload = { ...form, fieldMapping };
-    const result =
-      editing === "new"
-        ? await jobsApi.createSource(payload)
-        : await jobsApi.updateSource(editing, payload);
-    setSaving(false);
-    if (!result.success)
-      return toast.error(result.error || "Unable to save source");
-    toast.success("Source saved");
-    const saved = result.data?.data;
-    if (saved?._id) {
-      setSources((current) => editing === "new"
-        ? [saved, ...current]
-        : current.map((source) => source._id === saved._id ? saved : source));
-    }
-    setEditing(null);
-  };
+
   const sync = async (source) => {
     setSourceBusy(source._id, "sync");
     const result = await jobsApi.syncSource(source._id);
@@ -178,29 +166,46 @@ export default function JobSourcesPage() {
     );
     if (logs[source._id]) {
       const history = await jobsApi.sourceLogs(source._id);
-      if (history.success) setLogs((current) => ({ ...current, [source._id]: history.data?.data || [] }));
+      if (history.success)
+        setLogs((current) => ({
+          ...current,
+          [source._id]: history.data?.data || [],
+        }));
     }
   };
+
   const test = async (source) => {
     setSourceBusy(source._id, "test");
     const result = await jobsApi.testSource(source._id);
     setSourceBusy(source._id);
-    if (!result.success) return toast.error(result.error || "Source verification failed");
+    if (!result.success)
+      return toast.error(result.error || "Source verification failed");
     const details = result.data?.data || {};
     patchSource(details.source);
-    toast.success(`${details.verificationStatus}: ${details.uaeJobsFound || 0} UAE jobs found`);
+    toast.success(
+      `${details.verificationStatus}: ${details.uaeJobsFound || 0} UAE jobs found`,
+    );
   };
+
   const toggleEnabled = async (source) => {
     setSourceBusy(source._id, source.enabled ? "disable" : "enable");
-    const result = await jobsApi.updateSource(source._id, { enabled: !source.enabled });
+    const result = await jobsApi.updateSource(source._id, {
+      enabled: !source.enabled,
+    });
     setSourceBusy(source._id);
-    if (!result.success) return toast.error(result.error || "Unable to update source");
+    if (!result.success)
+      return toast.error(result.error || "Unable to update source");
     const updated = result.data?.data;
     patchSource(updated);
-    toast.success(source.enabled
-      ? "Source disabled"
-      : updated?.enabled ? "Source enabled after verification" : "Source remains disabled because verification did not pass");
+    toast.success(
+      source.enabled
+        ? "Source disabled"
+        : updated?.enabled
+          ? "Source enabled after verification"
+          : "Source remains disabled because verification did not pass",
+    );
   };
+
   const toggleLogs = async (source) => {
     if (logs[source._id])
       return setLogs((current) => ({ ...current, [source._id]: null }));
@@ -214,6 +219,7 @@ export default function JobSourcesPage() {
       [source._id]: result.data?.data || [],
     }));
   };
+
   return (
     <AdminPage className="space-y-6 py-5">
       <AdminPageHeader
@@ -221,34 +227,53 @@ export default function JobSourcesPage() {
         title="Job Sources"
         description="Configure public ATS feeds, auto-publish rules, synchronization intervals, and inspect each import run."
         actions={
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => load()} disabled={refreshing}>
-              <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => load()}
+              disabled={refreshing}
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+              />
               {refreshing ? "Refreshing" : "Refresh"}
             </Button>
-            <Button onClick={() => open()}>
-              <Plus className="h-4 w-4" />
-              Add source
-            </Button>
+            <Link href="/jobs/sources/new">
+              <Button>
+                <Plus className="h-4 w-4" />
+                Add source
+              </Button>
+            </Link>
           </div>
         }
       />
+
       <div className="rounded-3xl border border-blue-200 bg-blue-50 p-4 text-xs leading-5 text-blue-800 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-200">
-        <b>Supported adapters:</b> Greenhouse, Lever, SmartRecruiters, Workable, Ashby,
-        and mapped public JSON APIs. Provider credentials remain server-side;
-        this page shows configuration state only.
+        <b>Supported adapters:</b> Greenhouse, Lever, SmartRecruiters, Workable,
+        Ashby, and mapped public JSON APIs. Provider credentials remain
+        server-side; this page shows configuration state only.
       </div>
+
       {!loading && (
         <>
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
             <Summary label="Total sources" value={counts.total} />
             <Summary label="Enabled" value={counts.enabled} tone="emerald" />
             <Summary label="Verified" value={counts.verified} tone="blue" />
-            <Summary label="UAE jobs found" value={counts.uaeJobs} tone="violet" />
-            <Summary label="Needs attention" value={counts.attention} tone={counts.attention ? "rose" : "zinc"} />
+            <Summary
+              label="UAE jobs found"
+              value={counts.uaeJobs}
+              tone="violet"
+            />
+            <Summary
+              label="Needs attention"
+              value={counts.attention}
+              tone={counts.attention ? "rose" : "zinc"}
+            />
           </div>
-          <div className="grid gap-3 rounded-3xl border border-zinc-200 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:grid-cols-[minmax(0,1fr)_180px_180px]">
-            <div className="relative">
+
+          <div className="flex flex-col gap-3 rounded-3xl border border-zinc-200 bg-white p-3 shadow-xs dark:border-zinc-800 dark:bg-zinc-950 md:flex-row md:items-center">
+            <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
               <Input
                 value={search}
@@ -257,38 +282,234 @@ export default function JobSourcesPage() {
                 className="pl-9"
               />
             </div>
-            <Select value={provider} onChange={setProvider} values={["all", ...types]} labels={{ all: "All providers" }} />
-            <Select
-              value={sourceState}
-              onChange={setSourceState}
-              values={["all", "enabled", "disabled", "attention", "unverified"]}
-              labels={{ all: "All states", enabled: "Enabled", disabled: "Disabled", attention: "Needs attention", unverified: "Not verified" }}
-            />
+            <div className="flex flex-wrap items-center gap-2.5">
+              <div className="w-40 sm:w-44">
+                <Select
+                  value={provider}
+                  onChange={setProvider}
+                  values={["all", ...types]}
+                  labels={{ all: "All providers" }}
+                />
+              </div>
+              <div className="w-40 sm:w-44">
+                <Select
+                  value={sourceState}
+                  onChange={setSourceState}
+                  values={[
+                    "all",
+                    "enabled",
+                    "disabled",
+                    "attention",
+                    "unverified",
+                  ]}
+                  labels={{
+                    all: "All states",
+                    enabled: "Enabled",
+                    disabled: "Disabled",
+                    attention: "Needs attention",
+                    unverified: "Not verified",
+                  }}
+                />
+              </div>
+              <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            </div>
           </div>
-          <p className="text-xs text-zinc-500">
-            Showing {visibleSources.length} of {sources.length} sources. Sync and verification update only their source card.
-          </p>
+
+          <div className="flex items-center justify-between text-xs text-zinc-500">
+            <span>
+              Showing {visibleSources.length} of {sources.length} sources.
+            </span>
+          </div>
         </>
       )}
+
       {loading ? (
         <AdminLoading />
+      ) : viewMode === "list" ? (
+        /* List Table View */
+        <div className="overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-xs dark:border-zinc-800 dark:bg-zinc-950">
+          <div className="overflow-x-auto">
+            <table className="admin-table w-full min-w-225 text-left text-xs">
+              <thead>
+                <tr className="border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+                  <th className="px-5 py-3.5 font-bold text-zinc-500 uppercase tracking-wider text-[11px]">
+                    Source / Company
+                  </th>
+                  <th className="px-5 py-3.5 font-bold text-zinc-500 uppercase tracking-wider text-[11px]">
+                    Adapter & Board
+                  </th>
+                  <th className="px-5 py-3.5 font-bold text-zinc-500 uppercase tracking-wider text-[11px]">
+                    Status & Trust
+                  </th>
+                  <th className="px-5 py-3.5 font-bold text-zinc-500 uppercase tracking-wider text-[11px]">
+                    Jobs Ingested
+                  </th>
+                  <th className="px-5 py-3.5 font-bold text-zinc-500 uppercase tracking-wider text-[11px]">
+                    Sync Health
+                  </th>
+                  <th className="px-5 py-3.5 text-right font-bold text-zinc-500 uppercase tracking-wider text-[11px]">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                {visibleSources.map((source) => (
+                  <tr
+                    key={source._id}
+                    className="hover:bg-zinc-50/70 dark:hover:bg-zinc-900/40 transition-colors"
+                  >
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 shrink-0">
+                          <DatabaseZap className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <Link
+                            href={`/jobs/sources/${source._id}/edit`}
+                            className="font-bold text-zinc-900 hover:text-blue-600 dark:text-zinc-100 dark:hover:text-blue-400 truncate block"
+                          >
+                            {source.name}
+                          </Link>
+                          <span className="text-[10px] text-zinc-400 uppercase font-mono">
+                            {source.providerRegion || "global"}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="font-bold text-zinc-700 dark:text-zinc-300 capitalize">
+                        {source.type}
+                      </span>
+                      <p className="mt-0.5 text-[11px] font-mono text-zinc-400 truncate max-w-45">
+                        {source.providerOrganizationId || "—"}
+                      </p>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <Pill
+                          text={source.enabled ? "Enabled" : "Disabled"}
+                          good={source.enabled}
+                        />
+                        <Pill
+                          text={source.verificationStatus || "Requires Review"}
+                          good={source.verificationStatus === "Verified"}
+                        />
+                        {source.autoPublish && (
+                          <Pill text="Auto" good={source.trusted} />
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="font-black text-zinc-900 dark:text-zinc-100">
+                        {source.verifiedUaeJobsFound || 0} UAE
+                      </span>
+                      <p className="mt-0.5 text-[10px] text-zinc-400">
+                        {source.numberImported || 0} imported ·{" "}
+                        {source.numberUpdated || 0} updated
+                      </p>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-1.5 font-bold">
+                        {source.syncStatus === "failed" ? (
+                          <AlertTriangle className="h-3.5 w-3.5 text-rose-600 shrink-0" />
+                        ) : (
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                        )}
+                        <span className="capitalize">{source.syncStatus}</span>
+                      </div>
+                      <p className="mt-0.5 text-[10px] text-zinc-400">
+                        {source.lastSyncAt
+                          ? `Last: ${new Date(source.lastSyncAt).toLocaleDateString()}`
+                          : "Never synced"}
+                      </p>
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => test(source)}
+                          disabled={
+                            source.type === "manual" ||
+                            Boolean(busy[source._id])
+                          }
+                          title="Test public source"
+                          className="h-8 px-2.5 text-xs"
+                        >
+                          {busy[source._id] === "test" ? (
+                            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                          ) : null}
+                          {busy[source._id] === "test" ? "Testing" : "Test"}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => sync(source)}
+                          disabled={
+                            !source.enabled ||
+                            source.type === "manual" ||
+                            source.syncStatus === "running" ||
+                            Boolean(busy[source._id])
+                          }
+                          title="Sync now"
+                          className="h-8 w-8"
+                        >
+                          {busy[source._id] === "sync" ||
+                          source.syncStatus === "running" ? (
+                            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Play className="h-3.5 w-3.5" />
+                          )}
+                        </Button>
+                        <Link href={`/jobs/sources/${source._id}/edit`}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Edit"
+                            className="h-8 w-8"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {!visibleSources.length && (
+              <div className="p-16 text-center text-sm text-zinc-500">
+                No sources match these filters.
+              </div>
+            )}
+          </div>
+        </div>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
+        /* Card Grid View */
+        <div className="grid gap-1 lg:grid-cols-2">
           {visibleSources.map((source) => (
             <article
               key={source._id}
-              className="rounded-4xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950"
+              className="rounded-4xl border border-zinc-200 bg-white p-5 shadow-xs dark:border-zinc-800 dark:bg-zinc-950"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <DatabaseZap className="h-4 w-4 text-blue-600" />
-                    <h2 className="font-black">{source.name}</h2>
+                    <Link
+                      href={`/jobs/sources/${source._id}/edit`}
+                      className="font-black text-zinc-900 hover:text-blue-600 dark:text-zinc-100 dark:hover:text-blue-400"
+                    >
+                      {source.name}
+                    </Link>
                     <Pill
                       text={source.enabled ? "Enabled" : "Disabled"}
                       good={source.enabled}
                     />
-                    <Pill text={source.verificationStatus || "Requires Review"} good={source.verificationStatus === "Verified"} />
+                    <Pill
+                      text={source.verificationStatus || "Requires Review"}
+                      good={source.verificationStatus === "Verified"}
+                    />
                     <Pill
                       text={
                         source.autoPublish ? "Auto publish" : "Review first"
@@ -306,21 +527,26 @@ export default function JobSourcesPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => test(source)}
-                    disabled={source.type === "manual" || Boolean(busy[source._id])}
+                    disabled={
+                      source.type === "manual" || Boolean(busy[source._id])
+                    }
                     title="Test public source"
                   >
-                    {busy[source._id] === "test" ? <RefreshCw className="h-4 w-4 animate-spin" /> : null}
+                    {busy[source._id] === "test" ? (
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                    ) : null}
                     {busy[source._id] === "test" ? "Testing" : "Test"}
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => open(source)}
-                    disabled={Boolean(busy[source._id])}
-                    title="Edit"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
+                  <Link href={`/jobs/sources/${source._id}/edit`}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={Boolean(busy[source._id])}
+                      title="Edit"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </Link>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -333,16 +559,23 @@ export default function JobSourcesPage() {
                     }
                     title="Sync now"
                   >
-                    {busy[source._id] === "sync" || source.syncStatus === "running"
-                      ? <RefreshCw className="h-4 w-4 animate-spin" />
-                      : <Play className="h-4 w-4" />}
+                    {busy[source._id] === "sync" ||
+                    source.syncStatus === "running" ? (
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Play className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
               <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-zinc-100 bg-zinc-50/70 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900/70">
                 <div className="min-w-0 text-[10px] text-zinc-500">
-                  <span className="font-bold text-zinc-700 dark:text-zinc-200">Board ID:</span>{" "}
-                  <span className="break-all font-mono">{source.providerOrganizationId || "Not configured"}</span>
+                  <span className="font-bold text-zinc-700 dark:text-zinc-200">
+                    Board ID:
+                  </span>{" "}
+                  <span className="break-all font-mono">
+                    {source.providerOrganizationId || "Not configured"}
+                  </span>
                 </div>
                 {source.type !== "manual" && (
                   <Button
@@ -351,23 +584,41 @@ export default function JobSourcesPage() {
                     onClick={() => toggleEnabled(source)}
                     disabled={Boolean(busy[source._id])}
                   >
-                    {busy[source._id] === "enable" || busy[source._id] === "disable"
-                      ? <RefreshCw className="h-4 w-4 animate-spin" />
-                      : null}
+                    {busy[source._id] === "enable" ||
+                    busy[source._id] === "disable" ? (
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                    ) : null}
                     {source.enabled ? "Disable" : "Enable"}
                   </Button>
                 )}
               </div>
               <dl className="mt-5 grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">
-                <Stat label="UAE jobs found" value={source.verifiedUaeJobsFound || 0} />
+                <Stat
+                  label="UAE jobs found"
+                  value={source.verifiedUaeJobsFound || 0}
+                />
                 <Stat
                   label="Created / updated"
                   value={`${source.numberImported || 0} / ${source.numberUpdated || 0}`}
                 />
                 <Stat label="Rejected" value={source.numberRejected || 0} />
                 <Stat label="Duplicates" value={source.numberDuplicates || 0} />
-                <Stat label="Last sync" value={source.lastSyncAt ? new Date(source.lastSyncAt).toLocaleString() : "Never"} />
-                <Stat label="Last successful" value={source.lastSuccessfulSyncAt ? new Date(source.lastSuccessfulSyncAt).toLocaleString() : "Never"} />
+                <Stat
+                  label="Last sync"
+                  value={
+                    source.lastSyncAt
+                      ? new Date(source.lastSyncAt).toLocaleString()
+                      : "Never"
+                  }
+                />
+                <Stat
+                  label="Last successful"
+                  value={
+                    source.lastSuccessfulSyncAt
+                      ? new Date(source.lastSuccessfulSyncAt).toLocaleString()
+                      : "Never"
+                  }
+                />
                 <Stat
                   label="Next sync"
                   value={
@@ -376,7 +627,10 @@ export default function JobSourcesPage() {
                       : "Manual"
                   }
                 />
-                <Stat label="Errors" value={source.lastError ? "Review" : "0"} />
+                <Stat
+                  label="Errors"
+                  value={source.lastError ? "Review" : "0"}
+                />
               </dl>
               <div className="mt-4 flex items-center gap-2 text-xs font-bold">
                 {source.syncStatus === "failed" ? (
@@ -403,18 +657,26 @@ export default function JobSourcesPage() {
               {source.verificationNotes && (
                 <p className="mt-3 rounded-2xl bg-zinc-50 p-3 text-[10px] leading-4 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">
                   {source.verificationNotes}
-                  {source.lastVerifiedAt ? ` Verified ${new Date(source.lastVerifiedAt).toLocaleString()}.` : ""}
+                  {source.lastVerifiedAt
+                    ? ` Verified ${new Date(source.lastVerifiedAt).toLocaleString()}.`
+                    : ""}
                 </p>
               )}
               <button
                 onClick={() => toggleLogs(source)}
                 disabled={loadingLogs[source._id]}
-                className="mt-4 flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-blue-600"
+                className="mt-4 flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-blue-600 hover:underline cursor-pointer"
               >
+                {loadingLogs[source._id] ? (
+                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 transition-transform ${logs[source._id] ? "rotate-180" : ""}`}
+                  />
+                )}
                 {loadingLogs[source._id]
-                  ? <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                  : <ChevronDown className={`h-3.5 w-3.5 transition-transform ${logs[source._id] ? "rotate-180" : ""}`} />}
-                {loadingLogs[source._id] ? "Loading history" : "Recent sync history"}
+                  ? "Loading history"
+                  : "Recent sync history"}
               </button>
               {logs[source._id] && (
                 <div className="mt-3 space-y-2">
@@ -460,184 +722,18 @@ export default function JobSourcesPage() {
             <div className="col-span-full rounded-3xl border border-dashed border-zinc-300 bg-zinc-50 px-6 py-14 text-center dark:border-zinc-700 dark:bg-zinc-900/40">
               <DatabaseZap className="mx-auto h-8 w-8 text-zinc-300" />
               <p className="mt-3 font-bold">No sources match these filters.</p>
-              <button className="mt-2 text-xs font-bold text-blue-600" onClick={() => { setSearch(""); setProvider("all"); setSourceState("all"); }}>
+              <button
+                className="mt-2 text-xs font-bold text-blue-600"
+                onClick={() => {
+                  setSearch("");
+                  setProvider("all");
+                  setSourceState("all");
+                }}
+              >
                 Clear filters
               </button>
             </div>
           )}
-        </div>
-      )}
-      {editing && (
-        <div className="fixed inset-0 z-100 grid place-items-center overflow-y-auto bg-black/60 p-4 backdrop-blur-sm">
-          <form
-            onSubmit={save}
-            className="my-8 w-full max-w-3xl rounded-4xl bg-white p-6 shadow-2xl dark:bg-zinc-950"
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="font-outfit text-2xl font-black">
-                {editing === "new" ? "Add source" : "Edit source"}
-              </h2>
-              <button type="button" onClick={() => setEditing(null)}>
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <Field label="Source / company name">
-                <Input
-                  required
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                />
-              </Field>
-              <Field label="Provider">
-                <Select
-                  value={form.type}
-                  onChange={(type) => setForm({ ...form, type })}
-                  values={types}
-                />
-              </Field>
-              <Field label="Provider organization ID">
-                <Input
-                  value={form.providerOrganizationId}
-                  onChange={(e) =>
-                    setForm({ ...form, providerOrganizationId: e.target.value })
-                  }
-                  placeholder="Board token, site, company ID, or subdomain"
-                />
-              </Field>
-              <Field label="Provider region">
-                <Select
-                  value={form.providerRegion}
-                  onChange={(providerRegion) =>
-                    setForm({ ...form, providerRegion })
-                  }
-                  values={["global", "eu"]}
-                />
-              </Field>
-              <Field label="Base URL">
-                <Input
-                  type="url"
-                  value={form.baseUrl}
-                  onChange={(e) =>
-                    setForm({ ...form, baseUrl: e.target.value })
-                  }
-                />
-              </Field>
-              <Field label="Careers URL">
-                <Input
-                  type="url"
-                  value={form.careersUrl}
-                  onChange={(e) =>
-                    setForm({ ...form, careersUrl: e.target.value })
-                  }
-                />
-              </Field>
-              <Field label="Custom JSON endpoint">
-                <Input
-                  type="url"
-                  value={form.endpointUrl}
-                  onChange={(e) =>
-                    setForm({ ...form, endpointUrl: e.target.value })
-                  }
-                />
-              </Field>
-              <Field label="Jobs array path">
-                <Input
-                  value={form.jobsPath}
-                  onChange={(e) =>
-                    setForm({ ...form, jobsPath: e.target.value })
-                  }
-                  placeholder="data.jobs"
-                />
-              </Field>
-              <Field label="Credential environment variable">
-                <Input
-                  value={form.credentialEnvKey}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      credentialEnvKey: e.target.value.toUpperCase(),
-                    })
-                  }
-                  placeholder="JOBS_VENDOR_API_TOKEN"
-                />
-              </Field>
-              <Field label="Sync schedule">
-                <Select
-                  value={form.syncFrequency}
-                  onChange={(syncFrequency) =>
-                    setForm({ ...form, syncFrequency })
-                  }
-                  values={["manual", "daily", "weekly"]}
-                />
-              </Field>
-              <Field label="Interval in hours (6–168)">
-                <Input
-                  type="number"
-                  min="6"
-                  max="168"
-                  value={form.syncIntervalHours}
-                  onChange={(e) =>
-                    setForm({ ...form, syncIntervalHours: e.target.value })
-                  }
-                />
-              </Field>
-              <Field label="Auto-publish quality threshold">
-                <Input
-                  type="number"
-                  min="50"
-                  max="100"
-                  value={form.qualityThreshold}
-                  onChange={(e) =>
-                    setForm({ ...form, qualityThreshold: e.target.value })
-                  }
-                />
-              </Field>
-            </div>
-            <Field label="Field mapping JSON (generic APIs only)">
-              <textarea
-                rows={7}
-                value={form.fieldMapping}
-                onChange={(e) =>
-                  setForm({ ...form, fieldMapping: e.target.value })
-                }
-                className="mt-1.5 w-full rounded-2xl border border-zinc-200 bg-zinc-50 p-4 font-mono text-xs dark:border-zinc-800 dark:bg-zinc-900"
-              />
-            </Field>
-            <div className="mt-4 flex flex-wrap gap-5">
-              {[
-                ["enabled", "Enabled"],
-                ["trusted", "Trusted source"],
-                ["autoPublish", "Auto publish eligible jobs"],
-              ].map(([key, label]) => (
-                <label
-                  key={key}
-                  className="flex items-center gap-2 text-xs font-bold"
-                >
-                  <input
-                    type="checkbox"
-                    checked={Boolean(form[key])}
-                    onChange={(e) =>
-                      setForm({ ...form, [key]: e.target.checked })
-                    }
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-            <div className="mt-6 flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setEditing(null)}
-              >
-                Cancel
-              </Button>
-              <Button disabled={saving}>
-                {saving ? "Saving…" : "Save source"}
-              </Button>
-            </div>
-          </form>
         </div>
       )}
     </AdminPage>
@@ -647,27 +743,35 @@ export default function JobSourcesPage() {
 function Pill({ text, good }) {
   return (
     <span
-      className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${good ? "bg-emerald-100 text-emerald-700" : "bg-zinc-200 text-zinc-500 dark:bg-zinc-800"}`}
+      className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${good ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300" : "bg-zinc-200 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"}`}
     >
       {text}
     </span>
   );
 }
+
 function Summary({ label, value, tone = "zinc" }) {
   const tones = {
     zinc: "border-zinc-200 bg-white text-zinc-950 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white",
-    emerald: "border-emerald-200 bg-emerald-50 text-emerald-950 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100",
+    emerald:
+      "border-emerald-200 bg-emerald-50 text-emerald-950 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100",
     blue: "border-blue-200 bg-blue-50 text-blue-950 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-100",
-    violet: "border-violet-200 bg-violet-50 text-violet-950 dark:border-violet-900 dark:bg-violet-950/40 dark:text-violet-100",
+    violet:
+      "border-violet-200 bg-violet-50 text-violet-950 dark:border-violet-900 dark:bg-violet-950/40 dark:text-violet-100",
     rose: "border-rose-200 bg-rose-50 text-rose-950 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-100",
   };
   return (
-    <div className={`rounded-3xl border p-4 shadow-sm ${tones[tone] || tones.zinc}`}>
-      <p className="text-[10px] font-black uppercase tracking-wide opacity-60">{label}</p>
+    <div
+      className={`rounded-3xl border p-4 shadow-xs ${tones[tone] || tones.zinc}`}
+    >
+      <p className="text-[10px] font-black uppercase tracking-wide opacity-60">
+        {label}
+      </p>
       <p className="mt-1 font-outfit text-2xl font-black">{value}</p>
     </div>
   );
 }
+
 function Stat({ label, value }) {
   return (
     <div className="rounded-2xl bg-zinc-50 p-3 dark:bg-zinc-900">
@@ -676,14 +780,7 @@ function Stat({ label, value }) {
     </div>
   );
 }
-function Field({ label, children }) {
-  return (
-    <label className="block space-y-1.5">
-      <Label>{label}</Label>
-      {children}
-    </label>
-  );
-}
+
 function Select({ value, onChange, values, labels = {} }) {
   return (
     <select
@@ -692,7 +789,9 @@ function Select({ value, onChange, values, labels = {} }) {
       className="h-11 w-full rounded-2xl border border-zinc-200 bg-white px-3 text-xs font-bold dark:border-zinc-800 dark:bg-zinc-900"
     >
       {values.map((item) => (
-        <option key={item} value={item}>{labels[item] || item}</option>
+        <option key={item} value={item}>
+          {labels[item] || item}
+        </option>
       ))}
     </select>
   );

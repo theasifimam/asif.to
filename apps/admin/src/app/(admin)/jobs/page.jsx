@@ -34,6 +34,7 @@ import {
   AdminPagination,
   AdminSearch,
 } from "@/components/admin";
+import { ViewToggle } from "@/components/ui/ViewToggle";
 
 const metrics = [
   ["active", "Active jobs", BriefcaseBusiness, "text-emerald-600"],
@@ -59,8 +60,22 @@ const badge = {
   archived: "bg-zinc-200 text-zinc-500 dark:bg-zinc-800",
 };
 
-const originLabels = { admin_created: "Admin Created", manual_import: "Manual Import", automated_import: "Automated Import", ats_import: "ATS Import", api_import: "API Import" };
-const importLabels = { imported: "Imported", updated: "Updated", unchanged: "Unchanged", duplicate: "Duplicate", validation_failed: "Validation Failed", source_removed: "Source Removed", sync_error: "Sync Error" };
+const originLabels = {
+  admin_created: "Admin Created",
+  manual_import: "Manual Import",
+  automated_import: "Automated Import",
+  ats_import: "ATS Import",
+  api_import: "API Import",
+};
+const importLabels = {
+  imported: "Imported",
+  updated: "Updated",
+  unchanged: "Unchanged",
+  duplicate: "Duplicate",
+  validation_failed: "Validation Failed",
+  source_removed: "Source Removed",
+  sync_error: "Sync Error",
+};
 
 export default function JobsAdminPage() {
   const [dashboard, setDashboard] = useState(null);
@@ -82,6 +97,7 @@ export default function JobsAdminPage() {
   });
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState("list");
 
   const load = async (page = pagination.page) => {
     setLoading(true);
@@ -113,7 +129,14 @@ export default function JobsAdminPage() {
   useEffect(() => {
     const timer = setTimeout(() => load(1), 250);
     return () => clearTimeout(timer);
-  }, [filters.search, filters.status, filters.origin, filters.importStatus, filters.source, filters.sort]);
+  }, [
+    filters.search,
+    filters.status,
+    filters.origin,
+    filters.importStatus,
+    filters.source,
+    filters.sort,
+  ]);
 
   const act = async (action, ids = selected) => {
     if (!ids.length) return toast.error("Select at least one job");
@@ -126,7 +149,7 @@ export default function JobsAdminPage() {
   const remove = async (job) => {
     if (
       !window.confirm(
-        `Delete “${job.title}” and its applications/activity? This cannot be undone.`
+        `Delete “${job.title}” and its applications/activity? This cannot be undone.`,
       )
     )
       return;
@@ -211,65 +234,95 @@ export default function JobsAdminPage() {
         </section>
       )}
 
-      <AdminFilters>
-        <AdminSearch
-          value={filters.search}
-          onChange={(value) =>
-            setFilters((current) => ({ ...current, search: value }))
-          }
-          placeholder="Search title, company, location, source…"
-        />
-        <div className="w-40">
-          <Select
-            value={filters.status}
-            onValueChange={(val) =>
-              setFilters((current) => ({ ...current, status: val }))
+      <AdminFilters className="flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        <div className="flex flex-1 flex-wrap items-center gap-2.5">
+          <AdminSearch
+            value={filters.search}
+            onChange={(value) =>
+              setFilters((current) => ({ ...current, search: value }))
             }
-          >
-            <SelectTrigger size="sm" className="h-10 rounded-full px-4">
-              <SelectValue placeholder="All statuses" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              {[
-                "draft",
-                "pending",
-                "published",
-                "hidden",
-                "expired",
-                "rejected",
-                "archived",
-              ].map((value) => (
-                <SelectItem key={value} value={value}>
-                  {value.charAt(0).toUpperCase() + value.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            placeholder="Search title, company, location, source…"
+            className="w-full sm:w-64"
+          />
+          <div className="w-36 sm:w-40">
+            <Select
+              value={filters.status}
+              onValueChange={(val) =>
+                setFilters((current) => ({ ...current, status: val }))
+              }
+            >
+              <SelectTrigger size="sm" className="h-10 rounded-full px-4">
+                <SelectValue placeholder="All statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                {[
+                  "draft",
+                  "pending",
+                  "published",
+                  "hidden",
+                  "expired",
+                  "rejected",
+                  "archived",
+                ].map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {value.charAt(0).toUpperCase() + value.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <AdminSelectFilter
+            value={filters.origin}
+            onValueChange={(origin) =>
+              setFilters((current) => ({ ...current, origin }))
+            }
+            placeholder="All origins"
+            items={originLabels}
+          />
+          <AdminSelectFilter
+            value={filters.importStatus}
+            onValueChange={(importStatus) =>
+              setFilters((current) => ({ ...current, importStatus }))
+            }
+            placeholder="All import states"
+            items={importLabels}
+          />
+          <AdminSelectFilter
+            value={filters.source}
+            onValueChange={(source) =>
+              setFilters((current) => ({ ...current, source }))
+            }
+            placeholder="All sources"
+            items={Object.fromEntries(
+              sources.map((source) => [source._id, source.name]),
+            )}
+          />
+
+          <div className="w-40 sm:w-44">
+            <Select
+              value={filters.sort}
+              onValueChange={(val) =>
+                setFilters((current) => ({ ...current, sort: val }))
+              }
+            >
+              <SelectTrigger size="sm" className="h-10 rounded-full px-4">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Recently added</SelectItem>
+                <SelectItem value="posted">Posted date</SelectItem>
+                <SelectItem value="expiry">Expiry</SelectItem>
+                <SelectItem value="views">Most viewed</SelectItem>
+                <SelectItem value="clicks">Most clicks</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        <AdminSelectFilter value={filters.origin} onValueChange={(origin) => setFilters((current) => ({ ...current, origin }))} placeholder="All origins" items={originLabels} />
-        <AdminSelectFilter value={filters.importStatus} onValueChange={(importStatus) => setFilters((current) => ({ ...current, importStatus }))} placeholder="All import states" items={importLabels} />
-        <AdminSelectFilter value={filters.source} onValueChange={(source) => setFilters((current) => ({ ...current, source }))} placeholder="All sources" items={Object.fromEntries(sources.map((source) => [source._id, source.name]))} />
-
-        <div className="w-44">
-          <Select
-            value={filters.sort}
-            onValueChange={(val) =>
-              setFilters((current) => ({ ...current, sort: val }))
-            }
-          >
-            <SelectTrigger size="sm" className="h-10 rounded-full px-4">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Recently added</SelectItem>
-              <SelectItem value="posted">Posted date</SelectItem>
-              <SelectItem value="expiry">Expiry</SelectItem>
-              <SelectItem value="views">Most viewed</SelectItem>
-              <SelectItem value="clicks">Most clicks</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex items-center justify-end shrink-0">
+          <ViewToggle view={viewMode} onViewChange={setViewMode} />
         </div>
       </AdminFilters>
 
@@ -291,7 +344,7 @@ export default function JobsAdminPage() {
             <button
               key={action}
               onClick={() => act(action)}
-              className="rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-bold hover:bg-white/20 dark:bg-zinc-900/10"
+              className="rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-bold hover:bg-white/20 dark:bg-zinc-900/10 cursor-pointer"
             >
               {text}
             </button>
@@ -302,7 +355,8 @@ export default function JobsAdminPage() {
       <AdminContent>
         {loading ? (
           <AdminLoading />
-        ) : (
+        ) : viewMode === "list" ? (
+          /* List Table View */
           <div className="overflow-x-auto">
             <table className="admin-table min-w-300 w-full text-left text-xs">
               <thead>
@@ -315,7 +369,7 @@ export default function JobsAdminPage() {
                       }
                       onChange={(e) =>
                         setSelected(
-                          e.target.checked ? jobs.map((job) => job._id) : []
+                          e.target.checked ? jobs.map((job) => job._id) : [],
                         )
                       }
                       aria-label="Select all"
@@ -347,7 +401,7 @@ export default function JobsAdminPage() {
                 {jobs.map((job) => (
                   <tr
                     key={job._id}
-                    className="border-t border-zinc-100 dark:border-zinc-800"
+                    className="border-t border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50/70 dark:hover:bg-zinc-900/40 transition-colors"
                   >
                     <td className="px-5 py-4">
                       <input
@@ -357,7 +411,7 @@ export default function JobsAdminPage() {
                           setSelected((current) =>
                             e.target.checked
                               ? [...current, job._id]
-                              : current.filter((id) => id !== job._id)
+                              : current.filter((id) => id !== job._id),
                           )
                         }
                         className="h-4 w-4 rounded-sm accent-blue-600"
@@ -366,12 +420,12 @@ export default function JobsAdminPage() {
                     <td className="max-w-70 px-4 py-4">
                       <Link
                         href={`/jobs/${job._id}/edit`}
-                        className="font-black hover:text-blue-600"
+                        className="font-black hover:text-blue-600 dark:hover:text-blue-400"
                       >
                         {job.title}
                       </Link>
                       {job.isDemo && (
-                        <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black text-amber-700">
+                        <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">
                           DEMO
                         </span>
                       )}
@@ -381,9 +435,32 @@ export default function JobsAdminPage() {
                     </td>
                     <td className="px-4 py-4 font-bold">{job.companyName}</td>
                     <td className="px-4 py-4">{job.location}</td>
-                    <td className="px-4 py-4"><b className="whitespace-nowrap">{originLabels[job.creationOrigin] || "Admin Created"}</b><p className="mt-1 text-[10px] text-zinc-400">{job.sourceProvider || "manual"}</p></td>
-                    <td className="px-4 py-4"><b>{job.sourceName}</b><p className="mt-1 whitespace-nowrap text-[10px] text-zinc-400">{job.lastSyncedAt ? `Synced ${new Date(job.lastSyncedAt).toLocaleString()}` : "Not synchronized"}</p></td>
-                    <td className="px-4 py-4"><span className="whitespace-nowrap rounded-full bg-zinc-100 px-2 py-1 text-[9px] font-black uppercase dark:bg-zinc-800">{importLabels[job.importStatus] || "—"}</span>{job.importQualityScore != null && <p className="mt-1 text-[10px] text-zinc-400">Quality {job.importQualityScore}/100</p>}</td>
+                    <td className="px-4 py-4">
+                      <b className="whitespace-nowrap">
+                        {originLabels[job.creationOrigin] || "Admin Created"}
+                      </b>
+                      <p className="mt-1 text-[10px] text-zinc-400">
+                        {job.sourceProvider || "manual"}
+                      </p>
+                    </td>
+                    <td className="px-4 py-4">
+                      <b>{job.sourceName}</b>
+                      <p className="mt-1 whitespace-nowrap text-[10px] text-zinc-400">
+                        {job.lastSyncedAt
+                          ? `Synced ${new Date(job.lastSyncedAt).toLocaleString()}`
+                          : "Not synchronized"}
+                      </p>
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className="whitespace-nowrap rounded-full bg-zinc-100 px-2 py-1 text-[9px] font-black uppercase dark:bg-zinc-800">
+                        {importLabels[job.importStatus] || "—"}
+                      </span>
+                      {job.importQualityScore != null && (
+                        <p className="mt-1 text-[10px] text-zinc-400">
+                          Quality {job.importQualityScore}/100
+                        </p>
+                      )}
+                    </td>
                     <td className="px-4 py-4">
                       <span
                         className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase ${badge[job.status] || ""}`}
@@ -465,7 +542,179 @@ export default function JobsAdminPage() {
               </div>
             )}
           </div>
+        ) : (
+          /* Card Grid View */
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 p-4 sm:p-5">
+            {jobs.map((job) => (
+              <article
+                key={job._id}
+                className={`relative flex flex-col justify-between rounded-3xl border bg-white p-5 shadow-xs transition-all dark:bg-zinc-950 ${
+                  selected.includes(job._id)
+                    ? "border-blue-500 ring-2 ring-blue-500/20 dark:border-blue-500"
+                    : "border-zinc-200/80 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700"
+                }`}
+              >
+                <div className="space-y-3.5">
+                  {/* Header: Checkbox + Title + Badges */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-2.5 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(job._id)}
+                        onChange={(e) =>
+                          setSelected((current) =>
+                            e.target.checked
+                              ? [...current, job._id]
+                              : current.filter((id) => id !== job._id),
+                          )
+                        }
+                        className="mt-1 h-4 w-4 rounded-sm accent-blue-600 shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <Link
+                          href={`/jobs/${job._id}/edit`}
+                          className="font-bold text-sm text-zinc-900 hover:text-blue-600 dark:text-zinc-100 dark:hover:text-blue-400 line-clamp-1 block"
+                        >
+                          {job.title}
+                        </Link>
+                        <div className="mt-0.5 flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+                          <span className="font-semibold text-zinc-800 dark:text-zinc-200 truncate">
+                            {job.companyName}
+                          </span>
+                          <span>•</span>
+                          <span className="truncate">{job.location}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase ${badge[job.status] || ""}`}
+                      >
+                        {job.status}
+                      </span>
+                      {job.featured && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-900/50">
+                          <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+                          Featured
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Metadata Pills */}
+                  <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
+                    <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 font-bold text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">
+                      {originLabels[job.creationOrigin] || "Admin Created"}
+                    </span>
+                    {job.sourceName && (
+                      <span className="rounded-full bg-blue-50 px-2.5 py-0.5 font-bold text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 truncate max-w-35">
+                        {job.sourceName}
+                      </span>
+                    )}
+                    {job.importQualityScore != null && (
+                      <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 font-bold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                        Score: {job.importQualityScore}/100
+                      </span>
+                    )}
+                    {job.isDemo && (
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 font-black text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">
+                        DEMO
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Metrics Box */}
+                  <div className="grid grid-cols-2 gap-2 rounded-2xl bg-zinc-50/80 p-2.5 dark:bg-zinc-900/60 text-xs">
+                    <div>
+                      <span className="text-[10px] text-zinc-400 uppercase font-bold">
+                        Views
+                      </span>
+                      <p className="font-bold text-zinc-800 dark:text-zinc-200">
+                        {job.views || 0}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-zinc-400 uppercase font-bold">
+                        Applies / Clicks
+                      </span>
+                      <p className="font-bold text-zinc-800 dark:text-zinc-200">
+                        {job.applicationCount || 0} / {job.applyClicks || 0}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer: Date & Actions */}
+                <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-[11px] text-zinc-400">
+                  <span>
+                    Posted {new Date(job.postedAt).toLocaleDateString()}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <a
+                      href={`${process.env.NEXT_PUBLIC_WEB_URL || "https://asif.to"}/jobs/${job.slug}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        title="View live"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                    </a>
+                    <Link href={`/jobs/${job._id}/edit`}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2.5 text-xs"
+                      >
+                        Edit
+                      </Button>
+                    </Link>
+                    {job.status === "published" ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        title="Unpublish"
+                        onClick={() => act("unpublish", [job._id])}
+                      >
+                        <Archive className="h-3.5 w-3.5" />
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        title="Publish"
+                        onClick={() => act("publish", [job._id])}
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-rose-600 hover:text-rose-700"
+                      title="Delete"
+                      onClick={() => remove(job)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              </article>
+            ))}
+            {!jobs.length && (
+              <div className="col-span-full rounded-3xl border border-dashed border-zinc-300 bg-zinc-50 px-6 py-14 text-center dark:border-zinc-700 dark:bg-zinc-900/40">
+                <p className="font-bold text-zinc-500">No jobs match these filters.</p>
+              </div>
+            )}
+          </div>
         )}
+
         <AdminPagination
           page={pagination.page}
           pages={pagination.totalPages}
@@ -484,5 +733,21 @@ export default function JobsAdminPage() {
 }
 
 function AdminSelectFilter({ value, onValueChange, placeholder, items }) {
-  return <div className="w-44"><Select value={value} onValueChange={onValueChange}><SelectTrigger size="sm" className="h-10 rounded-full px-4"><SelectValue placeholder={placeholder} /></SelectTrigger><SelectContent><SelectItem value="all">{placeholder}</SelectItem>{Object.entries(items).map(([key, label]) => <SelectItem key={key} value={key}>{label}</SelectItem>)}</SelectContent></Select></div>;
+  return (
+    <div className="w-36 sm:w-44">
+      <Select value={value} onValueChange={onValueChange}>
+        <SelectTrigger size="sm" className="h-10 rounded-full px-4">
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{placeholder}</SelectItem>
+          {Object.entries(items).map(([key, label]) => (
+            <SelectItem key={key} value={key}>
+              {label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
 }

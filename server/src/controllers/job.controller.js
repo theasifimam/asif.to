@@ -591,11 +591,27 @@ export async function adminUpdateCompany(req, res) {
   } catch (error) { return errorResponse(res, error, "adminUpdateCompany"); }
 }
 
+export async function adminGetCompany(req, res) {
+  try {
+    const company = isId(req.params.id) ? await Company.findById(req.params.id).lean() : null;
+    if (!company) return res.status(404).json({ success: false, message: "Company not found." });
+    return res.json({ success: true, data: company });
+  } catch (error) { return errorResponse(res, error, "adminGetCompany"); }
+}
+
 export async function adminListSources(req, res) {
   try {
     const sources = await JobSource.find({}).sort({ createdAt: -1 }).lean();
     return res.json({ success: true, data: sources.map((source) => ({ ...source, credentialConfigured: Boolean(source.credentialEnvKey && process.env[source.credentialEnvKey]) })) });
   } catch (error) { return errorResponse(res, error, "adminListSources"); }
+}
+
+export async function adminGetSource(req, res) {
+  try {
+    const source = isId(req.params.id) ? await JobSource.findById(req.params.id).lean() : null;
+    if (!source) return res.status(404).json({ success: false, message: "Source not found." });
+    return res.json({ success: true, data: { ...source, credentialConfigured: Boolean(source.credentialEnvKey && process.env[source.credentialEnvKey]) } });
+  } catch (error) { return errorResponse(res, error, "adminGetSource"); }
 }
 
 export async function adminListSourceLogs(req, res) {

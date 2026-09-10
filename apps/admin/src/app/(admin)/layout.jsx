@@ -248,6 +248,7 @@ const NAV_ITEMS = [
         icon: DatabaseZap,
         permission: "job_sources.manage",
         description: "Imports, syncs & source health",
+        action: { href: "/jobs/sources/new", title: "New Source" },
       },
       {
         name: "Companies",
@@ -255,6 +256,7 @@ const NAV_ITEMS = [
         icon: Building2,
         permission: "jobs.view",
         description: "Employer profiles & open jobs",
+        action: { href: "/jobs/companies/new", title: "New Company" },
       },
       {
         name: "Applications",

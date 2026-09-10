@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -56,16 +56,14 @@ function ItemBadge({ badge }) {
         "bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-500/30",
       amber:
         "bg-amber-500/15 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 border-amber-500/30",
-      blue:
-        "bg-blue-500/15 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 border-blue-500/30",
-      zinc:
-        "bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700",
+      blue: "bg-blue-500/15 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 border-blue-500/30",
+      zinc: "bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700",
     }[variant] ||
     "bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-500/30";
 
   return (
     <span
-      className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-bold rounded-full border leading-none shrink-0 ${colorClasses}`}
+      className={`inline-flex items-center justify-center min-w-5 h-5 px-1.5 text-[10px] font-bold rounded-full border leading-none shrink-0 ${colorClasses}`}
     >
       {text}
     </span>
@@ -110,6 +108,22 @@ export default function SidebarNavigation({
     setMounted(true);
   }, []);
 
+  // Collect all distinct nav hrefs across all groups & submenus
+  const allNavHrefs = useMemo(() => {
+    const list = [];
+    navItems.forEach((group) => {
+      group.items.forEach((item) => {
+        if (item.href) list.push(item.href.split("?")[0]);
+        if (item.children) {
+          item.children.forEach((child) => {
+            if (child.href) list.push(child.href.split("?")[0]);
+          });
+        }
+      });
+    });
+    return list;
+  }, [navItems]);
+
   /**
    * Determine if a child href is actively selected.
    * Compares query params for parameterized URLs and exact routes for nested subpages.
@@ -132,25 +146,33 @@ export default function SidebarNavigation({
       return false;
     }
 
+    const cleanHref = childHref.split("?")[0];
+
     // 2. Exact match
-    if (pathname === childHref) {
+    if (pathname === cleanHref) {
       if (typeof window !== "undefined" && window.location.search) {
         // If current URL has a query param matching a sibling item, then base route is not active
         const hasMatchingQuerySibling = allSiblings.some(
-          (s) => s.href?.includes("?") && isChildActive(s.href, [])
+          (s) => s.href?.includes("?") && isChildActive(s.href, []),
         );
         if (hasMatchingQuerySibling) return false;
       }
       return true;
     }
 
-    // 3. Subpath match for detail/edit views (e.g. /topics/[id] matches /topics)
-    if (childHref !== "/" && pathname.startsWith(childHref + "/")) {
-      // If another sibling has an exact match (e.g. /topics/new), base is not active
-      const siblingExact = allSiblings.some(
-        (s) => s.href && pathname === s.href.split("?")[0]
+    // 3. Subpath match for detail/edit views (e.g. /jobs/sources/new matches /jobs/sources)
+    if (cleanHref !== "/" && pathname.startsWith(cleanHref + "/")) {
+      const candidateList = allSiblings.length
+        ? allSiblings.map((s) => s.href?.split("?")[0]).filter(Boolean)
+        : allNavHrefs;
+      const otherMatchingHrefs = candidateList.filter(
+        (h) =>
+          h !== cleanHref && (pathname === h || pathname.startsWith(h + "/")),
       );
-      if (!siblingExact) return true;
+      const hasMoreSpecificMatch = otherMatchingHrefs.some(
+        (h) => h.length > cleanHref.length || pathname === h,
+      );
+      if (!hasMoreSpecificMatch) return true;
     }
 
     return false;
@@ -165,7 +187,9 @@ export default function SidebarNavigation({
         ? `/users/${user._id}`
         : item.href;
 
-    if (item.children?.some((child) => isChildActive(child.href, item.children))) {
+    if (
+      item.children?.some((child) => isChildActive(child.href, item.children))
+    ) {
       return true;
     }
 
@@ -184,7 +208,7 @@ export default function SidebarNavigation({
       group.items.forEach((item) => {
         if (
           item.children?.some((child) =>
-            isChildActive(child.href, item.children)
+            isChildActive(child.href, item.children),
           )
         ) {
           setOpenSubmenus((prev) => ({ ...prev, [item.name]: true }));
@@ -288,7 +312,9 @@ export default function SidebarNavigation({
               {(!isGroupCollapsed || isCollapsed) && (
                 <motion.div
                   initial={!isCollapsed ? { opacity: 0, height: 0 } : false}
-                  animate={!isCollapsed ? { opacity: 1, height: "auto" } : false}
+                  animate={
+                    !isCollapsed ? { opacity: 1, height: "auto" } : false
+                  }
                   exit={!isCollapsed ? { opacity: 0, height: 0 } : false}
                   transition={{ duration: 0.18, ease: "easeInOut" }}
                   className="flex flex-col gap-1 overflow-hidden"
@@ -433,7 +459,7 @@ export default function SidebarNavigation({
                                   {item.children.map((child, idx) => {
                                     const childIsActive = isChildActive(
                                       child.href,
-                                      item.children
+                                      item.children,
                                     );
                                     const isLast =
                                       idx === item.children.length - 1;
@@ -566,7 +592,7 @@ export default function SidebarNavigation({
                 {hoveredItem.children.map((child, idx) => {
                   const childIsActive = isChildActive(
                     child.href,
-                    hoveredItem.children
+                    hoveredItem.children,
                   );
                   const isLast = idx === hoveredItem.children.length - 1;
 
@@ -603,7 +629,7 @@ export default function SidebarNavigation({
               </div>
             )}
           </div>,
-          document.body
+          document.body,
         )}
     </nav>
   );
