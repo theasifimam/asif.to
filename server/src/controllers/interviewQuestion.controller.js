@@ -49,7 +49,7 @@ function populateQuestion(query) {
     .select(questionFields)
     .populate("category", "name slug")
     .populate("course", "title slug status")
-    .populate("author", "fullName email");
+    .populate("author", "fullName name username email avatar role bio location socials jobTitle headline");
 }
 
 function publicQuestion(question) {

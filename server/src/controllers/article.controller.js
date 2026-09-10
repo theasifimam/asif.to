@@ -41,7 +41,7 @@ export const getArticles = async (req, res) => {
     }
 
     const articles = await Article.find(filter).
-    populate("author", "fullName name email avatar").
+    populate("author", "fullName name username avatar role bio location socials jobTitle headline").
     populate("topic", "name").
     sort({ createdAt: -1 }).
     skip((Number(page) - 1) * Number(limit)).
@@ -78,7 +78,7 @@ export const getArticleById = async (req, res) => {
     }
 
     const article = await Article.findById(id).
-    populate("author", "fullName name email avatar").
+    populate("author", "fullName name username avatar role bio location socials jobTitle headline").
     populate("topic", "name");
 
     if (!article) {
@@ -112,7 +112,7 @@ export const getArticleBySlug = async (req, res) => {
     const { slug } = req.params;
 
     const article = await Article.findOne({ slug }).
-    populate("author", "fullName username avatar bio location socials").
+    populate("author", "fullName name username avatar role bio location socials jobTitle headline").
     populate("topic", "name");
 
     if (!article) {
@@ -294,7 +294,7 @@ export const updateArticle = async (req, res) => {
       id,
       updateData,
       { returnDocument: 'after', runValidators: true }
-    ).populate("author", "fullName name email avatar").populate("topic", "name");
+    ).populate("author", "fullName name username avatar role bio location socials jobTitle headline").populate("topic", "name");
 
     await syncEntityAssetUsages({
       entityType: "article",

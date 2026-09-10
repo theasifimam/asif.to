@@ -92,7 +92,7 @@ function adminPopulate(query) {
   return query
     .populate("course", "title slug status")
     .populate("category", "name slug order")
-    .populate("author", "fullName email")
+    .populate("author", "fullName name username avatar image role bio location socials jobTitle headline")
     .populate("relatedTopics", "type title slug status order category")
     .populate(
       "interviewQuestions.question",
@@ -574,7 +574,7 @@ export const getPublicTopics = async (req, res) => {
         .limit(limit)
         .populate("course", "title slug techId")
         .populate("category", "name slug order")
-        .populate("author", "fullName avatar")
+        .populate("author", "fullName name username avatar image role bio location socials jobTitle headline")
         .select(
           "type title slug excerpt image seoTitle seoDescription keywords canonicalUrl publishedAt order category course author updatedAt createdAt",
         )
@@ -598,7 +598,7 @@ export const getPublicTopics = async (req, res) => {
     })
       .sort({ order: 1, title: 1 })
       .populate("category", "name slug order")
-      .populate("author", "fullName avatar")
+      .populate("author", "fullName name username avatar image role bio location socials jobTitle headline")
       .select(
         "type title slug excerpt image seoTitle seoDescription keywords canonicalUrl publishedAt order category updatedAt createdAt",
       )
@@ -655,6 +655,7 @@ export const getPublicTopic = async (req, res) => {
 
     const topic = await CourseTopic.findOne(filter)
       .populate("category", "name slug order")
+      .populate("author", "fullName name username avatar image role bio location socials jobTitle headline")
       .populate({
         path: "relatedTopics",
         match: { status: "published" },

@@ -137,7 +137,9 @@ export const getCourses = async (req, res) => {
     }
     if (techId) filter.techId = techId;
 
-    const courses = await Course.find(filter).lean();
+    const courses = await Course.find(filter)
+      .populate("author", "fullName name username avatar image role bio location socials jobTitle headline")
+      .lean();
     const courseIds = courses.map((c) => c._id);
 
     // Aggregate chapter count & total views for each course
@@ -194,10 +196,13 @@ export const getCourseBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
 
-    let course = await Course.findOne({ slug, status: "published" }).lean();
+    let course = await Course.findOne({ slug, status: "published" })
+      .populate("author", "fullName name username avatar image role bio location socials jobTitle headline")
+      .lean();
     if (!course) {
       // Fallback: search by techId if slug didn't match directly
       course = await Course.findOne({ techId: slug, status: "published" })
+        .populate("author", "fullName name username avatar image role bio location socials jobTitle headline")
         .sort({ createdAt: -1 })
         .lean();
     }
@@ -237,10 +242,13 @@ export const getChapterBySlug = async (req, res) => {
     let course = await Course.findOne({
       slug: courseSlug,
       status: "published",
-    }).lean();
+    })
+      .populate("author", "fullName name username avatar image role bio location socials jobTitle headline")
+      .lean();
     if (!course) {
       // Fallback: search by techId if slug didn't match directly
       course = await Course.findOne({ techId: courseSlug, status: "published" })
+        .populate("author", "fullName name username avatar image role bio location socials jobTitle headline")
         .sort({ createdAt: -1 })
         .lean();
     }
@@ -302,6 +310,7 @@ export const getChapterBySlug = async (req, res) => {
           techId: course.techId,
           examEnabled: course.examEnabled,
           examSettings: course.examSettings,
+          author: course.author,
         },
         chapter: chapterWithLearning,
         allChapters: allChaptersWithLearning,
@@ -343,7 +352,9 @@ export const getCoursesAdmin = async (req, res) => {
     }
 
     const total = await Course.countDocuments(filter);
-    let query = Course.find(filter).sort({ order: 1, createdAt: -1 });
+    let query = Course.find(filter)
+      .populate("author", "fullName name username email avatar role bio location socials jobTitle headline")
+      .sort({ order: 1, createdAt: -1 });
     if (hasPagination) query = query.skip(skip).limit(limit);
     const courses = await query.lean();
 
@@ -386,7 +397,9 @@ export const getCoursesAdmin = async (req, res) => {
 export const getCourseByIdAdmin = async (req, res) => {
   try {
     const { id } = req.params;
-    const course = await Course.findById(id).lean();
+    const course = await Course.findById(id)
+      .populate("author", "fullName name username email avatar role bio location socials jobTitle headline")
+      .lean();
     if (!course) {
       return res
         .status(404)
