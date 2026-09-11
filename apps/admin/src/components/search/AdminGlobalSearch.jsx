@@ -150,7 +150,7 @@ export default function AdminGlobalSearch() {
         ref={triggerRef}
         onClick={() => setOpen(true)}
         aria-label="Search admin content"
-        className="flex h-10 min-w-10 items-center gap-2 rounded-full border border-zinc-200/80 bg-zinc-50 px-3.5 text-zinc-600 transition-colors duration-200 hover:border-zinc-300 hover:bg-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-blue-500/15 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        className="flex h-11 min-w-11 items-center justify-center gap-2 rounded-full border border-zinc-200/80 bg-zinc-50 px-3 text-zinc-600 transition-colors duration-200 hover:border-zinc-300 hover:bg-white focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-blue-500/15 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 sm:justify-start sm:px-3.5 lg:h-10 lg:min-w-10"
       >
         <Search className="h-4 w-4" />
         <span className="hidden text-xs font-bold sm:inline">Search</span>

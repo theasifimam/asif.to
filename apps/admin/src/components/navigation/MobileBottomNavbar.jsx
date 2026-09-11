@@ -4,15 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Bell,
-  ChevronRight,
+  ChartNoAxesCombined,
   LayoutDashboard,
   Menu,
   MessageSquare,
+  Search,
   Sparkles,
   X,
 } from "lucide-react";
-import { activityApi } from "@/lib/api";
 import MessageNavBadge from "./MessageNavBadge";
 
 export default function MobileBottomNavbar({
@@ -22,37 +21,27 @@ export default function MobileBottomNavbar({
 }) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [menuQuery, setMenuQuery] = useState("");
   const islandRef = useRef(null);
-
-  // Load unread notifications count
-  useEffect(() => {
-    const loadNotifications = async () => {
-      try {
-        const response = await activityApi.notifications({ limit: 1 });
-        if (response.success && response.data?.data) {
-          setUnreadNotifications(response.data.data.unreadCount || 0);
-        }
-      } catch {
-        // ignore
-      }
-    };
-    loadNotifications();
-    const interval = setInterval(loadNotifications, 60_000);
-    window.addEventListener("notifications:refresh", loadNotifications);
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener("notifications:refresh", loadNotifications);
-    };
-  }, []);
 
   // Close island on route change
   useEffect(() => {
-    setIsOpen(false);
+    const timer = window.setTimeout(() => {
+      setIsOpen(false);
+      setMenuQuery("");
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [pathname]);
 
   useEffect(() => {
     if (!isOpen) return;
+    const main = document.querySelector("[data-admin-main]");
+    const previousOverflow = main?.style.overflowY || "";
+    if (main) main.style.overflowY = "hidden";
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setIsOpen(false);
+    };
     const handlePointerDown = (event) => {
       if (islandRef.current && !islandRef.current.contains(event.target)) {
         // if clicked inside bottom bar toggle button, let toggle handler run
@@ -63,9 +52,12 @@ export default function MobileBottomNavbar({
     };
     document.addEventListener("mousedown", handlePointerDown);
     document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
+      if (main) main.style.overflowY = previousOverflow;
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen]);
 
@@ -76,6 +68,9 @@ export default function MobileBottomNavbar({
     return pathname.startsWith(baseHref + "/") || pathname === baseHref;
   };
 
+  const permittedHrefs = new Set(
+    navItems.flatMap((group) => group.items.map((item) => item.href?.split("?")[0])),
+  );
   const primaryTabs = [
     {
       name: "Dashboard",
@@ -84,11 +79,10 @@ export default function MobileBottomNavbar({
       isActive: pathname === "/dashboard",
     },
     {
-      name: "Activity",
-      href: "/activity",
-      icon: Bell,
-      isActive: pathname.startsWith("/activity"),
-      badge: unreadNotifications,
+      name: "Analytics",
+      href: "/analytics",
+      icon: ChartNoAxesCombined,
+      isActive: pathname.startsWith("/analytics"),
     },
     {
       name: "Messages",
@@ -97,13 +91,33 @@ export default function MobileBottomNavbar({
       isActive: pathname.startsWith("/messages"),
       isMessageBadge: true,
     },
-  ];
+  ].filter(
+    (tab) => tab.href === "/dashboard" || permittedHrefs.has(tab.href),
+  );
+
+  const normalizedQuery = menuQuery.trim().toLowerCase();
+  const filteredNavItems = navItems
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) =>
+        [
+          item.name,
+          item.description,
+          ...(item.children || []).flatMap((child) => [child.name, child.href]),
+        ]
+          .filter(Boolean)
+          .some((value) => value.toLowerCase().includes(normalizedQuery)),
+      ),
+    }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <>
       {/* Light Backdrop when Menu Island is open */}
       {isOpen && (
-        <div
+        <button
+          type="button"
+          aria-label="Close admin navigation"
           onClick={() => setIsOpen(false)}
           className="fixed inset-0 z-40 bg-black/30 backdrop-blur-xs transition-opacity animate-in fade-in duration-200 lg:hidden"
         />
@@ -114,9 +128,13 @@ export default function MobileBottomNavbar({
         <div
           ref={islandRef}
           id="mobile-menu-island"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Admin navigation"
           data-scroll-ignore="true"
           onScroll={(e) => e.stopPropagation()}
-          className="fixed bottom-22 left-4 right-4 z-45 mx-auto max-w-sm rounded-[28px] border border-zinc-200/90 dark:border-zinc-800/90 bg-white/95 dark:bg-[#121215]/95 backdrop-blur-3xl shadow-2xl p-4.5 max-h-[calc(100dvh-7.5rem)] overflow-y-auto animate-in slide-in-from-bottom-3 zoom-in-95 duration-200 scrollbar-none lg:hidden"
+          data-mobile-menu
+          className="fixed left-2 right-2 z-45 mx-auto max-w-md overflow-y-auto rounded-[28px] border border-zinc-200/90 bg-white/97 p-3.5 shadow-2xl backdrop-blur-3xl animate-in slide-in-from-bottom-3 zoom-in-95 duration-200 scrollbar-none dark:border-zinc-800/90 dark:bg-[#121215]/97 sm:left-4 sm:right-4 sm:p-4.5 lg:hidden"
         >
           {/* Header inside island */}
           <div className="flex items-center justify-between border-b border-zinc-100 pb-3 mb-3.5 dark:border-zinc-800/80">
@@ -131,20 +149,34 @@ export default function MobileBottomNavbar({
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="rounded-full p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 cursor-pointer"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 cursor-pointer"
+              aria-label="Close admin navigation"
             >
-              <X size={15} />
+              <X size={18} />
             </button>
           </div>
 
+          <label className="relative mb-4 block">
+            <span className="sr-only">Filter admin navigation</span>
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <input
+              type="search"
+              value={menuQuery}
+              onChange={(event) => setMenuQuery(event.target.value)}
+              placeholder="Find a section..."
+              autoComplete="off"
+              className="h-12 w-full rounded-2xl border border-zinc-200 bg-zinc-50 pl-10 pr-4 text-base font-medium outline-none transition focus:border-blue-500 focus:bg-white focus:ring-3 focus:ring-blue-500/10 dark:border-zinc-800 dark:bg-zinc-900 dark:focus:bg-zinc-900"
+            />
+          </label>
+
           {/* Navlink Groups */}
           <div className="flex flex-col gap-4">
-            {navItems.map((group) => (
+            {filteredNavItems.map((group) => (
               <div key={group.group} className="flex flex-col gap-2">
                 <h3 className="px-1 text-[9.5px] font-black uppercase tracking-[0.25em] text-zinc-400 dark:text-zinc-500">
                   {group.group}
                 </h3>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                   {group.items.map((item) => {
                     const targetHref =
                       item.name === "My Profile" && user?._id
@@ -164,7 +196,7 @@ export default function MobileBottomNavbar({
                         key={item.href}
                         href={targetHref}
                         onClick={() => setIsOpen(false)}
-                        className={`group relative flex items-center gap-2.5 rounded-2xl border p-2.5 transition-all active:scale-95 ${
+                        className={`group relative flex min-h-14 items-center gap-2.5 rounded-2xl border p-2.5 transition-all active:scale-95 ${
                           isActive
                             ? "border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-600/20"
                             : "border-zinc-200/60 bg-zinc-50/70 hover:border-zinc-300 hover:bg-white dark:border-zinc-800/80 dark:bg-zinc-900/40 dark:hover:border-zinc-700 dark:hover:bg-zinc-900 text-zinc-800 dark:text-zinc-200"
@@ -201,6 +233,11 @@ export default function MobileBottomNavbar({
                 </div>
               </div>
             ))}
+            {filteredNavItems.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-zinc-200 px-4 py-8 text-center text-sm font-medium text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+                No admin section matches “{menuQuery}”.
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -208,7 +245,8 @@ export default function MobileBottomNavbar({
       {/* Floating Rounded Pill Bottom Tab Bar */}
       <nav
         aria-label="Mobile navigation"
-        className={`fixed bottom-4 left-4 right-4 z-45 mx-auto flex h-16 max-w-sm items-center justify-around rounded-full border border-zinc-200/80 bg-white/80 px-3 shadow-2xl shadow-zinc-950/15 backdrop-blur-xl transition-all duration-300 ease-out dark:border-zinc-800/80 dark:bg-[#121215]/80 dark:shadow-black/60 lg:hidden ${
+        data-mobile-nav
+        className={`fixed left-1/2 z-45 flex max-w-[calc(100vw-1rem)] -translate-x-1/2 items-center justify-center gap-0.5 rounded-full border border-zinc-200/80 bg-white/95 p-1 shadow-2xl backdrop-blur-2xl transition-[bottom,opacity] duration-300 ease-in-out dark:border-zinc-800/80 dark:bg-zinc-900/95 lg:hidden ${
           isVisible
             ? "translate-y-0 opacity-100"
             : "translate-y-28 opacity-0 pointer-events-none"
@@ -220,46 +258,59 @@ export default function MobileBottomNavbar({
             <Link
               key={tab.href}
               href={tab.href}
-              className={`relative flex h-12 w-16 flex-col items-center justify-center rounded-full transition-all duration-200 active:scale-90 ${
-                tab.isActive
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+              onClick={() => setIsOpen(false)}
+              aria-label={tab.name}
+              aria-current={tab.isActive ? "page" : undefined}
+              className={`flex items-center gap-1.5 rounded-full transition-all duration-300 ${
+                tab.isActive && !isOpen
+                  ? "bg-blue-600 px-3.5 text-white shadow-md shadow-blue-500/25"
+                  : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 active:scale-95 dark:text-zinc-400 dark:hover:bg-zinc-800/60 dark:hover:text-white"
               }`}
             >
-              <div className="relative flex items-center justify-center">
-                <Icon size={19} strokeWidth={tab.isActive ? 2.5 : 2} />
+              <span className="relative flex min-h-11 min-w-11 items-center justify-center gap-1.5">
+                <Icon className="h-4 w-4 shrink-0" strokeWidth={tab.isActive ? 2.5 : 2} />
                 {tab.isMessageBadge && (
-                  <div className="absolute -top-1 -right-2">
+                  <span className="absolute right-1 top-0.5">
                     <MessageNavBadge />
-                  </div>
-                )}
-                {tab.badge > 0 && (
-                  <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-600 px-1 text-[9px] font-black text-white shadow-xs">
-                    {tab.badge > 99 ? "99+" : tab.badge}
                   </span>
                 )}
-              </div>
-              <span className="mt-1 max-w-full truncate font-outfit text-[10px] font-bold tracking-tight">
-                {tab.name}
+                {tab.isActive && !isOpen && (
+                  <span className="animate-in whitespace-nowrap text-xs font-bold tracking-tight fade-in zoom-in-95 duration-200">
+                    {tab.name}
+                  </span>
+                )}
               </span>
             </Link>
           );
         })}
+
+        <div className="mx-0.5 h-4 w-px shrink-0 bg-zinc-200 dark:bg-zinc-800" />
 
         {/* More Menu Island Toggle Button */}
         <button
           id="mobile-menu-island-toggle"
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className={`flex h-12 w-16 flex-col items-center justify-center rounded-full transition-all duration-200 active:scale-90 cursor-pointer ${
+          aria-expanded={isOpen}
+          aria-controls="mobile-menu-island"
+          aria-label="Toggle navigation menu"
+          className={`flex items-center gap-1.5 rounded-full transition-all duration-300 cursor-pointer ${
             isOpen
-              ? "text-blue-600 dark:text-blue-400"
-              : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+              ? "bg-zinc-900 px-3.5 text-white shadow-md dark:bg-white dark:text-zinc-900"
+              : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 active:scale-95 dark:text-zinc-400 dark:hover:bg-zinc-800/60 dark:hover:text-white"
           }`}
         >
-          {isOpen ? <X size={19} strokeWidth={2.5} /> : <Menu size={19} />}
-          <span className="mt-1 font-outfit text-[10px] font-bold tracking-tight">
-            {isOpen ? "Close" : "More"}
+          <span className="flex min-h-11 min-w-11 items-center justify-center gap-1.5">
+            {isOpen ? (
+              <X className="h-4 w-4 shrink-0" />
+            ) : (
+              <Menu className="h-4 w-4 shrink-0" />
+            )}
+            {isOpen && (
+              <span className="animate-in whitespace-nowrap text-xs font-bold tracking-tight fade-in zoom-in-95 duration-200">
+                Close
+              </span>
+            )}
           </span>
         </button>
       </nav>

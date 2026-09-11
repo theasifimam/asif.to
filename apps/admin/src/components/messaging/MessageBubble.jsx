@@ -21,16 +21,16 @@ import {
 
 function BubbleAvatar({
   user,
-  className = "h-8 w-8 sm:h-9 sm:w-9 rounded-2xl object-cover shadow-2xs border border-zinc-200/80 dark:border-zinc-800/80",
+  className = "h-8 w-8 rounded-full object-cover shadow-2xs border border-zinc-200/80 dark:border-zinc-800/80",
 }) {
   const source = avatarUrl(user?.avatar);
   return source ? (
     <img src={source} alt="" className={className} />
   ) : (
     <span
-      className={`flex ${className} items-center justify-center bg-zinc-200 text-xs font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300`}
+      className={`flex ${className} items-center justify-center bg-zinc-200 text-[10px] font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300`}
     >
-      {user?.fullName?.[0] || <UserRound size={16} />}
+      {user?.fullName?.[0] || <UserRound size={14} />}
     </span>
   );
 }
@@ -173,43 +173,47 @@ export default function MessageBubble({
       <div
         className={`flex max-w-[90%] sm:max-w-[78%] md:max-w-[70%] ${
           compact ? "max-w-[95%] sm:max-w-[90%]" : ""
-        } items-end gap-2 ${
-          mine ? "flex-row-reverse" : "flex-row"
-        }`}
+        } flex-col ${mine ? "items-end" : "items-start"}`}
       >
-        {/* Avatar for incoming messages */}
-        {!mine && (
-          <div className="w-8 sm:w-9 shrink-0 flex items-end justify-center mb-0.5">
-            {isLast || isSingle ? (
-              <BubbleAvatar user={message.senderId} />
-            ) : (
-              <div className="w-8 sm:w-9" />
-            )}
-          </div>
+        {/* Sender name for channel conversations on first message */}
+        {!mine && isFirst && conversation?.type !== "direct" && (
+          <span className="mb-1 ml-11 text-xs font-bold text-zinc-500 dark:text-zinc-400">
+            {message.senderId?.fullName || "Team Member"}
+          </span>
         )}
 
-        {/* Bubble & Floating Actions Wrapper */}
-        <div className="relative group/bubble flex flex-col">
-          {/* Sender name for channel conversations on first message */}
-          {!mine && isFirst && conversation?.type !== "direct" && (
-            <span className="mb-1 ml-3 text-xs font-bold text-zinc-500 dark:text-zinc-400">
-              {message.senderId?.fullName || "Team Member"}
-            </span>
+        {/* Bubble & Avatar Row */}
+        <div
+          className={`flex items-end gap-1.5 ${
+            mine ? "flex-row-reverse" : "flex-row"
+          }`}
+        >
+          {/* Avatar for incoming messages */}
+          {!mine && (
+            <div className="w-8 shrink-0 flex items-end justify-center self-end">
+              {isLast || isSingle ? (
+                <BubbleAvatar user={message.senderId} />
+              ) : (
+                <div className="w-8" />
+              )}
+            </div>
           )}
 
-          {/* Actual Chat Bubble */}
-          <div
-            onClick={() => setActions((prev) => !prev)}
-            className={`relative transition-all duration-150 cursor-pointer select-text ${bubbleRadius} ${
-              compact
-                ? "px-3.5 py-2 text-sm"
-                : "px-4 py-2.5 sm:px-4.5 sm:py-3 text-sm sm:text-[15px] leading-relaxed"
-            } ${
-              mine
-                ? "bg-blue-600 text-white shadow-xs"
-                : "bg-white text-zinc-950 shadow-xs border border-zinc-200/90 dark:border-zinc-800 dark:bg-[#18181b] dark:text-zinc-100"
-            }`}
-          >
+          {/* Bubble & Floating Actions Wrapper */}
+          <div className="relative group/bubble flex flex-col">
+            {/* Actual Chat Bubble */}
+            <div
+              onClick={() => setActions((prev) => !prev)}
+              className={`relative transition-all duration-150 cursor-pointer select-text ${bubbleRadius} ${
+                compact
+                  ? "px-3.5 py-2 text-sm"
+                  : "px-4 py-2.5 sm:px-4.5 sm:py-3 text-sm sm:text-[15px] leading-relaxed"
+              } ${
+                mine
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "bg-white text-zinc-950 shadow-xs border border-zinc-200/90 dark:border-zinc-800 dark:bg-[#18181b] dark:text-zinc-100"
+              }`}
+            >
             {/* Reply Quote Reference */}
             {message.replyToMessageId && (
               <button
@@ -407,14 +411,8 @@ export default function MessageBubble({
             </div>
           )}
 
-          {/* Status indicators below bubble (time hidden) */}
-          {(message.pin || message.pending || message.failed) && (
-            <div
-              className={`mt-1 flex items-center gap-1.5 px-2 text-xs text-zinc-400 dark:text-zinc-500 font-medium ${
-                mine ? "justify-end" : "justify-start"
-              }`}
-            />
-          )}
+
+          </div>
         </div>
       </div>
     </div>

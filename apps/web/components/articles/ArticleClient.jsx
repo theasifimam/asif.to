@@ -4,7 +4,16 @@ import LogoLoader from "@/components/ui/LogoLoader";
 import React, { useMemo, useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { Clock, Eye, Share2, Facebook, Instagram, Link2, Check, ArrowLeft } from "lucide-react";
+import {
+  Clock,
+  Eye,
+  Share2,
+  Facebook,
+  Instagram,
+  Link2,
+  Check,
+  ArrowLeft,
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -39,15 +48,17 @@ export default function ArticleClient({ slug, initialData }) {
 
   const cleanSlug = looksLikeMongoId ? slug.substring(0, lastDash) : slug;
 
-  const { data: responseById, isLoading: idLoading, error: idError } = useGetArticleByIdQuery(
-    possibleId,
-    { skip: !looksLikeMongoId }
-  );
+  const {
+    data: responseById,
+    isLoading: idLoading,
+    error: idError,
+  } = useGetArticleByIdQuery(possibleId, { skip: !looksLikeMongoId });
 
-  const { data: responseBySlug, isLoading: slugLoading, error: slugError } = useGetArticleBySlugQuery(
-    cleanSlug,
-    { skip: looksLikeMongoId }
-  );
+  const {
+    data: responseBySlug,
+    isLoading: slugLoading,
+    error: slugError,
+  } = useGetArticleBySlugQuery(cleanSlug, { skip: looksLikeMongoId });
 
   const response = looksLikeMongoId ? responseById : responseBySlug;
   const isLoading = looksLikeMongoId ? idLoading : slugLoading;
@@ -58,12 +69,18 @@ export default function ArticleClient({ slug, initialData }) {
   const [copied, setCopied] = useState(false);
 
   const parsedBlocks = useMemo(
-    () => parseContentBlocks(article?.content, article?.topic?.[0]?.name || "Article"),
-    [article?.content, article?.topic]
+    () =>
+      parseContentBlocks(
+        article?.content,
+        article?.topic?.[0]?.name || "Article",
+      ),
+    [article?.content, article?.topic],
   );
-  const articleWordCount = (Array.isArray(article?.content)
-    ? article.content.join(" ")
-    : String(article?.content || ""))
+  const articleWordCount = (
+    Array.isArray(article?.content)
+      ? article.content.join(" ")
+      : String(article?.content || "")
+  )
     .split(/\s+/)
     .filter(Boolean).length;
 
@@ -149,9 +166,9 @@ export default function ArticleClient({ slug, initialData }) {
     <div className="min-h-screen bg-background text-foreground font-sans transition-colors duration-500">
       <Header />
 
-      <main className="flex flex-col items-center w-full pt-24 md:pt-28 pb-20">
+      <main className="flex flex-col items-center w-full pt-20 sm:pt-24 md:pt-28 pb-20">
         {/* Article Open Header */}
-        <div className="w-full max-w-4xl px-6 flex flex-col gap-6 mb-10">
+        <div className="w-full max-w-4xl px-4 sm:px-6 flex flex-col gap-5 sm:gap-6 mb-8 sm:mb-10">
           <Link
             href="/articles"
             className="inline-flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors uppercase tracking-widest w-fit"
@@ -160,7 +177,7 @@ export default function ArticleClient({ slug, initialData }) {
             Back to Dispatches
           </Link>
 
-          <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-zinc-400">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-bold uppercase tracking-[0.14em] sm:tracking-[0.2em] text-zinc-400">
             <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black">
               {article.topic?.[0]?.name || "EDITORIAL"}
             </span>
@@ -180,7 +197,7 @@ export default function ArticleClient({ slug, initialData }) {
             )}
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-black font-outfit tracking-tight text-zinc-900 dark:text-white leading-[1.1]">
+          <h1 className="text-2xl xs:text-3xl md:text-5xl font-black font-outfit tracking-tight text-zinc-900 dark:text-white leading-[1.1]">
             {article.title}
           </h1>
 
@@ -218,7 +235,7 @@ export default function ArticleClient({ slug, initialData }) {
 
         {/* Cover Image Container */}
         {article.image && (
-          <div className="w-full max-w-4xl px-6 mb-12">
+          <div className="w-full max-w-4xl px-4 sm:px-6 mb-8 sm:mb-12">
             <div className="w-full rounded-2xl md:rounded-3xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 shadow-md border border-zinc-200/70 dark:border-zinc-800">
               <Image
                 src={getImageUrl(article.image)}
@@ -234,12 +251,14 @@ export default function ArticleClient({ slug, initialData }) {
         )}
 
         {/* Article Body Content */}
-        <article className="w-full max-w-4xl px-6 flex flex-col gap-8">
+        <article className="mobile-reading-copy w-full max-w-4xl px-4 sm:px-6 flex flex-col gap-7 sm:gap-8">
           <ChapterBlocksRenderer
             chapter={article}
             parsedBlocks={parsedBlocks}
             fontBodyClass="text-base sm:text-lg md:text-xl font-medium"
-            middleAd={<ArticleAd position="middle" wordCount={articleWordCount} />}
+            middleAd={
+              <ArticleAd position="middle" wordCount={articleWordCount} />
+            }
           />
 
           <ArticleAd position="bottom" wordCount={articleWordCount} />
@@ -289,7 +308,7 @@ export default function ArticleClient({ slug, initialData }) {
 
         {/* Related Articles */}
         {moreArticles?.data && (
-          <section className="w-full max-w-350 mt-20 px-6 lg:px-12 border-t border-zinc-200/60 dark:border-zinc-800/60 pt-16">
+          <section className="w-full max-w-350 mt-14 sm:mt-20 px-4 sm:px-6 lg:px-12 border-t border-zinc-200/60 dark:border-zinc-800/60 pt-10 sm:pt-16">
             <div className="flex items-center justify-between mb-10">
               <h2 className="text-2xl font-bold font-outfit text-zinc-900 dark:text-white">
                 Further Dispatches

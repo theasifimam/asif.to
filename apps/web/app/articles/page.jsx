@@ -6,7 +6,7 @@ import Link from "next/link";
 import Footer from "@/components/layout/Footer";
 import ArticleCard from "@/components/articles/ArticleCard";
 import { useGetArticlesQuery } from "@/lib/api/articlesApi";
-import { Sparkles } from "lucide-react";
+import { Newspaper, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 
 export default function ArticlesPage() {
@@ -30,8 +30,8 @@ export default function ArticlesPage() {
     <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-500">
       <Header />
 
-      <main className="flex-1 w-full flex flex-col pt-24 md:pt-28 pb-24">
-        <div className="max-w-350 mx-auto px-6 lg:px-12 w-full">
+      <main className="flex-1 w-full flex flex-col pt-20 sm:pt-24 md:pt-28 pb-24">
+        <div className="max-w-350 mx-auto px-4 sm:px-6 lg:px-12 w-full">
           <nav className="mb-7 flex items-center gap-2 text-xs font-bold text-zinc-400">
             <Link href="/" className="hover:text-blue-600 transition-colors">
               Home
@@ -58,8 +58,8 @@ export default function ArticlesPage() {
           </div>
 
           {/* Page Header */}
-          <div className="flex flex-col gap-4 mb-16 max-w-2xl">
-            <h1 className="text-4xl md:text-6xl font-black font-outfit tracking-tight text-zinc-900 dark:text-white">
+          <div className="flex flex-col gap-3 mb-8 sm:gap-4 sm:mb-16 max-w-2xl">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-black font-outfit tracking-tight text-zinc-900 dark:text-white">
               The Archive.
             </h1>
             <p className="text-zinc-500 dark:text-zinc-400 text-base font-light leading-relaxed">
@@ -69,7 +69,7 @@ export default function ArticlesPage() {
           </div>
 
           {/* Articles Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-8 sm:gap-y-16">
             {articles.map((article) => (
               <ArticleCard
                 key={article._id}
@@ -87,6 +87,18 @@ export default function ArticlesPage() {
                 variant="vertical"
               />
             ))}
+            {!articles.length && (
+              <div className="col-span-full flex flex-col items-center rounded-3xl border border-dashed border-zinc-200 px-5 py-12 text-center dark:border-zinc-800 sm:py-16">
+                <Newspaper className="h-8 w-8 text-zinc-400" />
+                <h2 className="mt-3 font-outfit text-lg font-black">
+                  No dispatches published yet
+                </h2>
+                <p className="mt-1 max-w-sm text-sm leading-6 text-zinc-500">
+                  New technical articles will appear here as soon as they are
+                  published.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </main>

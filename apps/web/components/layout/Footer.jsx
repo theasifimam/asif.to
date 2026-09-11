@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Mail,
   Bookmark,
@@ -22,6 +23,13 @@ function WhatsAppIcon({ className = "w-4 h-4" }) {
 
 export default function Footer({ containerWidth = "max-w-7xl" }) {
   const [copied, setCopied] = useState(false);
+  const pathname = usePathname();
+  const hasGlobalBottomNav = !(
+    pathname === "/playground" ||
+    pathname === "/run" ||
+    pathname.startsWith("/play/") ||
+    /^\/practice\/[^/]+\/[^/]+/.test(pathname)
+  );
 
   const handleCopyLink = () => {
     if (typeof window !== "undefined" && navigator.clipboard) {
@@ -38,333 +46,375 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
   };
 
   return (
-    <footer className="w-full mt-auto pt-8">
-      <div
-        className={`w-full ${containerWidth} mx-auto px-4 sm:px-6 pb-28 md:pb-12 transition-all duration-300`}
+    <>
+      <footer
+        className={`mt-auto w-full px-4 pt-8 lg:hidden print:hidden ${hasGlobalBottomNav ? "pb-[calc(5.5rem+env(safe-area-inset-bottom))]" : "pb-[max(2rem,env(safe-area-inset-bottom))]"}`}
       >
-        <div className="p-6 sm:p-10 rounded-4xl sm:rounded-[3rem] bg-white dark:bg-zinc-900/90 shadow-lg shadow-black/5 dark:shadow-black/20 flex flex-col gap-8">
-          <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
-            {/* Brand */}
-            <div className="flex flex-col gap-3.5 max-w-sm">
-              <Link href="/" className="flex items-center gap-2.5 group">
-                <div className="relative">
-                  <img
-                    src="/logo.png"
-                    alt="asif.to"
-                    className="w-9 h-9 rounded-xl object-contain group-hover:scale-105 transition-transform"
-                  />
+        <div className="mx-auto flex max-w-md flex-col gap-4 border-t border-zinc-200/80 pt-5 dark:border-zinc-800/80">
+          <div className="flex items-center justify-between gap-4">
+            <Link href="/" className="flex items-center gap-2">
+              <img
+                src="/logo.png"
+                alt="asif.to"
+                className="h-8 w-8 rounded-xl object-contain"
+              />
+              <span className="font-outfit text-lg font-black tracking-tight text-foreground">
+                asif
+                <span className="text-blue-600 dark:text-blue-400">.to</span>
+              </span>
+            </Link>
+            <a
+              href="mailto:support@asif.to"
+              className="inline-flex min-h-11 items-center gap-1.5 text-xs font-bold text-zinc-500 dark:text-zinc-400"
+            >
+              <Mail className="h-3.5 w-3.5" />
+              Support
+            </a>
+          </div>
+          <nav
+            aria-label="Footer"
+            className="flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-zinc-500 dark:text-zinc-400"
+          >
+            <Link href="/about">About</Link>
+            <Link href="/contact">Contact</Link>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+          </nav>
+          <p className="text-[11px] font-medium text-zinc-400">
+            &copy; {new Date().getFullYear()} asif.to. Built for focused
+            learning.
+          </p>
+        </div>
+      </footer>
+
+      <footer className="hidden w-full mt-auto pt-8 lg:block">
+        <div
+          className={`w-full ${containerWidth} mx-auto px-4 sm:px-6 pb-28 md:pb-12 transition-all duration-300`}
+        >
+          <div className="p-6 sm:p-10 rounded-4xl sm:rounded-[3rem] bg-white dark:bg-zinc-900/90 shadow-lg shadow-black/5 dark:shadow-black/20 flex flex-col gap-8">
+            <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
+              {/* Brand */}
+              <div className="flex flex-col gap-3.5 max-w-sm">
+                <Link href="/" className="flex items-center gap-2.5 group">
+                  <div className="relative">
+                    <img
+                      src="/logo.png"
+                      alt="asif.to"
+                      className="w-9 h-9 rounded-xl object-contain group-hover:scale-105 transition-transform"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-outfit font-black text-2xl tracking-tight text-foreground leading-none">
+                      asif
+                      <span className="text-blue-600 dark:text-blue-400">
+                        .to
+                      </span>
+                    </span>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
+                      Coding Tutorials & Cheatsheets
+                    </span>
+                  </div>
+                </Link>
+                <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                  Modern step-by-step coding courses, instant syntax
+                  cheatsheets, interactive flashcards, and practice quizzes for
+                  React, Next.js, Express, Node & MongoDB.
+                </p>
+
+                {/* Bookmark & Share CTA Buttons */}
+                <div className="flex items-center gap-2 pt-1 flex-wrap">
+                  <button
+                    onClick={handleBookmark}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600/10 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white text-xs font-bold transition-all border border-blue-500/20 active:scale-95"
+                    title="Bookmark asif.to in your browser"
+                  >
+                    <Bookmark className="w-3.5 h-3.5" />
+                    <span>Bookmark asif.to</span>
+                  </button>
+                  <button
+                    onClick={handleCopyLink}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 text-xs font-bold transition-all active:scale-95"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-500" />
+                        <span className="text-emerald-500">Link Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Share2 className="w-3.5 h-3.5" />
+                        <span>Share asif.to</span>
+                      </>
+                    )}
+                  </button>
                 </div>
-                <div className="flex flex-col">
-                  <span className="font-outfit font-black text-2xl tracking-tight text-foreground leading-none">
-                    asif
+
+                {/* Social Media Badges */}
+                <div className="flex flex-col gap-1.5 pt-2">
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-400">
+                    Follow Us{" "}
                     <span className="text-blue-600 dark:text-blue-400">
-                      .to
+                      @theasifto
                     </span>
                   </span>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
-                    Coding Tutorials & Cheatsheets
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href="https://instagram.com/theasifto"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-linear-to-tr hover:from-amber-500 hover:via-rose-500 hover:to-purple-600 hover:text-white transition-all shadow-xs"
+                      title="Instagram @theasifto"
+                    >
+                      <Instagram className="w-4 h-4" />
+                    </a>
+                    <a
+                      href="https://facebook.com/theasifto"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-[#1877F2] hover:text-white transition-all shadow-xs"
+                      title="Facebook @theasifto"
+                    >
+                      <Facebook className="w-4 h-4" />
+                    </a>
+                    <a
+                      href="https://linkedin.com/company/asif.to"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-[#0A66C2] hover:text-white transition-all shadow-xs"
+                      title="LinkedIn @asif.to"
+                    >
+                      <Linkedin className="w-4 h-4" />
+                    </a>
+                    <a
+                      href="https://wa.me/asif.to"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-[#25D366] hover:text-white transition-all shadow-xs"
+                      title="WhatsApp asif.to"
+                    >
+                      <WhatsAppIcon className="w-4 h-4" />
+                    </a>
+                  </div>
                 </div>
-              </Link>
-              <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                Modern step-by-step coding courses, instant syntax cheatsheets,
-                interactive flashcards, and practice quizzes for React, Next.js,
-                Express, Node & MongoDB.
+
+                <a
+                  href="mailto:support@asif.to"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors w-fit pt-0.5"
+                >
+                  <Mail className="w-3.5 h-3.5" />
+                  <span>support@asif.to</span>
+                </a>
+              </div>
+
+              {/* Navigation Columns */}
+              <div className="flex flex-wrap gap-8 sm:gap-12">
+                {/* Learning Navigation */}
+                <div className="flex flex-col gap-2.5">
+                  <h4 className="text-xs font-extrabold uppercase tracking-widest text-blue-600 dark:text-blue-400">
+                    Navigation
+                  </h4>
+                  <nav className="flex flex-col gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                    <Link
+                      href="/"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      Courses
+                    </Link>
+                    <Link
+                      href="/cheatsheets"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      Cheatsheets
+                    </Link>
+                    <Link
+                      href="/revision"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      Revision Deck
+                    </Link>
+                    <Link
+                      href="/quiz"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      Practice Quiz
+                    </Link>
+                    <Link
+                      href="/jobs"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      UAE Jobs
+                    </Link>
+                    <Link
+                      href="/bookmarks"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      Saved Notes
+                    </Link>
+                  </nav>
+                </div>
+
+                {/* Popular Tracks */}
+                <div className="flex flex-col gap-2.5">
+                  <h4 className="text-xs font-extrabold uppercase tracking-widest text-blue-600 dark:text-blue-400">
+                    Popular Tracks
+                  </h4>
+                  <nav className="flex flex-col gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                    <Link
+                      href="/courses/reactjs"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      React.js Course
+                    </Link>
+                    <Link
+                      href="/courses/nextjs"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      Next.js Course
+                    </Link>
+                    <Link
+                      href="/courses/expressjs"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      Express.js API
+                    </Link>
+                    <Link
+                      href="/courses/mongodb"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      MongoDB Database
+                    </Link>
+                    <Link
+                      href="/courses/tailwindcss"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      Tailwind CSS
+                    </Link>
+                  </nav>
+                </div>
+
+                {/* Follow Us Handles */}
+                <div className="flex flex-col gap-2.5">
+                  <h4 className="text-xs font-extrabold uppercase tracking-widest text-blue-600 dark:text-blue-400">
+                    Follow @theasifto
+                  </h4>
+                  <nav className="flex flex-col gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                    <a
+                      href="https://instagram.com/theasifto"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 hover:text-pink-600 dark:hover:text-pink-400 transition-colors"
+                    >
+                      <Instagram className="w-3.5 h-3.5" />
+                      <span>Instagram</span>
+                    </a>
+                    <a
+                      href="https://facebook.com/theasifto"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    >
+                      <Facebook className="w-3.5 h-3.5" />
+                      <span>Facebook</span>
+                    </a>
+                    <a
+                      href="https://linkedin.com/company/asif.to"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+                    >
+                      <Linkedin className="w-3.5 h-3.5" />
+                      <span>LinkedIn</span>
+                    </a>
+                    <a
+                      href="https://wa.me/asif.to"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 hover:text-emerald-500 transition-colors"
+                    >
+                      <WhatsAppIcon className="w-3.5 h-3.5" />
+                      <span>WhatsApp</span>
+                    </a>
+                  </nav>
+                </div>
+
+                {/* Company & Legal */}
+                <div className="flex flex-col gap-2.5">
+                  <h4 className="text-xs font-extrabold uppercase tracking-widest text-blue-600 dark:text-blue-400">
+                    Company & Legal
+                  </h4>
+                  <nav className="flex flex-col gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
+                    <Link
+                      href="/about"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      About Us
+                    </Link>
+                    <Link
+                      href="/author/asif"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      Author: Asif
+                    </Link>
+                    <Link
+                      href="/contact"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      Contact Us
+                    </Link>
+                    <Link
+                      href="/privacy"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      Privacy Policy
+                    </Link>
+                    <Link
+                      href="/terms"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      Terms & Conditions
+                    </Link>
+                    <Link
+                      href="/legal/cookie-usage"
+                      className="hover:text-foreground transition-colors"
+                    >
+                      Cookie Policy
+                    </Link>
+                  </nav>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Status Bar */}
+            <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-bold text-zinc-400">
+              <p>
+                &copy; {new Date().getFullYear()} asif.to. All rights reserved.
               </p>
-
-              {/* Bookmark & Share CTA Buttons */}
-              <div className="flex items-center gap-2 pt-1 flex-wrap">
-                <button
-                  onClick={handleBookmark}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600/10 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white text-xs font-bold transition-all border border-blue-500/20 active:scale-95"
-                  title="Bookmark asif.to in your browser"
+              <div className="flex items-center gap-4 text-[11px]">
+                <a
+                  href="mailto:support@asif.to"
+                  className="hover:text-blue-500 transition-colors"
                 >
-                  <Bookmark className="w-3.5 h-3.5" />
-                  <span>Bookmark asif.to</span>
-                </button>
-                <button
-                  onClick={handleCopyLink}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 text-xs font-bold transition-all active:scale-95"
+                  support@asif.to
+                </a>
+                <span>•</span>
+                <Link
+                  href="/legal/privacy-policy"
+                  className="hover:text-foreground transition-colors"
                 >
-                  {copied ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-500" />
-                      <span className="text-emerald-500">Link Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Share2 className="w-3.5 h-3.5" />
-                      <span>Share asif.to</span>
-                    </>
-                  )}
-                </button>
+                  Privacy
+                </Link>
+                <span>•</span>
+                <Link
+                  href="/legal/terms-conditions"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Terms
+                </Link>
               </div>
-
-              {/* Social Media Badges */}
-              <div className="flex flex-col gap-1.5 pt-2">
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-400">
-                  Follow Us{" "}
-                  <span className="text-blue-600 dark:text-blue-400">
-                    @theasifto
-                  </span>
-                </span>
-                <div className="flex items-center gap-2">
-                  <a
-                    href="https://instagram.com/theasifto"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-linear-to-tr hover:from-amber-500 hover:via-rose-500 hover:to-purple-600 hover:text-white transition-all shadow-xs"
-                    title="Instagram @theasifto"
-                  >
-                    <Instagram className="w-4 h-4" />
-                  </a>
-                  <a
-                    href="https://facebook.com/theasifto"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-[#1877F2] hover:text-white transition-all shadow-xs"
-                    title="Facebook @theasifto"
-                  >
-                    <Facebook className="w-4 h-4" />
-                  </a>
-                  <a
-                    href="https://linkedin.com/company/asif.to"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-[#0A66C2] hover:text-white transition-all shadow-xs"
-                    title="LinkedIn @asif.to"
-                  >
-                    <Linkedin className="w-4 h-4" />
-                  </a>
-                  <a
-                    href="https://wa.me/asif.to"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-[#25D366] hover:text-white transition-all shadow-xs"
-                    title="WhatsApp asif.to"
-                  >
-                    <WhatsAppIcon className="w-4 h-4" />
-                  </a>
-                </div>
-              </div>
-
-              <a
-                href="mailto:support@asif.to"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors w-fit pt-0.5"
-              >
-                <Mail className="w-3.5 h-3.5" />
-                <span>support@asif.to</span>
-              </a>
-            </div>
-
-            {/* Navigation Columns */}
-            <div className="flex flex-wrap gap-8 sm:gap-12">
-              {/* Learning Navigation */}
-              <div className="flex flex-col gap-2.5">
-                <h4 className="text-xs font-extrabold uppercase tracking-widest text-blue-600 dark:text-blue-400">
-                  Navigation
-                </h4>
-                <nav className="flex flex-col gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
-                  <Link
-                    href="/"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Courses
-                  </Link>
-                  <Link
-                    href="/cheatsheets"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Cheatsheets
-                  </Link>
-                  <Link
-                    href="/revision"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Revision Deck
-                  </Link>
-                  <Link
-                    href="/quiz"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Practice Quiz
-                  </Link>
-                  <Link
-                    href="/jobs"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    UAE Jobs
-                  </Link>
-                  <Link
-                    href="/bookmarks"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Saved Notes
-                  </Link>
-                </nav>
-              </div>
-
-              {/* Popular Tracks */}
-              <div className="flex flex-col gap-2.5">
-                <h4 className="text-xs font-extrabold uppercase tracking-widest text-blue-600 dark:text-blue-400">
-                  Popular Tracks
-                </h4>
-                <nav className="flex flex-col gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
-                  <Link
-                    href="/courses/reactjs"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    React.js Course
-                  </Link>
-                  <Link
-                    href="/courses/nextjs"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Next.js Course
-                  </Link>
-                  <Link
-                    href="/courses/expressjs"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Express.js API
-                  </Link>
-                  <Link
-                    href="/courses/mongodb"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    MongoDB Database
-                  </Link>
-                  <Link
-                    href="/courses/tailwindcss"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Tailwind CSS
-                  </Link>
-                </nav>
-              </div>
-
-              {/* Follow Us Handles */}
-              <div className="flex flex-col gap-2.5">
-                <h4 className="text-xs font-extrabold uppercase tracking-widest text-blue-600 dark:text-blue-400">
-                  Follow @theasifto
-                </h4>
-                <nav className="flex flex-col gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
-                  <a
-                    href="https://instagram.com/theasifto"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 hover:text-pink-600 dark:hover:text-pink-400 transition-colors"
-                  >
-                    <Instagram className="w-3.5 h-3.5" />
-                    <span>Instagram</span>
-                  </a>
-                  <a
-                    href="https://facebook.com/theasifto"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                  >
-                    <Facebook className="w-3.5 h-3.5" />
-                    <span>Facebook</span>
-                  </a>
-                  <a
-                    href="https://linkedin.com/company/asif.to"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
-                  >
-                    <Linkedin className="w-3.5 h-3.5" />
-                    <span>LinkedIn</span>
-                  </a>
-                  <a
-                    href="https://wa.me/asif.to"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 hover:text-emerald-500 transition-colors"
-                  >
-                    <WhatsAppIcon className="w-3.5 h-3.5" />
-                    <span>WhatsApp</span>
-                  </a>
-                </nav>
-              </div>
-
-              {/* Company & Legal */}
-              <div className="flex flex-col gap-2.5">
-                <h4 className="text-xs font-extrabold uppercase tracking-widest text-blue-600 dark:text-blue-400">
-                  Company & Legal
-                </h4>
-                <nav className="flex flex-col gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400">
-                  <Link
-                    href="/about"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    About Us
-                  </Link>
-                  <Link
-                    href="/author/asif"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Author: Asif
-                  </Link>
-                  <Link
-                    href="/contact"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Contact Us
-                  </Link>
-                  <Link
-                    href="/privacy"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Privacy Policy
-                  </Link>
-                  <Link
-                    href="/terms"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Terms & Conditions
-                  </Link>
-                  <Link
-                    href="/legal/cookie-usage"
-                    className="hover:text-foreground transition-colors"
-                  >
-                    Cookie Policy
-                  </Link>
-                </nav>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Status Bar */}
-          <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-bold text-zinc-400">
-            <p>
-              &copy; {new Date().getFullYear()} asif.to. All rights reserved.
-            </p>
-            <div className="flex items-center gap-4 text-[11px]">
-              <a
-                href="mailto:support@asif.to"
-                className="hover:text-blue-500 transition-colors"
-              >
-                support@asif.to
-              </a>
-              <span>•</span>
-              <Link
-                href="/legal/privacy-policy"
-                className="hover:text-foreground transition-colors"
-              >
-                Privacy
-              </Link>
-              <span>•</span>
-              <Link
-                href="/legal/terms-conditions"
-                className="hover:text-foreground transition-colors"
-              >
-                Terms
-              </Link>
             </div>
           </div>
         </div>
-      </div>
-    </footer>
+      </footer>
+    </>
   );
 }

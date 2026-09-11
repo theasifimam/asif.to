@@ -108,7 +108,7 @@ export default function CourseClient({ initialData }) {
         activeCourseSlug={activeCourseSlug}
       />
 
-      <main className="flex-1 w-full max-w-4xl mx-auto px-3.5 sm:px-6 pt-36 sm:pt-44 flex flex-col gap-6">
+      <main className="flex-1 w-full max-w-4xl mx-auto px-3.5 sm:px-6 pt-36 sm:pt-44 flex flex-col gap-4 sm:gap-6">
         {/* Back Button */}
         <div>
           <Link
@@ -121,7 +121,7 @@ export default function CourseClient({ initialData }) {
         </div>
 
         {/* Course Hero Banner */}
-        <section className="relative p-5 sm:p-9 rounded-2xl sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-md flex flex-col gap-5">
+        <section className="relative p-5 sm:p-9 rounded-3xl sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-md flex flex-col gap-5">
           {/* Floating Intentional Top-Right Bookmark Button */}
           <div className="absolute -top-3 right-4 sm:right-9 z-20">
             <SaveButton
@@ -358,12 +358,12 @@ export default function CourseClient({ initialData }) {
                       itemType="chapter"
                       label="Save"
                       size="sm"
-                      className="rounded-full px-3.5 py-1.5 text-xs bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border-none shadow-none"
+                      className="min-h-11 rounded-full px-3.5 text-xs bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border-none shadow-none"
                     />
 
                     <Link
                       href={`/${activeCourseSlug}/${ch.slug}`}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs hover:shadow-md active:scale-95 transition-all group/btn"
+                      className="inline-flex min-h-11 items-center gap-1.5 px-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs hover:shadow-md active:scale-95 transition-all group/btn"
                     >
                       <span>Start Lesson</span>
                       <ChevronRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />

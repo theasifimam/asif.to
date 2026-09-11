@@ -48,7 +48,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "bg-white dark:bg-zinc-950 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-10000 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-5 rounded-[1.75rem] border border-zinc-200/90 p-6 shadow-[0_24px_80px_-24px_rgba(0,0,0,.35)] duration-200 outline-none dark:border-zinc-800 sm:max-w-lg sm:p-7",
+          "bg-white dark:bg-zinc-950 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom-4 data-[state=open]:slide-in-from-bottom-4 sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95 fixed bottom-0 left-[50%] z-10000 grid max-h-[calc(100dvh-env(safe-area-inset-top)-0.75rem)] w-full max-w-none translate-x-[-50%] gap-4 overflow-y-auto rounded-t-[1.75rem] border border-b-0 border-zinc-200/90 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[0_24px_80px_-24px_rgba(0,0,0,.35)] duration-200 outline-none dark:border-zinc-800 sm:bottom-auto sm:top-[50%] sm:max-w-lg sm:translate-y-[-50%] sm:gap-5 sm:rounded-[1.75rem] sm:border-b sm:p-7",
           className,
         )}
         {...props}

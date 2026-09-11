@@ -674,7 +674,7 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Search notes..."
-                  className="h-10 w-full rounded-xl border border-zinc-200 bg-zinc-50 pl-9 pr-3 text-xs font-medium text-zinc-900 outline-none transition focus:border-blue-500 focus:bg-white dark:border-zinc-800 dark:bg-zinc-900 dark:text-white dark:focus:border-blue-500"
+                  className="h-10 w-full rounded-xl border border-zinc-200 bg-zinc-50 pl-9 pr-3 text-xs font-medium text-zinc-900 outline-none transition focus:border-blue-500 focus:bg-white dark:border-zinc-800 dark:bg-zinc-900 dark:text-white dark:focus:border-blue-500 dark:focus:bg-zinc-900"
                 />
               </div>
               <div className="flex gap-2">

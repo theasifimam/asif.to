@@ -33,7 +33,7 @@ export default function ChapterBlocksRenderer({
 
   if (isSimplePoints) {
     return (
-      <div className="mt-2 space-y-3 text-justify">
+      <div className="mobile-reading-copy mt-2 space-y-3 text-left sm:text-justify">
         <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-blue-500" />
           Key Chapter Explanations
@@ -57,7 +57,7 @@ export default function ChapterBlocksRenderer({
 
   return (
     <div
-      className={`space-y-6 ${fontBodyClass} text-justify font-medium text-zinc-700 dark:text-zinc-300`}
+      className={`mobile-reading-copy space-y-5 sm:space-y-6 ${fontBodyClass} text-left sm:text-justify font-medium text-zinc-700 dark:text-zinc-300`}
     >
       {parsedBlocks.map((block, idx) => {
         const renderedBlock = (() => {
@@ -68,7 +68,7 @@ export default function ChapterBlocksRenderer({
               <h2
                 key={idx}
                 id={headingId}
-                className="text-xl sm:text-3xl font-black text-foreground tracking-tight mt-10 mb-4 border-b border-zinc-100 dark:border-zinc-800/80 pb-3 scroll-mt-20"
+                className="text-xl sm:text-3xl font-black text-foreground tracking-tight mt-8 sm:mt-10 mb-4 border-b border-zinc-100 dark:border-zinc-800/80 pb-3 scroll-mt-20"
               >
                 {renderInlineFormatting(block.text)}
               </h2>

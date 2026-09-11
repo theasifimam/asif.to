@@ -57,21 +57,26 @@ export default async function InterviewQuestionsIndexPage() {
   return (
     <div className="min-h-screen w-full bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
       <Header />
-      <main className="mx-auto max-w-7xl px-4 pb-20 pt-24 sm:px-6 lg:px-8">
-        <nav className="mb-7 flex items-center gap-2 text-xs font-bold text-zinc-400">
-          <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+      <main className="mx-auto max-w-7xl px-4 pb-20 pt-20 sm:px-6 sm:pt-24 lg:px-8">
+        <nav className="mb-5 flex items-center gap-2 text-xs font-bold text-zinc-400 sm:mb-7">
+          <Link href="/" className="hover:text-blue-600 transition-colors">
+            Home
+          </Link>
           <span>/</span>
-          <span className="text-zinc-700 dark:text-zinc-200">Interview Questions</span>
+          <span className="text-zinc-700 dark:text-zinc-200">
+            Interview Questions
+          </span>
         </nav>
-        <header className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:rounded-4xl sm:p-10">
+        <header className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:rounded-4xl sm:p-10">
           <p className="text-xs font-bold uppercase tracking-widest text-orange-600 dark:text-orange-400">
             Interview Preparation Directory
           </p>
-          <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-5xl">
+          <h1 className="mt-3 text-2xl font-black tracking-tight xs:text-3xl sm:text-5xl">
             Interview Questions by Technology
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-zinc-600 dark:text-zinc-300">
-            Select a category to view full answers, code examples, expected outputs, and likely follow-up questions.
+            Select a category to view full answers, code examples, expected
+            outputs, and likely follow-up questions.
           </p>
         </header>
 
@@ -81,7 +86,7 @@ export default async function InterviewQuestionsIndexPage() {
             No interview categories published yet.
           </div>
         ) : (
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid gap-4 sm:mt-8 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
             {categories.map((category) => (
               <Link
                 key={category._id}
@@ -90,7 +95,7 @@ export default async function InterviewQuestionsIndexPage() {
                     ? `/${category.course.slug}/interview-questions/${category.slug}`
                     : `/interview-questions/${category.slug}`
                 }
-                className="group flex flex-col justify-between rounded-3xl border border-zinc-200 bg-white p-6 shadow-xs transition-all hover:border-orange-500/50 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+                className="group flex flex-col justify-between rounded-3xl border border-zinc-200 bg-white p-5 shadow-xs transition-all hover:border-orange-500/50 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 sm:p-6"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">
@@ -107,7 +112,8 @@ export default async function InterviewQuestionsIndexPage() {
                     {category.name} Interview Questions
                   </h2>
                   <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400 line-clamp-3">
-                    {category.description || `Comprehensive interview questions and answers for ${category.name}.`}
+                    {category.description ||
+                      `Comprehensive interview questions and answers for ${category.name}.`}
                   </p>
                 </div>
                 <div className="mt-6 flex items-center justify-between border-t border-zinc-100 pt-4 dark:border-zinc-800">

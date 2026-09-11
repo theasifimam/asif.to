@@ -43,7 +43,7 @@ export default function AuthLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-foreground flex flex-col lg:flex-row items-center justify-center lg:gap-16 p-4 sm:p-8 lg:p-20 transition-colors duration-300 relative overflow-hidden font-sans">
+    <div className="min-h-dvh bg-zinc-50 dark:bg-zinc-950 text-foreground flex flex-col lg:flex-row items-center justify-center lg:gap-16 p-0 sm:p-8 lg:p-20 transition-colors duration-300 relative overflow-hidden font-sans">
       {/* Background Decorative Ambient Glows */}
       <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
@@ -114,7 +114,7 @@ export default function AuthLayout({ children }) {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="w-full bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/80 rounded-[2.5rem] p-8 sm:p-10 shadow-2xl shadow-blue-500/5 dark:shadow-black/50"
+          className="flex min-h-dvh w-full flex-col justify-center bg-white px-5 py-[max(1.5rem,env(safe-area-inset-top))] dark:bg-zinc-900 sm:min-h-0 sm:rounded-[2.5rem] sm:border sm:border-zinc-200/80 sm:p-10 sm:shadow-2xl sm:shadow-blue-500/5 sm:dark:border-zinc-800/80 sm:dark:shadow-black/50"
         >
           {children}
         </motion.div>

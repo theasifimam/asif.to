@@ -5,7 +5,7 @@ import Link from "next/link";
 import * as Tabs from "@radix-ui/react-tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { X, ShieldCheck, AlertCircle } from "lucide-react";
+import { X, AlertCircle } from "lucide-react";
 import {
   useSigninMutation,
   useSignupMutation,
@@ -49,13 +49,16 @@ export default function AuthCard({
   });
 
   useEffect(() => {
-    setActiveTab(defaultTab);
-    if (defaultTab === "signup") {
-      if (typeof window !== "undefined") {
-        const mode = new URLSearchParams(window.location.search).get("mode");
-        setSuStep(mode === "email" ? "form" : "options");
+    const syncDefaultTab = window.setTimeout(() => {
+      setActiveTab(defaultTab);
+      if (defaultTab === "signup") {
+        if (typeof window !== "undefined") {
+          const mode = new URLSearchParams(window.location.search).get("mode");
+          setSuStep(mode === "email" ? "form" : "options");
+        }
       }
-    }
+    }, 0);
+    return () => window.clearTimeout(syncDefaultTab);
   }, [defaultTab]);
 
   // Handle URL updates when switching tabs
@@ -293,15 +296,21 @@ export default function AuthCard({
   const isBusy = siLoading || suLoading || otpSending;
 
   return (
-    <div className="relative w-full max-w-110 bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden max-h-[85vh] sm:max-h-[88vh]">
-      {/* Subtle Accent Glow (inside solid card) */}
-      <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+    <div className="relative w-full max-w-110 bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden max-h-[calc(100dvh-env(safe-area-inset-top)-1rem)] sm:max-h-[88vh] pb-[env(safe-area-inset-bottom)]">
+      {/* Mobile Drag Handle Pill for Instagram-style Bottom Sheet */}
+      {isModal && (
+        <div className="pt-3 pb-1 flex justify-center cursor-grab active:cursor-grabbing sm:hidden shrink-0 touch-none bg-white dark:bg-zinc-900 relative z-10">
+          <div className="w-12 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700 hover:bg-zinc-400 dark:hover:bg-zinc-600 transition-colors" />
+        </div>
+      )}
 
       {/* OAuth error banner */}
       {oauthError && (
         <div className="relative z-20 flex items-start gap-2.5 bg-rose-50 dark:bg-rose-950/50 border-b border-rose-200 dark:border-rose-900 px-5 py-3">
-          <AlertCircle size={15} className="shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
+          <AlertCircle
+            size={15}
+            className="shrink-0 text-rose-600 dark:text-rose-400 mt-0.5"
+          />
           <p className="flex-1 text-xs font-semibold text-rose-800 dark:text-rose-300 leading-snug">
             {oauthError}
           </p>
@@ -316,7 +325,7 @@ export default function AuthCard({
         </div>
       )}
       {/* Header Bar - Fixed Branding & Title */}
-      <div className="relative z-10 flex flex-col px-6 sm:px-8 pt-6 pb-4 border-b border-zinc-100 dark:border-zinc-800/80 shrink-0 bg-white dark:bg-zinc-900">
+      <div className="relative z-10 flex flex-col px-5 sm:px-8 pt-5 sm:pt-6 pb-4 border-b border-zinc-100 dark:border-zinc-800/80 shrink-0 bg-white dark:bg-zinc-900">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-md shadow-blue-500/20">
@@ -335,7 +344,7 @@ export default function AuthCard({
             <button
               onClick={onClose}
               aria-label="Close modal"
-              className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer"
+              className="flex h-11 w-11 items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-pointer"
             >
               <X size={18} />
             </button>
@@ -361,7 +370,7 @@ export default function AuthCard({
       </div>
 
       {/* Main Content Area - Scrollable Body */}
-      <div className="relative z-10 flex-1 overflow-y-auto px-6 sm:px-8 py-5 scrollbar-none bg-white dark:bg-zinc-900">
+      <div className="relative z-10 flex-1 overflow-y-auto px-5 sm:px-8 py-5 scrollbar-none bg-white dark:bg-zinc-900">
         <AnimatePresence mode="wait">
           {isForgotPassword ? (
             <motion.div

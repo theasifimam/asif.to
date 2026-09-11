@@ -11,7 +11,7 @@ export default function AuthLayout({ children }) {
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
-    () => false
+    () => false,
   );
 
   const handleDismiss = () => {
@@ -49,7 +49,7 @@ export default function AuthLayout({ children }) {
           handleDismiss();
         }
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-zinc-950/70 dark:bg-black/85 backdrop-blur-md transition-all duration-300 font-sans cursor-pointer overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6 bg-zinc-950/70 dark:bg-black/85 backdrop-blur-md transition-all duration-300 font-sans cursor-pointer overflow-y-auto"
     >
       {/* Modal Container Card (Glassmorphism View) */}
       <motion.div
@@ -58,7 +58,7 @@ export default function AuthLayout({ children }) {
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
         transition={{ duration: 0.25, ease: "easeOut" }}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md cursor-default my-auto"
+        className="relative w-full max-w-md cursor-default sm:my-auto"
       >
         {React.isValidElement(children)
           ? React.cloneElement(children, {

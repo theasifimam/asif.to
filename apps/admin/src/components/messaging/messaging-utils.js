@@ -30,17 +30,17 @@ export const otherMember = (conversation, userId) =>
 
 export const getBubbleRadius = (mine, isFirst, isMiddle, isLast, isSingle) => {
   if (mine) {
-    if (isSingle) return "rounded-2xl rounded-br-[4px]";
-    if (isFirst) return "rounded-2xl rounded-br-[4px]";
-    if (isMiddle) return "rounded-l-2xl rounded-r-[4px]";
-    if (isLast) return "rounded-2xl rounded-tr-[4px]";
+    if (isSingle) return "rounded-3xl rounded-br-[4px]";
+    if (isFirst) return "rounded-3xl rounded-br-[8px]";
+    if (isMiddle) return "rounded-l-3xl rounded-r-[8px]";
+    if (isLast) return "rounded-l-3xl rounded-tr-[8px] rounded-br-[4px]";
   } else {
-    if (isSingle) return "rounded-2xl rounded-bl-[4px]";
-    if (isFirst) return "rounded-2xl rounded-bl-[4px]";
-    if (isMiddle) return "rounded-r-2xl rounded-l-[4px]";
-    if (isLast) return "rounded-2xl rounded-tl-[4px]";
+    if (isSingle) return "rounded-3xl rounded-bl-[4px]";
+    if (isFirst) return "rounded-3xl rounded-bl-[8px]";
+    if (isMiddle) return "rounded-r-3xl rounded-l-[8px]";
+    if (isLast) return "rounded-r-3xl rounded-tl-[8px] rounded-bl-[4px]";
   }
-  return "rounded-2xl";
+  return "rounded-3xl";
 };
 
 export const encodeContentCards = (text = "", contentCards = []) => {

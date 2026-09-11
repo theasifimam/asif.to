@@ -73,19 +73,28 @@ export default function CheatsheetReader({ slug, initialData, relatedData }) {
                   </span>
                 </div>
                 <span className="text-[11px] font-bold text-zinc-500 block mt-0.5">
-                  Curated Technical Cheatsheets & Syntax Guides &bull; https://asif.to
+                  Curated Technical Cheatsheets & Syntax Guides &bull;
+                  https://asif.to
                 </span>
               </div>
             </div>
             <div className="text-right text-[11px] font-bold text-zinc-500">
-              <div>TECH: {cheatsheet.techId ? cheatsheet.techId.toUpperCase() : "GENERAL"}</div>
+              <div>
+                TECH:{" "}
+                {cheatsheet.techId
+                  ? cheatsheet.techId.toUpperCase()
+                  : "GENERAL"}
+              </div>
               <div>Printed: {currentDateFormatted}</div>
             </div>
           </div>
 
           <div className="mt-6 pt-4 border-t border-zinc-200">
             <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 block mb-1">
-              {cheatsheet.techId ? cheatsheet.techId.toUpperCase() : "TECHNICAL"} CHEATSHEET
+              {cheatsheet.techId
+                ? cheatsheet.techId.toUpperCase()
+                : "TECHNICAL"}{" "}
+              CHEATSHEET
             </span>
             <h1 className="text-3xl font-black text-zinc-950 font-outfit leading-tight">
               {cheatsheet.title}
@@ -102,7 +111,7 @@ export default function CheatsheetReader({ slug, initialData, relatedData }) {
           {/* Main Content Area */}
           <div className="min-w-0 max-w-full">
             {/* Screen Header Card (Hidden on print) */}
-            <header className="rounded-4xl border border-zinc-200 bg-white p-6 shadow-xs dark:border-zinc-800 dark:bg-zinc-900 sm:p-10 print:hidden">
+            <header className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-xs dark:border-zinc-800 dark:bg-zinc-900 sm:rounded-4xl sm:p-10 print:hidden">
               <span className="inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
                 <BookOpen className="h-4 w-4" /> {cheatsheet.techId} cheatsheet
               </span>
@@ -131,7 +140,7 @@ export default function CheatsheetReader({ slug, initialData, relatedData }) {
             </header>
 
             {/* Printed & Screen Markdown Content with Left/Right Padding */}
-            <article className="mt-6 min-w-0 py-4 text-justify sm:py-8 cheatsheet-print-article px-0 print:px-6">
+            <article className="mobile-reading-copy mt-4 min-w-0 py-4 text-left sm:mt-6 sm:py-8 sm:text-justify cheatsheet-print-article px-0 print:px-6">
               <TopicMarkdown content={cheatsheet.content} />
             </article>
 
@@ -141,7 +150,9 @@ export default function CheatsheetReader({ slug, initialData, relatedData }) {
 
             {/* Dedicated Print Footer with Left/Right Padding */}
             <div className="hidden print:flex items-center justify-between pt-6 border-t border-zinc-300 mt-12 px-6 text-[10px] font-bold text-zinc-500">
-              <span>asif.to &bull; Developer Cheatsheet & Syntax Reference</span>
+              <span>
+                asif.to &bull; Developer Cheatsheet & Syntax Reference
+              </span>
               <span>https://asif.to/cheatsheets/{slug}</span>
             </div>
 
@@ -153,7 +164,10 @@ export default function CheatsheetReader({ slug, initialData, relatedData }) {
 
           {/* Desktop Sticky Sidebar (Hidden on print) */}
           <div className="hidden lg:sticky lg:top-24 lg:block print:hidden">
-            <RelatedContentSidebar relatedData={relatedData} currentType="cheatsheet" />
+            <RelatedContentSidebar
+              relatedData={relatedData}
+              currentType="cheatsheet"
+            />
           </div>
         </div>
       </main>

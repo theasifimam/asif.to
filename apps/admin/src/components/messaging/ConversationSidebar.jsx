@@ -113,7 +113,7 @@ export default function ConversationSidebar({
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search conversations…"
-              className="h-11 w-full rounded-2xl border border-zinc-200 bg-zinc-50 pl-10 pr-3.5 text-sm font-medium outline-none focus:border-blue-500 focus:bg-white dark:border-zinc-800 dark:bg-zinc-900 transition-all placeholder:text-zinc-400 text-zinc-900 dark:text-zinc-100"
+              className="h-11 w-full rounded-2xl border border-zinc-200 bg-zinc-50 pl-10 pr-3.5 text-sm font-medium outline-none focus:border-blue-500 focus:bg-white dark:border-zinc-800 dark:bg-zinc-900 dark:focus:bg-zinc-900 transition-all placeholder:text-zinc-400 text-zinc-900 dark:text-zinc-100"
             />
           </div>
 

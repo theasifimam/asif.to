@@ -181,7 +181,7 @@ export default function QuickPlannerAdd() {
         <button
           aria-label="Quick Planner Shortcut"
           title="Quick Planner Shortcut"
-          className={`relative flex h-9 w-9 items-center justify-center rounded-full border transition-all cursor-pointer md:h-10 md:w-10 ${
+          className={`relative flex h-11 w-11 items-center justify-center rounded-full border transition-all cursor-pointer lg:h-10 lg:w-10 ${
             open
               ? "border-blue-600 bg-blue-50 text-blue-600 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-400"
               : "border-zinc-200/80 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800/80 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"

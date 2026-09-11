@@ -24,6 +24,7 @@ export async function POST() {
       cache: "no-store",
     },
   );
+
   const result = await upstream.json().catch(() => ({}));
   if (!upstream.ok || !result?.data?.token)
     return NextResponse.json(

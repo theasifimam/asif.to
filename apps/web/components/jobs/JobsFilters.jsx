@@ -16,12 +16,19 @@ import { Button } from "@/components/ui/button";
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 function taxonomyOptions(items = [], fallback = []) {
-  if (items.length) return items.map((item) => ({
-    label: item.slug === "software-development" ? "Web & Software Development" : item.name,
-    value: item.slug,
-    count: item.count,
+  if (items.length)
+    return items.map((item) => ({
+      label:
+        item.slug === "software-development"
+          ? "Web & Software Development"
+          : item.name,
+      value: item.slug,
+      count: item.count,
+    }));
+  return fallback.map((item) => ({
+    label: item,
+    value: item.toLowerCase().replaceAll(" ", "-"),
   }));
-  return fallback.map((item) => ({ label: item, value: item.toLowerCase().replaceAll(" ", "-") }));
 }
 
 function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
@@ -31,19 +38,29 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
   const [keyword, setKeyword] = useState(values.keyword || "");
   const [location, setLocation] = useState(values.location || "all");
   const [category, setCategory] = useState(values.category || "all");
-  const [employmentType, setEmploymentType] = useState(values.employmentType || "all");
+  const [employmentType, setEmploymentType] = useState(
+    values.employmentType || "all",
+  );
   const [workMode, setWorkMode] = useState(values.workMode || "all");
-  const [experienceLevel, setExperienceLevel] = useState(values.experienceLevel || "all");
+  const [experienceLevel, setExperienceLevel] = useState(
+    values.experienceLevel || "all",
+  );
   const [datePosted, setDatePosted] = useState(values.datePosted || "all");
   const [salaryMin, setSalaryMin] = useState(values.salaryMin || "");
   const [salaryMax, setSalaryMax] = useState(values.salaryMax || "");
-  const locationOptions = taxonomyOptions(taxonomy.locations, taxonomy.availableLocations);
-  const categoryOptions = taxonomyOptions(taxonomy.categories, taxonomy.availableCategories);
+  const locationOptions = taxonomyOptions(
+    taxonomy.locations,
+    taxonomy.availableLocations,
+  );
+  const categoryOptions = taxonomyOptions(
+    taxonomy.categories,
+    taxonomy.availableCategories,
+  );
 
   // Analytics event recording
   useEffect(() => {
     const active = Object.entries(values).filter(
-      ([key, value]) => value && !["page", "sort"].includes(key)
+      ([key, value]) => value && !["page", "sort"].includes(key),
     );
     if (!active.length || !API) return;
     fetch(`${API}/jobs/events`, {
@@ -66,11 +83,15 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
     const query = new URLSearchParams();
 
     if (keyword?.trim()) query.set("keyword", keyword.trim());
-    if (!fixed.location && location && location !== "all") query.set("location", location);
-    if (!fixed.category && category && category !== "all") query.set("category", category);
-    if (employmentType && employmentType !== "all") query.set("employmentType", employmentType);
+    if (!fixed.location && location && location !== "all")
+      query.set("location", location);
+    if (!fixed.category && category && category !== "all")
+      query.set("category", category);
+    if (employmentType && employmentType !== "all")
+      query.set("employmentType", employmentType);
     if (workMode && workMode !== "all") query.set("workMode", workMode);
-    if (experienceLevel && experienceLevel !== "all") query.set("experienceLevel", experienceLevel);
+    if (experienceLevel && experienceLevel !== "all")
+      query.set("experienceLevel", experienceLevel);
     if (datePosted && datePosted !== "all") query.set("datePosted", datePosted);
     if (salaryMin) query.set("salaryMin", salaryMin);
     if (salaryMax) query.set("salaryMax", salaryMax);
@@ -82,7 +103,9 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
         ? `/jobs/category/${fixed.category}`
         : "/jobs";
 
-    const targetUrl = query.toString() ? `${basePath}?${query.toString()}` : basePath;
+    const targetUrl = query.toString()
+      ? `${basePath}?${query.toString()}`
+      : basePath;
     startTransition(() => {
       router.push(targetUrl);
     });
@@ -97,10 +120,14 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-4xl border border-zinc-200/80 bg-white p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900/90 sm:p-5"
+      className="rounded-3xl border border-zinc-200/80 bg-white p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900/90 sm:rounded-4xl sm:p-5"
     >
-      {fixed.location && <input type="hidden" name="location" value={fixed.location} />}
-      {fixed.category && <input type="hidden" name="category" value={fixed.category} />}
+      {fixed.location && (
+        <input type="hidden" name="location" value={fixed.location} />
+      )}
+      {fixed.category && (
+        <input type="hidden" name="category" value={fixed.category} />
+      )}
 
       {/* Keyword search input */}
       <div className="relative">
@@ -115,7 +142,7 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
       </div>
 
       {/* Select dropdowns */}
-      <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-1">
+      <div className="mt-3 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2 lg:grid-cols-1">
         {!fixed.location && (
           <Select value={location} onValueChange={setLocation}>
             <SelectTrigger
@@ -127,11 +154,9 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
             <SelectContent>
               <SelectItem value="all">All UAE locations</SelectItem>
               {locationOptions.map((item) => (
-                <SelectItem
-                  key={item.value}
-                  value={item.value}
-                >
-                  {item.label}{Number.isFinite(item.count) ? ` (${item.count})` : ""}
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                  {Number.isFinite(item.count) ? ` (${item.count})` : ""}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -149,11 +174,9 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
             <SelectContent>
               <SelectItem value="all">All categories</SelectItem>
               {categoryOptions.map((item) => (
-                <SelectItem
-                  key={item.value}
-                  value={item.value}
-                >
-                  {item.label}{Number.isFinite(item.count) ? ` (${item.count})` : ""}
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                  {Number.isFinite(item.count) ? ` (${item.count})` : ""}
                 </SelectItem>
               ))}
             </SelectContent>

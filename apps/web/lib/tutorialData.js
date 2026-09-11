@@ -76,6 +76,17 @@ export const TECH_STACKS = [
     category: "Programming Language",
     totalLessons: 6,
   },
+  {
+    id: "csharp",
+    name: "C# & .NET",
+    icon: "Code2",
+    color: "from-violet-600 to-indigo-700",
+    textColor: "text-violet-600 dark:text-violet-400",
+    badgeBg: "bg-violet-500/10 text-violet-700 dark:text-violet-300 font-bold",
+    description: "C# Fundamentals, OOP, LINQ, Async, EF Core, ASP.NET Core APIs, Testing & Docker",
+    category: "Language & Backend Platform",
+    totalLessons: 24,
+  },
 ];
 
 export const COURSES = [
@@ -639,4 +650,3 @@ export const TUTORIALS = COURSES.flatMap((c) =>
     ],
   }))
 );
-

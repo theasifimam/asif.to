@@ -504,10 +504,11 @@ export default function AdminLayout({ children }) {
         <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
           {/* Global Minimal Header - Absolute over content for zero layout shift during scroll */}
           <header
-            className={`absolute top-0 left-0 right-0 z-40 h-16 shrink-0 items-center justify-between bg-zinc-100 backdrop-blur-xl dark:bg-[#09090b]/85 dark:backdrop-blur-xl px-4 transition-all duration-300 ease-out sm:px-6 md:px-8 lg:px-10 ${headerDisplayClass} ${
+            data-admin-header
+            className={`absolute top-0 left-0 right-0 z-40 h-16 shrink-0 items-center justify-between bg-zinc-100/95 backdrop-blur-xl dark:bg-[#09090b]/90 dark:backdrop-blur-xl px-3 transition-all duration-300 ease-out sm:px-6 md:px-8 lg:px-10 ${headerDisplayClass} ${
               isNavVisible
                 ? "translate-y-0 opacity-100"
-                : "-translate-y-full opacity-0 pointer-events-none"
+                : "lg:-translate-y-full lg:opacity-0 lg:pointer-events-none"
             }`}
           >
             <div className="flex items-center gap-2 md:gap-6">
@@ -527,13 +528,17 @@ export default function AdminLayout({ children }) {
                 </span>
               </Link>
 
-              <div className="hidden sm:block">
+              <div className="block">
                 <AdminGlobalSearch />
               </div>
             </div>
 
             <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
-              {hasPermission(user, "planner.view") && <QuickPlannerAdd />}
+              {hasPermission(user, "planner.view") && (
+                <div className="hidden min-[360px]:block">
+                  <QuickPlannerAdd />
+                </div>
+              )}
 
               <NotesQuickAccess />
 
@@ -563,6 +568,8 @@ export default function AdminLayout({ children }) {
           {/* Content Viewport with constant top and bottom padding */}
           <main
             ref={mainRef}
+            data-admin-main
+            data-full-app={isFullAppRoute ? "true" : "false"}
             className={`min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain scrollbar-none bg-[#f3f4f6] dark:bg-[#09090b] ${mainPaddingClass}`}
           >
             {canViewPage ? (
@@ -580,7 +587,7 @@ export default function AdminLayout({ children }) {
         <MobileBottomNavbar
           navItems={visibleNavItems}
           user={user}
-          isVisible={isNavVisible && !isFullAppRoute}
+          isVisible={!isFullAppRoute}
         />
 
         {/* Logout Confirmation Dialog */}

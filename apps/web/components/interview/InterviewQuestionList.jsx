@@ -198,7 +198,7 @@ export default function InterviewQuestionList({
                 {/* Collapsible Content */}
                 {!collapsed ? (
                   <div className="mt-3.5 space-y-4 pt-1">
-                    <div className="min-w-0 max-w-full text-justify text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 sm:text-[15px] sm:leading-7 font-medium">
+                    <div className="mobile-reading-copy min-w-0 max-w-full text-left text-base leading-relaxed text-zinc-700 dark:text-zinc-300 sm:text-justify sm:leading-7 font-medium">
                       <InterviewAnswer content={item.answer} />
                     </div>
 

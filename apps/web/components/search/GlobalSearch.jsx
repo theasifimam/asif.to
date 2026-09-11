@@ -49,7 +49,7 @@ export default function GlobalSearch() {
         onClick={() => setOpen(true)}
         aria-label="Search site"
         title="Search (Ctrl/Command + K)"
-        className="flex h-10 items-center gap-2 rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 text-zinc-600 dark:text-zinc-300 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        className="flex h-11 min-w-11 sm:h-10 sm:min-w-0 items-center justify-center gap-2 rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 text-zinc-600 dark:text-zinc-300 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 touch-manipulation"
       >
         <Search className="h-4 w-4" />
         <span className="hidden sm:block text-xs font-semibold">Search</span>

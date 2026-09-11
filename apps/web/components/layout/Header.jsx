@@ -134,12 +134,12 @@ export default function Header() {
       <header
         className={`fixed left-0 w-full z-50 px-1.5 sm:px-3 md:px-8 transition-[top,opacity] duration-300 ease-in-out ${
           isNavVisible
-            ? "top-3 opacity-100"
+            ? "top-[max(.5rem,env(safe-area-inset-top))] sm:top-3 opacity-100"
             : "-top-22 opacity-0 pointer-events-none"
         }`}
       >
         <div
-          className={`${containerMaxWidth} mx-auto bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl rounded-full px-3 sm:px-4 md:px-6 h-14 md:h-16 flex items-center justify-between border border-zinc-200/80 dark:border-zinc-800/80 transition-all duration-300`}
+          className={`${containerMaxWidth} mx-auto bg-white/94 dark:bg-zinc-900/94 backdrop-blur-xl rounded-[1.4rem] sm:rounded-full px-3 sm:px-4 md:px-6 h-14 md:h-16 flex items-center justify-between border border-zinc-200/80 dark:border-zinc-800/80 shadow-sm shadow-black/5 transition-all duration-300`}
         >
           {/* Brand Logo & Circular Menu Trigger */}
           <div className="flex items-center gap-3">
@@ -177,7 +177,7 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation with Categorized Mega-Dropdowns */}
-          <nav className="hidden md:flex items-center gap-1 text-xs font-bold">
+          <nav className="hidden lg:flex items-center gap-1 text-xs font-bold">
             {/* Learn & Explore Dropdown */}
             <div className="relative" ref={learnRef}>
               <button
@@ -423,12 +423,12 @@ export default function Header() {
           </nav>
 
           {/* User Profile & Actions (Theme toggle visible on mobile, profile on desktop) */}
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             {/* ASIF_COURSE_LEARNING_FLOW_V1:header-progress */}
             <ContinueCoursePill />
             <ThemeToggle />
             <GlobalSearch />
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-2">
               {oauthStatus === "loading" || !isInitialized ? (
                 <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
               ) : oauthSession?.user ? (

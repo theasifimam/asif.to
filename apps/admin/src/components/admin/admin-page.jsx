@@ -15,7 +15,7 @@ export function AdminPage({ children, className, size = "xl" }) {
   return (
     <div
       className={cn(
-        "mx-auto min-w-0 space-y-1 px-4 py-1 sm:space-y-1 sm:px-6 sm:py-1 lg:px-10 lg:py-1",
+        "mx-auto min-w-0 space-y-4 px-0 py-2 sm:space-y-1 sm:px-6 sm:py-1 lg:px-10 lg:py-1",
         size === "lg" ? "max-w-6xl" : "max-w-7xl",
         className,
       )}
@@ -35,7 +35,7 @@ export function AdminPageHeader({
   stickyActions = true,
 }) {
   return (
-    <header className={cn("flex min-w-0 flex-col gap-1", className)}>
+    <header className={cn("flex min-w-0 flex-col gap-2 px-4 sm:gap-1 sm:px-0", className)}>
       <div className="min-w-0 w-full">
         {back}
         {eyebrow && (
@@ -59,10 +59,11 @@ export function AdminPageHeader({
       </div>
       {actions && (
         <div
+          data-admin-page-actions
           className={cn(
-            "flex flex-wrap items-stretch sm:items-center justify-start sm:justify-end gap-2.5 w-full *:grow sm:*:grow-0",
+            "-mx-4 flex w-[calc(100%+2rem)] flex-nowrap items-stretch justify-start gap-2 overflow-x-auto px-4 pb-1 scrollbar-none *:shrink-0 sm:mx-0 sm:w-full sm:flex-wrap sm:items-center sm:justify-end sm:gap-2.5 sm:px-0 sm:pb-0 sm:*:grow-0",
             stickyActions &&
-              "sticky top-16 z-30 py-2 bg-[#f3f4f6]/90 dark:bg-[#09090b]/90 backdrop-blur-xl transition-all",
+              "sticky top-16 z-30 py-2 bg-[#f3f4f6]/92 dark:bg-[#09090b]/92 backdrop-blur-xl transition-all",
           )}
         >
           {actions}
@@ -76,7 +77,7 @@ export function AdminFilters({ children, className }) {
   return (
     <section
       className={cn(
-        "admin-surface flex min-w-0 flex-col gap-1 p-3.5 sm:p-4 md:flex-row md:items-center rounded-[28px] sm:rounded-4xl",
+        "admin-surface flex min-w-0 flex-col gap-2 rounded-none border-x-0 p-4 sm:rounded-4xl sm:border-x sm:p-4 md:flex-row md:items-center",
         className,
       )}
     >
@@ -118,7 +119,7 @@ export function AdminContent({
   return (
     <section
       className={cn(
-        "admin-surface min-w-0 overflow-hidden rounded-[28px] sm:rounded-4xl",
+        "admin-surface min-w-0 overflow-hidden rounded-none border-x-0 sm:rounded-4xl sm:border-x",
         className,
       )}
     >
@@ -220,7 +221,7 @@ export function AdminPagination({
   return (
     <footer
       className={cn(
-        "flex flex-wrap items-center justify-between gap-4 border-t border-zinc-100 px-4 py-3.5 text-xs text-zinc-500 dark:border-zinc-800/80 sm:px-6",
+        "flex flex-col items-stretch justify-between gap-3 border-t border-zinc-100 px-4 py-3.5 text-xs text-zinc-500 dark:border-zinc-800/80 sm:flex-row sm:items-center sm:gap-4 sm:px-6",
         className,
       )}
     >
@@ -255,7 +256,7 @@ export function AdminPagination({
         )}
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center justify-between gap-1 sm:justify-start">
         <Button
           variant="outline"
           size="icon"
@@ -267,7 +268,7 @@ export function AdminPagination({
           <ChevronLeft className="h-3.5 w-3.5" />
         </Button>
 
-        <div className="flex items-center gap-1">
+        <div className="flex min-w-0 items-center justify-center gap-1 overflow-hidden">
           {pageNumbers.map((num, idx) => {
             if (num === "...") {
               return (

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import {
   ArrowLeft,
@@ -16,6 +15,7 @@ import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import TopicMarkdown from "@/components/articles/TopicMarkdown";
 import AuthorIdentityCard from "@/components/authors/AuthorIdentityCard";
+import SafeHeroImage from "@/components/ui/SafeHeroImage";
 import { getPublicTopic } from "@/lib/publicContent";
 import { absoluteUrl, getSiteUrl } from "@/lib/seo";
 import { getImageUrl } from "@/lib/config";
@@ -469,15 +469,15 @@ export default async function CourseTopicPage({ courseSlug, topicPath }) {
                   : "Learning guide"}
               </span>
             </div>
-            <h1 className="max-w-5xl font-outfit text-3xl font-black leading-tight text-zinc-950 sm:text-4xl lg:text-5xl dark:text-white">
+            <h1 className="max-w-5xl font-outfit text-2xl xs:text-3xl font-black leading-tight text-zinc-950 sm:text-4xl lg:text-5xl dark:text-white">
               {topic.title}
             </h1>
             {topic.excerpt && (
-              <p className="mt-5 max-w-4xl text-sm font-medium leading-7 text-zinc-600 sm:text-lg sm:leading-8 dark:text-zinc-300">
+              <p className="mt-4 max-w-4xl text-xs sm:text-base font-medium leading-relaxed sm:leading-8 text-zinc-600 dark:text-zinc-300">
                 {topic.excerpt}
               </p>
             )}
-            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-zinc-200/80 pt-5 text-xs font-semibold text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+            <div className="mt-6 flex flex-wrap items-center gap-x-4 sm:gap-x-5 gap-y-2.5 border-t border-zinc-200/80 pt-4 text-xs font-semibold text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
               <span className="inline-flex items-center gap-2">
                 <Clock className="h-4 w-4 text-blue-500" aria-hidden="true" />
                 {readingMinutes} min read
@@ -505,18 +505,14 @@ export default async function CourseTopicPage({ courseSlug, topicPath }) {
         </header>
 
         {topic.image && (
-          <div className="mb-10 lg:mb-12">
-            <div className="overflow-hidden rounded-2xl md:rounded-3xl bg-zinc-100 dark:bg-zinc-900 shadow-sm border border-zinc-200/70 dark:border-zinc-800">
-              <Image
-                src={getImageUrl(topic.image)}
-                alt={topic.title}
-                width={1200}
-                height={630}
-                className="h-auto w-full"
-                priority
-                unoptimized
-              />
-            </div>
+          <div className="mb-8 lg:mb-12">
+            <SafeHeroImage
+              src={getImageUrl(topic.image)}
+              alt={topic.title}
+              title={topic.title}
+              categoryName={topic.category?.name}
+              courseTitle={topic.course?.title}
+            />
           </div>
         )}
 

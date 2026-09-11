@@ -289,7 +289,7 @@ export default function MessageInput({
             rows={1}
             maxLength={4000}
             placeholder={editing ? "Edit message…" : "Write a message…"}
-            className="max-h-32 min-h-11 sm:min-h-12 flex-1 resize-none rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm sm:text-base outline-none focus:border-blue-500 focus:bg-white dark:border-zinc-800 dark:bg-zinc-900 placeholder:text-zinc-400 text-zinc-900 dark:text-zinc-100 transition-colors"
+            className="max-h-32 min-h-11 sm:min-h-12 flex-1 resize-none rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm sm:text-base outline-none focus:border-blue-500 focus:bg-white dark:border-zinc-800 dark:bg-zinc-900 dark:focus:bg-zinc-900 placeholder:text-zinc-400 text-zinc-900 dark:text-zinc-100 transition-colors"
           />
 
           {/* Mentions dropdown */}

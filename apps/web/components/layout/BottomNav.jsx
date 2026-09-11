@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -92,6 +92,27 @@ export default function BottomNav() {
     ? pathname.startsWith(profilePath)
     : false;
 
+  const isImmersiveRoute =
+    ["/login", "/signup", "/forgot-password", "/auth"].some(
+      (route) => pathname === route || pathname.startsWith(`${route}/`),
+    ) ||
+    pathname === "/playground" ||
+    pathname === "/run" ||
+    pathname.startsWith("/play/");
+
+  useEffect(() => {
+    if (!isMenuOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event) =>
+      event.key === "Escape" && setIsMenuOpen(false);
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [isMenuOpen]);
+
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/backend-session", { method: "DELETE" }).catch(
@@ -110,13 +131,16 @@ export default function BottomNav() {
     }
   };
 
+  if (isImmersiveRoute) return null;
+
   return (
     <>
       {/* Floating Bottom Tab Bar for Mobile - Always visible & elevated above backdrop */}
       <nav
-        className={`fixed left-1/2 -translate-x-1/2 z-110 md:hidden max-w-[calc(100vw-1.5rem)] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl p-1.5 rounded-full shadow-2xl border border-zinc-200/80 dark:border-zinc-800/80 flex items-center justify-center gap-1 transition-[bottom,opacity] duration-300 ease-in-out ${
+        aria-label="Primary navigation"
+        className={`fixed left-1/2 -translate-x-1/2 z-110 lg:hidden max-w-[calc(100vw-1rem)] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl p-1 rounded-full shadow-2xl border border-zinc-200/80 dark:border-zinc-800/80 flex items-center justify-center gap-0.5 transition-[bottom,opacity] duration-300 ease-in-out ${
           isNavVisible
-            ? "bottom-4 opacity-100"
+            ? "bottom-[max(.5rem,env(safe-area-inset-bottom))] opacity-100"
             : "-bottom-20 opacity-0 pointer-events-none"
         }`}
       >
@@ -127,16 +151,19 @@ export default function BottomNav() {
           aria-label="Home"
           className={`flex items-center gap-1.5 rounded-full transition-all duration-300 ${
             isHomeActive && !isMenuOpen
-              ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 px-3.5 py-2 scale-105"
-              : "p-2.5 text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800/60 active:scale-95"
+              ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 px-3.5"
+              : "text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800/60 active:scale-95"
           }`}
+          aria-current={isHomeActive && !isMenuOpen ? "page" : undefined}
         >
-          <Home className="w-4 h-4 shrink-0" />
-          {isHomeActive && !isMenuOpen && (
-            <span className="text-xs font-bold tracking-tight whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
-              Home
-            </span>
-          )}
+          <span className="flex min-h-11 min-w-11 items-center justify-center gap-1.5">
+            <Home className="w-4 h-4 shrink-0" />
+            {isHomeActive && !isMenuOpen && (
+              <span className="text-xs font-bold tracking-tight whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
+                Home
+              </span>
+            )}
+          </span>
         </Link>
 
         {/* Library Tab */}
@@ -146,16 +173,21 @@ export default function BottomNav() {
           aria-label="Library"
           className={`flex items-center gap-1.5 rounded-full transition-all duration-300 ${
             pathname.startsWith("/library") && !isMenuOpen
-              ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 px-3.5 py-2 scale-105"
-              : "p-2.5 text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800/60 active:scale-95"
+              ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 px-3.5"
+              : "text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800/60 active:scale-95"
           }`}
+          aria-current={
+            pathname.startsWith("/library") && !isMenuOpen ? "page" : undefined
+          }
         >
-          <BookOpen className="w-4 h-4 shrink-0" />
-          {pathname.startsWith("/library") && !isMenuOpen && (
-            <span className="text-xs font-bold tracking-tight whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
-              Library
-            </span>
-          )}
+          <span className="flex min-h-11 min-w-11 items-center justify-center gap-1.5">
+            <BookOpen className="w-4 h-4 shrink-0" />
+            {pathname.startsWith("/library") && !isMenuOpen && (
+              <span className="text-xs font-bold tracking-tight whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
+                Library
+              </span>
+            )}
+          </span>
         </Link>
 
         {/* Profile Tab */}
@@ -173,31 +205,34 @@ export default function BottomNav() {
           aria-label="Profile"
           className={`flex items-center gap-1.5 rounded-full transition-all duration-300 ${
             isProfileActive && !isMenuOpen
-              ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 px-3.5 py-2 scale-105"
-              : "p-2.5 text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800/60 active:scale-95"
+              ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 px-3.5"
+              : "text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800/60 active:scale-95"
           }`}
+          aria-current={isProfileActive && !isMenuOpen ? "page" : undefined}
         >
-          {!isInitialized ? (
-            <div className="w-4 h-4 rounded-full bg-zinc-300 dark:bg-zinc-700 animate-pulse shrink-0" />
-          ) : isAuthenticated && user ? (
-            <div className="relative w-4 h-4 rounded-full overflow-hidden shrink-0 border border-white/40">
-              {user.avatar && !user.avatar.includes("ui-avatars.com") ? (
-                <Image
-                  src={getImageUrl(user.avatar)}
-                  alt={user.fullName || "User"}
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-              ) : (
-                <span className="w-full h-full bg-blue-500 text-white text-[9px] font-black flex items-center justify-center">
-                  {user.fullName?.[0]?.toUpperCase() || "U"}
-                </span>
-              )}
-            </div>
-          ) : (
-            <User className="w-4 h-4 shrink-0" />
-          )}
+          <span className="flex min-h-11 min-w-11 items-center justify-center gap-1.5">
+            {!isInitialized ? (
+              <div className="w-4 h-4 rounded-full bg-zinc-300 dark:bg-zinc-700 animate-pulse shrink-0" />
+            ) : isAuthenticated && user ? (
+              <div className="relative w-4 h-4 rounded-full overflow-hidden shrink-0 border border-white/40">
+                {user.avatar && !user.avatar.includes("ui-avatars.com") ? (
+                  <Image
+                    src={getImageUrl(user.avatar)}
+                    alt={user.fullName || "User"}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                ) : (
+                  <span className="w-full h-full bg-blue-500 text-white text-[9px] font-black flex items-center justify-center">
+                    {user.fullName?.[0]?.toUpperCase() || "U"}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <User className="w-4 h-4 shrink-0" />
+            )}
+          </span>
           {isProfileActive && !isMenuOpen && (
             <span className="text-xs font-bold tracking-tight whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
               Profile
@@ -215,27 +250,29 @@ export default function BottomNav() {
           aria-label="Toggle navigation menu"
           className={`flex items-center gap-1.5 rounded-full transition-all duration-300 cursor-pointer ${
             isMenuOpen
-              ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-md px-3.5 py-2 scale-105"
-              : "p-2.5 text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800/60 active:scale-95"
+              ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-md px-3.5"
+              : "text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800/60 active:scale-95"
           }`}
         >
-          {isMenuOpen ? (
-            <X className="w-4 h-4 shrink-0" />
-          ) : (
-            <Menu className="w-4 h-4 shrink-0" />
-          )}
-          {isMenuOpen && (
-            <span className="text-xs font-bold tracking-tight whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
-              Close
-            </span>
-          )}
+          <span className="flex min-h-11 min-w-11 items-center justify-center gap-1.5">
+            {isMenuOpen ? (
+              <X className="w-4 h-4 shrink-0" />
+            ) : (
+              <Menu className="w-4 h-4 shrink-0" />
+            )}
+            {isMenuOpen && (
+              <span className="text-xs font-bold tracking-tight whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
+                Close
+              </span>
+            )}
+          </span>
         </button>
       </nav>
 
       {/* Floating Island Mobile Navigation Menu Sheet */}
       <AnimatePresence>
         {isMenuOpen && (
-          <div className="fixed inset-0 z-100 md:hidden flex flex-col justify-end pointer-events-none">
+          <div className="fixed inset-0 z-100 lg:hidden flex flex-col justify-end pointer-events-none">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -259,7 +296,10 @@ export default function BottomNav() {
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: "110%", opacity: 0, scale: 0.96 }}
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
-              className="relative mx-3 mb-20 max-h-[76vh] bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl rounded-[28px] sm:rounded-4xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-2xl flex flex-col overflow-hidden pointer-events-auto touch-pan-y z-105"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation menu"
+              className="relative mx-2.5 mb-[calc(4rem+env(safe-area-inset-bottom))] max-h-[min(76dvh,38rem)] bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl rounded-[28px] sm:rounded-4xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-2xl flex flex-col overflow-hidden pointer-events-auto touch-pan-y z-105"
             >
               {/* Drag Pill Handle */}
               <div

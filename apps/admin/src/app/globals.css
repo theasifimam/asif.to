@@ -612,3 +612,121 @@ pre.hljs code,
   font-family: var(--font-sans), sans-serif;
 }
 
+/* Mobile admin shell: preserve the desktop visual language while using the
+   viewport like an app screen. */
+@media (max-width: 1023px) {
+  html,
+  body {
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+  }
+
+  body {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  [data-admin-header] {
+    height: calc(4rem + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
+  }
+
+  [data-admin-main][data-full-app="false"] {
+    padding-top: calc(4rem + env(safe-area-inset-top)) !important;
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)) !important;
+    scroll-padding-top: calc(4rem + env(safe-area-inset-top));
+  }
+
+  [data-admin-page-actions] {
+    top: calc(4rem + env(safe-area-inset-top));
+  }
+
+  [data-mobile-nav] {
+    bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+
+  [data-mobile-menu] {
+    bottom: calc(5rem + max(0.5rem, env(safe-area-inset-bottom)));
+    max-height: calc(100dvh - 5.75rem - max(0.5rem, env(safe-area-inset-bottom)) - env(safe-area-inset-top));
+  }
+
+  .admin-surface,
+  .admin-surface-subtle,
+  .admin-floating-panel {
+    --shadow-surface: none;
+  }
+
+  /* Wide datasets remain complete on mobile. The identifying and action
+     columns stay reachable while the middle columns pan horizontally. */
+  .overflow-x-auto:has(> table) {
+    max-height: none;
+    overflow-y: visible;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-table thead th,
+  .admin-table tbody td {
+    padding: 0.875rem 1rem;
+  }
+
+  .admin-table thead th:first-child,
+  .admin-table tbody td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 11;
+    background: var(--surface);
+    box-shadow: 10px 0 18px -18px rgba(24, 24, 27, 0.75);
+  }
+
+  .admin-table thead th:last-child,
+  .admin-table tbody td:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 11;
+    background: var(--surface);
+    box-shadow: -10px 0 18px -18px rgba(24, 24, 27, 0.75);
+  }
+
+  .admin-table thead th:first-child,
+  .admin-table thead th:last-child {
+    background: var(--surface-subtle);
+    z-index: 12;
+  }
+
+  [data-slot="dialog-overlay"] {
+    touch-action: none;
+  }
+
+  [data-slot="dialog-content"] {
+    top: auto !important;
+    bottom: 0 !important;
+    max-width: 100% !important;
+    max-height: calc(100dvh - env(safe-area-inset-top) - 0.75rem) !important;
+    transform: translateX(-50%) !important;
+    border-bottom-width: 0 !important;
+    border-radius: 1.75rem 1.75rem 0 0 !important;
+    padding: 1.25rem 1.25rem max(1.25rem, env(safe-area-inset-bottom)) !important;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  [data-slot="dialog-content"]::-webkit-scrollbar {
+    display: none;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 359px) {
+  [data-mobile-nav] {
+    max-width: calc(100vw - 0.5rem);
+  }
+}
+

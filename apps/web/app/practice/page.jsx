@@ -37,18 +37,20 @@ export default function PracticePage() {
         }}
       />
       <Header />
-      <main className="mx-auto max-w-6xl px-4 pb-24 pt-24 sm:px-6 sm:pt-28">
-        <nav className="mb-7 flex items-center gap-2 text-xs font-bold text-zinc-400">
-          <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+      <main className="mx-auto max-w-6xl px-4 pb-24 pt-20 sm:px-6 sm:pt-28">
+        <nav className="mb-5 flex items-center gap-2 text-xs font-bold text-zinc-400 sm:mb-7">
+          <Link href="/" className="hover:text-blue-600 transition-colors">
+            Home
+          </Link>
           <span>/</span>
           <span className="text-zinc-700 dark:text-zinc-200">Practice</span>
         </nav>
-        <header className="mb-10 max-w-3xl">
+        <header className="mb-7 max-w-3xl sm:mb-10">
           <span className="inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-3 py-1 text-xs font-black text-blue-600 dark:text-blue-400">
             <Code2 className="h-4 w-4" />
             Interactive practice
           </span>
-          <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-5xl">
+          <h1 className="mt-4 text-2xl font-black tracking-tight xs:text-3xl sm:text-5xl">
             Learn by changing the code.
           </h1>
           <p className="mt-4 text-base leading-relaxed text-zinc-600 dark:text-zinc-400">
@@ -63,17 +65,17 @@ export default function PracticePage() {
             <Link
               href={`/practice/${slug}`}
               key={slug}
-              className="group rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-blue-500 dark:border-zinc-800 dark:bg-zinc-900"
+              className="group rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-blue-500 dark:border-zinc-800 dark:bg-zinc-900 sm:p-6"
             >
               <div className="flex items-start justify-between">
                 <Code2 className="h-7 w-7 text-blue-500" />
                 <ArrowRight className="h-5 w-5 text-zinc-400 transition group-hover:translate-x-1" />
               </div>
-              <h2 className="mt-6 text-xl font-black">{tech.name}</h2>
-              <p className="mt-2 min-h-12 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
+              <h2 className="mt-4 text-xl font-black sm:mt-6">{tech.name}</h2>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400 sm:min-h-12">
                 {tech.description}
               </p>
-              <p className="mt-5 text-xs font-bold text-blue-600 dark:text-blue-400">
+              <p className="mt-4 text-xs font-bold text-blue-600 dark:text-blue-400 sm:mt-5">
                 {getProblems(slug).length} practice problems
               </p>
             </Link>

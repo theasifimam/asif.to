@@ -31,7 +31,7 @@ export default function ChapterReaderHeader({
           {/* Mark as Done Toggle Button */}
           <button
             onClick={() => toggleChapterComplete(chapter?.slug)}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all ${
+            className={`flex min-h-11 items-center gap-1.5 px-3 rounded-full text-xs font-bold transition-all touch-manipulation ${
               isCurrentCompleted
                 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                 : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200"

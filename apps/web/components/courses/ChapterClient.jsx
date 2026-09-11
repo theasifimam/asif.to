@@ -184,10 +184,10 @@ export default function ChapterClient({
   // Font size multiplier classes
   const fontBodyClass =
     fontSize === "sm"
-      ? "text-[13px] sm:text-sm leading-relaxed"
+      ? "text-sm sm:text-base leading-relaxed"
       : fontSize === "lg"
-        ? "text-sm sm:text-xl leading-loose"
-        : "text-sm sm:text-lg leading-relaxed";
+        ? "text-lg sm:text-xl leading-loose"
+        : "text-base sm:text-lg leading-relaxed";
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground transition-colors duration-300">

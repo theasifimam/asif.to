@@ -83,7 +83,7 @@ export default function CoursesClient({ initialCourses = [] }) {
   }, [initialCourses]);
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 pb-24 pt-24 sm:px-6 md:px-8">
+    <main className="mx-auto w-full max-w-7xl px-4 pb-24 pt-20 sm:px-6 sm:pt-24 md:px-8">
       <nav className="mb-4 flex items-center gap-2 text-xs font-bold text-zinc-400">
         <Link href="/" className="hover:text-blue-600 transition-colors">
           Home
@@ -93,21 +93,21 @@ export default function CoursesClient({ initialCourses = [] }) {
       </nav>
 
       {/* Top Mode Switcher Bar */}
-      <div className="mb-7 flex flex-wrap items-center justify-center sm:justify-start gap-2 p-1.5 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 shadow-xs w-fit">
-        <div className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-blue-600 text-white shadow-md shadow-blue-500/20">
+      <div className="scrollbar-none -mx-4 mb-5 flex items-center gap-1 overflow-x-auto px-4 py-1 sm:mx-0 sm:mb-7 sm:w-fit sm:rounded-full sm:border sm:border-zinc-200/80 sm:bg-white sm:p-1.5 sm:shadow-xs dark:sm:border-zinc-800 dark:sm:bg-zinc-900">
+        <div className="flex min-h-11 shrink-0 items-center gap-2 px-4 rounded-full text-xs font-bold bg-blue-600 text-white shadow-md shadow-blue-500/20">
           <BookOpen className="w-4 h-4" />
           <span>Courses</span>
         </div>
         <Link
           href="/revision"
-          className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+          className="flex min-h-11 shrink-0 items-center gap-2 px-4 rounded-full text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
         >
           <Layers className="w-4 h-4 text-purple-500" />
           <span>Flashcards Deck</span>
         </Link>
         <Link
           href="/quiz"
-          className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+          className="flex min-h-11 shrink-0 items-center gap-2 px-4 rounded-full text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
         >
           <HelpCircle className="w-4 h-4 text-emerald-500" />
           <span>Practice Quiz</span>
@@ -115,7 +115,7 @@ export default function CoursesClient({ initialCourses = [] }) {
       </div>
 
       {/* Hero Banner Section */}
-      <section className="rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 p-6 sm:p-10 shadow-xs">
+      <section className="rounded-3xl sm:rounded-[2.5rem] border border-zinc-200/70 dark:border-zinc-800/70 bg-white dark:bg-zinc-900/90 p-5 sm:p-10 shadow-xs">
         <div className="max-w-3xl">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
             <GraduationCap className="h-3.5 w-3.5" />
@@ -133,7 +133,7 @@ export default function CoursesClient({ initialCourses = [] }) {
           </p>
 
           {/* Quick Stats Pill Strip */}
-          <div className="mt-6 flex flex-wrap items-center gap-3 pt-5 border-t border-zinc-100 dark:border-zinc-800/60 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+          <div className="mt-5 flex flex-wrap items-center gap-2 pt-4 border-t border-zinc-100 dark:border-zinc-800/60 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
             <div className="flex items-center gap-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-1 text-[11px] font-bold text-zinc-700 dark:text-zinc-300">
               <BookOpen className="w-3.5 h-3.5 text-blue-500" />
               <span>{initialCourses.length} Published Courses</span>
@@ -151,7 +151,7 @@ export default function CoursesClient({ initialCourses = [] }) {
       </section>
 
       {/* Search & Filter Bar Section */}
-      <section className="mt-8 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <section className="mt-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:mt-8 sm:gap-4">
         {/* Search Input */}
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
@@ -160,15 +160,15 @@ export default function CoursesClient({ initialCourses = [] }) {
             placeholder="Search courses by topic, framework, or title..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full pl-11 pr-5 py-3 text-xs font-semibold text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all shadow-xs"
+            className="h-12 w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-full pl-11 pr-5 text-sm font-semibold text-zinc-900 dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all shadow-xs"
           />
         </div>
 
         {/* Tech Stack Filter Pills */}
-        <div className="flex flex-wrap items-center gap-2 overflow-x-auto pb-1">
+        <div className="scrollbar-none -mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:px-0">
           <button
             onClick={() => setSelectedTech("")}
-            className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
+            className={`min-h-11 shrink-0 px-4 rounded-full text-xs font-bold transition-all cursor-pointer ${
               selectedTech === ""
                 ? "bg-blue-600 text-white shadow-sm"
                 : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 hover:border-blue-500"
@@ -180,7 +180,7 @@ export default function CoursesClient({ initialCourses = [] }) {
             <button
               key={tech.id}
               onClick={() => setSelectedTech(tech.id)}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
+              className={`flex min-h-11 shrink-0 items-center gap-1.5 px-3.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                 selectedTech === tech.id
                   ? "bg-blue-600 text-white shadow-sm"
                   : "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 hover:border-blue-500"
@@ -193,9 +193,9 @@ export default function CoursesClient({ initialCourses = [] }) {
       </section>
 
       {/* Courses Grid */}
-      <section className="mt-8">
+      <section className="mt-6 sm:mt-8">
         {filteredCourses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredCourses.map((course, idx) => {
               const slug = course.slug || course.id || course._id;
               const lessonCount =

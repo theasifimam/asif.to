@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronRight, Plus } from "lucide-react";
 import MessageNavBadge from "./MessageNavBadge";
@@ -74,18 +75,30 @@ function ItemBadge({ badge }) {
  * Quick action button (e.g. '+' to create a new item)
  */
 function ItemAction({ action }) {
+  const router = useRouter();
   if (!action) return null;
   const Icon = action.icon || Plus;
 
+  const navigate = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    router.push(action.href);
+  };
+
   return (
-    <Link
-      href={action.href}
+    <span
+      role="link"
+      tabIndex={0}
       title={action.title || "Quick action"}
-      onClick={(e) => e.stopPropagation()}
+      aria-label={action.title || "Quick action"}
+      onClick={navigate}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") navigate(event);
+      }}
       className="flex h-5 w-5 items-center justify-center rounded-full bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-950 dark:bg-zinc-800/90 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-white transition-colors cursor-pointer shrink-0"
     >
       <Icon size={11} strokeWidth={2.5} />
-    </Link>
+    </span>
   );
 }
 
@@ -95,7 +108,11 @@ export default function SidebarNavigation({
   user,
   navItems,
 }) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [openSubmenus, setOpenSubmenus] = useState({});
 
@@ -103,10 +120,6 @@ export default function SidebarNavigation({
   const [hoveredItem, setHoveredItem] = useState(null);
   const [flyoutPosition, setFlyoutPosition] = useState(null);
   const closeTimeoutRef = useRef(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Collect all distinct nav hrefs across all groups & submenus
   const allNavHrefs = useMemo(() => {

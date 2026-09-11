@@ -705,28 +705,34 @@ export default function MessagesPage() {
                       const isMine =
                         idOf(message.senderId) === String(currentUserId);
 
+                      const prevTime = prev?.createdAt
+                        ? new Date(prev.createdAt).getTime()
+                        : 0;
+                      const currTime = message?.createdAt
+                        ? new Date(message.createdAt).getTime()
+                        : 0;
+                      const nextTime = next?.createdAt
+                        ? new Date(next.createdAt).getTime()
+                        : 0;
+
                       const isSameSenderAsPrev = Boolean(
                         prev &&
-                        idOf(prev.senderId) === idOf(message.senderId) &&
-                        !prev.deletedAt &&
-                        !message.deletedAt &&
-                        Math.abs(
-                          new Date(message.createdAt) -
-                            new Date(prev.createdAt),
-                        ) <
-                          5 * 60 * 1000,
+                          idOf(prev.senderId) === idOf(message.senderId) &&
+                          !prev.deletedAt &&
+                          !message.deletedAt &&
+                          (!prevTime ||
+                            !currTime ||
+                            Math.abs(currTime - prevTime) < 5 * 60 * 1000),
                       );
 
                       const isSameSenderAsNext = Boolean(
                         next &&
-                        idOf(next.senderId) === idOf(message.senderId) &&
-                        !next.deletedAt &&
-                        !message.deletedAt &&
-                        Math.abs(
-                          new Date(next.createdAt) -
-                            new Date(message.createdAt),
-                        ) <
-                          5 * 60 * 1000,
+                          idOf(next.senderId) === idOf(message.senderId) &&
+                          !next.deletedAt &&
+                          !message.deletedAt &&
+                          (!nextTime ||
+                            !currTime ||
+                            Math.abs(nextTime - currTime) < 5 * 60 * 1000),
                       );
 
                       const isFirst = !isSameSenderAsPrev && isSameSenderAsNext;

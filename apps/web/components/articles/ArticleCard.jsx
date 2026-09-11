@@ -187,7 +187,7 @@ export default function ArticleCard({ article, variant = "horizontal" }) {
   // 4. Default Vertical Variant (Clean minimal card)
   if (variant === "vertical") {
     return (
-      <div className="flex flex-col justify-between group cursor-pointer p-5 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-br from-zinc-500/5 via-transparent to-white dark:to-zinc-900/90 border border-zinc-200/80 dark:border-zinc-800 hover:border-blue-500/40 shadow-xs hover:shadow-md transition-all duration-300">
+      <div className="flex flex-col justify-between group cursor-pointer p-4 sm:p-6 rounded-3xl sm:rounded-[2.5rem] bg-gradient-to-br from-zinc-500/5 via-transparent to-white dark:to-zinc-900/90 border border-zinc-200/80 dark:border-zinc-800 hover:border-blue-500/40 shadow-xs hover:shadow-md transition-all duration-300">
         <div className="flex flex-col gap-3.5">
           {/* Cover Image Frame */}
           <div className="relative aspect-16/10 w-full rounded-2xl overflow-hidden bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200/60 dark:border-zinc-800">

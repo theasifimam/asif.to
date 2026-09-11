@@ -39,7 +39,7 @@ export default function NotesQuickAccess() {
       <button
         type="button"
         onClick={() => openNotes(false)}
-        className="relative flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200/80 text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800/80 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white md:h-10 md:w-10"
+        className="relative flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200/80 text-zinc-600 transition-all hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800/80 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white lg:h-10 lg:w-10"
         aria-label="Open notes"
         title="Notes (Ctrl/Cmd + Shift + N)"
       >

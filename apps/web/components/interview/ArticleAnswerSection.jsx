@@ -14,7 +14,7 @@ export default function ArticleAnswerSection({ answer, codeExample }) {
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="flex w-full items-center justify-between gap-3 text-left transition-opacity hover:opacity-80 focus:outline-none"
+          className="flex min-h-11 w-full items-center justify-between gap-3 text-left transition-opacity hover:opacity-80 focus:outline-none"
           aria-expanded={isOpen}
         >
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wide text-orange-700 dark:text-orange-300 sm:text-sm">
@@ -22,7 +22,9 @@ export default function ArticleAnswerSection({ answer, codeExample }) {
             <span>Detailed interview answer</span>
           </div>
           <span className="inline-flex items-center gap-1 text-xs font-bold text-orange-600 dark:text-orange-400">
-            <span className="hidden sm:inline">{isOpen ? "Hide answer" : "Show answer"}</span>
+            <span className="hidden sm:inline">
+              {isOpen ? "Hide answer" : "Show answer"}
+            </span>
             <ChevronDown
               className={`h-4 w-4 transition-transform duration-200 ${
                 isOpen ? "rotate-0" : "-rotate-90"
@@ -33,7 +35,7 @@ export default function ArticleAnswerSection({ answer, codeExample }) {
 
         {isOpen ? (
           <div className="mt-4 space-y-5 pt-1">
-            <div className="min-w-0 max-w-full text-justify text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 sm:text-base sm:leading-7">
+            <div className="mobile-reading-copy min-w-0 max-w-full text-left text-base leading-relaxed text-zinc-700 dark:text-zinc-300 sm:text-justify sm:leading-7">
               <InterviewAnswer content={answer} />
             </div>
 

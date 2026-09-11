@@ -3,6 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
+  --breakpoint-xs: 24rem;
   --color-background: var(--site-bg);
   --color-foreground: var(--site-fg);
   --color-primary: var(--m3-primary);
@@ -88,11 +89,28 @@
   --code-inline-fg: #bfdbfe;
 }
 
+html {
+  min-width: 0;
+  scroll-padding-bottom: 6rem;
+}
+
 body {
   background-color: var(--site-bg);
   color: var(--site-fg);
   font-family: var(--font-inter);
   -webkit-font-smoothing: antialiased;
+  min-width: 0;
+  min-height: 100dvh;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Material 3 Tactile Spring Press */
@@ -132,6 +150,11 @@ body {
 }
 
 @media (max-width: 768px) {
+  html,
+  body {
+    overscroll-behavior-x: none;
+  }
+
   * {
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -139,6 +162,46 @@ body {
 
   *::-webkit-scrollbar {
     display: none;
+  }
+}
+
+@media (max-width: 639px) {
+  /* Left-aligned copy is easier to scan on narrow reading measures. */
+  .prose,
+  .wmde-markdown,
+  .mobile-reading-copy {
+    text-align: left !important;
+  }
+
+  .topic-markdown .wmde-markdown {
+    font-size: 0.9375rem !important;
+    line-height: 1.75 !important;
+  }
+
+  /* Preserve code indentation and let the code surface scroll independently. */
+  pre.ql-syntax,
+  .prose pre,
+  .ql-editor pre,
+  pre.hljs,
+  .wmde-markdown pre,
+  .topic-markdown pre,
+  .w-md-editor-preview pre,
+  .wmde-markdown pre code,
+  .topic-markdown pre code,
+  .prose pre code,
+  .ql-editor pre code,
+  pre.hljs code,
+  .w-md-editor-preview pre code {
+    white-space: pre !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+  }
+
+  .topic-markdown .wmde-markdown table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
   }
 }
 
@@ -357,7 +420,9 @@ pre.hljs code,
   background: var(--card-bg) !important;
   border: 1px solid var(--border, #bfdbfe) !important;
   color: var(--foreground, #172554) !important;
-  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.05), 0 8px 10px -6px rgba(37, 99, 235, 0.05) !important;
+  box-shadow:
+    0 10px 25px -5px rgba(37, 99, 235, 0.05),
+    0 8px 10px -6px rgba(37, 99, 235, 0.05) !important;
   backdrop-filter: blur(16px) !important;
   padding: 14px 18px !important;
   transition: all 0.2s ease !important;
@@ -368,7 +433,9 @@ pre.hljs code,
   background: rgba(15, 23, 42, 0.85) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
   color: #eff6ff !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3) !important;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.3),
+    0 8px 10px -6px rgba(0, 0, 0, 0.3) !important;
 }
 
 /* Success Toast */
@@ -434,7 +501,7 @@ pre.hljs code,
   font-family: var(--font-outfit), sans-serif !important;
   font-weight: 700 !important;
   font-size: 0.9rem !important;
-  letter-spacing: -0.010em !important;
+  letter-spacing: -0.01em !important;
   color: inherit !important;
 }
 
@@ -445,8 +512,6 @@ pre.hljs code,
   color: inherit !important;
   opacity: 0.8 !important;
 }
-
-
 
 /* Reading flow: code follows the active site theme everywhere. */
 .prose :not(pre) > code,
@@ -486,9 +551,11 @@ pre.ql-syntax,
 .topic-markdown pre,
 .w-md-editor-preview pre,
 pre.hljs {
-  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
 }
-
 
 /* Theme-aware highlight.js colors for dedicated CodeSnippetViewer.
    Base theme: github.css for light mode. */
@@ -580,6 +647,21 @@ pre.hljs {
   background: transparent !important;
 }
 
+/* Responsive protection for markdown content on small screens */
+.topic-markdown,
+.wmde-markdown,
+.w-md-editor-preview {
+  max-width: 100%;
+  overflow-x: auto;
+  word-break: break-word;
+}
+
+.topic-markdown pre,
+.wmde-markdown pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 /* ==========================================================================
    Cheatsheet & Article Print Styling System (asif.to Branding & Print Layout)
    ========================================================================== */
@@ -638,7 +720,12 @@ pre.hljs {
   }
 
   /* Headings print break protection */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     color: #0f172a !important;
     font-weight: 800 !important;
     page-break-after: avoid !important;
@@ -647,20 +734,34 @@ pre.hljs {
     margin-bottom: 0.5em !important;
   }
 
-  h1 { font-size: 20pt !important; }
-  h2 { font-size: 16pt !important; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
-  h3 { font-size: 13pt !important; }
-  h4 { font-size: 11pt !important; }
+  h1 {
+    font-size: 20pt !important;
+  }
+  h2 {
+    font-size: 16pt !important;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 4px;
+  }
+  h3 {
+    font-size: 13pt !important;
+  }
+  h4 {
+    font-size: 11pt !important;
+  }
 
   /* 5. High-Contrast Code Blocks for Crisp Paper Printing */
-  pre, code, .wmde-markdown pre, .topic-markdown pre {
+  pre,
+  code,
+  .wmde-markdown pre,
+  .topic-markdown pre {
     background-color: #f8fafc !important;
     color: #0f172a !important;
     border: 1px solid #cbd5e1 !important;
     border-radius: 8px !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+    font-family:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
     font-size: 9.5pt !important;
     line-height: 1.45 !important;
     padding: 10px 14px !important;
@@ -687,7 +788,8 @@ pre.hljs {
     break-inside: avoid !important;
   }
 
-  th, td {
+  th,
+  td {
     border: 1px solid #cbd5e1 !important;
     padding: 6px 12px !important;
     font-size: 10pt !important;
@@ -710,4 +812,3 @@ pre.hljs {
     break-inside: avoid !important;
   }
 }
-

@@ -91,17 +91,19 @@ export default function CheatsheetsClient({
   }, [initialCourses, initialCheatsheets, selectedTech, search]);
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-24 sm:px-6">
-      <nav className="mb-7 flex items-center gap-2 text-xs font-bold text-zinc-400">
-        <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+    <main className="mx-auto w-full max-w-6xl px-4 pb-24 pt-20 sm:px-6 sm:pt-24">
+      <nav className="mb-5 flex items-center gap-2 text-xs font-bold text-zinc-400 sm:mb-7">
+        <Link href="/" className="hover:text-blue-600 transition-colors">
+          Home
+        </Link>
         <span>/</span>
         <span className="text-zinc-700 dark:text-zinc-200">Cheatsheets</span>
       </nav>
-      <section className="overflow-hidden rounded-4xl border border-blue-500/15 bg-linear-to-br from-blue-600 to-indigo-700 p-7 text-white shadow-2xl shadow-blue-600/15 sm:p-12">
+      <section className="overflow-hidden rounded-4xl border border-blue-500/15 bg-linear-to-br from-blue-600 to-indigo-700 p-5 text-white shadow-xl shadow-blue-600/15 sm:p-12 sm:shadow-2xl">
         <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-black uppercase tracking-wider">
           <Sparkles className="h-4 w-4" /> Reference guides
         </span>
-        <h1 className="mt-5 max-w-3xl text-3xl font-black tracking-tight sm:text-5xl">
+        <h1 className="mt-4 max-w-3xl text-2xl font-black tracking-tight xs:text-3xl sm:mt-5 sm:text-5xl">
           Coding cheatsheets built for fast reading and live practice.
         </h1>
         <p className="mt-4 max-w-2xl text-sm font-medium leading-6 text-blue-100 sm:text-base">
@@ -110,20 +112,20 @@ export default function CheatsheetsClient({
         </p>
       </section>
 
-      <section className="mt-8 space-y-4">
+      <section className="mt-6 space-y-3 sm:mt-8 sm:space-y-4">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search titles, concepts, or code..."
-            className="w-full rounded-2xl border border-zinc-200 bg-white py-4 pl-11 pr-4 text-sm font-semibold shadow-sm outline-none focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-900"
+            className="h-12 w-full rounded-2xl border border-zinc-200 bg-white pl-11 pr-4 text-sm font-semibold shadow-sm outline-none focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-900"
           />
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-2">
           <button
             onClick={() => setSelectedTech("")}
-            className={`rounded-full px-4 py-2 text-xs font-bold ${
+            className={`min-h-11 shrink-0 rounded-full px-4 text-xs font-bold ${
               !selectedTech
                 ? "bg-blue-600 text-white"
                 : "bg-white text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300"
@@ -135,7 +137,7 @@ export default function CheatsheetsClient({
             <button
               key={tech.id}
               onClick={() => setSelectedTech(tech.id)}
-              className={`rounded-full px-4 py-2 text-xs font-bold whitespace-nowrap ${
+              className={`min-h-11 shrink-0 rounded-full px-4 text-xs font-bold whitespace-nowrap ${
                 selectedTech === tech.id
                   ? "bg-blue-600 text-white"
                   : "bg-white text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300"
@@ -148,7 +150,7 @@ export default function CheatsheetsClient({
       </section>
 
       {items.length ? (
-        <section className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <section className="mt-5 grid gap-4 sm:mt-6 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => {
             const tech = TECH_STACKS.find((entry) => entry.id === item.techId);
             const isComingSoon = item.type === "coming_soon";
@@ -156,7 +158,7 @@ export default function CheatsheetsClient({
             return (
               <article
                 key={item.id}
-                className={`group flex min-h-72 flex-col rounded-3xl border p-6 shadow-sm transition ${
+                className={`group flex min-h-0 flex-col rounded-3xl border p-5 shadow-sm transition sm:min-h-72 sm:p-6 ${
                   isComingSoon
                     ? "border-dashed border-zinc-200 bg-zinc-50/50 dark:border-zinc-800 dark:bg-zinc-900/30 opacity-75"
                     : "border-zinc-200 bg-white hover:-translate-y-1 hover:border-blue-400 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900"

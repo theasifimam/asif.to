@@ -605,7 +605,7 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       placeholder="Search messages..."
-                      className="h-10 w-full rounded-full border border-zinc-200 bg-zinc-50 pl-10 pr-4 text-xs font-medium outline-none focus:border-blue-500 focus:bg-white dark:border-zinc-800 dark:bg-zinc-900 transition-all"
+                      className="h-10 w-full rounded-full border border-zinc-200 bg-zinc-50 pl-10 pr-4 text-xs font-medium outline-none focus:border-blue-500 focus:bg-white dark:border-zinc-800 dark:bg-zinc-900 dark:focus:bg-zinc-900 transition-all text-zinc-900 dark:text-zinc-100"
                     />
                   </div>
                 </div>

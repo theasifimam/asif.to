@@ -134,7 +134,7 @@ export default function SearchPageClient() {
   return (
     <section className="flex flex-col gap-6">
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-4xl bg-linear-to-br from-blue-600 via-indigo-600 to-purple-700 text-white p-6 sm:p-10 shadow-xl shadow-blue-500/15">
+      <div className="relative overflow-hidden rounded-4xl bg-linear-to-br from-blue-600 via-indigo-600 to-purple-700 text-white p-5 sm:p-10 shadow-xl shadow-blue-500/15">
         <div className="absolute -right-12 -bottom-12 w-64 h-64 rounded-full bg-white/10 blur-3xl pointer-events-none" />
         <div className="absolute top-2 right-12 w-32 h-32 rounded-full bg-blue-400/20 blur-2xl pointer-events-none" />
 
@@ -159,7 +159,7 @@ export default function SearchPageClient() {
         <label htmlFor="search-page-input" className="sr-only">
           Search all asif.to content
         </label>
-        <div className="flex items-center gap-3.5 rounded-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl px-5 py-4 shadow-xl shadow-black/5 dark:shadow-black/20 border border-zinc-200/80 dark:border-zinc-800/80 ring-1 ring-black/5 dark:ring-white/10 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/40 transition-all">
+        <div className="flex min-h-14 items-center gap-3.5 rounded-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl px-4 sm:px-5 shadow-xl shadow-black/5 dark:shadow-black/20 border border-zinc-200/80 dark:border-zinc-800/80 ring-1 ring-black/5 dark:ring-white/10 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/40 transition-all">
           <Search className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0" />
           <input
             id="search-page-input"
@@ -258,7 +258,7 @@ export default function SearchPageClient() {
             <p className="font-bold">{error}</p>
           </div>
         ) : !deferredQuery.trim() ? (
-          <div className="rounded-4xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 p-8 sm:p-12 shadow-xl shadow-black/5 dark:shadow-black/20 text-center">
+          <div className="rounded-4xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 p-5 xs:p-7 sm:p-12 shadow-xl shadow-black/5 dark:shadow-black/20 text-center">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400 mb-4 shadow-inner">
               <Search className="h-6 w-6" />
             </div>

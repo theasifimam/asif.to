@@ -50,9 +50,9 @@ const buttonVariants = cva(
       },
       size: {
         default: "h-11 px-5 py-2.5 text-sm",
-        sm: "h-9 px-4 py-2 text-xs",
+        sm: "h-11 px-4 py-2 text-xs lg:h-9",
         lg: "h-12 px-7 py-3 text-base",
-        icon: "h-10 w-10 shrink-0 p-0"
+        icon: "h-11 w-11 shrink-0 p-0 lg:h-10 lg:w-10"
       }
     },
     defaultVariants: {

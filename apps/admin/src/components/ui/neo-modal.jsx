@@ -64,7 +64,7 @@ export function NeoModal({
   "border-zinc-200/50 dark:border-white/10";
 
   return createPortal(
-    <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[999] flex items-end justify-center lg:items-center lg:p-4">
       {/* Backdrop */}
       <div
         className={cn(
@@ -77,7 +77,7 @@ export function NeoModal({
       {/* Content */}
       <div
         className={cn(
-          "relative w-full max-w-lg bg-card/95 backdrop-blur-md rounded-[32px] border shadow-2xl transition-all duration-300 transform",
+          "relative max-h-[calc(100dvh-env(safe-area-inset-top)-0.75rem)] w-full max-w-lg overflow-y-auto rounded-t-[28px] border border-b-0 bg-card/95 backdrop-blur-md shadow-2xl transition-all duration-300 transform lg:rounded-[32px] lg:border-b",
           borderColor,
           isOpen ?
           "scale-100 opacity-100 translate-y-0" :
@@ -92,7 +92,7 @@ export function NeoModal({
           <X className="w-5 h-5 text-muted-foreground" />
         </button>
 
-        <div className="p-8">
+        <div className="p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] lg:p-8">
           {/* Header */}
           <div className="flex flex-col gap-2 mb-6">
             <div
