@@ -12,6 +12,7 @@ export default function AuthModal({
   defaultTab = "signin",
   callbackUrl = "/",
   updateUrl = true,
+  onTabChange,
 }) {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -79,7 +80,7 @@ export default function AuthModal({
                       : { opacity: 0, scale: 0.95, y: 16 }
                   }
                   transition={{ type: "spring", damping: 28, stiffness: 320 }}
-                  className="w-full max-w-[460px] outline-none touch-pan-y pointer-events-auto"
+                  className="w-full max-w-115 outline-none touch-pan-y pointer-events-auto"
                 >
                   <AuthCard
                     defaultTab={defaultTab}
@@ -87,6 +88,7 @@ export default function AuthModal({
                     onClose={handleClose}
                     isModal={true}
                     updateUrl={updateUrl}
+                    onTabChange={onTabChange}
                   />
                 </motion.div>
               </div>

@@ -35,13 +35,13 @@ export default function LogoutConfirm({ isOpen, onClose, onConfirm }) {
             <div className="flex flex-col w-full gap-3">
               <button
                 onClick={onConfirm}
-                className="w-full py-4 bg-red-500 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600 text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all active:scale-95"
+                className="w-full py-4 bg-red-500 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600 text-white text-xs font-black uppercase tracking-widest rounded-full transition-all active:scale-95"
               >
                 Confirm Sign Out
               </button>
               <button
                 onClick={onClose}
-                className="w-full py-4 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all active:scale-95"
+                className="w-full py-4 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white text-xs font-black uppercase tracking-widest rounded-full transition-all active:scale-95"
               >
                 Stay Signed In
               </button>

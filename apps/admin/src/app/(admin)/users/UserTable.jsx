@@ -3,7 +3,15 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Mail, Activity, Eye, Pencil, Trash2, Users as UsersIcon, Clock } from "lucide-react";
+import {
+  Mail,
+  Activity,
+  Eye,
+  Pencil,
+  Trash2,
+  Users as UsersIcon,
+  Clock,
+} from "lucide-react";
 import { ROLE_CONFIG, STATUS_CONFIG, initials, fmtDate } from "./types";
 import { Button, Skeleton } from "@/components/ui";
 
@@ -137,7 +145,7 @@ function UserTableComponent({
 
   if (viewMode === "card") {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
         {loading
           ? Array.from({ length: limit }).map((_, i) => (
               <UserCardSkeleton key={i} />
@@ -242,19 +250,20 @@ function UserTableComponent({
                           <Pencil className="mr-2 h-3.5 w-3.5" /> Edit user
                         </Button>
                       )}
-                      {canDelete && String(user._id) !== String(currentUserId) && (
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            onDelete?.(user);
-                          }}
-                          className="rounded-xl"
-                        >
-                          <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
-                        </Button>
-                      )}
+                      {canDelete &&
+                        String(user._id) !== String(currentUserId) && (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onDelete?.(user);
+                            }}
+                            className="rounded-xl"
+                          >
+                            <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
+                          </Button>
+                        )}
                     </div>
                   </div>
                 </motion.div>
@@ -364,19 +373,20 @@ function UserTableComponent({
                         <Pencil className="mr-2 h-3.5 w-3.5" /> Edit
                       </Button>
                     )}
-                    {canDelete && String(user._id) !== String(currentUserId) && (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onDelete?.(user);
-                        }}
-                        className="rounded-xl"
-                      >
-                        <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
-                      </Button>
-                    )}
+                    {canDelete &&
+                      String(user._id) !== String(currentUserId) && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onDelete?.(user);
+                          }}
+                          className="rounded-xl"
+                        >
+                          <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
+                        </Button>
+                      )}
                   </div>
                 </motion.div>
               );
@@ -508,19 +518,20 @@ function UserTableComponent({
                               <Pencil className="mr-1.5 h-3.5 w-3.5" /> Edit
                             </Button>
                           )}
-                          {canDelete && String(user._id) !== String(currentUserId) && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                onDelete?.(user);
-                              }}
-                              className="h-8 rounded-full px-3 text-xs font-bold text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-950/40"
-                            >
-                              <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
-                            </Button>
-                          )}
+                          {canDelete &&
+                            String(user._id) !== String(currentUserId) && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  onDelete?.(user);
+                                }}
+                                className="h-8 rounded-full px-3 text-xs font-bold text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-950/40"
+                              >
+                                <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
+                              </Button>
+                            )}
                         </div>
                       </td>
                     </motion.tr>

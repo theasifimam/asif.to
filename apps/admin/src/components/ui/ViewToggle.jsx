@@ -1,11 +1,12 @@
 "use client";
+"use client";
 
 import { LayoutGrid, List } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef } from "react";
 
 export function ViewToggle({
-  view = "table",
+  view = "card",
   onViewChange,
   className = "",
 }) {

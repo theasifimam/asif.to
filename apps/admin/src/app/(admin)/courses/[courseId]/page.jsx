@@ -112,8 +112,8 @@ export default function CourseChaptersPage() {
     page: 1,
     limit: 20,
   });
-  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "table" });
-  const viewMode = urlFilters.view || "table";
+  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "card" });
+  const viewMode = urlFilters.view || "card";
   const setViewMode = (v) =>
     setUrlFilters((current) => ({ ...current, view: v }));
   const [debouncedSearch, setDebouncedSearch] = useState("");

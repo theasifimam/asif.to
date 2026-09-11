@@ -122,9 +122,9 @@ export default function CoursesAdminPage() {
     level: "all",
     page: 1,
     limit: 20,
-    view: "table",
+    view: "card",
   });
-  const viewMode = filters.view || "table";
+  const viewMode = filters.view || "card";
   const setViewMode = (view) => setFilters((current) => ({ ...current, view }));
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [pagination, setPagination] = useState(initialPagination);

@@ -187,7 +187,7 @@ export default function ArticleForm({ articleId = null }) {
             variant="outline"
             disabled={saving}
             onClick={() => persist("draft")}
-            className="flex-1 sm:flex-initial"
+            className="shrink-0"
           >
             <Save className="mr-2 h-4 w-4" /> Save Draft
           </Button>
@@ -195,7 +195,7 @@ export default function ArticleForm({ articleId = null }) {
             <Button
               disabled={saving}
               onClick={() => persist(form.status)}
-              className="w-full sm:w-auto"
+              className="shrink-0"
             >
               {saving ? <LogoLoader className="mr-2 h-4 w-4" /> : <RefreshCw className="mr-2 h-4 w-4" />} Update
             </Button>
@@ -204,7 +204,7 @@ export default function ArticleForm({ articleId = null }) {
             variant={articleId ? "outline" : "default"}
             disabled={saving}
             onClick={() => persist("published")}
-            className="w-full sm:w-auto"
+            className="shrink-0"
           >
             <Send className="mr-2 h-4 w-4" /> Publish
           </Button>

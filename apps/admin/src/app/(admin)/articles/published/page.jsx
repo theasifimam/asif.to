@@ -30,8 +30,8 @@ export default function PublishedPage() {
   const [selectedArticle, setSelectedArticle] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [togglingId, setTogglingId] = useState(null);
-  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "list" });
-  const viewMode = urlFilters.view || "list";
+  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "card" });
+  const viewMode = urlFilters.view || "card";
   const setViewMode = (v) => setUrlFilters((current) => ({ ...current, view: v }));
   const [statusFilter, setStatusFilter] = useState("all"); // 'all' | 'published' | 'draft'
   const [searchQuery, setSearchQuery] = useState("");

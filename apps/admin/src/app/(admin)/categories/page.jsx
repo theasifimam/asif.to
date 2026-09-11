@@ -131,10 +131,10 @@ export default function CategoriesListPage() {
     filterStatus: "all",
     page: 1,
     limit: 20,
-    view: "table",
+    view: "card",
   });
   const { search, filterCourse, filterStatus, page, limit } = filters;
-  const viewMode = filters.view || "table";
+  const viewMode = filters.view || "card";
   const setViewMode = (view) => setFilters((current) => ({ ...current, view }));
   const [preview, setPreview] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);

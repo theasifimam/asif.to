@@ -53,8 +53,8 @@ export default function UsersPage() {
   const [providerFilter, setProviderFilter] = useState("all");
   const [verifiedFilter, setVerifiedFilter] = useState("all");
   const [sort, setSort] = useState("newest");
-  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "table" });
-  const viewMode = urlFilters.view || "table";
+  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "card" });
+  const viewMode = urlFilters.view || "card";
   const setViewMode = (v) =>
     setUrlFilters((current) => ({ ...current, view: v }));
   const [editingUser, setEditingUser] = useState(null);
@@ -164,14 +164,14 @@ export default function UsersPage() {
             size="icon"
             onClick={refetch}
             title="Refresh users"
-            className="flex-1 sm:flex-initial"
+            className="shrink-0"
           >
             {loading ? <LogoLoader size={16} /> : <RefreshCw size={16} />}
           </Button>
           {hasPermission(currentUser, "invitations.manage") && (
             <Button
               onClick={() => setIsAddOpen(true)}
-              className="w-full sm:w-auto"
+              className="shrink-0"
             >
               <UserPlus className="mr-2 h-4 w-4" /> Add user
             </Button>

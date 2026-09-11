@@ -97,7 +97,7 @@ export default function JobsAdminPage() {
   });
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState("list");
+  const [viewMode, setViewMode] = useState("card");
 
   const load = async (page = pagination.page) => {
     setLoading(true);

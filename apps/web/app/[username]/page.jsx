@@ -69,8 +69,12 @@ export default async function UserProfilePage({ params }) {
     redirect("/sitemap.xml");
   }
 
-  // 3. Reject file extensions that aren't valid routes
-  if (/\.[a-zA-Z0-9]+$/.test(rawSlug)) {
+  // 3. Reject known static file extensions that aren't valid routes.
+  // Use an explicit allowlist so that usernames containing dots (e.g. "asif.to")
+  // are never mistakenly treated as file paths.
+  const STATIC_EXTS =
+    /\.(txt|xml|json|js|mjs|cjs|css|ico|png|jpg|jpeg|gif|svg|webp|avif|woff|woff2|ttf|eot|map|gz|br|pdf|zip)$/i;
+  if (STATIC_EXTS.test(rawSlug)) {
     notFound();
   }
 

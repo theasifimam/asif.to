@@ -122,7 +122,7 @@ export default function DraftsPage() {
   };
 
   return (
-    <div className="p-6 md:p-12 flex flex-col gap-8 md:gap-12 max-w-400 mx-auto text-zinc-900 dark:text-zinc-400 transition-colors duration-300">
+    <div className="p-4 sm:p-6 md:p-12 flex flex-col gap-8 md:gap-12 max-w-400 mx-auto text-zinc-900 dark:text-zinc-400 transition-colors duration-300">
       <DraftHeader viewMode={viewMode} setViewMode={setViewMode} />
 
       {/* Main Drafts Section */}

@@ -119,11 +119,11 @@ export default function TopicsPage() {
     type: "all",
     status: "all",
     page: 1,
-    view: "table",
+    view: "card",
   });
   const editHref = (id) =>
     `/topics/${id}/edit?returnTo=${encodeURIComponent(returnTo)}`;
-  const viewMode = filters.view || "table";
+  const viewMode = filters.view || "card";
   const setViewMode = (v) => setFilters((current) => ({ ...current, view: v }));
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
   const [limit, setLimit] = useState(20);

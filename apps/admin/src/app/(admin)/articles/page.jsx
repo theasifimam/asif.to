@@ -98,11 +98,11 @@ export default function ArticlesPage() {
     status: "all",
     page: 1,
     limit: 20,
-    view: "table",
+    view: "card",
   });
   const { search, status, page, limit } = filters;
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const viewMode = filters.view || "table";
+  const viewMode = filters.view || "card";
   const setViewMode = (view) => setFilters((current) => ({ ...current, view }));
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);

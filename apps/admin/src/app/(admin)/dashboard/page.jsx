@@ -235,8 +235,8 @@ export default function DashboardPage() {
             </h1>
 
             <p className="mt-2 max-w-2xl text-xs sm:text-sm leading-relaxed font-medium text-zinc-400">
-              Here is your platform roadmap, course analytics, and planner status
-              for today.
+              Here is your platform roadmap, course analytics, and planner
+              status for today.
             </p>
           </div>
 
@@ -276,90 +276,6 @@ export default function DashboardPage() {
             </Button>
           </div>
         </div>
-      </section>
-
-      {/* 2. TASKS LEFT IN PLANNER BENTO CARD */}
-      <section className="rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 border border-amber-500/20 shadow-xs space-y-3 min-w-0">
-        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-              <ListTodo className="w-5 h-5" />
-            </div>
-            <div className="flex flex-wrap items-center gap-2 min-w-0">
-              <h2 className="font-outfit text-base sm:text-lg font-black text-zinc-950 dark:text-white truncate">
-                Tasks Left in Planner
-              </h2>
-              <span className="shrink-0 rounded-full bg-amber-500/15 border border-amber-500/20 text-amber-700 dark:text-amber-300 px-3 py-0.5 text-[10px] font-black">
-                {plannerLoading ? "..." : `${plannerTasks.length} pending`}
-              </span>
-            </div>
-          </div>
-
-          <Link
-            href="/planner"
-            className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline shrink-0"
-          >
-            <span>Open Planner</span>
-            <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
-
-        {plannerLoading ? (
-          <div className="flex items-center gap-2 text-xs text-zinc-400 font-semibold py-3">
-            <LogoLoader className="h-4 w-4" />
-            Fetching planner tasks...
-          </div>
-        ) : plannerTasks.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {plannerTasks.slice(0, 3).map((task) => {
-              let priorityColorClass = "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
-              let dotColorClass = "bg-zinc-400";
-              if (task.priority === "urgent" || task.priority === "high") {
-                priorityColorClass = "bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/20";
-                dotColorClass = "bg-rose-500";
-              } else if (task.priority === "medium") {
-                priorityColorClass = "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/20";
-                dotColorClass = "bg-amber-500";
-              } else if (task.priority === "low") {
-                priorityColorClass = "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20";
-                dotColorClass = "bg-emerald-500";
-              }
-
-              return (
-                <Link
-                  key={task._id || task.id}
-                  href="/planner"
-                  className="flex flex-col justify-between p-4 rounded-2xl bg-white dark:bg-zinc-900/95 border border-zinc-200/80 dark:border-zinc-800 hover:border-amber-500/40 hover:shadow-md transition-all group"
-                >
-                  <div className="flex gap-2.5 items-start">
-                    <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-zinc-300 dark:border-zinc-700 group-hover:border-amber-500 transition-all mt-0.5">
-                      <div className="h-1.5 w-1.5 rounded-full bg-transparent group-hover:bg-amber-500 transition-colors" />
-                    </div>
-                    <p className="font-outfit text-xs sm:text-sm font-extrabold text-zinc-900 dark:text-zinc-100 line-clamp-2 leading-snug group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                      {task.title}
-                    </p>
-                  </div>
-                  <div className="flex items-center justify-between gap-2 mt-3 pt-2.5 border-t border-zinc-100 dark:border-zinc-800/80">
-                    <span className="inline-flex items-center gap-1 text-[9.5px] font-black uppercase text-zinc-400 dark:text-zinc-500">
-                      <Tag className="w-2.5 h-2.5" />
-                      {task.type || "Task"}
-                    </span>
-                    {task.priority && (
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase ${priorityColorClass}`}>
-                        <span className={`w-1 h-1 rounded-full ${dotColorClass}`} />
-                        {task.priority}
-                      </span>
-                    )}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900/90 border border-zinc-200/80 dark:border-zinc-800 text-xs font-semibold text-zinc-600 dark:text-zinc-300">
-            🎉 All tasks in your planner are completed! Great job!
-          </div>
-        )}
       </section>
 
       {/* 3. BENTO METRICS CARDS GRID (SQUIRCLE MESH CARDS) */}
@@ -417,8 +333,100 @@ export default function DashboardPage() {
         })}
       </section>
 
+      {/* 2. TASKS LEFT IN PLANNER BENTO CARD */}
+      <section className="rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 border border-amber-500/20 shadow-xs space-y-3 min-w-0">
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+              <ListTodo className="w-5 h-5" />
+            </div>
+            <div className="flex flex-wrap items-center gap-2 min-w-0">
+              <h2 className="font-outfit text-base sm:text-lg font-black text-zinc-950 dark:text-white truncate">
+                Tasks Left in Planner
+              </h2>
+              <span className="shrink-0 rounded-full bg-amber-500/15 border border-amber-500/20 text-amber-700 dark:text-amber-300 px-3 py-0.5 text-[10px] font-black">
+                {plannerLoading ? "..." : `${plannerTasks.length} pending`}
+              </span>
+            </div>
+          </div>
+
+          <Link
+            href="/planner"
+            className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline shrink-0"
+          >
+            <span>Open Planner</span>
+            <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        {plannerLoading ? (
+          <div className="flex items-center gap-2 text-xs text-zinc-400 font-semibold py-3">
+            <LogoLoader className="h-4 w-4" />
+            Fetching planner tasks...
+          </div>
+        ) : plannerTasks.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {plannerTasks.slice(0, 3).map((task) => {
+              let priorityColorClass =
+                "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
+              let dotColorClass = "bg-zinc-400";
+              if (task.priority === "urgent" || task.priority === "high") {
+                priorityColorClass =
+                  "bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/20";
+                dotColorClass = "bg-rose-500";
+              } else if (task.priority === "medium") {
+                priorityColorClass =
+                  "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/20";
+                dotColorClass = "bg-amber-500";
+              } else if (task.priority === "low") {
+                priorityColorClass =
+                  "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20";
+                dotColorClass = "bg-emerald-500";
+              }
+
+              return (
+                <Link
+                  key={task._id || task.id}
+                  href="/planner"
+                  className="flex flex-col justify-between p-4 rounded-2xl bg-white dark:bg-zinc-900/95 border border-zinc-200/80 dark:border-zinc-800 hover:border-amber-500/40 hover:shadow-md transition-all group"
+                >
+                  <div className="flex gap-2.5 items-start">
+                    <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-zinc-300 dark:border-zinc-700 group-hover:border-amber-500 transition-all mt-0.5">
+                      <div className="h-1.5 w-1.5 rounded-full bg-transparent group-hover:bg-amber-500 transition-colors" />
+                    </div>
+                    <p className="font-outfit text-xs sm:text-sm font-extrabold text-zinc-900 dark:text-zinc-100 line-clamp-2 leading-snug group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                      {task.title}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between gap-2 mt-3 pt-2.5 border-t border-zinc-100 dark:border-zinc-800/80">
+                    <span className="inline-flex items-center gap-1 text-[9.5px] font-black uppercase text-zinc-400 dark:text-zinc-500">
+                      <Tag className="w-2.5 h-2.5" />
+                      {task.type || "Task"}
+                    </span>
+                    {task.priority && (
+                      <span
+                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase ${priorityColorClass}`}
+                      >
+                        <span
+                          className={`w-1 h-1 rounded-full ${dotColorClass}`}
+                        />
+                        {task.priority}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-4 rounded-2xl bg-white dark:bg-zinc-900/90 border border-zinc-200/80 dark:border-zinc-800 text-xs font-semibold text-zinc-600 dark:text-zinc-300">
+            🎉 All tasks in your planner are completed! Great job!
+          </div>
+        )}
+      </section>
+
       {/* 4. READERSHIP ANALYTICS (BENTO FEATURE CONTAINER) */}
-      <section className="rounded-[2rem] sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 border border-zinc-200/80 dark:border-zinc-800 flex flex-col gap-4 p-5 sm:p-8 shadow-xs hover:shadow-md transition-all">
+      <section className="rounded-4xl sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 border border-zinc-200/80 dark:border-zinc-800 flex flex-col gap-4 p-5 sm:p-8 shadow-xs hover:shadow-md transition-all">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 dark:border-zinc-800/80 pb-4">
           <div>
             <div className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1">
@@ -690,4 +698,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 export default function ArticleHeader() {
   return (
     <AdminPageHeader eyebrow="Content / Articles" title="Articles" description="Search, review, publish, and manage editorial content." actions={
-      <Button asChild className="w-full sm:w-auto">
+      <Button asChild className="shrink-0">
         <Link href="/articles/new">
           <Plus className="mr-2 h-4 w-4" /> New article
         </Link>

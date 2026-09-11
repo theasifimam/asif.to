@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -16,6 +16,8 @@ import {
   ChevronRight,
   LogOut,
   BriefcaseBusiness,
+  PlayCircle,
+  ArrowRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
@@ -85,6 +87,23 @@ export default function BottomNav() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [authTab, setAuthTab] = useState("signin");
+  const [continueReading, setContinueReading] = useState(null);
+
+  const loadContinueReading = useCallback(async () => {
+    const api = process.env.NEXT_PUBLIC_API_URL;
+    if (!api || !isAuthenticated) { setContinueReading(null); return; }
+    try {
+      const res = await fetch(
+        `${api.replace(/\/$/, "")}/courses/progress/me/summary`,
+        { credentials: "include", cache: "no-store" },
+      );
+      if (!res.ok) { setContinueReading(null); return; }
+      const body = await res.json();
+      setContinueReading(body?.data?.current || null);
+    } catch {
+      setContinueReading(null);
+    }
+  }, [isAuthenticated]);
 
   const isHomeActive = pathname === "/";
   const profilePath = user?.username ? `/${user.username}` : null;
@@ -112,6 +131,10 @@ export default function BottomNav() {
       window.removeEventListener("keydown", closeOnEscape);
     };
   }, [isMenuOpen]);
+
+  useEffect(() => {
+    if (isMenuOpen) loadContinueReading();
+  }, [isMenuOpen, loadContinueReading]);
 
   const handleLogout = async () => {
     try {
@@ -212,9 +235,9 @@ export default function BottomNav() {
         >
           <span className="flex min-h-11 min-w-11 items-center justify-center gap-1.5">
             {!isInitialized ? (
-              <div className="w-4 h-4 rounded-full bg-zinc-300 dark:bg-zinc-700 animate-pulse shrink-0" />
+              <div className="w-5 h-5 rounded-full bg-zinc-300 dark:bg-zinc-700 animate-pulse shrink-0" />
             ) : isAuthenticated && user ? (
-              <div className="relative w-4 h-4 rounded-full overflow-hidden shrink-0 border border-white/40">
+              <div className="relative w-5 h-5 rounded-full overflow-hidden shrink-0 ring-1 ring-white/50 dark:ring-zinc-700">
                 {user.avatar && !user.avatar.includes("ui-avatars.com") ? (
                   <Image
                     src={getImageUrl(user.avatar)}
@@ -232,12 +255,12 @@ export default function BottomNav() {
             ) : (
               <User className="w-4 h-4 shrink-0" />
             )}
+            {isProfileActive && !isMenuOpen && (
+              <span className="text-xs font-bold tracking-tight whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
+                Profile
+              </span>
+            )}
           </span>
-          {isProfileActive && !isMenuOpen && (
-            <span className="text-xs font-bold tracking-tight whitespace-nowrap animate-in fade-in zoom-in-95 duration-200">
-              Profile
-            </span>
-          )}
         </Link>
 
         {/* Divider */}
@@ -299,7 +322,7 @@ export default function BottomNav() {
               role="dialog"
               aria-modal="true"
               aria-label="Navigation menu"
-              className="relative mx-2.5 mb-[calc(4rem+env(safe-area-inset-bottom))] max-h-[min(76dvh,38rem)] bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl rounded-[28px] sm:rounded-4xl border border-zinc-200/80 dark:border-zinc-800/80 shadow-2xl flex flex-col overflow-hidden pointer-events-auto touch-pan-y z-105"
+              className="relative mx-2.5 mb-[calc(4rem+env(safe-area-inset-bottom))] max-h-[min(76dvh,38rem)] bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl rounded-[2rem] sm:rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-2xl flex flex-col overflow-hidden pointer-events-auto touch-pan-y z-105"
             >
               {/* Drag Pill Handle */}
               <div
@@ -344,13 +367,108 @@ export default function BottomNav() {
 
               {/* Scrollable Navigation Body */}
               <div className="flex-1 overflow-y-auto px-4 py-3.5 space-y-3.5 scrollbar-none">
+
+                {/* Continue Reading Card - shown when user has active course progress */}
+                {continueReading?.nextAction && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Link
+                      href={continueReading.nextAction.href}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="group flex items-center gap-3 p-3 rounded-3xl bg-blue-500/8 dark:bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/15 dark:hover:bg-blue-500/20 transition-all active:scale-[0.98]"
+                    >
+                      <div className="h-10 w-10 rounded-2xl bg-blue-600 flex items-center justify-center shrink-0 shadow-sm">
+                        <PlayCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0 leading-tight">
+                        <span className="text-[10px] font-black uppercase tracking-[0.15em] text-blue-600 dark:text-blue-400 block mb-0.5">
+                          Continue Reading
+                        </span>
+                        <span className="text-xs font-bold text-zinc-900 dark:text-white truncate block">
+                          {continueReading.nextAction.chapter?.title ||
+                            continueReading.course?.title ||
+                            "Resume where you left off"}
+                        </span>
+                        {continueReading.course?.title && continueReading.nextAction.chapter?.title && (
+                          <span className="text-[10px] text-zinc-400 truncate block mt-0.5">
+                            {continueReading.course.title}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-col items-end gap-1.5 shrink-0">
+                        <span className="text-[10px] font-black text-white bg-blue-600 rounded-full px-2 py-0.5">
+                          {continueReading.overallProgress || 0}%
+                        </span>
+                        <ArrowRight className="w-3.5 h-3.5 text-blue-500 group-hover:translate-x-0.5 transition-transform" />
+                      </div>
+                    </Link>
+                  </motion.div>
+                )}
+
+                {/* Jobs Quick Link */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 px-1 block">
+                    Opportunities
+                  </span>
+                  <Link
+                    href="/jobs"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`group flex items-center justify-between p-3 rounded-3xl transition-all active:scale-[0.98] ${
+                      pathname.startsWith("/jobs")
+                        ? "bg-blue-600 text-white font-bold shadow-xs"
+                        : "hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-900 dark:text-zinc-100"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={`h-8.5 w-8.5 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                          pathname.startsWith("/jobs")
+                            ? "text-white"
+                            : "text-sky-500 group-hover:text-sky-600 dark:text-sky-400"
+                        }`}
+                      >
+                        <BriefcaseBusiness className="w-4.5 h-4.5" />
+                      </div>
+                      <div className="min-w-0 flex flex-col leading-tight">
+                        <span
+                          className={`text-xs font-bold tracking-tight truncate font-outfit ${
+                            pathname.startsWith("/jobs")
+                              ? "text-white"
+                              : "text-zinc-950 dark:text-white"
+                          }`}
+                        >
+                          UAE Jobs
+                        </span>
+                        <span
+                          className={`text-[10px] truncate mt-0.5 ${
+                            pathname.startsWith("/jobs")
+                              ? "text-blue-100/80 font-medium"
+                              : "text-zinc-400 dark:text-zinc-500 font-normal"
+                          }`}
+                        >
+                          Search reviewed jobs across the Emirates
+                        </span>
+                      </div>
+                    </div>
+                    <ChevronRight
+                      className={`w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5 ${
+                        pathname.startsWith("/jobs") ? "text-white" : "text-zinc-400"
+                      }`}
+                    />
+                  </Link>
+                </div>
+
+                {/* Learning Tracks */}
                 <div className="space-y-1.5">
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 px-1 block">
                     Learning Tracks
                   </span>
 
                   <div className="grid grid-cols-1 gap-2">
-                    {MENU_SECTIONS.map((section, idx) => {
+                    {MENU_SECTIONS.filter((s) => s.href !== "/jobs").map((section, idx) => {
                       const Icon = section.icon;
                       const isActive =
                         pathname === section.href ||
@@ -415,18 +533,6 @@ export default function BottomNav() {
                     })}
                   </div>
                 </div>
-
-                {/* Interactive Learning Badge */}
-                {/* <div className="p-3 rounded-4xl bg-blue-500/10 dark:bg-blue-500/15 border border-blue-500/20 text-xs space-y-1">
-                  <div className="flex items-center gap-1.5 font-bold text-blue-600 dark:text-blue-400">
-                    <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                    <span>Interactive Full-Stack Platform</span>
-                  </div>
-                  <p className="text-zinc-600 dark:text-zinc-300 text-[11px] leading-relaxed font-medium">
-                    Practice code challenges, mark chapters done, and track your
-                    development streak.
-                  </p>
-                </div>*/}
               </div>
 
               {/* User Profile & Bottom-Left Close Action Footer */}

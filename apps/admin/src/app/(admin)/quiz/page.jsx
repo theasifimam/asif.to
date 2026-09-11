@@ -116,7 +116,7 @@ export default function QuestionsPage() {
     categoryId: "all",
     chapterId: "all",
     search: "",
-    view: "table",
+    view: "card",
   });
   const { courseId, categoryId, chapterId, search } = filters;
 
@@ -135,7 +135,7 @@ export default function QuestionsPage() {
     setFilters((current) => ({ ...current, search: value }));
   const setViewMode = (v) => setFilters((current) => ({ ...current, view: v }));
 
-  const viewMode = filters.view || "table";
+  const viewMode = filters.view || "card";
   const editHref = (id) =>
     `/quiz/${id}/edit?returnTo=${encodeURIComponent(returnTo)}`;
 

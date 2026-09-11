@@ -44,7 +44,7 @@ export default function JobApplicationsPage() {
     limit: 20,
   });
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState("list");
+  const [viewMode, setViewMode] = useState("card");
 
   const load = async (page = 1) => {
     setLoading(true);

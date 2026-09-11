@@ -36,20 +36,20 @@ export default function HomeHeroBanner() {
             in one focused developer platform.
           </p>
 
-          <div className="mt-5 flex flex-col min-[360px]:flex-row min-[360px]:flex-wrap items-stretch min-[360px]:items-center gap-2.5">
+          <div className="mt-5 flex flex-col min-[360px]:flex-row items-stretch min-[360px]:items-center gap-2.5 *:flex-1">
             <a
               href="#courses"
-              className="h-12 min-[360px]:h-11 inline-flex items-center justify-center gap-2 px-4 sm:px-6 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-md active:scale-95 transition-all"
+              className="h-12 min-[360px]:h-11 inline-flex flex-1 items-center justify-center gap-2 px-4 sm:px-6 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-md active:scale-95 transition-all"
             >
               <BookOpen className="w-4 h-4" />
               Start Learning
             </a>
             <Link
               href="/run"
-              className="h-12 min-[360px]:h-11 inline-flex items-center justify-center gap-2 px-4 sm:px-6 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-black active:scale-95 transition-all"
+              className="h-12 min-[360px]:h-11 inline-flex flex-1 items-center justify-center gap-2 px-4 sm:px-6 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-black active:scale-95 transition-all"
             >
               <Code2 className="w-4 h-4 text-blue-400" />
-              Open Playground
+              Playground
             </Link>
           </div>
         </div>

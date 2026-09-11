@@ -90,8 +90,8 @@ export default function CheatsheetsPage() {
   const [search, setSearch] = useState("");
   const [tech, setTech] = useState("all");
   const [status, setStatus] = useState("all");
-  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "table" });
-  const viewMode = urlFilters.view || "table";
+  const [urlFilters, setUrlFilters] = useUrlFilters({ view: "card" });
+  const viewMode = urlFilters.view || "card";
   const setViewMode = (v) =>
     setUrlFilters((current) => ({ ...current, view: v }));
   const [page, setPage] = useState(1);

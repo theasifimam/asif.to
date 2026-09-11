@@ -15,7 +15,7 @@ export function AdminPage({ children, className, size = "xl" }) {
   return (
     <div
       className={cn(
-        "mx-auto min-w-0 space-y-4 px-0 py-2 sm:space-y-1 sm:px-6 sm:py-1 lg:px-10 lg:py-1",
+        "mx-auto min-w-0 space-y-4 px-4 py-2 sm:space-y-1 sm:px-6 sm:py-1 lg:px-10 lg:py-1",
         size === "lg" ? "max-w-6xl" : "max-w-7xl",
         className,
       )}
@@ -35,7 +35,7 @@ export function AdminPageHeader({
   stickyActions = true,
 }) {
   return (
-    <header className={cn("flex min-w-0 flex-col gap-2 px-4 sm:gap-1 sm:px-0", className)}>
+    <header className={cn("flex min-w-0 flex-col gap-2 sm:gap-1", className)}>
       <div className="min-w-0 w-full">
         {back}
         {eyebrow && (
@@ -61,7 +61,7 @@ export function AdminPageHeader({
         <div
           data-admin-page-actions
           className={cn(
-            "-mx-4 flex w-[calc(100%+2rem)] flex-nowrap items-stretch justify-start gap-2 overflow-x-auto px-4 pb-1 scrollbar-none *:shrink-0 sm:mx-0 sm:w-full sm:flex-wrap sm:items-center sm:justify-end sm:gap-2.5 sm:px-0 sm:pb-0 sm:*:grow-0",
+            "-mx-4 flex w-[calc(100%+2rem)] flex-nowrap items-center justify-start gap-2 overflow-x-auto px-4 pb-1 scrollbar-none *:shrink-0 *:w-auto sm:mx-0 sm:w-full sm:flex-wrap sm:items-center sm:justify-end sm:gap-2.5 sm:px-0 sm:pb-0",
             stickyActions &&
               "sticky top-16 z-30 py-2 bg-[#f3f4f6]/92 dark:bg-[#09090b]/92 backdrop-blur-xl transition-all",
           )}
@@ -77,7 +77,7 @@ export function AdminFilters({ children, className }) {
   return (
     <section
       className={cn(
-        "admin-surface flex min-w-0 flex-col gap-2 rounded-none border-x-0 p-4 sm:rounded-4xl sm:border-x sm:p-4 md:flex-row md:items-center",
+        "admin-surface flex min-w-0 flex-col gap-2 rounded-2xl border p-4 sm:rounded-4xl sm:p-4 md:flex-row md:items-center",
         className,
       )}
     >
@@ -119,7 +119,7 @@ export function AdminContent({
   return (
     <section
       className={cn(
-        "admin-surface min-w-0 overflow-hidden rounded-none border-x-0 sm:rounded-4xl sm:border-x",
+        "admin-surface min-w-0 overflow-hidden rounded-2xl border sm:rounded-4xl",
         className,
       )}
     >
@@ -136,7 +136,7 @@ export function AdminLoading({ label = "Loading…", className }) {
         className,
       )}
     >
-      <LogoLoader className="h-5 w-5  text-blue-600"  />
+      <LogoLoader className="h-5 w-5 text-blue-600" />
       <span className="sr-only">{label}</span>
     </div>
   );

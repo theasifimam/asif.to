@@ -29,6 +29,7 @@ export default function AuthCard({
   isModal = false,
   updateUrl = true,
   initialError = null,
+  onTabChange,
 }) {
   const dispatch = useAppDispatch();
 
@@ -67,7 +68,11 @@ export default function AuthCard({
     setIsForgotPassword(false);
     if (val === "signup") setSuStep("options");
 
-    if (updateUrl && typeof window !== "undefined") {
+    // Never update the URL when inside a modal (intercepted route or prompt modal).
+    // window.history.replaceState can cause Next.js to re-process the route and
+    // close the bottom sheet. The full-page auth forms (isModal=false) still get
+    // the URL update so the browser back button and sharing work correctly.
+    if (!isModal && updateUrl && typeof window !== "undefined") {
       const url = new URL(window.location.href);
       const params = new URLSearchParams(url.search);
       const cb = params.get("callbackUrl");
@@ -79,7 +84,7 @@ export default function AuthCard({
 
   const handleSelectEmailSignup = () => {
     setSuStep("form");
-    if (updateUrl && typeof window !== "undefined") {
+    if (!isModal && updateUrl && typeof window !== "undefined") {
       const url = new URL(window.location.href);
       const params = new URLSearchParams(url.search);
       const cb = params.get("callbackUrl");
@@ -90,7 +95,7 @@ export default function AuthCard({
 
   const handleBackToOptions = () => {
     setSuStep("options");
-    if (updateUrl && typeof window !== "undefined") {
+    if (!isModal && updateUrl && typeof window !== "undefined") {
       const url = new URL(window.location.href);
       const params = new URLSearchParams(url.search);
       const cb = params.get("callbackUrl");
