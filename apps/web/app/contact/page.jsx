@@ -61,7 +61,7 @@ export default function ContactPage() {
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground font-sans transition-colors duration-300">
       <Header />
 
-      <main className="flex-1 w-full max-w-5xl mx-auto px-3.5 sm:px-6 pt-20 sm:pt-24 pb-16">
+      <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-16">
         {/* Breadcrumb Navigation */}
         <nav className="mb-4 sm:mb-6 flex items-center gap-2 text-xs font-bold text-zinc-400">
           <Link href="/" className="hover:text-blue-600 transition-colors">
@@ -72,7 +72,7 @@ export default function ContactPage() {
         </nav>
 
         {/* Hero Banner Header Card (Matches Jobs/Home extra rounded pastel header gradient aesthetic) */}
-        <div className="relative rounded-4xl sm:rounded-[2.5rem] bg-linear-to-br from-blue-500/10 via-indigo-500/10 to-sky-500/10 p-6 sm:p-9 border border-blue-500/15 dark:border-blue-500/20 dark:from-blue-950/40 dark:via-indigo-950/30 dark:to-zinc-900/90 shadow-xs mb-6 sm:mb-8 overflow-hidden">
+        <div className="relative rounded-4xl sm:rounded-[2.5rem] bg-linear-to-br from-blue-500/10 via-indigo-500/10 to-sky-500/10 p-5 sm:p-7 border border-blue-500/15 dark:border-blue-500/20 dark:from-blue-950/40 dark:via-indigo-950/30 dark:to-zinc-900/90 shadow-xs mb-6 sm:mb-8 overflow-hidden">
           <div className="relative z-10 text-center max-w-xl mx-auto space-y-2.5 sm:space-y-3">
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] sm:text-xs font-black uppercase tracking-widest border border-blue-500/15">
               <MessageSquare className="w-3.5 h-3.5" />
@@ -98,7 +98,7 @@ export default function ContactPage() {
           {/* Left Column: Direct Support & Official Social Handles */}
           <div className="lg:col-span-5 space-y-4">
             {/* Direct Email Card */}
-            <div className="flex items-center gap-3.5 p-4.5 rounded-full bg-white dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs hover:border-blue-500/30 transition-all">
+            <div className="flex items-center gap-3.5 p-4 sm:p-4.5 rounded-full bg-white dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs hover:border-blue-500/30 transition-all">
               <div className="p-3 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
                 <Mail className="w-5 h-5" />
               </div>
@@ -116,7 +116,7 @@ export default function ContactPage() {
             </div>
 
             {/* Platform Community Availability Card */}
-            <div className="flex items-center gap-3.5 p-4.5 rounded-full bg-white dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs hover:border-emerald-500/30 transition-all">
+            <div className="flex items-center gap-3.5 p-4 sm:p-4.5 rounded-full bg-white dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs hover:border-emerald-500/30 transition-all">
               <div className="p-3 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
                 <MapPin className="w-5 h-5" />
               </div>
@@ -137,7 +137,7 @@ export default function ContactPage() {
             </div>
 
             {/* Official Social Handles Card */}
-            <div className="p-5.5 rounded-4xl bg-white dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-4">
+            <div className="p-4.5 sm:p-5.5 rounded-4xl bg-white dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
                   Official Social Media
@@ -232,7 +232,7 @@ export default function ContactPage() {
           </div>
 
           {/* Right Column: Contact Form Card */}
-          <div className="lg:col-span-7 bg-white dark:bg-zinc-900/90 p-6 sm:p-9 rounded-4xl sm:rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs">
+          <div className="lg:col-span-7 bg-white dark:bg-zinc-900/90 p-5 sm:p-7 rounded-4xl sm:rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-xs">
             {submitted ? (
               <div className="flex flex-col items-center justify-center text-center py-10 space-y-4">
                 <div className="w-14 h-14 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center border border-emerald-500/20">

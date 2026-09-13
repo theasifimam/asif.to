@@ -4,23 +4,23 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Search, X, Clock, Trash2, ArrowRight } from "lucide-react";
 import SearchResult from "./SearchResult";
-import { FILTER_LABELS, FILTERS, rankResults } from "@/lib/search/rankResults";
+import { FILTER_LABELS, FILTERS } from "@/lib/search/rankResults";
 import {
   clearRecentSearches,
   getRecentSearches,
   rememberSearch,
   removeRecentSearch,
 } from "@/lib/search/recentSearches";
+import { useSearchWorker } from "@/lib/search/useSearchWorker";
 import { trackSearch } from "@/lib/search/analytics";
 
-let indexPromise;
 const loadIndex = () =>
-  (indexPromise ||= fetch("/api/search-index")
+  fetch("/api/search-index")
     .then((response) => {
       if (!response.ok) throw new Error("Search unavailable");
       return response.json();
     })
-    .then((body) => body.items || []));
+    .then((body) => body.items || []);
 
 export default function SearchDialog({
   open,
@@ -36,10 +36,7 @@ export default function SearchDialog({
   const [activeType, setActiveType] = useState("all");
   const [recent, setRecent] = useState([]);
   const inputRef = useRef(null);
-  const allResults = useMemo(
-    () => rankResults(items, query, { limit: 100 }),
-    [items, query],
-  );
+  const { results: allResults, searching, resultQuery, error: workerError } = useSearchWorker(items, query);
   const counts = useMemo(
     () =>
       allResults.reduce(
@@ -62,7 +59,7 @@ export default function SearchDialog({
 
   useEffect(() => {
     if (!open) return;
-    Promise.resolve().then(() => setRecent(getRecentSearches()));
+    Promise.resolve().then(() => { setRecent(getRecentSearches()); setLoading(true); setError(""); });
     loadIndex()
       .then(setItems)
       .catch(() => setError("Search is temporarily unavailable."))
@@ -84,6 +81,7 @@ export default function SearchDialog({
 
   if (!open || typeof document === "undefined") return null;
   const choose = (item) => {
+    if (searching) return;
     rememberSearch(query);
     trackSearch("search_result_clicked");
     location.assign(item.url);
@@ -96,7 +94,7 @@ export default function SearchDialog({
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setSelected((value) => Math.max(value - 1, 0));
-    } else if (event.key === "Enter" && results[selected]) {
+    } else if (event.key === "Enter" && !searching && results[selected]) {
       event.preventDefault();
       choose(results[selected]);
     }
@@ -120,10 +118,11 @@ export default function SearchDialog({
             aria-hidden="true"
           />
           <label htmlFor="global-search-input" className="sr-only">
-            Search tutorials, topics, questions
+            Search users, tutorials, jobs, and more
           </label>
           <input
             id="global-search-input"
+            aria-busy={searching}
             ref={inputRef}
             value={query}
             onChange={(e) => {
@@ -135,7 +134,7 @@ export default function SearchDialog({
             aria-activedescendant={
               results[selected] ? `search-result-${selected}` : undefined
             }
-            placeholder="Search tutorials, topics, questions..."
+            placeholder="Search users, tutorials, jobs..."
             className="min-w-0 flex-1 bg-transparent text-base sm:text-lg text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 font-medium outline-none"
           />
           {query && (
@@ -219,9 +218,9 @@ export default function SearchDialog({
                 <LogoLoader className="h-5 w-5  text-blue-500" /> Loading search
                 index…
               </div>
-            ) : error ? (
+            ) : (error || workerError) ? (
               <div className="py-12 text-center rounded-3xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl shadow-lg border border-zinc-200/80 dark:border-zinc-800/80 text-sm text-red-600">
-                {error}
+                {error || workerError}
               </div>
             ) : query ? (
               results.length ? (
@@ -237,7 +236,7 @@ export default function SearchDialog({
                       <SearchResult
                         id={`search-result-${index}`}
                         item={item}
-                        query={query}
+                        query={resultQuery}
                         selected={index === selected}
                         onSelect={() => setSelected(index)}
                       />
@@ -254,7 +253,7 @@ export default function SearchDialog({
               ) : (
                 <div className="py-12 px-4 text-center rounded-4xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl shadow-lg border border-zinc-200/80 dark:border-zinc-800/80">
                   <p className="font-bold text-zinc-900 dark:text-zinc-100">
-                    No results for “{query}”
+                    {searching ? "Searching" : "No results"} for “{query}”
                   </p>
                   <p className="mt-1.5 text-sm text-zinc-500">
                     Try fewer words or a related developer term.

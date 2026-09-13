@@ -1,6 +1,10 @@
 "use client";
+import { memo } from "react";
 import { highlightParts, TYPE_LABELS } from "@/lib/search/rankResults";
 import {
+  Users,
+  BriefcaseBusiness,
+  Building2,
   BookOpen,
   BookMarked,
   FileText,
@@ -12,6 +16,10 @@ import {
 } from "lucide-react";
 
 const TYPE_APPEARANCE = {
+  user: { Icon: Users, accent: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300", badge: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300" },
+  job: { Icon: BriefcaseBusiness, accent: "bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300", badge: "bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300" },
+  company: { Icon: Building2, accent: "bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-300", badge: "bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-300" },
+  "interview-category": { Icon: Layers3, accent: "bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300", badge: "bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300" },
   course: {
     Icon: BookOpen,
     accent: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
@@ -61,7 +69,7 @@ const TYPE_APPEARANCE = {
   },
 };
 
-export default function SearchResult({ item, query, selected, onSelect, id }) {
+function SearchResult({ item, query, selected, onSelect, id }) {
   const appearance = TYPE_APPEARANCE[item.type] || TYPE_APPEARANCE.test;
   const Icon = appearance.Icon;
   return (
@@ -121,3 +129,5 @@ export default function SearchResult({ item, query, selected, onSelect, id }) {
     </a>
   );
 }
+
+export default memo(SearchResult);

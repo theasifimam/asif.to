@@ -6,15 +6,11 @@ import {
   X,
   Sparkles,
   ArrowRight,
-  Layers,
-  BookOpen,
-  HelpCircle,
-  StickyNote,
-  TerminalSquare,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SearchResult from "./SearchResult";
-import { FILTER_LABELS, FILTERS, rankResults } from "@/lib/search/rankResults";
+import { FILTER_LABELS, FILTERS } from "@/lib/search/rankResults";
+import { useSearchWorker } from "@/lib/search/useSearchWorker";
 import { rememberSearch } from "@/lib/search/recentSearches";
 import { trackSearch } from "@/lib/search/analytics";
 
@@ -97,15 +93,7 @@ export default function SearchPageClient() {
     [items, technology],
   );
 
-  const allRanked = useMemo(
-    () =>
-      rankResults(allFilteredByTech, deferredQuery, {
-        type: "all",
-        limit: 300,
-      }),
-    [allFilteredByTech, deferredQuery],
-  );
-
+  const { results: allRanked, searching, resultQuery, error: workerError } = useSearchWorker(allFilteredByTech, query);
   const counts = useMemo(
     () =>
       allRanked.reduce(
@@ -120,9 +108,9 @@ export default function SearchPageClient() {
 
   const results = useMemo(
     () =>
-      type === "all"
+      (type === "all"
         ? allRanked
-        : allRanked.filter((item) => item.type === type),
+        : allRanked.filter((item) => item.type === type)).slice(0, 300),
     [allRanked, type],
   );
 
@@ -163,10 +151,11 @@ export default function SearchPageClient() {
           <Search className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0" />
           <input
             id="search-page-input"
+            aria-busy={searching}
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Try “react useEffect”, “nextjs routes”, “binary search”…"
+            placeholder="Search users, tutorials, jobs, companies…"
             className="min-w-0 flex-1 bg-transparent text-base sm:text-lg text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 font-medium outline-none"
           />
           {query && (
@@ -253,9 +242,9 @@ export default function SearchPageClient() {
             <LogoLoader className="h-12 w-12 sm:h-14 sm:w-14 text-blue-600 dark:text-blue-500" />
             <span className="font-semibold">Loading search index…</span>
           </div>
-        ) : error ? (
+        ) : (error || workerError) ? (
           <div className="rounded-4xl bg-red-50/80 dark:bg-red-950/30 backdrop-blur-xl border border-red-200 dark:border-red-900/50 p-8 text-center text-red-700 dark:text-red-300 shadow-md">
-            <p className="font-bold">{error}</p>
+            <p className="font-bold">{error || workerError}</p>
           </div>
         ) : !deferredQuery.trim() ? (
           <div className="rounded-4xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-2xl border border-zinc-200/80 dark:border-zinc-800/80 p-5 xs:p-7 sm:p-12 shadow-xl shadow-black/5 dark:shadow-black/20 text-center">
@@ -307,7 +296,7 @@ export default function SearchPageClient() {
                   key={item.id}
                   onClick={() => trackSearch("search_result_clicked")}
                 >
-                  <SearchResult item={item} query={deferredQuery} />
+                  <SearchResult item={item} query={resultQuery} />
                 </div>
               ))}
             </div>

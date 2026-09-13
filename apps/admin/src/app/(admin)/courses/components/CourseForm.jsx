@@ -1,4 +1,5 @@
 "use client";
+import useSubscriberNotification from "@/components/communications/useSubscriberNotification";
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -78,6 +79,7 @@ function slugify(value = "") {
 }
 
 export default function CourseForm({ courseId = null }) {
+  const subscriberNotification = useSubscriberNotification("course");
   const router = useRouter();
   const searchParams = useSearchParams();
   const requestedReturnTo = searchParams.get("returnTo");
@@ -277,6 +279,7 @@ export default function CourseForm({ courseId = null }) {
   };
 
   const persist = async (status) => {
+    if (!subscriberNotification.validate(status || form.status)) return null;
     if (!form.title.trim() || !form.subtitle.trim() || !form.techId.trim()) {
       toast.error("Title, subtitle, and technology ID are required");
       return null;
@@ -302,7 +305,8 @@ export default function CourseForm({ courseId = null }) {
     toast.success(status === "published" ? "Course published" : "Course saved");
     setSaving(false);
 
-    window.location.assign(returnTo);
+    const emailFollowUp = await subscriberNotification.notify(savedCourse?._id || courseId, status || form.status);
+    window.location.assign(emailFollowUp || returnTo);
     return savedCourse;
   };
 
@@ -734,6 +738,7 @@ export default function CourseForm({ courseId = null }) {
         </main>
 
         <aside className="space-y-6 min-w-0 w-full">
+          {subscriberNotification.controls}
           <div className="space-y-4 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-4 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950 min-w-0 w-full">
             <h2 className="font-semibold text-zinc-900 dark:text-white text-sm">
               Placement

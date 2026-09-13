@@ -11,21 +11,23 @@ import {
   Layers3,
   Search,
   StickyNote,
+  Users,
+  BriefcaseBusiness,
+  Building2,
   X,
 } from "lucide-react";
-import { rankAdminResults, SEARCH_TYPES } from "@/lib/admin-search";
+import { SEARCH_TYPES } from "@/lib/admin-search";
+import { useSearchWorker } from "@/lib/useSearchWorker";
+import api from "@/lib/axios";
+import { useAuth } from "@/contexts/AuthContext";
 
-let indexRequest;
-const fetchIndex = () =>
-  (indexRequest ||= fetch(`${process.env.NEXT_PUBLIC_API_URL}/search/index`, {
-    credentials: "include",
-  })
-    .then((response) => {
-      if (!response.ok) throw new Error();
-      return response.json();
-    })
-    .then((body) => body.data?.items || []));
+const fetchIndex = (signal) => api.get("/search/admin/index", { signal })
+  .then(({ data }) => data.data?.items || []);
 const TYPE_APPEARANCE = {
+  user: { Icon: Users, label: "User", box: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300", badge: "bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300" },
+  job: { Icon: BriefcaseBusiness, label: "Job", box: "bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300", badge: "bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300" },
+  company: { Icon: Building2, label: "Company", box: "bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-300", badge: "bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-300" },
+  "interview-category": { Icon: Layers3, label: "Interview category", box: "bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300", badge: "bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300" },
   course: {
     Icon: BookOpen,
     label: "Course",
@@ -67,6 +69,7 @@ const TYPE_APPEARANCE = {
 };
 
 export default function AdminGlobalSearch() {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [type, setType] = useState("all");
@@ -77,10 +80,7 @@ export default function AdminGlobalSearch() {
   const triggerRef = useRef(null);
   const inputRef = useRef(null);
   const router = useRouter();
-  const allResults = useMemo(
-    () => rankAdminResults(items, query),
-    [items, query],
-  );
+  const { results: allResults, searching, error: workerError } = useSearchWorker(items, open ? query : "");
   const counts = useMemo(
     () =>
       allResults.reduce(
@@ -111,23 +111,26 @@ export default function AdminGlobalSearch() {
     return () => removeEventListener("keydown", handler);
   }, []);
   useEffect(() => {
-    if (!open) return;
+    if (!open || !user) return;
+    const controller = new AbortController();
     const trigger = triggerRef.current;
     const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    Promise.resolve().then(() => setLoading(true));
-    fetchIndex()
+    Promise.resolve().then(() => { setLoading(true); setError(""); setItems([]); });
+    fetchIndex(controller.signal)
       .then(setItems)
-      .catch(() => setError("Admin search is temporarily unavailable."))
-      .finally(() => setLoading(false));
+      .catch(() => { if (!controller.signal.aborted) setError("Admin search is temporarily unavailable."); })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     requestAnimationFrame(() => inputRef.current?.focus());
     return () => {
+      controller.abort();
       document.body.style.overflow = overflow;
       trigger?.focus();
     };
-  }, [open]);
+  }, [open, user]);
   const close = () => setOpen(false);
   const navigate = (item) => {
+    if (searching) return;
     close();
     router.push(item.adminUrl);
   };
@@ -177,10 +180,11 @@ export default function AdminGlobalSearch() {
               >
                 <Search className="h-5 w-5 text-zinc-400 dark:text-zinc-400 shrink-0 ml-0.5" />
                 <label htmlFor="admin-global-search" className="sr-only">
-                  Search courses, topics, articles, and questions
+                  Search users, courses, articles, jobs, and more
                 </label>
                 <input
                   id="admin-global-search"
+                  aria-busy={searching}
                   ref={inputRef}
                   value={query}
                   onChange={(event) => {
@@ -188,7 +192,7 @@ export default function AdminGlobalSearch() {
                     setType("all");
                     setSelected(0);
                   }}
-                  placeholder="Search courses, topics, articles, questions..."
+                  placeholder="Search users, courses, articles, jobs..."
                   className="min-w-0 flex-1 bg-transparent text-base sm:text-lg text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 font-medium outline-none"
                 />
                 {query && (
@@ -270,9 +274,9 @@ export default function AdminGlobalSearch() {
                       <LogoLoader className="h-5 w-5  text-blue-500"  />{" "}
                       Loading content…
                     </div>
-                  ) : error ? (
+                  ) : (error || workerError) ? (
                     <div className="py-12 text-center rounded-3xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl shadow-lg border border-zinc-200/80 dark:border-zinc-800/80 text-sm text-red-500">
-                      {error}
+                      {error || workerError}
                     </div>
                   ) : !query ? (
                     <div className="py-12 text-center rounded-3xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl shadow-lg border border-zinc-200/80 dark:border-zinc-800/80 text-sm text-zinc-500">
@@ -335,7 +339,7 @@ export default function AdminGlobalSearch() {
                     </div>
                   ) : (
                     <div className="py-12 px-4 text-center rounded-3xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl shadow-lg border border-zinc-200/80 dark:border-zinc-800/80 text-sm text-zinc-500">
-                      No matching admin content.
+                      {searching ? "Searching..." : "No matching admin content."}
                     </div>
                   )}
                 </div>

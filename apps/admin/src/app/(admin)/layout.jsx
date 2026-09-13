@@ -285,18 +285,10 @@ const NAV_ITEMS = [
         ],
       },
       {
-        name: "Messages",
-        href: "/messages",
+        name: "Communications",
+        href: "/communications",
         icon: MessageSquare,
-        permission: "messages.view",
-        description: "Direct & team conversations",
-      },
-      {
-        name: "Contact Inquiries",
-        href: "/contact-inquiries",
-        icon: Mail,
-        permission: "messages.view",
-        description: "Website contact forms & support",
+        description: "Customer inbox, email and team collaboration",
       },
     ],
   },
@@ -477,7 +469,7 @@ export default function AdminLayout({ children }) {
   })).filter((group) => group.items.length > 0);
   const requiredPermission = permissionForPath(pathname);
   const canViewPage = hasPermission(user, requiredPermission);
-  const isMessagesRoute = pathname?.startsWith("/messages");
+  const isMessagesRoute = pathname?.startsWith("/messages") || pathname?.startsWith("/communications");
   const isFilesRoute = pathname?.startsWith("/files");
   const isFullAppRoute = isMessagesRoute || isFilesRoute;
 

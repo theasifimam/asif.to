@@ -83,10 +83,11 @@ export async function createAssetFromUpload({
   visibility = "public",
   uploadedBy,
   duplicateStrategy = "reject",
+  accessScope = "",
 }) {
   const details = describeAssetFile(file);
   const checksum = crypto.createHash("sha256").update(file.buffer).digest("hex");
-  const duplicate = await Asset.findOne({ checksum }).sort({ status: 1, createdAt: 1 }).lean();
+  const duplicate = await Asset.findOne({ checksum, accessScope: accessScope || { $ne: "communications" } }).sort({ status: 1, createdAt: 1 }).lean();
 
   if (duplicate && duplicateStrategy !== "upload-anyway") {
     return { status: "duplicate", asset: assetResponse(duplicate) };
@@ -96,7 +97,7 @@ export async function createAssetFromUpload({
   const provider = storage;
   const displayName = sanitizeAssetName(file.originalname);
 
-  if (duplicate && duplicateStrategy === "upload-anyway") {
+  if (duplicate && duplicateStrategy === "upload-anyway" && accessScope !== "communications") {
     const asset = await Asset.create({
       name: displayName,
       originalName: displayName,
@@ -113,6 +114,7 @@ export async function createAssetFromUpload({
       checksum,
       variants: duplicate.variants || [],
       uploadedBy,
+      accessScope,
       duplicateOf: duplicate._id,
     });
     return { status: "created", asset: assetResponse(asset), reusedStorage: true };
@@ -122,13 +124,13 @@ export async function createAssetFromUpload({
   let thumbnailUpload;
   try {
     const metadata = await imageMetadata(file.buffer, details.extension);
-    upload = await provider.upload({ buffer: file.buffer, extension: details.extension });
+    upload = await provider.upload({ buffer: file.buffer, extension: details.extension, prefix: accessScope === "communications" ? "private/communications" : "assets" });
     const variants = [];
     if (metadata.thumbnail) {
       thumbnailUpload = await provider.upload({
         buffer: metadata.thumbnail.buffer,
         extension: ".webp",
-        prefix: "assets/thumbnails",
+        prefix: accessScope === "communications" ? "private/communications/thumbnails" : "assets/thumbnails",
       });
       variants.push({
         kind: "thumbnail",
@@ -155,6 +157,7 @@ export async function createAssetFromUpload({
       checksum,
       variants,
       uploadedBy,
+      accessScope,
     });
     return { status: "created", asset: assetResponse(asset), reusedStorage: false };
   } catch (error) {

@@ -295,7 +295,7 @@ export async function cancelScheduledPublication(req, res) {
       status: "scheduled",
     },
     { $set: { status: "cancelled", errorMessage: "" } },
-    { new: true },
+    { returnDocument: 'after' },
   );
 
   if (!publication) {

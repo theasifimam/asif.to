@@ -17,6 +17,20 @@ export const DEFAULT_ROLE_PERMISSIONS = Object.freeze({
     "assets.view", "assets.upload", "assets.manage", "jobs.view", "jobs.manage", "job_applications.review",
   ],
   admin: [
+    "communications.inbox.read",
+    "communications.inbox.reply",
+    "communications.inbox.assign",
+    "communications.campaigns.read",
+    "communications.campaigns.create",
+    "communications.campaigns.send",
+    "communications.subscribers.read",
+    "communications.subscribers.manage",
+    "communications.automations.manage",
+    "communications.templates.manage",
+    "communications.transactional.read",
+    "communications.analytics.read",
+    "communications.settings.manage",
+
     "content.read", "articles.create", "articles.edit_own", "articles.edit_all",
     "articles.publish", "articles.delete", "topics.view", "topics.manage",
     "interview_questions.view", "interview_questions.manage", "courses.view",
@@ -41,6 +55,16 @@ export const hasPermission = (user, permission) => {
 };
 
 const routeRules = [
+  [/^\/communications\/(team|discussions)(?:\/|$)/, "messages.view"],
+  [/^\/communications\/inbox(?:\/|$)/, "communications.inbox.read"],
+  [/^\/communications\/campaigns(?:\/|$)/, "communications.campaigns.read"],
+  [/^\/communications\/subscribers(?:\/|$)/, "communications.subscribers.read"],
+  [/^\/communications\/automations(?:\/|$)/, "communications.automations.manage"],
+  [/^\/communications\/templates(?:\/|$)/, "communications.templates.manage"],
+  [/^\/communications\/transactional(?:\/|$)/, "communications.transactional.read"],
+  [/^\/communications\/analytics(?:\/|$)/, "communications.analytics.read"],
+  [/^\/communications\/settings(?:\/|$)/, "communications.settings.manage"],
+
   [/^\/jobs\/sources(?:\/|$)/, "job_sources.manage"],
   [/^\/jobs\/applications(?:\/|$)/, "job_applications.review"],
   [/^\/jobs\/(?:new|[^/]+\/edit)(?:\/|$)/, "jobs.manage"],

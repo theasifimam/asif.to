@@ -159,7 +159,7 @@ export function MessagingProvider({ children }) {
       let isViewingThisConversation = false;
       if (typeof window !== "undefined") {
         const isMessagesRoute =
-          window.location.pathname.startsWith("/messages");
+          (window.location.pathname.startsWith("/messages") || window.location.pathname.startsWith("/communications/team"));
         const activeConvInUrl = new URLSearchParams(window.location.search).get(
           "conversation",
         );

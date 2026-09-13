@@ -1,4 +1,5 @@
 "use client";
+import useSubscriberNotification from "@/components/communications/useSubscriberNotification";
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -31,6 +32,7 @@ import {
 } from "@/components/ui/select";
 
 export default function ArticleForm({ articleId = null }) {
+  const subscriberNotification = useSubscriberNotification("article");
   const router = useRouter();
   const searchParams = useSearchParams();
   const requestedReturnTo = searchParams.get("returnTo");
@@ -134,6 +136,7 @@ export default function ArticleForm({ articleId = null }) {
   };
 
   const persist = async (status) => {
+    if (!subscriberNotification.validate(status || form.status)) return;
     if (!form.title.trim() || !form.content.replace(/<[^>]*>/g, "").trim())
       return toast.error("Title and content are required");
     if (!form.topics.length) return toast.error("Select at least one topic");
@@ -159,7 +162,8 @@ export default function ArticleForm({ articleId = null }) {
       : await articlesApi.create(data);
     if (response.success) {
       toast.success(articleId ? "Article updated" : "Article created");
-      router.push(returnTo);
+      const emailFollowUp = await subscriberNotification.notify(response.data?.data?._id || articleId, status || form.status);
+      router.push(emailFollowUp || returnTo);
     } else toast.error(response.error || "Unable to save article");
     setSaving(false);
   };
@@ -296,6 +300,7 @@ export default function ArticleForm({ articleId = null }) {
           </div>
         </section>
         <aside className="space-y-6 min-w-0">
+          {subscriberNotification.controls}
           <div className={formAsideClass}>
             <h2 className="font-semibold text-zinc-900 dark:text-white">
               Publishing

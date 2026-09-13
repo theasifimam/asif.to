@@ -14,6 +14,7 @@ const variantSchema = new Schema(
 
 const assetSchema = new Schema(
   {
+    accessScope: { type: String, enum: ["", "communications"], default: "", index: true },
     name: { type: String, required: true, trim: true, maxlength: 255 },
     originalName: { type: String, required: true, trim: true, maxlength: 255 },
     storageKey: { type: String, required: true, trim: true },
@@ -62,5 +63,16 @@ assetSchema.index({ status: 1, isFavorite: 1, createdAt: -1 });
 assetSchema.index({ status: 1, uploadedBy: 1, createdAt: -1 });
 assetSchema.index({ checksum: 1, status: 1 });
 assetSchema.index({ storageKey: 1 });
+
+// Customer attachments are accessible only through the inbox service. Generic media
+// queries, mutations and exports must never expose or publish them.
+assetSchema.pre(/^(find|update|delete|count)/, function () {
+  if (!Object.prototype.hasOwnProperty.call(this.getFilter(), "accessScope")) this.where({ accessScope: { $ne: "communications" } });
+});
+assetSchema.pre("aggregate", function () {
+  const first = this.pipeline()[0];
+  if (first?.$match) first.$match.accessScope = { $ne: "communications" };
+  else this.pipeline().unshift({ $match: { accessScope: { $ne: "communications" } } });
+});
 
 export default model("Asset", assetSchema);

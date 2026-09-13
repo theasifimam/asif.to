@@ -197,6 +197,7 @@ export async function apiPostFormData(endpoint, formData) {
 export const contactApi = {
   list: (params = {}) => apiGet(`/contact?${new URLSearchParams(params).toString()}`),
   updateStatus: (id, status) => apiPatch(`/contact/${id}/status`, { status }),
+  reply: (id, data) => apiPost(`/contact/${id}/reply`, data),
 };
 
 /**

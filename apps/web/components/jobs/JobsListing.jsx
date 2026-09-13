@@ -13,6 +13,7 @@ import {
 /** Format exact count to rounded badge like 2,500+, 3,000+, 3,500+ */
 function formatRoundedCount(count = 0) {
   if (!count || count <= 0) return "1,000+";
+  if (count < 100) return count.toString();
   if (count < 500) return `${Math.floor(count / 100) * 100}+`;
   const rounded = Math.floor(count / 500) * 500;
   return `${rounded.toLocaleString("en-AE")}+`;

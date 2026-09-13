@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import MobileChapterIndex from "@/components/courses/MobileChapterIndex";
@@ -218,7 +217,6 @@ export default function ChapterClient({
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground transition-colors duration-300">
       <Header />
-
       {/* Chapter list index bar under main navbar with auto-hide on scroll */}
       {allChapters.length > 0 && (
         <MobileChapterIndex
@@ -227,7 +225,7 @@ export default function ChapterClient({
         />
       )}
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 pt-36 sm:pt-40 lg:pt-28 flex flex-col gap-3 sm:gap-6 pb-32 sm:pb-16">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 pt-16 sm:pt-20 lg:pt-24 flex flex-col gap-3 sm:gap-6 pb-32 sm:pb-16">
         {/* Standard Mode Top Header Bar */}
         <ChapterHeader
           courseId={activeCourseSlug}

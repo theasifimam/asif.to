@@ -3,31 +3,16 @@
 import LogoLoader from "@/components/ui/LogoLoader";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  BookMarked,
-  BookOpen,
-  FileText,
-  HelpCircle,
-  Layers3,
   Search,
-  StickyNote,
   X,
 } from "lucide-react";
-import { rankAdminResults, SEARCH_TYPES } from "@/lib/admin-search";
+import { rankAdminResults } from "@/lib/admin-search";
 import { CONTENT_TYPE_CONFIG } from "./ContentMessageCard";
 
-let cachedIndex = null;
-const fetchSearchIndex = () => {
-  if (cachedIndex) return Promise.resolve(cachedIndex);
-  return fetch(`${process.env.NEXT_PUBLIC_API_URL}/search/index`, {
-    credentials: "include",
-  })
-    .then((res) => (res.ok ? res.json() : Promise.reject()))
-    .then((body) => {
-      cachedIndex = body.data?.items || [];
-      return cachedIndex;
-    })
-    .catch(() => []);
-};
+import api from "@/lib/axios";
+const fetchSearchIndex = () => api.get("/search/admin/index").then(response =>
+  (response.data.data?.items || []).filter(item => ["article", "course", "chapter", "question", "cheatsheet"].includes(item.type))
+);
 
 export default function ContentAttachModal({ open, onClose, onSelect }) {
   const [items, setItems] = useState([]);
@@ -38,10 +23,14 @@ export default function ContentAttachModal({ open, onClose, onSelect }) {
 
   useEffect(() => {
     if (!open) return;
-    setLoading(true);
-    fetchSearchIndex()
-      .then((data) => setItems(data))
-      .finally(() => setLoading(false));
+    let active = true;
+    const timer = setTimeout(() => {
+      setLoading(true);
+      fetchSearchIndex().then(data => { if (active) setItems(data); })
+        .catch(() => { if (active) setItems([]); })
+        .finally(() => { if (active) setLoading(false); });
+    }, 0);
+    return () => { active = false; clearTimeout(timer); };
   }, [open]);
 
   useEffect(() => {

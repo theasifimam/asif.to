@@ -2,6 +2,7 @@ import { Schema, model } from "mongoose";
 
 const notificationSchema = new Schema(
   {
+    communicationKey: { type: String, unique: true, sparse: true },
     recipientId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     activityId: { type: Schema.Types.ObjectId, ref: "ActivityLog", default: null, index: true },
     actorId: { type: Schema.Types.ObjectId, ref: "User", default: null },

@@ -47,18 +47,35 @@ export default function JobActions({ job, layout = "stacked" }) {
   };
 
   const apply = async () => {
-    if (!requireAuth()) return;
     if (job.status === "expired") return;
     if (job.applicationType === "internal") {
+      if (!requireAuth()) return;
       setShowApplication(true);
       return;
     }
     setWorking(true);
     try {
-      const { data } = await api.post(`/jobs/${job._id}/external-apply`);
-      if (data?.data?.redirectUrl) window.location.assign(data.data.redirectUrl);
+      // Guest requests must not carry an old login token or session cookie.
+      let data;
+      if (isAuthenticated) {
+        try {
+          ({ data } = await api.post(`/jobs/${job._id}/external-apply`));
+        } catch (error) {
+          if (error.response?.status !== 401) throw error;
+        }
+      }
+      if (!data) {
+        const response = await fetch(`${API}/jobs/${job._id}/external-apply`, {
+          method: "POST",
+          credentials: "omit",
+        });
+        data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Unable to open the company application page");
+      }
+      if (!data?.data?.redirectUrl) throw new Error("Missing application destination");
+      window.location.assign(data.data.redirectUrl);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Unable to open the company application page");
+      toast.error(error.response?.data?.message || error.message || "Unable to open the company application page");
       setWorking(false);
     }
   };

@@ -77,6 +77,7 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
           >
             <Link href="/about">About</Link>
             <Link href="/contact">Contact</Link>
+            <Link href="/email-preferences">Email preferences</Link>
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
           </nav>

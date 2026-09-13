@@ -16,8 +16,12 @@ const connectDB = async (retries = 3) => {
   }
 
   const options = {
-    serverSelectionTimeoutMS: 5000,
-    connectTimeoutMS: 10000,
+    serverSelectionTimeoutMS: 30000,  // wait up to 30s before giving up on server selection
+    connectTimeoutMS: 30000,          // socket connect timeout
+    socketTimeoutMS: 45000,           // socket idle timeout
+    heartbeatFrequencyMS: 30000,      // check cluster health every 30s instead of 10s (reduces noise)
+    maxPoolSize: 10,                  // cap connection pool
+    family: 4,                        // force IPv4 (aligns with ipv4first DNS setting above)
   };
 
   for (let attempt = 1; attempt <= retries; attempt++) {

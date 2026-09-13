@@ -19,6 +19,17 @@
   --color-blue-700: var(--accent);
   --color-blue-900: var(--m3-on-primary-container);
   --color-blue-950: var(--m3-on-primary-container);
+
+  /* Standardize all box-shadow levels to shadow-sm */
+  --shadow-2xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-2xl: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-3xl: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 :root {
@@ -134,10 +145,10 @@ textarea {
 }
 .android-tile:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px -8px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 .dark .android-tile:hover {
-  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 /* Hide scrollbar on mobile devices for a cleaner app-like feel */
@@ -272,7 +283,7 @@ pre.ql-syntax {
   line-height: 1.7 !important;
   margin: 2rem 0 !important;
   border: 1px solid var(--code-block-border) !important;
-  box-shadow: 0 8px 24px -16px rgba(15, 23, 42, 0.22);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   white-space: pre-wrap !important;
   word-break: break-word !important;
 }
@@ -302,7 +313,7 @@ pre.hljs,
   font-size: 0.9rem !important;
   line-height: 1.7 !important;
   border: 1px solid var(--code-block-border) !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .dark .prose pre,
@@ -314,7 +325,7 @@ pre.hljs,
   background-color: #0b0e14 !important;
   color: #e2e8f0 !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 /* Eliminate inner double padding on code elements inside pre containers */
@@ -420,9 +431,7 @@ pre.hljs code,
   background: var(--card-bg) !important;
   border: 1px solid var(--border, #bfdbfe) !important;
   color: var(--foreground, #172554) !important;
-  box-shadow:
-    0 10px 25px -5px rgba(37, 99, 235, 0.05),
-    0 8px 10px -6px rgba(37, 99, 235, 0.05) !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
   backdrop-filter: blur(16px) !important;
   padding: 14px 18px !important;
   transition: all 0.2s ease !important;
@@ -433,9 +442,7 @@ pre.hljs code,
   background: rgba(15, 23, 42, 0.85) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
   color: #eff6ff !important;
-  box-shadow:
-    0 20px 25px -5px rgba(0, 0, 0, 0.3),
-    0 8px 10px -6px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
 }
 
 /* Success Toast */

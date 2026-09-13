@@ -17,7 +17,7 @@ export default function ChapterHeader({
   setIsSidebarOpen,
 }) {
   return (
-    <div className="flex flex-col gap-3 p-3.5 sm:p-4 rounded-3xl bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/60 dark:border-zinc-800/60 transition-all">
+    <div className="flex flex-col gap-3 py-1 transition-all">
       {/* Breadcrumb & Top Actions Bar */}
       <div className="flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
         {/* Left: Back Link & Breadcrumbs */}
@@ -37,13 +37,12 @@ export default function ChapterHeader({
               Courses
             </Link>
             <ChevronRight className="w-3.5 h-3.5 text-zinc-300 dark:text-zinc-600 shrink-0 hidden sm:inline" />
-            <Link
-              href={`/courses/${courseId}`}
-              className="hover:text-blue-600 dark:hover:text-blue-400 font-bold text-zinc-800 dark:text-zinc-200 transition-colors truncate max-w-55 sm:max-w-95"
+            <span
+              className="font-bold text-zinc-800 dark:text-zinc-200 truncate max-w-55 sm:max-w-95"
               title={course?.title}
             >
               {course?.title || "Course Overview"}
-            </Link>
+            </span>
           </nav>
         </div>
 

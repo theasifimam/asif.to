@@ -1,4 +1,5 @@
-import nodemailer from "nodemailer";
+import { getSupportSender } from "./smtp.provider.js";
+import { sendLegacyEmail } from "./communications/email.service.js";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -28,43 +29,20 @@ const BRAND = {
   dangerInk: "#991b1b",
 };
 
-let cachedTransporter = null;
 
-const getTransporter = () => {
-  if (cachedTransporter) {
-    return cachedTransporter;
-  }
-
-  const host = process.env.EMAIL_HOST;
-  const user = process.env.EMAIL_USER;
-  const pass = process.env.EMAIL_PASSWORD;
-  const port = Number.parseInt(process.env.EMAIL_PORT || "587", 10);
-  const secure =
-    process.env.EMAIL_SECURE !== undefined
-      ? process.env.EMAIL_SECURE === "true"
-      : port === 465;
-
-  if (!host || !user || !pass) {
-    throw new Error(
-      "Email delivery is not configured. EMAIL_HOST, EMAIL_USER and EMAIL_PASSWORD are required.",
-    );
-  }
-
-  cachedTransporter = nodemailer.createTransport({
-    host,
-    port,
-    secure,
-    auth: { user, pass },
-    connectionTimeout: 15000,
-    greetingTimeout: 15000,
-    socketTimeout: 20000,
-    tls: {
-      rejectUnauthorized: process.env.EMAIL_TLS_REJECT_UNAUTHORIZED !== "false",
-      minVersion: "TLSv1.2",
-    },
-  });
-
-  return cachedTransporter;
+export const sendContactReplyEmail = async ({ to, subject, message, inReplyTo }) => {
+  const sender = getSupportSender();
+  const delivery = await sendLegacyEmail({
+    from: sender,
+    replyTo: sender.address,
+    to: { address: to },
+    subject,
+    text: message,
+    html: `<div style="font-family:Arial,sans-serif;line-height:1.6;white-space:pre-wrap">${escapeHtml(message)}</div>`,
+    ...(inReplyTo ? { inReplyTo, references: [inReplyTo] } : {}),
+  }, { stream: "SUPPORT" });
+  if (!delivery.accepted?.length) throw new Error("Reply recipient was not accepted by the email server.");
+  return delivery;
 };
 
 const escapeHtml = (value = "") =>
@@ -231,7 +209,7 @@ export const sendOtpEmail = async (to, fullName, otp, purpose = "verification") 
       ? `Hi ${safeName}, use the secure code below to confirm the account security action you requested. It is valid for the next 10 minutes.`
       : `Hi ${safeName}, use the secure code below to finish setting up your account. It is valid for the next 10 minutes.`;
 
-  const delivery = await getTransporter().sendMail({
+  const delivery = await sendLegacyEmail({
     from,
     to,
     subject,
@@ -272,7 +250,7 @@ export const sendWelcomeEmail = async (to, fullName) => {
   const siteUrl = getSiteUrl();
   const safeName = escapeHtml(fullName || "there");
 
-  await getTransporter().sendMail({
+  await sendLegacyEmail({
     from,
     to,
     subject: "Welcome to asif.to - Your account is ready",
@@ -318,7 +296,7 @@ export const sendWelcomeEmail = async (to, fullName) => {
  */
 export const sendUserInvitationEmail = async (to, role, inviteUrl) => {
   const from = process.env.EMAIL_FROM || "asif.to <noreply@asif.to>";
-  await getTransporter().sendMail({
+  await sendLegacyEmail({
     from,
     to,
     subject: `You're invited to join asif.to as ${role}`,
@@ -338,14 +316,14 @@ export const sendUserInvitationEmail = async (to, role, inviteUrl) => {
  * Send a contact form notification to support.
  */
 export const sendContactEmail = async (name, email, subject, message) => {
-  const from = process.env.EMAIL_FROM || "asif.to <noreply@asif.to>";
+  const from = getSupportSender();
   const to = process.env.ADMIN_NOTIFY_EMAIL || "support@asif.to";
   const safeName = escapeHtml(name);
   const safeEmail = escapeHtml(email);
   const safeSubject = escapeHtml(subject);
   const safeMessage = escapeHtml(message).replaceAll("\n", "<br>");
 
-  await getTransporter().sendMail({
+  await sendLegacyEmail({
     from,
     to,
     replyTo: email,
@@ -379,7 +357,7 @@ export const sendContactEmail = async (name, email, subject, message) => {
         </table>
         ${renderButton(`Reply to ${name || "sender"}`, `mailto:${email}`)}`,
     }),
-  });
+  }, { stream: "SUPPORT" });
 };
 
 /**
@@ -399,7 +377,7 @@ export const sendCourseDeletionOtpEmail = async ({
   const safeCourse = escapeHtml(courseTitle || "course");
   const safeOtp = escapeHtml(otp);
 
-  await getTransporter().sendMail({
+  await sendLegacyEmail({
     from,
     to,
     subject: `${otp} - ${
@@ -450,7 +428,7 @@ export const sendCourseDeletionApprovalRequestEmail = async ({
   ).replace(/\/$/, "");
   const reviewUrl = `${adminUrl}/courses?deletionRequest=${requestId}`;
 
-  await getTransporter().sendMail({
+  await sendLegacyEmail({
     from,
     to,
     subject: `Approval required: delete ${courseTitle}`,
@@ -481,7 +459,7 @@ export const sendAccountDeactivatedEmail = async (to, fullName) => {
   const siteUrl = getSiteUrl();
   const safeName = escapeHtml(fullName || "there");
 
-  await getTransporter().sendMail({
+  await sendLegacyEmail({
     from,
     to,
     subject: "Your asif.to account has been deactivated",
@@ -524,7 +502,7 @@ export const sendAccountDeletedEmail = async (to, fullName) => {
     { year: "numeric", month: "long", day: "numeric" },
   );
 
-  await getTransporter().sendMail({
+  await sendLegacyEmail({
     from,
     to,
     subject: "Your asif.to account deletion request",

@@ -19,7 +19,7 @@ export async function processDuePublications() {
       const publication = await SocialPublication.findOneAndUpdate(
         { status: "scheduled", scheduledAt: { $lte: new Date() } },
         { $set: { status: "publishing", lastAttemptAt: new Date() } },
-        { new: true, sort: { scheduledAt: 1 } },
+        { returnDocument: 'after', sort: { scheduledAt: 1 } },
       );
 
       if (!publication) break;

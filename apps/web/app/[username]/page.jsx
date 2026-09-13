@@ -55,6 +55,7 @@ export async function generateMetadata({ params }) {
 export default async function UserProfilePage({ params }) {
   const { username } = await params;
   const rawSlug = decodeURIComponent(username || "").trim();
+  console.log("HITTING USERNAME", rawSlug);
 
   // 1. Handle robot.txt and robots.txt
   if (

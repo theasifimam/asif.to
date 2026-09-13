@@ -18,6 +18,8 @@ import courseRoutes from "./routes/course.routes.js";
 import cheatsheetRoutes from "./routes/cheatsheet.routes.js";
 import quizRoutes from "./routes/quiz.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
+import communicationsRoutes from "./routes/communications.routes.js";
+import { startCommunicationsWorker } from "./services/communications/worker.service.js";
 import deletionRoutes from "./routes/deletion.routes.js";
 import kanbanRoutes from "./routes/kanban.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
@@ -72,9 +74,13 @@ app.use(
     credentials: true,
   }),
 );
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "15mb", verify: (req, _res, buffer) => {
+  if (req.originalUrl.startsWith("/api/v1/communications/webhooks/")) req.rawBody = Buffer.from(buffer);
+} }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+app.use("/uploads/private", (_req, res) => res.sendStatus(404));
 
 // Serve static field from uploads directory
 app.use(
@@ -120,6 +126,7 @@ app.use("/api/v1/chapters", (req, res, next) => {
 app.use("/api/v1/cheatsheets", cheatsheetRoutes);
 app.use("/api/v1/quiz", quizRoutes);
 app.use("/api/v1/contact", contactRoutes);
+app.use("/api/v1/communications", communicationsRoutes);
 app.use("/api/v1/kanban", kanbanRoutes);
 app.use("/api/v1/analytics", analyticsRoutes);
 app.use("/api/v1/search", searchRoutes);
@@ -191,6 +198,8 @@ const startServer = async () => {
     await ensureMessagingBootstrap();
     startSocialPublishingScheduler();
     startJobScheduler();
+    // Start background email queue worker
+    startCommunicationsWorker();
     const PORT = parseInt(process.env.PORT || "5000", 10);
     const httpServer = createServer(app);
     initializeMessagingSocket(httpServer, allowedOrigins);

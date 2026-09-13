@@ -53,6 +53,10 @@ export default function MessageBubble({
   onReact,
   onPin,
   compact = false,
+  readOnly = false,
+  internalNote = false,
+  footer,
+  renderAttachment,
 }) {
   const [actions, setActions] = useState(false);
   const [placement, setPlacement] = useState("top");
@@ -110,8 +114,8 @@ export default function MessageBubble({
 
   // Extract text and inline cards
   const { text: displayText, cards: parsedCards } = useMemo(
-    () => parseContentCards(message.content || ""),
-    [message.content],
+    () => readOnly ? { text: message.content || "", cards: [] } : parseContentCards(message.content || ""),
+    [message.content, readOnly],
   );
 
   const displayMessage = useMemo(
@@ -203,13 +207,13 @@ export default function MessageBubble({
           <div className="relative group/bubble flex flex-col">
             {/* Actual Chat Bubble */}
             <div
-              onClick={() => setActions((prev) => !prev)}
+              onClick={readOnly ? undefined : () => setActions((prev) => !prev)}
               className={`relative transition-all duration-150 cursor-pointer select-text ${bubbleRadius} ${
                 compact
                   ? "px-3.5 py-2 text-sm"
                   : "px-4 py-2.5 sm:px-4.5 sm:py-3 text-sm sm:text-[15px] leading-relaxed"
               } ${
-                mine
+                internalNote ? "border border-amber-200 bg-amber-50 text-amber-950 shadow-xs dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100" : mine
                   ? "bg-blue-600 text-white shadow-xs"
                   : "bg-white text-zinc-950 shadow-xs border border-zinc-200/90 dark:border-zinc-800 dark:bg-[#18181b] dark:text-zinc-100"
               }`}
@@ -239,6 +243,7 @@ export default function MessageBubble({
               </button>
             )}
 
+            {internalNote && <p className="mb-2 text-xs font-semibold">Internal note &middot; Only your team</p>}
             {/* Message Body */}
             {message.deletedAt ? (
               <p className="text-sm italic opacity-70">Message deleted</p>
@@ -262,7 +267,7 @@ export default function MessageBubble({
 
                 {message.attachments?.length > 0 && (
                   <div className="mt-2.5 flex flex-wrap gap-2">
-                    {message.attachments.map((file) => (
+                    {message.attachments.map((file) => renderAttachment ? renderAttachment(file) : (
                       <AttachmentView
                         key={file.attachmentId || file._id}
                         file={file}
@@ -273,6 +278,15 @@ export default function MessageBubble({
               </>
             )}
 
+            {footer && (
+              <div
+                className={`mt-1 flex items-center justify-end gap-1 text-[11px] font-medium leading-none select-none ${
+                  mine ? "text-blue-100/80" : "text-zinc-400 dark:text-zinc-500"
+                }`}
+              >
+                {footer}
+              </div>
+            )}
             {/* Status indicators (Pin / Pending / Failed) */}
             {(message.pin || message.pending || message.failed) && (
               <div
@@ -327,7 +341,7 @@ export default function MessageBubble({
           </div>
 
           {/* Quick Action Button on Hover */}
-          {!message.pending && !message.deletedAt && (
+          {!readOnly && !message.pending && !message.deletedAt && (
             <div ref={actionsRef} className="contents">
               <button
                 onClick={handleToggleActions}

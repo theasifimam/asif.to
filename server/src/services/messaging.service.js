@@ -137,8 +137,9 @@ export async function getMessages(user, conversationId, { before, limit = 30 } =
   return { conversation, messages: await hydrateMessages(messages), hasMore, nextCursor: hasMore ? String(messages[0]._id) : null };
 }
 
+export const parseMentionUsernames = (content) => [...new Set([...content.matchAll(/(^|\s)@([a-z0-9._-]{3,40})\b/gi)].map((match) => match[2].toLowerCase()))];
 async function resolveMentions(content, conversation, user) {
-  const usernames = [...new Set([...content.matchAll(/(^|\s)@([a-z0-9._-]{3,40})\b/gi)].map((match) => match[2].toLowerCase()))];
+  const usernames = parseMentionUsernames(content);
   if (!usernames.length) return [];
   const mentioned = await User.find({ username: { $in: usernames }, role: { $in: TEAM_ROLES }, status: "active" }).select(senderFields).lean();
   const accessibleIds = new Set([String(user._id), ...(await getConversationRecipientIds(conversation, null))]);
@@ -397,4 +398,13 @@ export async function getMessageContext(user, messageId) {
   ]);
   const center = await populatedMessage(message._id);
   return { conversation, messages: await hydrateMessages([...before.reverse(), center, ...after]), targetMessageId: String(message._id) };
+}
+
+// Read-only overview of the established collaboration collections.
+export async function discussionOverview(user, search) {
+  const items = (await listConversations(user, search)).filter(item => item.type === "discussion");
+  const counts = await Message.aggregate([{ $match: { conversationId: { $in: items.map(item => item._id) }, deletedAt: null } },
+    { $group: { _id: "$conversationId", count: { $sum: 1 }, mentionedMe: { $max: { $cond: [{ $in: [user._id, { $ifNull: ["$mentions", []] }] }, 1, 0] } } } }]);
+  const byId = new Map(counts.map(row => [String(row._id), row]));
+  return items.map(item => ({ ...item, messageCount: byId.get(String(item._id))?.count || 0, mentionedMe: Boolean(byId.get(String(item._id))?.mentionedMe) }));
 }

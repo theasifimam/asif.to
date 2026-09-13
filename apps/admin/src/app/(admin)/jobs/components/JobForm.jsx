@@ -1,4 +1,5 @@
 "use client";
+import useSubscriberNotification from "@/components/communications/useSubscriberNotification";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -127,6 +128,7 @@ function Toggle({ label, checked, onChange, hint }) {
 }
 
 export default function JobForm({ jobId = null }) {
+  const subscriberNotification = useSubscriberNotification("job");
   const router = useRouter();
   const [form, setForm] = useState(initial);
   const [companies, setCompanies] = useState([]);
@@ -174,6 +176,7 @@ export default function JobForm({ jobId = null }) {
 
   const submit = async (event) => {
     event.preventDefault();
+    if (!subscriberNotification.validate(form.status)) return;
     if (!form.company) {
       return toast.error("Please select a company");
     }
@@ -198,7 +201,8 @@ export default function JobForm({ jobId = null }) {
     setSaving(false);
     if (!result.success) return toast.error(result.error || "Unable to save job");
     toast.success(jobId ? "Job updated" : "Job created");
-    router.push("/jobs");
+    const emailFollowUp = await subscriberNotification.notify(result.data?.data?._id || jobId, form.status);
+    router.push(emailFollowUp || "/jobs");
   };
 
   if (loading)
@@ -601,6 +605,7 @@ export default function JobForm({ jobId = null }) {
         </main>
 
         <aside className="space-y-6 min-w-0 w-full lg:sticky lg:top-6 lg:self-start">
+          {subscriberNotification.controls}
           <Section title="Publishing">
             <Field label="Status">
               <Select

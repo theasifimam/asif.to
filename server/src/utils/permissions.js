@@ -1,6 +1,20 @@
 import RolePermission from "../models/RolePermission.js";
 
 export const PERMISSION_CATALOG = Object.freeze([
+  ["communications.inbox.read", "Inbox Read", "Communications"],
+  ["communications.inbox.reply", "Inbox Reply", "Communications"],
+  ["communications.inbox.assign", "Inbox Assign", "Communications"],
+  ["communications.campaigns.read", "Campaigns Read", "Communications"],
+  ["communications.campaigns.create", "Campaigns Create", "Communications"],
+  ["communications.campaigns.send", "Campaigns Send", "Communications"],
+  ["communications.subscribers.read", "Subscribers Read", "Communications"],
+  ["communications.subscribers.manage", "Subscribers Manage", "Communications"],
+  ["communications.automations.manage", "Automations Manage", "Communications"],
+  ["communications.templates.manage", "Templates Manage", "Communications"],
+  ["communications.transactional.read", "Transactional Read", "Communications"],
+  ["communications.analytics.read", "Analytics Read", "Communications"],
+  ["communications.settings.manage", "Settings Manage", "Communications"],
+
   ["content.read", "Read public content", "Content"],
   ["articles.create", "Create articles", "Articles"],
   ["articles.edit_own", "Edit own articles", "Articles"],

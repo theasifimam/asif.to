@@ -1,8 +1,8 @@
-import { SEARCH_ALIASES } from "./aliases";
+import { SEARCH_ALIASES } from "./aliases.js";
 
-export const TYPE_LABELS = { course: "Course", chapter: "Chapter", topic: "Topic", article: "Article", question: "Interview Question", cheatsheet: "Cheatsheet", practice: "Practice" };
-export const FILTERS = ["all", "course", "chapter", "topic", "article", "question", "cheatsheet", "practice"];
-export const FILTER_LABELS = { all: "All", course: "Courses", chapter: "Chapters", topic: "Topics", article: "Articles", question: "Questions", cheatsheet: "Cheatsheets", practice: "Practice" };
+export const TYPE_LABELS = { user: "User", job: "Job", company: "Company", "interview-category": "Interview category", course: "Course", chapter: "Chapter", topic: "Topic", article: "Article", question: "Interview Question", cheatsheet: "Cheatsheet", practice: "Practice" };
+export const FILTERS = ["all", "user", "job", "company", "interview-category", "course", "chapter", "topic", "article", "question", "cheatsheet", "practice"];
+export const FILTER_LABELS = { user: "Users", job: "Jobs", company: "Companies", "interview-category": "Interview categories", all: "All", course: "Courses", chapter: "Chapters", topic: "Topics", article: "Articles", question: "Questions", cheatsheet: "Cheatsheets", practice: "Practice" };
 
 export function normalize(value = "") {
   return String(value).normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
@@ -32,28 +32,38 @@ function expandedQuery(query) {
   return { normalized, queryTokens: [...new Set([...tokens(normalized), ...extra.flatMap(tokens)])] };
 }
 
+// Index entries are immutable. Reuse normalized fields across successive queries.
+const preparedItems = new WeakMap();
+function prepare(item) {
+  if (preparedItems.has(item)) return preparedItems.get(item);
+  const fields = {
+    title: normalize(item.title), keywords: normalize((item.keywords || []).join(" ")), headings: normalize((item.headings || []).join(" ")),
+    context: normalize(`${item.course || ""} ${item.category || ""} ${item.technology || ""}`), description: normalize(item.description), content: normalize(item.content),
+  };
+  const prepared = { fields, fieldTokens: Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, tokens(value)])) };
+  preparedItems.set(item, prepared);
+  return prepared;
+}
+
 export function rankResults(items, query, options = {}) {
   const { normalized: q, queryTokens } = expandedQuery(query);
   if (!q) return [];
   const requestedType = normalize(options.type || "all");
+  const originalTokens = tokens(q);
   const intent = q.includes("interview") || q.includes("question") ? "question" : q.includes("practice") || q.includes("problem") ? "practice" : null;
   return items.flatMap((item) => {
     if (requestedType !== "all" && item.type !== requestedType) return [];
-    const fields = {
-      title: normalize(item.title), keywords: normalize((item.keywords || []).join(" ")), headings: normalize((item.headings || []).join(" ")),
-      context: normalize(`${item.course || ""} ${item.category || ""} ${item.technology || ""}`), description: normalize(item.description), content: normalize(item.content),
-    };
+    const { fields, fieldTokens } = prepare(item);
     let score = Number(item.priority || 0);
     if (fields.title === q) score += 180; else if (fields.title.startsWith(q)) score += 120; else if (fields.title.includes(q)) score += 88;
     const weights = { title: 42, keywords: 30, headings: 24, context: 19, description: 12, content: 4 };
     let matchedOriginal = 0;
-    const originalTokens = tokens(q);
     for (const token of queryTokens) {
       let best = 0;
-      for (const [field, weight] of Object.entries(weights)) best = Math.max(best, tokenMatch(token, tokens(fields[field])) * weight);
+      for (const [field, weight] of Object.entries(weights)) best = Math.max(best, tokenMatch(token, fieldTokens[field]) * weight);
       score += best;
     }
-    for (const token of originalTokens) if (Object.values(fields).some((field) => tokenMatch(token, tokens(field)) >= .62)) matchedOriginal++;
+    for (const token of originalTokens) if (Object.values(fieldTokens).some((field) => tokenMatch(token, field) >= .62)) matchedOriginal++;
     if (!matchedOriginal) return [];
     score *= .45 + .55 * (matchedOriginal / Math.max(1, originalTokens.length));
     if (matchedOriginal === originalTokens.length) score += 24;

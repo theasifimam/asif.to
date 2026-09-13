@@ -164,7 +164,7 @@ export async function syncJobSource(sourceId, { trigger = "scheduled", providerO
   const staleBefore = new Date(startedAt.getTime() - 45 * 60_000);
   const source = await JobSource.findOneAndUpdate(
     { _id: sourceId, enabled: true, $or: [{ syncStatus: { $ne: "running" } }, { lastSyncAt: null }, { lastSyncAt: { $lt: staleBefore } }] },
-    { $set: { syncStatus: "running", lastSyncAt: startedAt, lastError: "" } }, { new: true },
+    { $set: { syncStatus: "running", lastSyncAt: startedAt, lastError: "" } }, { returnDocument: 'after' },
   );
   if (!source) {
     const existing = await JobSource.findById(sourceId).select("enabled syncStatus").lean();

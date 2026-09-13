@@ -379,9 +379,11 @@ export async function externalApply(req, res) {
     if (job.applicationType !== "external" || !job.applicationUrl) return res.status(400).json({ success: false, message: "This job uses an internal application." });
     const redirectUrl = normalizeUrl(job.applicationUrl, { required: true });
     await Promise.all([
-      JobApplication.create({ kind: "external_click", user: req.user._id, job: job._id, sourceName: job.sourceName, redirectUrl, appliedAt: new Date() }),
+      req.user?._id
+        ? JobApplication.create({ kind: "external_click", user: req.user._id, job: job._id, sourceName: job.sourceName, redirectUrl, appliedAt: new Date() })
+        : Promise.resolve(),
       Job.updateOne({ _id: job._id }, { $inc: { applyClicks: 1 } }),
-      JobEvent.create({ event: "external_redirect", user: req.user._id, job: job._id, company: job.company, category: job.category, location: job.location }),
+      JobEvent.create({ event: "external_redirect", user: req.user?._id, job: job._id, company: job.company, category: job.category, location: job.location }),
     ]);
     return res.json({ success: true, data: { redirectUrl }, message: "Continue on the company website. asif.to cannot confirm submission there." });
   } catch (error) { return errorResponse(res, error, "externalApply"); }

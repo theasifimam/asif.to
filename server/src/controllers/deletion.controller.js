@@ -1268,7 +1268,7 @@ export const approveDeletion = async (req, res) => {
           approverOtpExpiresAt: null,
         },
       },
-      { new: true },
+      { returnDocument: 'after' },
     );
 
     if (!claimedRequest) {

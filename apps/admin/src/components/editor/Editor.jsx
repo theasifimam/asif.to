@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), {
   ssr: false,
@@ -13,26 +13,10 @@ const MDEditor = dynamic(() => import("@uiw/react-md-editor"), {
 
 const Editor = memo(function Editor({ value, onChange, placeholder }) {
   const { theme } = useTheme();
-  const [draft, setDraft] = useState(value || "");
-  const latestValue = useRef(value || "");
-  const timer = useRef(null);
-
-  useEffect(() => {
-    const next = value || "";
-    if (next !== latestValue.current) {
-      latestValue.current = next;
-      setDraft(next);
-    }
-  }, [value]);
-
-  useEffect(() => () => timer.current && clearTimeout(timer.current), []);
-
+  // Keep the controlled value in sync during the input event. Debouncing it
+  // can replay older content, reset the caret, and omit edits from an immediate save.
   const handleChange = (nextValue) => {
-    const next = nextValue || "";
-    latestValue.current = next;
-    setDraft(next);
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => onChange(next), 150);
+    onChange(nextValue || "");
   };
 
   return (
@@ -41,8 +25,10 @@ const Editor = memo(function Editor({ value, onChange, placeholder }) {
       data-color-mode={theme === "dark" ? "dark" : "light"}
     >
       <MDEditor
-        value={draft}
+        value={value || ""}
         onChange={handleChange}
+        // Full-document syntax highlighting blocks input on long articles/chapters.
+        highlightEnable={false}
         preview="edit"
         height={500}
         className="w-full font-inter"
@@ -132,6 +118,8 @@ const Editor = memo(function Editor({ value, onChange, placeholder }) {
         }
 
         .w-md-editor-text {
+          /* The textarea fills the editor without a syntax-highlight mirror. */
+          height: 100%;
           width: 100% !important;
           max-width: 100% !important;
           min-width: 0 !important;

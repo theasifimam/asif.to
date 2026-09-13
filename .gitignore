@@ -10,3 +10,5 @@ out/
 .tmp-chrome-cpp
 
 media/*
+
+.tmp-communications-chrome

@@ -381,8 +381,8 @@ export default function FloatingChatDock({ isNavVisible = true }) {
     }
   };
 
-  // Do not render floating dock on the main full-screen /messages page
-  if (pathname?.startsWith("/messages")) {
+  // Do not render floating dock on the main full-screen /messages page or inside communications module
+  if (pathname?.startsWith("/messages") || pathname?.startsWith("/communications")) {
     return null;
   }
 

@@ -24,7 +24,7 @@ router.post("/:id/events", optionalProtect, jobRateLimit({ max: 40 }), recordJob
 router.get("/me/saved", protect, getMySavedJobs);
 router.get("/me/applications", protect, getMyJobApplications);
 router.post("/:id/save", protect, jobRateLimit({ max: 30 }), toggleSavedJob);
-router.post("/:id/external-apply", protect, jobRateLimit({ windowMs: 60_000, max: 12 }), externalApply);
+router.post("/:id/external-apply", optionalProtect, jobRateLimit({ windowMs: 60_000, max: 12 }), externalApply);
 router.post("/:id/apply", protect, jobRateLimit({ windowMs: 60_000, max: 8 }), uploadJobResume.single("resume"), internalApply);
 
 router.get("/admin/dashboard", protect, requirePermission("jobs.view"), adminDashboard);

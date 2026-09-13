@@ -60,7 +60,7 @@ async function requestJson(url, options = {}) {
 }
 
 async function save(platform, values) {
-  return SocialIntegration.findOneAndUpdate({ platform }, { $set: { platform, ...values, lastCheckedAt: new Date() } }, { new: true, upsert: true, setDefaultsOnInsert: true });
+  return SocialIntegration.findOneAndUpdate({ platform }, { $set: { platform, ...values, lastCheckedAt: new Date() } }, { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true });
 }
 
 async function connectLinkedIn(code, userId) {

@@ -8,6 +8,7 @@ import {
   getPinnedMessages,
   getUnreadSummary,
   listConversations,
+  discussionOverview,
   listTeamMembers,
   markConversationRead,
   searchMessages,
@@ -31,7 +32,7 @@ const handleError = (res, error, fallback) => {
 };
 
 export const conversations = async (req, res) => {
-  try { res.json({ success: true, data: { conversations: await listConversations(req.user, req.query.search) } }); }
+  try { res.json({ success: true, data: { conversations: req.query.overview === "discussions" ? await discussionOverview(req.user, req.query.search) : await listConversations(req.user, req.query.search) } }); }
   catch (error) { handleError(res, error, "Unable to load conversations."); }
 };
 
