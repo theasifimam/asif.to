@@ -29,6 +29,9 @@ const types = [
   "smartrecruiters",
   "workable",
   "ashby",
+  "recruitee",
+  "pinpoint",
+  "teamtailor",
   "api",
   "other",
 ];
@@ -370,6 +373,7 @@ export default function JobSourcesPage() {
                           >
                             {source.name}
                           </Link>
+                          {source.creationOrigin === "automated_source_discovery" && <p className="text-xs text-zinc-500">Automated Source Discovery</p>}
                           <span className="text-[10px] text-zinc-400 uppercase font-mono">
                             {source.providerRegion || "global"}
                           </span>
@@ -403,6 +407,7 @@ export default function JobSourcesPage() {
                       <span className="font-black text-zinc-900 dark:text-zinc-100">
                         {source.verifiedUaeJobsFound || 0} UAE
                       </span>
+                      <p className="text-xs text-zinc-500">{source.verifiedJobsFound || 0} total returned</p>
                       <p className="mt-0.5 text-[10px] text-zinc-400">
                         {source.numberImported || 0} imported ·{" "}
                         {source.numberUpdated || 0} updated
@@ -517,6 +522,7 @@ export default function JobSourcesPage() {
                       good={source.autoPublish && source.trusted}
                     />
                   </div>
+                  {source.creationOrigin === "automated_source_discovery" && <p className="text-xs text-zinc-500">Automated Source Discovery</p>}
                   <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-zinc-400">
                     {source.type} · every {source.syncIntervalHours || 12} hours
                     · quality {source.qualityThreshold || 90}+

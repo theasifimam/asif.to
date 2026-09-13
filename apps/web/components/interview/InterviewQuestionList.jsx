@@ -107,7 +107,7 @@ export default function InterviewQuestionList({
             <article
               id={`question-${number}`}
               key={item._id}
-              className="w-full min-w-0 max-w-full scroll-mt-36 my-4 p-5 sm:p-7 rounded-[2rem] sm:rounded-[2.5rem] border border-orange-500/20 bg-gradient-to-br from-orange-500/5 via-amber-500/5 to-white dark:to-zinc-900/90 shadow-xs hover:shadow-md transition-all"
+              className="w-full min-w-0 max-w-full scroll-mt-36 my-4 p-5 sm:p-7 rounded-4xl sm:rounded-[2.5rem] border border-orange-500/20 bg-linear-to-br from-orange-500/5 via-amber-500/5 to-white dark:to-zinc-900/90 shadow-xs hover:shadow-md transition-all"
             >
               {/* Question Header */}
               <div className="flex items-start gap-3 sm:gap-4">
@@ -255,9 +255,9 @@ export default function InterviewQuestionList({
 
                     {(item.tags || []).length > 0 && (
                       <div className="mt-3 flex flex-wrap gap-1.5 pt-1">
-                        {item.tags.map((tag) => (
+                        {item.tags.map((tag, tagIdx) => (
                           <span
-                            key={tag}
+                            key={`${tag}-${tagIdx}`}
                             className="inline-flex items-center gap-1 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200/60 dark:border-zinc-700/60 px-2.5 py-0.5 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400"
                           >
                             <Tag className="h-3 w-3" /> {tag}

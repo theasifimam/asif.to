@@ -831,9 +831,9 @@ function SortableCard({ item, onPreview, onDelete, editHref }) {
 
         {item.tags && item.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 pt-1">
-            {item.tags.slice(0, 3).map((tag) => (
+            {item.tags.slice(0, 3).map((tag, tagIdx) => (
               <span
-                key={tag}
+                key={`${tag}-${tagIdx}`}
                 className="rounded-lg bg-zinc-100 px-2 py-0.5 text-[10px] font-semibold text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400"
               >
                 {tag}

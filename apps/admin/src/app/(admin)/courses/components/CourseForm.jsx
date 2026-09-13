@@ -364,8 +364,8 @@ export default function CourseForm({ courseId = null }) {
         </>
       }
     >
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <main className="space-y-6">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] min-w-0 w-full">
+        <main className="space-y-6 min-w-0 w-full">
           <section className={formSectionClass}>
             <div className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-primary" />
@@ -733,8 +733,8 @@ export default function CourseForm({ courseId = null }) {
           </section>
         </main>
 
-        <aside className="space-y-6">
-          <div className="space-y-4 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+        <aside className="space-y-6 min-w-0 w-full">
+          <div className="space-y-4 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-4 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950 min-w-0 w-full">
             <h2 className="font-semibold text-zinc-900 dark:text-white text-sm">
               Placement
             </h2>

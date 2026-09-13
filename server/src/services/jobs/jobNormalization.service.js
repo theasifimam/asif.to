@@ -3,7 +3,7 @@ import { cleanText, decodeHtmlEntities, parseNullableNumber, sanitizeJobHtml } f
 import { slugify } from "../../utils/slugify.js";
 
 const locationRules = [
-  ["Dubai", /\bdubai\b/i], ["Abu Dhabi", /\babu[ -]?dhabi\b/i], ["Sharjah", /\bsharjah\b/i],
+  ["Dubai", /\b(dubai|jebel[ -]?ali)\b/i], ["Abu Dhabi", /\babu[ -]?dhabi\b/i], ["Sharjah", /\bsharjah\b/i],
   ["Ajman", /\bajman\b/i], ["Ras Al Khaimah", /\b(ras al khaimah|ras al-khaimah|rak)\b/i],
   ["Fujairah", /\bfujairah\b/i], ["Umm Al Quwain", /\b(umm al quwain|umm al-quwain|uaq)\b/i],
   ["Al Ain", /\bal[ -]?ain\b/i],

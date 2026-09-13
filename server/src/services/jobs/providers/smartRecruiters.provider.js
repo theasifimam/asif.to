@@ -1,4 +1,5 @@
 import { JobProvider } from "./base.provider.js";
+import { normalizeUaeLocation } from "../jobNormalization.service.js";
 
 export class SmartRecruitersJobProvider extends JobProvider {
   async fetchJobs() {
@@ -7,21 +8,27 @@ export class SmartRecruitersJobProvider extends JobProvider {
     const base = this.source.endpointUrl || `https://api.smartrecruiters.com/v1/companies/${encodeURIComponent(id)}/postings`;
     const summaries = [];
     let jobsFound = 0;
-    for (let offset = 0; offset < 1000; offset += 100) {
+    let countryOnly = false;
+    for (let offset = 0; ; offset += 100) {
+      if (offset >= 10000) throw new Error("SmartRecruiters pagination exceeded its safety limit; refusing a partial sync.");
       const separator = base.includes("?") ? "&" : "?";
-      const body = await this.requestJson(`${base}${separator}limit=100&offset=${offset}&destination=PUBLIC`);
+      const body = await this.requestJson(`${base}${separator}limit=100&offset=${offset}&destination=PUBLIC${countryOnly ? "&country=ae" : ""}`);
       const page = body?.content;
       if (!Array.isArray(page)) throw new Error("SmartRecruiters response did not contain content.");
       jobsFound = Math.max(jobsFound, Number(body.totalFound) || offset + page.length);
       summaries.push(...page.filter((item) => {
         const location = [item.location?.city, item.location?.region, item.location?.country].filter(Boolean).join(", ");
-        return /\b(AE|UAE|United Arab Emirates|Dubai|Abu Dhabi|Sharjah|Ajman|Fujairah|Al Ain|Ras Al Khaimah|Umm Al Quwain)\b/i.test(location);
+        return Boolean(normalizeUaeLocation(location, item.location?.country));
       }));
       if (page.length < 100) break;
+      // The public Posting API documents a country filter. Fetch the global
+      // count once, then paginate UAE results without truncating large boards.
+      if (!countryOnly) { countryOnly = true; offset = -100; }
     }
+    const uniqueSummaries = [...new Map(summaries.map((job) => [job.id, job])).values()];
     const jobs = [];
-    for (let start = 0; start < summaries.length; start += 8) {
-      const batch = summaries.slice(start, start + 8).map((summary) => {
+    for (let start = 0; start < uniqueSummaries.length; start += 5) {
+      const batch = uniqueSummaries.slice(start, start + 5).map((summary) => {
         const parsed = new URL(base); parsed.search = ""; parsed.pathname = `${parsed.pathname.replace(/\/$/, "")}/${encodeURIComponent(summary.id)}`;
         return this.requestJson(parsed.toString());
       });

@@ -13,7 +13,6 @@ import RelatedContentSidebar from "@/components/related/RelatedContentSidebar";
 import RelatedContentBottom from "@/components/related/RelatedContentBottom";
 import {
   getPublicInterviewQuestion,
-  getPublicInterviewQuestions,
   getRelatedContent,
 } from "@/lib/publicContent";
 import { absoluteUrl, getSiteUrl, jsonLd } from "@/lib/seo";
@@ -170,9 +169,9 @@ export default async function InterviewQuestionArticle({
                   {question.question}
                 </h1>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {(question.tags || []).map((tag) => (
+                  {(question.tags || []).map((tag, tagIdx) => (
                     <span
-                      key={tag}
+                      key={`${tag}-${tagIdx}`}
                       className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-500 dark:bg-zinc-800"
                     >
                       <Tag className="h-3 w-3" />

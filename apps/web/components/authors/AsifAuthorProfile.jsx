@@ -176,9 +176,9 @@ export default function AsifAuthorProfile({
             </p>
             <h3 className="mt-6 text-sm font-black">Technologies used</h3>
             <div className="mt-3 flex flex-wrap gap-2">
-              {authorIdentity.technologies.map((tech) => (
+              {authorIdentity.technologies.map((tech, idx) => (
                 <span
-                  key={tech}
+                  key={`${tech}-${idx}`}
                   className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
                 >
                   {tech}
@@ -204,8 +204,8 @@ export default function AsifAuthorProfile({
                 "Node.js, Express, MongoDB, and Mongoose APIs",
                 "Redux Toolkit and RTK Query data flows",
                 "Content platforms, authentication, SEO, and deployment workflows",
-              ].map((item) => (
-                <li key={item} className="flex gap-2">
+              ].map((item, idx) => (
+                <li key={`${item}-${idx}`} className="flex gap-2">
                   <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
                   {item}
                 </li>

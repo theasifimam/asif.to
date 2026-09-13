@@ -77,6 +77,32 @@ export default function ChapterClient({
     ? positionPercentage
     : courseProgress.overallProgress;
 
+  // ASIF_COURSE_LEARNING_FLOW_V1:track-last-visited-chapter
+  // Write the last-visited chapter to localStorage immediately on page visit.
+  // BottomNav reads this key so the "Continue" pill always reflects the last
+  // chapter the user actually opened, even if no progress was submitted yet.
+  useEffect(() => {
+    if (!activeCourseSlug || !chapter?._id || !chapter?.slug) return;
+    try {
+      localStorage.setItem(
+        "asif-last-reading",
+        JSON.stringify({
+          courseSlug: activeCourseSlug,
+          courseTitle: course?.title || "",
+          chapterId: String(chapter._id),
+          chapterSlug: chapter.slug,
+          chapterTitle: chapter.title || "",
+          href: `/${activeCourseSlug}/${chapter.slug}`,
+          visitedAt: new Date().toISOString(),
+        }),
+      );
+      // Notify BottomNav/ContinueCoursePill to re-render the pill
+      window.dispatchEvent(new CustomEvent("asif-last-reading-updated"));
+    } catch {
+      // localStorage unavailable — ignore
+    }
+  }, [activeCourseSlug, chapter?._id, chapter?.slug, chapter?.title, course?.title]);
+
   const activeItemRef = useRef(null);
 
   // Parse structured blocks from chapter content

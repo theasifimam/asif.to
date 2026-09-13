@@ -28,7 +28,7 @@ export class JobProvider {
     return jobs;
   }
 
-  async requestJson(url, { headers = {}, retries = 2 } = {}) {
+  async requestJson(url, { headers = {}, retries = 2, responseType = "json" } = {}) {
     const { assertSafeRemoteHost } = await import("../../../utils/jobValidation.js");
     const endpoint = this.validateRemoteHost ? await assertSafeRemoteHost(url) : url;
     let lastError;
@@ -39,13 +39,20 @@ export class JobProvider {
           redirect: "error", signal: AbortSignal.timeout(20_000),
         });
         if (!response.ok) {
-          const error = new Error(`Source returned HTTP ${response.status}.`); error.statusCode = response.status; throw error;
+          const error = new Error(`Source returned HTTP ${response.status}.`);
+          error.statusCode = response.status;
+          const retryAfter = response.headers?.get?.("retry-after");
+          if (retryAfter) error.retryAfterMs = /^\d+$/.test(retryAfter) ? Number(retryAfter) * 1000 : Math.max(0, Date.parse(retryAfter) - Date.now());
+          throw error;
         }
-        return await response.json();
+        return responseType === "text" ? await response.text() : await response.json();
       } catch (error) {
         lastError = error;
         if (attempt >= retries || ![429, 500, 502, 503, 504].includes(error.statusCode)) break;
-        await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
+        const retryDelay = Math.max(1000 * 2 ** attempt, error.retryAfterMs || 0);
+        // Longer cooldowns are left to the next scheduled run, never shortened.
+        if (retryDelay > 60_000) break;
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
       }
     }
     throw lastError;

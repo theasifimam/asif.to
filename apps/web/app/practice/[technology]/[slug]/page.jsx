@@ -84,9 +84,9 @@ export default async function ProblemPage({ params }) {
                 Topics
               </h2>
               <div className="mt-3 flex flex-wrap gap-2">
-                {problem.topics.map((topic) => (
+                {problem.topics.map((topic, idx) => (
                   <span
-                    key={topic}
+                    key={`${topic}-${idx}`}
                     className="rounded-lg bg-zinc-100 px-2.5 py-1 text-xs font-semibold dark:bg-zinc-800"
                   >
                     {topic}
@@ -100,8 +100,8 @@ export default async function ProblemPage({ params }) {
                     Hints
                   </summary>
                   <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-zinc-600 dark:text-zinc-300">
-                    {problem.hints.map((hint) => (
-                      <li key={hint}>{hint}</li>
+                    {problem.hints.map((hint, idx) => (
+                      <li key={`${hint}-${idx}`}>{hint}</li>
                     ))}
                   </ul>
                 </details>

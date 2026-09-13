@@ -330,16 +330,16 @@ export default function TopicForm({ topicId = null }) {
     );
 
   return (
-    <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-      <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-        <div>
+    <main className="mx-auto max-w-6xl space-y-6 px-3 py-6 sm:px-6 lg:px-8 min-w-0 w-full overflow-x-hidden">
+      <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end min-w-0 w-full">
+        <div className="min-w-0">
           <Link
             href={returnTo}
             className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" /> Back to topics
           </Link>
-          <h1 className="mt-4 text-3xl font-bold text-zinc-950 dark:text-white">
+          <h1 className="mt-4 text-2xl sm:text-3xl font-bold text-zinc-950 dark:text-white wrap-break-word">
             {topicId ? "Edit topic" : "Create topic"}
           </h1>
           <p className="mt-2 text-sm text-zinc-500">
@@ -383,9 +383,9 @@ export default function TopicForm({ topicId = null }) {
         </div>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <section className="space-y-6">
-          <div className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] min-w-0 w-full">
+        <section className="space-y-6 min-w-0 w-full">
+          <div className="space-y-5 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-4 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950 min-w-0 w-full">
             <div className="space-y-2">
               <Label>Title</Label>
               <Input
@@ -471,7 +471,7 @@ export default function TopicForm({ topicId = null }) {
                     Select a course to browse its reusable question library.
                   </p>
                 ) : questionsLoading ? (
-                  <LogoLoader className="mx-auto my-6 h-5 w-5  text-blue-600"  />
+                  <LogoLoader className="mx-auto my-6 h-5 w-5  text-blue-600" />
                 ) : (
                   questionOptions.map((question) => {
                     const assigned = form.interviewQuestions.some(
@@ -625,8 +625,8 @@ export default function TopicForm({ topicId = null }) {
           </div>
         </section>
 
-        <aside className="space-y-6">
-          <div className="space-y-4 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+        <aside className="space-y-6 min-w-0 w-full">
+          <div className="space-y-4 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-4 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950 min-w-0 w-full">
             <h2 className="font-semibold text-zinc-900 dark:text-white">
               Placement
             </h2>

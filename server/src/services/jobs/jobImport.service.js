@@ -9,6 +9,7 @@ import {
   normalizeWorkMode, prepareDescription, scoreImport, validateNormalizedJob,
 } from "./jobNormalization.service.js";
 import { providerForSource } from "./providers/index.js";
+import { isJobSuppressed } from "./jobSuppression.service.js";
 
 const asDate = (value, fallback = null) => {
   if (!value) return fallback;
@@ -30,7 +31,7 @@ async function uniqueSlug(model, value, excludeId = null) {
   return slug;
 }
 
-const creationOriginFor = (source) => ["greenhouse", "lever", "smartrecruiters", "workable", "ashby"].includes(source.type)
+const creationOriginFor = (source) => ["greenhouse", "lever", "smartrecruiters", "workable", "ashby", "recruitee", "pinpoint", "teamtailor"].includes(source.type)
   ? "ats_import" : source.type === "api" ? "api_import" : "automated_import";
 
 export async function resolveCompany(data, source, { CompanyModel = Company } = {}) {
@@ -136,14 +137,13 @@ export function buildImportedUpdate(existing, data) {
   return { update, changed };
 }
 
-export async function upsertJob(data, source, { CompanyModel = Company, JobModel = Job } = {}) {
+export async function upsertJob(data, source, { CompanyModel = Company, JobModel = Job, checkSuppressed = isJobSuppressed } = {}) {
+  if (await checkSuppressed(data)) return { outcome: "duplicates", job: null };
   const company = await resolveCompany(data, source, { CompanyModel }); data.company = company._id; data.companyName = company.name; data.companyLogo ||= company.logo;
   data.fingerprint = normalizedJobFingerprint({ title: data.title, companyName: company.name, location: data.location, employmentType: data.employmentType });
   const duplicate = await deduplicateJob(data, source, { JobModel });
   if (duplicate && !duplicate.update) {
-    const slug = await uniqueSlug(JobModel, `${data.title}-${data.companyName}-${data.location}`);
-    const job = await JobModel.create({ ...data, slug, status: "pending", importStatus: "duplicate", duplicateCandidate: duplicate.match._id, duplicateConfidence: duplicate.confidence });
-    return { outcome: "duplicates", job };
+    return { outcome: "duplicates", job: duplicate.match };
   }
   if (!duplicate) {
     const slug = await uniqueSlug(JobModel, `${data.title}-${data.companyName}-${data.location}`);
@@ -194,6 +194,10 @@ export async function syncJobSource(sourceId, { trigger = "scheduled", providerO
     const completedAt = new Date(); const runStatus = counts.errors || counts.validationFailed ? "partial" : "success";
     Object.assign(source, {
       syncStatus: "success", availabilityStatus: "available", lastSuccessfulSyncAt: completedAt,
+      verifiedJobsFound: provider.lastFetchStats?.jobsFound ?? rawJobs.length,
+      verifiedUaeJobsFound: Math.max(0, rawJobs.length - counts.validationFailed - counts.errors),
+      lastVerifiedAt: completedAt,
+      verificationStatus: rawJobs.length > counts.validationFailed + counts.errors ? "Verified" : "No UAE Jobs Currently",
       nextSyncAt: source.syncFrequency === "manual" ? null : new Date(completedAt.getTime() + source.syncIntervalHours * 3_600_000),
       lastRunImported: counts.created, lastRunUpdated: counts.updated, lastRunRejected: counts.rejected, lastRunDuplicates: counts.duplicates, lastRunUnchanged: counts.unchanged,
       numberImported: source.numberImported + counts.created, numberUpdated: source.numberUpdated + counts.updated,

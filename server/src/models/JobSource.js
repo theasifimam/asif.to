@@ -4,6 +4,7 @@ import { SOURCE_TYPES, SOURCE_VERIFICATION_STATUSES } from "../constants/jobs.js
 const jobSourceSchema = new Schema(
   {
     name: { type: String, required: true, trim: true, maxlength: 160 },
+    creationOrigin: { type: String, enum: ["admin_created", "automated_source_discovery"], default: "admin_created" },
     slug: { type: String, required: true, unique: true, trim: true, lowercase: true },
     type: { type: String, enum: SOURCE_TYPES, required: true, default: "manual", index: true },
     providerOrganizationId: { type: String, default: "", trim: true, maxlength: 300 },

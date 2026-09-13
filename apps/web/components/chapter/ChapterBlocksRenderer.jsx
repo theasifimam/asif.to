@@ -142,7 +142,7 @@ export default function ChapterBlocksRenderer({
             return (
               <p
                 key={idx}
-                className="mb-4 text-zinc-700 dark:text-zinc-300 leading-relaxed"
+                className="mb-4 text-zinc-800 dark:text-zinc-200 leading-relaxed font-medium sm:font-semibold"
               >
                 {renderInlineFormatting(block.text)}
               </p>

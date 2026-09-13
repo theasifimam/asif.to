@@ -257,7 +257,7 @@ export default function CategoryForm({
       />
 
       {/* Form Navigation Tabs */}
-      <div className="flex max-w-md rounded-2xl border border-zinc-200/80 bg-zinc-100 p-1 dark:border-zinc-800/80 dark:bg-zinc-900 text-xs font-bold shadow-xs">
+      <div className="flex max-w-md rounded-2xl border border-zinc-200/80 bg-zinc-100 p-1 dark:border-zinc-800/80 dark:bg-zinc-900 text-xs font-bold shadow-xs overflow-x-auto scrollbar-none *:shrink-0 min-w-0 w-full">
         <button
           type="button"
           onClick={() => setActiveTab("general")}
@@ -342,10 +342,10 @@ export default function CategoryForm({
                     className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60 font-mono text-xs"
                   />
                   {liveUrl && (
-                    <p className="flex items-center gap-1.5 text-xs text-zinc-500 pt-1">
+                    <p className="flex items-center gap-1.5 text-xs text-zinc-500 pt-1 min-w-0">
                       <Globe className="h-3.5 w-3.5 text-blue-500 shrink-0" />
-                      Frontend landing URL:{" "}
-                      <code className="font-mono text-blue-600 dark:text-blue-400">
+                      <span className="shrink-0">Frontend landing URL:</span>{" "}
+                      <code className="font-mono text-blue-600 dark:text-blue-400 break-all min-w-0">
                         {liveUrl}
                       </code>
                     </p>

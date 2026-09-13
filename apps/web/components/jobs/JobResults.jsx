@@ -31,7 +31,7 @@ export default function JobResults({
   compact = false,
 }) {
   return (
-    <section className="min-w-0">
+    <section className="min-w-0 max-w-full overflow-x-clip">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <p className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500">
           <BriefcaseBusiness className="h-4 w-4 text-blue-600" />
@@ -40,7 +40,7 @@ export default function JobResults({
         <JobSort currentSort={searchParams.sort} searchParams={searchParams} path={path} />
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3 min-w-0 max-w-full">
         {jobs.map((job) => (
           <JobCard
             key={job._id}

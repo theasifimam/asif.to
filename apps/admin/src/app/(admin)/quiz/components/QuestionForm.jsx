@@ -112,8 +112,8 @@ export default function QuestionForm({ questionId }) {
         </Button>
       }
     >
-      <form id="question-form" onSubmit={submit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <section className="space-y-6">
+      <form id="question-form" onSubmit={submit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] min-w-0 w-full">
+        <section className="space-y-6 min-w-0 w-full">
           <div className={formSectionClass}>
             <div className="space-y-2">
               <Label>Question</Label>
@@ -185,7 +185,7 @@ export default function QuestionForm({ questionId }) {
           </div>
         </section>
 
-        <aside className={`${formAsideClass} self-start lg:sticky lg:top-24`}>
+        <aside className={`${formAsideClass} min-w-0 w-full self-start lg:sticky lg:top-24`}>
           <div className="space-y-2">
             <Label>Courses</Label>
             <div className="max-h-48 overflow-y-auto space-y-1.5 rounded-2xl border border-zinc-200/80 bg-zinc-50/50 p-2.5 dark:border-zinc-800/80 dark:bg-zinc-900/50">

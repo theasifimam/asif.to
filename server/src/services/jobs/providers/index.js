@@ -5,8 +5,14 @@ import { LeverJobProvider } from "./lever.provider.js";
 import { SmartRecruitersJobProvider } from "./smartRecruiters.provider.js";
 import { WorkableJobProvider } from "./workable.provider.js";
 import { AshbyJobProvider } from "./ashby.provider.js";
+import { RecruiteeJobProvider } from "./recruitee.provider.js";
+import { PinpointJobProvider } from "./pinpoint.provider.js";
+import { TeamtailorJobProvider } from "./teamtailor.provider.js";
 
 export function providerForSource(source, options) {
+  if (source.type === "recruitee") return new RecruiteeJobProvider(source, options);
+  if (source.type === "pinpoint") return new PinpointJobProvider(source, options);
+  if (source.type === "teamtailor") return new TeamtailorJobProvider(source, options);
   if (source.type === "manual") return new ManualJobProvider(source, options);
   if (source.type === "greenhouse") return new GreenhouseJobProvider(source, options);
   if (source.type === "lever") return new LeverJobProvider(source, options);

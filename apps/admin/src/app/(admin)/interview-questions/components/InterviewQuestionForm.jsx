@@ -234,8 +234,8 @@ export default function InterviewQuestionForm({
           )}
         </article>
       ) : (
-        <div className="grid gap-6 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <section className="space-y-6">
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] min-w-0 w-full">
+          <section className="space-y-6 min-w-0 w-full">
             <div className={formSectionClass}>
               <div className="space-y-2">
                 <Label>Question</Label>
@@ -290,7 +290,7 @@ export default function InterviewQuestionForm({
               </div>
             </div>
           </section>
-          <aside className="space-y-5 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-4 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+          <aside className="space-y-5 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-4 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950 min-w-0 w-full">
             <div className="space-y-2">
               <Label>Course (Optional)</Label>
               <Select

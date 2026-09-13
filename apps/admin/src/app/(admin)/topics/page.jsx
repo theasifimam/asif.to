@@ -149,11 +149,15 @@ export default function TopicsPage() {
     if (filters.category !== "all") topicParams.category = filters.category;
     if (filters.type !== "all") topicParams.type = filters.type;
     if (filters.status !== "all") topicParams.status = filters.status;
-    const [topicResponse, courseResponse, categoryResponse] = await Promise.all([
-      topicsApi.list(topicParams),
-      courses.length ? Promise.resolve(null) : coursesApi.listAll(),
-      categories.length ? Promise.resolve(null) : topicCategoriesApi.list("all"),
-    ]);
+    const [topicResponse, courseResponse, categoryResponse] = await Promise.all(
+      [
+        topicsApi.list(topicParams),
+        courses.length ? Promise.resolve(null) : coursesApi.listAll(),
+        categories.length
+          ? Promise.resolve(null)
+          : topicCategoriesApi.list("all"),
+      ],
+    );
     if (topicResponse.success) {
       const payload = topicResponse.data?.data;
       setTopics(Array.isArray(payload) ? payload : []);
@@ -284,7 +288,9 @@ export default function TopicsPage() {
           value={filters.course}
           onValueChange={(course) =>
             setFilters((current) => {
-              const currentCat = categories.find((c) => c._id === current.category);
+              const currentCat = categories.find(
+                (c) => c._id === current.category,
+              );
               const catCourseId = currentCat?.course?._id || currentCat?.course;
               const keepCat =
                 course === "all" ||
@@ -319,7 +325,8 @@ export default function TopicsPage() {
                 return { ...current, category, page: 1 };
               }
               const selectedCat = categories.find((c) => c._id === category);
-              const catCourseId = selectedCat?.course?._id || selectedCat?.course;
+              const catCourseId =
+                selectedCat?.course?._id || selectedCat?.course;
               return {
                 ...current,
                 category,
@@ -396,8 +403,8 @@ export default function TopicsPage() {
 
       {filters.course !== "all" && !canReorder && (
         <p className="text-xs text-zinc-500">
-          Clear search, category, type, and status filters to reorder this course&apos;s
-          topics.
+          Clear search, category, type, and status filters to reorder this
+          course&apos;s topics.
         </p>
       )}
 
@@ -420,35 +427,35 @@ export default function TopicsPage() {
                 topics.map((topic, index) => (
                   <div
                     key={topic._id}
-                    className="group flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs transition-all hover:border-blue-500/50 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950"
+                    className="group relative flex flex-col justify-between rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-xs transition-all hover:border-blue-500/50 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950 min-w-0 overflow-hidden"
                   >
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800 text-[10px] font-black text-zinc-600 dark:text-zinc-400">
+                    <div className="space-y-3 min-w-0">
+                      <div className="flex items-center justify-between gap-2 flex-wrap min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800 text-[10px] font-black text-zinc-600 dark:text-zinc-400">
                             #{topic.order}
                           </span>
-                          <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                          <span className="text-[10px] shrink-0 font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
                             {topic.type || "article"}
                           </span>
                           {topic.category?.name && (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
+                            <span className="text-[10px] shrink-0 font-bold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 truncate max-w-30">
                               {topic.category.name}
                             </span>
                           )}
                         </div>
                         <button
                           onClick={() => toggleStatus(topic)}
-                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${statusStyles[topic.status]}`}
+                          className={`rounded-full shrink-0 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${statusStyles[topic.status]}`}
                         >
                           {topic.status}
                         </button>
                       </div>
 
-                      <div>
+                      <div className="min-w-0">
                         <Link
                           href={editHref(topic._id)}
-                          className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-2"
+                          className="font-bold text-zinc-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors line-clamp-2 wrap-break-word"
                         >
                           {topic.title}
                         </Link>

@@ -5,8 +5,8 @@ import { absoluteUrl, assetUrl, jsonLd } from "@/lib/seo";
 export const dynamic = "force-dynamic";
 
 async function getArticle(slugWithId) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (!baseUrl || !slugWithId) return null;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  if (!slugWithId) return null;
 
   const lastDash = slugWithId.lastIndexOf("-");
   const possibleId = lastDash >= 0 ? slugWithId.slice(lastDash + 1) : "";
@@ -24,21 +24,32 @@ async function getArticle(slugWithId) {
     } catch {}
   }
 
-  const slug = looksLikeMongoId
-    ? slugWithId.slice(0, lastDash)
-    : slugWithId;
-
   try {
-    const bySlug = await fetch(
-      `${baseUrl}/articles/slug/${encodeURIComponent(slug)}`,
+    const byFullSlug = await fetch(
+      `${baseUrl}/articles/slug/${encodeURIComponent(slugWithId)}`,
       { next: { revalidate: 60 } },
     );
-    if (!bySlug.ok) return null;
-    const body = await bySlug.json();
-    return body?.data || null;
-  } catch {
-    return null;
+    if (byFullSlug.ok) {
+      const body = await byFullSlug.json();
+      if (body?.data) return body.data;
+    }
+  } catch {}
+
+  if (looksLikeMongoId && lastDash > 0) {
+    const cleanSlug = slugWithId.slice(0, lastDash);
+    try {
+      const bySlug = await fetch(
+        `${baseUrl}/articles/slug/${encodeURIComponent(cleanSlug)}`,
+        { next: { revalidate: 60 } },
+      );
+      if (bySlug.ok) {
+        const body = await bySlug.json();
+        return body?.data || null;
+      }
+    } catch {}
   }
+
+  return null;
 }
 
 import { getImageUrl } from "@/lib/config";

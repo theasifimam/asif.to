@@ -312,9 +312,9 @@ function InterviewQuestions({ questions }) {
                     {question.questionType}
                   </span>
                 )}
-                {(question.tags || []).map((tag) => (
+                {(question.tags || []).map((tag, tagIndex) => (
                   <span
-                    key={tag}
+                    key={`${tag}-${tagIndex}`}
                     className="inline-flex items-center gap-1 rounded-full border border-zinc-200 px-2.5 py-1 dark:border-zinc-700"
                   >
                     <Tag className="h-3 w-3" aria-hidden="true" />

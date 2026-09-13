@@ -12,6 +12,7 @@ import {
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import JobActions from "@/components/jobs/JobActions";
+import CompanyLogo from "@/components/jobs/CompanyLogo";
 import JobCard from "@/components/jobs/JobCard";
 import JobResults from "@/components/jobs/JobResults";
 import JobsFilters from "@/components/jobs/JobsFilters";
@@ -345,17 +346,7 @@ export default async function JobPage({ params, searchParams }) {
             <article className="min-w-0 space-y-8">
               <header className="rounded-4xl border border-zinc-200/80 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90 sm:p-8">
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950">
-                    {company.logo || job.companyLogo ? (
-                      <img
-                        src={assetUrl(company.logo || job.companyLogo)}
-                        alt={`${job.companyName} logo`}
-                        className="h-full w-full object-contain p-2"
-                      />
-                    ) : (
-                      <Building2 className="h-7 w-7 text-zinc-400" />
-                    )}
-                  </div>
+                  <CompanyLogo company={company} job={job} className="h-16 w-16" priority />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap gap-2">
                       {job.featured && (

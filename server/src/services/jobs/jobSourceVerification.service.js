@@ -3,7 +3,8 @@ import { providerForSource } from "./providers/index.js";
 
 const statusFromError = (error) => {
   const statusCode = Number(error?.statusCode);
-  if ([401, 403, 429].includes(statusCode)) return "Blocked";
+  if (statusCode === 401) return "Requires Credentials";
+  if ([403, 429].includes(statusCode)) return "Blocked";
   if (statusCode === 404) return "Source Unavailable";
   if (/not configured|did not contain|was not an array|invalid/i.test(error?.message || "")) return "Requires Review";
   return "Source Unavailable";
@@ -20,6 +21,9 @@ export async function verifyJobSource(source, { providerOptions } = {}) {
     const canSync = uaeJobsFound > 0;
     return {
       reachable: true, providerValid: true, jobsFound, uaeJobsFound, canSync,
+      providerDetected: true, publicFeedAvailable: true, credentialsRequired: false,
+      currentJobsFound: jobsFound, valid: canSync, reason: canSync ? null : "No current UAE jobs",
+      access: "PUBLIC_STRUCTURED_FEED",
       verificationStatus: canSync ? "Verified" : "No UAE Jobs Currently",
       checkedAt, error: null,
       notes: canSync
@@ -30,6 +34,9 @@ export async function verifyJobSource(source, { providerOptions } = {}) {
     const verificationStatus = statusFromError(error);
     return {
       reachable: false, providerValid: false, jobsFound: 0, uaeJobsFound: 0, canSync: false,
+      providerDetected: false, publicFeedAvailable: false, credentialsRequired: verificationStatus === "Requires Credentials",
+      currentJobsFound: 0, valid: false, reason: cleanText(error?.message || "Verification failed.", 1000),
+      access: verificationStatus === "Requires Credentials" ? "REQUIRES_CREDENTIALS" : verificationStatus === "Blocked" ? "BLOCKED" : "UNSUPPORTED",
       verificationStatus, checkedAt, error: cleanText(error?.message || "Verification failed.", 1000),
       notes: `Automatic sync remains disabled: ${cleanText(error?.message || "verification failed", 900)}`,
     };

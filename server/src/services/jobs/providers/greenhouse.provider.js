@@ -7,7 +7,7 @@ export class GreenhouseJobProvider extends JobProvider {
     const endpoint = this.source.endpointUrl || `https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(id)}/jobs?content=true`;
     const body = await this.requestJson(endpoint);
     if (!Array.isArray(body?.jobs)) throw new Error("Greenhouse response did not contain a jobs array.");
-    return this.onlyUaeJobs(body.jobs.slice(0, 2000));
+    return this.onlyUaeJobs(body.jobs);
   }
 
   normalizeJob(raw) {

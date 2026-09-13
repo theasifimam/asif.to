@@ -1,7 +1,7 @@
 "use client";
 
 import LogoLoader from "@/components/ui/LogoLoader";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import {
@@ -33,6 +33,7 @@ import AuthorIdentityCard from "../authors/AuthorIdentityCard";
 import ChapterBlocksRenderer from "@/components/chapter/ChapterBlocksRenderer";
 import { parseContentBlocks } from "@/components/chapter/chapterUtils";
 import { ArticleAd } from "@/components/ads/SemanticAds";
+import RelatedContentSidebar from "@/components/related/RelatedContentSidebar";
 
 const WhatsAppIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -51,22 +52,46 @@ export default function ArticleClient({ slug, initialData }) {
   const {
     data: responseById,
     isLoading: idLoading,
-    error: idError,
   } = useGetArticleByIdQuery(possibleId, { skip: !looksLikeMongoId });
 
   const {
     data: responseBySlug,
     isLoading: slugLoading,
-    error: slugError,
-  } = useGetArticleBySlugQuery(cleanSlug, { skip: looksLikeMongoId });
+  } = useGetArticleBySlugQuery(slug);
 
-  const response = looksLikeMongoId ? responseById : responseBySlug;
-  const isLoading = looksLikeMongoId ? idLoading : slugLoading;
-  const error = looksLikeMongoId ? idError : slugError;
+  const {
+    data: responseByCleanSlug,
+    isLoading: cleanSlugLoading,
+  } = useGetArticleBySlugQuery(cleanSlug, { skip: !looksLikeMongoId || cleanSlug === slug });
+
+  const article =
+    initialData ||
+    responseById?.data ||
+    responseBySlug?.data ||
+    responseByCleanSlug?.data;
+
+  const isLoading =
+    !article && (idLoading || slugLoading || cleanSlugLoading);
+
+  const error = !article && !isLoading;
 
   const { data: moreArticles } = useGetArticlesQuery({ limit: 4 });
-  const article = response?.data || initialData;
   const [copied, setCopied] = useState(false);
+  const [relatedData, setRelatedData] = useState(null);
+
+  useEffect(() => {
+    if (article?.slug) {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      fetch(
+        `${baseUrl}/related-content/public?type=article&slug=${encodeURIComponent(article.slug)}`
+      )
+        .then((res) => (res.ok ? res.json() : null))
+        .then((body) => {
+          if (body?.data) setRelatedData(body.data);
+        })
+        .catch(() => {});
+    }
+  }, [article?.slug]);
 
   const parsedBlocks = useMemo(
     () =>
@@ -132,7 +157,7 @@ export default function ArticleClient({ slug, initialData }) {
 
   if (isInitialLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
         <div className="flex flex-col items-center gap-4">
           <LogoLoader className="h-14 w-14 sm:h-16 sm:w-16 text-blue-600 dark:text-blue-500" />
           <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">
@@ -145,7 +170,7 @@ export default function ArticleClient({ slug, initialData }) {
 
   if (!article || error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 gap-6">
         <div className="text-center">
           <h2 className="text-2xl font-bold font-outfit mb-2">Signal Lost</h2>
           <p className="text-zinc-500 text-sm">
@@ -163,12 +188,12 @@ export default function ArticleClient({ slug, initialData }) {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans transition-colors duration-500">
+    <div className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 font-sans transition-colors duration-500">
       <Header />
 
-      <main className="flex flex-col items-center w-full pt-20 sm:pt-24 md:pt-28 pb-20">
-        {/* Article Open Header */}
-        <div className="w-full max-w-4xl px-4 sm:px-6 flex flex-col gap-5 sm:gap-6 mb-8 sm:mb-10">
+      <main className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 md:pt-28 pb-20">
+        {/* Back Link */}
+        <div className="mb-6">
           <Link
             href="/articles"
             className="inline-flex items-center gap-2 text-xs font-bold text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors uppercase tracking-widest w-fit"
@@ -176,139 +201,170 @@ export default function ArticleClient({ slug, initialData }) {
             <ArrowLeft size={16} />
             Back to Dispatches
           </Link>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-bold uppercase tracking-[0.14em] sm:tracking-[0.2em] text-zinc-400">
-            <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black">
-              {article.topic?.[0]?.name || "EDITORIAL"}
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1">
-              <Clock size={13} />
-              {format(new Date(article.createdAt), "MMM d, yyyy")}
-            </span>
-            {article.readCount && (
-              <>
+        {/* 2-Column Grid Layout: Article Content Left, Sticky Sidebar Right */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-8 items-start">
+          {/* Main Article Column */}
+          <div className="min-w-0 w-full flex flex-col gap-6 sm:gap-8">
+            {/* Header Info */}
+            <div className="flex flex-col gap-5 sm:gap-6">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-bold uppercase tracking-[0.14em] sm:tracking-[0.2em] text-zinc-400">
+                {(article.topic || []).slice(0, 3).map((t, i) => {
+                  const topicName = typeof t === "object" ? t.name : t;
+                  return (
+                    <span
+                      key={t._id || topicName || i}
+                      className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black"
+                    >
+                      {topicName || "EDITORIAL"}
+                    </span>
+                  );
+                })}
+                {(!article.topic || article.topic.length === 0) && (
+                  <span className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black">
+                    EDITORIAL
+                  </span>
+                )}
                 <span>•</span>
-                <span className="flex items-center gap-1">
-                  <Eye size={13} />
-                  {article.readCount.toLocaleString()} reads
+                <span className="flex items-center gap-1 font-bold">
+                  <Clock size={13} />
+                  {format(new Date(article.createdAt), "MMM d, yyyy")}
                 </span>
-              </>
+                {article.readCount && (
+                  <>
+                    <span>•</span>
+                    <span className="flex items-center gap-1 font-bold">
+                      <Eye size={13} />
+                      {article.readCount.toLocaleString()} reads
+                    </span>
+                  </>
+                )}
+              </div>
+
+              <h1 className="text-2xl xs:text-3xl md:text-4xl lg:text-5xl font-black font-outfit tracking-tight text-zinc-900 dark:text-white leading-[1.1]">
+                {article.title}
+              </h1>
+
+              {/* Author & Action Row */}
+              <div className="flex items-center justify-between pt-6 border-t border-zinc-200/60 dark:border-zinc-800/60 mt-2">
+                <Link href="/author/asif" className="flex items-center gap-3 group">
+                  <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-zinc-100 dark:bg-zinc-800 relative border border-zinc-200 dark:border-zinc-700">
+                    <Image
+                      src={
+                        article.author?.avatar
+                          ? getImageUrl(article.author.avatar)
+                          : `https://ui-avatars.com/api/?name=${encodeURIComponent(article.author?.fullName || "A")}&background=18181b&color=ffffff`
+                      }
+                      alt={article.author?.fullName || "Author"}
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">
+                      Written By
+                    </span>
+                    <span className="text-sm font-bold text-zinc-900 dark:text-white group-hover:text-emerald-600 transition-colors">
+                      {article.author?.fullName}
+                    </span>
+                  </div>
+                </Link>
+
+                <div className="flex items-center gap-3">
+                  <BookmarkButton articleId={article._id} />
+                </div>
+              </div>
+            </div>
+
+            {/* Cover Image Container */}
+            {article.image && (
+              <div className="w-full">
+                <div className="w-full rounded-2xl md:rounded-3xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 shadow-md border border-zinc-200/70 dark:border-zinc-800">
+                  <Image
+                    src={getImageUrl(article.image)}
+                    alt={article.title}
+                    width={1200}
+                    height={630}
+                    className="h-auto w-full object-cover"
+                    priority
+                    unoptimized
+                  />
+                </div>
+              </div>
             )}
+
+            {/* Article Body Content */}
+            <article className="mobile-reading-copy w-full flex flex-col gap-7 sm:gap-8">
+              <ChapterBlocksRenderer
+                chapter={article}
+                parsedBlocks={parsedBlocks}
+                fontBodyClass="text-base sm:text-lg md:text-xl font-medium sm:font-semibold text-zinc-800 dark:text-zinc-200"
+                middleAd={
+                  <ArticleAd position="middle" wordCount={articleWordCount} />
+                }
+              />
+
+              <ArticleAd position="bottom" wordCount={articleWordCount} />
+
+              <AuthorIdentityCard
+                author={article.author}
+                publishedAt={article.createdAt}
+                updatedAt={article.updatedAt}
+              />
+
+              {/* Share Section */}
+              <div className="flex flex-col gap-6 py-8 border-y border-zinc-200/60 dark:border-zinc-800/60 my-6">
+                <div className="flex items-center gap-2">
+                  <Share2 size={16} className="text-zinc-400" />
+                  <span className="text-xs font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-white">
+                    Share Investigation
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap gap-3 items-center">
+                  {shareLinks.map((link) => (
+                    <a
+                      key={link.name}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-400 text-xs font-bold uppercase tracking-wider transition-all"
+                    >
+                      {link.icon}
+                      <span>{link.name}</span>
+                    </a>
+                  ))}
+                  <button
+                    onClick={handleCopyLink}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-400 text-xs font-bold uppercase tracking-wider transition-all"
+                  >
+                    {copied ? (
+                      <Check size={16} className="text-emerald-500" />
+                    ) : (
+                      <Link2 size={16} />
+                    )}
+                    <span>{copied ? "Copied" : "Copy Link"}</span>
+                  </button>
+                </div>
+              </div>
+            </article>
           </div>
 
-          <h1 className="text-2xl xs:text-3xl md:text-5xl font-black font-outfit tracking-tight text-zinc-900 dark:text-white leading-[1.1]">
-            {article.title}
-          </h1>
-
-          {/* Author & Action Row */}
-          <div className="flex items-center justify-between pt-6 border-t border-zinc-200/60 dark:border-zinc-800/60 mt-2">
-            <Link href="/author/asif" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-zinc-100 dark:bg-zinc-800 relative border border-zinc-200 dark:border-zinc-700">
-                <Image
-                  src={
-                    article.author?.avatar
-                      ? getImageUrl(article.author.avatar)
-                      : `https://ui-avatars.com/api/?name=${encodeURIComponent(article.author?.fullName || "A")}&background=18181b&color=ffffff`
-                  }
-                  alt={article.author?.fullName || "Author"}
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">
-                  Written By
-                </span>
-                <span className="text-sm font-bold text-zinc-900 dark:text-white group-hover:text-emerald-600 transition-colors">
-                  {article.author?.fullName}
-                </span>
-              </div>
-            </Link>
-
-            <div className="flex items-center gap-3">
-              <BookmarkButton articleId={article._id} />
-            </div>
+          {/* Desktop Sticky Right Sidebar */}
+          <div className="hidden lg:sticky lg:top-24 lg:block">
+            <RelatedContentSidebar
+              relatedData={relatedData}
+              article={article}
+              currentType="article"
+            />
           </div>
         </div>
 
-        {/* Cover Image Container */}
-        {article.image && (
-          <div className="w-full max-w-4xl px-4 sm:px-6 mb-8 sm:mb-12">
-            <div className="w-full rounded-2xl md:rounded-3xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 shadow-md border border-zinc-200/70 dark:border-zinc-800">
-              <Image
-                src={getImageUrl(article.image)}
-                alt={article.title}
-                width={1200}
-                height={630}
-                className="h-auto w-full"
-                priority
-                unoptimized
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Article Body Content */}
-        <article className="mobile-reading-copy w-full max-w-4xl px-4 sm:px-6 flex flex-col gap-7 sm:gap-8">
-          <ChapterBlocksRenderer
-            chapter={article}
-            parsedBlocks={parsedBlocks}
-            fontBodyClass="text-base sm:text-lg md:text-xl font-medium"
-            middleAd={
-              <ArticleAd position="middle" wordCount={articleWordCount} />
-            }
-          />
-
-          <ArticleAd position="bottom" wordCount={articleWordCount} />
-
-          <AuthorIdentityCard
-            author={article.author}
-            publishedAt={article.createdAt}
-            updatedAt={article.updatedAt}
-          />
-
-          {/* Share Section */}
-          <div className="flex flex-col gap-6 py-8 border-y border-zinc-200/60 dark:border-zinc-800/60 my-6">
-            <div className="flex items-center gap-2">
-              <Share2 size={16} className="text-zinc-400" />
-              <span className="text-xs font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-white">
-                Share Investigation
-              </span>
-            </div>
-
-            <div className="flex flex-wrap gap-3 items-center">
-              {shareLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-400 text-xs font-bold uppercase tracking-wider transition-all"
-                >
-                  {link.icon}
-                  <span>{link.name}</span>
-                </a>
-              ))}
-              <button
-                onClick={handleCopyLink}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:border-zinc-400 text-xs font-bold uppercase tracking-wider transition-all"
-              >
-                {copied ? (
-                  <Check size={16} className="text-emerald-500" />
-                ) : (
-                  <Link2 size={16} />
-                )}
-                <span>{copied ? "Copied" : "Copy Link"}</span>
-              </button>
-            </div>
-          </div>
-        </article>
-
-        {/* Related Articles */}
+        {/* Further Dispatches Recommendations Footer */}
         {moreArticles?.data && (
-          <section className="w-full max-w-350 mt-14 sm:mt-20 px-4 sm:px-6 lg:px-12 border-t border-zinc-200/60 dark:border-zinc-800/60 pt-10 sm:pt-16">
+          <section className="w-full mt-14 sm:mt-20 border-t border-zinc-200/60 dark:border-zinc-800/60 pt-10 sm:pt-16">
             <div className="flex items-center justify-between mb-10">
               <h2 className="text-2xl font-bold font-outfit text-zinc-900 dark:text-white">
                 Further Dispatches

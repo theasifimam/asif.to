@@ -4,9 +4,9 @@ export const WORK_MODES = ["on-site", "hybrid", "remote", "not-specified"];
 export const EXPERIENCE_LEVELS = ["entry", "junior", "mid", "senior", "lead", "manager", "director", "executive", "not-specified"];
 export const APPLICATION_TYPES = ["external", "internal"];
 export const SALARY_PERIODS = ["hour", "day", "month", "year"];
-export const SOURCE_TYPES = ["manual", "employer-career-page", "greenhouse", "lever", "smartrecruiters", "workable", "ashby", "api", "other"];
+export const SOURCE_TYPES = ["manual", "employer-career-page", "greenhouse", "lever", "smartrecruiters", "workable", "ashby", "recruitee", "pinpoint", "teamtailor", "api", "other"];
 export const SOURCE_VERIFICATION_STATUSES = [
-  "Verified", "No UAE Jobs Currently", "Source Unavailable", "Requires Review", "Provider Changed", "Blocked",
+  "Verified", "No UAE Jobs Currently", "Source Unavailable", "Requires Review", "Requires Credentials", "Provider Changed", "Blocked",
 ];
 export const CREATION_ORIGINS = ["admin_created", "manual_import", "automated_import", "ats_import", "api_import"];
 export const IMPORT_STATUSES = ["imported", "updated", "unchanged", "duplicate", "validation_failed", "source_removed", "sync_error"];

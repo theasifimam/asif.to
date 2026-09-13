@@ -46,13 +46,14 @@ export default function JobApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("card");
 
-  const load = async (page = 1) => {
+  const load = async (page = pagination.page, overrideLimit = null) => {
     setLoading(true);
+    const limit = overrideLimit || pagination.limit;
     const result = await jobsApi.applications({
       kind,
       status: status === "all" ? "" : status,
       page,
-      limit: pagination.limit,
+      limit,
     });
     setLoading(false);
     if (!result.success)
@@ -62,26 +63,8 @@ export default function JobApplicationsPage() {
   };
 
   useEffect(() => {
-    let active = true;
-    jobsApi
-      .applications({
-        kind,
-        status: status === "all" ? "" : status,
-        page: 1,
-        limit: pagination.limit,
-      })
-      .then((result) => {
-        if (!active) return;
-        setLoading(false);
-        if (!result.success)
-          return toast.error(result.error || "Unable to load applications");
-        setItems(result.data?.data || []);
-        setPagination(result.data?.pagination || pagination);
-      });
-    return () => {
-      active = false;
-    };
-  }, [kind, status, pagination.limit]);
+    load(1);
+  }, [kind, status]);
 
   const update = async (id, nextStatus) => {
     const result = await jobsApi.updateApplication(id, nextStatus);
@@ -154,7 +137,7 @@ export default function JobApplicationsPage() {
         </div>
       </AdminFilters>
 
-      <AdminContent>
+      <AdminContent plain={viewMode === "card"}>
         {loading ? (
           <AdminLoading />
         ) : viewMode === "list" ? (
@@ -276,7 +259,7 @@ export default function JobApplicationsPage() {
           </div>
         ) : (
           /* Card Grid View */
-          <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3 p-4 sm:p-5">
+          <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => (
               <article
                 key={item._id}
@@ -416,8 +399,12 @@ export default function JobApplicationsPage() {
           pages={pagination.totalPages}
           total={pagination.totalCount}
           limit={pagination.limit}
-          itemLabel="records"
-          onPageChange={load}
+          itemLabel="applications"
+          onPageChange={(page) => load(page)}
+          onLimitChange={(limit) => {
+            setPagination((current) => ({ ...current, limit }));
+            load(1, limit);
+          }}
         />
       </AdminContent>
     </AdminPage>

@@ -87,8 +87,8 @@ export default function CheatsheetForm({ cheatsheetId }) {
       back={<Link href={returnTo} className="inline-flex items-center gap-2 text-sm text-zinc-500"><ArrowLeft className="h-4 w-4" /> Back to cheatsheets</Link>}
       actions={<Button form="cheatsheet-form" type="submit" loading={saving}><Save className="mr-2 h-4 w-4" /> Save cheatsheet</Button>}
     >
-      <form id="cheatsheet-form" onSubmit={submit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <section className="space-y-6">
+      <form id="cheatsheet-form" onSubmit={submit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] min-w-0 w-full">
+        <section className="space-y-6 min-w-0 w-full">
           <div className={formSectionClass}>
             <div className="space-y-2">
               <Label>Title</Label>
@@ -143,7 +143,7 @@ export default function CheatsheetForm({ cheatsheetId }) {
             </div>
           </div>
         </section>
-        <aside className={`${formAsideClass} self-start lg:sticky lg:top-24`}>
+        <aside className={`${formAsideClass} min-w-0 w-full self-start lg:sticky lg:top-24`}>
           <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-4 text-xs leading-5 text-zinc-600 dark:text-zinc-300"><strong className="block text-blue-600 dark:text-blue-400">Unified content model</strong>This entry is stored in the articles collection with type set to cheatsheet.</div>
           <div className="space-y-2"><Label>Technology</Label><Select required value={form.techId} onValueChange={(value) => update("techId", value)}><SelectTrigger><SelectValue placeholder="Select technology" /></SelectTrigger><SelectContent>{TECH_IDS.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select></div>
           <div className="space-y-2"><Label>Slug</Label><Input value={form.slug || "Generated on create"} disabled={!cheatsheetId} onChange={(event) => update("slug", event.target.value)} /></div>

@@ -1,13 +1,23 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, DatabaseZap, Save, Settings2, Sliders, RefreshCw } from "lucide-react";
+import {
+  ArrowLeft,
+  DatabaseZap,
+  Save,
+  Settings2,
+  Sliders,
+  RefreshCw,
+} from "lucide-react";
 import { toast } from "sonner";
 import { jobsApi } from "@/lib/api";
 import { getModuleBackUrl } from "@/hooks/useModuleHistory";
-import AdminFormShell, { formAsideClass, formSectionClass } from "@/components/forms/AdminFormShell";
+import AdminFormShell, {
+  formAsideClass,
+  formSectionClass,
+} from "@/components/forms/AdminFormShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,6 +39,9 @@ const types = [
   { value: "smartrecruiters", label: "SmartRecruiters" },
   { value: "workable", label: "Workable" },
   { value: "ashby", label: "Ashby" },
+  { value: "recruitee", label: "Recruitee" },
+  { value: "pinpoint", label: "Pinpoint" },
+  { value: "teamtailor", label: "Teamtailor" },
   { value: "api", label: "Custom JSON API" },
   { value: "other", label: "Other" },
 ];
@@ -56,7 +69,10 @@ const emptySource = {
 export default function SourceForm({ sourceId }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const returnTo = getModuleBackUrl("/jobs/sources", searchParams.get("returnTo"));
+  const returnTo = getModuleBackUrl(
+    "/jobs/sources",
+    searchParams.get("returnTo"),
+  );
 
   const [form, setForm] = useState(emptySource);
   const [loading, setLoading] = useState(Boolean(sourceId));
@@ -118,7 +134,11 @@ export default function SourceForm({ sourceId }) {
     setSaving(false);
 
     if (res.success) {
-      toast.success(sourceId ? "Source updated successfully" : "Source created successfully");
+      toast.success(
+        sourceId
+          ? "Source updated successfully"
+          : "Source created successfully",
+      );
       router.push(returnTo);
     } else {
       toast.error(res.error || "Unable to save source");
@@ -136,28 +156,50 @@ export default function SourceForm({ sourceId }) {
   return (
     <AdminFormShell
       eyebrow="Jobs / Sources"
-      title={sourceId ? `Edit Source: ${form.name || "Job Source"}` : "Add New Job Source"}
+      title={
+        sourceId
+          ? `Edit Source: ${form.name || "Job Source"}`
+          : "Add New Job Source"
+      }
       description="Configure public ATS integrations, endpoint mappings, and scheduled sync parameters for job ingestion."
       back={
-        <Link href={returnTo} className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
+        <Link
+          href={returnTo}
+          className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
+        >
           <ArrowLeft className="h-4 w-4" /> Back to job sources
         </Link>
       }
       actions={
-        <Button form="source-form" type="submit" disabled={saving} className="rounded-full">
-          {saving ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+        <Button
+          form="source-form"
+          type="submit"
+          disabled={saving}
+          className="rounded-full"
+        >
+          {saving ? (
+            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="mr-2 h-4 w-4" />
+          )}
           {saving ? "Saving..." : sourceId ? "Update Source" : "Create Source"}
         </Button>
       }
     >
-      <form id="source-form" onSubmit={submit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <form
+        id="source-form"
+        onSubmit={submit}
+        className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] min-w-0 w-full"
+      >
         {/* Main Content Sections */}
-        <section className="space-y-6">
+        <section className="space-y-6 min-w-0 w-full">
           {/* General Information */}
           <div className={formSectionClass}>
             <div className="flex items-center gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800">
               <DatabaseZap className="h-4 w-4 text-blue-600" />
-              <h2 className="font-semibold text-zinc-900 dark:text-white">Source Information</h2>
+              <h2 className="font-semibold text-zinc-900 dark:text-white">
+                Source Information
+              </h2>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -173,7 +215,10 @@ export default function SourceForm({ sourceId }) {
 
               <div className="space-y-2">
                 <Label required>Provider / Integration Type</Label>
-                <Select value={form.type} onValueChange={(val) => update("type", val)}>
+                <Select
+                  value={form.type}
+                  onValueChange={(val) => update("type", val)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select provider" />
                   </SelectTrigger>
@@ -191,15 +236,22 @@ export default function SourceForm({ sourceId }) {
                 <Label>Provider Organization / Board ID</Label>
                 <Input
                   value={form.providerOrganizationId}
-                  onChange={(e) => update("providerOrganizationId", e.target.value)}
+                  onChange={(e) =>
+                    update("providerOrganizationId", e.target.value)
+                  }
                   placeholder="e.g. careem, deliveroo (board token or slug)"
                 />
-                <p className="text-[11px] text-zinc-500">Board token, site ID, company slug, or ATS identifier.</p>
+                <p className="text-[11px] text-zinc-500">
+                  Board token, site ID, company slug, or ATS identifier.
+                </p>
               </div>
 
               <div className="space-y-2">
                 <Label>Provider Region</Label>
-                <Select value={form.providerRegion} onValueChange={(val) => update("providerRegion", val)}>
+                <Select
+                  value={form.providerRegion}
+                  onValueChange={(val) => update("providerRegion", val)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -217,7 +269,9 @@ export default function SourceForm({ sourceId }) {
           <div className={formSectionClass}>
             <div className="flex items-center gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800">
               <Sliders className="h-4 w-4 text-violet-600" />
-              <h2 className="font-semibold text-zinc-900 dark:text-white">Endpoints & URLs</h2>
+              <h2 className="font-semibold text-zinc-900 dark:text-white">
+                Endpoints & URLs
+              </h2>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -249,7 +303,9 @@ export default function SourceForm({ sourceId }) {
                   onChange={(e) => update("endpointUrl", e.target.value)}
                   placeholder="https://api.example.com/v1/jobs"
                 />
-                <p className="text-[11px] text-zinc-500">Overrides standard provider URL for custom API imports.</p>
+                <p className="text-[11px] text-zinc-500">
+                  Overrides standard provider URL for custom API imports.
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -265,7 +321,9 @@ export default function SourceForm({ sourceId }) {
                 <Label>Credential Environment Variable</Label>
                 <Input
                   value={form.credentialEnvKey}
-                  onChange={(e) => update("credentialEnvKey", e.target.value.toUpperCase())}
+                  onChange={(e) =>
+                    update("credentialEnvKey", e.target.value.toUpperCase())
+                  }
                   placeholder="e.g. JOBS_VENDOR_API_TOKEN"
                 />
               </div>
@@ -277,13 +335,17 @@ export default function SourceForm({ sourceId }) {
             <div className="flex items-center justify-between border-b border-zinc-100 pb-3 dark:border-zinc-800">
               <div className="flex items-center gap-2">
                 <Settings2 className="h-4 w-4 text-amber-500" />
-                <h2 className="font-semibold text-zinc-900 dark:text-white">Field Mapping JSON</h2>
+                <h2 className="font-semibold text-zinc-900 dark:text-white">
+                  Field Mapping JSON
+                </h2>
               </div>
               <span className="text-xs font-mono text-zinc-400">JSON</span>
             </div>
 
             <p className="text-xs leading-5 text-zinc-500">
-              For generic public JSON APIs, map custom response fields (e.g. `externalId`, `title`, `location`, `url`, `publishedAt`) to the internal schema.
+              For generic public JSON APIs, map custom response fields (e.g.
+              `externalId`, `title`, `location`, `url`, `publishedAt`) to the
+              internal schema.
             </p>
 
             <textarea
@@ -297,16 +359,24 @@ export default function SourceForm({ sourceId }) {
         </section>
 
         {/* Sidebar Settings */}
-        <aside className={`${formAsideClass} self-start lg:sticky lg:top-24 space-y-5`}>
+        <aside
+          className={`${formAsideClass} min-w-0 w-full self-start lg:sticky lg:top-24 space-y-5`}
+        >
           <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-4 text-xs leading-5 text-zinc-600 dark:text-zinc-300">
-            <strong className="block text-blue-600 dark:text-blue-400 font-bold mb-1">ATS Ingestion Adapter</strong>
-            Supported adapters automatically sanitize, extract UAE location coordinates, verify company profiles, and score listing quality.
+            <strong className="block text-blue-600 dark:text-blue-400 font-bold mb-1">
+              ATS Ingestion Adapter
+            </strong>
+            Supported adapters automatically sanitize, extract UAE location
+            coordinates, verify company profiles, and score listing quality.
           </div>
 
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>Sync Schedule</Label>
-              <Select value={form.syncFrequency} onValueChange={(val) => update("syncFrequency", val)}>
+              <Select
+                value={form.syncFrequency}
+                onValueChange={(val) => update("syncFrequency", val)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -343,8 +413,12 @@ export default function SourceForm({ sourceId }) {
             <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 space-y-3">
               <div className="flex items-center justify-between rounded-xl bg-zinc-50 p-3 dark:bg-zinc-900/60">
                 <div className="space-y-0.5">
-                  <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">Enabled</span>
-                  <p className="text-[10px] text-zinc-500">Allow background syncs</p>
+                  <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                    Enabled
+                  </span>
+                  <p className="text-[10px] text-zinc-500">
+                    Allow background syncs
+                  </p>
                 </div>
                 <Switch
                   checked={form.enabled}
@@ -354,8 +428,12 @@ export default function SourceForm({ sourceId }) {
 
               <div className="flex items-center justify-between rounded-xl bg-zinc-50 p-3 dark:bg-zinc-900/60">
                 <div className="space-y-0.5">
-                  <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">Trusted Source</span>
-                  <p className="text-[10px] text-zinc-500">High-reputation employer</p>
+                  <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                    Trusted Source
+                  </span>
+                  <p className="text-[10px] text-zinc-500">
+                    High-reputation employer
+                  </p>
                 </div>
                 <Switch
                   checked={form.trusted}
@@ -365,8 +443,12 @@ export default function SourceForm({ sourceId }) {
 
               <div className="flex items-center justify-between rounded-xl bg-zinc-50 p-3 dark:bg-zinc-900/60">
                 <div className="space-y-0.5">
-                  <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">Auto Publish</span>
-                  <p className="text-[10px] text-zinc-500">Publish high-quality jobs</p>
+                  <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                    Auto Publish
+                  </span>
+                  <p className="text-[10px] text-zinc-500">
+                    Publish high-quality jobs
+                  </p>
                 </div>
                 <Switch
                   checked={form.autoPublish}

@@ -211,8 +211,8 @@ export default function ArticleForm({ articleId = null }) {
         </>
       }
     >
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <section className="space-y-6 min-w-0">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] min-w-0 w-full">
+        <section className="space-y-6 min-w-0 w-full">
           <div className={formSectionClass}>
             <div className="space-y-2">
               <Label>Title</Label>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import * as Dialog from "@radix-ui/react-dialog";
 import { Bookmark, Check, ExternalLink, Send, Share2, X } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/axios";
@@ -66,7 +67,7 @@ export default function JobActions({ job, layout = "stacked" }) {
     const payload = {
       title: `${job.title} at ${job.companyName}`,
       text: `View this UAE job on asif.to`,
-      url: window.location.href,
+      url: `${window.location.origin}/jobs/${encodeURIComponent(job.slug)}`,
     };
     try {
       if (navigator.share) await navigator.share(payload);
@@ -123,6 +124,7 @@ export default function JobActions({ job, layout = "stacked" }) {
           <span className="truncate">
             {job.status === "expired"
               ? "Applications closed"
+              : isBar ? "Apply now"
               : job.applicationType === "external"
                 ? "Apply on company website"
                 : "Apply through asif.to"}
@@ -136,6 +138,7 @@ export default function JobActions({ job, layout = "stacked" }) {
             onClick={save}
             disabled={working}
             aria-pressed={saved}
+            aria-label={saved ? "Remove saved job" : "Save job"}
             className={`h-11 rounded-full border border-zinc-200/90 bg-white px-4 text-xs font-black hover:border-blue-300 dark:border-zinc-700 dark:bg-zinc-900 ${isBar ? "shrink-0" : "flex-1"}`}
           >
             {saved ? (
@@ -166,13 +169,10 @@ export default function JobActions({ job, layout = "stacked" }) {
       )}
 
       {showApplication && (
-        <div
-          className="fixed inset-0 z-150 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="application-title"
-        >
-          <div className="relative max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-[28px] border border-zinc-800/80 bg-zinc-950 p-6 text-left text-zinc-100 shadow-2xl sm:p-8">
+        <Dialog.Root open onOpenChange={setShowApplication}>
+          <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 z-150 bg-black/70 backdrop-blur-md" />
+          <Dialog.Content aria-describedby="application-description" className="fixed left-1/2 top-1/2 z-151 max-h-[90dvh] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[28px] border border-zinc-800/80 bg-zinc-950 p-6 text-left text-zinc-100 shadow-2xl sm:p-8">
             <button
               type="button"
               onClick={() => setShowApplication(false)}
@@ -190,12 +190,12 @@ export default function JobActions({ job, layout = "stacked" }) {
               <p className="text-[10px] font-black uppercase tracking-widest text-blue-500">
                 Direct application
               </p>
-              <h2 id="application-title" className="mt-1 font-outfit text-2xl font-black tracking-tight text-white">
+              <Dialog.Title className="mt-1 pr-8 font-outfit text-2xl font-black tracking-tight text-white">
                 Apply for {job.title}
-              </h2>
-              <p className="mt-1.5 text-xs font-medium leading-relaxed text-zinc-400">
+              </Dialog.Title>
+              <Dialog.Description id="application-description" className="mt-1.5 text-xs font-medium leading-relaxed text-zinc-400">
                 Your details and CV will be stored privately and shared directly with the employer.
-              </p>
+              </Dialog.Description>
             </div>
 
             <form onSubmit={submitInternal} className="mt-6 space-y-4">
@@ -300,8 +300,9 @@ export default function JobActions({ job, layout = "stacked" }) {
                 </Button>
               </div>
             </form>
-          </div>
-        </div>
+          </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
       )}
     </>
   );

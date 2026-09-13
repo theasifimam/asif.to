@@ -130,7 +130,7 @@ export default function AboutPage() {
           <ol className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {process.map((item, index) => (
               <li
-                key={item}
+                key={`${item}-${index}`}
                 className="flex items-center gap-3 rounded-3xl bg-zinc-50 p-4 text-sm font-bold dark:bg-zinc-950"
               >
                 <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-blue-600 text-xs text-white">

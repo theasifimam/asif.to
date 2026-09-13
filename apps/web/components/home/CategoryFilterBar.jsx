@@ -20,13 +20,13 @@ export default function CategoryFilterBar({
     <div className="w-full pb-3 mb-4">
       {/* Scrollable Container with Glass Effect */}
       <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-3 px-4 rounded-[2rem] bg-white/40 dark:bg-[#191f13]/40 border border-[#e1e7d4]/80 dark:border-[#2d3624]/60 backdrop-blur-md shadow-xs">
-        {categories.map((cat) => {
+        {categories.map((cat, idx) => {
           const isActive = activeCategory.toLowerCase() === cat.toLowerCase();
           const icon = CATEGORY_ICONS[cat.toUpperCase()] || "📌";
 
           return (
             <button
-              key={cat}
+              key={`${cat}-${idx}`}
               onClick={() => onSelectCategory(cat)}
               className={`relative px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 android-haptic shrink-0 flex items-center gap-2 cursor-pointer ${
                 isActive

@@ -52,8 +52,7 @@ const badge = {
   published:
     "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
   pending: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300",
-  expired:
-    "bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300",
+  expired: "bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300",
   rejected: "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300",
   draft: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
   hidden: "bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300",
@@ -99,8 +98,9 @@ export default function JobsAdminPage() {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("card");
 
-  const load = async (page = pagination.page) => {
+  const load = async (page = pagination.page, overrideLimit = null) => {
     setLoading(true);
+    const limit = overrideLimit || pagination.limit;
     const queryParams = {
       ...filters,
       status: filters.status === "all" ? "" : filters.status,
@@ -108,7 +108,7 @@ export default function JobsAdminPage() {
       importStatus: filters.importStatus === "all" ? "" : filters.importStatus,
       source: filters.source === "all" ? "" : filters.source,
       page,
-      limit: pagination.limit,
+      limit,
     };
     const [jobsResult, dashboardResult, sourcesResult] = await Promise.all([
       jobsApi.list(queryParams),
@@ -142,7 +142,9 @@ export default function JobsAdminPage() {
     if (!ids.length) return toast.error("Select at least one job");
     const result = await jobsApi.bulk(action, ids);
     if (!result.success) return toast.error(result.error || "Action failed");
-    toast.success(`${result.data?.data?.modified || ids.length} job(s) updated`);
+    toast.success(
+      `${result.data?.data?.modified || ids.length} job(s) updated`,
+    );
     load();
   };
 
@@ -352,7 +354,7 @@ export default function JobsAdminPage() {
         </div>
       )}
 
-      <AdminContent>
+      <AdminContent plain={viewMode === "card"}>
         {loading ? (
           <AdminLoading />
         ) : viewMode === "list" ? (
@@ -544,7 +546,7 @@ export default function JobsAdminPage() {
           </div>
         ) : (
           /* Card Grid View */
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 p-4 sm:p-5">
+          <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
             {jobs.map((job) => (
               <article
                 key={job._id}
@@ -709,7 +711,9 @@ export default function JobsAdminPage() {
             ))}
             {!jobs.length && (
               <div className="col-span-full rounded-3xl border border-dashed border-zinc-300 bg-zinc-50 px-6 py-14 text-center dark:border-zinc-700 dark:bg-zinc-900/40">
-                <p className="font-bold text-zinc-500">No jobs match these filters.</p>
+                <p className="font-bold text-zinc-500">
+                  No jobs match these filters.
+                </p>
               </div>
             )}
           </div>
@@ -721,10 +725,10 @@ export default function JobsAdminPage() {
           total={pagination.totalCount}
           limit={pagination.limit}
           itemLabel="jobs"
-          onPageChange={load}
+          onPageChange={(page) => load(page)}
           onLimitChange={(limit) => {
             setPagination((current) => ({ ...current, limit }));
-            setTimeout(() => load(1), 0);
+            load(1, limit);
           }}
         />
       </AdminContent>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   ChartNoAxesCombined,
+  ChevronDown,
   LayoutDashboard,
   Menu,
   MessageSquare,
@@ -12,6 +13,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import MessageNavBadge from "./MessageNavBadge";
 
 export default function MobileBottomNavbar({
@@ -22,7 +24,15 @@ export default function MobileBottomNavbar({
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [menuQuery, setMenuQuery] = useState("");
+  const [collapsedGroups, setCollapsedGroups] = useState({});
   const islandRef = useRef(null);
+
+  const toggleGroup = (groupName) => {
+    setCollapsedGroups((prev) => ({
+      ...prev,
+      [groupName]: !prev[groupName],
+    }));
+  };
 
   // Close island on route change
   useEffect(() => {
@@ -69,7 +79,9 @@ export default function MobileBottomNavbar({
   };
 
   const permittedHrefs = new Set(
-    navItems.flatMap((group) => group.items.map((item) => item.href?.split("?")[0])),
+    navItems.flatMap((group) =>
+      group.items.map((item) => item.href?.split("?")[0]),
+    ),
   );
   const primaryTabs = [
     {
@@ -91,9 +103,7 @@ export default function MobileBottomNavbar({
       isActive: pathname.startsWith("/messages"),
       isMessageBadge: true,
     },
-  ].filter(
-    (tab) => tab.href === "/dashboard" || permittedHrefs.has(tab.href),
-  );
+  ].filter((tab) => tab.href === "/dashboard" || permittedHrefs.has(tab.href));
 
   const normalizedQuery = menuQuery.trim().toLowerCase();
   const filteredNavItems = navItems
@@ -171,68 +181,109 @@ export default function MobileBottomNavbar({
 
           {/* Navlink Groups */}
           <div className="flex flex-col gap-4">
-            {filteredNavItems.map((group) => (
-              <div key={group.group} className="flex flex-col gap-2">
-                <h3 className="px-1 text-[9.5px] font-black uppercase tracking-[0.25em] text-zinc-400 dark:text-zinc-500">
-                  {group.group}
-                </h3>
-                <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
-                  {group.items.map((item) => {
-                    const targetHref =
-                      item.name === "My Profile" && user?._id
-                        ? `/users/${user._id}`
-                        : item.href;
-                    const isActive =
-                      checkIsActive(targetHref) ||
-                      Boolean(
-                        item.children?.some((child) =>
-                          checkIsActive(child.href)
-                        )
-                      );
-                    const Icon = item.icon;
+            {filteredNavItems.map((group) => {
+              const isGroupCollapsed = Boolean(collapsedGroups[group.group]);
 
-                    return (
-                      <Link
-                        key={item.href}
-                        href={targetHref}
-                        onClick={() => setIsOpen(false)}
-                        className={`group relative flex min-h-14 items-center gap-2.5 rounded-2xl border p-2.5 transition-all active:scale-95 ${
-                          isActive
-                            ? "border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-600/20"
-                            : "border-zinc-200/60 bg-zinc-50/70 hover:border-zinc-300 hover:bg-white dark:border-zinc-800/80 dark:bg-zinc-900/40 dark:hover:border-zinc-700 dark:hover:bg-zinc-900 text-zinc-800 dark:text-zinc-200"
-                        }`}
+              return (
+                <div key={group.group} className="flex flex-col gap-1">
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.group)}
+                    className="group/header flex w-full items-center justify-between px-1 py-1.5 text-[9.5px] font-black uppercase tracking-[0.25em] text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors cursor-pointer select-none"
+                  >
+                    <span>{group.group}</span>
+                    <ChevronDown
+                      size={13}
+                      className={`text-zinc-400 dark:text-zinc-600 transition-transform duration-200 ${
+                        isGroupCollapsed ? "-rotate-90" : "rotate-0"
+                      }`}
+                    />
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {!isGroupCollapsed && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.18, ease: "easeInOut" }}
+                        className="overflow-hidden"
                       >
-                        <div
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors ${
-                            isActive
-                              ? "bg-white/20 text-white"
-                              : "bg-white text-zinc-600 shadow-2xs dark:bg-zinc-800 dark:text-zinc-300 group-hover:text-blue-600 dark:group-hover:text-blue-400"
-                          }`}
-                        >
-                          <Icon size={16} />
+                        <div className="flex flex-col overflow-hidden rounded-[20px] border border-zinc-200/80 bg-zinc-50/50 dark:border-zinc-800/80 dark:bg-zinc-900/30 mt-1 mb-1.5 divide-y divide-zinc-100 dark:divide-zinc-800/80">
+                          {group.items.map((item) => {
+                            const targetHref =
+                              item.name === "My Profile" && user?._id
+                                ? `/users/${user._id}`
+                                : item.href;
+                            const isActive =
+                              checkIsActive(targetHref) ||
+                              Boolean(
+                                item.children?.some((child) =>
+                                  checkIsActive(child.href),
+                                ),
+                              );
+                            const Icon = item.icon;
+
+                            return (
+                              <Link
+                                key={item.href}
+                                href={targetHref}
+                                onClick={() => setIsOpen(false)}
+                                className={`group relative flex min-h-14 items-center gap-3 px-3.5 py-2 transition-all active:bg-zinc-100 dark:active:bg-zinc-800 ${
+                                  isActive
+                                    ? "bg-blue-50/60 dark:bg-blue-900/10"
+                                    : "hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40"
+                                }`}
+                              >
+                                <div
+                                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors ${
+                                    isActive
+                                      ? "bg-blue-600 text-white shadow-xs shadow-blue-600/20"
+                                      : "bg-white text-zinc-500 shadow-xs border border-zinc-200/60 dark:border-zinc-700/50 dark:bg-zinc-800 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white"
+                                  }`}
+                                >
+                                  <Icon
+                                    size={16}
+                                    strokeWidth={isActive ? 2.5 : 2}
+                                  />
+                                </div>
+                                <div className="min-w-0 flex-1 flex flex-col justify-center">
+                                  <p
+                                    className={`truncate font-outfit text-[13px] font-bold leading-tight ${
+                                      isActive
+                                        ? "text-blue-700 dark:text-blue-300"
+                                        : "text-zinc-900 dark:text-zinc-100"
+                                    }`}
+                                  >
+                                    {item.name}
+                                  </p>
+                                  {item.description && (
+                                    <p
+                                      className={`truncate text-[10px] mt-0.5 ${
+                                        isActive
+                                          ? "text-blue-600/80 dark:text-blue-400/80 font-medium"
+                                          : "text-zinc-500 dark:text-zinc-500"
+                                      }`}
+                                    >
+                                      {item.description}
+                                    </p>
+                                  )}
+                                </div>
+                                {isActive && (
+                                  <div className="shrink-0 ml-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
+                                  </div>
+                                )}
+                              </Link>
+                            );
+                          })}
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate font-outfit text-xs font-bold leading-tight">
-                            {item.name}
-                          </p>
-                          {item.description && (
-                            <p
-                              className={`truncate text-[9.5px] mt-0.5 ${
-                                isActive
-                                  ? "text-blue-100"
-                                  : "text-zinc-400 dark:text-zinc-500"
-                              }`}
-                            >
-                              {item.description}
-                            </p>
-                          )}
-                        </div>
-                      </Link>
-                    );
-                  })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {filteredNavItems.length === 0 && (
               <div className="rounded-2xl border border-dashed border-zinc-200 px-4 py-8 text-center text-sm font-medium text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
                 No admin section matches “{menuQuery}”.
@@ -268,7 +319,10 @@ export default function MobileBottomNavbar({
               }`}
             >
               <span className="relative flex min-h-11 min-w-11 items-center justify-center gap-1.5">
-                <Icon className="h-4 w-4 shrink-0" strokeWidth={tab.isActive ? 2.5 : 2} />
+                <Icon
+                  className="h-4 w-4 shrink-0"
+                  strokeWidth={tab.isActive ? 2.5 : 2}
+                />
                 {tab.isMessageBadge && (
                   <span className="absolute right-1 top-0.5">
                     <MessageNavBadge />

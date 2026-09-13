@@ -107,9 +107,9 @@ export default function CompanyForm({ companyId }) {
         </Button>
       }
     >
-      <form id="company-form" onSubmit={submit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <form id="company-form" onSubmit={submit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] min-w-0 w-full">
         {/* Main Section */}
-        <section className="space-y-6">
+        <section className="space-y-6 min-w-0 w-full">
           {/* General Info */}
           <div className={formSectionClass}>
             <div className="flex items-center gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800">
@@ -221,7 +221,7 @@ export default function CompanyForm({ companyId }) {
         </section>
 
         {/* Sidebar Settings & Preview */}
-        <aside className={`${formAsideClass} self-start lg:sticky lg:top-24 space-y-5`}>
+        <aside className={`${formAsideClass} min-w-0 w-full self-start lg:sticky lg:top-24 space-y-5`}>
           {/* Logo preview */}
           <div className="rounded-3xl border border-zinc-200 bg-white p-5 text-center dark:border-zinc-800 dark:bg-zinc-950 shadow-xs">
             <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-3">

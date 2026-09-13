@@ -361,9 +361,9 @@ export default function FAQPage() {
               Categories
             </h2>
             <div className="flex flex-row lg:flex-col overflow-x-auto gap-2 scrollbar-none rounded-3xl text-xs sm:text-sm font-bold border bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800/80 p-2">
-              {categories.map((cat) => (
+              {categories.map((cat, idx) => (
                 <button
-                  key={cat}
+                  key={`${cat}-${idx}`}
                   onClick={() => {
                     setActiveCategory(cat);
                     setOpenIndexes({}); // close accordions on tab switch

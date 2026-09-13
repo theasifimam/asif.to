@@ -3,7 +3,7 @@ import LogoLoader from "@/components/ui/LogoLoader";
 import { AdminPage, AdminPageHeader } from "@/components/admin";
 
 export const formSectionClass =
-  "admin-surface min-w-0 space-y-4 px-4 py-5 sm:space-y-5 sm:p-7";
+  "admin-surface min-w-0 w-full space-y-4 px-4 py-5 sm:space-y-5 sm:p-7 overflow-hidden rounded-3xl sm:rounded-4xl";
 export const formAsideClass = formSectionClass;
 
 export function AdminFormLoading() {

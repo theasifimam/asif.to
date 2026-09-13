@@ -271,9 +271,9 @@ export default function SearchPageClient() {
             </p>
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-2 max-w-xl mx-auto">
-              {POPULAR_SEARCHES.map((topic) => (
+              {POPULAR_SEARCHES.map((topic, index) => (
                 <button
-                  key={topic}
+                  key={`${topic}-${index}`}
                   onClick={() => setQuery(topic)}
                   className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100/80 dark:bg-zinc-800/80 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/50 dark:hover:text-blue-400 px-3.5 py-1.5 text-xs font-semibold text-zinc-700 dark:text-zinc-300 border border-zinc-200/60 dark:border-zinc-700/60 transition shadow-sm"
                 >

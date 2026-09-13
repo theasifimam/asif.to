@@ -120,7 +120,7 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-3xl border border-zinc-200/80 bg-white p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900/90 sm:rounded-4xl sm:p-5"
+      className="space-y-4 rounded-3xl border border-zinc-200/80 bg-white p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900/90 sm:rounded-4xl sm:p-5"
     >
       {fixed.location && (
         <input type="hidden" name="location" value={fixed.location} />
@@ -141,157 +141,191 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
         />
       </div>
 
-      {/* Select dropdowns */}
-      <div className="mt-3 grid grid-cols-1 gap-2 min-[380px]:grid-cols-2 lg:grid-cols-1">
+      {/* Location & Category Selects */}
+      <div className="grid grid-cols-1 gap-2.5">
         {!fixed.location && (
-          <Select value={location} onValueChange={setLocation}>
-            <SelectTrigger
-              aria-label="UAE location"
-              className="h-11 rounded-2xl bg-zinc-50/80 text-xs font-semibold dark:bg-zinc-950"
-            >
-              <SelectValue placeholder="All UAE locations" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All UAE locations</SelectItem>
-              {locationOptions.map((item) => (
-                <SelectItem key={item.value} value={item.value}>
-                  {item.label}
-                  {Number.isFinite(item.count) ? ` (${item.count})` : ""}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Location</label>
+            <Select value={location} onValueChange={setLocation}>
+              <SelectTrigger
+                aria-label="UAE location"
+                className="h-11 rounded-2xl bg-zinc-50/80 text-xs font-semibold dark:bg-zinc-950"
+              >
+                <SelectValue placeholder="All UAE locations" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All UAE locations</SelectItem>
+                {locationOptions.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                    {Number.isFinite(item.count) ? ` (${item.count})` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         )}
 
         {!fixed.category && (
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger
-              aria-label="Category"
-              className="h-11 rounded-2xl bg-zinc-50/80 text-xs font-semibold dark:bg-zinc-950"
-            >
-              <SelectValue placeholder="All categories" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All categories</SelectItem>
-              {categoryOptions.map((item) => (
-                <SelectItem key={item.value} value={item.value}>
-                  {item.label}
-                  {Number.isFinite(item.count) ? ` (${item.count})` : ""}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Category</label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger
+                aria-label="Category"
+                className="h-11 rounded-2xl bg-zinc-50/80 text-xs font-semibold dark:bg-zinc-950"
+              >
+                <SelectValue placeholder="All categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All categories</SelectItem>
+                {categoryOptions.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                    {Number.isFinite(item.count) ? ` (${item.count})` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         )}
+      </div>
 
-        <Select value={employmentType} onValueChange={setEmploymentType}>
-          <SelectTrigger
-            aria-label="Employment type"
-            className="h-11 rounded-2xl bg-zinc-50/80 text-xs font-semibold dark:bg-zinc-950"
-          >
-            <SelectValue placeholder="Employment type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All employment types</SelectItem>
-            {(taxonomy.employmentTypes || []).map((item) => (
-              <SelectItem key={item} value={item}>
-                {item}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Work Mode Chips */}
+      <div className="space-y-1.5">
+        <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Work mode</label>
+        <div className="flex flex-wrap gap-1.5">
+          {["all", ...(taxonomy.workModes || ["on-site", "remote", "hybrid"])].map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => setWorkMode(mode)}
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                workMode === mode
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
+              }`}
+            >
+              {mode === "all" ? "All" : mode.charAt(0).toUpperCase() + mode.slice(1).replaceAll("-", " ")}
+            </button>
+          ))}
+        </div>
+      </div>
 
-        <Select value={workMode} onValueChange={setWorkMode}>
-          <SelectTrigger
-            aria-label="Work mode"
-            className="h-11 rounded-2xl bg-zinc-50/80 text-xs font-semibold dark:bg-zinc-950"
-          >
-            <SelectValue placeholder="Work mode" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All work modes</SelectItem>
-            {(taxonomy.workModes || []).map((item) => (
-              <SelectItem key={item} value={item}>
-                {item}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Employment Type Chips */}
+      <div className="space-y-1.5">
+        <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Employment type</label>
+        <div className="flex flex-wrap gap-1.5">
+          {["all", ...(taxonomy.employmentTypes || ["full-time", "part-time", "contract", "freelance", "internship"])].map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => setEmploymentType(type)}
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                employmentType === type
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
+              }`}
+            >
+              {type === "all" ? "All" : type.charAt(0).toUpperCase() + type.slice(1).replaceAll("-", " ")}
+            </button>
+          ))}
+        </div>
+      </div>
 
-        <Select value={experienceLevel} onValueChange={setExperienceLevel}>
-          <SelectTrigger
-            aria-label="Experience level"
-            className="h-11 rounded-2xl bg-zinc-50/80 text-xs font-semibold dark:bg-zinc-950"
-          >
-            <SelectValue placeholder="Experience level" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All experience levels</SelectItem>
-            {(taxonomy.experienceLevels || []).map((item) => (
-              <SelectItem key={item} value={item}>
-                {item}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Experience Level Chips */}
+      <div className="space-y-1.5">
+        <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Experience level</label>
+        <div className="flex flex-wrap gap-1.5">
+          {["all", ...(taxonomy.experienceLevels || ["entry", "mid", "senior", "lead", "executive"])].map((lvl) => (
+            <button
+              key={lvl}
+              type="button"
+              onClick={() => setExperienceLevel(lvl)}
+              className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                experienceLevel === lvl
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
+              }`}
+            >
+              {lvl === "all" ? "All" : lvl.charAt(0).toUpperCase() + lvl.slice(1).replaceAll("-", " ")}
+            </button>
+          ))}
+        </div>
+      </div>
 
-        <Select value={datePosted} onValueChange={setDatePosted}>
-          <SelectTrigger
-            aria-label="Date posted"
-            className="h-11 rounded-2xl bg-zinc-50/80 text-xs font-semibold dark:bg-zinc-950"
-          >
-            <SelectValue placeholder="Date posted" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Any date</SelectItem>
-            <SelectItem value="day">Past 24 hours</SelectItem>
-            <SelectItem value="week">Past week</SelectItem>
-            <SelectItem value="month">Past month</SelectItem>
-          </SelectContent>
-        </Select>
+      {/* Date Posted Segmented Control */}
+      <div className="space-y-1.5">
+        <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Date posted</label>
+        <div className="grid grid-cols-4 gap-1 rounded-2xl bg-zinc-100 p-1 dark:bg-zinc-950">
+          {[
+            ["all", "Anytime"],
+            ["day", "24h"],
+            ["week", "Week"],
+            ["month", "Month"],
+          ].map(([value, labelText]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setDatePosted(value)}
+              className={`rounded-xl py-1.5 text-[11px] font-bold transition-all cursor-pointer ${
+                datePosted === value
+                  ? "bg-white text-zinc-950 shadow-xs dark:bg-zinc-800 dark:text-white"
+                  : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+              }`}
+            >
+              {labelText}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Salary inputs */}
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <Input
-          name="salaryMin"
-          type="number"
-          min="0"
-          step="1000"
-          value={salaryMin}
-          onChange={(e) => setSalaryMin(e.target.value)}
-          placeholder="Min AED"
-          className="h-11 rounded-2xl bg-zinc-50/80 text-xs font-semibold dark:bg-zinc-950"
-        />
-        <Input
-          name="salaryMax"
-          type="number"
-          min="0"
-          step="1000"
-          value={salaryMax}
-          onChange={(e) => setSalaryMax(e.target.value)}
-          placeholder="Max AED"
-          className="h-11 rounded-2xl bg-zinc-50/80 text-xs font-semibold dark:bg-zinc-950"
-        />
+      <div className="space-y-1.5">
+        <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Monthly Salary (AED)</label>
+        <div className="grid grid-cols-2 gap-2">
+          <Input
+            name="salaryMin"
+            type="number"
+            min="0"
+            step="1000"
+            value={salaryMin}
+            onChange={(e) => setSalaryMin(e.target.value)}
+            placeholder="Min AED"
+            className="h-11 rounded-2xl bg-zinc-50/80 text-xs font-semibold dark:bg-zinc-950"
+          />
+          <Input
+            name="salaryMax"
+            type="number"
+            min="0"
+            step="1000"
+            value={salaryMax}
+            onChange={(e) => setSalaryMax(e.target.value)}
+            placeholder="Max AED"
+            className="h-11 rounded-2xl bg-zinc-50/80 text-xs font-semibold dark:bg-zinc-950"
+          />
+        </div>
       </div>
 
       {/* Action buttons */}
-      <Button
-        type="submit"
-        disabled={isPending}
-        loading={isPending}
-        className="mt-3.5 h-11 w-full rounded-full bg-blue-600 text-xs font-black text-white shadow-md shadow-blue-600/15 transition hover:bg-blue-700 active:scale-[0.985]"
-      >
-        <SlidersHorizontal className="h-3.5 w-3.5" />
-        Find jobs
-      </Button>
+      <div className="pt-1 space-y-2">
+        <Button
+          type="submit"
+          disabled={isPending}
+          loading={isPending}
+          className="h-12 w-full rounded-full bg-blue-600 text-xs font-black text-white shadow-md shadow-blue-600/15 transition hover:bg-blue-700 active:scale-[0.985] cursor-pointer"
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          Apply filters
+        </Button>
 
-      <a
-        href={clearHref}
-        className="mt-2.5 flex items-center justify-center gap-1.5 text-center text-[11px] font-bold text-zinc-400 transition hover:text-blue-600 dark:text-zinc-500 dark:hover:text-blue-400"
-      >
-        <RotateCcw className="h-3 w-3" />
-        Clear filters
-      </a>
+        <a
+          href={clearHref}
+          className="flex items-center justify-center gap-1.5 text-center text-[11px] font-bold text-zinc-400 transition hover:text-blue-600 dark:text-zinc-500 dark:hover:text-blue-400 py-1"
+        >
+          <RotateCcw className="h-3 w-3" />
+          Reset all filters
+        </a>
+      </div>
     </form>
   );
 }

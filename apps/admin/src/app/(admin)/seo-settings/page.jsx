@@ -29,8 +29,8 @@ export default function SeoSettingsPage() {
         </p>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-        <aside className="admin-surface rounded-3xl p-4 self-start">
+      <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)] min-w-0 w-full">
+        <aside className="admin-surface rounded-3xl p-4 self-start min-w-0 w-full">
           <p className="px-3 py-2 text-[10px] font-black uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
             Common Routes
           </p>
@@ -51,7 +51,7 @@ export default function SeoSettingsPage() {
           </div>
         </aside>
 
-        <main className="admin-surface space-y-5 rounded-3xl p-6 sm:p-8">
+        <main className="admin-surface space-y-5 rounded-3xl p-6 sm:p-8 min-w-0 w-full">
           <div className="flex items-center gap-2 border-b border-zinc-100 dark:border-zinc-800 pb-4">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
               <SearchCheck className="h-4.5 w-4.5" />

@@ -88,16 +88,54 @@ export default function BottomNav() {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [authTab, setAuthTab] = useState("signin");
   const [continueReading, setContinueReading] = useState(null);
+  const [localLastReading, setLocalLastReading] = useState(null);
+
+  // Load last-visited chapter from localStorage (set by ChapterClient on each visit).
+  // Only show the pill if the entry is fresh (within 7 days). Older entries are
+  // cleared so the pill doesn't persist indefinitely for inactive users.
+  const loadLocalLastReading = useCallback(() => {
+    try {
+      const raw = localStorage.getItem("asif-last-reading");
+      if (!raw) {
+        setLocalLastReading(null);
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      if (!parsed?.href) {
+        setLocalLastReading(null);
+        return;
+      }
+      // Expiry check: 7 days
+      const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+      const age = parsed.visitedAt
+        ? Date.now() - new Date(parsed.visitedAt).getTime()
+        : Infinity;
+      if (age > SEVEN_DAYS_MS) {
+        localStorage.removeItem("asif-last-reading");
+        setLocalLastReading(null);
+        return;
+      }
+      setLocalLastReading(parsed);
+    } catch {
+      setLocalLastReading(null);
+    }
+  }, []);
 
   const loadContinueReading = useCallback(async () => {
     const api = process.env.NEXT_PUBLIC_API_URL;
-    if (!api || !isAuthenticated) { setContinueReading(null); return; }
+    if (!api || !isAuthenticated) {
+      setContinueReading(null);
+      return;
+    }
     try {
       const res = await fetch(
         `${api.replace(/\/$/, "")}/courses/progress/me/summary`,
         { credentials: "include", cache: "no-store" },
       );
-      if (!res.ok) { setContinueReading(null); return; }
+      if (!res.ok) {
+        setContinueReading(null);
+        return;
+      }
       const body = await res.json();
       setContinueReading(body?.data?.current || null);
     } catch {
@@ -132,9 +170,39 @@ export default function BottomNav() {
     };
   }, [isMenuOpen]);
 
+  // Load on menu open AND on mount (so the tab bar pill is populated immediately)
+  useEffect(() => {
+    loadContinueReading();
+    loadLocalLastReading();
+    const onLocalUpdate = () => loadLocalLastReading();
+    window.addEventListener("asif-last-reading-updated", onLocalUpdate);
+    return () =>
+      window.removeEventListener("asif-last-reading-updated", onLocalUpdate);
+  }, [loadContinueReading, loadLocalLastReading]);
+
   useEffect(() => {
     if (isMenuOpen) loadContinueReading();
   }, [isMenuOpen, loadContinueReading]);
+
+  // Merge: prefer localLastReading if it exists; fall back to API continueReading
+  const activeContinueReading = localLastReading
+    ? {
+        course: {
+          title: localLastReading.courseTitle,
+          slug: localLastReading.courseSlug,
+        },
+        overallProgress: continueReading?.overallProgress || 0,
+        nextAction: {
+          href: localLastReading.href,
+          chapter: {
+            title: localLastReading.chapterTitle,
+            slug: localLastReading.chapterSlug,
+          },
+          stage: "learn",
+          label: "Continue reading",
+        },
+      }
+    : continueReading;
 
   const handleLogout = async () => {
     try {
@@ -212,6 +280,53 @@ export default function BottomNav() {
             )}
           </span>
         </Link>
+
+        {/* Continue Reading Pill Tab — always visible when last-reading exists;
+            active style only when currently ON that chapter page */}
+        <AnimatePresence>
+          {activeContinueReading?.nextAction && !isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, width: 0 }}
+              animate={{ opacity: 1, scale: 1, width: "auto" }}
+              exit={{ opacity: 0, scale: 0.8, width: 0 }}
+              transition={{ type: "spring", damping: 22, stiffness: 280 }}
+              className="overflow-hidden"
+            >
+              {(() => {
+                const isChapterActive =
+                  pathname === activeContinueReading.nextAction.href;
+                return (
+                  <Link
+                    href={activeContinueReading.nextAction.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    aria-label={`Continue reading: ${
+                      activeContinueReading.nextAction.chapter?.title ||
+                      activeContinueReading.course?.title ||
+                      "Resume"
+                    }`}
+                    className={`flex items-center gap-1.5 rounded-full transition-all duration-300 active:scale-95 ${
+                      isChapterActive
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 px-3.5"
+                        : "text-zinc-500 dark:text-zinc-400 hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
+                    }`}
+                    aria-current={isChapterActive ? "page" : undefined}
+                  >
+                    <span className="flex min-h-11 min-w-11 items-center justify-center gap-1.5">
+                      <PlayCircle className="w-4 h-4 shrink-0" />
+                      {isChapterActive && (
+                        <span className="text-xs font-bold tracking-tight whitespace-nowrap max-w-24 truncate animate-in fade-in zoom-in-95 duration-200">
+                          {activeContinueReading.nextAction.chapter?.title ||
+                            activeContinueReading.course?.title ||
+                            "Continue"}
+                        </span>
+                      )}
+                    </span>
+                  </Link>
+                );
+              })()}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Profile Tab */}
         <Link
@@ -322,7 +437,7 @@ export default function BottomNav() {
               role="dialog"
               aria-modal="true"
               aria-label="Navigation menu"
-              className="relative mx-2.5 mb-[calc(4rem+env(safe-area-inset-bottom))] max-h-[min(76dvh,38rem)] bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl rounded-[2rem] sm:rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-2xl flex flex-col overflow-hidden pointer-events-auto touch-pan-y z-105"
+              className="relative mx-2.5 mb-[calc(4rem+env(safe-area-inset-bottom))] max-h-[min(76dvh,38rem)] bg-white/95 dark:bg-[#121215]/95 backdrop-blur-2xl rounded-4xl sm:rounded-[2.5rem] border border-zinc-200/80 dark:border-zinc-800/80 shadow-2xl flex flex-col overflow-hidden pointer-events-auto touch-pan-y z-105"
             >
               {/* Drag Pill Handle */}
               <div
@@ -367,16 +482,15 @@ export default function BottomNav() {
 
               {/* Scrollable Navigation Body */}
               <div className="flex-1 overflow-y-auto px-4 py-3.5 space-y-3.5 scrollbar-none">
-
                 {/* Continue Reading Card - shown when user has active course progress */}
-                {continueReading?.nextAction && (
+                {activeContinueReading?.nextAction && (
                   <motion.div
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2 }}
                   >
                     <Link
-                      href={continueReading.nextAction.href}
+                      href={activeContinueReading.nextAction.href}
                       onClick={() => setIsMenuOpen(false)}
                       className="group flex items-center gap-3 p-3 rounded-3xl bg-blue-500/8 dark:bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/15 dark:hover:bg-blue-500/20 transition-all active:scale-[0.98]"
                     >
@@ -388,19 +502,20 @@ export default function BottomNav() {
                           Continue Reading
                         </span>
                         <span className="text-xs font-bold text-zinc-900 dark:text-white truncate block">
-                          {continueReading.nextAction.chapter?.title ||
-                            continueReading.course?.title ||
+                          {activeContinueReading.nextAction.chapter?.title ||
+                            activeContinueReading.course?.title ||
                             "Resume where you left off"}
                         </span>
-                        {continueReading.course?.title && continueReading.nextAction.chapter?.title && (
-                          <span className="text-[10px] text-zinc-400 truncate block mt-0.5">
-                            {continueReading.course.title}
-                          </span>
-                        )}
+                        {activeContinueReading.course?.title &&
+                          activeContinueReading.nextAction.chapter?.title && (
+                            <span className="text-[10px] text-zinc-400 truncate block mt-0.5">
+                              {activeContinueReading.course.title}
+                            </span>
+                          )}
                       </div>
                       <div className="flex flex-col items-end gap-1.5 shrink-0">
                         <span className="text-[10px] font-black text-white bg-blue-600 rounded-full px-2 py-0.5">
-                          {continueReading.overallProgress || 0}%
+                          {activeContinueReading.overallProgress || 0}%
                         </span>
                         <ArrowRight className="w-3.5 h-3.5 text-blue-500 group-hover:translate-x-0.5 transition-transform" />
                       </div>
@@ -455,7 +570,9 @@ export default function BottomNav() {
                     </div>
                     <ChevronRight
                       className={`w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5 ${
-                        pathname.startsWith("/jobs") ? "text-white" : "text-zinc-400"
+                        pathname.startsWith("/jobs")
+                          ? "text-white"
+                          : "text-zinc-400"
                       }`}
                     />
                   </Link>
@@ -468,69 +585,71 @@ export default function BottomNav() {
                   </span>
 
                   <div className="grid grid-cols-1 gap-2">
-                    {MENU_SECTIONS.filter((s) => s.href !== "/jobs").map((section, idx) => {
-                      const Icon = section.icon;
-                      const isActive =
-                        pathname === section.href ||
-                        (section.href !== "/" &&
-                          pathname.startsWith(section.href));
+                    {MENU_SECTIONS.filter((s) => s.href !== "/jobs").map(
+                      (section, idx) => {
+                        const Icon = section.icon;
+                        const isActive =
+                          pathname === section.href ||
+                          (section.href !== "/" &&
+                            pathname.startsWith(section.href));
 
-                      return (
-                        <motion.div
-                          key={section.href}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: idx * 0.03 }}
-                        >
-                          <Link
-                            href={section.href}
-                            onClick={() => setIsMenuOpen(false)}
-                            className={`group flex items-center justify-between p-3 rounded-3xl transition-all active:scale-[0.98] ${
-                              isActive
-                                ? "bg-blue-600 text-white font-bold shadow-xs"
-                                : " hover:bg-zinc-100  dark:hover:bg-zinc-800/80  text-zinc-900 dark:text-zinc-100"
-                            }`}
+                        return (
+                          <motion.div
+                            key={section.href}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.03 }}
                           >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <div
-                                className={`h-8.5 w-8.5 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                                  isActive
-                                    ? "text-white"
-                                    : "text-zinc-500 group-hover:text-zinc-900 dark:text-zinc-400 dark:group-hover:text-white"
-                                }`}
-                              >
-                                <Icon className="w-4.5 h-4.5" />
-                              </div>
-                              <div className="min-w-0 flex flex-col leading-tight">
-                                <span
-                                  className={`text-xs font-bold tracking-tight truncate font-outfit ${
+                            <Link
+                              href={section.href}
+                              onClick={() => setIsMenuOpen(false)}
+                              className={`group flex items-center justify-between p-3 rounded-3xl transition-all active:scale-[0.98] ${
+                                isActive
+                                  ? "bg-blue-600 text-white font-bold shadow-xs"
+                                  : " hover:bg-zinc-100  dark:hover:bg-zinc-800/80  text-zinc-900 dark:text-zinc-100"
+                              }`}
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div
+                                  className={`h-8.5 w-8.5 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                                     isActive
                                       ? "text-white"
-                                      : "text-zinc-950 dark:text-white"
+                                      : "text-zinc-500 group-hover:text-zinc-900 dark:text-zinc-400 dark:group-hover:text-white"
                                   }`}
                                 >
-                                  {section.title}
-                                </span>
-                                <span
-                                  className={`text-[10px] truncate mt-0.5 ${
-                                    isActive
-                                      ? "text-blue-100/80 font-medium"
-                                      : "text-zinc-400 dark:text-zinc-500 font-normal"
-                                  }`}
-                                >
-                                  {section.description}
-                                </span>
+                                  <Icon className="w-4.5 h-4.5" />
+                                </div>
+                                <div className="min-w-0 flex flex-col leading-tight">
+                                  <span
+                                    className={`text-xs font-bold tracking-tight truncate font-outfit ${
+                                      isActive
+                                        ? "text-white"
+                                        : "text-zinc-950 dark:text-white"
+                                    }`}
+                                  >
+                                    {section.title}
+                                  </span>
+                                  <span
+                                    className={`text-[10px] truncate mt-0.5 ${
+                                      isActive
+                                        ? "text-blue-100/80 font-medium"
+                                        : "text-zinc-400 dark:text-zinc-500 font-normal"
+                                    }`}
+                                  >
+                                    {section.description}
+                                  </span>
+                                </div>
                               </div>
-                            </div>
-                            <ChevronRight
-                              className={`w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5 ${
-                                isActive ? "text-white" : "text-zinc-400"
-                              }`}
-                            />
-                          </Link>
-                        </motion.div>
-                      );
-                    })}
+                              <ChevronRight
+                                className={`w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5 ${
+                                  isActive ? "text-white" : "text-zinc-400"
+                                }`}
+                              />
+                            </Link>
+                          </motion.div>
+                        );
+                      },
+                    )}
                   </div>
                 </div>
               </div>

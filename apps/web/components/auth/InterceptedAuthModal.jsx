@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useAppSelector } from "@/lib/store/hooks";
 import AuthModal from "@/components/auth/AuthModal";
 
 /**
@@ -17,23 +18,31 @@ export default function InterceptedAuthModal() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const [isOpen, setIsOpen] = useState(true);
 
   const callbackUrl = searchParams?.get("callbackUrl") || "/";
 
+  // Check if current route is actually an auth route
+  const isAuthRoute =
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname?.startsWith("/login") ||
+    pathname?.startsWith("/signup");
+
   // Derive the initial tab from the intercepted route path.
-  // After mount, AuthCard owns the active tab via its own state.
   const defaultTab = pathname?.startsWith("/signup") ? "signup" : "signin";
 
-  // Re-open the sheet if the user navigates back to an auth route after
-  // having dismissed it (edge-case guard).
+  // Only open modal if on an auth route AND the user is NOT authenticated
   useEffect(() => {
-    setIsOpen(true);
-  }, [pathname]);
+    if (isAuthRoute && !isAuthenticated) {
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+    }
+  }, [pathname, isAuthRoute, isAuthenticated]);
 
   // Capture the safe back-URL once on mount (before any navigation happens).
-  // We use router.push(safeBackUrl) instead of router.back() to avoid
-  // accidentally navigating the user to an external website.
   const [safeBackUrl] = useState(() => {
     if (typeof window === "undefined") return "/";
     try {
@@ -56,10 +65,16 @@ export default function InterceptedAuthModal() {
 
   const handleClose = () => {
     setIsOpen(false);
-    setTimeout(() => {
-      router.push(safeBackUrl);
-    }, 120);
+    if (!isAuthenticated) {
+      setTimeout(() => {
+        router.push(safeBackUrl);
+      }, 120);
+    }
   };
+
+  if (isAuthenticated || !isAuthRoute) {
+    return null;
+  }
 
   return (
     <AuthModal

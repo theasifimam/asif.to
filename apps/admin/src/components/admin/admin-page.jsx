@@ -112,9 +112,11 @@ export function AdminContent({
   className,
   plain = false,
   variant = "default",
+  viewMode,
+  view,
 }) {
-  if (plain || variant === "plain") {
-    return <div className={cn("min-w-0", className)}>{children}</div>;
+  if (plain || variant === "plain" || viewMode === "card" || view === "card") {
+    return <div className={cn("min-w-0 space-y-4", className)}>{children}</div>;
   }
   return (
     <section

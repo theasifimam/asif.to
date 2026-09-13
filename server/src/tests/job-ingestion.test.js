@@ -93,17 +93,18 @@ test("admin-controlled fields survive future imported updates", () => {
   assert.equal(update.description, "New"); assert.equal(changed, true); assert.equal(update.importStatus, "updated");
 });
 
-test("upsert creates a new normalized job and flags uncertain cross-source duplicates", async () => {
+test("upsert creates a normalized job and prevents cross-source duplicates", async () => {
   const company = { _id: "company-1", name: "Example", logo: "", normalizedName: "example", providerIdentities: [], overrideFields: [] };
   const CompanyModel = { findOne: async () => company, exists: async () => false };
   const createdJobs = [];
   const JobModel = { findOne: async () => null, exists: async () => false, create: async (value) => { createdJobs.push(value); return { _id: `job-${createdJobs.length}`, ...value }; } };
   const source = { _id: "source-a", type: "greenhouse", name: "Example" };
   const data = { title: "Engineer", companyName: "Example", location: "Dubai", employmentType: "full-time", sourceJobId: "a1", normalizedApplicationUrl: "https://example.com/a1", fingerprint: "fp1", companyLogo: "" };
-  assert.equal((await upsertJob({ ...data }, source, { CompanyModel, JobModel })).outcome, "created");
+  const checkSuppressed = async () => false;
+  assert.equal((await upsertJob({ ...data }, source, { CompanyModel, JobModel, checkSuppressed })).outcome, "created");
   const duplicateModel = { ...JobModel, findOne: async (query) => query.fingerprint ? { _id: "other-job", source: "source-b" } : null };
-  const duplicate = await upsertJob({ ...data, sourceJobId: "a2", normalizedApplicationUrl: "https://example.com/a2" }, source, { CompanyModel, JobModel: duplicateModel });
-  assert.equal(duplicate.outcome, "duplicates"); assert.equal(duplicate.job.status, "pending"); assert.equal(duplicate.job.importStatus, "duplicate");
+  const duplicate = await upsertJob({ ...data, sourceJobId: "a2", normalizedApplicationUrl: "https://example.com/a2" }, source, { CompanyModel, JobModel: duplicateModel, checkSuppressed });
+  assert.equal(duplicate.outcome, "duplicates"); assert.equal(duplicate.job._id, "other-job"); assert.equal(createdJobs.length, 1);
 });
 
 test("Greenhouse fetch uses a mocked public response and normalizes ATS data", async () => {

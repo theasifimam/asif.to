@@ -194,6 +194,11 @@ export async function apiPostFormData(endpoint, formData) {
 // ADMIN API ENDPOINTS (Placeholders)
 // ═══════════════════════════════════════════════════════════════════════════
 
+export const contactApi = {
+  list: (params = {}) => apiGet(`/contact?${new URLSearchParams(params).toString()}`),
+  updateStatus: (id, status) => apiPatch(`/contact/${id}/status`, { status }),
+};
+
 /**
  * Admin Dashboard Stats
  */

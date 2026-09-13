@@ -15,23 +15,19 @@ export const getArticles = async (req, res) => {
   try {
     const { limit = 10, page = 1, topic, author, status, search, type = "article" } = req.query;
 
-    // The legacy article API is public. Personal library entries are served only
-    // through the library routes, which enforce ownership and visibility.
     const filter = { isUserGenerated: { $ne: true } };
     if (type === "article") filter.type = { $in: ["article", null] };
     else if (type !== "all") filter.type = type;
     if (topic) filter.topic = topic;
     if (author) filter.author = author;
 
-    // Text search implementation
     if (search) {
       filter.$or = [
-      { title: { $regex: search, $options: "i" } },
-      { content: { $regex: search, $options: "i" } }];
-
+        { title: { $regex: search, $options: "i" } },
+        { content: { $regex: search, $options: "i" } },
+      ];
     }
 
-    // Filter by status (draft | published), default to 'published' for public routes
     if (status) {
       if (status !== "all") {
         filter.status = status;
@@ -40,12 +36,13 @@ export const getArticles = async (req, res) => {
       filter.status = "published";
     }
 
-    const articles = await Article.find(filter).
-    populate("author", "fullName name username avatar role bio location socials jobTitle headline").
-    populate("topic", "name").
-    sort({ createdAt: -1 }).
-    skip((Number(page) - 1) * Number(limit)).
-    limit(Number(limit));
+    const articles = await Article.find(filter)
+      .populate("author", "fullName name username avatar role bio location socials jobTitle headline")
+      .populate("topic", "name slug description icon")
+      .populate("relatedCourses", "title slug subtitle level duration thumbnail techId")
+      .sort({ createdAt: -1 })
+      .skip((Number(page) - 1) * Number(limit))
+      .limit(Number(limit));
 
     const totalCount = await Article.countDocuments(filter);
 
@@ -56,8 +53,8 @@ export const getArticles = async (req, res) => {
         totalCount,
         page: Number(page),
         limit: Number(limit),
-        totalPages: Math.ceil(totalCount / Number(limit))
-      }
+        totalPages: Math.ceil(totalCount / Number(limit)),
+      },
     });
   } catch (error) {
     console.error("[ARTICLES] getArticles error:", error);
@@ -77,9 +74,10 @@ export const getArticleById = async (req, res) => {
       return;
     }
 
-    const article = await Article.findById(id).
-    populate("author", "fullName name username avatar role bio location socials jobTitle headline").
-    populate("topic", "name");
+    const article = await Article.findById(id)
+      .populate("author", "fullName name username avatar role bio location socials jobTitle headline")
+      .populate("topic", "name slug description icon")
+      .populate("relatedCourses", "title slug subtitle level duration thumbnail techId");
 
     if (!article) {
       res.status(404).json({ success: false, message: "Article not found." });
@@ -91,7 +89,6 @@ export const getArticleById = async (req, res) => {
       return;
     }
 
-    // Increment read count only for published articles
     if (article.status === "published") {
       article.readCount = (article.readCount || 0) + 1;
       await article.save({ validateBeforeSave: false });
@@ -111,9 +108,10 @@ export const getArticleBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
 
-    const article = await Article.findOne({ slug }).
-    populate("author", "fullName name username avatar role bio location socials jobTitle headline").
-    populate("topic", "name");
+    const article = await Article.findOne({ slug })
+      .populate("author", "fullName name username avatar role bio location socials jobTitle headline")
+      .populate("topic", "name slug description icon")
+      .populate("relatedCourses", "title slug subtitle level duration thumbnail techId");
 
     if (!article) {
       res.status(404).json({ success: false, message: "Article not found." });
@@ -125,7 +123,6 @@ export const getArticleBySlug = async (req, res) => {
       return;
     }
 
-    // Increment read count only for published articles
     if (article.status === "published") {
       article.readCount = (article.readCount || 0) + 1;
       await article.save({ validateBeforeSave: false });
@@ -146,7 +143,6 @@ export const createArticle = async (req, res) => {
     const { title, content, topic, status, seoTitle, seoDescription, keywords, canonicalUrl, type = "article", techId, order, relatedCourses, relatedChapters, relatedQuestions, imageAsset } = req.body;
 
     if (!title || !content || !topic) {
-      // Delete uploaded file if validation fails
       if (req.file) fs.unlinkSync(req.file.path);
       res.status(400).json({ success: false, message: "Title, content and topics are required." });
       return;
@@ -162,7 +158,6 @@ export const createArticle = async (req, res) => {
 
     const articleStatus = status === "draft" ? "draft" : "published";
 
-    // Generate unique slug
     let slug = slugify(title);
     const existing = await Article.findOne({ slug });
     if (existing) {
@@ -183,13 +178,17 @@ export const createArticle = async (req, res) => {
       image: imageUrl,
       imageAsset: selectedAsset?.asset._id || null,
       status: articleStatus,
-      seoTitle: seoTitle || "", seoDescription: seoDescription || "", keywords: keywords || [], canonicalUrl: finalCanonicalUrl,
-      techId: techId || "", order: Number(order) || 0,
+      seoTitle: seoTitle || "",
+      seoDescription: seoDescription || "",
+      keywords: keywords || [],
+      canonicalUrl: finalCanonicalUrl,
+      techId: techId || "",
+      order: Number(order) || 0,
       relatedCourses: Array.isArray(relatedCourses) ? relatedCourses : [],
       relatedChapters: Array.isArray(relatedChapters) ? relatedChapters : [],
       relatedQuestions: Array.isArray(relatedQuestions) ? relatedQuestions : [],
       readCount: 0,
-      views: []
+      views: [],
     });
 
     await syncEntityAssetUsages({
@@ -201,7 +200,16 @@ export const createArticle = async (req, res) => {
       references: newArticle.imageAsset ? [{ asset: newArticle.imageAsset, field: "image" }] : [],
     });
 
-    await logActivity({ actor: req.user, action: "article.created", entityType: "article", entityId: newArticle._id, entityTitle: newArticle.title, description: "created", severity: "info", url: `/articles/edit/${newArticle._id}` });
+    await logActivity({
+      actor: req.user,
+      action: "article.created",
+      entityType: "article",
+      entityId: newArticle._id,
+      entityTitle: newArticle.title,
+      description: "created",
+      severity: "info",
+      url: `/articles/edit/${newArticle._id}`,
+    });
 
     res.status(201).json({ success: true, data: newArticle });
   } catch (error) {
@@ -227,16 +235,15 @@ export const updateArticle = async (req, res) => {
     }
 
     const updateData = {
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     if (title) {
       updateData.title = title;
       updateData.slug = slugify(title);
-      // Check for uniqueness
       const existing = await Article.findOne({
         slug: updateData.slug,
-        _id: { $ne: id }
+        _id: { $ne: id },
       });
       if (existing) {
         updateData.slug = `${updateData.slug}-${Date.now()}`;
@@ -267,13 +274,11 @@ export const updateArticle = async (req, res) => {
     if (techId !== undefined) updateData.techId = techId;
     if (order !== undefined) updateData.order = Number(order) || 0;
 
-    // Super-admin only: re-assign the content author
     if (authorId && req.user?.role === "super_admin") {
       updateData.author = authorId;
     }
 
     if (req.file) {
-      // New image uploaded, delete old one and set new path
       const oldImagePath = article.image?.startsWith("/") ? article.image.slice(1) : article.image;
       if (!article.imageAsset && oldImagePath?.startsWith("uploads/articles/") && fs.existsSync(oldImagePath)) {
         fs.unlinkSync(oldImagePath);
@@ -293,8 +298,11 @@ export const updateArticle = async (req, res) => {
     const updatedArticle = await Article.findByIdAndUpdate(
       id,
       updateData,
-      { returnDocument: 'after', runValidators: true }
-    ).populate("author", "fullName name username avatar role bio location socials jobTitle headline").populate("topic", "name");
+      { returnDocument: "after", runValidators: true },
+    )
+      .populate("author", "fullName name username avatar role bio location socials jobTitle headline")
+      .populate("topic", "name slug description icon")
+      .populate("relatedCourses", "title slug subtitle level duration thumbnail techId");
 
     await syncEntityAssetUsages({
       entityType: "article",
@@ -309,11 +317,17 @@ export const updateArticle = async (req, res) => {
     const statusChanged = updateData.status && updateData.status !== article.status;
     const changedFields = Object.keys(updateData).filter((key) => !["updatedAt", "content"].includes(key));
     await logActivity({
-      actor: req.user, action: seoChanged ? "article.seo_updated" : statusChanged ? `article.${updateData.status}` : "article.updated",
-      entityType: "article", entityId: article._id, entityTitle: updatedArticle.title,
+      actor: req.user,
+      action: seoChanged ? "article.seo_updated" : statusChanged ? `article.${updateData.status}` : "article.updated",
+      entityType: "article",
+      entityId: article._id,
+      entityTitle: updatedArticle.title,
       description: seoChanged ? "changed SEO metadata for" : statusChanged ? `${updateData.status === "published" ? "published" : "unpublished"}` : "updated",
-      severity: seoChanged || statusChanged ? "important" : "info", targetUserId: article.author,
-      before: { status: article.status, title: article.title }, after: { status: updatedArticle.status, changedFields }, url: `/articles/edit/${article._id}`,
+      severity: seoChanged || statusChanged ? "important" : "info",
+      targetUserId: article.author,
+      before: { status: article.status, title: article.title },
+      after: { status: updatedArticle.status, changedFields },
+      url: `/articles/edit/${article._id}`,
     });
 
     res.status(200).json({ success: true, data: updatedArticle });
@@ -353,7 +367,19 @@ export const publishArticle = async (req, res) => {
       route: `/articles/edit/${article._id}`,
       references: article.imageAsset ? [{ asset: article.imageAsset, field: "image" }] : [],
     });
-    await logActivity({ actor: req.user, action: "article.published", entityType: "article", entityId: article._id, entityTitle: article.title, description: "published", severity: "important", targetUserId: article.author, before: { status: "draft" }, after: { status: "published" }, url: `/articles/edit/${article._id}` });
+    await logActivity({
+      actor: req.user,
+      action: "article.published",
+      entityType: "article",
+      entityId: article._id,
+      entityTitle: article.title,
+      description: "published",
+      severity: "important",
+      targetUserId: article.author,
+      before: { status: "draft" },
+      after: { status: "published" },
+      url: `/articles/edit/${article._id}`,
+    });
 
     res.status(200).json({ success: true, data: article, message: "Article published successfully." });
   } catch (error) {
@@ -375,7 +401,6 @@ export const deleteArticle = async (req, res) => {
       return;
     }
 
-    // Delete the image file if it exists
     const imagePath = article.image?.startsWith("/") ? article.image.slice(1) : article.image;
     if (!article.imageAsset && imagePath?.startsWith("uploads/articles/") && fs.existsSync(imagePath)) {
       fs.unlinkSync(imagePath);
@@ -383,7 +408,17 @@ export const deleteArticle = async (req, res) => {
 
     await Article.findByIdAndDelete(id);
     await removeEntityAssetUsages("article", article._id);
-    await logActivity({ actor: req.user, action: "article.deleted", entityType: "article", entityId: article._id, entityTitle: article.title, description: "permanently deleted", severity: "critical", targetUserId: article.author, url: "/articles/published" });
+    await logActivity({
+      actor: req.user,
+      action: "article.deleted",
+      entityType: "article",
+      entityId: article._id,
+      entityTitle: article.title,
+      description: "permanently deleted",
+      severity: "critical",
+      targetUserId: article.author,
+      url: "/articles/published",
+    });
 
     res.status(200).json({ success: true, message: "Article deleted successfully." });
   } catch (error) {

@@ -154,12 +154,23 @@ export default function AuthCard({
   const commitAuth = (data) => {
     dispatch(setCredentials({ user: data.data.user, token: data.data.token }));
     toast.success(
-      `Welcome to asif.to, ${data.data.user.fullName.split(" ")[0]}! 🎉`,
+      `Welcome to asif.to, ${data.data.user.fullName?.split(" ")[0] || "back"}! 🎉`,
     );
     if (onClose) {
       onClose();
-    } else if (typeof window !== "undefined") {
-      window.location.assign(callbackUrl || "/");
+    }
+    if (typeof window !== "undefined") {
+      const currentPath = window.location.pathname;
+      const target =
+        callbackUrl &&
+        callbackUrl !== "/login" &&
+        callbackUrl !== "/signup" &&
+        callbackUrl !== "/auth/continue"
+          ? callbackUrl
+          : currentPath !== "/login" && currentPath !== "/signup"
+            ? currentPath
+            : "/";
+      window.location.assign(target);
     }
   };
 
@@ -301,7 +312,7 @@ export default function AuthCard({
   const isBusy = siLoading || suLoading || otpSending;
 
   return (
-    <div className="relative w-full max-w-110 bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden max-h-[calc(100dvh-env(safe-area-inset-top)-1rem)] sm:max-h-[88vh] pb-[env(safe-area-inset-bottom)]">
+    <div className="relative w-full max-w-110 bg-white dark:bg-zinc-900 border border-zinc-200/90 dark:border-zinc-800 rounded-t-4xl sm:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden max-h-[calc(100dvh-env(safe-area-inset-top)-1rem)] sm:max-h-[88vh] pb-[env(safe-area-inset-bottom)]">
       {/* Mobile Drag Handle Pill for Instagram-style Bottom Sheet */}
       {isModal && (
         <div className="pt-3 pb-1 flex justify-center cursor-grab active:cursor-grabbing sm:hidden shrink-0 touch-none bg-white dark:bg-zinc-900 relative z-10">
@@ -333,13 +344,11 @@ export default function AuthCard({
       <div className="relative z-10 flex flex-col px-5 sm:px-8 pt-5 sm:pt-6 pb-4 border-b border-zinc-100 dark:border-zinc-800/80 shrink-0 bg-white dark:bg-zinc-900">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-md shadow-blue-500/20">
-              <img
-                src="/logo.png"
-                alt="asif.to"
-                className="w-5 h-5 object-contain invert brightness-200"
-              />
-            </div>
+            <img
+              src="/logo.png"
+              alt="asif.to"
+              className="w-8 h-8 object-contain"
+            />
             <span className="font-outfit font-black text-xl tracking-tight text-zinc-950 dark:text-white">
               asif<span className="text-blue-600 dark:text-blue-400">.to</span>
             </span>

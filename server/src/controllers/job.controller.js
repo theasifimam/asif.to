@@ -7,6 +7,7 @@ import JobEvent from "../models/JobEvent.js";
 import JobSource from "../models/JobSource.js";
 import JobSyncLog from "../models/JobSyncLog.js";
 import SavedJob from "../models/SavedJob.js";
+import { suppressDeletedJob } from "../services/jobs/jobSuppression.service.js";
 import {
   APPLICATION_TYPES, CREATION_ORIGINS, EMPLOYMENT_TYPES, EXPERIENCE_LEVELS, IMPORT_STATUSES, JOB_STATUSES, SOURCE_TYPES, UAE_JOB_CATEGORIES,
   UAE_LOCATIONS, WORK_MODES,
@@ -536,6 +537,7 @@ export async function adminDeleteJob(req, res) {
   try {
     const job = isId(req.params.id) ? await Job.findById(req.params.id) : null;
     if (!job) return res.status(404).json({ success: false, message: "Job not found." });
+    await suppressDeletedJob(job);
     const applications = await JobApplication.find({ job: job._id, kind: "internal" }).select("resume.storageKey").lean();
     await Promise.all(applications.map((item) => item.resume?.storageKey ? fs.unlink(getPrivateJobResumePath(item.resume.storageKey)).catch(() => {}) : null));
     await Promise.all([JobApplication.deleteMany({ job: job._id }), SavedJob.deleteMany({ job: job._id }), JobEvent.deleteMany({ job: job._id }), job.deleteOne()]);

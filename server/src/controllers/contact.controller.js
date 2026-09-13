@@ -32,9 +32,18 @@ export const submitMessage = async (req, res) => {
 // GET /api/v1/contact
 export const getMessages = async (req, res) => {
   try {
-    const { status, page = 1, limit = 20 } = req.query;
+    const { status, search, page = 1, limit = 20 } = req.query;
     const query = {};
     if (status) query.status = status;
+    
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+        { subject: { $regex: search, $options: "i" } },
+        { message: { $regex: search, $options: "i" } },
+      ];
+    }
 
     const messages = await ContactMessage.find(query)
       .sort({ createdAt: -1 })

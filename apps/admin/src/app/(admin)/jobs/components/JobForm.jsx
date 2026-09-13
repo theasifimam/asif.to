@@ -246,8 +246,8 @@ export default function JobForm({ jobId = null }) {
         </div>
       )}
 
-      <form id="job-editor" onSubmit={submit} className="grid gap-6 lg:grid-cols-[1fr_320px]">
-        <main className="space-y-6">
+      <form id="job-editor" onSubmit={submit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] min-w-0 w-full">
+        <main className="space-y-6 min-w-0 w-full">
           <Section title="Core listing">
             <Field label="Job title" required>
               <Input
@@ -600,7 +600,7 @@ export default function JobForm({ jobId = null }) {
           </Section>
         </main>
 
-        <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+        <aside className="space-y-6 min-w-0 w-full lg:sticky lg:top-6 lg:self-start">
           <Section title="Publishing">
             <Field label="Status">
               <Select

@@ -62,9 +62,10 @@ export async function getUnifiedRelatedContent(req, res) {
         slug: slug.toLowerCase(),
         status: "published",
       })
-        .populate("relatedCourses", "title slug techId subtitle thumbnail")
+        .populate("relatedCourses", "title slug techId subtitle thumbnail level duration")
         .populate("relatedChapters", "title slug summary order")
         .populate("relatedQuestions", "question slug difficulty questionType")
+        .populate("topic", "name slug description icon")
         .lean();
       if (targetArticle?.techId && !effectiveTechId) {
         effectiveTechId = targetArticle.techId;
