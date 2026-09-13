@@ -215,7 +215,7 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6 p-4 font-sans text-zinc-800 dark:text-zinc-300 sm:p-6 md:p-8 lg:p-10 min-w-0">
       {/* 1. CREATOR HERO BENTO BANNER */}
-      <section className="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-zinc-950 text-white p-6 sm:p-9 shadow-xl border border-zinc-800 min-w-0">
+      <section className="relative overflow-hidden rounded-4xl sm:rounded-[2.5rem] bg-zinc-950 text-white p-6 sm:p-9 shadow-xl border border-zinc-800 min-w-0">
         {/* Ambient Radial Mesh Glows */}
         <div className="absolute -right-12 -top-12 w-80 h-80 rounded-full bg-blue-600/15 blur-3xl pointer-events-none" />
         <div className="absolute -left-12 -bottom-12 w-80 h-80 rounded-full bg-indigo-600/15 blur-3xl pointer-events-none" />
@@ -301,7 +301,7 @@ export default function DashboardPage() {
               className="relative group min-w-0"
             >
               <div
-                className={`relative flex min-h-36 sm:min-h-44 flex-col justify-between overflow-hidden p-5 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border shadow-xs transition-all duration-300 ${theme.bg} ${theme.border} ${theme.borderHover} hover:shadow-md hover:-translate-y-0.5`}
+                className={`relative flex min-h-36 sm:min-h-44 flex-col justify-between overflow-hidden p-5 sm:p-6 rounded-4xl sm:rounded-[2.5rem] border shadow-xs transition-all duration-300 ${theme.bg} ${theme.border} ${theme.borderHover} hover:shadow-md hover:-translate-y-0.5`}
               >
                 <div className="relative z-10 flex items-center justify-between gap-2 mb-3">
                   <div
@@ -334,7 +334,7 @@ export default function DashboardPage() {
       </section>
 
       {/* 2. TASKS LEFT IN PLANNER BENTO CARD */}
-      <section className="rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 border border-amber-500/20 shadow-xs space-y-3 min-w-0">
+      <section className="rounded-4xl sm:rounded-[2.5rem] bg-linear-to-br from-amber-500/10 via-orange-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 border border-amber-500/20 shadow-xs space-y-3 min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20">
@@ -542,7 +542,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
         {/* Top Performing Courses (Bento Container) */}
         <section className="lg:col-span-8 flex flex-col gap-3 min-w-0">
-          <div className="rounded-[2rem] sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 border border-zinc-200/80 dark:border-zinc-800 p-5 sm:p-7 shadow-xs flex flex-col gap-4">
+          <div className="rounded-4xl sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 border border-zinc-200/80 dark:border-zinc-800 p-5 sm:p-7 shadow-xs flex flex-col gap-4">
             <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/80 pb-3.5">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20">
@@ -620,7 +620,7 @@ export default function DashboardPage() {
 
         {/* Curriculum Focus Bento Container */}
         <section className="lg:col-span-4 flex flex-col gap-3 min-w-0">
-          <div className="rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-white dark:to-zinc-900/90 border border-blue-500/20 p-5 sm:p-7 shadow-xs flex flex-col gap-5">
+          <div className="rounded-4xl sm:rounded-[2.5rem] bg-linear-to-br from-blue-500/10 via-indigo-500/5 to-white dark:to-zinc-900/90 border border-blue-500/20 p-5 sm:p-7 shadow-xs flex flex-col gap-5">
             <div className="flex items-center gap-2.5 border-b border-zinc-200/60 dark:border-zinc-800/80 pb-3.5">
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                 <BarChart3 className="w-5 h-5" />

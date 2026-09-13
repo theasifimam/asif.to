@@ -35,21 +35,31 @@ export default function RelatedContentSidebar({
     : [];
 
   // Extract courses set on article during writing/adding/updating or from relatedData
-  const articleCourses = Array.isArray(article?.relatedCourses) && article.relatedCourses.length > 0
-    ? article.relatedCourses.map((c) => (typeof c === "object" ? c : { _id: c }))
-    : [];
+  const articleCourses =
+    Array.isArray(article?.relatedCourses) && article.relatedCourses.length > 0
+      ? article.relatedCourses.map((c) =>
+          typeof c === "object" ? c : { _id: c },
+        )
+      : [];
 
-  const coursesToDisplay = articleCourses.length > 0
-    ? articleCourses
-    : (currentCourse ? [currentCourse] : (relatedCourses.length > 0 ? relatedCourses.slice(0, 2) : []));
+  const coursesToDisplay =
+    articleCourses.length > 0
+      ? articleCourses
+      : currentCourse
+        ? [currentCourse]
+        : relatedCourses.length > 0
+          ? relatedCourses.slice(0, 2)
+          : [];
 
-  const activeCourse = currentCourse || (coursesToDisplay.length > 0 ? coursesToDisplay[0] : null);
+  const activeCourse =
+    currentCourse || (coursesToDisplay.length > 0 ? coursesToDisplay[0] : null);
 
-  if (!articleTopics.length && !coursesToDisplay.length && !relatedData) return null;
+  if (!articleTopics.length && !coursesToDisplay.length && !relatedData)
+    return null;
 
   return (
     <aside
-      className={`hidden lg:block w-full max-w-[310px] xl:max-w-[330px] shrink-0 space-y-5 ${className}`}
+      className={`hidden lg:block w-full max-w-77.5 xl:max-w-82.5 shrink-0 space-y-5 ${className}`}
       aria-label="Related course and study resources"
     >
       {/* Topics Set on Article */}
