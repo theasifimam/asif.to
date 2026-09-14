@@ -13,6 +13,7 @@ import HomeInterviewPrep from "./sections/HomeInterviewPrep";
 import HomeArticlesSection from "./sections/HomeArticlesSection";
 import HomeLearningLoop from "./sections/HomeLearningLoop";
 import HomeFinalCta from "./sections/HomeFinalCta";
+import HomeSubscribeSection from "./sections/HomeSubscribeSection";
 
 export default function HomePageClient({
   courses = [],
@@ -80,7 +81,10 @@ export default function HomePageClient({
         {/* 7. ONE LEARNING LOOP STEPPER */}
         <HomeLearningLoop />
 
-        {/* 8. FINAL HIGH IMPACT CTA */}
+        {/* 8. PERSONALIZED EMAIL UPDATES */}
+        <HomeSubscribeSection />
+
+        {/* 9. FINAL HIGH IMPACT CTA */}
         <HomeFinalCta />
       </main>
 

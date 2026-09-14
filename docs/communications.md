@@ -65,6 +65,7 @@ Existing SMTP is preserved. No provider credentials are hardcoded.
 | `WEB_URL`, `ADMIN_URL` | Public web/admin link origins |
 | `PUBLIC_API_URL` | API base including `/api/v1`, used for one-click unsubscribe; default `https://api.asif.to/api/v1` |
 | `NEXT_PUBLIC_API_URL` | Existing frontend API base |
+| `EMAIL_LOGO_URL` | Optional absolute logo URL used by the shared branded HTML email layout; defaults to `${WEB_URL}/logo.png` |
 
 Keep signing secrets stable. Replacing the signing secret invalidates existing preference and reply addresses; no rotating-key ring is implemented.
 
