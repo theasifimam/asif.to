@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 import {
   SlidersHorizontal,
@@ -15,7 +16,13 @@ import JobsFilters from "./JobsFilters";
 
 export default function MobileJobsFilters(props) {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
   const values = props.values || {};
+  const clearHref = props.fixed?.location
+    ? `/jobs/location/${props.fixed.location}`
+    : props.fixed?.category
+      ? `/jobs/category/${props.fixed.category}`
+      : "/jobs";
 
   const activeCount = Object.entries(values).filter(
     ([key, value]) =>
@@ -83,6 +90,17 @@ export default function MobileJobsFilters(props) {
           )}
         </button>
 
+        {activeCount > 0 && (
+          <button
+            type="button"
+            onClick={() => { setOpen(false); router.push(clearHref); }}
+            className="shrink-0 inline-flex min-h-10 items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3.5 text-xs font-black text-zinc-600 transition hover:border-blue-300 hover:text-blue-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-blue-700 dark:hover:text-blue-400"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            <span>Reset filters</span>
+          </button>
+        )}
+
         {quickChips.map((chip) => {
           const Icon = chip.icon;
           return (
@@ -92,12 +110,12 @@ export default function MobileJobsFilters(props) {
               onClick={() => setOpen(true)}
               className={`shrink-0 inline-flex min-h-10 items-center gap-1.5 rounded-full px-3.5 text-xs font-bold transition-all capitalize cursor-pointer ${
                 chip.active
-                  ? "bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-900/60 font-black"
-                  : "bg-white text-zinc-600 border border-zinc-200/80 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-400 dark:border-zinc-800"
+                  ? "bg-blue-600 text-white border border-blue-600 dark:bg-blue-600 dark:text-white dark:border-blue-500 font-black shadow-xs shadow-blue-600/20"
+                  : "bg-white text-zinc-700 border border-zinc-200 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-zinc-800/80"
               }`}
             >
               <Icon
-                className={`h-3.5 w-3.5 ${chip.active ? "text-blue-600 dark:text-blue-400" : "text-zinc-400"}`}
+                className={`h-3.5 w-3.5 ${chip.active ? "text-white dark:text-white" : "text-zinc-400 dark:text-zinc-400"}`}
               />
               <span>{chip.label}</span>
             </button>
@@ -127,7 +145,7 @@ export default function MobileJobsFilters(props) {
                   Filter jobs
                 </Dialog.Title>
                 {activeCount > 0 && (
-                  <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-black text-blue-700 dark:bg-blue-950/80 dark:text-blue-300">
+                  <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-black text-blue-700 dark:bg-blue-900/60 dark:text-blue-200">
                     {activeCount} active
                   </span>
                 )}

@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Inbox,
   Send,
@@ -14,11 +14,20 @@ import {
   ChartNoAxesCombined,
   Settings,
   Search,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMessaging } from "@/contexts/MessagingContext";
 import { hasPermission } from "@/lib/permissions";
 import { communicationApi } from "./api";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 export const sections = [
   [
     "inbox",
@@ -99,13 +108,18 @@ export const sections = [
     : `communications.${permission}`,
   description,
 }));
+
 export default function CommunicationsShell({ children }) {
-  const { user } = useAuth(),
-    { unread, socket } = useMessaging();
+  const { user } = useAuth();
+  const { unread, socket } = useMessaging();
   const pathname = usePathname();
-  const [inboxUnread, setInboxUnread] = useState(0),
-    [query, setQuery] = useState(""),
-    [found, setFound] = useState([]);
+  const router = useRouter();
+  const [inboxUnread, setInboxUnread] = useState(0);
+  const [query, setQuery] = useState("");
+  const [found, setFound] = useState([]);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const searchInputRef = useRef(null);
+
   useEffect(() => {
     if (!hasPermission(user, "communications.inbox.read")) return;
     const load = () =>
@@ -116,6 +130,7 @@ export default function CommunicationsShell({ children }) {
     socket?.on("communications:updated", load);
     return () => socket?.off("communications:updated", load);
   }, [user, socket]);
+
   useEffect(() => {
     const controller = new AbortController();
     const timer = setTimeout(() => {
@@ -132,14 +147,16 @@ export default function CommunicationsShell({ children }) {
       controller.abort();
     };
   }, [query]);
-  useEffect(() => {
-    document
-      .querySelector('nav[aria-label="Communications"] [aria-current="page"]')
-      ?.scrollIntoView({ block: "nearest", inline: "nearest" });
-  }, [pathname]);
+
+  const currentSection = sections.find((s) =>
+    pathname.startsWith(`/communications/${s.key}`)
+  );
+  const activeKey = currentSection ? currentSection.key : "inbox";
+
   const chat =
     pathname.startsWith("/communications/team") ||
     pathname.startsWith("/communications/inbox");
+
   return (
     <div
       className={
@@ -155,82 +172,132 @@ export default function CommunicationsShell({ children }) {
             : "mx-auto w-full max-w-375 space-y-4"
         }
       >
-        <header className="flex shrink-0 items-center justify-between gap-3 border-b border-zinc-200/80 px-4 py-4 dark:border-zinc-800 sm:px-6">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950 dark:text-white">
+        <header className="flex shrink-0 items-center justify-between gap-3 border-b border-zinc-200/80 px-4 py-3.5 dark:border-zinc-800 sm:px-6">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950 dark:text-white truncate">
               Communications
             </h1>
             {!chat && (
-              <p className="mt-1 text-sm text-zinc-500">
+              <p className="mt-0.5 text-xs sm:text-sm text-zinc-500 truncate">
                 Conversations, email and your team.
               </p>
             )}
           </div>
-          <div className="relative w-48 sm:w-80">
-            <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-zinc-400" />
-            <input
-              aria-label="Search communications"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search communications..."
-              className="h-10 w-full rounded-xl border border-zinc-200 bg-zinc-50 pl-9 pr-3 text-sm font-medium outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 dark:border-zinc-800 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
-            />
-            {query.length > 1 && (
-              <div className="absolute right-0 z-40 mt-2 max-h-80 w-80 max-w-[90vw] overflow-y-auto rounded-2xl border bg-white p-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
-                {found.map((item, i) => (
-                  <Link
-                    onClick={() => setQuery("")}
-                    key={`${item.url}:${i}`}
-                    href={item.url}
-                    className="block rounded-xl p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                  >
-                    <span className="text-xs text-blue-500">{item.type}</span>
-                    <p className="truncate text-sm font-semibold">
-                      {item.title}
-                    </p>
-                  </Link>
-                ))}
-                {!found.length && (
-                  <p className="p-3 text-sm text-zinc-500">
-                    No matching communications.
-                  </p>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Section Select Dropdown */}
+            <Select
+              value={activeKey}
+              onValueChange={(val) => router.push(`/communications/${val}`)}
+            >
+              <SelectTrigger className="h-10 w-36 sm:w-48 rounded-xl border border-zinc-200 bg-zinc-50 px-3 text-xs sm:text-sm font-semibold outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 dark:border-zinc-800 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-none">
+                <SelectValue placeholder="Select section" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border border-zinc-200/80 bg-white p-1 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 z-10050">
+                {sections
+                  .filter((item) => hasPermission(user, item.permission))
+                  .map((item) => {
+                    const count =
+                      item.key === "inbox"
+                        ? inboxUnread
+                        : item.key === "team"
+                        ? unread.totalUnread
+                        : 0;
+                    const IconComponent = item.icon;
+                    return (
+                      <SelectItem
+                        key={item.key}
+                        value={item.key}
+                        className="rounded-xl py-2 px-3 text-xs sm:text-sm font-medium"
+                      >
+                        <div className="flex items-center justify-between gap-3 w-full min-w-0">
+                          <div className="flex items-center gap-2 truncate">
+                            <IconComponent className="h-4 w-4 shrink-0 text-zinc-400" />
+                            <span className="truncate">{item.label}</span>
+                          </div>
+                          {count > 0 && (
+                            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300 shrink-0">
+                              {count}
+                            </span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
+              </SelectContent>
+            </Select>
+
+            {/* Expandable Search Input (Icon when not focused) */}
+            {!isSearchExpanded && !query ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSearchExpanded(true);
+                  setTimeout(() => searchInputRef.current?.focus(), 50);
+                }}
+                aria-label="Search communications"
+                title="Search communications"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-500 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-white transition-colors"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            ) : (
+              <div className="relative w-44 sm:w-64">
+                <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-zinc-400" />
+                <input
+                  ref={searchInputRef}
+                  aria-label="Search communications"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onFocus={() => setIsSearchExpanded(true)}
+                  onBlur={() => {
+                    if (!query) {
+                      setTimeout(() => setIsSearchExpanded(false), 150);
+                    }
+                  }}
+                  placeholder="Search..."
+                  className="h-10 w-full rounded-xl border border-zinc-200 bg-zinc-50 pl-9 pr-8 text-xs sm:text-sm font-medium outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 dark:border-zinc-800 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuery("");
+                    setIsSearchExpanded(false);
+                  }}
+                  className="absolute right-2 top-2.5 flex h-5 w-5 items-center justify-center rounded-full text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+                {query.length > 1 && (
+                  <div className="absolute right-0 z-40 mt-2 max-h-80 w-72 sm:w-80 max-w-[90vw] overflow-y-auto rounded-2xl border bg-white p-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
+                    {found.map((item, i) => (
+                      <Link
+                        onClick={() => {
+                          setQuery("");
+                          setIsSearchExpanded(false);
+                        }}
+                        key={`${item.url}:${i}`}
+                        href={item.url}
+                        className="block rounded-xl p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                      >
+                        <span className="text-xs text-blue-500">{item.type}</span>
+                        <p className="truncate text-sm font-semibold">
+                          {item.title}
+                        </p>
+                      </Link>
+                    ))}
+                    {!found.length && (
+                      <p className="p-3 text-sm text-zinc-500">
+                        No matching communications.
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             )}
           </div>
         </header>
-        <nav
-          aria-label="Communications"
-          className="flex shrink-0 gap-1 overflow-x-auto scrollbar-none border-b border-zinc-200 px-3 dark:border-zinc-800 sm:px-5"
-        >
-          {sections
-            .filter((item) => hasPermission(user, item.permission))
-            .map((item) => {
-              const count =
-                item.key === "inbox"
-                  ? inboxUnread
-                  : item.key === "team"
-                    ? unread.totalUnread
-                    : 0;
-              const active = pathname.startsWith(`/communications/${item.key}`);
-              return (
-                <Link
-                  key={item.key}
-                  href={`/communications/${item.key}`}
-                  aria-current={active ? "page" : undefined}
-                  className={`relative flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-3.5 py-3 text-sm font-semibold transition-colors motion-reduce:transition-none ${active ? "border-blue-600 text-blue-600 dark:text-blue-400" : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100"}`}
-                >
-                  <item.icon className="hidden h-4 w-4 2xl:block" />
-                  {item.label}
-                  {count > 0 && (
-                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                      {count}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-        </nav>
+
         <div
           className={
             chat ? "min-h-0 min-w-0 flex-1 overflow-hidden" : "min-w-0 pt-4"

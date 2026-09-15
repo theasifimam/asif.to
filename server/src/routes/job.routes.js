@@ -6,6 +6,7 @@ import {
   getJobsSitemap, getMyJobApplications, getMySavedJobs, getPublicCompany, getPublicJob, getPublicTaxonomy,
   internalApply, listPublicJobs, recordJobEvent, toggleSavedJob,
 } from "../controllers/job.controller.js";
+import { createJobAlert, deleteJobAlert, listMyJobAlerts } from "../controllers/jobAlert.controller.js";
 import { optionalProtect, protect } from "../middlewares/auth.middleware.js";
 import { jobRateLimit } from "../middlewares/jobRateLimit.middleware.js";
 import { uploadJobResume } from "../middlewares/upload.middleware.js";
@@ -23,6 +24,9 @@ router.post("/:id/events", optionalProtect, jobRateLimit({ max: 40 }), recordJob
 
 router.get("/me/saved", protect, getMySavedJobs);
 router.get("/me/applications", protect, getMyJobApplications);
+router.get("/me/alerts", protect, listMyJobAlerts);
+router.post("/me/alerts", protect, jobRateLimit({ max: 20 }), createJobAlert);
+router.delete("/me/alerts/:id", protect, deleteJobAlert);
 router.post("/:id/save", protect, jobRateLimit({ max: 30 }), toggleSavedJob);
 router.post("/:id/external-apply", optionalProtect, jobRateLimit({ windowMs: 60_000, max: 12 }), externalApply);
 router.post("/:id/apply", protect, jobRateLimit({ windowMs: 60_000, max: 8 }), uploadJobResume.single("resume"), internalApply);

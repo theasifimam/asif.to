@@ -227,12 +227,14 @@ export default function DashboardPage() {
               Creator & Admin Studio
             </div>
 
-            <h1 className="font-outfit text-2xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
-              Welcome back,{" "}
-              <span className="text-blue-400 block sm:inline">
-                {userName}! 👋
+            <div className="space-y-1">
+              <span className="block text-xs sm:text-sm font-bold uppercase tracking-widest text-zinc-400">
+                Welcome back
               </span>
-            </h1>
+              <h1 className="font-outfit text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight text-blue-400">
+                {userName}! 👋
+              </h1>
+            </div>
 
             <p className="mt-2 max-w-2xl text-xs sm:text-sm leading-relaxed font-medium text-zinc-400">
               Here is your platform roadmap, course analytics, and planner

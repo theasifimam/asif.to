@@ -422,11 +422,25 @@ export default function Header() {
             </Link>
           </nav>
 
-          {/* User Profile & Actions (Theme toggle visible on mobile, profile on desktop) */}
+          {/* User Profile & Actions (Jobs icon on mobile, darkmode toggle & profile on desktop) */}
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             {/* ASIF_COURSE_LEARNING_FLOW_V1:header-progress */}
             <ContinueCoursePill />
-            <ThemeToggle />
+            <div className="hidden lg:block">
+              <ThemeToggle />
+            </div>
+            <Link
+              href="/jobs"
+              className={`lg:hidden flex items-center justify-center w-11 h-11 sm:w-10 sm:h-10 rounded-full border border-zinc-200 dark:border-zinc-800 transition-colors touch-manipulation ${
+                isJobsActive
+                  ? "bg-blue-600 text-white border-blue-600 dark:border-blue-600 shadow-sm"
+                  : "bg-zinc-50 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              }`}
+              aria-label="Jobs"
+              title="Jobs"
+            >
+              <BriefcaseBusiness size={18} />
+            </Link>
             <GlobalSearch />
             <div className="hidden lg:flex items-center gap-2">
               {oauthStatus === "loading" || !isInitialized ? (

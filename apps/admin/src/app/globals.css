@@ -647,8 +647,8 @@ pre.hljs code,
   }
 
   [data-mobile-menu] {
-    bottom: calc(5rem + max(0.5rem, env(safe-area-inset-bottom)));
-    max-height: calc(100dvh - 5.75rem - max(0.5rem, env(safe-area-inset-bottom)) - env(safe-area-inset-top));
+    bottom: calc(3.875rem + max(0.5rem, env(safe-area-inset-bottom)));
+    max-height: calc(100dvh - 4.5rem - max(0.5rem, env(safe-area-inset-bottom)) - env(safe-area-inset-top));
   }
 
   .admin-surface,

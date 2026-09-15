@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Search, SlidersHorizontal, RotateCcw } from "lucide-react";
+import { Bell, BellRing, Search, RotateCcw } from "lucide-react";
+import { toast } from "sonner";
+import api from "@/lib/axios";
+import { useAuthPrompt } from "@/components/auth/AuthPromptProvider";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -33,7 +36,11 @@ function taxonomyOptions(items = [], fallback = []) {
 
 function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
   const router = useRouter();
+  const { requireAuth, isAuthenticated } = useAuthPrompt();
   const [isPending, startTransition] = useTransition();
+  const [alertId, setAlertId] = useState(null);
+  const [alertCriteriaKey, setAlertCriteriaKey] = useState("");
+  const [alertWorking, setAlertWorking] = useState(false);
 
   const [keyword, setKeyword] = useState(values.keyword || "");
   const [location, setLocation] = useState(values.location || "all");
@@ -56,6 +63,48 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
     taxonomy.categories,
     taxonomy.availableCategories,
   );
+  const alertCriteria = {
+    keyword: keyword.trim(),
+    category: fixed.category || (category !== "all" ? category : ""),
+    location: fixed.location || (location !== "all" ? location : ""),
+    employmentType: employmentType !== "all" ? employmentType : "",
+    workMode: workMode !== "all" ? workMode : "",
+    experienceLevel: experienceLevel !== "all" ? experienceLevel : "",
+  };
+  const alertKey = JSON.stringify(alertCriteria);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    api.get("/jobs/me/alerts").then(({ data }) => {
+      const current = data?.data?.find((alert) => Object.entries(alertCriteria).every(([key, value]) => (alert[key] || "") === value));
+      setAlertId(current?._id || null);
+      setAlertCriteriaKey(alertKey);
+    }).catch(() => {});
+    // The filter form is remounted when the search changes; this only loads its current alert.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
+
+  const toggleAlert = async () => {
+    if (!requireAuth()) return;
+    setAlertWorking(true);
+    const activeAlertId = alertId && alertCriteriaKey === alertKey ? alertId : null;
+    try {
+      if (activeAlertId) {
+        await api.delete(`/jobs/me/alerts/${activeAlertId}`);
+        setAlertId(null);
+        toast.success("Job alert turned off");
+      } else {
+        const { data } = await api.post("/jobs/me/alerts", alertCriteria);
+        setAlertId(data?.data?._id || "active");
+        setAlertCriteriaKey(alertKey);
+        toast.success("You’ll be notified when a matching job is posted");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Unable to update your job alert");
+    } finally {
+      setAlertWorking(false);
+    }
+  };
 
   // Analytics event recording
   useEffect(() => {
@@ -78,23 +127,34 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
     }).catch(() => {});
   }, [values]);
 
-  const handleSubmit = (e) => {
-    e?.preventDefault();
+  const applyFilters = (overrides = {}) => {
+    const next = {
+      keyword,
+      location,
+      category,
+      employmentType,
+      workMode,
+      experienceLevel,
+      datePosted,
+      salaryMin,
+      salaryMax,
+      ...overrides,
+    };
     const query = new URLSearchParams();
 
-    if (keyword?.trim()) query.set("keyword", keyword.trim());
-    if (!fixed.location && location && location !== "all")
-      query.set("location", location);
-    if (!fixed.category && category && category !== "all")
-      query.set("category", category);
-    if (employmentType && employmentType !== "all")
-      query.set("employmentType", employmentType);
-    if (workMode && workMode !== "all") query.set("workMode", workMode);
-    if (experienceLevel && experienceLevel !== "all")
-      query.set("experienceLevel", experienceLevel);
-    if (datePosted && datePosted !== "all") query.set("datePosted", datePosted);
-    if (salaryMin) query.set("salaryMin", salaryMin);
-    if (salaryMax) query.set("salaryMax", salaryMax);
+    if (next.keyword?.trim()) query.set("keyword", next.keyword.trim());
+    if (!fixed.location && next.location && next.location !== "all")
+      query.set("location", next.location);
+    if (!fixed.category && next.category && next.category !== "all")
+      query.set("category", next.category);
+    if (next.employmentType && next.employmentType !== "all")
+      query.set("employmentType", next.employmentType);
+    if (next.workMode && next.workMode !== "all") query.set("workMode", next.workMode);
+    if (next.experienceLevel && next.experienceLevel !== "all")
+      query.set("experienceLevel", next.experienceLevel);
+    if (next.datePosted && next.datePosted !== "all") query.set("datePosted", next.datePosted);
+    if (next.salaryMin) query.set("salaryMin", next.salaryMin);
+    if (next.salaryMax) query.set("salaryMax", next.salaryMax);
     if (values.sort && values.sort !== "newest") query.set("sort", values.sort);
 
     const basePath = fixed.location
@@ -110,6 +170,21 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
       router.push(targetUrl);
     });
   };
+
+  const handleSubmit = (e) => {
+    e?.preventDefault();
+    applyFilters();
+  };
+
+  const keywordInitialized = useRef(false);
+  useEffect(() => {
+    if (!keywordInitialized.current) {
+      keywordInitialized.current = true;
+      return;
+    }
+    const timer = setTimeout(() => applyFilters(), 450);
+    return () => clearTimeout(timer);
+  }, [keyword]);
 
   const clearHref = fixed.location
     ? `/jobs/location/${fixed.location}`
@@ -146,7 +221,7 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
         {!fixed.location && (
           <div className="space-y-1">
             <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Location</label>
-            <Select value={location} onValueChange={setLocation}>
+            <Select value={location} onValueChange={(value) => { setLocation(value); applyFilters({ location: value }); }}>
               <SelectTrigger
                 aria-label="UAE location"
                 className="h-11 rounded-2xl bg-zinc-50/80 text-xs font-semibold dark:bg-zinc-950"
@@ -169,7 +244,7 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
         {!fixed.category && (
           <div className="space-y-1">
             <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Category</label>
-            <Select value={category} onValueChange={setCategory}>
+            <Select value={category} onValueChange={(value) => { setCategory(value); applyFilters({ category: value }); }}>
               <SelectTrigger
                 aria-label="Category"
                 className="h-11 rounded-2xl bg-zinc-50/80 text-xs font-semibold dark:bg-zinc-950"
@@ -198,7 +273,7 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
             <button
               key={mode}
               type="button"
-              onClick={() => setWorkMode(mode)}
+              onClick={() => { setWorkMode(mode); applyFilters({ workMode: mode }); }}
               className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                 workMode === mode
                   ? "bg-blue-600 text-white shadow-xs"
@@ -219,7 +294,7 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
             <button
               key={type}
               type="button"
-              onClick={() => setEmploymentType(type)}
+              onClick={() => { setEmploymentType(type); applyFilters({ employmentType: type }); }}
               className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                 employmentType === type
                   ? "bg-blue-600 text-white shadow-xs"
@@ -240,7 +315,7 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
             <button
               key={lvl}
               type="button"
-              onClick={() => setExperienceLevel(lvl)}
+              onClick={() => { setExperienceLevel(lvl); applyFilters({ experienceLevel: lvl }); }}
               className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                 experienceLevel === lvl
                   ? "bg-blue-600 text-white shadow-xs"
@@ -266,7 +341,7 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
             <button
               key={value}
               type="button"
-              onClick={() => setDatePosted(value)}
+              onClick={() => { setDatePosted(value); applyFilters({ datePosted: value }); }}
               className={`rounded-xl py-1.5 text-[11px] font-bold transition-all cursor-pointer ${
                 datePosted === value
                   ? "bg-white text-zinc-950 shadow-xs dark:bg-zinc-800 dark:text-white"
@@ -290,6 +365,8 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
             step="1000"
             value={salaryMin}
             onChange={(e) => setSalaryMin(e.target.value)}
+            onBlur={() => applyFilters()}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyFilters(); } }}
             placeholder="Min AED"
             className="h-11 rounded-2xl bg-zinc-50/80 text-xs font-semibold dark:bg-zinc-950"
           />
@@ -300,6 +377,8 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
             step="1000"
             value={salaryMax}
             onChange={(e) => setSalaryMax(e.target.value)}
+            onBlur={() => applyFilters()}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyFilters(); } }}
             placeholder="Max AED"
             className="h-11 rounded-2xl bg-zinc-50/80 text-xs font-semibold dark:bg-zinc-950"
           />
@@ -309,22 +388,26 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
       {/* Action buttons */}
       <div className="pt-1 space-y-2">
         <Button
-          type="submit"
-          disabled={isPending}
-          loading={isPending}
-          className="h-12 w-full rounded-full bg-blue-600 text-xs font-black text-white shadow-md shadow-blue-600/15 transition hover:bg-blue-700 active:scale-[0.985] cursor-pointer"
+          type="button"
+          variant="outline"
+          onClick={toggleAlert}
+          disabled={alertWorking}
+          className="h-11 w-full rounded-full border-blue-200 text-xs font-black text-blue-700 hover:bg-blue-50 dark:border-blue-900 dark:text-blue-300 dark:hover:bg-blue-950/40"
         >
-          <SlidersHorizontal className="h-4 w-4" />
-          Apply filters
+          {alertId && alertCriteriaKey === alertKey ? <BellRing className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+          {alertWorking ? "Saving alert…" : alertId && alertCriteriaKey === alertKey ? "Job alert active" : "Notify me about matching jobs"}
         </Button>
 
-        <a
-          href={clearHref}
-          className="flex items-center justify-center gap-1.5 text-center text-[11px] font-bold text-zinc-400 transition hover:text-blue-600 dark:text-zinc-500 dark:hover:text-blue-400 py-1"
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => router.push(clearHref)}
+          disabled={isPending}
+          className="h-9 w-full gap-1.5 border-zinc-200 text-[11px] font-bold text-zinc-500 hover:border-blue-300 hover:text-blue-600 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-blue-700 dark:hover:text-blue-400"
         >
           <RotateCcw className="h-3 w-3" />
           Reset all filters
-        </a>
+        </Button>
       </div>
     </form>
   );

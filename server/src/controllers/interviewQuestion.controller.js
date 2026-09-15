@@ -517,6 +517,19 @@ export const deleteInterviewQuestion = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: "Interview question not found." });
+
+    const role = req.user?.role;
+    const isSuperAdmin = role === "super_admin";
+    const isAdmin = role === "admin";
+    const isAuthor = role === "author" && question.author && String(question.author) === String(req.user?._id);
+
+    if (!isSuperAdmin && !isAdmin && !isAuthor) {
+      return res.status(403).json({
+        success: false,
+        message: "Only a Super Admin, Admin, or authorized question author can delete this question.",
+      });
+    }
+
     if (
       await CourseTopic.exists({ "interviewQuestions.question": question._id })
     )

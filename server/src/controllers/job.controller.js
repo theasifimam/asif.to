@@ -18,6 +18,7 @@ import { logActivity } from "../services/activity.service.js";
 import { normalizeCompanyName, syncJobSource } from "../services/jobs/jobImport.service.js";
 import { expireJobs } from "../services/jobs/jobScheduler.service.js";
 import { verifyAndPersistJobSource } from "../services/jobs/jobSourceVerification.service.js";
+import { notifyMatchingJobAlerts } from "../services/jobs/jobAlert.service.js";
 import {
   assertSafeRemoteUrl, cleanStringArray, cleanText, decodeHtmlEntities, escapeRegex, normalizeUrl, normalizedJobFingerprint,
   parseNullableNumber, publicJobFilter, sanitizeJobHtml,
@@ -495,6 +496,7 @@ export async function adminCreateJob(req, res) {
     if (duplicate) throw Object.assign(new Error(`A matching job already exists: ${duplicate.title}`), { statusCode: 409 });
     const requestedSlug = cleanText(req.body.slug, 220) || `${payload.title}-${payload.companyName}-${payload.location}`;
     const job = await Job.create({ ...payload, creationOrigin: "admin_created", slug: await uniqueSlug(Job, requestedSlug), createdBy: req.user._id, updatedBy: req.user._id });
+    notifyMatchingJobAlerts(job).catch((error) => console.error("[JOBS] alert notification:", error.message));
     await logActivity({ actor: req.user, action: "job.created", entityType: "job", entityId: job._id, entityTitle: job.title, description: "created a job", url: `/jobs/${job._id}/edit` });
     return res.status(201).json({ success: true, data: job });
   } catch (error) { return errorResponse(res, error, "adminCreateJob"); }
@@ -504,6 +506,7 @@ export async function adminUpdateJob(req, res) {
   try {
     const job = isId(req.params.id) ? await Job.findById(req.params.id) : null;
     if (!job) return res.status(404).json({ success: false, message: "Job not found." });
+    const wasPublished = job.status === "published";
     const payload = await buildJobPayload(req.body, { existing: job, userId: req.user._id });
     if (req.body.slug !== undefined) payload.slug = await uniqueSlug(Job, cleanText(req.body.slug, 220) || payload.title, job._id);
     const editableFields = Object.keys(payload);
@@ -514,6 +517,7 @@ export async function adminUpdateJob(req, res) {
     payload.updatedBy = req.user._id;
     Object.assign(job, payload);
     await job.save();
+    if (!wasPublished && job.status === "published") notifyMatchingJobAlerts(job).catch((error) => console.error("[JOBS] alert notification:", error.message));
     await logActivity({ actor: req.user, action: "job.updated", entityType: "job", entityId: job._id, entityTitle: job.title, description: "updated a job", metadata: { fields: touchedFields }, url: `/jobs/${job._id}/edit` });
     return res.json({ success: true, data: job });
   } catch (error) { return errorResponse(res, error, "adminUpdateJob"); }
@@ -531,6 +535,10 @@ export async function adminBulkJobs(req, res) {
     if (!updates[action]) return res.status(400).json({ success: false, message: "Invalid bulk action." });
     const overrideField = ["feature", "unfeature"].includes(action) ? "featured" : "status";
     const result = await Job.updateMany({ _id: { $in: ids } }, { $set: { ...updates[action], updatedBy: req.user._id }, $addToSet: { overrideFields: overrideField } });
+    if (["publish", "approve"].includes(action)) {
+      const published = await Job.find({ _id: { $in: ids }, status: "published" });
+      published.forEach((job) => notifyMatchingJobAlerts(job).catch((error) => console.error("[JOBS] alert notification:", error.message)));
+    }
     return res.json({ success: true, data: { modified: result.modifiedCount } });
   } catch (error) { return errorResponse(res, error, "adminBulkJobs"); }
 }

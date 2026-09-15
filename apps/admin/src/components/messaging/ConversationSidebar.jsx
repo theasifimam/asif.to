@@ -1,7 +1,8 @@
 "use client";
 
+import { useState, useRef } from "react";
 import Link from "next/link";
-import { ArrowLeft, Search, UserRound } from "lucide-react";
+import { ArrowLeft, Search, UserRound, X } from "lucide-react";
 import ConversationRow from "./ConversationRow";
 import { avatarUrl, conversationName, idOf } from "./messaging-utils";
 import { useMessaging } from "@/contexts/MessagingContext";
@@ -61,6 +62,9 @@ export default function ConversationSidebar({
   onStartDirect,
 }) {
   const { isOnline } = useMessaging();
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const searchInputRef = useRef(null);
+
   const direct = conversations.filter((item) => item?.type === "direct");
   const channels = conversations.filter((item) => item?.type === "channel");
   const discussions = conversations.filter(
@@ -80,51 +84,77 @@ export default function ConversationSidebar({
       } w-full shrink-0 flex-col border-r border-zinc-200 dark:border-zinc-800 md:w-80 lg:w-96 h-full`}
     >
       <div className="border-b border-zinc-100 p-4 sm:p-5 dark:border-zinc-800">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <Link
               href="/dashboard"
-              className="flex md:hidden h-10 w-10 items-center justify-center rounded-2xl border border-zinc-200 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white cursor-pointer transition-colors"
+              className="flex md:hidden h-10 w-10 items-center justify-center rounded-2xl border border-zinc-200 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white cursor-pointer transition-colors shrink-0"
               title="Back to Dashboard"
             >
               <ArrowLeft size={18} />
             </Link>
-            <div>
-              <p className="text-xs font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
+            <div className="min-w-0">
+              <p className="text-xs font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 truncate">
                 Internal team
               </p>
-              <h1 className="text-2xl sm:text-3xl font-black font-outfit text-zinc-950 dark:text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black font-outfit text-zinc-950 dark:text-white tracking-tight truncate">
                 Messages
               </h1>
             </div>
           </div>
-          {unread.totalUnread > 0 && (
-            <span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-black text-white shadow-xs">
-              {unread.totalUnread}
-            </span>
-          )}
-        </div>
 
-        {/* Single clean search bar on smaller devices, message history search enabled on tablet/desktop */}
-        <div className="flex flex-row gap-2.5 mt-4">
-          <div className="relative w-full sm:flex-1">
-            <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-zinc-400" />
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search conversations…"
-              className="h-11 w-full rounded-2xl border border-zinc-200 bg-zinc-50 pl-10 pr-3.5 text-sm font-medium outline-none focus:border-blue-500 focus:bg-white dark:border-zinc-800 dark:bg-zinc-900 dark:focus:bg-zinc-900 transition-all placeholder:text-zinc-400 text-zinc-900 dark:text-zinc-100"
-            />
-          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {unread.totalUnread > 0 && (
+              <span className="rounded-full bg-emerald-600 px-2.5 py-0.5 text-xs font-black text-white shadow-xs">
+                {unread.totalUnread}
+              </span>
+            )}
 
-          <div className="relative hidden sm:block sm:flex-1">
-            <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-zinc-400" />
-            <input
-              value={messageSearch}
-              onChange={(event) => setMessageSearch(event.target.value)}
-              placeholder="Search message history…"
-              className="h-11 w-full rounded-2xl border border-zinc-200 bg-white pl-10 pr-3.5 text-sm font-medium outline-none focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-950 transition-all placeholder:text-zinc-400 text-zinc-900 dark:text-zinc-100"
-            />
+            {!isSearchExpanded && !search && !messageSearch ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSearchExpanded(true);
+                  setTimeout(() => searchInputRef.current?.focus(), 50);
+                }}
+                aria-label="Search conversations"
+                title="Search conversations"
+                className="flex h-10 w-10 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors cursor-pointer"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            ) : (
+              <div className="relative w-40 sm:w-56">
+                <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-zinc-400" />
+                <input
+                  ref={searchInputRef}
+                  value={search || messageSearch}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setMessageSearch(e.target.value);
+                  }}
+                  onFocus={() => setIsSearchExpanded(true)}
+                  onBlur={() => {
+                    if (!search && !messageSearch) {
+                      setTimeout(() => setIsSearchExpanded(false), 150);
+                    }
+                  }}
+                  placeholder="Search..."
+                  className="h-10 w-full rounded-2xl border border-zinc-200 bg-zinc-50 pl-9 pr-8 text-xs sm:text-sm font-medium outline-none focus:border-blue-500 focus:bg-white dark:border-zinc-800 dark:bg-zinc-900 dark:focus:bg-zinc-900 transition-all placeholder:text-zinc-400 text-zinc-900 dark:text-zinc-100"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("");
+                    setMessageSearch("");
+                    setIsSearchExpanded(false);
+                  }}
+                  className="absolute right-2 top-2.5 flex h-5 w-5 items-center justify-center rounded-full text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 cursor-pointer"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

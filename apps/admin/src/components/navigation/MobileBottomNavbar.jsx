@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import MessageNavBadge from "./MessageNavBadge";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function MobileBottomNavbar({
   navItems = [],
@@ -146,24 +146,40 @@ export default function MobileBottomNavbar({
           data-mobile-menu
           className="fixed left-2 right-2 z-45 mx-auto max-w-md overflow-y-auto rounded-[28px] border border-zinc-200/90 bg-white/97 p-3.5 shadow-2xl backdrop-blur-3xl animate-in slide-in-from-bottom-3 zoom-in-95 duration-200 scrollbar-none dark:border-zinc-800/90 dark:bg-[#121215]/97 sm:left-4 sm:right-4 sm:p-4.5 lg:hidden"
         >
-          {/* Header inside island */}
+          {/* Header inside island with logo & darkmode toggle */}
           <div className="flex items-center justify-between border-b border-zinc-100 pb-3 mb-3.5 dark:border-zinc-800/80">
-            <div className="flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
-                <Sparkles size={13} />
-              </span>
-              <h2 className="font-outfit text-sm font-black tracking-tight text-zinc-950 dark:text-white">
-                Admin Navigation
-              </h2>
-            </div>
-            <button
-              type="button"
+            <Link
+              href="/dashboard"
               onClick={() => setIsOpen(false)}
-              className="flex h-11 w-11 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 cursor-pointer"
-              aria-label="Close admin navigation"
+              className="flex items-center gap-2.5 group"
             >
-              <X size={18} />
-            </button>
+              <img
+                src="/logo.png"
+                alt="asif.to"
+                className="w-7 h-7 rounded-xl object-contain shrink-0 group-hover:scale-105 transition-transform"
+              />
+              <div className="flex items-center gap-2">
+                <span className="font-outfit font-black text-base tracking-tight text-zinc-950 dark:text-white leading-none">
+                  asif
+                  <span className="text-blue-600 dark:text-blue-400">.to</span>
+                </span>
+                <span className="rounded-full border border-zinc-200/80 bg-zinc-50/80 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.16em] text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400">
+                  Admin
+                </span>
+              </div>
+            </Link>
+
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-zinc-200/80 bg-zinc-50 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                aria-label="Close admin navigation"
+              >
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           <label className="relative mb-4 block">
@@ -179,17 +195,17 @@ export default function MobileBottomNavbar({
             />
           </label>
 
-          {/* Navlink Groups */}
+          {/* Navlink Groups as Smartphone App Drawer Grid */}
           <div className="flex flex-col gap-4">
             {filteredNavItems.map((group) => {
               const isGroupCollapsed = Boolean(collapsedGroups[group.group]);
 
               return (
-                <div key={group.group} className="flex flex-col gap-1">
+                <div key={group.group} className="flex flex-col gap-2">
                   <button
                     type="button"
                     onClick={() => toggleGroup(group.group)}
-                    className="group/header flex w-full items-center justify-between px-1 py-1.5 text-[9.5px] font-black uppercase tracking-[0.25em] text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors cursor-pointer select-none"
+                    className="group/header flex w-full items-center justify-between px-1 py-1 text-[9.5px] font-black uppercase tracking-[0.25em] text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors cursor-pointer select-none"
                   >
                     <span>{group.group}</span>
                     <ChevronDown
@@ -209,7 +225,7 @@ export default function MobileBottomNavbar({
                         transition={{ duration: 0.18, ease: "easeInOut" }}
                         className="overflow-hidden"
                       >
-                        <div className="flex flex-col overflow-hidden rounded-[20px] border border-zinc-200/80 bg-zinc-50/50 dark:border-zinc-800/80 dark:bg-zinc-900/30 mt-1 mb-1.5 divide-y divide-zinc-100 dark:divide-zinc-800/80">
+                        <div className="grid grid-cols-4 gap-y-3.5 gap-x-2 py-1">
                           {group.items.map((item) => {
                             const targetHref =
                               item.name === "My Profile" && user?._id
@@ -229,51 +245,34 @@ export default function MobileBottomNavbar({
                                 key={item.href}
                                 href={targetHref}
                                 onClick={() => setIsOpen(false)}
-                                className={`group relative flex min-h-14 items-center gap-3 px-3.5 py-2 transition-all active:bg-zinc-100 dark:active:bg-zinc-800 ${
-                                  isActive
-                                    ? "bg-blue-50/60 dark:bg-blue-900/10"
-                                    : "hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40"
-                                }`}
+                                className="group flex flex-col items-center text-center gap-1.5 p-1 rounded-lg transition-all active:scale-90 cursor-pointer"
                               >
                                 <div
-                                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors ${
+                                  className={`relative flex h-12 w-12 sm:h-13 sm:w-13 items-center justify-center rounded-lg transition-all shadow-xs group-hover:scale-105 ${
                                     isActive
-                                      ? "bg-blue-600 text-white shadow-xs shadow-blue-600/20"
-                                      : "bg-white text-zinc-500 shadow-xs border border-zinc-200/60 dark:border-zinc-700/50 dark:bg-zinc-800 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white"
+                                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/30 ring-2 ring-blue-500/40"
+                                      : "bg-zinc-100/90 text-zinc-700 border border-zinc-200/80 dark:bg-zinc-800/80 dark:border-zinc-700/60 dark:text-zinc-200 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700"
                                   }`}
                                 >
                                   <Icon
-                                    size={16}
-                                    strokeWidth={isActive ? 2.5 : 2}
+                                    size={21}
+                                    strokeWidth={isActive ? 2.4 : 1.9}
                                   />
-                                </div>
-                                <div className="min-w-0 flex-1 flex flex-col justify-center">
-                                  <p
-                                    className={`truncate font-outfit text-[13px] font-bold leading-tight ${
-                                      isActive
-                                        ? "text-blue-700 dark:text-blue-300"
-                                        : "text-zinc-900 dark:text-zinc-100"
-                                    }`}
-                                  >
-                                    {item.name}
-                                  </p>
-                                  {item.description && (
-                                    <p
-                                      className={`truncate text-[10px] mt-0.5 ${
-                                        isActive
-                                          ? "text-blue-600/80 dark:text-blue-400/80 font-medium"
-                                          : "text-zinc-500 dark:text-zinc-500"
-                                      }`}
-                                    >
-                                      {item.description}
-                                    </p>
+                                  {isActive && (
+                                    <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-blue-600 ring-2 ring-white dark:ring-zinc-900">
+                                      <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                                    </span>
                                   )}
                                 </div>
-                                {isActive && (
-                                  <div className="shrink-0 ml-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
-                                  </div>
-                                )}
+                                <span
+                                  className={`text-[11px] font-bold leading-tight font-outfit tracking-tight line-clamp-1 max-w-full ${
+                                    isActive
+                                      ? "text-blue-600 dark:text-blue-400 font-extrabold"
+                                      : "text-zinc-800 dark:text-zinc-200 group-hover:text-zinc-950 dark:group-hover:text-white"
+                                  }`}
+                                >
+                                  {item.name}
+                                </span>
                               </Link>
                             );
                           })}
