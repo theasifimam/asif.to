@@ -226,44 +226,47 @@ function UserTableComponent({
                         </div>
                       </div>
                     </div>
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="mt-4 flex items-center justify-between gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800/80">
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={(event) => {
                           event.stopPropagation();
                           router.push(`/users/${user._id}`);
                         }}
-                        className="rounded-xl"
+                        className="rounded-xl text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white"
                       >
-                        <Eye className="mr-2 h-3.5 w-3.5" /> View profile
+                        <Eye className="mr-1.5 h-3.5 w-3.5" /> View
                       </Button>
-                      {canUpdate && (
-                        <Button
-                          size="sm"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            onUpdate?.(user);
-                          }}
-                          className="rounded-xl"
-                        >
-                          <Pencil className="mr-2 h-3.5 w-3.5" /> Edit user
-                        </Button>
-                      )}
-                      {canDelete &&
-                        String(user._id) !== String(currentUserId) && (
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {canUpdate && (
                           <Button
-                            variant="destructive"
                             size="sm"
                             onClick={(event) => {
                               event.stopPropagation();
-                              onDelete?.(user);
+                              onUpdate?.(user);
                             }}
-                            className="rounded-xl"
+                            className="rounded-xl text-xs font-bold px-3.5 shadow-md shadow-blue-500/10"
                           >
-                            <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
+                            <Pencil className="mr-1.5 h-3.5 w-3.5" /> Edit user
                           </Button>
                         )}
+                        {canDelete &&
+                          String(user._id) !== String(currentUserId) && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="Delete user"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                onDelete?.(user);
+                              }}
+                              className="h-8 w-8 rounded-xl text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                            >
+                              <Trash2 className="h-4 w-4 text-rose-500" />
+                            </Button>
+                          )}
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -349,44 +352,47 @@ function UserTableComponent({
                       </span>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-2 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+                  <div className="flex items-center justify-between gap-2 border-t border-zinc-100 pt-3 dark:border-zinc-800/80">
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
                       onClick={(event) => {
                         event.stopPropagation();
                         router.push(`/users/${user._id}`);
                       }}
-                      className="rounded-xl"
+                      className="rounded-xl text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white"
                     >
-                      <Eye className="mr-2 h-3.5 w-3.5" /> View
+                      <Eye className="mr-1.5 h-3.5 w-3.5" /> View
                     </Button>
-                    {canUpdate && (
-                      <Button
-                        size="sm"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onUpdate?.(user);
-                        }}
-                        className="rounded-xl"
-                      >
-                        <Pencil className="mr-2 h-3.5 w-3.5" /> Edit
-                      </Button>
-                    )}
-                    {canDelete &&
-                      String(user._id) !== String(currentUserId) && (
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {canUpdate && (
                         <Button
-                          variant="destructive"
                           size="sm"
                           onClick={(event) => {
                             event.stopPropagation();
-                            onDelete?.(user);
+                            onUpdate?.(user);
                           }}
-                          className="rounded-xl"
+                          className="rounded-xl text-xs font-bold px-3.5 shadow-md shadow-blue-500/10"
                         >
-                          <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
+                          <Pencil className="mr-1.5 h-3.5 w-3.5" /> Edit
                         </Button>
                       )}
+                      {canDelete &&
+                        String(user._id) !== String(currentUserId) && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Delete user"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onDelete?.(user);
+                            }}
+                            className="h-8 w-8 rounded-xl text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                          >
+                            <Trash2 className="h-4 w-4 text-rose-500" />
+                          </Button>
+                        )}
+                    </div>
                   </div>
                 </motion.div>
               );

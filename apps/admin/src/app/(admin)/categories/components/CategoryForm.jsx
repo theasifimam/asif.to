@@ -1,14 +1,16 @@
 "use client";
 
-import LogoLoader from "@/components/ui/LogoLoader";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getModuleBackUrl } from "@/hooks/useModuleHistory";
-import { ArrowLeft, ExternalLink, Globe, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, ExternalLink, Globe, Save, Send, Trash2, FolderTree, Layers } from "lucide-react";
 import { toast } from "sonner";
-import { AdminPage, AdminPageHeader, CanonicalUrlInput } from "@/components/admin";
-import { formSectionClass } from "@/components/forms/AdminFormShell";
+import { CanonicalUrlInput } from "@/components/admin";
+import AdminFormShell, {
+  AdminFormLoading,
+  formSectionClass,
+} from "@/components/forms/AdminFormShell";
 import Editor from "@/components/editor/Editor";
 import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { Button } from "@/components/ui/button";
@@ -44,8 +46,8 @@ const initialForm = {
   relatedCourses: [],
 };
 
-function slugify(value) {
-  return value
+function slugify(value = "") {
+  return String(value)
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
@@ -71,7 +73,6 @@ export default function CategoryForm({
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("general"); // "general" | "content" | "seo" | "related"
 
   useEffect(() => {
     Promise.all([
@@ -130,13 +131,16 @@ export default function CategoryForm({
     }));
   };
 
-  const save = async (event) => {
-    if (event) event.preventDefault();
-    if (!form.name.trim()) return toast.error("Category name is required");
+  const persist = async (status = form.status) => {
+    if (!form.name.trim()) {
+      toast.error("Category name is required");
+      return;
+    }
 
     setSaving(true);
     const payload = {
       ...form,
+      status,
       course: form.course === "none" ? null : form.course,
       keywords:
         typeof form.keywords === "string"
@@ -190,395 +194,209 @@ export default function CategoryForm({
     : "";
 
   if (loading) {
-    return (
-      <AdminPage size="lg">
-        <div className="flex min-h-[60vh] items-center justify-center">
-          <LogoLoader className="h-12 w-12 text-blue-600" />
-        </div>
-      </AdminPage>
-    );
+    return <AdminFormLoading />;
   }
 
   return (
-    <AdminPage size="lg">
-      <AdminPageHeader
-        eyebrow="Taxonomy Manager"
-        title={
-          categoryId
-            ? `Edit "${form.name || "Category"}"`
-            : "Create New Category"
-        }
-        description="Configure category taxonomy, rich landing intro guides, and search engine metadata."
-        back={
-          <Link
-            href={returnTo}
-            className="inline-flex items-center text-xs font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
-          >
-            <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back to Categories
-          </Link>
-        }
-        actions={
-          <div className="flex items-center gap-2.5">
-            {liveUrl && (
-              <Button
-                variant="outline"
-                asChild
-                className="hidden sm:inline-flex"
-              >
-                <a href={liveUrl} target="_blank" rel="noreferrer">
-                  <ExternalLink className="mr-2 h-4 w-4" /> View Landing
-                </a>
-              </Button>
-            )}
-            {categoryId && (
-              <Button
-                variant="outline"
-                type="button"
-                onClick={() => setDeleteOpen(true)}
-                className="text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 dark:text-rose-400"
-              >
-                <Trash2 className="mr-2 h-4 w-4" /> Delete
-              </Button>
-            )}
+    <AdminFormShell
+      eyebrow={selectedCourse ? `Taxonomy / ${selectedCourse.title}` : "Taxonomy Manager"}
+      title={categoryId ? `Edit category` : "Create new category"}
+      description="Configure category taxonomy, rich landing intro guides, and search engine metadata."
+      back={
+        <Link
+          href={returnTo}
+          className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back to categories
+        </Link>
+      }
+      actions={
+        <>
+          {liveUrl && (
             <Button
-              onClick={save}
-              disabled={saving}
-              className="shadow-lg shadow-blue-500/20"
+              variant="outline"
+              asChild
+              className="flex-1 sm:flex-initial"
             >
-              {saving ? (
-                <LogoLoader className="mr-2 h-4 w-4 "  />
-              ) : (
-                <Save className="mr-2 h-4 w-4" />
-              )}
-              {categoryId ? "Update Category" : "Publish Category"}
+              <a href={liveUrl} target="_blank" rel="noreferrer">
+                <ExternalLink className="mr-2 h-4 w-4" />
+                View Landing
+              </a>
             </Button>
-          </div>
-        }
-      />
-
-      {/* Form Navigation Tabs */}
-      <div className="flex max-w-md rounded-2xl border border-zinc-200/80 bg-zinc-100 p-1 dark:border-zinc-800/80 dark:bg-zinc-900 text-xs font-bold shadow-xs overflow-x-auto scrollbar-none *:shrink-0 min-w-0 w-full">
-        <button
-          type="button"
-          onClick={() => setActiveTab("general")}
-          className={`flex-1 rounded-xl py-2 transition-all cursor-pointer ${
-            activeTab === "general"
-              ? "bg-white text-zinc-900 shadow-xs dark:bg-zinc-800 dark:text-white"
-              : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
-          }`}
-        >
-          General Information
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("content")}
-          className={`flex-1 rounded-xl py-2 transition-all cursor-pointer ${
-            activeTab === "content"
-              ? "bg-white text-zinc-900 shadow-xs dark:bg-zinc-800 dark:text-white"
-              : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
-          }`}
-        >
-          Rich Intro Guide
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("seo")}
-          className={`flex-1 rounded-xl py-2 transition-all cursor-pointer ${
-            activeTab === "seo"
-              ? "bg-white text-zinc-900 shadow-xs dark:bg-zinc-800 dark:text-white"
-              : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
-          }`}
-        >
-          SEO & Social
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("related")}
-          className={`flex-1 rounded-xl py-2 transition-all cursor-pointer ${
-            activeTab === "related"
-              ? "bg-white text-zinc-900 shadow-xs dark:bg-zinc-800 dark:text-white"
-              : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
-          }`}
-        >
-          Related Content
-        </button>
-      </div>
-
-      <form onSubmit={save} className="space-y-6">
-        {/* Tab 1: General Info */}
-        {activeTab === "general" && (
-          <div className="space-y-6">
-            <section className={formSectionClass}>
-              <div className="border-b border-zinc-100 pb-3 dark:border-zinc-800">
-                <h2 className="font-outfit text-base font-bold text-zinc-950 dark:text-white">
-                  Basic Information
-                </h2>
-                <p className="text-xs text-zinc-500">
-                  Primary title, URL slug, and course taxonomy assignment.
-                </p>
-              </div>
-
-              <div className="grid gap-5 sm:grid-cols-2">
-                <div className="space-y-2 sm:col-span-2">
-                  <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                    Category Name <span className="text-rose-500">*</span>
-                  </Label>
-                  <Input
-                    value={form.name}
-                    onChange={handleNameChange}
-                    placeholder="e.g. React & Next.js"
-                    className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60 font-medium"
-                  />
-                </div>
-
-                <div className="space-y-2 sm:col-span-2">
-                  <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                    URL Slug <span className="text-rose-500">*</span>
-                  </Label>
-                  <Input
-                    value={form.slug}
-                    onChange={handleSlugChange}
-                    placeholder="e.g. react-nextjs"
-                    className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60 font-mono text-xs"
-                  />
-                  {liveUrl && (
-                    <p className="flex items-center gap-1.5 text-xs text-zinc-500 pt-1 min-w-0">
-                      <Globe className="h-3.5 w-3.5 text-blue-500 shrink-0" />
-                      <span className="shrink-0">Frontend landing URL:</span>{" "}
-                      <code className="font-mono text-blue-600 dark:text-blue-400 break-all min-w-0">
-                        {liveUrl}
-                      </code>
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2 sm:col-span-2">
-                  <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                    Associated Course (Optional)
-                  </Label>
-                  <Select
-                    value={form.course}
-                    onValueChange={(val) =>
-                      setForm((curr) => ({ ...curr, course: val }))
-                    }
-                  >
-                    <SelectTrigger className="h-11 w-full rounded-2xl border-zinc-200/80 bg-zinc-50/60 dark:border-zinc-800/80 dark:bg-zinc-900/60">
-                      <SelectValue placeholder="Standalone (No specific course)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">
-                        Standalone (Global Taxonomy)
-                      </SelectItem>
-                      {courses.map((item) => (
-                        <SelectItem key={item._id} value={item._id}>
-                          {item.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2 sm:col-span-2">
-                  <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                    Short Description / Subtitle
-                  </Label>
-                  <Textarea
-                    value={form.description}
-                    onChange={(event) =>
-                      setForm((current) => ({
-                        ...current,
-                        description: event.target.value,
-                      }))
-                    }
-                    rows={3}
-                    placeholder="Brief overview displayed on category cards and the landing page hero."
-                    className="rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60 text-xs leading-relaxed"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                    Status
-                  </Label>
-                  <Select
-                    value={form.status}
-                    onValueChange={(status) =>
-                      setForm((current) => ({ ...current, status }))
-                    }
-                  >
-                    <SelectTrigger className="h-11 rounded-2xl border-zinc-200/80 bg-zinc-50/60 dark:border-zinc-800/80 dark:bg-zinc-900/60">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="published">Published</SelectItem>
-                      <SelectItem value="draft">Draft</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                    Display Sort Order
-                  </Label>
-                  <Input
-                    type="number"
-                    value={form.order}
-                    onChange={(event) =>
-                      setForm((current) => ({
-                        ...current,
-                        order: Number(event.target.value) || 0,
-                      }))
-                    }
-                    className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60 font-mono text-xs"
-                  />
-                </div>
-              </div>
-            </section>
-          </div>
-        )}
-
-        {/* Tab 2: Rich Intro Content */}
-        {activeTab === "content" && (
+          )}
+          <Button
+            variant="outline"
+            disabled={saving}
+            onClick={() => persist("draft")}
+            className="flex-1 sm:flex-initial"
+          >
+            <Save className="mr-2 h-4 w-4" />
+            Save Draft
+          </Button>
+          <Button
+            disabled={saving}
+            onClick={() => persist("published")}
+            className="w-full sm:w-auto shadow-lg shadow-blue-500/20"
+          >
+            <Send className="mr-2 h-4 w-4" />
+            Publish
+          </Button>
+        </>
+      }
+    >
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        {/* Main Left Content Column */}
+        <main className="space-y-6">
+          {/* General Details Section */}
           <section className={formSectionClass}>
-            <div className="border-b border-zinc-100 pb-3 dark:border-zinc-800">
-              <h2 className="font-outfit text-base font-bold text-zinc-950 dark:text-white">
-                Landing Page Rich Guide
-              </h2>
-              <p className="text-xs text-zinc-500">
-                Write comprehensive introduction notes, cheat-sheets, or study
-                guide content displayed on this category's landing page.
-              </p>
+            <div className="flex items-center gap-2">
+              <FolderTree className="h-5 w-5 text-primary" />
+              <h2 className="text-base font-semibold">Category Details &amp; Intro Guide</h2>
             </div>
 
-            <div className="min-h-96 pt-2">
+            <div className="space-y-2">
+              <Label htmlFor="category-name">
+                Category Name <span className="text-rose-500">*</span>
+              </Label>
+              <Input
+                id="category-name"
+                value={form.name}
+                onChange={handleNameChange}
+                placeholder="e.g. React & Next.js"
+                className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60 font-medium"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="category-slug">
+                  URL Slug <span className="text-rose-500">*</span>
+                </Label>
+                {liveUrl && (
+                  <span className="truncate text-xs text-muted-foreground">
+                    /{form.slug || "category-slug"}
+                  </span>
+                )}
+              </div>
+              <Input
+                id="category-slug"
+                value={form.slug}
+                onChange={handleSlugChange}
+                placeholder="e.g. react-nextjs"
+                className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60 font-mono text-xs"
+              />
+              {liveUrl && (
+                <p className="flex items-center gap-1.5 text-xs text-zinc-500 pt-1 min-w-0">
+                  <Globe className="h-3.5 w-3.5 text-blue-500 shrink-0" />
+                  <span className="shrink-0">Frontend URL:</span>
+                  <code className="font-mono text-blue-600 dark:text-blue-400 break-all min-w-0">
+                    {liveUrl}
+                  </code>
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="category-description">Short Description / Subtitle</Label>
+              <Textarea
+                id="category-description"
+                value={form.description}
+                onChange={(e) => setForm((curr) => ({ ...curr, description: e.target.value }))}
+                rows={3}
+                placeholder="Brief overview displayed on category cards and the landing page hero."
+                className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 shadow-none dark:bg-zinc-900 text-xs leading-relaxed"
+              />
+            </div>
+
+            <div className="space-y-2 pt-2">
+              <Label>Landing Page Rich Guide</Label>
+              <p className="text-xs text-muted-foreground">
+                Write comprehensive introduction notes, cheat-sheets, or study guide content displayed on this category landing page.
+              </p>
               <Editor
                 value={form.content}
-                onChange={(content) =>
-                  setForm((current) => ({ ...current, content }))
-                }
+                onChange={(content) => setForm((curr) => ({ ...curr, content }))}
                 placeholder="Start writing the landing guide for this category..."
               />
             </div>
           </section>
-        )}
 
-        {/* Tab 3: SEO & Social */}
-        {activeTab === "seo" && (
-          <section className={formSectionClass}>
-            <div className="border-b border-zinc-100 pb-3 dark:border-zinc-800">
-              <h2 className="font-outfit text-base font-bold text-zinc-950 dark:text-white">
-                Search Engine Optimization & Social Sharing
-              </h2>
-              <p className="text-xs text-zinc-500">
-                Custom meta tags, OpenGraph previews, and indexing directives.
+          {/* Search Engine Optimization Section */}
+          <section className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+            <div>
+              <h2 className="text-base font-semibold">Search Engine Optimization &amp; Social</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Custom meta tags, OpenGraph previews, and search engine directives.
               </p>
             </div>
 
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div className="space-y-2 sm:col-span-2">
-                <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                  Custom SEO Title
-                </Label>
-                <Input
-                  value={form.seoTitle}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      seoTitle: event.target.value,
-                    }))
-                  }
-                  placeholder="Defaults to category name if left blank"
-                  className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="category-seo-title">Custom SEO Title</Label>
+              <Input
+                id="category-seo-title"
+                value={form.seoTitle}
+                onChange={(e) => setForm((curr) => ({ ...curr, seoTitle: e.target.value }))}
+                placeholder="Defaults to category name if left blank"
+                className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60"
+              />
+            </div>
 
-              <div className="space-y-2 sm:col-span-2">
-                <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                  Meta Description
-                </Label>
-                <Textarea
-                  value={form.seoDescription}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      seoDescription: event.target.value,
-                    }))
-                  }
-                  rows={3}
-                  placeholder="Concise summary for search engine snippet (recommended 150-160 characters)"
-                  className="rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60 text-xs leading-relaxed"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="category-seo-description">Meta Description</Label>
+              <Textarea
+                id="category-seo-description"
+                value={form.seoDescription}
+                onChange={(e) => setForm((curr) => ({ ...curr, seoDescription: e.target.value }))}
+                rows={3}
+                placeholder="Concise summary for search engine snippet (recommended 150-160 characters)"
+                className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 shadow-none dark:bg-zinc-900 text-xs leading-relaxed"
+              />
+            </div>
 
-              <div className="space-y-2 sm:col-span-2">
-                <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                  Keywords (comma separated)
-                </Label>
-                <Input
-                  value={form.keywords}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      keywords: event.target.value,
-                    }))
-                  }
-                  placeholder="e.g. react, nextjs, frontend, javascript"
-                  className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="category-keywords">Keywords (comma separated)</Label>
+              <Input
+                id="category-keywords"
+                value={form.keywords}
+                onChange={(e) => setForm((curr) => ({ ...curr, keywords: e.target.value }))}
+                placeholder="e.g. react, nextjs, frontend, javascript"
+                className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60"
+              />
+            </div>
 
-              <div className="sm:col-span-2">
-                <CanonicalUrlInput
-                  basePrefix={(() => {
-                    const selectedCourse = courses.find(
-                      (c) => String(c._id) === String(form.course),
-                    );
-                    return selectedCourse?.slug
-                      ? `https://asif.to/${selectedCourse.slug}/interview-questions`
-                      : "https://asif.to/interview-questions";
-                  })()}
-                  value={form.canonicalUrl}
-                  onChange={(value) =>
-                    setForm((current) => ({
-                      ...current,
-                      canonicalUrl: value,
-                    }))
-                  }
-                  placeholder={form.slug || slugify(form.name)}
-                />
-              </div>
+            <div>
+              <CanonicalUrlInput
+                basePrefix={selectedCourseSlug ? `https://asif.to/${selectedCourseSlug}/interview-questions` : "https://asif.to/interview-questions"}
+                value={form.canonicalUrl}
+                onChange={(val) => setForm((curr) => ({ ...curr, canonicalUrl: val }))}
+                placeholder={form.slug || slugify(form.name)}
+              />
+            </div>
 
-              <div className="space-y-2 sm:col-span-2">
-                <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                  OG Social Image URL
-                </Label>
-                <Input
-                  value={form.ogImage}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      ogImage: event.target.value,
-                    }))
-                  }
-                  placeholder="https://asif.to/images/og/..."
-                  className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60 font-mono text-xs"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="category-og-image">OG Social Image URL</Label>
+              <Input
+                id="category-og-image"
+                value={form.ogImage}
+                onChange={(e) => setForm((curr) => ({ ...curr, ogImage: e.target.value }))}
+                placeholder="https://asif.to/images/og/..."
+                className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60 font-mono text-xs"
+              />
+            </div>
 
+            <div className="grid gap-4 sm:grid-cols-2 pt-2">
               <div className="flex items-center justify-between rounded-2xl border border-zinc-200/80 bg-zinc-50/60 p-4 dark:border-zinc-800/80 dark:bg-zinc-900/40">
                 <div>
                   <p className="text-xs font-bold text-zinc-900 dark:text-white">
-                    No-Index (Hide from Google)
+                    No-Index (Hide from Search)
                   </p>
                   <p className="text-[11px] text-zinc-500">
-                    Instruct search engines not to index this category page.
+                    Prevent search engines from indexing this category.
                   </p>
                 </div>
                 <Switch
                   checked={form.noindex}
-                  onCheckedChange={(checked) =>
-                    setForm((current) => ({ ...current, noindex: checked }))
-                  }
+                  onCheckedChange={(checked) => setForm((curr) => ({ ...curr, noindex: checked }))}
                 />
               </div>
 
@@ -588,44 +406,33 @@ export default function CategoryForm({
                     No-Follow Links
                   </p>
                   <p className="text-[11px] text-zinc-500">
-                    Instruct search engines not to follow outbound links.
+                    Instruct search engines not to follow links.
                   </p>
                 </div>
                 <Switch
                   checked={form.nofollow}
-                  onCheckedChange={(checked) =>
-                    setForm((current) => ({ ...current, nofollow: checked }))
-                  }
+                  onCheckedChange={(checked) => setForm((curr) => ({ ...curr, nofollow: checked }))}
                 />
               </div>
             </div>
           </section>
-        )}
 
-        {/* TAB 4: RELATED CONTENT */}
-        {activeTab === "related" && (
-          <section className="space-y-6 rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-800/80 dark:bg-zinc-950">
+          {/* Related Content & Cross-Promotion */}
+          <section className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
             <div>
-              <h2 className="text-base font-black tracking-tight text-zinc-900 dark:text-white">
-                Related Content & Cross-Promotion
-              </h2>
-              <p className="mt-1 text-xs text-zinc-500">
-                Choose featured course lessons or other courses to show
-                alongside these interview questions.
+              <h2 className="text-base font-semibold">Related Content &amp; Cross-Promotion</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Choose featured course lessons or related courses to display alongside this guide.
               </p>
             </div>
 
             {/* Featured Chapters */}
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                Featured / Popular Chapters (Shown in sidebar for this guide)
-              </Label>
+              <Label>Featured Chapters / Lessons</Label>
               {courseChapters.length > 0 ? (
                 <div className="max-h-56 overflow-y-auto space-y-1 rounded-2xl border border-zinc-200/80 bg-zinc-50/60 p-3 dark:border-zinc-800/80 dark:bg-zinc-900/40">
                   {courseChapters.map((ch, idx) => {
-                    const isSelected = (form.featuredChapters || []).includes(
-                      ch._id,
-                    );
+                    const isSelected = (form.featuredChapters || []).includes(ch._id);
                     return (
                       <label
                         key={ch._id}
@@ -637,15 +444,10 @@ export default function CategoryForm({
                           onChange={(e) => {
                             const next = e.target.checked
                               ? [...(form.featuredChapters || []), ch._id]
-                              : (form.featuredChapters || []).filter(
-                                  (id) => id !== ch._id,
-                                );
-                            setForm((current) => ({
-                              ...current,
-                              featuredChapters: next,
-                            }));
+                              : (form.featuredChapters || []).filter((id) => id !== ch._id);
+                            setForm((curr) => ({ ...curr, featuredChapters: next }));
                           }}
-                          className="h-4 w-4 rounded border-zinc-300 text-orange-500 focus:ring-orange-400"
+                          className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
                         />
                         <span>
                           {ch.order ?? idx + 1}. {ch.title}
@@ -656,24 +458,19 @@ export default function CategoryForm({
                 </div>
               ) : (
                 <p className="rounded-2xl border border-dashed border-zinc-200 p-4 text-xs text-zinc-400 dark:border-zinc-800">
-                  Select a Course in General Information to attach specific
-                  lessons from that course.
+                  Select an Associated Course in the right sidebar to attach specific lessons from that course.
                 </p>
               )}
             </div>
 
             {/* Related Courses */}
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                Related Courses
-              </Label>
+              <Label>Related Courses</Label>
               <div className="max-h-48 overflow-y-auto space-y-1 rounded-2xl border border-zinc-200/80 bg-zinc-50/60 p-3 dark:border-zinc-800/80 dark:bg-zinc-900/40">
                 {courses
                   .filter((c) => c._id !== form.course)
                   .map((c) => {
-                    const isSelected = (form.relatedCourses || []).includes(
-                      c._id,
-                    );
+                    const isSelected = (form.relatedCourses || []).includes(c._id);
                     return (
                       <label
                         key={c._id}
@@ -685,15 +482,10 @@ export default function CategoryForm({
                           onChange={(e) => {
                             const next = e.target.checked
                               ? [...(form.relatedCourses || []), c._id]
-                              : (form.relatedCourses || []).filter(
-                                  (id) => id !== c._id,
-                                );
-                            setForm((current) => ({
-                              ...current,
-                              relatedCourses: next,
-                            }));
+                              : (form.relatedCourses || []).filter((id) => id !== c._id);
+                            setForm((curr) => ({ ...curr, relatedCourses: next }));
                           }}
-                          className="h-4 w-4 rounded border-zinc-300 text-orange-500 focus:ring-orange-400"
+                          className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
                         />
                         <span>{c.title}</span>
                       </label>
@@ -702,32 +494,105 @@ export default function CategoryForm({
               </div>
             </div>
           </section>
-        )}
+        </main>
 
-        {/* Bottom Save Bar */}
-        <div className="flex items-center justify-between pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.push("/categories")}
-          >
-            Cancel
-          </Button>
+        {/* Right Sidebar */}
+        <aside className="space-y-6">
+          {/* Status & Taxonomy Assignment */}
+          <section className={formSectionClass}>
+            <div className="flex items-center gap-2">
+              <Layers className="h-5 w-5 text-primary" />
+              <h2 className="text-base font-semibold">Publishing &amp; Taxonomy</h2>
+            </div>
 
-          <Button
-            type="submit"
-            disabled={saving}
-            className="shadow-lg shadow-blue-500/20"
-          >
-            {saving ? (
-              <LogoLoader className="mr-2 h-4 w-4 "  />
-            ) : (
-              <Save className="mr-2 h-4 w-4" />
-            )}
-            {categoryId ? "Update Category" : "Publish Category"}
-          </Button>
-        </div>
-      </form>
+            <div className="space-y-2">
+              <Label htmlFor="category-status">Status</Label>
+              <Select
+                value={form.status}
+                onValueChange={(status) => setForm((curr) => ({ ...curr, status }))}
+              >
+                <SelectTrigger id="category-status" className="h-11 rounded-2xl border-zinc-200/80 bg-zinc-50/60 dark:border-zinc-800/80 dark:bg-zinc-900/60">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="published">Published</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="category-course">Associated Course</Label>
+              <Select
+                value={form.course}
+                onValueChange={(val) => {
+                  setForm((curr) => ({ ...curr, course: val }));
+                  if (val && val !== "none") {
+                    coursesApi.getById(val).then((cRes) => {
+                      if (cRes.success) setCourseChapters(cRes.data?.data?.chapters || []);
+                    });
+                  } else {
+                    setCourseChapters([]);
+                  }
+                }}
+              >
+                <SelectTrigger id="category-course" className="h-11 w-full rounded-2xl border-zinc-200/80 bg-zinc-50/60 dark:border-zinc-800/80 dark:bg-zinc-900/60">
+                  <SelectValue placeholder="Standalone (Global Taxonomy)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">
+                    Standalone (Global Taxonomy)
+                  </SelectItem>
+                  {courses.map((item) => (
+                    <SelectItem key={item._id} value={item._id}>
+                      {item.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="category-order">Display Sort Order</Label>
+              <Input
+                id="category-order"
+                type="number"
+                value={form.order}
+                onChange={(e) => setForm((curr) => ({ ...curr, order: Number(e.target.value) || 0 }))}
+                className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60 font-mono text-xs"
+              />
+            </div>
+          </section>
+
+          {/* Quick Actions Card */}
+          <section className="space-y-4 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+            <h2 className="text-base font-semibold">Actions</h2>
+            <div className="space-y-2">
+              <Button
+                type="button"
+                disabled={saving}
+                onClick={() => persist(form.status)}
+                className="w-full shadow-lg shadow-blue-500/20"
+              >
+                <Save className="mr-2 h-4 w-4" />
+                {categoryId ? "Update Category" : "Save Category"}
+              </Button>
+
+              {categoryId && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setDeleteOpen(true)}
+                  className="w-full text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 dark:text-rose-400 border-rose-200 dark:border-rose-900/50"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Category
+                </Button>
+              )}
+            </div>
+          </section>
+        </aside>
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
@@ -740,6 +605,6 @@ export default function CategoryForm({
         loading={deleting}
         onConfirm={remove}
       />
-    </AdminPage>
+    </AdminFormShell>
   );
 }
