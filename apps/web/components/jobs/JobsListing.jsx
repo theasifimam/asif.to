@@ -154,30 +154,29 @@ export default async function JobsListing({
                 </p>
               </div>
 
-              {/* Counts Buttons Row (1 single row on small screens) */}
-              {stats.length > 0 && (
-                <div className="mt-4 grid grid-cols-3 gap-1.5 xs:gap-2 w-full sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-2">
-                  {stats.map(({ icon: Icon, label }) => (
-                    <span
-                      key={label}
-                      className="flex min-w-0 items-center justify-center gap-1 xs:gap-1.5 rounded-xl sm:rounded-full border border-blue-500/20 bg-white/95 dark:bg-zinc-900 px-2 py-2 text-[10px] xs:text-xs font-bold text-zinc-800 dark:text-zinc-100 shadow-xs sm:px-3.5 sm:py-2 sm:flex-initial"
-                    >
-                      <Icon className="h-3 w-3 xs:h-3.5 xs:w-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
-                      <span className="truncate">{label}</span>
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Saved Jobs Full Width Action Button */}
-              <div className="mt-3 sm:mt-4">
+              {/* Hero Count & Saved Buttons Row */}
+              <div className="mt-4 grid grid-cols-2 gap-1.5 xs:grid-cols-4 xs:gap-2 w-full sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-2">
+                {/* 1st Button: Saved Jobs */}
                 <Link
                   href="/jobs/my"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 text-xs font-bold text-zinc-950 transition hover:bg-zinc-100 active:scale-[0.99] dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-100 shadow-xs cursor-pointer"
+                  title="Saved jobs and applications"
+                  aria-label="Saved jobs and applications"
+                  className="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-blue-500/20 bg-white/95 px-3 py-2 text-xs font-bold text-blue-600 shadow-xs transition hover:border-blue-400 hover:bg-blue-50 dark:bg-zinc-900 dark:text-blue-400 dark:hover:bg-blue-950/40 sm:rounded-full sm:px-3.5 sm:py-2 sm:flex-initial cursor-pointer"
                 >
-                  <BookmarkCheck className="h-4 w-4 text-blue-600 shrink-0" />
-                  <span>My Saved Jobs &amp; Applications</span>
+                  <BookmarkCheck className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
+                  <span className="truncate">Saved Jobs</span>
                 </Link>
+
+                {/* Count Stat Chips */}
+                {stats.map(({ icon: Icon, label }) => (
+                  <span
+                    key={label}
+                    className="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-blue-500/20 bg-white/95 px-3 py-2 text-xs font-bold text-zinc-800 shadow-xs dark:bg-zinc-900 dark:text-zinc-100 sm:rounded-full sm:px-3.5 sm:py-2 sm:flex-initial"
+                  >
+                    <Icon className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
+                    <span className="truncate">{label}</span>
+                  </span>
+                ))}
               </div>
             </div>
           </div>
