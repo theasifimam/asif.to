@@ -222,17 +222,17 @@ export default function BottomNav() {
     }
   };
 
-  if (isImmersiveRoute) return null;
+  const isVisible = (isNavVisible || isMenuOpen) && !isImmersiveRoute;
 
   return (
     <>
       {/* Floating Bottom Tab Bar for Mobile - Always visible & elevated above backdrop */}
       <nav
         aria-label="Primary navigation"
-        className={`fixed left-1/2 -translate-x-1/2 z-110 lg:hidden max-w-[calc(100vw-1rem)] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl p-1 rounded-full shadow-2xl border border-zinc-200/80 dark:border-zinc-800/80 flex items-center justify-center gap-0.5 transition-[bottom,opacity] duration-300 ease-in-out ${
-          isNavVisible
-            ? "bottom-[max(.5rem,env(safe-area-inset-bottom))] opacity-100"
-            : "-bottom-20 opacity-0 pointer-events-none"
+        className={`fixed left-1/2 -translate-x-1/2 z-110 lg:hidden max-w-[calc(100vw-1rem)] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl p-1 rounded-full shadow-2xl border border-zinc-200/80 dark:border-zinc-800/80 flex items-center justify-center gap-0.5 bottom-[max(.5rem,env(safe-area-inset-bottom))] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
+          isVisible
+            ? "translate-y-0 opacity-100 scale-100 pointer-events-auto"
+            : "translate-y-[calc(100%+2rem)] opacity-0 scale-95 pointer-events-none"
         }`}
       >
         {/* Home Tab */}
@@ -433,7 +433,7 @@ export default function BottomNav() {
               initial={{ y: "110%", opacity: 0, scale: 0.96 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: "110%", opacity: 0, scale: 0.96 }}
-              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              transition={{ type: "spring", damping: 22, stiffness: 220, mass: 0.8 }}
               role="dialog"
               aria-modal="true"
               aria-label="Navigation menu"

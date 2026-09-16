@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useBottomSheetDrag } from "@/lib/hooks/useBottomSheetDrag";
 
 export default function JobAlertButton({ criteria = {}, taxonomy = {} }) {
   const { requireAuth, isAuthenticated } = useAuthPrompt();
@@ -22,6 +23,9 @@ export default function JobAlertButton({ criteria = {}, taxonomy = {} }) {
   const [alertId, setAlertId] = useState(null);
   const [working, setWorking] = useState(false);
   const [open, setOpen] = useState(false);
+  const { dragProps, sheetStyle } = useBottomSheetDrag({
+    onClose: () => setOpen(false),
+  });
 
   // Local filter options state for interactive configuration inside the sheet
   const [keyword, setKeyword] = useState(criteria.keyword || "");
@@ -151,31 +155,39 @@ export default function JobAlertButton({ criteria = {}, taxonomy = {} }) {
       <Dialog.Root open={open} onOpenChange={setOpen}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-200 bg-zinc-950/60 backdrop-blur-sm transition-opacity" />
-          <Dialog.Content className="fixed inset-x-0 bottom-0 z-201 mx-auto flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-4xl border border-zinc-200 bg-white text-zinc-950 shadow-2xl outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 sm:max-w-xl sm:rounded-4xl sm:bottom-1/2 sm:-translate-y-1/2">
-            {/* Top Drag Handle for mobile */}
-            <div className="pt-3 pb-1 flex justify-center shrink-0 sm:hidden">
-              <div className="w-10 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
-            </div>
-
-            {/* Header */}
-            <div className="px-6 pt-4 pb-3 flex items-start justify-between border-b border-zinc-100 dark:border-zinc-800/80 shrink-0">
-              <div>
-                <Dialog.Title className="font-outfit text-xl sm:text-2xl font-black tracking-tight">
-                  Get notified about matching jobs
-                </Dialog.Title>
-                <Dialog.Description className="mt-1 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
-                  We’ll email you automatically when a new published job matches these criteria.
-                </Dialog.Description>
+          <Dialog.Content
+            style={sheetStyle}
+            className="fixed inset-x-0 bottom-0 z-201 mx-auto flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-4xl border border-zinc-200 bg-white text-zinc-950 shadow-2xl outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 sm:max-w-xl sm:rounded-4xl sm:bottom-1/2 sm:-translate-y-1/2 motion-safe:animate-[job-sheet-in_420ms_cubic-bezier(0.16,1,0.3,1)]"
+          >
+            <div
+              className="shrink-0 select-none touch-none cursor-grab active:cursor-grabbing border-b border-zinc-100 dark:border-zinc-800/80"
+              {...dragProps}
+            >
+              {/* Top Drag Handle for mobile */}
+              <div className="pt-3 pb-1 flex justify-center shrink-0 sm:hidden">
+                <div className="w-10 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
               </div>
-              <Dialog.Close asChild>
-                <button
-                  type="button"
-                  aria-label="Close"
-                  className="rounded-full p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-900 dark:hover:text-zinc-200 transition"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </Dialog.Close>
+
+              {/* Header */}
+              <div className="px-6 pt-2 sm:pt-4 pb-3 flex items-start justify-between">
+                <div>
+                  <Dialog.Title className="font-outfit text-xl sm:text-2xl font-black tracking-tight">
+                    Get notified about matching jobs
+                  </Dialog.Title>
+                  <Dialog.Description className="mt-1 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
+                    We’ll email you automatically when a new published job matches these criteria.
+                  </Dialog.Description>
+                </div>
+                <Dialog.Close asChild>
+                  <button
+                    type="button"
+                    aria-label="Close"
+                    className="rounded-full p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-900 dark:hover:text-zinc-200 transition"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </Dialog.Close>
+              </div>
             </div>
 
             {/* Scrollable Body */}

@@ -10,7 +10,7 @@ import {
 
 const ScrollNavContext = createContext(true);
 
-const SCROLL_THRESHOLD = 5;
+const SCROLL_THRESHOLD = 12;
 
 function getScrollY() {
   return (

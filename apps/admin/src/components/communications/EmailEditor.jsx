@@ -3,45 +3,614 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasPermission } from "@/lib/permissions";
 import SelectField, { readable } from "./SelectField";
 import { communicationApi as api, errorMessage } from "./api";
-export const inputClass = "w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 dark:border-zinc-700";
-export const cardClass = "rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 sm:p-6";
-export function Field({ label, hint, children }) { return <div className="space-y-2"><label className="block text-sm font-medium">{label}{children}</label>{hint && <p className="text-xs leading-5 text-zinc-400">{hint}</p>}</div>; }
-export function AudiencePicker({ topics, value, onChange }) {
-  return <div className="space-y-3"><Field label="Audience" hint={value.length ? "Subscribers interested in any of these topics." : "Everyone who confirmed their email and opted in."}><SelectField aria-label="Audience topics" className="mt-2" value="" onChange={e => { if (e.target.value) onChange([...value, e.target.value]); }}><option value="">{value.length ? "Add another topic" : "All active subscribers"}</option>{topics.filter(t => !value.includes(t)).map(t => <option key={t}>{t}</option>)}</SelectField></Field>{value.length > 0 && <div className="flex flex-wrap gap-2">{value.map(t => <button type="button" key={t} onClick={() => onChange(value.filter(v => v !== t))} className="flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs text-blue-600 dark:bg-blue-950">{t}<X size={12} /></button>)}</div>}</div>;
+export const inputClass =
+  "w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 dark:border-zinc-700";
+export const cardClass =
+  "rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 sm:p-6";
+export function Field({ label, hint, children }) {
+  return (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium">
+        {label}
+        {children}
+      </label>
+      {hint && <p className="text-xs leading-5 text-zinc-400">{hint}</p>}
+    </div>
+  );
 }
-const empty = { name: "", subject: "", text: "", category: "Marketing", kind: "newsletter", topics: [], stream: "MARKETING" };
+export function AudiencePicker({ topics, value, onChange }) {
+  return (
+    <div className="space-y-3">
+      <Field
+        label="Audience"
+        hint={
+          value.length
+            ? "Subscribers interested in any of these topics."
+            : "Everyone who confirmed their email and opted in."
+        }
+      >
+        <SelectField
+          aria-label="Audience topics"
+          className="mt-2"
+          value=""
+          onChange={(e) => {
+            if (e.target.value) onChange([...value, e.target.value]);
+          }}
+        >
+          <option value="">
+            {value.length ? "Add another topic" : "All active subscribers"}
+          </option>
+          {topics
+            .filter((t) => !value.includes(t))
+            .map((t) => (
+              <option key={t}>{t}</option>
+            ))}
+        </SelectField>
+      </Field>
+      {value.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {value.map((t) => (
+            <button
+              type="button"
+              key={t}
+              onClick={() => onChange(value.filter((v) => v !== t))}
+              className="flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs text-blue-600 dark:bg-blue-950"
+            >
+              {t}
+              <X size={12} />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+const empty = {
+  name: "",
+  subject: "",
+  text: "",
+  category: "Marketing",
+  kind: "newsletter",
+  topics: [],
+  stream: "MARKETING",
+};
 export default function EmailEditor({ section, initial, onSaved }) {
-  const { user } = useAuth(), router = useRouter();
-  const [draft, setDraft] = useState(initial || empty), [topics, setTopics] = useState([]), [templates, setTemplates] = useState([]), [count, setCount] = useState(null);
-  const [busy, setBusy] = useState(false), [error, setError] = useState(""), [notice, setNotice] = useState(""), [preview, setPreview] = useState(false), [review, setReview] = useState(false), [when, setWhen] = useState("now"), [date, setDate] = useState("");
-  const campaign = section === "campaigns", editable = !campaign || !draft.status || draft.status === "DRAFT";
-  const canEdit = !campaign || hasPermission(user, "communications.campaigns.create"), canSend = hasPermission(user, "communications.campaigns.send");
-  const change = (key, value) => setDraft(d => ({ ...d, [key]: value }));
-  useEffect(() => { Promise.all([api("/public/topics"), api("/templates")]).then(([a, b]) => { setTopics(a.topics); setTemplates(b.items); }).catch(e => setError(errorMessage(e))); }, []);
-  useEffect(() => { if (!campaign) return; const abort = new AbortController(); api("/audience", { method: "POST", body: { topics: draft.topics }, signal: abort.signal }).then(data => setCount(data.count)).catch(() => {}); return () => abort.abort(); }, [campaign, draft.topics]);
-  const run = async (fn, message) => { if (busy) return; setBusy(true); setError(""); setNotice(""); try { const value = await fn(); setNotice(message); return value; } catch (e) { setError(errorMessage(e)); return null; } finally { setBusy(false); } };
+  const { user } = useAuth(),
+    router = useRouter();
+  const [draft, setDraft] = useState(initial || empty),
+    [topics, setTopics] = useState([]),
+    [templates, setTemplates] = useState([]),
+    [count, setCount] = useState(null);
+  const [busy, setBusy] = useState(false),
+    [error, setError] = useState(""),
+    [notice, setNotice] = useState(""),
+    [preview, setPreview] = useState(false),
+    [review, setReview] = useState(false),
+    [when, setWhen] = useState("now"),
+    [date, setDate] = useState("");
+  const campaign = section === "campaigns",
+    editable = !campaign || !draft.status || draft.status === "DRAFT";
+  const canEdit =
+      !campaign || hasPermission(user, "communications.campaigns.create"),
+    canSend = hasPermission(user, "communications.campaigns.send");
+  const change = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
+  useEffect(() => {
+    Promise.all([api("/public/topics"), api("/templates")])
+      .then(([a, b]) => {
+        setTopics(a.topics);
+        setTemplates(b.items);
+      })
+      .catch((e) => setError(errorMessage(e)));
+  }, []);
+  useEffect(() => {
+    if (!campaign) return;
+    const abort = new AbortController();
+    api("/audience", {
+      method: "POST",
+      body: { topics: draft.topics },
+      signal: abort.signal,
+    })
+      .then((data) => setCount(data.count))
+      .catch(() => {});
+    return () => abort.abort();
+  }, [campaign, draft.topics]);
+  const run = async (fn, message) => {
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      const value = await fn();
+      setNotice(message);
+      return value;
+    } catch (e) {
+      setError(errorMessage(e));
+      return null;
+    } finally {
+      setBusy(false);
+    }
+  };
   const save = async (navigate = true) => {
-    const saved = await run(() => api(`/${section}${draft._id ? `/${draft._id}` : ""}`, { method: draft._id ? "PATCH" : "POST", body: draft }), "Saved.");
-    if (saved) { setDraft(saved); onSaved?.(saved); if (navigate && !draft._id) router.replace(`/communications/${section}/${saved._id}`); } return saved;
+    const saved = await run(
+      () =>
+        api(`/${section}${draft._id ? `/${draft._id}` : ""}`, {
+          method: draft._id ? "PATCH" : "POST",
+          body: draft,
+        }),
+      "Saved.",
+    );
+    if (saved) {
+      setDraft(saved);
+      onSaved?.(saved);
+      if (navigate && !draft._id)
+        router.replace(`/communications/${section}/${saved._id}`);
+    }
+    return saved;
   };
-  const operation = async action => {
-    const updated = await run(() => api(`/campaigns/${draft._id}/action`, { method: "POST", body: { action, ...(action === "schedule" ? { scheduledAt: new Date(date).toISOString() } : {}) } }), action === "send" || action === "schedule" ? "Your campaign is queued for delivery." : "Campaign updated.");
-    if (updated) { if (action === "duplicate") router.push(`/communications/campaigns/${updated._id}`); else { setDraft(updated); setReview(false); } }
+  const operation = async (action) => {
+    const updated = await run(
+      () =>
+        api(`/campaigns/${draft._id}/action`, {
+          method: "POST",
+          body: {
+            action,
+            ...(action === "schedule"
+              ? { scheduledAt: new Date(date).toISOString() }
+              : {}),
+          },
+        }),
+      action === "send" || action === "schedule"
+        ? "Your campaign is queued for delivery."
+        : "Campaign updated.",
+    );
+    if (updated) {
+      if (action === "duplicate")
+        router.push(`/communications/campaigns/${updated._id}`);
+      else {
+        setDraft(updated);
+        setReview(false);
+      }
+    }
   };
-  return <div className="mx-auto max-w-3xl space-y-4">
-    {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}{notice && <p role="status" className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700">{notice}</p>}
-    {campaign && draft._id && <div className="flex flex-wrap items-center justify-between gap-3"><span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600 dark:bg-blue-950">{readable(draft.status)}</span><div className="flex gap-2">{hasPermission(user, "communications.analytics.read") && <Button variant="ghost" onClick={() => router.push(`/communications/analytics?campaign=${draft._id}`)}>View results</Button>}<SelectField aria-label="Campaign actions" className="h-9 w-40" value="" onChange={e => operation(e.target.value)}><option value="">More actions</option>{canEdit && <option value="duplicate">Duplicate</option>}{canSend && ["QUEUED", "SCHEDULED", "SENDING"].includes(draft.status) && <option value="pause">Pause delivery</option>}{canSend && draft.status === "PAUSED" && <option value="resume">Resume delivery</option>}{canSend && !["SENT", "CANCELLED"].includes(draft.status) && <option value="cancel">Cancel campaign</option>}</SelectField></div></div>}
-    <form className="space-y-4" onSubmit={e => { e.preventDefault(); save(); }}>
-      <fieldset disabled={!editable || !canEdit || busy} className={`${cardClass} space-y-5`}><div><h3 className="font-semibold">{campaign ? "Campaign details" : "Template details"}</h3><p className="mt-1 text-sm text-zinc-500">{campaign ? "Give this email a name and choose who receives it." : "Save a reusable message for your team."}</p></div><Field label="Name"><input required className={`${inputClass} mt-2`} placeholder={campaign ? "e.g. This week on asif.to" : "e.g. Help with course access"} value={draft.name} onChange={e => change("name", e.target.value)} /></Field>{campaign ? <><Field label="Type"><SelectField className="mt-2" value={draft.kind} onChange={e => setDraft(d => ({ ...d, kind: e.target.value, stream: e.target.value === "job_alert" ? "JOBS" : "MARKETING" }))}>{["newsletter", "article_announcement", "course_announcement", "job_alert", "feature_announcement", "offer", "platform_update", "maintenance"].map(t => <option key={t} value={t}>{readable(t)}</option>)}</SelectField></Field><AudiencePicker topics={topics} value={draft.topics} onChange={topics => change("topics", topics)} /><p className="text-sm text-zinc-500">{count === null ? "Estimating audience…" : `${count.toLocaleString()} eligible subscribers`}</p></> : <Field label="Category"><SelectField className="mt-2" value={draft.category} onChange={e => change("category", e.target.value)}>{["Support", "Marketing", "Article", "Course", "Jobs", "Authentication", "System"].map(t => <option key={t}>{t}</option>)}</SelectField></Field>}</fieldset>
-      <fieldset disabled={!editable || !canEdit || busy} className={`${cardClass} space-y-5`}><div className="flex flex-wrap items-center justify-between gap-3"><h3 className="font-semibold">Write your email</h3>{campaign && templates.length > 0 && <SelectField aria-label="Start from template" className="h-9 w-52 text-xs" value="" onChange={e => { const template = templates.find(t => t._id === e.target.value); if (template) setDraft(d => ({ ...d, subject: template.subject, text: template.text })); }}><option value="">Start from a template</option>{templates.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}</SelectField>}</div><Field label="Subject"><input required maxLength={250} className={`${inputClass} mt-2`} placeholder="What should the recipient see first?" value={draft.subject} onChange={e => change("subject", e.target.value)} /></Field><Field label="Message"><textarea required rows={10} maxLength={50000} className={`${inputClass} mt-2 leading-7`} placeholder="Write your message…" value={draft.text} onChange={e => change("text", e.target.value)} /></Field><details className="text-xs text-zinc-500"><summary className="cursor-pointer">Personalize this message</summary><p className="mt-2 leading-6">Use {"{{firstName}} or {{email}}"}. Content announcements also support {"{{articleTitle}}, {{articleUrl}}, {{courseTitle}}, {{courseUrl}}, {{jobTitle}}, {{jobUrl}}"}. Support templates support {"{{conversationNumber}}"}.</p></details>{campaign && <p className="text-xs text-zinc-400">An unsubscribe link is added automatically.</p>}</fieldset>
-      <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex gap-2"><Button type="button" variant="outline" onClick={() => setPreview(true)}>Preview</Button>{hasPermission(user, "communications.templates.manage") && <Button type="button" variant="ghost" disabled={busy || !draft.subject || !draft.text} onClick={() => run(() => api("/test", { method: "POST", body: { ...draft, requestId: crypto.randomUUID(), variables: { firstName: user.fullName, email: user.email } } }), "Test email queued to your email address.")}>Send test to me</Button>}</div><div className="flex gap-2">{editable && canEdit && <Button variant={campaign ? "outline" : "default"} disabled={busy}>{busy ? "Saving…" : campaign ? "Save draft" : "Save template"}</Button>}{campaign && editable && canSend && <Button type="button" disabled={busy || !draft.subject || !draft.text || !draft.name} onClick={async () => { const saved = canEdit ? await save(false) : draft; if (saved) setReview(true); }}>Review & send</Button>}</div></div>
-    </form>
-    <Dialog open={preview} onOpenChange={setPreview}><DialogContent className="max-h-[80dvh] overflow-y-auto"><DialogHeader><DialogTitle>Email preview</DialogTitle><DialogDescription>{draft.subject || "Subject"}</DialogDescription></DialogHeader><p className="whitespace-pre-wrap text-sm leading-7">{draft.text.replace(/{{firstName}}/g, "Alex").replace(/{{email}}/g, "alex@example.com") || "Your message will appear here."}</p>{campaign && <p className="border-t pt-4 text-xs text-zinc-400">Sender footer · Email preferences / unsubscribe</p>}</DialogContent></Dialog>
-    <Dialog open={review} onOpenChange={setReview}><DialogContent><DialogHeader><DialogTitle>Ready to send?</DialogTitle><DialogDescription>{draft.name}</DialogDescription></DialogHeader><div className="space-y-4"><p className="text-sm"><strong>{count ?? "Calculating"}</strong> eligible subscribers will receive this email.</p><Field label="When should it send?"><SelectField className="mt-2" value={when} onChange={e => setWhen(e.target.value)}><option value="now">Send now</option><option value="later">Schedule for later</option></SelectField></Field>{when === "later" && <Field label="Send date and time"><input className={`${inputClass} mt-2`} type="datetime-local" value={date} onChange={e => setDate(e.target.value)} /></Field>}<p className="text-xs text-zinc-400">Delivery happens in the background. Unsubscribed and suppressed addresses are excluded.</p>{error && <p role="alert" className="text-sm text-red-600">{error}</p>}<Button className="w-full" disabled={busy || when === "later" && !date} onClick={() => operation(when === "later" ? "schedule" : "send")}>{busy ? "Queuing…" : when === "later" ? "Schedule campaign" : "Send campaign"}</Button></div></DialogContent></Dialog>
-  </div>;
+  return (
+    <div className="mx-auto max-w-3xl space-y-4">
+      {error && (
+        <p
+          role="alert"
+          className="rounded-xl bg-red-50 p-3 text-sm text-red-700"
+        >
+          {error}
+        </p>
+      )}
+      {notice && (
+        <p
+          role="status"
+          className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700"
+        >
+          {notice}
+        </p>
+      )}
+      {campaign && draft._id && (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600 dark:bg-blue-950">
+            {readable(draft.status)}
+          </span>
+          <div className="flex gap-2">
+            {hasPermission(user, "communications.analytics.read") && (
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  router.push(`/communications/analytics?campaign=${draft._id}`)
+                }
+              >
+                View results
+              </Button>
+            )}
+            <SelectField
+              aria-label="Campaign actions"
+              className="h-9 w-40"
+              value=""
+              onChange={(e) => operation(e.target.value)}
+            >
+              <option value="">More actions</option>
+              {canEdit && <option value="duplicate">Duplicate</option>}
+              {canSend &&
+                ["QUEUED", "SCHEDULED", "SENDING"].includes(draft.status) && (
+                  <option value="pause">Pause delivery</option>
+                )}
+              {canSend && draft.status === "PAUSED" && (
+                <option value="resume">Resume delivery</option>
+              )}
+              {canSend && !["SENT", "CANCELLED"].includes(draft.status) && (
+                <option value="cancel">Cancel campaign</option>
+              )}
+            </SelectField>
+          </div>
+        </div>
+      )}
+      <form
+        className="space-y-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          save();
+        }}
+      >
+        <fieldset
+          disabled={!editable || !canEdit || busy}
+          className={`${cardClass} space-y-5`}
+        >
+          <div>
+            <h3 className="font-semibold">
+              {campaign ? "Campaign details" : "Template details"}
+            </h3>
+            <p className="mt-1 text-sm text-zinc-500">
+              {campaign
+                ? "Give this email a name and choose who receives it."
+                : "Save a reusable message for your team."}
+            </p>
+          </div>
+          <Field label="Name">
+            <input
+              required
+              className={`${inputClass} mt-2`}
+              placeholder={
+                campaign
+                  ? "e.g. This week on asif.to"
+                  : "e.g. Help with course access"
+              }
+              value={draft.name}
+              onChange={(e) => change("name", e.target.value)}
+            />
+          </Field>
+          {campaign ? (
+            <>
+              <Field label="Type">
+                <SelectField
+                  className="mt-2"
+                  value={draft.kind}
+                  onChange={(e) =>
+                    setDraft((d) => ({
+                      ...d,
+                      kind: e.target.value,
+                      stream:
+                        e.target.value === "job_alert" ? "JOBS" : "MARKETING",
+                    }))
+                  }
+                >
+                  {[
+                    "newsletter",
+                    "article_announcement",
+                    "course_announcement",
+                    "job_alert",
+                    "feature_announcement",
+                    "offer",
+                    "platform_update",
+                    "maintenance",
+                  ].map((t) => (
+                    <option key={t} value={t}>
+                      {readable(t)}
+                    </option>
+                  ))}
+                </SelectField>
+              </Field>
+              <AudiencePicker
+                topics={topics}
+                value={draft.topics}
+                onChange={(topics) => change("topics", topics)}
+              />
+              <p className="text-sm text-zinc-500">
+                {count === null
+                  ? "Estimating audience…"
+                  : `${count.toLocaleString()} eligible subscribers`}
+              </p>
+            </>
+          ) : (
+            <Field label="Category">
+              <SelectField
+                className="mt-2"
+                value={draft.category}
+                onChange={(e) => change("category", e.target.value)}
+              >
+                {[
+                  "Support",
+                  "Marketing",
+                  "Article",
+                  "Course",
+                  "Jobs",
+                  "Authentication",
+                  "System",
+                ].map((t) => (
+                  <option key={t}>{t}</option>
+                ))}
+              </SelectField>
+            </Field>
+          )}
+        </fieldset>
+        <fieldset
+          disabled={!editable || !canEdit || busy}
+          className={`${cardClass} space-y-5`}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className="font-semibold">Write your email</h3>
+            {campaign && templates.length > 0 && (
+              <SelectField
+                aria-label="Start from template"
+                className="h-9 w-52 text-xs"
+                value=""
+                onChange={(e) => {
+                  const template = templates.find(
+                    (t) => t._id === e.target.value,
+                  );
+                  if (template)
+                    setDraft((d) => ({
+                      ...d,
+                      subject: template.subject,
+                      text: template.text,
+                    }));
+                }}
+              >
+                <option value="">Start from a template</option>
+                {templates.map((t) => (
+                  <option key={t._id} value={t._id}>
+                    {t.name}
+                  </option>
+                ))}
+              </SelectField>
+            )}
+          </div>
+          <Field label="Subject">
+            <input
+              required
+              maxLength={250}
+              className={`${inputClass} mt-2`}
+              placeholder="What should the recipient see first?"
+              value={draft.subject}
+              onChange={(e) => change("subject", e.target.value)}
+            />
+          </Field>
+          <Field label="Message">
+            <textarea
+              required
+              rows={10}
+              maxLength={50000}
+              className={`${inputClass} mt-2 leading-7`}
+              placeholder="Write your message…"
+              value={draft.text}
+              onChange={(e) => change("text", e.target.value)}
+            />
+          </Field>
+          <details className="text-xs text-zinc-500">
+            <summary className="cursor-pointer">
+              Personalize this message
+            </summary>
+            <p className="mt-2 leading-6">
+              Use {"{{firstName}} or {{email}}"}. Content announcements also
+              support{" "}
+              {
+                "{{articleTitle}}, {{articleUrl}}, {{courseTitle}}, {{courseUrl}}, {{jobTitle}}, {{jobUrl}}"
+              }
+              . Support templates support {"{{conversationNumber}}"}.
+            </p>
+          </details>
+          {campaign && (
+            <p className="text-xs text-zinc-400">
+              An unsubscribe link is added automatically.
+            </p>
+          )}
+        </fieldset>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setPreview(true)}
+            >
+              Preview
+            </Button>
+            {hasPermission(user, "communications.templates.manage") && (
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={busy || !draft.subject || !draft.text}
+                onClick={() =>
+                  run(
+                    () =>
+                      api("/test", {
+                        method: "POST",
+                        body: {
+                          ...draft,
+                          requestId: crypto.randomUUID(),
+                          variables: {
+                            firstName: user.fullName,
+                            email: user.email,
+                          },
+                        },
+                      }),
+                    "Test email queued to your email address.",
+                  )
+                }
+              >
+                Send test to me
+              </Button>
+            )}
+          </div>
+          <div className="flex gap-2">
+            {editable && canEdit && (
+              <Button
+                variant={campaign ? "outline" : "default"}
+                disabled={busy}
+              >
+                {busy ? "Saving…" : campaign ? "Save draft" : "Save template"}
+              </Button>
+            )}
+            {campaign && editable && canSend && (
+              <Button
+                type="button"
+                disabled={busy || !draft.subject || !draft.text || !draft.name}
+                onClick={async () => {
+                  const saved = canEdit ? await save(false) : draft;
+                  if (saved) setReview(true);
+                }}
+              >
+                Review & send
+              </Button>
+            )}
+          </div>
+        </div>
+      </form>
+      <Dialog open={preview} onOpenChange={setPreview}>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto bg-zinc-100 p-3 sm:max-w-2xl sm:p-5 dark:bg-zinc-950">
+          <DialogHeader className="px-2">
+            <DialogTitle>Email preview</DialogTitle>
+            <DialogDescription>
+              Rendered in the asif.to branded email design.
+            </DialogDescription>
+          </DialogHeader>
+          <BrandedEmailPreview
+            subject={draft.subject}
+            text={draft.text}
+            marketing={campaign}
+          />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={review} onOpenChange={setReview}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ready to send?</DialogTitle>
+            <DialogDescription>{draft.name}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm">
+              <strong>{count ?? "Calculating"}</strong> eligible subscribers
+              will receive this email.
+            </p>
+            <Field label="When should it send?">
+              <SelectField
+                className="mt-2"
+                value={when}
+                onChange={(e) => setWhen(e.target.value)}
+              >
+                <option value="now">Send now</option>
+                <option value="later">Schedule for later</option>
+              </SelectField>
+            </Field>
+            {when === "later" && (
+              <Field label="Send date and time">
+                <input
+                  className={`${inputClass} mt-2`}
+                  type="datetime-local"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                />
+              </Field>
+            )}
+            <p className="text-xs text-zinc-400">
+              Delivery happens in the background. Unsubscribed and suppressed
+              addresses are excluded.
+            </p>
+            {error && (
+              <p role="alert" className="text-sm text-red-600">
+                {error}
+              </p>
+            )}
+            <Button
+              className="w-full"
+              disabled={busy || (when === "later" && !date)}
+              onClick={() => operation(when === "later" ? "schedule" : "send")}
+            >
+              {busy
+                ? "Queuing…"
+                : when === "later"
+                  ? "Schedule campaign"
+                  : "Send campaign"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+function BrandedEmailPreview({ subject, text, marketing }) {
+  const raw = (text || "Your message will appear here.")
+    .replace(/{{firstName}}/g, "Alex")
+    .replace(/{{email}}/g, "alex@example.com");
+
+  const clean = raw
+    .replace(
+      /^([=\-\s]*\n)+\s*asif\.to\s*\n\s*Engineering\s*[•·]\s*Systems\s*[•·]\s*Insights\s*\n+([=\-\s]*\n)+/gi,
+      "",
+    )
+    .replace(/^[=\-]{5,}\s*$/gm, "---");
+
+  const paragraphs = clean.split(/\n\s*\n/).filter(Boolean);
+
+  return (
+    <div className="w-full overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="border-b border-blue-100 bg-linear-to-br from-blue-50 to-indigo-50 px-6 py-6 dark:border-blue-950 dark:from-blue-950/50 dark:to-indigo-950/30">
+        <div className="flex items-center gap-3">
+          <img
+            src="/logo.png"
+            alt="asif.to"
+            className="h-11 w-11 rounded-xl object-cover shadow-xs"
+          />
+          <div>
+            <p className="text-lg font-bold tracking-tight text-zinc-950 dark:text-white">
+              asif<span className="text-blue-600">.to</span>
+            </p>
+            <p className="text-xs text-zinc-500">
+              Coding tutorials, courses and developer resources.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="px-6 py-7 sm:px-8">
+        <p className="mb-5 text-base font-semibold text-zinc-950 dark:text-white">
+          {subject || "Subject"}
+        </p>
+        <div className="space-y-4 text-sm leading-7 text-zinc-700 dark:text-zinc-300">
+          {paragraphs.map((p, index) => {
+            const trimmed = p.trim();
+            if (/^(---|\*\*\*|___)$/.test(trimmed)) {
+              return (
+                <hr
+                  key={index}
+                  className="my-5 border-t border-zinc-200 dark:border-zinc-800"
+                />
+              );
+            }
+            return (
+              <p key={index} className="whitespace-pre-wrap">
+                {trimmed}
+              </p>
+            );
+          })}
+        </div>
+        {marketing && (
+          <div className="mt-7 rounded-xl border border-blue-100 bg-blue-50/70 px-4 py-3 text-xs leading-5 text-blue-900 dark:border-blue-950 dark:bg-blue-950/30 dark:text-blue-200">
+            You are receiving this because you subscribed to asif.to updates.
+            Manage your email preferences or unsubscribe.
+          </div>
+        )}
+      </div>
+      <div className="border-t border-zinc-100 bg-zinc-50 px-6 py-5 text-xs leading-5 text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950">
+        <strong className="text-zinc-700 dark:text-zinc-300">asif.to</strong>
+        <br />
+        Coding tutorials, courses and developer resources.
+        <br />
+        <span className="text-blue-600">Visit asif.to</span> ·{" "}
+        <span className="text-blue-600">Contact support</span>
+      </div>
+    </div>
+  );
 }

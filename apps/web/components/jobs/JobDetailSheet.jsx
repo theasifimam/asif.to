@@ -17,13 +17,15 @@ import { safeJobDescription } from "@/lib/jobDescription.mjs";
 import CompanyLogo from "./CompanyLogo";
 import JobActions from "./JobActions";
 
+import { useBottomSheetDrag } from "@/lib/hooks/useBottomSheetDrag";
+
 const label = (value) => (value || "Not specified").replaceAll("-", " ");
 
 export default function JobDetailSheet({ selection, onClose, onRestoreFocus }) {
   const [job, setJob] = useState(null);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
-  const gesture = useRef(null);
+  const { dragProps, sheetStyle } = useBottomSheetDrag({ onClose });
   useEffect(() => {
     const controller = new AbortController();
     api
@@ -63,26 +65,16 @@ export default function JobDetailSheet({ selection, onClose, onRestoreFocus }) {
         <Dialog.Content
           onCloseAutoFocus={onRestoreFocus}
           aria-describedby="job-sheet-summary"
-          className="fixed inset-x-0 bottom-0 z-201 mx-auto flex max-h-[94dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-[28px] border border-zinc-200 bg-white text-zinc-950 shadow-2xl outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 sm:max-h-[90dvh] sm:rounded-t-4xl motion-safe:animate-[job-sheet-in_220ms_ease-out]"
+          style={sheetStyle}
+          className="fixed inset-x-0 bottom-0 z-201 mx-auto flex max-h-[94dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-[28px] border border-zinc-200 bg-white text-zinc-950 shadow-2xl outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 sm:max-h-[90dvh] sm:rounded-t-4xl motion-safe:animate-[job-sheet-in_420ms_cubic-bezier(0.16,1,0.3,1)]"
         >
-          <div className="relative shrink-0 border-b border-zinc-100 px-5 pb-4 pt-3 dark:border-zinc-800 sm:px-7">
+          <div
+            className="relative shrink-0 border-b border-zinc-100 px-5 pb-4 pt-3 select-none touch-none cursor-grab active:cursor-grabbing dark:border-zinc-800 sm:px-7"
+            {...dragProps}
+          >
             <div
               aria-hidden="true"
-              className="mx-auto mb-2 flex h-5 w-24 touch-none items-center justify-center"
-              onPointerDown={(event) => {
-                gesture.current = { y: event.clientY, x: event.clientX };
-                event.currentTarget.setPointerCapture(event.pointerId);
-              }}
-              onPointerUp={(event) => {
-                const start = gesture.current;
-                gesture.current = null;
-                if (
-                  start &&
-                  event.clientY - start.y > 65 &&
-                  Math.abs(event.clientX - start.x) < 80
-                )
-                  onClose();
-              }}
+              className="mx-auto mb-2 flex h-5 w-24 items-center justify-center"
             >
               <span className="h-1 w-10 rounded-full bg-zinc-300 dark:bg-zinc-700" />
             </div>

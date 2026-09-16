@@ -13,9 +13,13 @@ import {
   RotateCcw,
 } from "lucide-react";
 import JobsFilters from "./JobsFilters";
+import { useBottomSheetDrag } from "@/lib/hooks/useBottomSheetDrag";
 
 export default function MobileJobsFilters(props) {
   const [open, setOpen] = useState(false);
+  const { dragProps, sheetStyle } = useBottomSheetDrag({
+    onClose: () => setOpen(false),
+  });
   const router = useRouter();
   const values = props.values || {};
   const clearHref = props.fixed?.location
@@ -132,33 +136,41 @@ export default function MobileJobsFilters(props) {
       <Dialog.Root open={open} onOpenChange={setOpen}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-200 bg-zinc-950/60 backdrop-blur-sm transition-opacity" />
-          <Dialog.Content className="fixed inset-x-0 bottom-0 z-201 mx-auto flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-4xl border border-zinc-200 bg-white text-zinc-950 shadow-2xl outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 motion-safe:animate-[job-sheet-in_220ms_ease-out]">
-            {/* Top Drag Handle */}
-            <div className="pt-3 pb-1 flex justify-center shrink-0">
-              <div className="w-10 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
-            </div>
-
-            {/* App Sheet Header */}
-            <div className="flex items-center justify-between px-5 pb-3 pt-1 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
-              <div className="flex items-center gap-2">
-                <Dialog.Title className="font-outfit text-lg font-black tracking-tight">
-                  Filter jobs
-                </Dialog.Title>
-                {activeCount > 0 && (
-                  <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-black text-blue-700 dark:bg-blue-900/60 dark:text-blue-200">
-                    {activeCount} active
-                  </span>
-                )}
+          <Dialog.Content
+            style={sheetStyle}
+            className="fixed inset-x-0 bottom-0 z-201 mx-auto flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-4xl border border-zinc-200 bg-white text-zinc-950 shadow-2xl outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 motion-safe:animate-[job-sheet-in_420ms_cubic-bezier(0.16,1,0.3,1)]"
+          >
+            <div
+              className="shrink-0 select-none touch-none cursor-grab active:cursor-grabbing border-b border-zinc-100 dark:border-zinc-800"
+              {...dragProps}
+            >
+              {/* Top Drag Handle */}
+              <div className="pt-3 pb-1 flex justify-center shrink-0">
+                <div className="w-10 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
               </div>
-              <Dialog.Close asChild>
-                <button
-                  type="button"
-                  aria-label="Close filters"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </Dialog.Close>
+
+              {/* App Sheet Header */}
+              <div className="flex items-center justify-between px-5 pb-3 pt-1 shrink-0">
+                <div className="flex items-center gap-2">
+                  <Dialog.Title className="font-outfit text-lg font-black tracking-tight">
+                    Filter jobs
+                  </Dialog.Title>
+                  {activeCount > 0 && (
+                    <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-black text-blue-700 dark:bg-blue-900/60 dark:text-blue-200">
+                      {activeCount} active
+                    </span>
+                  )}
+                </div>
+                <Dialog.Close asChild>
+                  <button
+                    type="button"
+                    aria-label="Close filters"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </Dialog.Close>
+              </div>
             </div>
 
             {/* App Sheet Scrollable Content */}

@@ -4,16 +4,21 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Archive,
+  ArrowUpRight,
   BriefcaseBusiness,
+  Building2,
   CheckCircle2,
   Clock3,
   ExternalLink,
   Eye,
   FileCheck2,
+  FolderKanban,
+  MousePointerClick,
   Plus,
   RefreshCw,
   Star,
   Trash2,
+  TrendingUp,
 } from "lucide-react";
 import { jobsApi } from "@/lib/api";
 import { toast } from "@/lib/toast";
@@ -200,37 +205,181 @@ export default function JobsAdminPage() {
       </section>
 
       {dashboard?.topJobs?.length > 0 && (
-        <section className="grid gap-4 lg:grid-cols-3">
-          <div className="rounded-3xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950 lg:col-span-2">
-            <h2 className="text-sm font-black">Top job performance</h2>
-            <div className="mt-3 space-y-2">
-              {dashboard.topJobs.slice(0, 5).map((job) => (
-                <div
-                  key={job._id}
-                  className="flex items-center justify-between gap-4 rounded-2xl bg-zinc-50 px-4 py-3 text-xs dark:bg-zinc-900"
-                >
-                  <span className="truncate font-bold">
-                    {job.title}{" "}
-                    <span className="font-medium text-zinc-400">
-                      · {job.companyName}
-                    </span>
-                  </span>
-                  <span className="shrink-0 text-zinc-500">
-                    {job.views} views · {job.applyClicks} clicks
-                  </span>
+        <section className="grid gap-1 lg:grid-cols-3">
+          {/* Top Job Performance Card */}
+          <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-800/80 dark:bg-zinc-950 lg:col-span-2">
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-100 dark:border-zinc-800/80">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 dark:bg-amber-500/15 border border-amber-500/20">
+                  <TrendingUp className="h-5 w-5" />
                 </div>
-              ))}
+                <div>
+                  <h2 className="font-outfit text-base font-black tracking-tight text-zinc-900 dark:text-zinc-100">
+                    Top Job Performance
+                  </h2>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    Most viewed and clicked job listings
+                  </p>
+                </div>
+              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400 border border-emerald-500/20">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                Live metric
+              </span>
+            </div>
+
+            <div className="mt-4 space-y-2.5">
+              {dashboard.topJobs.slice(0, 5).map((job, idx) => {
+                const rankBadges = [
+                  "bg-gradient-to-r from-amber-500 to-yellow-400 text-zinc-950 shadow-amber-500/20 shadow-xs font-black",
+                  "bg-zinc-200 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 font-black",
+                  "bg-amber-900/60 text-amber-200 border border-amber-700/40 font-black",
+                  "bg-zinc-100 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400 font-bold",
+                  "bg-zinc-100 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400 font-bold",
+                ];
+
+                return (
+                  <div
+                    key={job._id}
+                    className="group flex items-center justify-between gap-3 rounded-2xl border border-zinc-100 bg-zinc-50/60 p-3.5 transition-all duration-200 hover:border-blue-500/30 hover:bg-zinc-100/80 hover:shadow-xs dark:border-zinc-800/60 dark:bg-zinc-900/40 dark:hover:border-blue-500/40 dark:hover:bg-zinc-900/90"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span
+                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-xl text-xs ${
+                          rankBadges[idx] || rankBadges[3]
+                        }`}
+                      >
+                        #{idx + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <Link
+                          href={`/jobs?search=${encodeURIComponent(job.title)}`}
+                          className="truncate block font-outfit text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                        >
+                          {job.title}
+                        </Link>
+                        <div className="mt-0.5 flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                          <span className="inline-flex items-center gap-1 truncate font-medium">
+                            <Building2 className="h-3 w-3 shrink-0 text-zinc-400" />
+                            {job.companyName}
+                          </span>
+                          {job.location && (
+                            <span className="hidden sm:inline-block text-[11px] text-zinc-400">
+                              · {job.location}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="inline-flex items-center gap-1 rounded-xl bg-blue-500/10 px-2.5 py-1 text-xs font-bold text-blue-600 dark:bg-blue-500/15 dark:text-blue-300 border border-blue-500/15">
+                        <Eye className="h-3.5 w-3.5" />
+                        {job.views?.toLocaleString() ?? 0}
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-xl bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400 border border-emerald-500/15">
+                        <MousePointerClick className="h-3.5 w-3.5" />
+                        {job.applyClicks?.toLocaleString() ?? 0}
+                      </span>
+                      {job.slug && (
+                        <a
+                          href={`https://asif.to/jobs/${job.slug}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="hidden sm:flex h-8 w-8 items-center justify-center rounded-xl bg-zinc-200/50 text-zinc-500 transition hover:bg-blue-600 hover:text-white dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-blue-600 dark:hover:text-white"
+                          title="View on site"
+                        >
+                          <ArrowUpRight className="h-4 w-4" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-          <div className="rounded-3xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-            <h2 className="text-sm font-black">Popular categories</h2>
-            <div className="mt-3 space-y-2">
-              {dashboard.categories?.slice(0, 5).map((item) => (
-                <div key={item._id} className="flex justify-between text-xs">
-                  <span className="text-zinc-500">{item._id}</span>
-                  <b>{item.count}</b>
+
+          {/* Popular Categories Card */}
+          <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-800/80 dark:bg-zinc-950 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-4 border-b border-zinc-100 dark:border-zinc-800/80">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-500 dark:bg-blue-500/15 border border-blue-500/20">
+                    <FolderKanban className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="font-outfit text-base font-black tracking-tight text-zinc-900 dark:text-zinc-100">
+                      Popular Categories
+                    </h2>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      Active job volume by sector
+                    </p>
+                  </div>
                 </div>
-              ))}
+              </div>
+
+              <div className="mt-4 space-y-4">
+                {(() => {
+                  const categories = dashboard.categories?.slice(0, 5) || [];
+                  const maxCount = Math.max(
+                    ...categories.map((c) => c.count),
+                    1,
+                  );
+                  const totalCount =
+                    categories.reduce((acc, c) => acc + c.count, 0) || 1;
+                  const barGradients = [
+                    "from-blue-600 via-indigo-500 to-cyan-400",
+                    "from-indigo-600 via-violet-500 to-purple-400",
+                    "from-purple-600 via-pink-500 to-rose-400",
+                    "from-emerald-600 via-teal-500 to-cyan-400",
+                    "from-amber-500 via-orange-500 to-yellow-400",
+                  ];
+
+                  return categories.map((item, idx) => {
+                    const pct = Math.round((item.count / totalCount) * 100);
+                    const fillPct = Math.min(
+                      100,
+                      Math.max(8, Math.round((item.count / maxCount) * 100)),
+                    );
+
+                    return (
+                      <div key={item._id} className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs font-bold">
+                          <span className="text-zinc-800 dark:text-zinc-200 capitalize truncate pr-2">
+                            {item._id}
+                          </span>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-zinc-400 text-[11px] font-medium">
+                              {pct}%
+                            </span>
+                            <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-black text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                              {item.count?.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800/80">
+                          <div
+                            className={`h-full rounded-full bg-linear-to-r ${
+                              barGradients[idx % barGradients.length]
+                            } transition-all duration-500`}
+                            style={{ width: `${fillPct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
+
+            <div className="mt-5 pt-3 border-t border-zinc-100 dark:border-zinc-800/60 text-center">
+              <Link
+                href="/jobs"
+                className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-500 dark:text-blue-400 transition-colors"
+              >
+                View all categories
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
           </div>
         </section>

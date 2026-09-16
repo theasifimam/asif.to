@@ -37,7 +37,7 @@ export default function SidebarAccount({
                 : "flex items-center gap-3 min-w-0"
             }
           >
-            <Avatar className="w-9 h-9 border border-zinc-200/80 dark:border-zinc-700/80 shadow-xs shrink-0 transition-transform group-hover/user:scale-105">
+            <Avatar className="w-9 h-9 shadow-xs shrink-0 transition-transform group-hover/user:scale-105">
               <AvatarImage src={avatarUrl || ""} className="object-cover" />
               <AvatarFallback className="bg-zinc-200/80 dark:bg-zinc-800 text-zinc-900 dark:text-white font-black uppercase text-xs">
                 {user?.fullName
@@ -71,11 +71,11 @@ export default function SidebarAccount({
         align="start"
         side="top"
         sideOffset={10}
-        className="w-68 z-[100] bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800/80 rounded-[24px] p-3.5 shadow-2xl flex flex-col gap-2.5"
+        className="w-68 z-100 bg-white dark:bg-[#121215] border border-zinc-200/80 dark:border-zinc-800/80 rounded-xl p-3.5 shadow-sm flex flex-col gap-2.5"
       >
         {/* User Info Header */}
         <div className="flex items-center gap-3 pb-3 border-b border-zinc-100 dark:border-zinc-800">
-          <Avatar className="w-9 h-9 border border-zinc-200 dark:border-zinc-700 shadow-xs shrink-0">
+          <Avatar className="w-9 h-9 shadow-xs shrink-0">
             <AvatarImage src={avatarUrl || ""} className="object-cover" />
             <AvatarFallback className="bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-black uppercase text-xs">
               {user?.fullName

@@ -1,56 +1,723 @@
 "use client";
+
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { ArrowLeft, Plus, Search, ChevronRight, Mail } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  Plus,
+  Search,
+  ChevronRight,
+  Mail,
+  Sparkles,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { AdminPage, AdminPageHeader, AdminFilters } from "@/components/admin";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasPermission } from "@/lib/permissions";
 import axios from "@/lib/axios";
 import { communicationApi as api, errorMessage } from "./api";
 import { sections } from "./CommunicationsShell";
 import SelectField, { readable } from "./SelectField";
-import EmailEditor, { Field, AudiencePicker, inputClass, cardClass } from "./EmailEditor";
+import EmailEditor, {
+  Field,
+  AudiencePicker,
+  inputClass,
+  cardClass,
+} from "./EmailEditor";
 import { SettingsEditor, AutomationEditor } from "./ManagementSettings";
+
 export default function ManagementWorkspace({ section, record }) {
-  const { user } = useAuth(), params = useSearchParams();
-  const [data, setData] = useState(null), [error, setError] = useState(""), [notice, setNotice] = useState(""), [busy, setBusy] = useState(false);
-  const [search, setSearch] = useState(params.get("search") || ""), [status, setStatus] = useState(""), [page, setPage] = useState(1), [templates, setTemplates] = useState([]);
-  const definition = sections.find(s => s.key === section), detail = Boolean(record), initial = data?.items?.find(item => item._id === record);
-  const can = name => hasPermission(user, `communications.${name}`);
-  const load = useCallback(async signal => setData(await api(`/${section}?${new URLSearchParams({ search, status, page, ...(record && !["new", "notify"].includes(record) ? { id: record } : {}), ...(params.get("campaign") ? { campaign: params.get("campaign") } : {}) })}`, { signal })), [section, search, status, page, record, params]);
-  useEffect(() => { const abort = new AbortController(); const timer = setTimeout(() => load(abort.signal).catch(e => { if (!abort.signal.aborted) setError(errorMessage(e)); }), 180); return () => { clearTimeout(timer); abort.abort(); }; }, [load]);
-  useEffect(() => { if (section === "automations") api("/templates").then(d => setTemplates(d.items)).catch(e => setError(errorMessage(e))); }, [section]);
-  const perform = async (fn, message = "Saved.") => { if (busy) return; setBusy(true); setError(""); try { const result = await fn(); await load(); setNotice(message); return result; } catch (e) { setError(errorMessage(e)); } finally { setBusy(false); } };
-  const create = ["campaigns", "templates", "automations"].includes(section) && (section !== "campaigns" || can("campaigns.create"));
-  const singular = section === "campaigns" ? "campaign" : section === "templates" ? "template" : "automation";
-  return <div className="space-y-5">
-    <header className="flex flex-wrap items-center justify-between gap-4"><div>{detail && <Link href={`/communications/${section}`} className="mb-3 inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-blue-600"><ArrowLeft size={15} />Back to {section}</Link>}<h2 className="text-xl font-semibold">{record === "new" ? `New ${singular}` : record === "notify" ? "Announce published content" : detail ? initial?.name || "Loading…" : definition.label}</h2>{!detail && <p className="mt-1 text-sm text-zinc-500">{definition.description}</p>}</div>{!detail && create && <Button asChild><Link href={`/communications/${section}/new`}><Plus size={16} />New {singular}</Link></Button>}</header>
-    {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}{notice && <p role="status" className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700">{notice}</p>}
-    {section === "subscribers" && !detail && <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-950 dark:border-blue-950 dark:bg-blue-950/30 dark:text-blue-100"><p className="font-semibold">How subscriptions work</p><p className="mt-1 leading-6">Subscribers choose their interests and receive a confirmation email before marketing starts. They can unsubscribe or change topics at any time from every marketing email. Suppressed and bounced addresses are never sent campaigns.</p></div>}
-    {section === "templates" && !detail && <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-950 dark:border-indigo-950 dark:bg-indigo-950/30 dark:text-indigo-100"><p className="font-semibold">Branded email templates</p><p className="mt-1 leading-6">Write the message content here; delivery automatically adds the asif.to logo, colors, footer, support link, and— for marketing email—an unsubscribe/preferences link.</p></div>}
-    {!detail && ["campaigns", "templates", "subscribers", "transactional"].includes(section) && <div className="flex flex-wrap gap-3"><div className="relative w-full max-w-sm"><Search className="absolute left-3 top-3 h-4 w-4 text-zinc-400" /><input aria-label={`Search ${section}`} className={`${inputClass} bg-white pl-9 dark:bg-zinc-900`} value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder={`Search ${section}`} /></div>{["subscribers", "transactional"].includes(section) && <SelectField aria-label="Filter by status" className="w-48" value={status} onChange={e => { setStatus(e.target.value); setPage(1); }}><option value="">All statuses</option>{(section === "subscribers" ? ["PENDING", "ACTIVE", "UNSUBSCRIBED", "BOUNCED", "COMPLAINED", "SUPPRESSED"] : ["QUEUED", "SENDING", "SENT", "DELIVERED", "FAILED", "BOUNCED", "COMPLAINED", "SUPPRESSED"]).map(s => <option key={s}>{s}</option>)}</SelectField>}</div>}
-    {["campaigns", "templates"].includes(section) && (record === "notify" ? <ContentAnnouncement /> : detail ? (record === "new" || initial) && <EmailEditor key={record} section={section} initial={initial} onSaved={() => load()} /> : <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">{data?.items.map(item => <Link key={item._id} href={`/communications/${section}/${item._id}`} className="flex items-center gap-4 border-b border-zinc-100 p-4 transition-colors last:border-b-0 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-800/50"><span className="hidden rounded-xl bg-zinc-50 p-3 text-zinc-400 dark:bg-zinc-800 sm:block"><Mail size={18} /></span><div className="min-w-0 flex-1"><h3 className="truncate text-sm font-semibold">{item.name}</h3><p className="mt-1 truncate text-xs text-zinc-500">{item.subject}</p></div><span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs text-zinc-500 dark:bg-zinc-800">{readable(item.status || item.category)}</span><ChevronRight size={16} className="text-zinc-300" /></Link>)}</div>)}
-    {section === "campaigns" && !detail && can("campaigns.send") && <Link className="inline-block text-sm text-blue-600" href="/communications/campaigns/notify">Announce an article, course or job</Link>}
-    {section === "subscribers" && <div className="space-y-2">{data?.items.map(item => <article key={item._id} className={`${cardClass} flex flex-wrap items-center gap-4`}><div className="min-w-0 flex-1"><h3 className="truncate text-sm font-semibold">{item.email}</h3><p className="mt-1 text-xs text-zinc-500">{readable(item.status)} · {item.topics.join(", ") || "General updates"}</p><details className="mt-2 text-xs text-zinc-400"><summary className="cursor-pointer">Subscription details</summary><p className="mt-2">Source: {readable(item.source)} · {item.verifiedAt ? "Email confirmed" : "Awaiting confirmation"}</p>{item.suppressionReason && <p>{readable(item.suppressionReason)}</p>}{item.user && <Link className="text-blue-600" href={`/users/${item.user}`}>Open user profile</Link>}</details></div>{can("subscribers.manage") && <SelectField aria-label={`Manage ${item.email}`} className="h-9 w-40" disabled={busy} value="" onChange={e => perform(() => api(`/subscribers/${item._id}`, { method: "PATCH", body: { status: e.target.value } }))}><option value="">Manage</option><option value="UNSUBSCRIBED">Unsubscribe</option><option value="SUPPRESSED">Suppress emails</option></SelectField>}</article>)}</div>}
-    {section === "transactional" && <div className="space-y-2">{data?.items.map(item => <details key={item._id} className={cardClass}><summary className="flex cursor-pointer items-center justify-between gap-3"><div className="min-w-0"><p className="truncate text-sm font-semibold">{item.recipient}</p><p className="mt-1 text-xs text-zinc-500">{item.mail?.subject || item.metadata?.subject || readable(item.type)} · {new Date(item.createdAt).toLocaleDateString()}</p></div><span className={`rounded-full px-2.5 py-1 text-xs ${item.status === "FAILED" ? "bg-red-50 text-red-600" : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800"}`}>{readable(item.status)}</span></summary><div className="mt-4 space-y-2 border-t pt-4 text-sm dark:border-zinc-800"><p>{readable(item.stream)} · {item.attempts} attempts · {new Date(item.createdAt).toLocaleString()}</p>{item.error && <p className="text-red-600">{item.error}</p>}{item.status === "FAILED" && item.safeToRetry && !["TRANSACTIONAL", "SECURITY"].includes(item.stream) && can("inbox.reply") && <Button size="sm" disabled={busy} onClick={() => perform(() => api(`/transactional/${item._id}/retry`, { method: "POST" }), "Retry queued.")}>Retry delivery</Button>}</div></details>)}</div>}
-    {section === "automations" && (record === "new" || !detail || initial) && <div className={detail ? "mx-auto max-w-3xl" : ""}><AutomationEditor key={initial?._id || record || "list"} data={data} templates={templates} busy={busy} perform={perform} record={record} initial={initial} /></div>}
-    {section === "settings" && data && <div className="mx-auto max-w-3xl"><SettingsEditor key={data.settings.updatedAt} data={data} busy={busy} perform={perform} /></div>}
-    {section === "analytics" && data && <Analytics data={data} />}
-    {!data && !error && <p role="status" className="py-12 text-center text-sm text-zinc-400">Loading…</p>}
-    {!detail && data?.items?.length === 0 && <div className="py-12 text-center"><Mail className="mx-auto mb-3 h-8 w-8 text-zinc-300" /><p className="font-medium">No {section} yet</p><p className="mt-1 text-sm text-zinc-400">{search || status ? "Try a different search or filter." : create ? `Create your first ${singular} to get started.` : "New activity will appear here."}</p></div>}
-    {detail && !["new", "notify"].includes(record) && data && !initial && <p className={cardClass}>This {singular} could not be found.</p>}
-    {data?.total > 30 && <div className="flex items-center justify-center gap-4"><Button variant="ghost" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Previous</Button><span className="text-xs text-zinc-400">{page} / {Math.ceil(data.total / 30)}</span><Button variant="ghost" disabled={page * 30 >= data.total} onClick={() => setPage(p => p + 1)}>Next</Button></div>}
-  </div>;
+  const { user } = useAuth();
+  const params = useSearchParams();
+  const router = useRouter();
+  const [data, setData] = useState(null),
+    [error, setError] = useState(""),
+    [notice, setNotice] = useState(""),
+    [busy, setBusy] = useState(false);
+  const [search, setSearch] = useState(params.get("search") || ""),
+    [status, setStatus] = useState(""),
+    [page, setPage] = useState(1),
+    [templates, setTemplates] = useState([]);
+  const definition = sections.find((s) => s.key === section),
+    detail = Boolean(record),
+    initial = data?.items?.find((item) => item._id === record);
+  const can = (name) => hasPermission(user, `communications.${name}`);
+  const load = useCallback(
+    async (signal) =>
+      setData(
+        await api(
+          `/${section}?${new URLSearchParams({ search, status, page, ...(record && !["new", "notify"].includes(record) ? { id: record } : {}), ...(params.get("campaign") ? { campaign: params.get("campaign") } : {}) })}`,
+          { signal },
+        ),
+      ),
+    [section, search, status, page, record, params],
+  );
+
+  useEffect(() => {
+    const abort = new AbortController();
+    const timer = setTimeout(
+      () =>
+        load(abort.signal).catch((e) => {
+          if (!abort.signal.aborted) setError(errorMessage(e));
+        }),
+      180,
+    );
+    return () => {
+      clearTimeout(timer);
+      abort.abort();
+    };
+  }, [load]);
+  useEffect(() => {
+    if (section === "automations")
+      api("/templates")
+        .then((d) => setTemplates(d.items))
+        .catch((e) => setError(errorMessage(e)));
+  }, [section]);
+
+  const perform = async (fn, message = "Saved.") => {
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      const result = await fn();
+      await load();
+      setNotice(message);
+      return result;
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+  const create =
+    ["campaigns", "templates", "automations"].includes(section) &&
+    (section !== "campaigns" || can("campaigns.create"));
+  const singular =
+    section === "campaigns"
+      ? "campaign"
+      : section === "templates"
+        ? "template"
+        : "automation";
+
+  return (
+    <AdminPage>
+      <AdminPageHeader
+        eyebrow="Communications"
+        title={
+          record === "new"
+            ? `New ${singular}`
+            : record === "notify"
+              ? "Announce published content"
+              : detail
+                ? initial?.name || "Loading…"
+                : definition?.label || "Communications"
+        }
+        description={definition?.description}
+        back={
+          detail && (
+            <Link
+              href={`/communications/${section}`}
+              className="mb-3 inline-flex items-center gap-1 text-xs font-semibold text-zinc-500 hover:text-blue-600 transition-colors"
+            >
+              <ArrowLeft size={14} />
+              Back to {section}
+            </Link>
+          )
+        }
+        actions={
+          <div className="flex items-center gap-2">
+            <Select
+              value={section}
+              onValueChange={(val) => router.push(`/communications/${val}`)}
+            >
+              <SelectTrigger className="h-10 w-44 sm:w-52 rounded-2xl border border-zinc-200/80 bg-white px-3.5 text-xs sm:text-sm font-semibold outline-none transition dark:border-zinc-800 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 shadow-xs">
+                <SelectValue placeholder="Select section" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border border-zinc-200/80 bg-white p-1 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950 z-10050">
+                {sections
+                  .filter((item) => hasPermission(user, item.permission))
+                  .map((item) => {
+                    const IconComponent = item.icon;
+                    return (
+                      <SelectItem
+                        key={item.key}
+                        value={item.key}
+                        className="rounded-xl py-2 px-3 text-xs sm:text-sm font-medium cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <IconComponent className="h-4 w-4 shrink-0 text-zinc-400" />
+                          <span className="truncate">{item.label}</span>
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
+              </SelectContent>
+            </Select>
+
+            {!detail && create && (
+              <Button
+                asChild
+                className="shadow-lg shadow-blue-500/20 rounded-2xl"
+              >
+                <Link href={`/communications/${section}/new`}>
+                  <Plus className="mr-1.5 h-4 w-4" />
+                  New {singular}
+                </Link>
+              </Button>
+            )}
+          </div>
+        }
+      />
+
+      {error && (
+        <p
+          role="alert"
+          className="rounded-xl bg-red-50 p-3 text-sm text-red-700"
+        >
+          {error}
+        </p>
+      )}
+      {notice && (
+        <p
+          role="status"
+          className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700"
+        >
+          {notice}
+        </p>
+      )}
+
+      {!detail &&
+        ["campaigns", "templates", "subscribers", "transactional"].includes(
+          section,
+        ) && (
+          <AdminFilters className="flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+              <Input
+                aria-label={`Search ${section}`}
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+                placeholder={`Search ${section}…`}
+                className="pl-9 h-10 rounded-xl"
+              />
+            </div>
+            {["subscribers", "transactional"].includes(section) && (
+              <SelectField
+                aria-label="Filter by status"
+                className="w-48 h-10 rounded-xl"
+                value={status}
+                onChange={(e) => {
+                  setStatus(e.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="">All statuses</option>
+                {(section === "subscribers"
+                  ? [
+                      "PENDING",
+                      "ACTIVE",
+                      "UNSUBSCRIBED",
+                      "BOUNCED",
+                      "COMPLAINED",
+                      "SUPPRESSED",
+                    ]
+                  : [
+                      "QUEUED",
+                      "SENDING",
+                      "SENT",
+                      "DELIVERED",
+                      "FAILED",
+                      "BOUNCED",
+                      "COMPLAINED",
+                      "SUPPRESSED",
+                    ]
+                ).map((s) => (
+                  <option key={s}>{s}</option>
+                ))}
+              </SelectField>
+            )}
+          </AdminFilters>
+        )}
+
+      {["campaigns", "templates"].includes(section) &&
+        (record === "notify" ? (
+          <ContentAnnouncement />
+        ) : detail ? (
+          (record === "new" || initial) && (
+            <EmailEditor
+              key={record}
+              section={section}
+              initial={initial}
+              onSaved={() => load()}
+            />
+          )
+        ) : (
+          <div className="grid gap-1 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {data?.items.map((item) => (
+              <EmailTemplateCard key={item._id} item={item} section={section} />
+            ))}
+          </div>
+        ))}
+
+      {section === "campaigns" && !detail && can("campaigns.send") && (
+        <Link
+          className="inline-block text-sm text-blue-600"
+          href="/communications/campaigns/notify"
+        >
+          Announce an article, course or job
+        </Link>
+      )}
+
+      {section === "subscribers" && (
+        <div className="space-y-2">
+          {data?.items.map((item) => (
+            <article
+              key={item._id}
+              className={`${cardClass} flex flex-wrap items-center gap-4`}
+            >
+              <div className="min-w-0 flex-1">
+                <h3 className="truncate text-sm font-semibold">{item.email}</h3>
+                <p className="mt-1 text-xs text-zinc-500">
+                  {readable(item.status)} ·{" "}
+                  {item.topics.join(", ") || "General updates"}
+                </p>
+                <details className="mt-2 text-xs text-zinc-400">
+                  <summary className="cursor-pointer">
+                    Subscription details
+                  </summary>
+                  <p className="mt-2">
+                    Source: {readable(item.source)} ·{" "}
+                    {item.verifiedAt
+                      ? "Email confirmed"
+                      : "Awaiting confirmation"}
+                  </p>
+                  {item.suppressionReason && (
+                    <p>{readable(item.suppressionReason)}</p>
+                  )}
+                  {item.user && (
+                    <Link
+                      className="text-blue-600"
+                      href={`/users/${item.user}`}
+                    >
+                      Open user profile
+                    </Link>
+                  )}
+                </details>
+              </div>
+              {can("subscribers.manage") && (
+                <SelectField
+                  aria-label={`Manage ${item.email}`}
+                  className="h-9 w-40"
+                  disabled={busy}
+                  value=""
+                  onChange={(e) =>
+                    perform(() =>
+                      api(`/subscribers/${item._id}`, {
+                        method: "PATCH",
+                        body: { status: e.target.value },
+                      }),
+                    )
+                  }
+                >
+                  <option value="">Manage</option>
+                  <option value="UNSUBSCRIBED">Unsubscribe</option>
+                  <option value="SUPPRESSED">Suppress emails</option>
+                </SelectField>
+              )}
+            </article>
+          ))}
+        </div>
+      )}
+
+      {section === "transactional" && (
+        <div className="space-y-2">
+          {data?.items.map((item) => (
+            <details key={item._id} className={cardClass}>
+              <summary className="flex cursor-pointer items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold">
+                    {item.recipient}
+                  </p>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    {item.mail?.subject ||
+                      item.metadata?.subject ||
+                      readable(item.type)}{" "}
+                    · {new Date(item.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs ${item.status === "FAILED" ? "bg-red-50 text-red-600" : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800"}`}
+                >
+                  {readable(item.status)}
+                </span>
+              </summary>
+              <div className="mt-4 space-y-2 border-t pt-4 text-sm dark:border-zinc-800">
+                <p>
+                  {readable(item.stream)} · {item.attempts} attempts ·{" "}
+                  {new Date(item.createdAt).toLocaleString()}
+                </p>
+                {item.error && <p className="text-red-600">{item.error}</p>}
+                {item.status === "FAILED" &&
+                  item.safeToRetry &&
+                  !["TRANSACTIONAL", "SECURITY"].includes(item.stream) &&
+                  can("inbox.reply") && (
+                    <Button
+                      size="sm"
+                      disabled={busy}
+                      onClick={() =>
+                        perform(
+                          () =>
+                            api(`/transactional/${item._id}/retry`, {
+                              method: "POST",
+                            }),
+                          "Retry queued.",
+                        )
+                      }
+                    >
+                      Retry delivery
+                    </Button>
+                  )}
+              </div>
+            </details>
+          ))}
+        </div>
+      )}
+
+      {section === "automations" &&
+        (record === "new" || !detail || initial) && (
+          <div className={detail ? "mx-auto max-w-3xl" : ""}>
+            <AutomationEditor
+              key={initial?._id || record || "list"}
+              data={data}
+              templates={templates}
+              busy={busy}
+              perform={perform}
+              record={record}
+              initial={initial}
+            />
+          </div>
+        )}
+
+      {section === "settings" && data && (
+        <div className="mx-auto max-w-3xl">
+          <SettingsEditor
+            key={data.settings.updatedAt}
+            data={data}
+            busy={busy}
+            perform={perform}
+          />
+        </div>
+      )}
+
+      {section === "analytics" && data && <Analytics data={data} />}
+      {!data && !error && (
+        <p role="status" className="py-12 text-center text-sm text-zinc-400">
+          Loading…
+        </p>
+      )}
+      {!detail && data?.items?.length === 0 && (
+        <div className="py-12 text-center">
+          <Mail className="mx-auto mb-3 h-8 w-8 text-zinc-300" />
+          <p className="font-medium">No {section} yet</p>
+          <p className="mt-1 text-sm text-zinc-400">
+            {search || status
+              ? "Try a different search or filter."
+              : create
+                ? `Create your first ${singular} to get started.`
+                : "New activity will appear here."}
+          </p>
+        </div>
+      )}
+      {detail && !["new", "notify"].includes(record) && data && !initial && (
+        <p className={cardClass}>This {singular} could not be found.</p>
+      )}
+      {data?.total > 30 && (
+        <div className="flex items-center justify-center gap-4">
+          <Button
+            variant="ghost"
+            disabled={page === 1}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            Previous
+          </Button>
+          <span className="text-xs text-zinc-400">
+            {page} / {Math.ceil(data.total / 30)}
+          </span>
+          <Button
+            variant="ghost"
+            disabled={page * 30 >= data.total}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </Button>
+        </div>
+      )}
+    </AdminPage>
+  );
 }
+
+function EmailTemplateCard({ item, section }) {
+  const isCampaign = section === "campaigns";
+  const statusOrCategory = item.status || item.category || "Template";
+  const previewSnippet = item.text
+    ? item.text
+        .replace(/^([=\-\s]*\n)+\s*asif\.to[^\n]*\n+/gi, "")
+        .replace(/^[=\-]{5,}\s*$/gm, "")
+        .trim()
+        .slice(0, 120) + (item.text.length > 120 ? "…" : "")
+    : "No preview text available.";
+
+  return (
+    <Link
+      href={`/communications/${section}/${item._id}`}
+      className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-blue-500/40 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-blue-500/40"
+    >
+      <div>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50">
+            <Mail size={16} />
+          </div>
+          <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-bold text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300 border border-zinc-200/60 dark:border-zinc-800">
+            {readable(statusOrCategory)}
+          </span>
+        </div>
+
+        <div className="mt-3.5">
+          <h3 className="font-outfit text-sm font-bold text-zinc-950 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
+            {item.name}
+          </h3>
+          <p className="mt-0.5 text-xs font-medium text-zinc-400 line-clamp-1">
+            {item.subject || "No subject defined"}
+          </p>
+        </div>
+
+        <p className="mt-3 text-xs leading-5 text-zinc-500 dark:text-zinc-400 line-clamp-3 bg-zinc-50/80 dark:bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-100 dark:border-zinc-800/60">
+          {previewSnippet}
+        </p>
+      </div>
+
+      <div className="mt-4 flex items-center justify-between border-t border-zinc-100 pt-3 text-xs text-zinc-400 dark:border-zinc-800/80">
+        <span className="text-[11px]">
+          {isCampaign
+            ? item.sentAt
+              ? `Sent ${new Date(item.sentAt).toLocaleDateString()}`
+              : "Draft campaign"
+            : item.updatedAt
+              ? `Updated ${new Date(item.updatedAt).toLocaleDateString()}`
+              : "Template"}
+        </span>
+        <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 group-hover:translate-x-0.5 transition-transform">
+          Edit
+          <ChevronRight size={14} />
+        </span>
+      </div>
+    </Link>
+  );
+}
+
 function Analytics({ data }) {
-  return <div className="space-y-5"><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{["support", "email", "subscribers"].map(group => <section key={group} className={cardClass}><h3 className="mb-4 font-semibold">{group === "email" ? "Email delivery" : readable(group)}</h3>{data[group].map(row => <p key={row._id || "legacy"} className="flex justify-between py-1.5 text-sm"><span className="text-zinc-500">{readable(row._id) || "Unclassified"}</span><strong>{row.count}</strong></p>)}{!data[group].length && <p className="text-sm text-zinc-400">No activity yet.</p>}</section>)}</div><div className="grid gap-4 sm:grid-cols-3">{[["Average first response", data.timing.averageResponseMs == null ? "—" : `${Math.round(data.timing.averageResponseMs / 60000)} min`], ["Average resolution", data.timing.averageResolutionMs == null ? "—" : `${Math.round(data.timing.averageResolutionMs / 60000)} min`], ["Unread team messages", data.collaboration.unread]].map(([label, value]) => <div key={label} className={cardClass}><p className="text-sm text-zinc-500">{label}</p><p className="mt-2 text-2xl font-semibold">{value}</p></div>)}</div><details className={cardClass}><summary className="cursor-pointer text-sm font-medium">Topics, categories and tracking</summary><div className="mt-5 grid gap-5 sm:grid-cols-2">{["categories", "topics"].map(group => <div key={group}><h3 className="mb-2 text-sm font-semibold">{readable(group)}</h3>{data[group].map(row => <p key={row._id || "other"} className="flex justify-between py-1 text-sm text-zinc-500">{row._id || "Other"}<span>{row.count}</span></p>)}</div>)}</div><p className="mt-5 text-sm text-zinc-500">{data.tracking.opened} provider-reported opens · {data.tracking.clicked} clicks · {data.collaboration.discussions} discussions</p><p className="mt-2 text-xs text-zinc-400">Open and click counts require tracking events from your email provider.</p></details></div>;
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {["support", "email", "subscribers"].map((group) => (
+          <section key={group} className={cardClass}>
+            <h3 className="mb-4 font-semibold">
+              {group === "email" ? "Email delivery" : readable(group)}
+            </h3>
+            {data[group].map((row) => (
+              <p
+                key={row._id || "legacy"}
+                className="flex justify-between py-1.5 text-sm"
+              >
+                <span className="text-zinc-500">
+                  {readable(row._id) || "Unclassified"}
+                </span>
+                <strong>{row.count}</strong>
+              </p>
+            ))}
+            {!data[group].length && (
+              <p className="text-sm text-zinc-400">No activity yet.</p>
+            )}
+          </section>
+        ))}
+      </div>
+      <div className="grid gap-4 sm:grid-cols-3">
+        {[
+          [
+            "Average first response",
+            data.timing.averageResponseMs == null
+              ? "—"
+              : `${Math.round(data.timing.averageResponseMs / 60000)} min`,
+          ],
+          [
+            "Average resolution",
+            data.timing.averageResolutionMs == null
+              ? "—"
+              : `${Math.round(data.timing.averageResolutionMs / 60000)} min`,
+          ],
+          ["Unread team messages", data.collaboration.unread],
+        ].map(([label, value]) => (
+          <div key={label} className={cardClass}>
+            <p className="text-sm text-zinc-500">{label}</p>
+            <p className="mt-2 text-2xl font-semibold">{value}</p>
+          </div>
+        ))}
+      </div>
+      <details className={cardClass}>
+        <summary className="cursor-pointer text-sm font-medium">
+          Topics, categories and tracking
+        </summary>
+        <div className="mt-5 grid gap-5 sm:grid-cols-2">
+          {["categories", "topics"].map((group) => (
+            <div key={group}>
+              <h3 className="mb-2 text-sm font-semibold">{readable(group)}</h3>
+              {data[group].map((row) => (
+                <p
+                  key={row._id || "other"}
+                  className="flex justify-between py-1 text-sm text-zinc-500"
+                >
+                  {row._id || "Other"}
+                  <span>{row.count}</span>
+                </p>
+              ))}
+            </div>
+          ))}
+        </div>
+        <p className="mt-5 text-sm text-zinc-500">
+          {data.tracking.opened} provider-reported opens ·{" "}
+          {data.tracking.clicked} clicks · {data.collaboration.discussions}{" "}
+          discussions
+        </p>
+        <p className="mt-2 text-xs text-zinc-400">
+          Open and click counts require tracking events from your email
+          provider.
+        </p>
+      </details>
+    </div>
+  );
 }
+
 function ContentAnnouncement() {
   const params = useSearchParams();
   const [contentItems, setContentItems] = useState([]);
-  useEffect(() => { axios.get("/search/admin/index").then(response => setContentItems(response.data.data.items || [])).catch(() => {}); }, []);
-  const [type, setType] = useState(params.get("type") || "article"), [id, setId] = useState(params.get("contentId") || ""), [template, setTemplate] = useState(""), [topics, setTopics] = useState([]), [available, setAvailable] = useState([]), [templates, setTemplates] = useState([]), [busy, setBusy] = useState(false), [message, setMessage] = useState("");
-  useEffect(() => { Promise.all([api("/public/topics"), api("/templates")]).then(([a, b]) => { setAvailable(a.topics); setTemplates(b.items); }).catch(e => setMessage(errorMessage(e))); }, []);
-  return <form className={`${cardClass} mx-auto max-w-2xl space-y-5`} onSubmit={async e => { e.preventDefault(); setBusy(true); try { await api("/notify-content", { method: "POST", body: { type, id, template, topics, requestId: crypto.randomUUID() } }); setMessage("Announcement queued."); } catch (e) { setMessage(errorMessage(e)); } finally { setBusy(false); } }}><p className="text-sm text-zinc-500">Choose published content and send an update to interested subscribers. You can also do this directly from the content editor.</p><Field label="Content type"><SelectField className="mt-2" value={type} onChange={e => setType(e.target.value)}>{["article", "course", "job"].map(t => <option key={t} value={t}>{readable(t)}</option>)}</SelectField></Field><Field label="Content" hint="Select the article, course or job you want to announce. It must already be published."><SelectField className="mt-2" value={id} onChange={e => setId(e.target.value)}><option value="">Choose content</option>{contentItems.filter(item => item.type === type).map(item => <option key={item.id} value={item.id.split(":").at(-1)}>{item.title}</option>)}</SelectField></Field><Field label="Email template"><SelectField className="mt-2" value={template} onChange={e => setTemplate(e.target.value)}><option value="">Choose a template</option>{templates.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}</SelectField></Field><AudiencePicker topics={available} value={topics} onChange={setTopics} /><Button disabled={busy || !template}>{busy ? "Queuing…" : "Queue announcement"}</Button>{message && <p role="status" className="text-sm">{message}</p>}</form>;
+  useEffect(() => {
+    axios
+      .get("/search/admin/index")
+      .then((response) => setContentItems(response.data.data.items || []))
+      .catch(() => {});
+  }, []);
+  const [type, setType] = useState(params.get("type") || "article"),
+    [id, setId] = useState(params.get("contentId") || ""),
+    [template, setTemplate] = useState(""),
+    [topics, setTopics] = useState([]),
+    [available, setAvailable] = useState([]),
+    [templates, setTemplates] = useState([]),
+    [busy, setBusy] = useState(false),
+    [message, setMessage] = useState("");
+  useEffect(() => {
+    Promise.all([api("/public/topics"), api("/templates")])
+      .then(([a, b]) => {
+        setAvailable(a.topics);
+        setTemplates(b.items);
+      })
+      .catch((e) => setMessage(errorMessage(e)));
+  }, []);
+  return (
+    <form
+      className={`${cardClass} mx-auto max-w-2xl space-y-5`}
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setBusy(true);
+        try {
+          await api("/notify-content", {
+            method: "POST",
+            body: {
+              type,
+              id,
+              template,
+              topics,
+              requestId: crypto.randomUUID(),
+            },
+          });
+          setMessage("Announcement queued.");
+        } catch (e) {
+          setMessage(errorMessage(e));
+        } finally {
+          setBusy(false);
+        }
+      }}
+    >
+      <p className="text-sm text-zinc-500">
+        Choose published content and send an update to interested subscribers.
+        You can also do this directly from the content editor.
+      </p>
+      <Field label="Content type">
+        <SelectField
+          className="mt-2"
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+        >
+          {["article", "course", "job"].map((t) => (
+            <option key={t} value={t}>
+              {readable(t)}
+            </option>
+          ))}
+        </SelectField>
+      </Field>
+      <Field
+        label="Content"
+        hint="Select the article, course or job you want to announce. It must already be published."
+      >
+        <SelectField
+          className="mt-2"
+          value={id}
+          onChange={(e) => setId(e.target.value)}
+        >
+          <option value="">Choose content</option>
+          {contentItems
+            .filter((item) => item.type === type)
+            .map((item) => (
+              <option key={item.id} value={item.id.split(":").at(-1)}>
+                {item.title}
+              </option>
+            ))}
+        </SelectField>
+      </Field>
+      <Field label="Email template">
+        <SelectField
+          className="mt-2"
+          value={template}
+          onChange={(e) => setTemplate(e.target.value)}
+        >
+          <option value="">Choose a template</option>
+          {templates.map((t) => (
+            <option key={t._id} value={t._id}>
+              {t.name}
+            </option>
+          ))}
+        </SelectField>
+      </Field>
+      <AudiencePicker topics={available} value={topics} onChange={setTopics} />
+      <Button disabled={busy || !template}>
+        {busy ? "Queuing…" : "Queue announcement"}
+      </Button>
+      {message && (
+        <p role="status" className="text-sm">
+          {message}
+        </p>
+      )}
+    </form>
+  );
 }

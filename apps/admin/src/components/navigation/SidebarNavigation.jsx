@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useSyncExternalStore } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -480,7 +486,7 @@ export default function SidebarNavigation({
                                     return (
                                       <div
                                         key={child.href}
-                                        className="relative flex items-center min-h-[34px]"
+                                        className="relative flex items-center min-h-8.5"
                                       >
                                         <TreeBranchLine isLast={isLast} />
                                         <Link
@@ -589,7 +595,7 @@ export default function SidebarNavigation({
               top: flyoutPosition.top,
               left: flyoutPosition.left,
             }}
-            className="fixed z-[9999] flex flex-col gap-1.5 pointer-events-auto select-none"
+            className="fixed z-9999 flex flex-col gap-1.5 pointer-events-auto select-none"
             onMouseEnter={handleFlyoutMouseEnter}
             onMouseLeave={handleFlyoutMouseLeave}
           >
@@ -601,7 +607,7 @@ export default function SidebarNavigation({
 
             {/* Submenu Popover Card if Item Has Children */}
             {hoveredItem.children && hoveredItem.children.length > 0 && (
-              <div className="rounded-2xl border border-zinc-200/90 dark:border-zinc-800/90 bg-white/95 dark:bg-[#121215]/95 backdrop-blur-xl p-2.5 shadow-2xl min-w-[190px] flex flex-col gap-0.5">
+              <div className="rounded-xl border border-zinc-200/90 dark:border-zinc-800/90 bg-white/95 dark:bg-[#121215]/95 backdrop-blur-xl p-2.5 shadow-sm min-w-47.5 flex flex-col gap-0.5">
                 {hoveredItem.children.map((child, idx) => {
                   const childIsActive = isChildActive(
                     child.href,
@@ -612,7 +618,7 @@ export default function SidebarNavigation({
                   return (
                     <div
                       key={child.href}
-                      className="relative flex items-center min-h-[32px]"
+                      className="relative flex items-center min-h-8"
                     >
                       <TreeBranchLine isLast={isLast} />
                       <Link
