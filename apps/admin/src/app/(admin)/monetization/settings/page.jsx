@@ -128,7 +128,9 @@ export default function SettingsPage() {
               AdSense Client ID
             </span>
             <p className="mt-2 font-mono text-xs">
-              {settings.adsenseClientId || "Not configured"}
+              {settings.adsense?.clientId ||
+                settings.adsenseClientId ||
+                "Not configured"}
             </p>
           </div>
           <div className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800">

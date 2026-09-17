@@ -10,7 +10,6 @@ import {
 } from "./jobNormalization.service.js";
 import { providerForSource } from "./providers/index.js";
 import { isJobSuppressed } from "./jobSuppression.service.js";
-import { notifyMatchingJobAlerts } from "./jobAlert.service.js";
 
 const asDate = (value, fallback = null) => {
   if (!value) return fallback;
@@ -149,7 +148,6 @@ export async function upsertJob(data, source, { CompanyModel = Company, JobModel
   if (!duplicate) {
     const slug = await uniqueSlug(JobModel, `${data.title}-${data.companyName}-${data.location}`);
     const job = await JobModel.create({ ...data, slug, lastImportChangedAt: new Date() });
-    notifyMatchingJobAlerts(job).catch((error) => console.error("[JOBS] alert notification:", error.message));
     return { outcome: "created", job };
   }
   const existing = duplicate.match; const { update, changed } = buildImportedUpdate(existing, data);

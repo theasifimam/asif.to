@@ -155,10 +155,11 @@ export default function JobAlertButton({ criteria = {}, taxonomy = {} }) {
       <Dialog.Root open={open} onOpenChange={setOpen}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-200 bg-zinc-950/60 backdrop-blur-sm transition-opacity" />
-          <Dialog.Content
-            style={sheetStyle}
-            className="fixed inset-x-0 bottom-0 z-201 mx-auto flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-4xl border border-zinc-200 bg-white text-zinc-950 shadow-2xl outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 sm:max-w-xl sm:rounded-4xl sm:bottom-1/2 sm:-translate-y-1/2 motion-safe:animate-[job-sheet-in_420ms_cubic-bezier(0.16,1,0.3,1)]"
-          >
+          <div className="fixed inset-0 z-201 flex items-end sm:items-center justify-center pointer-events-none p-0 sm:p-4">
+            <Dialog.Content
+              style={sheetStyle}
+              className="pointer-events-auto flex max-h-[92dvh] sm:max-h-[85dvh] w-full sm:max-w-xl flex-col overflow-hidden rounded-t-4xl sm:rounded-4xl border border-zinc-200 bg-white text-zinc-950 shadow-2xl outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 motion-safe:animate-[job-sheet-in_420ms_cubic-bezier(0.16,1,0.3,1)]"
+            >
             <div
               className="shrink-0 select-none touch-none cursor-grab active:cursor-grabbing border-b border-zinc-100 dark:border-zinc-800/80"
               {...dragProps}
@@ -350,6 +351,7 @@ export default function JobAlertButton({ criteria = {}, taxonomy = {} }) {
               </button>
             </div>
           </Dialog.Content>
+          </div>
         </Dialog.Portal>
       </Dialog.Root>
     </>

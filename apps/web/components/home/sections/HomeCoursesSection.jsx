@@ -118,7 +118,7 @@ export default function HomeCoursesSection({
           return (
             <article
               key={course._id || course.id}
-              className={`group flex w-67.5 xs:w-[300px] sm:w-82.5 md:w-87.5 shrink-0 snap-start flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border bg-linear-to-br from-blue-500/10 via-indigo-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-md ${techColors.card}`}
+              className={`group flex w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border bg-linear-to-br from-blue-500/10 via-indigo-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-md ${techColors.card}`}
             >
               <div>
                 <SafeCourseCover
@@ -173,7 +173,7 @@ export default function HomeCoursesSection({
         })}
 
         {/* Catalog Bento Card */}
-        <article className="group relative flex w-67.5 xs:w-[300px] sm:w-82.5 md:w-87.5 shrink-0 snap-start flex-col justify-between overflow-hidden rounded-4xl sm:rounded-[2.5rem] border border-blue-500/25 dark:border-blue-500/20 bg-linear-to-br from-blue-600/10 via-indigo-600/10 to-violet-600/10 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-blue-500/50 transition-all duration-300">
+        <article className="group relative flex w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start flex-col justify-between overflow-hidden rounded-4xl sm:rounded-[2.5rem] border border-blue-500/25 dark:border-blue-500/20 bg-linear-to-br from-blue-600/10 via-indigo-600/10 to-violet-600/10 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-blue-500/50 transition-all duration-300">
           <div className="flex flex-col">
             <div className="mb-3.5 flex items-center justify-between">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-md shadow-blue-500/20">

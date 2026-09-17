@@ -16,6 +16,9 @@ import { resolveContentEntity } from "../services/contentDiscussion.service.js";
 import { createAssetFromUpload } from "../services/asset.service.js";
 import Asset from "../models/Asset.js";
 import { getStorageProvider } from "../services/storage/index.js";
+import JobAlert from "../models/JobAlert.js";
+import User from "../models/User.js";
+import { sendManualJobAlertDigest, unsentJobsForAlert } from "../services/jobs/jobAlert.service.js";
 
 export const action = (fn) => async (req, res) => {
   try { const data = await fn(req, res); if (!res.headersSent) res.json({ success: true, data }); }
@@ -88,9 +91,66 @@ export const downloadInboxAttachment = action(async (req, res) => {
 });
 
 export const listSubscribers = action(async req => {
-  const query = { ...(req.query.status ? { status: req.query.status } : {}), ...(req.query.topic ? { topics: req.query.topic } : {}), ...(req.query.search ? { email: regex(req.query.search) } : {}) };
+  const alertUsers = await JobAlert.distinct("user", { active: true });
+  const users = await User.find({ _id: { $in: alertUsers }, status: "active" }).select("_id email fullName").lean();
+  await Promise.all(users.filter(user => user.email).map(user => EmailSubscriber.findOneAndUpdate(
+    { email: user.email },
+    { $set: { user: user._id }, $setOnInsert: {
+      firstName: user.fullName?.split(" ")[0] || "",
+      status: "ACTIVE",
+      topics: ["Job Alerts"],
+      source: "job_alert",
+      verifiedAt: new Date(),
+      consentAt: new Date(),
+    } },
+    { upsert: true, setDefaultsOnInsert: true },
+  )));
+  const query = { ...(req.query.id ? { _id: id(req.query.id) } : {}), ...(req.query.status ? { status: req.query.status } : {}), ...(req.query.topic ? { topics: req.query.topic } : {}), ...(req.query.search ? { email: regex(req.query.search) } : {}) };
   const { skip, limit } = page(req);
-  return { items: await EmailSubscriber.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit), total: await EmailSubscriber.countDocuments(query) };
+  const config = await settings();
+  return {
+    items: await EmailSubscriber.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    total: await EmailSubscriber.countDocuments(query),
+    jobAlertDigest: {
+      enabled: config.jobAlertDigestEnabled,
+      hour: config.jobAlertDigestHour,
+      minute: config.jobAlertDigestMinute,
+      timezone: config.jobAlertDigestTimezone,
+    },
+  };
+});
+export const saveJobAlertDigestSettings = action(async req => {
+  const hour = Number(req.body.hour), minute = Number(req.body.minute);
+  if (!Number.isInteger(hour) || hour < 0 || hour > 23 || !Number.isInteger(minute) || minute < 0 || minute > 59) fail("Choose a valid digest time.");
+  const config = await CommunicationSettings.findOneAndUpdate({ key: "default" }, { $set: {
+    jobAlertDigestEnabled: req.body.enabled !== false,
+    jobAlertDigestHour: hour,
+    jobAlertDigestMinute: minute,
+  } }, { returnDocument: "after", upsert: true, runValidators: true });
+  return { enabled: config.jobAlertDigestEnabled, hour: config.jobAlertDigestHour, minute: config.jobAlertDigestMinute, timezone: config.jobAlertDigestTimezone };
+});
+export const listSubscriberJobAlerts = action(async req => {
+  const subscriber = await EmailSubscriber.findById(id(req.params.id)).lean(); if (!subscriber) fail("Subscriber not found.", 404);
+  const user = subscriber.user
+    ? await User.findOne({ _id: subscriber.user, status: "active" }).select("_id").lean()
+    : await User.findOne({ email: subscriber.email, status: "active" }).select("_id").lean();
+  if (!user) return { alerts: [] };
+  const alerts = await JobAlert.find({ user: user._id, active: true }).sort({ createdAt: -1 }).lean();
+  return { alerts: await Promise.all(alerts.map(async alert => ({ alert, jobs: await unsentJobsForAlert(alert) }))) };
+});
+export const sendSubscriberJobAlerts = action(async req => {
+  const subscriber = await EmailSubscriber.findById(id(req.params.id)).lean(); if (!subscriber) fail("Subscriber not found.", 404);
+  if (["SUPPRESSED", "BOUNCED", "COMPLAINED"].includes(subscriber.status) || subscriber.marketingSuppressed) fail("This subscriber is not eligible for email.", 409);
+  const user = subscriber.user
+    ? await User.findOne({ _id: subscriber.user, status: "active" }).select("email fullName").lean()
+    : await User.findOne({ email: subscriber.email, status: "active" }).select("email fullName").lean();
+  if (!user) return { queued: 0 };
+  const alerts = await JobAlert.find({ user: user._id, active: true }).lean(); let queued = 0;
+  for (const alert of alerts) {
+    const jobs = await unsentJobsForAlert(alert);
+    if (jobs.length && await sendManualJobAlertDigest(alert, user, jobs)) queued += 1;
+  }
+  return { queued };
 });
 export const manageSubscriber = action(async req => {
   const subscriber = await EmailSubscriber.findById(id(req.params.id)); if (!subscriber) fail("Subscriber not found.", 404);

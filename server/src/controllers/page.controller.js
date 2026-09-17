@@ -9,10 +9,20 @@ export const getAllPages = async (req, res) => {
   }
 };
 
+const SLUG_ALIASES = {
+  privacy: ["privacy-policy", "privacy"],
+  "privacy-policy": ["privacy-policy", "privacy"],
+  terms: ["terms-conditions", "terms"],
+  "terms-conditions": ["terms-conditions", "terms"],
+  cookies: ["cookie-usage", "cookies"],
+  "cookie-usage": ["cookie-usage", "cookies"],
+};
+
 export const getPageBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
-    const page = await Page.findOne({ slug });
+    const searchSlugs = SLUG_ALIASES[slug] || [slug];
+    const page = await Page.findOne({ slug: { $in: searchSlugs } });
     if (!page) {
       return res.status(404).json({ success: false, message: 'Page not found' });
     }
@@ -25,6 +35,7 @@ export const getPageBySlug = async (req, res) => {
 export const updatePage = async (req, res) => {
   try {
     const { slug } = req.params;
+    const searchSlugs = SLUG_ALIASES[slug] || [slug];
     const {
       title,
       content,
@@ -42,7 +53,7 @@ export const updatePage = async (req, res) => {
         ? keywords.split(',').map((k) => k.trim()).filter(Boolean)
         : [];
 
-    let page = await Page.findOne({ slug });
+    let page = await Page.findOne({ slug: { $in: searchSlugs } });
 
     if (page) {
       if (title !== undefined) page.title = title;

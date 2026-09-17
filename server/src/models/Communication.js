@@ -90,5 +90,9 @@ export const CommunicationSettings = model("CommunicationSettings", new Schema({
   ratePerMinute: { type: Number, default: 30, min: 1, max: 300 },
   footer: { type: String, default: "asif.to" },
   workerOwner: String, workerLeaseUntil: Date, nextSendAt: Date,
+  jobAlertDigestEnabled: { type: Boolean, default: true },
+  jobAlertDigestHour: { type: Number, default: 18, min: 0, max: 23 },
+  jobAlertDigestMinute: { type: Number, default: 0, min: 0, max: 59 },
+  jobAlertDigestTimezone: { type: String, default: "Asia/Dubai", maxlength: 80 },
   lastWebhookAt: Date, lastWorkerAt: Date,
 }, { timestamps: true }));

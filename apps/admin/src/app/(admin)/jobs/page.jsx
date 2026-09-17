@@ -102,6 +102,7 @@ export default function JobsAdminPage() {
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("card");
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   const load = async (page = pagination.page, overrideLimit = null) => {
     setLoading(true);
@@ -167,7 +168,7 @@ export default function JobsAdminPage() {
   };
 
   return (
-    <AdminPage className="space-y-6 py-5">
+    <AdminPage className="space-y-5 py-4 pb-28 sm:pb-8">
       <AdminPageHeader
         eyebrow="UAE jobs"
         title="Jobs"
@@ -187,206 +188,234 @@ export default function JobsAdminPage() {
         }
       />
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-9">
+      <section className="grid grid-cols-3 gap-2 sm:gap-3 xl:grid-cols-9">
         {metrics.map(([key, label, Icon, color]) => (
           <div
             key={key}
-            className="rounded-3xl border border-zinc-200/80 bg-white p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-950"
+            className="rounded-2xl sm:rounded-3xl border border-zinc-200/80 bg-white p-2.5 sm:p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-950 flex flex-col justify-between"
           >
-            <Icon className={`h-4 w-4 ${color}`} />
-            <p className="mt-3 text-2xl font-black">
-              {dashboard?.metrics?.[key] ?? "—"}
-            </p>
-            <p className="mt-1 text-[10px] font-black uppercase tracking-wide text-zinc-400">
-              {label}
-            </p>
+            <div className="flex items-center justify-between">
+              <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${color}`} />
+            </div>
+            <div className="mt-2 sm:mt-3">
+              <p className="text-base sm:text-2xl font-black text-zinc-900 dark:text-zinc-100">
+                {dashboard?.metrics?.[key] ?? "—"}
+              </p>
+              <p className="mt-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-zinc-400 truncate">
+                {label}
+              </p>
+            </div>
           </div>
         ))}
       </section>
 
       {dashboard?.topJobs?.length > 0 && (
-        <section className="grid gap-1 lg:grid-cols-3">
-          {/* Top Job Performance Card */}
-          <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-800/80 dark:bg-zinc-950 lg:col-span-2">
-            <div className="flex items-center justify-between pb-4 border-b border-zinc-100 dark:border-zinc-800/80">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 dark:bg-amber-500/15 border border-amber-500/20">
-                  <TrendingUp className="h-5 w-5" />
-                </div>
-                <div>
-                  <h2 className="font-outfit text-base font-black tracking-tight text-zinc-900 dark:text-zinc-100">
-                    Top Job Performance
-                  </h2>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    Most viewed and clicked job listings
-                  </p>
-                </div>
-              </div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400 border border-emerald-500/20">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                Live metric
+        <div className="space-y-3">
+          <div className="flex items-center justify-between lg:hidden pt-1">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-amber-500" />
+              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                Performance &amp; Category Insights
               </span>
             </div>
-
-            <div className="mt-4 space-y-2.5">
-              {dashboard.topJobs.slice(0, 5).map((job, idx) => {
-                const rankBadges = [
-                  "bg-gradient-to-r from-amber-500 to-yellow-400 text-zinc-950 shadow-amber-500/20 shadow-xs font-black",
-                  "bg-zinc-200 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 font-black",
-                  "bg-amber-900/60 text-amber-200 border border-amber-700/40 font-black",
-                  "bg-zinc-100 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400 font-bold",
-                  "bg-zinc-100 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400 font-bold",
-                ];
-
-                return (
-                  <div
-                    key={job._id}
-                    className="group flex items-center justify-between gap-3 rounded-2xl border border-zinc-100 bg-zinc-50/60 p-3.5 transition-all duration-200 hover:border-blue-500/30 hover:bg-zinc-100/80 hover:shadow-xs dark:border-zinc-800/60 dark:bg-zinc-900/40 dark:hover:border-blue-500/40 dark:hover:bg-zinc-900/90"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span
-                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-xl text-xs ${
-                          rankBadges[idx] || rankBadges[3]
-                        }`}
-                      >
-                        #{idx + 1}
-                      </span>
-                      <div className="min-w-0">
-                        <Link
-                          href={`/jobs?search=${encodeURIComponent(job.title)}`}
-                          className="truncate block font-outfit text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                        >
-                          {job.title}
-                        </Link>
-                        <div className="mt-0.5 flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-                          <span className="inline-flex items-center gap-1 truncate font-medium">
-                            <Building2 className="h-3 w-3 shrink-0 text-zinc-400" />
-                            {job.companyName}
-                          </span>
-                          {job.location && (
-                            <span className="hidden sm:inline-block text-[11px] text-zinc-400">
-                              · {job.location}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="inline-flex items-center gap-1 rounded-xl bg-blue-500/10 px-2.5 py-1 text-xs font-bold text-blue-600 dark:bg-blue-500/15 dark:text-blue-300 border border-blue-500/15">
-                        <Eye className="h-3.5 w-3.5" />
-                        {job.views?.toLocaleString() ?? 0}
-                      </span>
-                      <span className="inline-flex items-center gap-1 rounded-xl bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400 border border-emerald-500/15">
-                        <MousePointerClick className="h-3.5 w-3.5" />
-                        {job.applyClicks?.toLocaleString() ?? 0}
-                      </span>
-                      {job.slug && (
-                        <a
-                          href={`https://asif.to/jobs/${job.slug}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="hidden sm:flex h-8 w-8 items-center justify-center rounded-xl bg-zinc-200/50 text-zinc-500 transition hover:bg-blue-600 hover:text-white dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-blue-600 dark:hover:text-white"
-                          title="View on site"
-                        >
-                          <ArrowUpRight className="h-4 w-4" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAnalytics((prev) => !prev)}
+              className="h-8 rounded-full text-xs font-bold cursor-pointer"
+            >
+              {showAnalytics ? "Hide charts" : "Show charts"}
+            </Button>
           </div>
 
-          {/* Popular Categories Card */}
-          <div className="rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-800/80 dark:bg-zinc-950 flex flex-col justify-between">
-            <div>
+          <section
+            className={`gap-4 sm:gap-6 lg:grid-cols-3 ${
+              showAnalytics ? "grid grid-cols-1" : "hidden lg:grid"
+            }`}
+          >
+            {/* Top Job Performance Card */}
+            <div className="rounded-2xl sm:rounded-3xl border border-zinc-200/80 bg-white p-4 sm:p-6 shadow-xs dark:border-zinc-800/80 dark:bg-zinc-950 lg:col-span-2">
               <div className="flex items-center justify-between pb-4 border-b border-zinc-100 dark:border-zinc-800/80">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-500 dark:bg-blue-500/15 border border-blue-500/20">
-                    <FolderKanban className="h-5 w-5" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 dark:bg-amber-500/15 border border-amber-500/20">
+                    <TrendingUp className="h-5 w-5" />
                   </div>
                   <div>
                     <h2 className="font-outfit text-base font-black tracking-tight text-zinc-900 dark:text-zinc-100">
-                      Popular Categories
+                      Top Job Performance
                     </h2>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                      Active job volume by sector
+                      Most viewed and clicked job listings
                     </p>
                   </div>
                 </div>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400 border border-emerald-500/20">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  Live metric
+                </span>
               </div>
 
-              <div className="mt-4 space-y-4">
-                {(() => {
-                  const categories = dashboard.categories?.slice(0, 5) || [];
-                  const maxCount = Math.max(
-                    ...categories.map((c) => c.count),
-                    1,
-                  );
-                  const totalCount =
-                    categories.reduce((acc, c) => acc + c.count, 0) || 1;
-                  const barGradients = [
-                    "from-blue-600 via-indigo-500 to-cyan-400",
-                    "from-indigo-600 via-violet-500 to-purple-400",
-                    "from-purple-600 via-pink-500 to-rose-400",
-                    "from-emerald-600 via-teal-500 to-cyan-400",
-                    "from-amber-500 via-orange-500 to-yellow-400",
+              <div className="mt-4 space-y-2.5">
+                {dashboard.topJobs.slice(0, 5).map((job, idx) => {
+                  const rankBadges = [
+                    "bg-gradient-to-r from-amber-500 to-yellow-400 text-zinc-950 shadow-amber-500/20 shadow-xs font-black",
+                    "bg-zinc-200 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 font-black",
+                    "bg-amber-900/60 text-amber-200 border border-amber-700/40 font-black",
+                    "bg-zinc-100 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400 font-bold",
+                    "bg-zinc-100 text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400 font-bold",
                   ];
 
-                  return categories.map((item, idx) => {
-                    const pct = Math.round((item.count / totalCount) * 100);
-                    const fillPct = Math.min(
-                      100,
-                      Math.max(8, Math.round((item.count / maxCount) * 100)),
-                    );
-
-                    return (
-                      <div key={item._id} className="space-y-1.5">
-                        <div className="flex items-center justify-between text-xs font-bold">
-                          <span className="text-zinc-800 dark:text-zinc-200 capitalize truncate pr-2">
-                            {item._id}
-                          </span>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-zinc-400 text-[11px] font-medium">
-                              {pct}%
+                  return (
+                    <div
+                      key={job._id}
+                      className="group flex flex-col xs:flex-row xs:items-center justify-between gap-2.5 xs:gap-3 rounded-2xl border border-zinc-100 bg-zinc-50/60 p-3 sm:p-3.5 transition-all duration-200 hover:border-blue-500/30 hover:bg-zinc-100/80 hover:shadow-xs dark:border-zinc-800/60 dark:bg-zinc-900/40 dark:hover:border-blue-500/40 dark:hover:bg-zinc-900/90"
+                    >
+                      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                        <span
+                          className={`flex h-6 w-6 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-xl text-[11px] sm:text-xs font-black ${
+                            rankBadges[idx] || rankBadges[3]
+                          }`}
+                        >
+                          #{idx + 1}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <Link
+                            href={`/jobs?search=${encodeURIComponent(job.title)}`}
+                            className="truncate block font-outfit text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                          >
+                            {job.title}
+                          </Link>
+                          <div className="mt-0.5 flex items-center gap-2 text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400">
+                            <span className="inline-flex items-center gap-1 truncate font-medium">
+                              <Building2 className="h-3 w-3 shrink-0 text-zinc-400" />
+                              {job.companyName}
                             </span>
-                            <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-black text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-                              {item.count?.toLocaleString()}
-                            </span>
+                            {job.location && (
+                              <span className="hidden sm:inline-block text-[11px] text-zinc-400">
+                                · {job.location}
+                              </span>
+                            )}
                           </div>
                         </div>
-                        <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800/80">
-                          <div
-                            className={`h-full rounded-full bg-linear-to-r ${
-                              barGradients[idx % barGradients.length]
-                            } transition-all duration-500`}
-                            style={{ width: `${fillPct}%` }}
-                          />
-                        </div>
                       </div>
-                    );
-                  });
-                })()}
+
+                      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 self-end xs:self-auto pl-8 xs:pl-0">
+                        <span className="inline-flex items-center gap-1 rounded-xl bg-blue-500/10 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-bold text-blue-600 dark:bg-blue-500/15 dark:text-blue-300 border border-blue-500/15">
+                          <Eye className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                          {job.views?.toLocaleString() ?? 0}
+                        </span>
+                        <span className="inline-flex items-center gap-1 rounded-xl bg-emerald-500/10 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-bold text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400 border border-emerald-500/15">
+                          <MousePointerClick className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                          {job.applyClicks?.toLocaleString() ?? 0}
+                        </span>
+                        {job.slug && (
+                          <a
+                            href={`https://asif.to/jobs/${job.slug}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="hidden sm:flex h-8 w-8 items-center justify-center rounded-xl bg-zinc-200/50 text-zinc-500 transition hover:bg-blue-600 hover:text-white dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-blue-600 dark:hover:text-white"
+                            title="View on site"
+                          >
+                            <ArrowUpRight className="h-4 w-4" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            <div className="mt-5 pt-3 border-t border-zinc-100 dark:border-zinc-800/60 text-center">
-              <Link
-                href="/jobs"
-                className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-500 dark:text-blue-400 transition-colors"
-              >
-                View all categories
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </Link>
+            {/* Popular Categories Card */}
+            <div className="rounded-2xl sm:rounded-3xl border border-zinc-200/80 bg-white p-4 sm:p-6 shadow-xs dark:border-zinc-800/80 dark:bg-zinc-950 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between pb-4 border-b border-zinc-100 dark:border-zinc-800/80">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-500 dark:bg-blue-500/15 border border-blue-500/20">
+                      <FolderKanban className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h2 className="font-outfit text-base font-black tracking-tight text-zinc-900 dark:text-zinc-100">
+                        Popular Categories
+                      </h2>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        Active job volume by sector
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 space-y-4">
+                  {(() => {
+                    const categories = dashboard.categories?.slice(0, 5) || [];
+                    const maxCount = Math.max(
+                      ...categories.map((c) => c.count),
+                      1,
+                    );
+                    const totalCount =
+                      categories.reduce((acc, c) => acc + c.count, 0) || 1;
+                    const barGradients = [
+                      "from-blue-600 via-indigo-500 to-cyan-400",
+                      "from-indigo-600 via-violet-500 to-purple-400",
+                      "from-purple-600 via-pink-500 to-rose-400",
+                      "from-emerald-600 via-teal-500 to-cyan-400",
+                      "from-amber-500 via-orange-500 to-yellow-400",
+                    ];
+
+                    return categories.map((item, idx) => {
+                      const pct = Math.round((item.count / totalCount) * 100);
+                      const fillPct = Math.min(
+                        100,
+                        Math.max(8, Math.round((item.count / maxCount) * 100)),
+                      );
+
+                      return (
+                        <div key={item._id} className="space-y-1.5">
+                          <div className="flex items-center justify-between text-xs font-bold">
+                            <span className="text-zinc-800 dark:text-zinc-200 capitalize truncate pr-2">
+                              {item._id}
+                            </span>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-zinc-400 text-[11px] font-medium">
+                                {pct}%
+                              </span>
+                              <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-black text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                                {item.count?.toLocaleString()}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800/80">
+                            <div
+                              className={`h-full rounded-full bg-linear-to-r ${
+                                barGradients[idx % barGradients.length]
+                              } transition-all duration-500`}
+                              style={{ width: `${fillPct}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+
+              <div className="mt-5 pt-3 border-t border-zinc-100 dark:border-zinc-800/60 text-center">
+                <Link
+                  href="/jobs"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-500 dark:text-blue-400 transition-colors"
+                >
+                  View all categories
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </div>
       )}
 
       <AdminFilters className="flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-        <div className="flex flex-1 flex-wrap items-center gap-2.5">
+        <div className="flex flex-1 flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2 sm:gap-2.5 min-w-0">
           <AdminSearch
             value={filters.search}
             onChange={(value) =>
@@ -395,90 +424,102 @@ export default function JobsAdminPage() {
             placeholder="Search title, company, location, source…"
             className="w-full sm:w-64"
           />
-          <div className="w-36 sm:w-40">
-            <Select
-              value={filters.status}
-              onValueChange={(val) =>
-                setFilters((current) => ({ ...current, status: val }))
-              }
-            >
-              <SelectTrigger size="sm" className="h-10 rounded-full px-4">
-                <SelectValue placeholder="All statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
-                {[
-                  "draft",
-                  "pending",
-                  "published",
-                  "hidden",
-                  "expired",
-                  "rejected",
-                  "archived",
-                ].map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {value.charAt(0).toUpperCase() + value.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
 
-          <AdminSelectFilter
-            value={filters.origin}
-            onValueChange={(origin) =>
-              setFilters((current) => ({ ...current, origin }))
-            }
-            placeholder="All origins"
-            items={originLabels}
-          />
-          <AdminSelectFilter
-            value={filters.importStatus}
-            onValueChange={(importStatus) =>
-              setFilters((current) => ({ ...current, importStatus }))
-            }
-            placeholder="All import states"
-            items={importLabels}
-          />
-          <AdminSelectFilter
-            value={filters.source}
-            onValueChange={(source) =>
-              setFilters((current) => ({ ...current, source }))
-            }
-            placeholder="All sources"
-            items={Object.fromEntries(
-              sources.map((source) => [source._id, source.name]),
-            )}
-          />
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
+            <div className="w-full sm:w-36">
+              <Select
+                value={filters.status}
+                onValueChange={(val) =>
+                  setFilters((current) => ({ ...current, status: val }))
+                }
+              >
+                <SelectTrigger
+                  size="sm"
+                  className="h-10 w-full rounded-full px-3 text-xs font-semibold"
+                >
+                  <SelectValue placeholder="All statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  {[
+                    "draft",
+                    "pending",
+                    "published",
+                    "hidden",
+                    "expired",
+                    "rejected",
+                    "archived",
+                  ].map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {value.charAt(0).toUpperCase() + value.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          <div className="w-40 sm:w-44">
-            <Select
-              value={filters.sort}
-              onValueChange={(val) =>
-                setFilters((current) => ({ ...current, sort: val }))
+            <AdminSelectFilter
+              value={filters.origin}
+              onValueChange={(origin) =>
+                setFilters((current) => ({ ...current, origin }))
               }
-            >
-              <SelectTrigger size="sm" className="h-10 rounded-full px-4">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Recently added</SelectItem>
-                <SelectItem value="posted">Posted date</SelectItem>
-                <SelectItem value="expiry">Expiry</SelectItem>
-                <SelectItem value="views">Most viewed</SelectItem>
-                <SelectItem value="clicks">Most clicks</SelectItem>
-              </SelectContent>
-            </Select>
+              placeholder="All origins"
+              items={originLabels}
+            />
+            <AdminSelectFilter
+              value={filters.importStatus}
+              onValueChange={(importStatus) =>
+                setFilters((current) => ({ ...current, importStatus }))
+              }
+              placeholder="All import states"
+              items={importLabels}
+            />
+            <AdminSelectFilter
+              value={filters.source}
+              onValueChange={(source) =>
+                setFilters((current) => ({ ...current, source }))
+              }
+              placeholder="All sources"
+              items={Object.fromEntries(
+                sources.map((source) => [source._id, source.name]),
+              )}
+            />
+
+            <div className="col-span-2 sm:col-span-1 w-full sm:w-38">
+              <Select
+                value={filters.sort}
+                onValueChange={(val) =>
+                  setFilters((current) => ({ ...current, sort: val }))
+                }
+              >
+                <SelectTrigger
+                  size="sm"
+                  className="h-10 w-full rounded-full px-3 text-xs font-semibold"
+                >
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Recently added</SelectItem>
+                  <SelectItem value="posted">Posted date</SelectItem>
+                  <SelectItem value="expiry">Expiry</SelectItem>
+                  <SelectItem value="views">Most viewed</SelectItem>
+                  <SelectItem value="clicks">Most clicks</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-end shrink-0">
+        <div className="flex items-center justify-between sm:justify-end shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-100 dark:border-zinc-800">
+          <span className="text-xs text-zinc-400 sm:hidden font-medium">
+            {pagination.totalCount || jobs.length} listings
+          </span>
           <ViewToggle view={viewMode} onViewChange={setViewMode} />
         </div>
       </AdminFilters>
 
       {selected.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 rounded-3xl bg-zinc-900 p-3 text-white dark:bg-white dark:text-zinc-900">
+        <div className="sticky bottom-20 z-20 flex flex-wrap items-center gap-2 rounded-2xl sm:rounded-3xl bg-zinc-900 p-3 text-white shadow-xl dark:bg-white dark:text-zinc-900">
           <span className="px-2 text-xs font-black">
             {selected.length} selected
           </span>
@@ -508,8 +549,8 @@ export default function JobsAdminPage() {
           <AdminLoading />
         ) : viewMode === "list" ? (
           /* List Table View */
-          <div className="overflow-x-auto">
-            <table className="admin-table min-w-300 w-full text-left text-xs">
+          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+            <table className="admin-table min-w-280 w-full text-left text-xs">
               <thead>
                 <tr>
                   <th className="px-5 py-4">
@@ -695,11 +736,11 @@ export default function JobsAdminPage() {
           </div>
         ) : (
           /* Card Grid View */
-          <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {jobs.map((job) => (
               <article
                 key={job._id}
-                className={`relative flex flex-col justify-between rounded-3xl border bg-white p-5 shadow-xs transition-all dark:bg-zinc-950 ${
+                className={`relative flex flex-col justify-between rounded-2xl sm:rounded-3xl border bg-white p-4 sm:p-5 shadow-xs transition-all dark:bg-zinc-950 ${
                   selected.includes(job._id)
                     ? "border-blue-500 ring-2 ring-blue-500/20 dark:border-blue-500"
                     : "border-zinc-200/80 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700"
@@ -887,9 +928,12 @@ export default function JobsAdminPage() {
 
 function AdminSelectFilter({ value, onValueChange, placeholder, items }) {
   return (
-    <div className="w-36 sm:w-44">
+    <div className="w-full sm:w-38">
       <Select value={value} onValueChange={onValueChange}>
-        <SelectTrigger size="sm" className="h-10 rounded-full px-4">
+        <SelectTrigger
+          size="sm"
+          className="h-10 w-full rounded-full px-3 text-xs font-semibold"
+        >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>

@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, BriefcaseBusiness, MapPin } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { BriefcaseBusiness, LoaderCircle, MapPin } from "lucide-react";
 import JobCard from "./JobCard";
 import JobSort from "./JobSort";
 
@@ -9,12 +12,6 @@ function queryString(params = {}, excluded = []) {
     if (value && !excluded.includes(key)) query.set(key, String(value));
   }
   return query.toString();
-}
-
-function pageHref(path, params, page) {
-  const query = new URLSearchParams(queryString(params, ["page"]));
-  if (page > 1) query.set("page", page);
-  return `${path}${query.size ? `?${query}` : ""}`;
 }
 
 function jobHref(slug, searchParams) {
@@ -29,7 +26,50 @@ export default function JobResults({
   path = "/jobs",
   selectedSlug = "",
   compact = false,
+  queryParams = searchParams,
 }) {
+  const [items, setItems] = useState(() => jobs);
+  const [currentPage, setCurrentPage] = useState(() => pagination.page || 1);
+  const [hasMore, setHasMore] = useState(() => (pagination.page || 1) < (pagination.totalPages || 1));
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const sentinel = useRef(null);
+  const loadNextPage = useCallback(async () => {
+    if (loading || !hasMore) return;
+    setLoading(true);
+    setLoadError("");
+    try {
+      const params = new URLSearchParams();
+      Object.entries(queryParams || {}).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "" && key !== "page") params.set(key, String(value));
+      });
+      params.set("page", String(currentPage + 1));
+      params.set("limit", "15");
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/jobs?${params}`, { credentials: "include" });
+      if (!response.ok) throw new Error("Unable to load more jobs.");
+      const result = await response.json();
+      const nextItems = result?.data || [];
+      setItems((previous) => [...previous, ...nextItems.filter((item) => !previous.some((job) => job._id === item._id))]);
+      const nextPagination = result?.pagination || {};
+      setCurrentPage(nextPagination.page || currentPage + 1);
+      setHasMore((nextPagination.page || currentPage + 1) < (nextPagination.totalPages || currentPage + 1));
+    } catch (error) {
+      setLoadError(error.message || "Unable to load more jobs.");
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, hasMore, loading, queryParams]);
+
+  useEffect(() => {
+    const node = sentinel.current;
+    if (!node || !hasMore) return undefined;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) loadNextPage();
+    }, { rootMargin: "500px 0px" });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMore, loadNextPage]);
+
   return (
     <section className="min-w-0 max-w-full overflow-x-clip">
       {jobs.length > 0 && (
@@ -43,7 +83,7 @@ export default function JobResults({
       )}
 
       <div className="space-y-3 min-w-0 max-w-full">
-        {jobs.map((job) => (
+        {items.map((job) => (
           <JobCard
             key={job._id}
             job={job}
@@ -54,7 +94,7 @@ export default function JobResults({
         ))}
       </div>
 
-      {!jobs.length && (
+      {!items.length && (
         <div className="rounded-4xl border border-dashed border-zinc-300 px-6 py-20 text-center dark:border-zinc-700">
           <MapPin className="mx-auto h-8 w-8 text-zinc-300" />
           <h2 className="mt-4 font-outfit text-xl font-black">No active jobs match these filters</h2>
@@ -63,21 +103,11 @@ export default function JobResults({
         </div>
       )}
 
-      {pagination.totalPages > 1 && (
-        <nav className="mt-6 flex items-center justify-between rounded-3xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900" aria-label="Jobs pagination">
-          {pagination.page > 1 ? (
-            <Link href={pageHref(path, searchParams, pagination.page - 1)} className="inline-flex items-center gap-1 rounded-full px-3 py-2 text-xs font-bold hover:bg-zinc-100 dark:hover:bg-zinc-800">
-              <ArrowLeft className="h-3.5 w-3.5" />Previous
-            </Link>
-          ) : <span />}
-          <span className="text-[11px] font-bold text-zinc-400">Page {pagination.page} of {pagination.totalPages}</span>
-          {pagination.page < pagination.totalPages ? (
-            <Link href={pageHref(path, searchParams, pagination.page + 1)} className="inline-flex items-center gap-1 rounded-full px-3 py-2 text-xs font-bold hover:bg-zinc-100 dark:hover:bg-zinc-800">
-              Next<ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          ) : <span />}
-        </nav>
-      )}
+      {hasMore && <div ref={sentinel} className="flex min-h-16 items-center justify-center" aria-live="polite">
+        {loading && <LoaderCircle className="h-5 w-5 animate-spin text-blue-600" aria-label="Loading more jobs" />}
+        {!loading && loadError && <button type="button" onClick={loadNextPage} className="rounded-full px-4 py-2 text-xs font-bold text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40">Try again</button>}
+      </div>}
+      {!hasMore && items.length > 0 && <p className="mt-6 text-center text-xs font-medium text-zinc-400">You&apos;ve reached the end of the results.</p>}
     </section>
   );
 }

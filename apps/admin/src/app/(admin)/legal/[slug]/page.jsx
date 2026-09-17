@@ -71,7 +71,11 @@ export default function LegalPageEditor() {
               data.canonicalUrl ||
               (slug === "faq"
                 ? `https://asif.to/faq`
-                : `https://asif.to/legal/${slug}`),
+                : slug === "privacy-policy"
+                  ? `https://asif.to/privacy`
+                  : slug === "terms-conditions"
+                    ? `https://asif.to/terms`
+                    : `https://asif.to/legal/${slug}`),
           });
           setLastUpdated(data.lastUpdated || data.updatedAt || null);
         } else {
@@ -244,7 +248,7 @@ export default function LegalPageEditor() {
               )}
 
               <div
-                className="prose prose-zinc dark:prose-invert max-w-none pt-2 leading-relaxed"
+                className="legal-content pt-2"
                 dangerouslySetInnerHTML={{ __html: form.content }}
               />
             </div>
@@ -351,7 +355,11 @@ export default function LegalPageEditor() {
                 href={
                   slug === "faq"
                     ? `https://asif.to/faq`
-                    : `https://asif.to/legal/${slug}`
+                    : slug === "privacy-policy"
+                      ? `https://asif.to/privacy`
+                      : slug === "terms-conditions"
+                        ? `https://asif.to/terms`
+                        : `https://asif.to/legal/${slug}`
                 }
                 target="_blank"
                 rel="noreferrer"

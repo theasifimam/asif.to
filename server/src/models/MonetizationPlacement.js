@@ -57,7 +57,10 @@ const monetizationPlacementSchema = new Schema(
 );
 
 monetizationPlacementSchema.pre("validate", function validateEnabledAdSense() {
-  if (this.enabled && this.implementationStatus !== "mounted") {
+  const status =
+    this.implementationStatus ||
+    (this.key === "SIDEBAR" ? "reserved" : "mounted");
+  if (this.enabled && status !== "mounted") {
     this.invalidate("enabled", "A reserved placement cannot be enabled.");
   }
   if (this.enabled && this.provider === "adsense" && !this.slotId) {

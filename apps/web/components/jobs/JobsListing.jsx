@@ -193,9 +193,11 @@ export default async function JobsListing({
           />
         </aside>
         <JobResults
+          key={JSON.stringify({ searchParams, fixed })}
           jobs={jobs}
           pagination={pagination}
           searchParams={searchParams}
+          queryParams={{ ...searchParams, ...fixed }}
           path={path}
         />
       </main>

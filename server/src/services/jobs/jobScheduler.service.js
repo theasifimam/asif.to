@@ -2,6 +2,7 @@ import Job from "../../models/Job.js";
 import JobSource from "../../models/JobSource.js";
 import { syncJobSource } from "./jobImport.service.js";
 import { ensureDefaultPublicJobSources } from "./defaultSources.service.js";
+import { runDailyJobAlertDigests } from "./jobAlert.service.js";
 
 export async function expireJobs() {
   return Job.updateMany(
@@ -40,6 +41,10 @@ export async function runMaintenance({
 export function startJobScheduler() {
   if (timer) return;
   runMaintenance().catch((error) => console.error("[JOBS] maintenance failed:", error.message));
-  timer = setInterval(() => runMaintenance().catch((error) => console.error("[JOBS] maintenance failed:", error.message)), 15 * 60_000);
+  runDailyJobAlertDigests().catch((error) => console.error("[JOBS] daily alert digest failed:", error.message));
+  timer = setInterval(() => {
+    runMaintenance().catch((error) => console.error("[JOBS] maintenance failed:", error.message));
+    runDailyJobAlertDigests().catch((error) => console.error("[JOBS] daily alert digest failed:", error.message));
+  }, 15 * 60_000);
   timer.unref();
 }

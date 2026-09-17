@@ -6,7 +6,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useGetPageBySlugQuery } from "@/lib/api/pagesApi";
 import { ShieldCheck, FileText, Cookie, Mail } from "lucide-react";
-import { PrivacyPolicy, TermsOfService } from "@/components/legal/LegalPolicies";
+import { PrivacyPolicy, TermsOfService, CookiePolicy } from "@/components/legal/LegalPolicies";
 import LogoLoader from "@/components/ui/LogoLoader";
 
 const LEGAL_FALLBACKS = {
@@ -189,7 +189,8 @@ LEGAL_FALLBACKS["privacy-policy"].content = <PrivacyPolicy />;
 LEGAL_FALLBACKS["privacy-policy"].subtitle = "Effective and Last Updated: August 15, 2026";
 LEGAL_FALLBACKS["terms-conditions"].content = <TermsOfService />;
 LEGAL_FALLBACKS["terms-conditions"].title = "Terms of Service";
-LEGAL_FALLBACKS["terms-conditions"].subtitle = "Effective and Last Updated: August 15, 2026";
+LEGAL_FALLBACKS["cookie-usage"].content = <CookiePolicy />;
+LEGAL_FALLBACKS["cookie-usage"].subtitle = "Effective and Last Updated: August 15, 2026";
 LEGAL_FALLBACKS["cookies"] = LEGAL_FALLBACKS["cookie-usage"];
 LEGAL_FALLBACKS["privacy"] = LEGAL_FALLBACKS["privacy-policy"];
 LEGAL_FALLBACKS["terms"] = LEGAL_FALLBACKS["terms-conditions"];
@@ -239,19 +240,19 @@ export default function LegalPage() {
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground font-sans transition-colors duration-300">
       <Header />
 
-      <main className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 pt-20 sm:pt-28 pb-16 space-y-8">
+      <main className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 pt-20 sm:pt-28 pb-16 space-y-6">
         {/* Document Header */}
-        <div className="space-y-4 py-6 sm:py-10">
+        <div className="space-y-6 py-2">
           <div className="flex items-center gap-2.5">
             <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
               <IconComponent className="w-5 h-5" />
             </div>
             <span className="text-xs font-extrabold uppercase tracking-widest text-blue-600 dark:text-blue-400">
-              asif.to Legal & Policy
+              asif.to Legal &amp; Policy
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-black text-foreground tracking-tight">
+          <h1 className="text-2xl sm:text-4xl font-black text-foreground tracking-tight font-outfit">
             {displayTitle}
           </h1>
 
@@ -261,14 +262,14 @@ export default function LegalPage() {
             </p>
           )}
 
-          <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
+          <div className="pt-6 border-t border-zinc-200/70 dark:border-zinc-800">
             {page?.content ? (
               <div
-                className="prose prose-zinc dark:prose-invert max-w-none text-justify text-zinc-600 dark:text-zinc-300 leading-relaxed font-medium"
+                className="legal-content"
                 dangerouslySetInnerHTML={{ __html: page.content }}
               />
             ) : fallback?.content ? (
-              fallback.content
+              <div className="legal-content">{fallback.content}</div>
             ) : (
               <p className="text-sm text-zinc-500 font-medium">
                 Document content is currently being updated. For inquiries,

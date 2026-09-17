@@ -27,6 +27,9 @@ router.post("/inbox/:id/messages", allow("inbox.read"), allow("inbox.reply"), c.
 router.post("/inbox/:id/attachments", allow("inbox.read"), allow("inbox.reply"), upload.array("files", 4), c.inboxAttachments);
 router.post("/inbox/:id/share", allow("inbox.read"), requirePermission("messages.send"), c.shareInbox);
 router.get("/subscribers", allow("subscribers.read"), c.listSubscribers);
+router.get("/subscribers/:id/job-alerts", allow("subscribers.read"), c.listSubscriberJobAlerts);
+router.post("/subscribers/:id/job-alerts/send", allow("subscribers.manage"), c.sendSubscriberJobAlerts);
+router.patch("/subscribers/job-alert-digest", allow("subscribers.manage"), c.saveJobAlertDigestSettings);
 router.patch("/subscribers/:id", allow("subscribers.manage"), c.manageSubscriber);
 router.get("/templates", templateRead, c.listTemplates);
 router.post("/templates", allow("templates.manage"), c.saveTemplate);

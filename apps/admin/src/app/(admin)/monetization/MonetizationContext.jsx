@@ -232,6 +232,14 @@ export function MonetizationProvider({ children }) {
   const savePlacement = useCallback(
     async (placement) => {
       if (!canManage) return;
+      if (placement.enabled && placement.implementationStatus === "reserved") {
+        toast.error("A reserved placement (like Sidebar) cannot be enabled.");
+        return;
+      }
+      if (placement.enabled && !placement.slotId) {
+        toast.error("Please enter a numeric AdSense Slot ID before enabling this placement.");
+        return;
+      }
       setSaving(placement.key);
       const result = await monetizationApi.updatePlacement(placement.key, {
         enabled: placement.enabled,
@@ -250,7 +258,7 @@ export function MonetizationProvider({ children }) {
     [canManage, load]
   );
 
-  const live = Boolean(settings?.runtimeEffective?.live);
+  const live = Boolean(settings?.effective ?? settings?.runtimeEffective?.live);
 
   const value = {
     user,

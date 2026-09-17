@@ -101,21 +101,32 @@ export async function getSettings(_req, res) {
     ensureMonetizationSettings(),
     ensureMonetizationPlacements(),
   ]);
+  const configuredClientId =
+    settings.adsense?.clientId ||
+    process.env.ADSENSE_CLIENT_ID ||
+    process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID ||
+    "";
+  const effectiveLive =
+    publicMonetizationPayload(settings, placements).effectiveAdsEnabled;
   res.set("Cache-Control", "no-store").json({
     success: true,
     data: {
       ...settingsSnapshot(settings),
       version: settings.version,
       updatedAt: settings.updatedAt,
+      adsenseClientId: configuredClientId,
       environment: {
         masterEnabled: process.env.ADS_MASTER_ENABLED === "true",
+        clientId: configuredClientId,
         envClientIdConfigured: Boolean(
           process.env.ADSENSE_CLIENT_ID ||
           process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID,
         ),
       },
-      effective: publicMonetizationPayload(settings, placements)
-        .effectiveAdsEnabled,
+      effective: effectiveLive,
+      runtimeEffective: {
+        live: effectiveLive,
+      },
     },
   });
 }

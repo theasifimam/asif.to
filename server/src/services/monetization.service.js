@@ -166,7 +166,12 @@ export async function ensureMonetizationPlacements() {
       DEFAULT_MONETIZATION_PLACEMENTS.map((placement) => ({
         updateOne: {
           filter: { key: placement.key },
-          update: { $setOnInsert: placement },
+          update: {
+            $setOnInsert: placement,
+            $set: {
+              implementationStatus: placement.implementationStatus,
+            },
+          },
           upsert: true,
         },
       })),
