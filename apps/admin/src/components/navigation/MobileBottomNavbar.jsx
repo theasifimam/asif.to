@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Menu,
   MessageSquare,
+  NotebookPen,
   Search,
   Sparkles,
   X,
@@ -195,100 +196,67 @@ export default function MobileBottomNavbar({
             />
           </label>
 
-          {/* Navlink Groups as Smartphone App Drawer Grid */}
-          <div className="flex flex-col gap-4">
-            {filteredNavItems.map((group) => {
-              const isGroupCollapsed = Boolean(collapsedGroups[group.group]);
+          {/* Smartphone App Drawer Grid (All items in one unified sequence without category grouping) */}
+          <div className="grid grid-cols-4 gap-y-3.5 gap-x-2 py-1">
+            {filteredNavItems
+              .flatMap((group) => group.items)
+              .map((item) => {
+                const targetHref =
+                  item.name === "My Profile" && user?._id
+                    ? `/users/${user._id}`
+                    : item.href;
+                const isActive =
+                  checkIsActive(targetHref) ||
+                  Boolean(
+                    item.children?.some((child) =>
+                      checkIsActive(child.href),
+                    ),
+                  );
+                const Icon = item.icon;
 
-              return (
-                <div key={group.group} className="flex flex-col gap-2">
-                  <button
-                    type="button"
-                    onClick={() => toggleGroup(group.group)}
-                    className="group/header flex w-full items-center justify-between px-1 py-1 text-[9.5px] font-black uppercase tracking-[0.25em] text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors cursor-pointer select-none"
+                return (
+                  <Link
+                    key={item.href || item.name}
+                    href={targetHref}
+                    onClick={() => setIsOpen(false)}
+                    className="group flex flex-col items-center text-center gap-1.5 p-1 rounded-lg transition-all active:scale-90 cursor-pointer"
                   >
-                    <span>{group.group}</span>
-                    <ChevronDown
-                      size={13}
-                      className={`text-zinc-400 dark:text-zinc-600 transition-transform duration-200 ${
-                        isGroupCollapsed ? "-rotate-90" : "rotate-0"
+                    <div
+                      className={`relative flex h-12 w-12 sm:h-13 sm:w-13 items-center justify-center rounded-lg transition-all shadow-xs group-hover:scale-105 ${
+                        isActive
+                          ? "bg-blue-600 text-white shadow-md shadow-blue-500/30 ring-2 ring-blue-500/40"
+                          : "bg-zinc-100/90 text-zinc-700 border border-zinc-200/80 dark:bg-zinc-800/80 dark:border-zinc-700/60 dark:text-zinc-200 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700"
                       }`}
-                    />
-                  </button>
-
-                  <AnimatePresence initial={false}>
-                    {!isGroupCollapsed && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.18, ease: "easeInOut" }}
-                        className="overflow-hidden"
-                      >
-                        <div className="grid grid-cols-4 gap-y-3.5 gap-x-2 py-1">
-                          {group.items.map((item) => {
-                            const targetHref =
-                              item.name === "My Profile" && user?._id
-                                ? `/users/${user._id}`
-                                : item.href;
-                            const isActive =
-                              checkIsActive(targetHref) ||
-                              Boolean(
-                                item.children?.some((child) =>
-                                  checkIsActive(child.href),
-                                ),
-                              );
-                            const Icon = item.icon;
-
-                            return (
-                              <Link
-                                key={item.href}
-                                href={targetHref}
-                                onClick={() => setIsOpen(false)}
-                                className="group flex flex-col items-center text-center gap-1.5 p-1 rounded-lg transition-all active:scale-90 cursor-pointer"
-                              >
-                                <div
-                                  className={`relative flex h-12 w-12 sm:h-13 sm:w-13 items-center justify-center rounded-lg transition-all shadow-xs group-hover:scale-105 ${
-                                    isActive
-                                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/30 ring-2 ring-blue-500/40"
-                                      : "bg-zinc-100/90 text-zinc-700 border border-zinc-200/80 dark:bg-zinc-800/80 dark:border-zinc-700/60 dark:text-zinc-200 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700"
-                                  }`}
-                                >
-                                  <Icon
-                                    size={21}
-                                    strokeWidth={isActive ? 2.4 : 1.9}
-                                  />
-                                  {isActive && (
-                                    <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-blue-600 ring-2 ring-white dark:ring-zinc-900">
-                                      <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                                    </span>
-                                  )}
-                                </div>
-                                <span
-                                  className={`text-[11px] font-bold leading-tight font-outfit tracking-tight line-clamp-1 max-w-full ${
-                                    isActive
-                                      ? "text-blue-600 dark:text-blue-400 font-extrabold"
-                                      : "text-zinc-800 dark:text-zinc-200 group-hover:text-zinc-950 dark:group-hover:text-white"
-                                  }`}
-                                >
-                                  {item.name}
-                                </span>
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-            {filteredNavItems.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-zinc-200 px-4 py-8 text-center text-sm font-medium text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
-                No admin section matches “{menuQuery}”.
-              </div>
-            )}
+                    >
+                      <Icon
+                        size={21}
+                        strokeWidth={isActive ? 2.4 : 1.9}
+                      />
+                      {isActive && (
+                        <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-blue-600 ring-2 ring-white dark:ring-zinc-900">
+                          <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                        </span>
+                      )}
+                    </div>
+                    <span
+                      className={`text-[11px] font-bold leading-tight font-outfit tracking-tight line-clamp-1 max-w-full ${
+                        isActive
+                          ? "text-blue-600 dark:text-blue-400 font-extrabold"
+                          : "text-zinc-800 dark:text-zinc-200 group-hover:text-zinc-950 dark:group-hover:text-white"
+                      }`}
+                    >
+                      {item.name}
+                    </span>
+                  </Link>
+                );
+              })}
           </div>
+
+          {filteredNavItems.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-zinc-200 px-4 py-8 text-center text-sm font-medium text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+              No admin section matches “{menuQuery}”.
+            </div>
+          )}
         </div>
       )}
 
@@ -336,6 +304,22 @@ export default function MobileBottomNavbar({
             </Link>
           );
         })}
+
+        {/* Quick Notes Island Toggle Button */}
+        <button
+          type="button"
+          onClick={() => {
+            setIsOpen(false);
+            window.dispatchEvent(new CustomEvent("notes:open"));
+          }}
+          aria-label="Open quick notes"
+          title="Quick Notes"
+          className="flex items-center gap-1.5 rounded-full text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 active:scale-95 dark:text-zinc-400 dark:hover:bg-zinc-800/60 dark:hover:text-white transition-all duration-300 cursor-pointer"
+        >
+          <span className="flex min-h-11 min-w-11 items-center justify-center gap-1.5">
+            <NotebookPen className="h-4 w-4 shrink-0" />
+          </span>
+        </button>
 
         <div className="mx-0.5 h-4 w-px shrink-0 bg-zinc-200 dark:bg-zinc-800" />
 

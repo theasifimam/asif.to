@@ -2,7 +2,14 @@
 
 import LogoLoader from "@/components/ui/LogoLoader";
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, CheckCircle2, MailCheck, ShieldCheck, Trash2, X } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  MailCheck,
+  ShieldCheck,
+  Trash2,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,7 +97,10 @@ export default function DeletionDialog({
 
     (async () => {
       setBusy(true);
-      const response = await deletionApi.deletionImpact(entityModel, entity._id);
+      const response = await deletionApi.deletionImpact(
+        entityModel,
+        entity._id,
+      );
       if (!alive) return;
 
       if (response.success) {
@@ -192,7 +202,7 @@ export default function DeletionDialog({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6">
+    <div className="fixed inset-0 z-100 flex items-end sm:items-center justify-center p-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:p-6">
       <button
         type="button"
         aria-label="Close dialog"
@@ -204,7 +214,7 @@ export default function DeletionDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="course-delete-title"
-        className="relative z-10 max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-zinc-200 bg-zinc-50 shadow-2xl dark:border-zinc-800 dark:bg-[#0f0f11]"
+        className="relative z-10 max-h-[85vh] sm:max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[28px] sm:rounded-3xl border border-zinc-200 bg-zinc-50 shadow-2xl dark:border-zinc-800 dark:bg-[#0f0f11]"
       >
         <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-zinc-200 bg-zinc-50/95 p-5 backdrop-blur dark:border-zinc-800 dark:bg-[#0f0f11]/95 sm:p-6">
           <div>
@@ -215,7 +225,7 @@ export default function DeletionDialog({
               id="course-delete-title"
               className="mt-1 text-xl font-black text-zinc-950 dark:text-white"
             >
-              Delete {course?.title || "course"}
+              Delete {entity?.title || "course"}
             </h2>
           </div>
           <Button
@@ -240,10 +250,10 @@ export default function DeletionDialog({
                       This is permanent and can affect SEO.
                     </p>
                     <p className="mt-1 text-xs leading-5">
-                      Deleted pages may return 404, indexed URLs can lose traffic,
-                      and the selected content cannot be recovered from the admin
-                      panel. The database operation runs only after your OTP and a
-                      different admin/super admin&apos;s OTP.
+                      Deleted pages may return 404, indexed URLs can lose
+                      traffic, and the selected content cannot be recovered from
+                      the admin panel. The database operation runs only after
+                      your OTP and a different admin/super admin&apos;s OTP.
                     </p>
                   </div>
                 </div>
@@ -251,7 +261,7 @@ export default function DeletionDialog({
 
               {busy && !impact ? (
                 <div className="flex h-44 items-center justify-center">
-                  <LogoLoader className="h-6 w-6  text-blue-600"  />
+                  <LogoLoader className="h-6 w-6  text-blue-600" />
                 </div>
               ) : impact ? (
                 <div className="space-y-3">
@@ -335,9 +345,10 @@ export default function DeletionDialog({
                     <strong className="text-zinc-800 dark:text-zinc-200">
                       Automatic reference cleanup:
                     </strong>{" "}
-                    {impact.relatedArticles || 0} independent article(s) reference
-                    this item. They are not deleted; their dead course/chapter/question
-                    references are removed automatically.
+                    {impact.relatedArticles || 0} independent article(s)
+                    reference this item. They are not deleted; their dead
+                    course/chapter/question references are removed
+                    automatically.
                   </div>
                 </div>
               ) : null}
@@ -366,7 +377,7 @@ export default function DeletionDialog({
                     className="bg-rose-600 text-white hover:bg-rose-700"
                   >
                     {busy ? (
-                      <LogoLoader className="h-4 w-4 "  />
+                      <LogoLoader className="h-4 w-4 " />
                     ) : (
                       <MailCheck className="h-4 w-4" />
                     )}
@@ -387,9 +398,9 @@ export default function DeletionDialog({
                       Verify your own admin identity
                     </p>
                     <p className="mt-1 text-xs leading-5 text-blue-800 dark:text-blue-300">
-                      A 6-digit code was sent to {maskedEmail}. After you verify,
-                      the deletion request is sent to a different admin/super
-                      admin. You cannot approve your own request.
+                      A 6-digit code was sent to {maskedEmail}. After you
+                      verify, the deletion request is sent to a different
+                      admin/super admin. You cannot approve your own request.
                     </p>
                   </div>
                 </div>
@@ -416,7 +427,7 @@ export default function DeletionDialog({
                   disabled={busy || otp.length !== 6}
                   className="bg-rose-600 text-white hover:bg-rose-700"
                 >
-                  {busy && <LogoLoader className="h-4 w-4 "  />}
+                  {busy && <LogoLoader className="h-4 w-4 " />}
                   Verify & request second approval
                 </Button>
               </div>
@@ -434,7 +445,8 @@ export default function DeletionDialog({
               <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-zinc-500 dark:text-zinc-400">
                 Nothing has been deleted yet. Another active admin/super admin
                 has received an in-app notification and email. They must review
-                exactly what you selected, request their own OTP, and approve it.
+                exactly what you selected, request their own OTP, and approve
+                it.
               </p>
               <Button onClick={close} className="mt-5">
                 Done

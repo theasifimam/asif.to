@@ -34,12 +34,24 @@ export function AssetTextDialog({ open, onOpenChange, title, description, label,
 export function AssetConfirmDialog({ open, onOpenChange, title, description, confirmLabel, destructive = false, loading, onConfirm }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600"><AlertTriangle className="h-5 w-5" /></div>
-          <DialogTitle>{title}</DialogTitle><DialogDescription>{description}</DialogDescription>
+      <DialogContent variant="island" className="p-6 sm:p-8 sm:max-w-[440px]">
+        <DialogHeader className="items-center text-center gap-3 sm:gap-4">
+          <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600">
+            <AlertTriangle className="h-6 w-6 sm:h-7 sm:w-7" />
+          </div>
+          <div className="flex flex-col gap-1.5 sm:gap-2">
+            <DialogTitle className="font-outfit text-xl sm:text-2xl font-black tracking-tight">{title}</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">{description}</DialogDescription>
+          </div>
         </DialogHeader>
-        <DialogFooter><Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button><Button type="button" variant={destructive ? "destructive" : "default"} loading={loading} onClick={onConfirm}>{confirmLabel}</Button></DialogFooter>
+        <DialogFooter className="mt-6 sm:mt-8 grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:gap-3">
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:flex-1 rounded-full text-xs font-bold">
+            Cancel
+          </Button>
+          <Button type="button" variant={destructive ? "destructive" : "default"} loading={loading} onClick={onConfirm} className="w-full sm:flex-1 rounded-full text-xs font-bold">
+            {confirmLabel}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

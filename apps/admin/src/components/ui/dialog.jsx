@@ -40,15 +40,22 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  variant = "default",
   ...props
 }) {
+  const isIsland = variant === "island";
+
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
+        data-variant={variant}
         className={cn(
-          "bg-white dark:bg-zinc-950 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom-4 data-[state=open]:slide-in-from-bottom-4 sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95 fixed bottom-0 left-[50%] z-10000 grid max-h-[calc(100dvh-env(safe-area-inset-top)-0.75rem)] w-full max-w-none translate-x-[-50%] gap-4 overflow-y-auto rounded-t-[1.75rem] border border-b-0 border-zinc-200/90 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[0_24px_80px_-24px_rgba(0,0,0,.35)] duration-200 outline-none dark:border-zinc-800 sm:bottom-auto sm:top-[50%] sm:max-w-lg sm:translate-y-[-50%] sm:gap-5 sm:rounded-[1.75rem] sm:border-b sm:p-7",
+          "bg-white dark:bg-zinc-950 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-200 outline-none dark:border-zinc-800",
+          isIsland
+            ? "fixed bottom-[max(0.875rem,env(safe-area-inset-bottom))] left-3.5 right-3.5 z-10000 mx-auto grid max-h-[calc(100dvh-2rem)] w-auto max-w-md overflow-y-auto rounded-[2rem] border border-zinc-200/90 p-5 sm:p-8 shadow-[0_24px_80px_-20px_rgba(0,0,0,0.35)] dark:shadow-[0_24px_80px_-20px_rgba(0,0,0,0.7)] data-[state=closed]:slide-out-to-bottom-6 data-[state=open]:slide-in-from-bottom-6 sm:bottom-auto sm:top-[50%] sm:left-[50%] sm:right-auto sm:w-full sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%] sm:gap-5 sm:rounded-[2rem] sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95"
+            : "data-[state=closed]:slide-out-to-bottom-4 data-[state=open]:slide-in-from-bottom-4 sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95 fixed bottom-0 left-[50%] z-10000 grid max-h-[calc(100dvh-env(safe-area-inset-top)-0.75rem)] w-full max-w-none translate-x-[-50%] gap-4 overflow-y-auto rounded-t-[1.75rem] border border-b-0 border-zinc-200/90 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[0_24px_80px_-24px_rgba(0,0,0,.35)] sm:bottom-auto sm:top-[50%] sm:max-w-lg sm:translate-y-[-50%] sm:gap-5 sm:rounded-[1.75rem] sm:border-b sm:p-7",
           className,
         )}
         {...props}

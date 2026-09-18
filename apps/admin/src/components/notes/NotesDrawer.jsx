@@ -570,7 +570,7 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
   return createPortal(
     <>
       <div
-        className="fixed inset-0 z-5000 bg-zinc-950/30 backdrop-blur-[1px]"
+        className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
         onMouseDown={closeDrawer}
         aria-hidden="true"
       />
@@ -581,7 +581,7 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
         data-scroll-ignore
         onMouseDown={(event) => event.stopPropagation()}
         onClick={() => setMenuOpen(null)}
-        className="fixed inset-x-0 bottom-0 z-5001 flex h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl border border-b-0 border-zinc-200 bg-zinc-50 shadow-2xl animate-in slide-in-from-bottom duration-200 dark:border-zinc-800 dark:bg-[#09090b] sm:inset-y-0 sm:left-auto sm:right-0 sm:h-auto sm:w-110 sm:rounded-none sm:border-y-0 sm:border-r-0 sm:border-l sm:slide-in-from-right"
+        className="fixed left-2 right-2 bottom-2 z-[10000] mx-auto max-w-md flex h-[85vh] max-h-[85vh] flex-col overflow-hidden rounded-[32px] border border-zinc-200/90 bg-white/98 shadow-2xl backdrop-blur-2xl animate-in slide-in-from-bottom-5 duration-200 dark:border-zinc-800/90 dark:bg-[#121215]/98 sm:inset-y-0 sm:left-auto sm:right-0 sm:bottom-auto sm:h-auto sm:max-h-none sm:w-110 sm:max-w-none sm:rounded-none sm:border-y-0 sm:border-r-0 sm:border-l sm:bg-zinc-50 dark:sm:bg-[#09090b] sm:slide-in-from-right"
         style={{
           transform: dragOffset ? `translateY(${dragOffset}px)` : undefined,
           transition: dragging ? "none" : "transform 160ms ease-out",

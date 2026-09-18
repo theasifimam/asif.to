@@ -17,7 +17,8 @@ export default function SidebarAccount({
   isCollapsed,
   setIsLogoutDialogOpen,
 }) {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const activeTheme = resolvedTheme || theme;
   const router = useRouter();
 
   return (
@@ -115,12 +116,12 @@ export default function SidebarAccount({
 
           <button
             type="button"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            onClick={() => setTheme(activeTheme === "dark" ? "light" : "dark")}
             className="flex items-center justify-between p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-all text-zinc-700 dark:text-zinc-300 font-bold text-xs cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400">
-                {theme === "dark" ? (
+                {activeTheme === "dark" ? (
                   <Sun size={14} />
                 ) : (
                   <Moon size={14} className="text-blue-600" />
@@ -129,7 +130,7 @@ export default function SidebarAccount({
               <span>Theme</span>
             </div>
             <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500">
-              {theme === "dark" ? "Dark" : "Light"}
+              {theme === "system" ? "System" : activeTheme === "dark" ? "Dark" : "Light"}
             </span>
           </button>
 

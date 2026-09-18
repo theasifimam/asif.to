@@ -20,27 +20,30 @@ export default function ArticleDeleteDialog({
 }) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-100 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-8 rounded-4xl gap-8">
-        <DialogHeader className="gap-4">
-          <div className="w-16 h-16 rounded-3xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center text-red-500 mb-2">
-            <AlertCircle size={32} />
+      <DialogContent
+        variant="island"
+        className="p-6 sm:p-8 sm:max-w-110 rounded-4xl gap-6 sm:gap-8"
+      >
+        <DialogHeader className="items-center text-center gap-3 sm:gap-4">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-3xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center text-red-500 mb-1">
+            <AlertCircle size={28} />
           </div>
-          <DialogTitle className="text-2xl font-black font-outfit uppercase tracking-tighter text-zinc-900 dark:text-white leading-none">
+          <DialogTitle className="text-xl sm:text-2xl font-black font-outfit uppercase tracking-tighter text-zinc-900 dark:text-white leading-none">
             Delete Article?
           </DialogTitle>
-          <DialogDescription className="text-zinc-500 dark:text-zinc-400 text-[13px] font-medium leading-relaxed">
+          <DialogDescription className="text-zinc-500 dark:text-zinc-400 text-xs sm:text-[13px] font-medium leading-relaxed">
             Are you sure you want to delete{" "}
             <strong className="text-zinc-900 dark:text-white">
-              "{selectedArticle?.title}"
+              &ldquo;{selectedArticle?.title}&rdquo;
             </strong>
             ? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-900">
+        <DialogFooter className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-900">
           <Button
             variant="ghost"
             onClick={() => setIsOpen(false)}
-            className="flex-1 rounded-2xl text-[11px] font-black uppercase tracking-widest text-zinc-500 h-14"
+            className="w-full sm:flex-1 rounded-2xl text-[11px] font-black uppercase tracking-widest text-zinc-500 h-12 sm:h-14 cursor-pointer"
           >
             Cancel
           </Button>
@@ -48,12 +51,10 @@ export default function ArticleDeleteDialog({
             variant="destructive"
             onClick={handleDelete}
             disabled={submitting}
-            className="flex-1 rounded-2xl bg-red-500 hover:bg-red-600 text-white text-[11px] font-black uppercase tracking-widest transition-all h-14 shadow-lg shadow-red-500/20"
+            className="w-full sm:flex-1 rounded-2xl bg-red-500 hover:bg-red-600 text-white text-[11px] font-black uppercase tracking-widest transition-all h-12 sm:h-14 shadow-lg shadow-red-500/20 cursor-pointer"
           >
-            {submitting ? (
-              <LogoLoader size={14} className=" mr-2"  />
-            ) : null}
-            Delete Article
+            {submitting ? <LogoLoader size={14} className=" mr-2" /> : null}
+            Delete
           </Button>
         </DialogFooter>
       </DialogContent>

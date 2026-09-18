@@ -7,20 +7,20 @@ import { ReduxProvider } from "@/redux/provider";
 
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"]
+  subsets: ["latin"],
 });
 
 const outfit = Outfit({
   variable: "--font-outfit",
-  subsets: ["latin"]
+  subsets: ["latin"],
 });
 
 export const metadata = {
   title: "asif.to | Admin Control Panel",
   description: "Advanced Admin & Content Management Interface for asif.to",
   icons: {
-    icon: "/logo.png"
-  }
+    icon: "/logo.png",
+  },
 };
 
 export const viewport = {
@@ -41,8 +41,8 @@ export default function RootLayout({ children }) {
           <ReduxProvider>
             <ThemeProvider
               attribute="class"
-              defaultTheme="dark"
-              enableSystem={false}
+              defaultTheme="system"
+              enableSystem
               storageKey="asif-admin-theme"
               disableTransitionOnChange
             >
