@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Eye, Save } from "lucide-react";
 import { toast } from "sonner";
 import { getModuleBackUrl } from "@/hooks/useModuleHistory";
-import Editor from "@/components/editor/Editor";
+import Editor, { MarkdownPreview } from "@/components/editor/Editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -219,8 +219,8 @@ export default function InterviewQuestionForm({
           <h2 className="text-xl sm:text-2xl font-bold text-zinc-950 dark:text-white">
             {form.question || "Untitled question"}
           </h2>
-          <div className="whitespace-pre-wrap leading-7 text-zinc-700 dark:text-zinc-300 text-sm sm:text-base">
-            {form.answer}
+          <div className="rounded-2xl bg-zinc-50 dark:bg-zinc-900 p-4 border border-zinc-200/60 dark:border-zinc-800/60">
+            <MarkdownPreview source={form.answer} placeholder="No answer content provided." />
           </div>
           {form.codeExample && (
             <pre className="overflow-x-auto rounded-2xl bg-zinc-950 p-4 text-xs sm:text-sm text-zinc-100">

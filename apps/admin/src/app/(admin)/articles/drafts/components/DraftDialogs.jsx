@@ -20,7 +20,10 @@ export function DraftPublishDialog({
 }) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent variant="island" className="p-6 sm:p-8 sm:max-w-[440px] rounded-[2rem] gap-6 sm:gap-8">
+      <DialogContent
+        variant="island"
+        className="p-6 sm:p-8 sm:max-w-110 rounded-4xl gap-6 sm:gap-8"
+      >
         <DialogHeader className="items-center text-center gap-3 sm:gap-4">
           <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-3xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-1">
             <Send size={28} />
@@ -49,9 +52,7 @@ export function DraftPublishDialog({
             disabled={submitting}
             className="w-full sm:flex-1 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-black uppercase tracking-widest transition-all h-12 sm:h-14 shadow-lg shadow-emerald-500/20 cursor-pointer"
           >
-            {submitting ? (
-              <LogoLoader size={14} className=" mr-2"  />
-            ) : null}
+            {submitting ? <LogoLoader size={14} className=" mr-2" /> : null}
             Publish Article
           </Button>
         </DialogFooter>
@@ -69,7 +70,10 @@ export function DraftDeleteDialog({
 }) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent variant="island" className="p-6 sm:p-8 sm:max-w-[440px] rounded-[2rem] gap-6 sm:gap-8">
+      <DialogContent
+        variant="island"
+        className="p-6 sm:p-8 sm:max-w-110 rounded-4xl gap-6 sm:gap-8"
+      >
         <DialogHeader className="items-center text-center gap-3 sm:gap-4">
           <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-3xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center text-red-500 mb-1">
             <AlertCircle size={28} />
@@ -99,9 +103,7 @@ export function DraftDeleteDialog({
             disabled={submitting}
             className="w-full sm:flex-1 rounded-2xl bg-red-500 hover:bg-red-600 text-white text-[11px] font-black uppercase tracking-widest transition-all h-12 sm:h-14 shadow-lg shadow-red-500/20 cursor-pointer"
           >
-            {submitting ? (
-              <LogoLoader size={14} className=" mr-2"  />
-            ) : null}
+            {submitting ? <LogoLoader size={14} className=" mr-2" /> : null}
             Delete Draft
           </Button>
         </DialogFooter>

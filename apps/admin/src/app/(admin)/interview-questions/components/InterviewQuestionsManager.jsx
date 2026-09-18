@@ -29,6 +29,14 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { MarkdownPreview } from "@/components/editor/Editor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -497,20 +505,17 @@ export default function InterviewQuestionsManager({
         </div>
       )}
 
-      {/* Preview Modal */}
-      {preview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-          <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl sm:rounded-4xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950">
-            <button
-              onClick={() => setPreview(null)}
-              className="absolute right-4 top-4 rounded-full p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-white"
-            >
-              <X className="h-5 w-5" />
-            </button>
-            <div className="space-y-4 pr-6">
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="outline">{preview.difficulty}</Badge>
-                <Badge variant="outline">{preview.questionType}</Badge>
+      {/* Preview Island Modal */}
+      <Dialog open={Boolean(preview)} onOpenChange={(open) => !open && setPreview(null)}>
+        {preview && (
+          <DialogContent
+            variant="island"
+            className="w-full max-w-full sm:max-w-3xl p-6 sm:p-8 rounded-4xl border border-zinc-200/90 bg-white dark:border-zinc-800/90 dark:bg-zinc-950 shadow-2xl gap-5"
+          >
+            <DialogHeader className="space-y-3 text-left">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="capitalize">{preview.difficulty}</Badge>
+                <Badge variant="outline" className="capitalize">{preview.questionType}</Badge>
                 {preview.category?.name && (
                   <Badge variant="secondary">{preview.category.name}</Badge>
                 )}
@@ -518,35 +523,47 @@ export default function InterviewQuestionsManager({
                   <Badge variant="outline">{preview.course.title}</Badge>
                 )}
               </div>
-              <h2 className="text-xl font-black text-zinc-950 dark:text-white">
+              <DialogTitle className="text-xl sm:text-2xl font-black font-outfit text-zinc-950 dark:text-white leading-tight">
                 {preview.question}
-              </h2>
-              <div className="rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-900">
-                <p className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
-                  Answer
+              </DialogTitle>
+              <DialogDescription className="sr-only">
+                Interview Question Preview
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-5 overflow-y-auto max-h-[70vh] pr-1">
+              {/* Answer Section with Markdown Parsing */}
+              <div className="rounded-3xl bg-zinc-50 dark:bg-zinc-900/90 p-5 sm:p-6 border border-zinc-200/60 dark:border-zinc-800/60">
+                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-3">
+                  ANSWER
                 </p>
-                <div className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-                  {preview.answer}
-                </div>
+                <MarkdownPreview source={preview.answer} placeholder="No answer provided." />
               </div>
+
               {preview.codeExample && (
-                <div className="rounded-2xl bg-zinc-950 p-4 text-xs font-mono text-zinc-100 overflow-x-auto">
-                  <p className="text-zinc-500 mb-2">Code Example</p>
-                  <pre>{preview.codeExample}</pre>
-                </div>
-              )}
-              {preview.expectedOutput && (
-                <div className="rounded-2xl bg-zinc-100 dark:bg-zinc-900 p-4 text-xs font-mono text-zinc-800 dark:text-zinc-200 overflow-x-auto">
-                  <p className="text-zinc-400 mb-1">Expected Output</p>
-                  <pre>{preview.expectedOutput}</pre>
-                </div>
-              )}
-              {preview.followUps?.length > 0 && (
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
-                    Follow-up Questions
+                <div className="rounded-3xl bg-zinc-950 p-5 text-xs font-mono text-zinc-100 overflow-x-auto border border-zinc-800">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2">
+                    CODE EXAMPLE
                   </p>
-                  <ul className="list-disc space-y-1 pl-5 text-xs text-zinc-600 dark:text-zinc-400">
+                  <pre className="whitespace-pre-wrap"><code>{preview.codeExample}</code></pre>
+                </div>
+              )}
+
+              {preview.expectedOutput && (
+                <div className="rounded-3xl bg-zinc-100 dark:bg-zinc-900 p-5 text-xs font-mono text-zinc-800 dark:text-zinc-200 overflow-x-auto border border-zinc-200/80 dark:border-zinc-800">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">
+                    EXPECTED OUTPUT
+                  </p>
+                  <pre className="whitespace-pre-wrap"><code>{preview.expectedOutput}</code></pre>
+                </div>
+              )}
+
+              {preview.followUps?.length > 0 && (
+                <div className="rounded-3xl bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/20 p-5">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-2">
+                    FOLLOW-UP QUESTIONS
+                  </p>
+                  <ul className="list-disc space-y-1.5 pl-5 text-xs font-medium text-zinc-700 dark:text-zinc-300">
                     {preview.followUps.map((item, index) => (
                       <li key={index}>{item}</li>
                     ))}
@@ -554,9 +571,9 @@ export default function InterviewQuestionsManager({
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      )}
+          </DialogContent>
+        )}
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog

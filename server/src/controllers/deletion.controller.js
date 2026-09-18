@@ -387,12 +387,16 @@ function publicRequest(request, currentUserId) {
   };
 }
 
+const resolveEntityModel = (param) =>
+  ["TopicCategory", "categories", "category"].includes(param)
+    ? "TopicCategory"
+    : "Course";
+
 export const getDeletionImpact = async (req, res) => {
   try {
     if (!ensurePrivileged(req, res)) return;
 
-    const entityModel =
-      req.params.entityModel === "categories" ? "TopicCategory" : "Course";
+    const entityModel = resolveEntityModel(req.params.entityModel);
     const entityId = req.params.entityId;
 
     const data = await computeImpact(entityId, entityModel);
@@ -441,8 +445,7 @@ export const beginDeletion = async (req, res) => {
       });
     }
 
-    const entityModel =
-      req.params.entityModel === "categories" ? "TopicCategory" : "Course";
+    const entityModel = resolveEntityModel(req.params.entityModel);
     const entityId = req.params.entityId;
 
     const data = await computeImpact(entityId, entityModel);

@@ -4,9 +4,20 @@ import LogoLoader from "@/components/ui/LogoLoader";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { ChevronRight, KanbanSquare, Plus, Trash2, ListTodo, X } from "lucide-react";
+import {
+  ChevronRight,
+  KanbanSquare,
+  Plus,
+  Trash2,
+  ListTodo,
+  X,
+} from "lucide-react";
 import { kanbanApi } from "@/lib/api";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -221,10 +232,13 @@ export default function QuickPlannerAdd() {
       <form onSubmit={submit} className="mt-3.5 space-y-2.5">
         <div className="flex items-center gap-2">
           <Select value={kind} onValueChange={setKind}>
-            <SelectTrigger size="sm" className="h-9 w-28 shrink-0 rounded-xl text-xs font-bold bg-zinc-50/80 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
+            <SelectTrigger
+              size="sm"
+              className="h-9 w-28 shrink-0 rounded-xl text-xs font-bold bg-zinc-50/80 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+            >
               <SelectValue placeholder="Category" />
             </SelectTrigger>
-            <SelectContent align="start" className="z-[10100]">
+            <SelectContent align="start" className="z-10100">
               <SelectItem value="Development">Development</SelectItem>
               <SelectItem value="SEO">SEO</SelectItem>
               <SelectItem value="Content">Content</SelectItem>
@@ -263,9 +277,7 @@ export default function QuickPlannerAdd() {
           <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">
             Recent Tasks ({tasks.length})
           </span>
-          {loadingTasks && (
-            <LogoLoader size={11} className="text-zinc-400" />
-          )}
+          {loadingTasks && <LogoLoader size={11} className="text-zinc-400" />}
         </div>
 
         <div className="max-h-52 overflow-y-auto overflow-x-hidden space-y-1.5 pr-1 min-w-0">
@@ -276,8 +288,12 @@ export default function QuickPlannerAdd() {
           ) : tasks.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-200 py-6 text-center dark:border-zinc-800">
               <ListTodo size={20} className="mb-1.5 text-zinc-400" />
-              <p className="text-xs font-medium text-zinc-500">No tasks added yet</p>
-              <p className="text-[10px] text-zinc-400">Add a task above to see it here</p>
+              <p className="text-xs font-medium text-zinc-500">
+                No tasks added yet
+              </p>
+              <p className="text-[10px] text-zinc-400">
+                Add a task above to see it here
+              </p>
             </div>
           ) : (
             tasks.slice(0, 8).map((task) => {
@@ -366,20 +382,20 @@ export default function QuickPlannerAdd() {
         createPortal(
           <div className="sm:hidden">
             <div
-              className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+              className="fixed inset-0 z-9999 bg-black/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
               onClick={() => setOpen(false)}
             />
             <div
               role="dialog"
               aria-modal="true"
               aria-label="Quick Planner"
-              className="fixed left-2 right-2 bottom-2 z-[10000] mx-auto max-w-md flex flex-col gap-3 rounded-[32px] border border-zinc-200/90 bg-white/98 p-4.5 shadow-2xl backdrop-blur-2xl animate-in slide-in-from-bottom-5 duration-200 dark:border-zinc-800/90 dark:bg-[#121215]/98 pb-[calc(1.25rem+max(0.5rem,env(safe-area-inset-bottom)))]"
+              className="fixed left-2 right-2 bottom-2 z-10000 mx-auto max-w-md flex flex-col gap-3 rounded-4xl border border-zinc-200/90 bg-white/98 p-4.5 shadow-2xl backdrop-blur-2xl animate-in slide-in-from-bottom-5 duration-200 dark:border-zinc-800/90 dark:bg-[#121215]/98 pb-[calc(1.25rem+max(0.5rem,env(safe-area-inset-bottom)))]"
             >
               <div className="w-10 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700 mx-auto mb-0.5 opacity-80" />
               {plannerContent}
             </div>
           </div>,
-          document.body
+          document.body,
         )}
     </>
   );

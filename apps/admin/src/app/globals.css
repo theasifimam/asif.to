@@ -719,7 +719,7 @@ pre.hljs code,
     left: 0.875rem !important;
     right: 0.875rem !important;
     width: auto !important;
-    max-width: 28rem !important;
+    max-width: min(calc(100vw - 1.75rem), 48rem);
     margin-left: auto !important;
     margin-right: auto !important;
     transform: none !important;

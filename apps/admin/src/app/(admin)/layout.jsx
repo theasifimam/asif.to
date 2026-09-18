@@ -687,7 +687,10 @@ export default function AdminLayout({ children }) {
 
         {/* Logout Confirmation Dialog */}
         <Dialog open={isLogoutDialogOpen} onOpenChange={setIsLogoutDialogOpen}>
-          <DialogContent className="max-w-100 border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#121215] p-8 rounded-[28px] sm:rounded-4xl gap-7 shadow-2xl">
+          <DialogContent
+            variant="island"
+            className="max-w-100 border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#121215] p-6 sm:p-8 rounded-4xl gap-6 sm:gap-7 shadow-2xl"
+          >
             <DialogHeader className="gap-4 items-center sm:items-start text-center sm:text-left">
               <div className="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center text-rose-600 dark:text-rose-400 mb-1">
                 <LogOut size={26} />

@@ -155,7 +155,8 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
     (temporaryId, note) => {
       const request = notesApi.create(payloadFor(note)).then((response) => {
         const created = response.success ? unwrapNote(response) : null;
-        if (!created) throw new Error(response.error || "Unable to create note.");
+        if (!created)
+          throw new Error(response.error || "Unable to create note.");
         return replaceTemporaryId(temporaryId, created);
       });
       creationPromisesRef.current.set(temporaryId, request);
@@ -184,7 +185,10 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
   const persistSnapshot = useCallback(
     async (snapshot) => {
       const persisted = await resolvePersistedNote(snapshot);
-      const response = await notesApi.update(persisted._id, payloadFor(persisted));
+      const response = await notesApi.update(
+        persisted._id,
+        payloadFor(persisted),
+      );
       if (!response.success) {
         const error = new Error(response.error || "Unable to save note.");
         error.noteId = persisted._id;
@@ -265,7 +269,9 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
     saveTimerRef.current = null;
     if (!draftRef.current) return Promise.resolve();
     let snapshot = { ...draftRef.current };
-    const checklist = (snapshot.checklist || []).filter((item) => item.text?.trim());
+    const checklist = (snapshot.checklist || []).filter((item) =>
+      item.text?.trim(),
+    );
     if (checklist.length !== (snapshot.checklist || []).length) {
       snapshot = { ...snapshot, checklist };
       draftRef.current = snapshot;
@@ -291,7 +297,11 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
 
   const discardBlankDraft = useCallback(
     (note) => {
-      if (!note || !freshNoteIdsRef.current.has(String(note._id)) || !isBlankNote(note)) {
+      if (
+        !note ||
+        !freshNoteIdsRef.current.has(String(note._id)) ||
+        !isBlankNote(note)
+      ) {
         return false;
       }
       if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
@@ -492,7 +502,8 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
         .then(() => notesApi.delete(persisted._id));
       saveQueueRef.current = operation;
       const response = await operation;
-      if (!response.success) throw new Error(response.error || "Unable to delete note.");
+      if (!response.success)
+        throw new Error(response.error || "Unable to delete note.");
       updateNotes((current) =>
         current.filter(
           (entry) =>
@@ -560,7 +571,11 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
           note.title,
           note.content,
           ...(note.checklist || []).map((item) => item.text),
-        ].some((value) => String(value || "").toLowerCase().includes(normalized));
+        ].some((value) =>
+          String(value || "")
+            .toLowerCase()
+            .includes(normalized),
+        );
       }),
     );
   }, [notes, query, showArchived]);
@@ -570,7 +585,7 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
   return createPortal(
     <>
       <div
-        className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+        className="fixed inset-0 z-9999 bg-black/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
         onMouseDown={closeDrawer}
         aria-hidden="true"
       />
@@ -581,7 +596,7 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
         data-scroll-ignore
         onMouseDown={(event) => event.stopPropagation()}
         onClick={() => setMenuOpen(null)}
-        className="fixed left-2 right-2 bottom-2 z-[10000] mx-auto max-w-md flex h-[85vh] max-h-[85vh] flex-col overflow-hidden rounded-[32px] border border-zinc-200/90 bg-white/98 shadow-2xl backdrop-blur-2xl animate-in slide-in-from-bottom-5 duration-200 dark:border-zinc-800/90 dark:bg-[#121215]/98 sm:inset-y-0 sm:left-auto sm:right-0 sm:bottom-auto sm:h-auto sm:max-h-none sm:w-110 sm:max-w-none sm:rounded-none sm:border-y-0 sm:border-r-0 sm:border-l sm:bg-zinc-50 dark:sm:bg-[#09090b] sm:slide-in-from-right"
+        className="fixed left-2 right-2 bottom-2 z-10000 mx-auto max-w-md flex h-[85vh] max-h-[85vh] flex-col overflow-hidden rounded-4xl border border-zinc-200/90 bg-white/98 shadow-2xl backdrop-blur-2xl animate-in slide-in-from-bottom-5 duration-200 dark:border-zinc-800/90 dark:bg-[#121215]/98 sm:inset-y-0 sm:left-auto sm:right-0 sm:bottom-auto sm:h-auto sm:max-h-none sm:w-110 sm:max-w-none sm:rounded-none sm:border-y-0 sm:border-r-0 sm:border-l sm:bg-zinc-50 dark:sm:bg-[#09090b] sm:slide-in-from-right"
         style={{
           transform: dragOffset ? `translateY(${dragOffset}px)` : undefined,
           transition: dragging ? "none" : "transform 160ms ease-out",
@@ -619,7 +634,9 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
                 <NotebookPen className="h-4.5 w-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <h2 className="text-sm font-black text-zinc-900 dark:text-white">Notes</h2>
+                <h2 className="text-sm font-black text-zinc-900 dark:text-white">
+                  Notes
+                </h2>
                 <p className="text-[10px] font-medium text-zinc-400">
                   {showArchived ? "Archived notes" : "Your private scratchpad"}
                 </p>
@@ -628,10 +645,14 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
                 type="button"
                 onClick={(event) => {
                   event.stopPropagation();
-                  setViewMode((current) => (current === "list" ? "grid" : "list"));
+                  setViewMode((current) =>
+                    current === "list" ? "grid" : "list",
+                  );
                 }}
                 className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-white"
-                aria-label={viewMode === "list" ? "Use card view" : "Use list view"}
+                aria-label={
+                  viewMode === "list" ? "Use card view" : "Use list view"
+                }
                 title={viewMode === "list" ? "Card view" : "List view"}
               >
                 {viewMode === "list" ? (
@@ -652,10 +673,16 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
                     ? "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400"
                     : "text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-white"
                 }`}
-                aria-label={showArchived ? "Show current notes" : "Show archived notes"}
+                aria-label={
+                  showArchived ? "Show current notes" : "Show archived notes"
+                }
                 title={showArchived ? "Current notes" : "Archived notes"}
               >
-                {showArchived ? <Inbox className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
+                {showArchived ? (
+                  <Inbox className="h-4 w-4" />
+                ) : (
+                  <Archive className="h-4 w-4" />
+                )}
               </button>
               <button
                 type="button"
@@ -698,14 +725,19 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto p-3.5" data-scroll-ignore>
+            <div
+              className="min-h-0 flex-1 overflow-y-auto p-3.5"
+              data-scroll-ignore
+            >
               {loading && !visibleNotes.length ? (
                 <div className="flex h-40 items-center justify-center">
                   <LogoLoader className="h-8 w-8 text-blue-600" />
                 </div>
               ) : error && !visibleNotes.length ? (
                 <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-center dark:border-rose-500/20 dark:bg-rose-500/10">
-                  <p className="text-xs font-semibold text-rose-600 dark:text-rose-300">{error}</p>
+                  <p className="text-xs font-semibold text-rose-600 dark:text-rose-300">
+                    {error}
+                  </p>
                   <button
                     type="button"
                     onClick={() => loadNotes(showArchived, true)}
@@ -728,10 +760,16 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
                       note={note}
                       viewMode={viewMode}
                       menuOpen={menuOpen === note._id}
-                      onToggleMenu={(id) => setMenuOpen((current) => (current === id ? null : id))}
+                      onToggleMenu={(id) =>
+                        setMenuOpen((current) => (current === id ? null : id))
+                      }
                       onOpen={openNote}
-                      onPin={(item) => updateImmediately(item, { pinned: !item.pinned })}
-                      onArchive={(item) => updateImmediately(item, { archived: !item.archived })}
+                      onPin={(item) =>
+                        updateImmediately(item, { pinned: !item.pinned })
+                      }
+                      onArchive={(item) =>
+                        updateImmediately(item, { archived: !item.archived })
+                      }
                       onDelete={requestDelete}
                     />
                   ))}
@@ -739,7 +777,11 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
               ) : (
                 <div className="flex min-h-64 flex-col items-center justify-center px-8 text-center">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-400 dark:bg-zinc-900 dark:text-zinc-600">
-                    {query ? <Search className="h-5 w-5" /> : <NotebookPen className="h-5 w-5" />}
+                    {query ? (
+                      <Search className="h-5 w-5" />
+                    ) : (
+                      <NotebookPen className="h-5 w-5" />
+                    )}
                   </div>
                   <p className="mt-4 text-sm font-black text-zinc-900 dark:text-white">
                     {query

@@ -1,7 +1,7 @@
 "use client";
 
 import LogoLoader from "@/components/ui/LogoLoader";
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,19 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle } from 'lucide-react';
-
-
-
-
-
-
-
-
-
-
-
-
+import { AlertTriangle } from "lucide-react";
 
 export function ConfirmDialog({
   isOpen,
@@ -34,26 +22,28 @@ export function ConfirmDialog({
   confirmText = "Confirm",
   cancelText = "Cancel",
   variant = "default",
-  loading = false
+  loading = false,
 }) {
-
   const variantStyles = {
-    default: "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200",
+    default:
+      "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200",
     destructive: "bg-red-600 hover:bg-red-700 text-white shadow-sm",
-    warning: "bg-amber-500 hover:bg-amber-600 text-white shadow-sm"
+    warning: "bg-amber-500 hover:bg-amber-600 text-white shadow-sm",
   };
 
   const iconStyles = {
     default: "bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400",
     destructive: "bg-red-50 dark:bg-red-500/10 text-red-500",
-    warning: "bg-amber-50 dark:bg-amber-500/10 text-amber-500"
+    warning: "bg-amber-50 dark:bg-amber-500/10 text-amber-500",
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={(o) => !o && !loading && onClose()}>
-      <DialogContent variant="island" className="p-6 sm:p-8 sm:max-w-[440px]">
+      <DialogContent variant="island" className="p-6 sm:p-8 sm:max-w-110">
         <DialogHeader className="items-center text-center gap-3 sm:gap-4">
-          <div className={`flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl ${iconStyles[variant]}`}>
+          <div
+            className={`flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl ${iconStyles[variant]}`}
+          >
             <AlertTriangle className="h-6 w-6 sm:h-7 sm:w-7" />
           </div>
           <div className="flex flex-col gap-1.5 sm:gap-2">
