@@ -93,8 +93,11 @@ async function fetchApi(endpoint) {
   if (!apiUrl) return null;
 
   try {
+    const isSearchIndex = endpoint.includes("search/index");
     const res = await fetch(`${apiUrl}${endpoint}`, {
-      next: { revalidate: 3600 },
+      ...(isSearchIndex
+        ? { cache: "no-store" }
+        : { next: { revalidate: 3600 } }),
     });
     if (!res.ok) return null;
     const json = await res.json();
