@@ -169,14 +169,14 @@ export default function UserProfilePage() {
           </Link>
         }
         actions={
-          <>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
             {isOwnProfile && (
-              <span className="inline-flex items-center rounded-full bg-emerald-100/90 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-500/30 px-3 py-1 text-[10px] font-black uppercase tracking-wider">
+              <span className="inline-flex items-center rounded-full bg-emerald-100/90 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-500/30 px-3 py-1 text-[10px] font-black uppercase tracking-wider shrink-0">
                 Your Profile
               </span>
             )}
             <div
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-zinc-200/80 dark:border-zinc-800 ${statusConf.bg}`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-zinc-200/80 dark:border-zinc-800 shrink-0 ${statusConf.bg}`}
             >
               <div className={`w-1.5 h-1.5 rounded-full ${statusConf.dot}`} />
               <span
@@ -185,14 +185,7 @@ export default function UserProfilePage() {
                 {statusConf.label}
               </span>
             </div>
-            <Button
-              onClick={() => setIsEditOpen(true)}
-              className="rounded-full font-bold text-xs px-5 shadow-2xs"
-            >
-              <Edit3 className="mr-1.5 h-3.5 w-3.5" />
-              {isOwnProfile ? "Edit My Profile" : "Edit Profile"}
-            </Button>
-          </>
+          </div>
         }
       />
 
@@ -208,6 +201,8 @@ export default function UserProfilePage() {
           roleConf={roleConf}
           statusConf={statusConf}
           getInitials={getInitials}
+          onEditAvatar={() => setIsEditOpen(true)}
+          onEditProfile={() => setIsEditOpen(true)}
         />
 
         {/* Stats Grid */}

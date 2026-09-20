@@ -329,6 +329,8 @@ export async function deleteMessage(user, messageId, requestMetadata = {}) {
     message.deletedAt = new Date();
     message.deletedBy = user._id;
     await message.save({ validateBeforeSave: false });
+    await MessagePin.deleteMany({ messageId: message._id });
+    emitMutation(conversation._id, "message_unpinned", { messageId: String(message._id), pinned: false });
   }
   if (!own) await AuditLog.create({ actor: user._id, action: "message.moderated_deleted", metadata: { messageId: message._id, conversationId: conversation._id }, ip: requestMetadata.ip, userAgent: requestMetadata.userAgent });
   const result = await populatedMessage(message._id);
@@ -371,8 +373,10 @@ export async function getPinnedMessages(user, conversationId) {
   const conversation = await Conversation.findById(conversationId).lean();
   if (!canAccessConversation(user, conversation)) throw Object.assign(new Error("Conversation access denied."), { status: 403 });
   const pins = await MessagePin.find({ conversationId }).sort({ pinnedAt: -1 }).limit(30).lean();
-  const messages = await Message.find({ _id: { $in: pins.map((pin) => pin.messageId) } }).populate("senderId", senderFields).lean();
-  return pins.map((pin) => ({ ...pin, message: messages.find((message) => String(message._id) === String(pin.messageId)) || null }));
+  const messages = await Message.find({ _id: { $in: pins.map((pin) => pin.messageId) }, deletedAt: null }).populate("senderId", senderFields).lean();
+  return pins
+    .map((pin) => ({ ...pin, message: messages.find((message) => String(message._id) === String(pin.messageId)) || null }))
+    .filter((pin) => pin.message && !pin.message.deletedAt);
 }
 
 export async function searchMessages(user, query = {}) {

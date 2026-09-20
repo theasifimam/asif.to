@@ -31,6 +31,8 @@ import AssetBulkActions from "./browser/AssetBulkActions";
 import AssetCardGrid from "./browser/AssetCardGrid";
 import AssetContextMenu from "./browser/AssetContextMenu";
 import AssetTableListView from "./browser/AssetTableListView";
+import AssetCategoryGrid from "./browser/AssetCategoryGrid";
+import AssetCategoryHeader from "./browser/AssetCategoryHeader";
 import AssetTransferBar from "./browser/AssetTransferBar";
 import {
   childrenFromDirectorySource,
@@ -57,7 +59,7 @@ const FILE_URL_DEFAULTS = {
   usage: "all",
   uploader: "all",
   date: "all",
-  view: "card",
+  view: "list",
 };
 
 const MONGODB_ID = /^[a-f\d]{24}$/i;
@@ -77,7 +79,7 @@ function normalizeFileUrlState(state) {
     usage: optionOrDefault(state.usage, USAGE_LABELS, "all"),
     uploader: String(state.uploader || "all"),
     date: optionOrDefault(state.date, DATE_LABELS, "all"),
-    view: viewVal === "list" || viewVal === "table" ? "list" : "card",
+    view: viewVal === "card" ? "card" : "list",
   };
 }
 
@@ -275,6 +277,7 @@ export default function AssetBrowser({
     });
     setPagination(data.pagination || { page: 1, pages: 1, total: 0 });
     if (folderResponse) setFolders(unwrap(folderResponse, []));
+    else if (isFirstPage) setFolders([]);
     if (uploaderResponse?.success) setUploaders(unwrap(uploaderResponse, []));
     if (isFirstPage) setLoading(false);
     else setLoadingMore(false);
@@ -1153,11 +1156,34 @@ export default function AssetBrowser({
               pickerMode && "min-h-0 pb-0",
             )}
             data-scroll-ignore
-            aria-busy={loading || loadingMore || pasting}
           >
+            {/* Top Category Grid (Shown only on Home view when at root and not searching) */}
+            {!pickerMode && scope === "all" && !currentFolderId && !debouncedSearch && (
+              <AssetCategoryGrid
+                scope={scope}
+                setScope={setScope}
+                currentFolderId={currentFolderId}
+                openFolder={openFolder}
+                onScopeChange={() => {
+                  setCurrentFolderId(null);
+                  setBreadcrumbState({ folderId: null, items: [] });
+                  resetNavigationState();
+                }}
+              />
+            )}
+
+            {/* Dedicated Category Page View Header */}
+            {!pickerMode && scope !== "all" && (
+              <AssetCategoryHeader
+                scope={scope}
+                setScope={setScope}
+                totalItems={pagination.total}
+              />
+            )}
+
           {loading ? (
             view === "card" ? (
-              <div className="grid grid-cols-4 gap-2.5 p-3 sm:gap-3 sm:p-4 sm:grid-cols-5 xl:grid-cols-6">
+              <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 2xl:grid-cols-9 gap-2 p-2 sm:gap-2.5 sm:p-3">
                 {Array.from({ length: 12 }).map((_, index) => (
                   <div
                     key={index}

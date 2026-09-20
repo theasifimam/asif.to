@@ -23,7 +23,7 @@ export default function AdminFormShell({
   actions,
 }) {
   return (
-    <AdminPage size="lg">
+    <AdminPage size="lg" className="pb-36 sm:pb-8">
       <AdminPageHeader
         eyebrow={eyebrow}
         title={title}

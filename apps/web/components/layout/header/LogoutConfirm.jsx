@@ -7,7 +7,7 @@ export default function LogoutConfirm({ isOpen, onClose, onConfirm }) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-200 flex items-center justify-center px-6">
+        <div className="fixed inset-0 z-300 flex items-end sm:items-center justify-center p-0 sm:px-6">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -17,10 +17,10 @@ export default function LogoutConfirm({ isOpen, onClose, onConfirm }) {
           />
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2.5rem] p-10 flex flex-col items-center text-center shadow-2xl border border-zinc-200 dark:border-zinc-800"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 30 }}
+            className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-t-[2.25rem] sm:rounded-[2.5rem] p-6 sm:p-10 flex flex-col items-center text-center shadow-2xl border-t sm:border border-zinc-200 dark:border-zinc-800"
           >
             <div className="w-16 h-16 rounded-3xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center text-red-500 mb-8">
               <LogOut size={28} />

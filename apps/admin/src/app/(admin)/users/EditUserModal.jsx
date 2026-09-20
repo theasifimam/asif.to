@@ -98,9 +98,12 @@ export function EditUserModal({ isOpen, onClose, user, onUpdate, submitting }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[92vh] overflow-hidden rounded-3xl border-zinc-200 bg-white p-0 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950 sm:max-w-2xl">
-        <form onSubmit={submit} className="flex max-h-[85vh] flex-col">
-          <div className="border-b border-zinc-100 px-6 py-6 dark:border-zinc-900 sm:px-8">
+      <DialogContent className="max-h-[calc(100dvh-2.5rem)] w-[calc(100%-1.5rem)] overflow-hidden rounded-3xl border-zinc-200 bg-white p-0 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950 sm:max-w-2xl">
+        <form
+          onSubmit={submit}
+          className="flex h-full max-h-[calc(100dvh-2.5rem)] min-h-0 flex-col overflow-hidden"
+        >
+          <div className="shrink-0 border-b border-zinc-100 px-4 py-5 dark:border-zinc-900 sm:px-8 sm:py-6">
             <DialogHeader className="text-left">
               <DialogTitle className="text-xl font-black tracking-tight text-zinc-950 dark:text-white">
                 Update user
@@ -112,37 +115,55 @@ export function EditUserModal({ isOpen, onClose, user, onUpdate, submitting }) {
             </DialogHeader>
           </div>
 
-          <div className="overflow-y-auto px-6 py-6 sm:px-8">
-            <section className="flex flex-col gap-5 border-b border-zinc-100 pb-6 dark:border-zinc-900 sm:flex-row sm:items-center">
-              <Avatar className="h-20 w-20 border border-zinc-200 dark:border-zinc-800">
-                <AvatarImage
-                  src={preview}
-                  alt={form.fullName}
-                  className="object-cover"
-                />
-                <AvatarFallback className="text-lg font-black">
-                  {initials(form.fullName)}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <input
-                  ref={inputRef}
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  className="hidden"
-                  onChange={chooseAvatar}
-                />
-                <Button
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-8 sm:py-6">
+            <section className="mb-6 rounded-2xl border border-zinc-100 bg-zinc-50/60 p-4 dark:border-zinc-800/80 dark:bg-zinc-900/40 sm:p-5">
+              <input
+                ref={inputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={chooseAvatar}
+              />
+              <div className="flex items-center gap-4 sm:gap-5">
+                <button
                   type="button"
-                  variant="outline"
-                  size="sm"
                   onClick={() => inputRef.current?.click()}
+                  className="group relative h-16 w-16 shrink-0 cursor-pointer rounded-full focus:outline-none sm:h-18 sm:w-18"
+                  title="Click to change profile picture"
+                  aria-label="Change profile picture"
                 >
-                  <Camera className="mr-2 h-4 w-4" /> Change photo
-                </Button>
-                <p className="mt-2 text-xs text-zinc-400">
-                  PNG, JPG or WebP. Keep files reasonably small.
-                </p>
+                  <Avatar className="h-full w-full rounded-full border border-zinc-200/80 ring-2 ring-transparent transition-all group-hover:ring-blue-500 dark:border-zinc-700/80">
+                    <AvatarImage
+                      src={preview}
+                      alt={form.fullName}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="text-base font-black">
+                      {initials(form.fullName)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 backdrop-blur-xs">
+                    <Camera className="h-4 w-4" />
+                    <span className="mt-0.5 text-[8px] font-bold uppercase tracking-wider">
+                      Upload
+                    </span>
+                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 flex h-5.5 w-5.5 items-center justify-center rounded-full bg-blue-600 text-white shadow-xs ring-2 ring-white transition-transform group-hover:scale-110 dark:ring-zinc-900">
+                    <Camera className="h-3 w-3" />
+                  </div>
+                </button>
+
+                <div className="flex flex-col justify-center">
+                  <h3 className="text-sm font-black text-zinc-900 dark:text-white">
+                    Profile Photo
+                  </h3>
+                  <p className="mt-0.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                    Click avatar to upload a new picture.
+                  </p>
+                  <p className="mt-1 text-[11px] text-zinc-400 dark:text-zinc-500">
+                    PNG, JPG or WebP up to 5MB.
+                  </p>
+                </div>
               </div>
             </section>
 
@@ -244,7 +265,7 @@ export function EditUserModal({ isOpen, onClose, user, onUpdate, submitting }) {
             </section>
           </div>
 
-          <DialogFooter className="flex-row border-t border-zinc-100 bg-zinc-50/70 sm:px-4 px-2 py-2 dark:border-zinc-900 dark:bg-zinc-900/40 rounded-full mb-2 lg:mb-0 mx-2">
+          <DialogFooter className="shrink-0 grid grid-cols-2 border-t border-zinc-100 bg-zinc-50/70 px-2 py-2 dark:border-zinc-900 dark:bg-zinc-900/40 sm:flex sm:px-4 sm:py-3">
             <Button
               type="button"
               variant="outline"
@@ -260,7 +281,7 @@ export function EditUserModal({ isOpen, onClose, user, onUpdate, submitting }) {
               }
               className="flex-1 md:flex-none"
             >
-              {submitting ? "Saving…" : "Save changes"}
+              {submitting ? "Saving…" : "Save"}
             </Button>
           </DialogFooter>
         </form>

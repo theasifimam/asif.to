@@ -69,18 +69,18 @@ export default function CardFolderItem({
               : "border-zinc-200/80 hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg dark:border-zinc-800",
         )}
       >
-        <div className="aspect-4/3 flex items-center justify-center overflow-hidden bg-blue-50/50 dark:bg-blue-950/20">
-          <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600 shadow-xs transition-transform duration-300 group-hover:scale-110 dark:bg-blue-500/20 dark:text-blue-400">
-            <Folder className="h-7 w-7 sm:h-8 sm:w-8 fill-blue-500/20" />
+        <div className="aspect-square sm:aspect-4/3 flex items-center justify-center overflow-hidden bg-blue-50/50 dark:bg-blue-950/20">
+          <div className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 shadow-xs transition-transform duration-300 group-hover:scale-110 dark:bg-blue-500/20 dark:text-blue-400">
+            <Folder className="h-5 w-5 sm:h-6 sm:w-6 fill-blue-500/20" />
           </div>
         </div>
-        <div className="flex items-center gap-2 p-2.5 sm:p-3">
+        <div className="flex items-center gap-1.5 p-2">
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-xs font-black text-zinc-900 dark:text-white">
+            <h3 className="truncate text-[11px] sm:text-xs font-extrabold text-zinc-900 dark:text-white">
               {folder.name}
             </h3>
-            <p className="mt-0.5 truncate text-[10px] font-medium text-zinc-400">
-              Folder · {folder.assetCount} files · {folder.childCount} folders
+            <p className="mt-0.5 truncate text-[9px] sm:text-[10px] font-medium text-zinc-400">
+              Folder · {folder.assetCount} files
             </p>
           </div>
           {!pickerMode && canManage && (

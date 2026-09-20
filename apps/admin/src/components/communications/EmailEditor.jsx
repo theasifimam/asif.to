@@ -14,10 +14,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { hasPermission } from "@/lib/permissions";
 import SelectField, { readable } from "./SelectField";
 import { communicationApi as api, errorMessage } from "./api";
+
 export const inputClass =
-  "w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 dark:border-zinc-700";
+  "flex h-11 w-full rounded-2xl border border-zinc-200/90 bg-white px-4 py-2 text-sm text-zinc-900 shadow-none transition-[border-color,box-shadow,background-color] duration-200 outline-none placeholder:text-zinc-400 focus-visible:border-blue-500 focus-visible:ring-3 focus-visible:ring-blue-500/10 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus-visible:border-blue-500 dark:focus-visible:ring-blue-500/15";
+
 export const cardClass =
   "rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 sm:p-6";
+
 export function Field({ label, hint, children }) {
   return (
     <div className="space-y-2">
@@ -29,6 +32,7 @@ export function Field({ label, hint, children }) {
     </div>
   );
 }
+
 export function AudiencePicker({ topics, value, onChange }) {
   return (
     <div className="space-y-3">
@@ -76,6 +80,7 @@ export function AudiencePicker({ topics, value, onChange }) {
     </div>
   );
 }
+
 const empty = {
   name: "",
   subject: "",
@@ -85,6 +90,7 @@ const empty = {
   topics: [],
   stream: "MARKETING",
 };
+
 export default function EmailEditor({ section, initial, onSaved }) {
   const { user } = useAuth(),
     router = useRouter();
@@ -99,12 +105,15 @@ export default function EmailEditor({ section, initial, onSaved }) {
     [review, setReview] = useState(false),
     [when, setWhen] = useState("now"),
     [date, setDate] = useState("");
+
   const campaign = section === "campaigns",
     editable = !campaign || !draft.status || draft.status === "DRAFT";
+
   const canEdit =
       !campaign || hasPermission(user, "communications.campaigns.create"),
     canSend = hasPermission(user, "communications.campaigns.send");
   const change = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
+
   useEffect(() => {
     Promise.all([api("/public/topics"), api("/templates")])
       .then(([a, b]) => {
@@ -113,6 +122,7 @@ export default function EmailEditor({ section, initial, onSaved }) {
       })
       .catch((e) => setError(errorMessage(e)));
   }, []);
+
   useEffect(() => {
     if (!campaign) return;
     const abort = new AbortController();
@@ -125,6 +135,7 @@ export default function EmailEditor({ section, initial, onSaved }) {
       .catch(() => {});
     return () => abort.abort();
   }, [campaign, draft.topics]);
+
   const run = async (fn, message) => {
     if (busy) return;
     setBusy(true);
@@ -141,6 +152,7 @@ export default function EmailEditor({ section, initial, onSaved }) {
       setBusy(false);
     }
   };
+
   const save = async (navigate = true) => {
     const saved = await run(
       () =>
@@ -158,6 +170,7 @@ export default function EmailEditor({ section, initial, onSaved }) {
     }
     return saved;
   };
+
   const operation = async (action) => {
     const updated = await run(
       () =>
@@ -183,6 +196,7 @@ export default function EmailEditor({ section, initial, onSaved }) {
       }
     }
   };
+
   return (
     <div className="mx-auto max-w-3xl space-y-4">
       {error && (

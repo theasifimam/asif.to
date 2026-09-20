@@ -35,6 +35,7 @@ import { getImageUrl } from "@/lib/config";
 // ASIF_COURSE_LEARNING_FLOW_V1:header-progress-import
 import ContinueCoursePill from "@/components/layout/ContinueCoursePill";
 import SiteAnnouncement from "@/components/layout/SiteAnnouncement";
+import { useSiteBranding } from "@/components/providers/SiteBrandingProvider";
 
 const LogoutConfirm = dynamic(() => import("./header/LogoutConfirm"), {
   ssr: false,
@@ -42,6 +43,7 @@ const LogoutConfirm = dynamic(() => import("./header/LogoutConfirm"), {
 
 export default function Header() {
   const pathname = usePathname();
+  const branding = useSiteBranding();
   const { data: oauthSession, status: oauthStatus } = useSession();
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
@@ -156,20 +158,17 @@ export default function Header() {
               <Link href="/" className="flex items-center gap-2.5 group">
                 <div className="relative">
                   <img
-                    src="/logo.png"
-                    alt="asif.to logo"
+                    src={branding.logoUrl || "/logo.png"}
+                    alt={`${branding.title || "asif.to"} logo`}
                     className="w-8 h-8 rounded-xl object-contain group-hover:scale-105 transition-transform"
                   />
                 </div>
                 <div className="flex flex-col">
                   <span className="font-outfit font-black text-lg sm:text-xl tracking-tight text-foreground leading-none">
-                    asif
-                    <span className="text-blue-600 dark:text-blue-400">
-                      .to
-                    </span>
+                    {branding.title || "asif.to"}
                   </span>
                   <span className="text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 hidden xs:block -mt-0.5">
-                    Tutorials
+                    {branding.tagline || "Tutorials"}
                   </span>
                 </div>
               </Link>

@@ -45,12 +45,12 @@ export default function AuthModal({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="fixed inset-0 bg-black/50 dark:bg-black/75 backdrop-blur-md z-200"
+                className="fixed inset-0 bg-black/50 dark:bg-black/75 backdrop-blur-md z-300"
               />
             </Dialog.Overlay>
 
             <Dialog.Content asChild>
-              <div className="fixed inset-0 z-201 flex items-end sm:items-center justify-center pointer-events-none p-0 sm:p-4">
+              <div className="fixed inset-0 z-301 flex items-end sm:items-center justify-center pointer-events-none p-0 sm:p-4">
                 <motion.div
                   drag={isMobile ? "y" : false}
                   dragConstraints={{ top: 0, bottom: 0 }}

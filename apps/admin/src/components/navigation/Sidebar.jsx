@@ -15,6 +15,7 @@ export default function Sidebar({
   avatarUrl,
   navItems,
   setIsLogoutDialogOpen,
+  branding,
 }) {
   return (
     <motion.aside
@@ -50,15 +51,14 @@ export default function Sidebar({
         >
           <Link href="/dashboard" className="flex items-center gap-2.5 group">
             <img
-              src="/logo.png"
-              alt="asif.to logo"
+              src={branding?.logoUrl || "/logo.png"}
+              alt={`${branding?.title || "asif.to"} logo`}
               className="w-8 h-8 rounded-xl object-contain shrink-0 group-hover:scale-105 transition-transform"
             />
             {!isCollapsed && (
               <div className="flex items-center gap-2">
                 <span className="font-outfit font-black text-xl tracking-tight text-zinc-950 dark:text-white">
-                  asif
-                  <span className="text-blue-600 dark:text-blue-400">.to</span>
+                  asif<span className="text-blue-600 dark:text-blue-400">.to</span>
                 </span>
                 <span className="rounded-full border border-zinc-200/80 bg-zinc-50/80 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.16em] text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-400">
                   Admin

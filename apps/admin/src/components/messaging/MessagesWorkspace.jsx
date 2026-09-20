@@ -578,6 +578,9 @@ export default function MessagesPage() {
             : item,
         ),
       );
+      if (selected?._id) {
+        loadPins(selected._id);
+      }
     } else {
       setError(result.error || "Unable to delete message.");
     }

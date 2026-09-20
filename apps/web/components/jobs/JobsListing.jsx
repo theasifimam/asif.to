@@ -2,6 +2,7 @@ import Link from "next/link";
 import MobileJobsFilters from "./MobileJobsFilters";
 import JobResults from "./JobResults";
 import JobAlertButton from "./JobAlertButton";
+import JobSubscriptions from "./JobSubscriptions";
 import { fetchJobs, fetchJobTaxonomy } from "@/lib/jobs";
 import {
   Briefcase,
@@ -183,9 +184,11 @@ export default async function JobsListing({
         </div>
       </section>
 
+      <JobSubscriptions />
+
       {/* Main Jobs Listing & Filters Grid */}
       <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-4 sm:px-6 sm:py-6 lg:grid-cols-[300px_1fr] lg:py-8 min-w-0 overflow-x-clip">
-        <aside className="min-w-0 max-w-full lg:sticky lg:top-24 lg:self-start">
+        <aside className="min-w-0 max-w-full lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100dvh-6.5rem)] lg:overflow-y-auto scrollbar-none pr-0.5">
           <MobileJobsFilters
             values={searchParams}
             taxonomy={taxonomy}

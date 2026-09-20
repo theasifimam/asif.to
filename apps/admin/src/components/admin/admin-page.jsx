@@ -61,9 +61,9 @@ export function AdminPageHeader({
         <div
           data-admin-page-actions
           className={cn(
-            "-mx-4 flex w-[calc(100%+2rem)] flex-nowrap items-center justify-start gap-2 overflow-x-auto px-4 pb-1 scrollbar-none *:shrink-0 *:w-auto sm:mx-0 sm:w-full sm:flex-wrap sm:items-center sm:justify-end sm:gap-2.5 sm:px-0 sm:pb-0",
+            "flex w-full flex-wrap items-center justify-start gap-2 py-1 sm:justify-end sm:gap-2.5 sm:py-0",
             stickyActions &&
-              "sticky top-16 z-30 py-2 bg-[#f3f4f6]/92 dark:bg-[#09090b]/92 backdrop-blur-xl transition-all",
+              "sticky top-16 z-30 bg-[#f3f4f6]/92 dark:bg-[#09090b]/92 backdrop-blur-xl transition-all",
           )}
         >
           {actions}

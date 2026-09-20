@@ -15,6 +15,8 @@ import { AuthPromptProvider } from "@/components/auth/AuthPromptProvider";
 import AdSenseProvider from "@/components/ads/AdSenseProvider";
 import MonetizationProvider from "@/components/ads/MonetizationProvider";
 import { getRuntimeMonetizationConfig } from "@/lib/ads/runtimeConfig";
+import { getSiteSetting } from "@/lib/publicContent";
+import { SiteBrandingProvider } from "@/components/providers/SiteBrandingProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -26,7 +28,7 @@ const outfit = Outfit({
   subsets: ["latin"],
 });
 
-export const metadata = {
+const baseMetadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://asif.to"),
   title: {
     default:
@@ -73,6 +75,18 @@ export const metadata = {
   },
 };
 
+export async function generateMetadata() {
+  const branding = await getSiteSetting("public");
+  if (!branding) return baseMetadata;
+  return {
+    ...baseMetadata,
+    title: { ...baseMetadata.title, default: branding.title ? `${branding.title}${branding.tagline ? ` — ${branding.tagline}` : ""}` : baseMetadata.title.default },
+    description: branding.description || baseMetadata.description,
+    icons: { icon: branding.faviconUrl || branding.logoUrl || "/logo.png" },
+    openGraph: { ...baseMetadata.openGraph, title: branding.title || baseMetadata.openGraph.title, description: branding.description || baseMetadata.openGraph.description, siteName: branding.title || baseMetadata.openGraph.siteName, ...(branding.logoUrl ? { images: [branding.logoUrl] } : {}) },
+  };
+}
+
 export const viewport = {
   width: "device-width",
   initialScale: 1,
@@ -83,6 +97,7 @@ export const viewport = {
 export default async function RootLayout({ children, modal }) {
   const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   const monetizationConfig = await getRuntimeMonetizationConfig();
+  const branding = await getSiteSetting("public");
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -133,7 +148,7 @@ export default async function RootLayout({ children, modal }) {
                           </Suspense>
                         </>
                       )}
-                      {children}
+                      <SiteBrandingProvider value={branding}>{children}</SiteBrandingProvider>
                       {modal}
                       <FloatingPlayground />
                       <BottomNav />

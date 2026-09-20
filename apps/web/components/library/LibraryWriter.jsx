@@ -8,38 +8,157 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useGetMyLibraryQuery, useCreateEntryMutation, useUpdateEntryMutation } from "@/lib/api/libraryApi";
-import { ArrowLeft, ChevronDown, Lock, Save, ShieldAlert, X } from "lucide-react";
+import {
+  useGetMyLibraryQuery,
+  useCreateEntryMutation,
+  useUpdateEntryMutation,
+} from "@/lib/api/libraryApi";
+import {
+  ArrowLeft,
+  ChevronDown,
+  Lock,
+  Save,
+  ShieldAlert,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 
-const TYPES = [["note","Note"],["cheatsheet","Cheatsheet"],["code_snippet","Code Snippet"],["debug_fix","Debug / Fix"],["command","Command"],["setup_guide","Setup Guide"],["interview_note","Interview Note"],["template","Template"],["mini_article","Mini Article"],["tip","Tip / TIL"]];
-const TEMPLATES = { note:"## What I want to remember\n\n## Details\n\n## References\n", code_snippet:"## What this solves\n\n## Language / Technology\n\n## Code\n```js\n\n```\n\n## How to use it\n\n## Notes\n", debug_fix:"## Problem\n\n## Error message\n\n## Cause\n\n## Solution\n\n## Fixed code\n```\n\n```\n\n## Things to remember\n", command:"## Command\n```bash\n\n```\n\n## Purpose\n\n## Example\n\n## Explanation\n\n## Warning / Notes\n", setup_guide:"## Goal\n\n## Prerequisites\n\n## Steps\n\n## Configuration\n\n## Common issues\n\n## Verification\n", interview_note:"## Question\n\n## Short answer\n\n## Detailed explanation\n\n## Example\n\n## Key points to remember\n", cheatsheet:"## Quick reference\n\n## Syntax / commands\n\n## Examples\n\n## Important notes\n", tip:"## What I learned\n\n## Example\n\n## Why it matters\n", template:"## Use this template for\n\n## Template\n\n## Notes\n", mini_article:"## Introduction\n\n## Main idea\n\n## Example\n\n## Takeaway\n" };
-const blank = (type) => ({ title: "", content: TEMPLATES[type] || TEMPLATES.note, tags: "", visibility: "private", collectionId: "", seoTitle: "", seoDescription: "", canonicalUrl: "" });
+const TYPES = [
+  ["note", "Note"],
+  ["cheatsheet", "Cheatsheet"],
+  ["code_snippet", "Code Snippet"],
+  ["debug_fix", "Debug / Fix"],
+  ["command", "Command"],
+  ["setup_guide", "Setup Guide"],
+  ["interview_note", "Interview Note"],
+  ["template", "Template"],
+  ["mini_article", "Mini Article"],
+  ["tip", "Tip / TIL"],
+];
+const TEMPLATES = {
+  note: "## What I want to remember\n\n## Details\n\n## References\n",
+  code_snippet:
+    "## What this solves\n\n## Language / Technology\n\n## Code\n```js\n\n```\n\n## How to use it\n\n## Notes\n",
+  debug_fix:
+    "## Problem\n\n## Error message\n\n## Cause\n\n## Solution\n\n## Fixed code\n```\n\n```\n\n## Things to remember\n",
+  command:
+    "## Command\n```bash\n\n```\n\n## Purpose\n\n## Example\n\n## Explanation\n\n## Warning / Notes\n",
+  setup_guide:
+    "## Goal\n\n## Prerequisites\n\n## Steps\n\n## Configuration\n\n## Common issues\n\n## Verification\n",
+  interview_note:
+    "## Question\n\n## Short answer\n\n## Detailed explanation\n\n## Example\n\n## Key points to remember\n",
+  cheatsheet:
+    "## Quick reference\n\n## Syntax / commands\n\n## Examples\n\n## Important notes\n",
+  tip: "## What I learned\n\n## Example\n\n## Why it matters\n",
+  template: "## Use this template for\n\n## Template\n\n## Notes\n",
+  mini_article:
+    "## Introduction\n\n## Main idea\n\n## Example\n\n## Takeaway\n",
+};
+const blank = (type) => ({
+  title: "",
+  content: TEMPLATES[type] || TEMPLATES.note,
+  tags: "",
+  visibility: "private",
+  collectionId: "",
+  seoTitle: "",
+  seoDescription: "",
+  canonicalUrl: "",
+});
 
-export default function LibraryWriter({ entryId = null, initialType = "note" }) {
-  const router = useRouter(); const requestedType = initialType;
-  const { data, isLoading } = useGetMyLibraryQuery(); const [createEntry, createState] = useCreateEntryMutation(); const [updateEntry, updateState] = useUpdateEntryMutation();
-  const [type, setType] = useState(requestedType); const [form, setForm] = useState(blank(requestedType)); const [showSeo, setShowSeo] = useState(false); const [showPublishConfirm, setShowPublishConfirm] = useState(false); const [saving, setSaving] = useState(false);
-  const entry = useMemo(() => data?.data?.entries?.find((item) => item._id === entryId), [data, entryId]);
-  useEffect(() => { if (entry) { setType(entry.type); setForm({ ...entry, tags: entry.tags?.join(", ") || "", collectionId: entry.collectionId || "" }); } }, [entry]);
-  const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
-  const chooseType = (next) => { setType(next); if (!form.title) update("content", TEMPLATES[next] || TEMPLATES.note); };
-  const saveEntry = async (publishConfirmed = false) => { setSaving(true); try { if (entryId) await updateEntry({ id: entryId, ...form, type, publishConfirmed }).unwrap(); else await createEntry({ ...form, type, publishConfirmed }).unwrap(); toast.success(entryId ? "Knowledge updated" : "Saved privately in your library"); router.push("/library"); } catch (error) { toast.error(error?.data?.message || "Unable to save this knowledge"); } finally { setSaving(false); } };
-  const submit = async (event) => { event.preventDefault(); if (form.visibility === "public") { setShowPublishConfirm(true); return; } await saveEntry(false); };
-  if (isLoading && entryId) return <><Header/><main className="mx-auto max-w-5xl px-4 pt-32 text-zinc-500">Loading your writing space…</main></>;
+export default function LibraryWriter({
+  entryId = null,
+  initialType = "note",
+}) {
+  const router = useRouter();
+  const requestedType = initialType;
+  const { data, isLoading } = useGetMyLibraryQuery();
+  const [createEntry, createState] = useCreateEntryMutation();
+  const [updateEntry, updateState] = useUpdateEntryMutation();
+  const [type, setType] = useState(requestedType);
+  const [form, setForm] = useState(blank(requestedType));
+  const [showSeo, setShowSeo] = useState(false);
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const entry = useMemo(
+    () => data?.data?.entries?.find((item) => item._id === entryId),
+    [data, entryId],
+  );
+  useEffect(() => {
+    if (entry) {
+      setType(entry.type);
+      setForm({
+        ...entry,
+        tags: entry.tags?.join(", ") || "",
+        collectionId: entry.collectionId || "",
+      });
+    }
+  }, [entry]);
+  const update = (key, value) =>
+    setForm((current) => ({ ...current, [key]: value }));
+  const chooseType = (next) => {
+    setType(next);
+    if (!form.title) update("content", TEMPLATES[next] || TEMPLATES.note);
+  };
+  const saveEntry = async (publishConfirmed = false) => {
+    setSaving(true);
+    try {
+      if (entryId)
+        await updateEntry({
+          id: entryId,
+          ...form,
+          type,
+          publishConfirmed,
+        }).unwrap();
+      else await createEntry({ ...form, type, publishConfirmed }).unwrap();
+      toast.success(
+        entryId ? "Knowledge updated" : "Saved privately in your library",
+      );
+      router.push("/library");
+    } catch (error) {
+      toast.error(error?.data?.message || "Unable to save this knowledge");
+    } finally {
+      setSaving(false);
+    }
+  };
+  const submit = async (event) => {
+    event.preventDefault();
+    if (form.visibility === "public") {
+      setShowPublishConfirm(true);
+      return;
+    }
+    await saveEntry(false);
+  };
+  if (isLoading && entryId)
+    return (
+      <>
+        <Header />
+        <main className="mx-auto max-w-5xl px-4 pt-32 text-zinc-500">
+          Loading your writing space…
+        </main>
+      </>
+    );
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
       <Header />
       <main className="mx-auto max-w-6xl px-4 pb-20 pt-24 sm:px-6">
         <div className="mb-6 flex items-center justify-between gap-3">
-          <Button type="button" variant="ghost" onClick={() => router.push("/library")}>
-            <ArrowLeft size={17} />Back to library
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => router.push("/library")}
+          >
+            <ArrowLeft size={17} />
+            Back to library
           </Button>
           <div className="flex items-center gap-2 text-xs font-semibold text-zinc-500">
-            <Lock size={14} className="text-emerald-600" />Saved privately by default
+            <Lock size={14} className="text-emerald-600" />
+            Saved privately by default
           </div>
         </div>
-        <form onSubmit={submit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <form
+          onSubmit={submit}
+          className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]"
+        >
           <section className="min-w-0 rounded-4xl bg-white p-5 shadow-sm dark:bg-zinc-900 sm:p-8">
             <div className="mb-6">
               <p className="text-xs font-black uppercase tracking-widest text-blue-600">
@@ -49,7 +168,8 @@ export default function LibraryWriter({ entryId = null, initialType = "note" }) 
                 Write something your future self will thank you for.
               </h1>
               <p className="mt-2 text-sm text-zinc-500">
-                Use the guide as a starting point. Edit, remove, or rearrange anything.
+                Use the guide as a starting point. Edit, remove, or rearrange
+                anything.
               </p>
             </div>
             <div className="space-y-2">
@@ -95,7 +215,9 @@ export default function LibraryWriter({ entryId = null, initialType = "note" }) 
                   onChange={(event) => update("tags", event.target.value)}
                   placeholder="react, debugging, nextjs"
                 />
-                <p className="text-xs text-zinc-400">Separate tags with commas.</p>
+                <p className="text-xs text-zinc-400">
+                  Separate tags with commas.
+                </p>
               </div>
             </div>
             <div className="rounded-3xl bg-white p-5 shadow-sm dark:bg-zinc-900">
@@ -111,7 +233,8 @@ export default function LibraryWriter({ entryId = null, initialType = "note" }) 
                 <option value="public">Public — shareable and indexable</option>
               </select>
               <p className="mt-2 text-xs leading-5 text-zinc-500">
-                Private content never appears in public APIs, search, metadata, feeds, or sitemap.
+                Private content never appears in public APIs, search, metadata,
+                feeds, or sitemap.
               </p>
             </div>
             <div className="rounded-3xl bg-white p-5 shadow-sm dark:bg-zinc-900">
@@ -121,12 +244,16 @@ export default function LibraryWriter({ entryId = null, initialType = "note" }) 
                 className="flex w-full items-center justify-between text-left text-sm font-bold"
               >
                 Optional SEO settings
-                <ChevronDown size={16} className={showSeo ? "rotate-180" : ""} />
+                <ChevronDown
+                  size={16}
+                  className={showSeo ? "rotate-180" : ""}
+                />
               </button>
               {showSeo && (
                 <div className="mt-4 space-y-3">
                   <p className="text-xs leading-5 text-zinc-500">
-                    Only public entries may be indexed. Defaults are generated automatically.
+                    Only public entries may be indexed. Defaults are generated
+                    automatically.
                   </p>
                   <Input
                     value={form.seoTitle}
@@ -136,12 +263,16 @@ export default function LibraryWriter({ entryId = null, initialType = "note" }) 
                   <Textarea
                     rows={3}
                     value={form.seoDescription}
-                    onChange={(event) => update("seoDescription", event.target.value)}
+                    onChange={(event) =>
+                      update("seoDescription", event.target.value)
+                    }
                     placeholder="Meta description"
                   />
                   <Input
                     value={form.canonicalUrl}
-                    onChange={(event) => update("canonicalUrl", event.target.value)}
+                    onChange={(event) =>
+                      update("canonicalUrl", event.target.value)
+                    }
                     placeholder="Canonical URL (optional)"
                   />
                 </div>
@@ -150,7 +281,9 @@ export default function LibraryWriter({ entryId = null, initialType = "note" }) 
             <Button
               type="submit"
               className="w-full"
-              disabled={saving || createState.isLoading || updateState.isLoading}
+              disabled={
+                saving || createState.isLoading || updateState.isLoading
+              }
             >
               <Save size={16} />
               {entryId ? "Save changes" : "Save privately"}
@@ -160,12 +293,12 @@ export default function LibraryWriter({ entryId = null, initialType = "note" }) 
       </main>
       <Footer />
       {showPublishConfirm && (
-        <div className="fixed inset-0 z-80 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
+        <div className="fixed inset-0 z-300 flex items-end sm:items-center justify-center bg-black/70 p-0 sm:p-4 backdrop-blur-md">
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="publish-warning-title"
-            className="relative w-full max-w-110 overflow-hidden rounded-[28px] border border-zinc-800/80 bg-zinc-950 p-7 text-left text-zinc-100 shadow-2xl sm:p-8"
+            className="relative w-full max-w-110 overflow-hidden rounded-t-[2.25rem] sm:rounded-[28px] border-t sm:border border-zinc-800/80 bg-zinc-950 p-6 sm:p-8 text-left text-zinc-100 shadow-2xl animate-in slide-in-from-bottom-6 sm:slide-in-from-bottom-0 duration-200"
           >
             <button
               type="button"
@@ -189,11 +322,13 @@ export default function LibraryWriter({ entryId = null, initialType = "note" }) 
                 Make this public?
               </h2>
               <p className="mt-1.5 text-xs font-medium leading-relaxed text-zinc-400">
-                Anyone on the internet will be able to view, share, copy and index this content.
+                Anyone on the internet will be able to view, share, copy and
+                index this content.
               </p>
             </div>
             <div className="mt-4 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-3.5 text-xs font-medium leading-5 text-zinc-400">
-              Make sure it does not contain passwords, API keys, private URLs, personal information, client data or confidential code.
+              Make sure it does not contain passwords, API keys, private URLs,
+              personal information, client data or confidential code.
             </div>
             <div className="mt-8 flex items-center justify-end gap-3 pt-3 border-t border-zinc-800/80">
               <Button

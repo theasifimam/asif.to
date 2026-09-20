@@ -46,39 +46,6 @@ export function useProfileSettingsForm() {
   );
   const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
 
-  // Accordion open/collapse states
-  const [openSections, setOpenSections] = useState({
-    profile: true,
-    socials: true,
-    notifications: false,
-    privacy: false,
-    security: false,
-  });
-
-  const toggleSection = (key) => {
-    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const expandAll = () => {
-    setOpenSections({
-      profile: true,
-      socials: true,
-      notifications: true,
-      privacy: true,
-      security: true,
-    });
-  };
-
-  const collapseAll = () => {
-    setOpenSections({
-      profile: false,
-      socials: false,
-      notifications: false,
-      privacy: false,
-      security: false,
-    });
-  };
-
   const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -186,10 +153,6 @@ export function useProfileSettingsForm() {
     profileRes,
     profileLoading,
     isUpdating,
-    openSections,
-    toggleSection,
-    expandAll,
-    collapseAll,
     formData,
     setFormData,
     handleInputChange,

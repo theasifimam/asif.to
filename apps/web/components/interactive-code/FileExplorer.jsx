@@ -40,18 +40,36 @@ import {
   X,
 } from "lucide-react";
 import {
-  SandpackCodeEditor, SandpackPreview, SandpackProvider, useSandpack,
+  SandpackCodeEditor,
+  SandpackPreview,
+  SandpackProvider,
+  useSandpack,
 } from "@codesandbox/sandpack-react";
 import BetterConsole from "./BetterConsole";
 import {
-  executeCurrentFiles, normalizeFiles, VSCODE_DARK_THEME, VSCODE_LIGHT_THEME,
+  executeCurrentFiles,
+  normalizeFiles,
+  VSCODE_DARK_THEME,
+  VSCODE_LIGHT_THEME,
 } from "./sandpackConfig";
 import { sandpackTemplateFor } from "@/lib/playground/config";
 import {
-  decodeShareState, encodeShareState, explainError, formatSource, RECENT_PRACTICE_KEY, storageKey, unsupportedFeedback,
+  decodeShareState,
+  encodeShareState,
+  explainError,
+  formatSource,
+  RECENT_PRACTICE_KEY,
+  storageKey,
+  unsupportedFeedback,
 } from "@/lib/playground/client";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 function FileExplorer({ isDark = true, onFileSelect }) {
@@ -120,12 +138,15 @@ function FileExplorer({ isDark = true, onFileSelect }) {
   };
   const handleMove = (sourcePath, targetFolder) => {
     if (!sourcePath || !targetFolder) return;
-    if (targetFolder !== "/" && sourcePath.startsWith(`${targetFolder}/`)) return;
+    if (targetFolder !== "/" && sourcePath.startsWith(`${targetFolder}/`))
+      return;
     const name = sourcePath.split("/").filter(Boolean).pop();
     const newPath = `${targetFolder === "/" ? "" : targetFolder}/${name}`;
     if (sourcePath === newPath) return;
     if (sandpack.files[newPath]) {
-      setError(`Cannot move: A file named ${name} already exists in that folder.`);
+      setError(
+        `Cannot move: A file named ${name} already exists in that folder.`,
+      );
       return;
     }
     const sourceCode = sandpack.files[sourcePath]?.code || "";
@@ -223,13 +244,17 @@ function FileExplorer({ isDark = true, onFileSelect }) {
   return (
     <aside
       className={`flex h-full min-h-0 flex-col border-r transition-colors ${
-        isDark ? "border-zinc-800/80 bg-[#141416]" : "border-zinc-200/90 bg-white"
+        isDark
+          ? "border-zinc-800/80 bg-[#141416]"
+          : "border-zinc-200/90 bg-white"
       }`}
       aria-label="Project file explorer"
     >
       <div
         className={`flex h-10 items-center justify-between border-b px-2.5 ${
-          isDark ? "border-zinc-800/80 bg-[#121214]" : "border-zinc-200/90 bg-zinc-50"
+          isDark
+            ? "border-zinc-800/80 bg-[#121214]"
+            : "border-zinc-200/90 bg-zinc-50"
         }`}
       >
         <span
@@ -323,9 +348,11 @@ function FileExplorer({ isDark = true, onFileSelect }) {
           )}
         </div>
       )}
-      <div 
+      <div
         className="min-h-0 flex-1 overflow-y-auto p-1.5 space-y-0.5"
-        onDragOver={(e) => { e.preventDefault(); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+        }}
         onDrop={(e) => {
           e.preventDefault();
           const source = e.dataTransfer.getData("text/plain");
@@ -346,7 +373,10 @@ function FileExplorer({ isDark = true, onFileSelect }) {
                   isDark ? "hover:bg-zinc-800/70" : "hover:bg-zinc-100"
                 }`}
                 style={{ paddingLeft: `${depth * 12 + 4}px` }}
-                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
                 onDrop={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -431,10 +461,12 @@ function FileExplorer({ isDark = true, onFileSelect }) {
           }
           const isActive = sandpack.activeFile === entry.path;
           return (
-              <div
+            <div
               key={entry.path}
               draggable
-              onDragStart={(e) => { e.dataTransfer.setData("text/plain", entry.path); }}
+              onDragStart={(e) => {
+                e.dataTransfer.setData("text/plain", entry.path);
+              }}
               className={`group flex items-center gap-1 pr-1 rounded-lg transition-colors ${
                 isActive
                   ? isDark
@@ -486,23 +518,29 @@ function FileExplorer({ isDark = true, onFileSelect }) {
                     align="end"
                     className={`w-48 p-1 shadow-2xl backdrop-blur-md rounded-xl ${
                       isDark
-                        ? "!bg-[#18181b] !border-zinc-800 !text-zinc-100 shadow-black/80"
-                        : "!bg-white !border-zinc-200 !text-zinc-900 shadow-zinc-400/40"
+                        ? "bg-[#18181b]! border-zinc-800!1 text-zinc-100! shadow-black/80"
+                        : "bg-white! border-zinc-200! text-zinc-900! shadow-zinc-400/40"
                     }`}
                   >
                     <DropdownMenuItem
                       onClick={() => handleSetEntryPoint(entry.path)}
                       className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold transition ${
-                        isDark ? "hover:!bg-zinc-800 focus:!bg-zinc-800" : "hover:!bg-zinc-100 focus:!bg-zinc-100"
+                        isDark
+                          ? "hover:bg-zinc-800! focus:bg-zinc-800!"
+                          : "hover:bg-zinc-100! focus:bg-zinc-100!"
                       }`}
                     >
                       <Play className="h-3.5 w-3.5" /> Set as Main / Run
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator className={isDark ? "!bg-zinc-800" : "!bg-zinc-200"} />
+                    <DropdownMenuSeparator
+                      className={isDark ? "bg-zinc-800!" : "bg-zinc-200!"}
+                    />
                     <DropdownMenuItem
                       onClick={() => beginRename(entry.path)}
                       className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold transition ${
-                        isDark ? "hover:!bg-zinc-800 focus:!bg-zinc-800" : "hover:!bg-zinc-100 focus:!bg-zinc-100"
+                        isDark
+                          ? "hover:bg-zinc-800! focus:bg-zinc-800!"
+                          : "hover:bg-zinc-100! focus:bg-zinc-100!"
                       }`}
                     >
                       <Pencil className="h-3.5 w-3.5" /> Rename
@@ -510,7 +548,9 @@ function FileExplorer({ isDark = true, onFileSelect }) {
                     <DropdownMenuItem
                       onClick={() => handleDuplicate(entry.path)}
                       className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold transition ${
-                        isDark ? "hover:!bg-zinc-800 focus:!bg-zinc-800" : "hover:!bg-zinc-100 focus:!bg-zinc-100"
+                        isDark
+                          ? "hover:bg-zinc-800! focus:bg-zinc-800!"
+                          : "hover:bg-zinc-100! focus:bg-zinc-100!"
                       }`}
                     >
                       <Copy className="h-3.5 w-3.5" /> Duplicate
@@ -518,19 +558,23 @@ function FileExplorer({ isDark = true, onFileSelect }) {
                     <DropdownMenuItem
                       onClick={() => handleCopyPath(entry.path)}
                       className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold transition ${
-                        isDark ? "hover:!bg-zinc-800 focus:!bg-zinc-800" : "hover:!bg-zinc-100 focus:!bg-zinc-100"
+                        isDark
+                          ? "hover:bg-zinc-800! focus:bg-zinc-800!"
+                          : "hover:bg-zinc-100! focus:bg-zinc-100!"
                       }`}
                     >
                       <ExternalLink className="h-3.5 w-3.5" /> Copy Path
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator className={isDark ? "!bg-zinc-800" : "!bg-zinc-200"} />
+                    <DropdownMenuSeparator
+                      className={isDark ? "bg-zinc-800!" : "bg-zinc-200!"}
+                    />
                     <DropdownMenuItem
                       onClick={() =>
                         files.length === 1
                           ? setError("A project must keep at least one file.")
                           : setDeleteTarget({ type: "file", path: entry.path })
                       }
-                      className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold text-red-500 hover:!bg-red-500/10 focus:!bg-red-500/10 focus:!text-red-500 transition"
+                      className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold text-red-500 hover:bg-red-500/10! focus:bg-red-500/10! focus:text-red-500! transition"
                     >
                       <Trash2 className="h-3.5 w-3.5" /> Delete
                     </DropdownMenuItem>
@@ -552,13 +596,13 @@ function FileExplorer({ isDark = true, onFileSelect }) {
       )}
       {deleteTarget && (
         <div
-          className="fixed inset-0 z-100 flex items-center justify-center bg-black/70 p-4"
+          className="fixed inset-0 z-300 flex items-end sm:items-center justify-center bg-black/70 p-0 sm:p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-file-title"
         >
           <div
-            className={`w-full max-w-sm rounded-3xl border p-6 shadow-2xl ${
+            className={`w-full max-w-sm rounded-t-3xl sm:rounded-3xl border-t sm:border p-6 shadow-2xl animate-in slide-in-from-bottom-6 sm:slide-in-from-bottom-0 duration-200 ${
               isDark
                 ? "border-zinc-800 bg-[#18181b] text-white shadow-black/80"
                 : "border-zinc-200 bg-white text-zinc-900 shadow-zinc-400/40"
@@ -567,7 +611,10 @@ function FileExplorer({ isDark = true, onFileSelect }) {
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-red-500/10 text-red-500">
               <Trash2 className="h-5 w-5" />
             </div>
-            <h3 id="delete-file-title" className="mt-4 text-base font-black font-outfit">
+            <h3
+              id="delete-file-title"
+              className="mt-4 text-base font-black font-outfit"
+            >
               Delete {deleteTarget.type}?
             </h3>
             <p
@@ -609,6 +656,5 @@ function FileExplorer({ isDark = true, onFileSelect }) {
     </aside>
   );
 }
-
 
 export default FileExplorer;

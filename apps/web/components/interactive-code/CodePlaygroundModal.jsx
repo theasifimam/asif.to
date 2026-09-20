@@ -57,12 +57,15 @@ export function runnableLanguage(language = "javascript", code = "") {
   if (looksLikeNext) return "nextjs";
 
   const looksLikeReact =
-    /\b(import\s+.*from\s+["']react|use(State|Effect|Ref|Context|Reducer|Memo|Callback)|<[A-Z][\w.]*|className=|style=\{\{|return\s*\(?\s*<[a-z]+)/i.test(code);
+    /\b(import\s+.*from\s+["']react|use(State|Effect|Ref|Context|Reducer|Memo|Callback)|<[A-Z][\w.]*|className=|style=\{\{|return\s*\(?\s*<[a-z]+)/i.test(
+      code,
+    );
   if (["js", "javascript"].includes(cleanLanguage) && looksLikeReact) {
     return "react";
   }
-  
-  const looksLikeHtml = /^\s*(<!doctype html>|<html|<body|<\/?div|<\/?h[1-6])/i.test(code);
+
+  const looksLikeHtml =
+    /^\s*(<!doctype html>|<html|<body|<\/?div|<\/?h[1-6])/i.test(code);
   if (["js", "javascript", ""].includes(cleanLanguage) && looksLikeHtml) {
     return "html";
   }
@@ -76,7 +79,7 @@ export function runnableLanguage(language = "javascript", code = "") {
   if (looksLikeReact) return "react";
   if (looksLikeHtml) return "html";
   if (looksLikeCss) return "css";
-  
+
   return "javascript";
 }
 
@@ -114,7 +117,7 @@ export default function CodePlaygroundModal({
 
   return (
     <div
-      className="fixed inset-0 z-100 flex flex-col bg-zinc-950/80 p-2 backdrop-blur-sm sm:p-5"
+      className="fixed inset-0 z-300 flex flex-col bg-zinc-950/80 p-2 backdrop-blur-sm sm:p-5"
       role="dialog"
       aria-modal="true"
       aria-label={`Run ${title || "code snippet"}`}
@@ -126,11 +129,21 @@ export default function CodePlaygroundModal({
               <Play className="h-4 w-4 fill-current" />
             </span>
             <div className="min-w-0">
-              <p className="truncate text-sm font-black text-zinc-900 dark:text-white">{title || "Interactive code"}</p>
-              <p className="text-[11px] font-semibold text-zinc-500">Edit the code, press Run, and inspect the output</p>
+              <p className="truncate text-sm font-black text-zinc-900 dark:text-white">
+                {title || "Interactive code"}
+              </p>
+              <p className="text-[11px] font-semibold text-zinc-500">
+                Edit the code, press Run, and inspect the output
+              </p>
             </div>
           </div>
-          <button type="button" onClick={onClose} className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition hover:bg-red-500/10 hover:text-red-500 dark:bg-zinc-800 dark:text-zinc-300" aria-label="Close interactive editor" title="Close editor (Esc)">
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 transition hover:bg-red-500/10 hover:text-red-500 dark:bg-zinc-800 dark:text-zinc-300"
+            aria-label="Close interactive editor"
+            title="Close editor (Esc)"
+          >
             <X className="h-5 w-5" />
           </button>
         </header>

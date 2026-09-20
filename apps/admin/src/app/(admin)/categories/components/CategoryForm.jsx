@@ -211,50 +211,53 @@ export default function CategoryForm({
         </Link>
       }
       actions={
-        <>
+        <div className="grid grid-cols-2 sm:flex sm:w-auto items-center gap-2 w-full">
           {liveUrl && (
             <Button
               variant="outline"
               asChild
-              className="flex-1 sm:flex-initial"
+              size="sm"
+              className="col-span-1 h-9 text-xs font-semibold sm:h-10 sm:text-sm"
             >
               <a href={liveUrl} target="_blank" rel="noreferrer">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                View Landing
+                <ExternalLink className="mr-1.5 h-3.5 w-3.5 shrink-0 sm:mr-2 sm:h-4 sm:w-4" />
+                <span className="truncate">View Landing</span>
               </a>
             </Button>
           )}
           <Button
             variant="outline"
+            size="sm"
             disabled={saving}
             onClick={() => persist("draft")}
-            className="flex-1 sm:flex-initial"
+            className="col-span-1 h-9 text-xs font-semibold sm:h-10 sm:text-sm"
           >
-            <Save className="mr-2 h-4 w-4" />
-            Save Draft
+            <Save className="mr-1.5 h-3.5 w-3.5 shrink-0 sm:mr-2 sm:h-4 sm:w-4" />
+            <span className="truncate">Save Draft</span>
           </Button>
           <Button
+            size="sm"
             disabled={saving}
             onClick={() => persist("published")}
-            className="w-full sm:w-auto shadow-lg shadow-blue-500/20"
+            className="col-span-2 sm:col-span-1 h-9 text-xs font-semibold sm:h-10 sm:text-sm shadow-lg shadow-blue-500/20"
           >
-            <Send className="mr-2 h-4 w-4" />
-            Publish
+            <Send className="mr-1.5 h-3.5 w-3.5 shrink-0 sm:mr-2 sm:h-4 sm:w-4" />
+            <span className="truncate">Publish</span>
           </Button>
-        </>
+        </div>
       }
     >
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid min-w-0 w-full gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         {/* Main Left Content Column */}
-        <main className="space-y-6">
+        <main className="min-w-0 w-full space-y-6">
           {/* General Details Section */}
           <section className={formSectionClass}>
             <div className="flex items-center gap-2">
-              <FolderTree className="h-5 w-5 text-primary" />
+              <FolderTree className="h-5 w-5 text-primary shrink-0" />
               <h2 className="text-base font-semibold">Category Details &amp; Intro Guide</h2>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="category-name">
                 Category Name <span className="text-rose-500">*</span>
               </Label>
@@ -267,13 +270,13 @@ export default function CategoryForm({
               />
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-3">
+            <div className="space-y-2 min-w-0">
+              <div className="flex flex-wrap items-center justify-between gap-1.5 min-w-0">
                 <Label htmlFor="category-slug">
                   URL Slug <span className="text-rose-500">*</span>
                 </Label>
                 {liveUrl && (
-                  <span className="truncate text-xs text-muted-foreground">
+                  <span className="truncate text-xs font-mono text-muted-foreground max-w-full">
                     /{form.slug || "category-slug"}
                   </span>
                 )}
@@ -286,17 +289,19 @@ export default function CategoryForm({
                 className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60 font-mono text-xs"
               />
               {liveUrl && (
-                <p className="flex items-center gap-1.5 text-xs text-zinc-500 pt-1 min-w-0">
-                  <Globe className="h-3.5 w-3.5 text-blue-500 shrink-0" />
-                  <span className="shrink-0">Frontend URL:</span>
-                  <code className="font-mono text-blue-600 dark:text-blue-400 break-all min-w-0">
+                <div className="flex flex-wrap items-center gap-1.5 text-xs text-zinc-500 pt-1 min-w-0 overflow-hidden">
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <Globe className="h-3.5 w-3.5 text-blue-500 shrink-0" />
+                    <span className="font-semibold text-zinc-600 dark:text-zinc-400">Frontend URL:</span>
+                  </div>
+                  <code className="font-mono text-blue-600 dark:text-blue-400 break-all text-[11px] min-w-0 max-w-full">
                     {liveUrl}
                   </code>
-                </p>
+                </div>
               )}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="category-description">Short Description / Subtitle</Label>
               <Textarea
                 id="category-description"
@@ -308,7 +313,7 @@ export default function CategoryForm({
               />
             </div>
 
-            <div className="space-y-2 pt-2">
+            <div className="space-y-2 pt-2 min-w-0">
               <Label>Landing Page Rich Guide</Label>
               <p className="text-xs text-muted-foreground">
                 Write comprehensive introduction notes, cheat-sheets, or study guide content displayed on this category landing page.
@@ -322,7 +327,7 @@ export default function CategoryForm({
           </section>
 
           {/* Search Engine Optimization Section */}
-          <section className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+          <section className={formSectionClass}>
             <div>
               <h2 className="text-base font-semibold">Search Engine Optimization &amp; Social</h2>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -330,7 +335,7 @@ export default function CategoryForm({
               </p>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="category-seo-title">Custom SEO Title</Label>
               <Input
                 id="category-seo-title"
@@ -341,7 +346,7 @@ export default function CategoryForm({
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="category-seo-description">Meta Description</Label>
               <Textarea
                 id="category-seo-description"
@@ -353,7 +358,7 @@ export default function CategoryForm({
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="category-keywords">Keywords (comma separated)</Label>
               <Input
                 id="category-keywords"
@@ -364,7 +369,7 @@ export default function CategoryForm({
               />
             </div>
 
-            <div>
+            <div className="min-w-0 w-full">
               <CanonicalUrlInput
                 basePrefix={selectedCourseSlug ? `https://asif.to/${selectedCourseSlug}/interview-questions` : "https://asif.to/interview-questions"}
                 value={form.canonicalUrl}
@@ -373,7 +378,7 @@ export default function CategoryForm({
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="category-og-image">OG Social Image URL</Label>
               <Input
                 id="category-og-image"
@@ -384,7 +389,7 @@ export default function CategoryForm({
               />
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 pt-2">
+            <div className="grid gap-4 sm:grid-cols-2 pt-2 min-w-0">
               <div className="flex items-center justify-between rounded-2xl border border-zinc-200/80 bg-zinc-50/60 p-4 dark:border-zinc-800/80 dark:bg-zinc-900/40">
                 <div>
                   <p className="text-xs font-bold text-zinc-900 dark:text-white">
@@ -418,7 +423,7 @@ export default function CategoryForm({
           </section>
 
           {/* Related Content & Cross-Promotion */}
-          <section className="space-y-5 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+          <section className={formSectionClass}>
             <div>
               <h2 className="text-base font-semibold">Related Content &amp; Cross-Promotion</h2>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -427,7 +432,7 @@ export default function CategoryForm({
             </div>
 
             {/* Featured Chapters */}
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label>Featured Chapters / Lessons</Label>
               {courseChapters.length > 0 ? (
                 <div className="max-h-56 overflow-y-auto space-y-1 rounded-2xl border border-zinc-200/80 bg-zinc-50/60 p-3 dark:border-zinc-800/80 dark:bg-zinc-900/40">
@@ -449,7 +454,7 @@ export default function CategoryForm({
                           }}
                           className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
                         />
-                        <span>
+                        <span className="truncate">
                           {ch.order ?? idx + 1}. {ch.title}
                         </span>
                       </label>
@@ -464,7 +469,7 @@ export default function CategoryForm({
             </div>
 
             {/* Related Courses */}
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label>Related Courses</Label>
               <div className="max-h-48 overflow-y-auto space-y-1 rounded-2xl border border-zinc-200/80 bg-zinc-50/60 p-3 dark:border-zinc-800/80 dark:bg-zinc-900/40">
                 {courses
@@ -487,7 +492,7 @@ export default function CategoryForm({
                           }}
                           className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
                         />
-                        <span>{c.title}</span>
+                        <span className="truncate">{c.title}</span>
                       </label>
                     );
                   })}
@@ -497,15 +502,15 @@ export default function CategoryForm({
         </main>
 
         {/* Right Sidebar */}
-        <aside className="space-y-6">
+        <aside className="min-w-0 w-full space-y-6">
           {/* Status & Taxonomy Assignment */}
           <section className={formSectionClass}>
             <div className="flex items-center gap-2">
-              <Layers className="h-5 w-5 text-primary" />
+              <Layers className="h-5 w-5 text-primary shrink-0" />
               <h2 className="text-base font-semibold">Publishing &amp; Taxonomy</h2>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="category-status">Status</Label>
               <Select
                 value={form.status}
@@ -521,7 +526,7 @@ export default function CategoryForm({
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="category-course">Associated Course</Label>
               <Select
                 value={form.course}
@@ -552,7 +557,7 @@ export default function CategoryForm({
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="category-order">Display Sort Order</Label>
               <Input
                 id="category-order"
@@ -565,9 +570,9 @@ export default function CategoryForm({
           </section>
 
           {/* Quick Actions Card */}
-          <section className="space-y-4 rounded-4xl border border-zinc-200/60 bg-white p-5 dark:border-zinc-800/60 dark:bg-zinc-950">
+          <section className={formSectionClass}>
             <h2 className="text-base font-semibold">Actions</h2>
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <Button
                 type="button"
                 disabled={saving}
@@ -596,12 +601,12 @@ export default function CategoryForm({
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
+        isOpen={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
         title="Delete Category?"
         description={`Are you sure you want to delete "${form.name}"? Questions categorized under this category may become unassigned.`}
-        confirmLabel="Delete Category"
-        tone="destructive"
+        confirmText="Delete Category"
+        variant="destructive"
         loading={deleting}
         onConfirm={remove}
       />

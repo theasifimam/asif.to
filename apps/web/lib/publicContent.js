@@ -118,6 +118,10 @@ export const getSeoSetting = cache((path) =>
   fetchPublicData(`/seo-settings/public?path=${encodeURIComponent(path)}`, "SEO setting"),
 );
 
+export const getSiteSetting = cache((site = "public") =>
+  fetchPublicData(`/site-settings/public?site=${encodeURIComponent(site)}`, "site settings"),
+);
+
 export const getRelatedContent = cache(
   ({ type, slug, courseSlug, techId, categorySlug } = {}) => {
     const params = new URLSearchParams();

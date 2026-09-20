@@ -61,12 +61,12 @@ export default function JobDetailSheet({ selection, onClose, onRestoreFocus }) {
       }}
     >
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-200 bg-zinc-950/50 backdrop-blur-sm" />
+        <Dialog.Overlay className="fixed inset-0 z-300 bg-zinc-950/50 backdrop-blur-sm" />
         <Dialog.Content
           onCloseAutoFocus={onRestoreFocus}
           aria-describedby="job-sheet-summary"
           style={sheetStyle}
-          className="fixed inset-x-0 bottom-0 z-201 mx-auto flex max-h-[94dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-[28px] border border-zinc-200 bg-white text-zinc-950 shadow-2xl outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 sm:max-h-[90dvh] sm:rounded-t-4xl motion-safe:animate-[job-sheet-in_420ms_cubic-bezier(0.16,1,0.3,1)]"
+          className="fixed inset-x-0 bottom-0 z-301 mx-auto flex max-h-[94dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-[28px] border border-zinc-200 bg-white text-zinc-950 shadow-2xl outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 sm:max-h-[90dvh] sm:rounded-t-4xl motion-safe:animate-[job-sheet-in_420ms_cubic-bezier(0.16,1,0.3,1)]"
         >
           <div
             className="relative shrink-0 border-b border-zinc-100 px-5 pb-4 pt-3 select-none touch-none cursor-grab active:cursor-grabbing dark:border-zinc-800 sm:px-7"

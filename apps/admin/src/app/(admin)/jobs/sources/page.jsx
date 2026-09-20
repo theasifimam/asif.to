@@ -230,7 +230,7 @@ export default function JobSourcesPage() {
         title="Job Sources"
         description="Configure public ATS feeds, auto-publish rules, synchronization intervals, and inspect each import run."
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:items-center">
             <Button
               variant="outline"
               onClick={() => load()}
@@ -285,8 +285,8 @@ export default function JobSourcesPage() {
                 className="pl-9"
               />
             </div>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <div className="w-40 sm:w-44">
+            <div className="grid grid-cols-1 items-stretch gap-2.5 sm:flex sm:flex-wrap sm:items-center">
+              <div className="w-full sm:w-44">
                 <Select
                   value={provider}
                   onChange={setProvider}
@@ -294,7 +294,7 @@ export default function JobSourcesPage() {
                   labels={{ all: "All providers" }}
                 />
               </div>
-              <div className="w-40 sm:w-44">
+              <div className="w-full sm:w-44">
                 <Select
                   value={sourceState}
                   onChange={setSourceState}
@@ -314,7 +314,7 @@ export default function JobSourcesPage() {
                   }}
                 />
               </div>
-              <ViewToggle view={viewMode} onViewChange={setViewMode} />
+              <div className="justify-self-end sm:justify-self-auto"><ViewToggle view={viewMode} onViewChange={setViewMode} /></div>
             </div>
           </div>
 
@@ -491,14 +491,14 @@ export default function JobSourcesPage() {
         </div>
       ) : (
         /* Card Grid View */
-        <div className="grid gap-1 lg:grid-cols-2">
+        <div className="grid min-w-0 gap-3 sm:gap-4 lg:grid-cols-2">
           {visibleSources.map((source) => (
             <article
               key={source._id}
               className="rounded-4xl border border-zinc-200 bg-white p-5 shadow-xs dark:border-zinc-800 dark:bg-zinc-950"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
+              <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <DatabaseZap className="h-4 w-4 text-blue-600" />
                     <Link
@@ -528,7 +528,7 @@ export default function JobSourcesPage() {
                     · quality {source.qualityThreshold || 90}+
                   </p>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex w-full flex-wrap items-center justify-end gap-1 sm:w-auto">
                   <Button
                     variant="ghost"
                     size="sm"

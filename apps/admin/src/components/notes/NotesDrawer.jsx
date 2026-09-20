@@ -596,7 +596,7 @@ export default function NotesDrawer({ open, onClose, createSignal = 0 }) {
         data-scroll-ignore
         onMouseDown={(event) => event.stopPropagation()}
         onClick={() => setMenuOpen(null)}
-        className="fixed left-2 right-2 bottom-2 z-10000 mx-auto max-w-md flex h-[85vh] max-h-[85vh] flex-col overflow-hidden rounded-4xl border border-zinc-200/90 bg-white/98 shadow-2xl backdrop-blur-2xl animate-in slide-in-from-bottom-5 duration-200 dark:border-zinc-800/90 dark:bg-[#121215]/98 sm:inset-y-0 sm:left-auto sm:right-0 sm:bottom-auto sm:h-auto sm:max-h-none sm:w-110 sm:max-w-none sm:rounded-none sm:border-y-0 sm:border-r-0 sm:border-l sm:bg-zinc-50 dark:sm:bg-[#09090b] sm:slide-in-from-right"
+        className="fixed left-2 right-2 bottom-2 z-10000 mx-auto max-w-md flex h-[85vh] max-h-[85vh] flex-col overflow-hidden rounded-4xl border border-zinc-200/90 bg-white/98 shadow-2xl backdrop-blur-2xl animate-in slide-in-from-bottom-5 duration-200 dark:border-zinc-800/90 dark:bg-[#121215]/98 sm:top-4 sm:bottom-4 sm:right-4 sm:left-auto sm:mx-0 sm:w-110 sm:max-w-none sm:h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-2rem)] sm:rounded-3xl sm:border sm:border-zinc-200/90 dark:sm:border-zinc-800/90 sm:shadow-2xl sm:bg-white/98 dark:sm:bg-[#121215]/98 sm:slide-in-from-right-5"
         style={{
           transform: dragOffset ? `translateY(${dragOffset}px)` : undefined,
           transition: dragging ? "none" : "transform 160ms ease-out",

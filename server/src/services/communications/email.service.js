@@ -3,6 +3,7 @@ import {
   getTransporter,
   getSupportTransporter,
   getSupportSender,
+  getAuthenticatedSender,
 } from "../smtp.provider.js";
 import {
   EmailJob,
@@ -158,7 +159,11 @@ export async function sendLegacyEmail(mail, { stream = "TRANSACTIONAL" } = {}) {
   try {
     const result = await (
       stream === "SUPPORT" ? getSupportTransporter() : getTransporter()
-    ).sendMail({ ...mail, html: brandedEmail({ text: mail.text, stream }) });
+    ).sendMail({
+      ...mail,
+      from: stream === "SUPPORT" ? mail.from : getAuthenticatedSender(),
+      html: mail.html || brandedEmail({ text: mail.text, stream }),
+    });
     if (log)
       await EmailJob.updateOne(
         { _id: log._id },
@@ -204,16 +209,13 @@ export async function deliverJob(job, config, provider) {
   // in the MAIL FROM envelope. Transactional/test mail previously used the
   // database default support@asif.to while authenticating as EMAIL_USER, which
   // results in `553 Sender is not allowed to relay emails`.
-  const sender =
-    job.stream === "SUPPORT"
-      ? getSupportSender(config.senders.SUPPORT)
+  const sender = job.stream === "SUPPORT"
+    ? getSupportSender(config.senders.SUPPORT)
+    : job.stream === "TRANSACTIONAL"
+      ? getAuthenticatedSender()
       : {
           name: "asif.to",
-          address: emailAddress(
-            job.stream === "TRANSACTIONAL" && process.env.EMAIL_USER
-              ? process.env.EMAIL_USER
-              : config.senders[job.stream],
-          ),
+          address: emailAddress(config.senders[job.stream]),
         };
   const from = sender.address;
   let text = job.mail.text;

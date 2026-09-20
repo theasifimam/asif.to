@@ -591,6 +591,11 @@ export const seoSettingsApi = {
   save: (data) => apiPut("/seo-settings", data),
 };
 
+export const siteSettingsApi = {
+  list: () => apiGet("/site-settings"),
+  save: (data) => apiPut("/site-settings", data),
+};
+
 export const playgroundSettingsApi = {
   get: () => apiGet("/playground-settings"),
   save: (data) => apiPut("/playground-settings", data),

@@ -4,11 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
-export default function SettingsHeader({
-  username,
-  onExpandAll,
-  onCollapseAll,
-}) {
+export default function SettingsHeader({ username }) {
   return (
     <div className="flex flex-col gap-3">
       <Link
@@ -32,23 +28,6 @@ export default function SettingsHeader({
           </p>
         </div>
 
-        {/* Quick Accordion Toggles */}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onExpandAll}
-            className="px-3 py-1.5 rounded-full bg-zinc-200/70 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-[11px] font-bold transition-colors cursor-pointer"
-          >
-            Expand all
-          </button>
-          <button
-            type="button"
-            onClick={onCollapseAll}
-            className="px-3 py-1.5 rounded-full bg-zinc-200/70 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-[11px] font-bold transition-colors cursor-pointer"
-          >
-            Collapse all
-          </button>
-        </div>
       </div>
     </div>
   );

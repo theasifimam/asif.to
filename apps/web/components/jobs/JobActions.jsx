@@ -27,7 +27,9 @@ export default function JobActions({ job, layout = "stacked" }) {
     api
       .get("/jobs/me/saved?limit=100")
       .then(({ data }) => {
-        setSaved(Boolean(data?.data?.some((item) => item.job?._id === job._id)));
+        setSaved(
+          Boolean(data?.data?.some((item) => item.job?._id === job._id)),
+        );
       })
       .catch(() => {});
   }, [isAuthenticated, job._id]);
@@ -38,9 +40,13 @@ export default function JobActions({ job, layout = "stacked" }) {
     try {
       const { data } = await api.post(`/jobs/${job._id}/save`);
       setSaved(Boolean(data?.data?.saved));
-      toast.success(data?.data?.saved ? "Job saved" : "Job removed from saved jobs");
+      toast.success(
+        data?.data?.saved ? "Job saved" : "Job removed from saved jobs",
+      );
     } catch (error) {
-      toast.error(error.response?.data?.message || "Unable to update saved jobs");
+      toast.error(
+        error.response?.data?.message || "Unable to update saved jobs",
+      );
     } finally {
       setWorking(false);
     }
@@ -70,12 +76,20 @@ export default function JobActions({ job, layout = "stacked" }) {
           credentials: "omit",
         });
         data = await response.json();
-        if (!response.ok) throw new Error(data.message || "Unable to open the company application page");
+        if (!response.ok)
+          throw new Error(
+            data.message || "Unable to open the company application page",
+          );
       }
-      if (!data?.data?.redirectUrl) throw new Error("Missing application destination");
+      if (!data?.data?.redirectUrl)
+        throw new Error("Missing application destination");
       window.location.assign(data.data.redirectUrl);
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message || "Unable to open the company application page");
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Unable to open the company application page",
+      );
       setWorking(false);
     }
   };
@@ -114,7 +128,8 @@ export default function JobActions({ job, layout = "stacked" }) {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.message || "Application could not be submitted");
+      if (!response.ok)
+        throw new Error(result.message || "Application could not be submitted");
       setShowApplication(false);
       toast.success("Application submitted to the employer");
     } catch (error) {
@@ -141,10 +156,11 @@ export default function JobActions({ job, layout = "stacked" }) {
           <span className="truncate">
             {job.status === "expired"
               ? "Applications closed"
-              : isBar ? "Apply now"
-              : job.applicationType === "external"
-                ? "Apply on company website"
-                : "Apply through asif.to"}
+              : isBar
+                ? "Apply now"
+                : job.applicationType === "external"
+                  ? "Apply on company website"
+                  : "Apply through asif.to"}
           </span>
         </Button>
 
@@ -163,7 +179,9 @@ export default function JobActions({ job, layout = "stacked" }) {
             ) : (
               <Bookmark className="h-4 w-4 shrink-0" />
             )}
-            <span className={isBar ? "hidden sm:inline" : ""}>{saved ? "Saved" : "Save job"}</span>
+            <span className={isBar ? "hidden sm:inline" : ""}>
+              {saved ? "Saved" : "Save job"}
+            </span>
           </Button>
 
           <Button
@@ -179,145 +197,180 @@ export default function JobActions({ job, layout = "stacked" }) {
         </div>
       </div>
 
-      {!isBar && job.applicationType === "external" && job.status !== "expired" && (
-        <p className="mt-2 text-[10px] leading-4 text-zinc-400">
-          You’ll continue to the employer or original source. asif.to records the click but cannot confirm whether you submit there.
-        </p>
-      )}
+      {!isBar &&
+        job.applicationType === "external" &&
+        job.status !== "expired" && (
+          <p className="mt-2 text-[10px] leading-4 text-zinc-400">
+            You’ll continue to the employer or original source. asif.to records
+            the click but cannot confirm whether you submit there.
+          </p>
+        )}
 
       {showApplication && (
         <Dialog.Root open onOpenChange={setShowApplication}>
           <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-150 bg-black/70 backdrop-blur-md" />
-          <Dialog.Content aria-describedby="application-description" className="fixed left-1/2 top-1/2 z-151 max-h-[90dvh] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[28px] border border-zinc-800/80 bg-zinc-950 p-6 text-left text-zinc-100 shadow-2xl sm:p-8">
-            <button
-              type="button"
-              onClick={() => setShowApplication(false)}
-              className="absolute right-5 top-5 rounded-full p-2 text-zinc-500 hover:bg-zinc-900 hover:text-white transition-colors"
-              aria-label="Close"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900 text-blue-400 mb-5">
-              <Send className="h-5 w-5" />
-            </div>
-
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-blue-500">
-                Direct application
-              </p>
-              <Dialog.Title className="mt-1 pr-8 font-outfit text-2xl font-black tracking-tight text-white">
-                Apply for {job.title}
-              </Dialog.Title>
-              <Dialog.Description id="application-description" className="mt-1.5 text-xs font-medium leading-relaxed text-zinc-400">
-                Your details and CV will be stored privately and shared directly with the employer.
-              </Dialog.Description>
-            </div>
-
-            <form onSubmit={submitInternal} className="mt-6 space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="app-fullName" className="text-xs font-bold text-zinc-300" required>
-                  Full name
-                </Label>
-                <Input
-                  id="app-fullName"
-                  name="fullName"
-                  required
-                  maxLength={180}
-                  defaultValue={user?.fullName || user?.name || ""}
-                  placeholder="e.g. Alex Smith"
-                  className="h-11 rounded-2xl border-zinc-800 bg-zinc-900/90 text-sm text-white placeholder:text-zinc-600 focus-visible:border-zinc-600 focus-visible:ring-1 focus-visible:ring-zinc-600"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="app-email" className="text-xs font-bold text-zinc-300" required>
-                  Email
-                </Label>
-                <Input
-                  id="app-email"
-                  name="email"
-                  type="email"
-                  required
-                  maxLength={254}
-                  defaultValue={user?.email || ""}
-                  placeholder="e.g. alex@example.com"
-                  className="h-11 rounded-2xl border-zinc-800 bg-zinc-900/90 text-sm text-white placeholder:text-zinc-600 focus-visible:border-zinc-600 focus-visible:ring-1 focus-visible:ring-zinc-600"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="app-phone" className="text-xs font-bold text-zinc-300" required>
-                  Phone number
-                </Label>
-                <Input
-                  id="app-phone"
-                  name="phone"
-                  type="tel"
-                  required
-                  maxLength={40}
-                  defaultValue={user?.mNumber || ""}
-                  placeholder="+971 50 123 4567"
-                  className="h-11 rounded-2xl border-zinc-800 bg-zinc-900/90 text-sm text-white placeholder:text-zinc-600 focus-visible:border-zinc-600 focus-visible:ring-1 focus-visible:ring-zinc-600"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="app-resume" className="text-xs font-bold text-zinc-300" required>
-                    CV / resume
-                  </Label>
-                  <span className="text-[10px] font-medium text-zinc-500">
-                    PDF, DOC, DOCX · max 8 MB
-                  </span>
-                </div>
-                <Input
-                  id="app-resume"
-                  name="resume"
-                  type="file"
-                  required
-                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                  className="h-auto rounded-2xl border-dashed border-zinc-800 bg-zinc-900/60 p-3 text-xs text-zinc-300 hover:border-zinc-700 file:mr-3 file:rounded-xl file:border-0 file:bg-zinc-800 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-zinc-200"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="app-coverMessage" className="text-xs font-bold text-zinc-300">Cover message</Label>
-                  <span className="text-[10px] font-medium text-zinc-500">optional</span>
-                </div>
-                <Textarea
-                  id="app-coverMessage"
-                  name="coverMessage"
-                  maxLength={5000}
-                  rows={4}
-                  placeholder="Brief note to introduce yourself and why you're a fit..."
-                  className="rounded-2xl border-zinc-800 bg-zinc-900/90 p-3.5 text-sm leading-6 text-white placeholder:text-zinc-600 focus-visible:border-zinc-600 focus-visible:ring-1 focus-visible:ring-zinc-600"
-                />
-              </div>
-
-              <div className="mt-8 flex items-center justify-end gap-3 pt-3 border-t border-zinc-800/80">
-                <Button
+            <Dialog.Overlay className="fixed inset-0 z-300 bg-black/70 backdrop-blur-md" />
+            <div className="fixed inset-0 z-301 flex items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-none">
+              <Dialog.Content
+                aria-describedby="application-description"
+                className="pointer-events-auto max-h-[88dvh] sm:max-h-[90dvh] w-full sm:max-w-xl overflow-y-auto rounded-t-[2.25rem] sm:rounded-[28px] border-t sm:border border-zinc-800/80 bg-zinc-950 p-6 text-left text-zinc-100 shadow-2xl sm:p-8 animate-in slide-in-from-bottom-6 sm:slide-in-from-bottom-0 duration-200 outline-none"
+              >
+                <button
                   type="button"
-                  variant="ghost"
                   onClick={() => setShowApplication(false)}
-                  disabled={working}
-                  className="rounded-full px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors"
+                  className="absolute right-5 top-5 rounded-full p-2 text-zinc-500 hover:bg-zinc-900 hover:text-white transition-colors"
+                  aria-label="Close"
                 >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={working}
-                  loading={working}
-                  className="rounded-full bg-white px-6 py-2.5 text-xs font-bold text-zinc-950 transition-all shadow-sm hover:bg-zinc-200 disabled:opacity-50"
-                >
-                  {working ? "Submitting…" : "Submit application"}
-                </Button>
-              </div>
-            </form>
-          </Dialog.Content>
+                  <X className="h-4 w-4" />
+                </button>
+
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900 text-blue-400 mb-5">
+                  <Send className="h-5 w-5" />
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-blue-500">
+                    Direct application
+                  </p>
+                  <Dialog.Title className="mt-1 pr-8 font-outfit text-2xl font-black tracking-tight text-white">
+                    Apply for {job.title}
+                  </Dialog.Title>
+                  <Dialog.Description
+                    id="application-description"
+                    className="mt-1.5 text-xs font-medium leading-relaxed text-zinc-400"
+                  >
+                    Your details and CV will be stored privately and shared
+                    directly with the employer.
+                  </Dialog.Description>
+                </div>
+
+                <form onSubmit={submitInternal} className="mt-6 space-y-4">
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="app-fullName"
+                      className="text-xs font-bold text-zinc-300"
+                      required
+                    >
+                      Full name
+                    </Label>
+                    <Input
+                      id="app-fullName"
+                      name="fullName"
+                      required
+                      maxLength={180}
+                      defaultValue={user?.fullName || user?.name || ""}
+                      placeholder="e.g. Alex Smith"
+                      className="h-11 rounded-2xl border-zinc-800 bg-zinc-900/90 text-sm text-white placeholder:text-zinc-600 focus-visible:border-zinc-600 focus-visible:ring-1 focus-visible:ring-zinc-600"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="app-email"
+                      className="text-xs font-bold text-zinc-300"
+                      required
+                    >
+                      Email
+                    </Label>
+                    <Input
+                      id="app-email"
+                      name="email"
+                      type="email"
+                      required
+                      maxLength={254}
+                      defaultValue={user?.email || ""}
+                      placeholder="e.g. alex@example.com"
+                      className="h-11 rounded-2xl border-zinc-800 bg-zinc-900/90 text-sm text-white placeholder:text-zinc-600 focus-visible:border-zinc-600 focus-visible:ring-1 focus-visible:ring-zinc-600"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="app-phone"
+                      className="text-xs font-bold text-zinc-300"
+                      required
+                    >
+                      Phone number
+                    </Label>
+                    <Input
+                      id="app-phone"
+                      name="phone"
+                      type="tel"
+                      required
+                      maxLength={40}
+                      defaultValue={user?.mNumber || ""}
+                      placeholder="+971 50 123 4567"
+                      className="h-11 rounded-2xl border-zinc-800 bg-zinc-900/90 text-sm text-white placeholder:text-zinc-600 focus-visible:border-zinc-600 focus-visible:ring-1 focus-visible:ring-zinc-600"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <Label
+                        htmlFor="app-resume"
+                        className="text-xs font-bold text-zinc-300"
+                        required
+                      >
+                        CV / resume
+                      </Label>
+                      <span className="text-[10px] font-medium text-zinc-500">
+                        PDF, DOC, DOCX · max 8 MB
+                      </span>
+                    </div>
+                    <Input
+                      id="app-resume"
+                      name="resume"
+                      type="file"
+                      required
+                      accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      className="h-auto rounded-2xl border-dashed border-zinc-800 bg-zinc-900/60 p-3 text-xs text-zinc-300 hover:border-zinc-700 file:mr-3 file:rounded-xl file:border-0 file:bg-zinc-800 file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-zinc-200"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <Label
+                        htmlFor="app-coverMessage"
+                        className="text-xs font-bold text-zinc-300"
+                      >
+                        Cover message
+                      </Label>
+                      <span className="text-[10px] font-medium text-zinc-500">
+                        optional
+                      </span>
+                    </div>
+                    <Textarea
+                      id="app-coverMessage"
+                      name="coverMessage"
+                      maxLength={5000}
+                      rows={4}
+                      placeholder="Brief note to introduce yourself and why you're a fit..."
+                      className="rounded-2xl border-zinc-800 bg-zinc-900/90 p-3.5 text-sm leading-6 text-white placeholder:text-zinc-600 focus-visible:border-zinc-600 focus-visible:ring-1 focus-visible:ring-zinc-600"
+                    />
+                  </div>
+
+                  <div className="mt-8 flex items-center justify-end gap-3 pt-3 border-t border-zinc-800/80">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setShowApplication(false)}
+                      disabled={working}
+                      className="rounded-full px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={working}
+                      loading={working}
+                      className="rounded-full bg-white px-6 py-2.5 text-xs font-bold text-zinc-950 transition-all shadow-sm hover:bg-zinc-200 disabled:opacity-50"
+                    >
+                      {working ? "Submitting…" : "Submit application"}
+                    </Button>
+                  </div>
+                </form>
+              </Dialog.Content>
+            </div>
           </Dialog.Portal>
         </Dialog.Root>
       )}

@@ -12,6 +12,7 @@ import {
   Facebook,
   Linkedin,
 } from "lucide-react";
+import { useSiteBranding } from "@/components/providers/SiteBrandingProvider";
 
 function WhatsAppIcon({ className = "w-4 h-4" }) {
   return (
@@ -23,6 +24,7 @@ function WhatsAppIcon({ className = "w-4 h-4" }) {
 
 export default function Footer({ containerWidth = "max-w-7xl" }) {
   const [copied, setCopied] = useState(false);
+  const branding = useSiteBranding();
   const pathname = usePathname();
   const hasGlobalBottomNav = !(
     pathname === "/playground" ||
@@ -54,13 +56,12 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
           <div className="flex items-center justify-between gap-4">
             <Link href="/" className="flex items-center gap-2">
               <img
-                src="/logo.png"
-                alt="asif.to"
+                src={branding.logoUrl || "/logo.png"}
+                alt={branding.title || "asif.to"}
                 className="h-8 w-8 rounded-xl object-contain"
               />
               <span className="font-outfit text-lg font-black tracking-tight text-foreground">
-                asif
-                <span className="text-blue-600 dark:text-blue-400">.to</span>
+                {branding.title || "asif.to"}
               </span>
             </Link>
             <a
@@ -99,27 +100,22 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
                 <Link href="/" className="flex items-center gap-2.5 group">
                   <div className="relative">
                     <img
-                      src="/logo.png"
-                      alt="asif.to"
+                      src={branding.logoUrl || "/logo.png"}
+                      alt={branding.title || "asif.to"}
                       className="w-9 h-9 rounded-xl object-contain group-hover:scale-105 transition-transform"
                     />
                   </div>
                   <div className="flex flex-col">
                     <span className="font-outfit font-black text-2xl tracking-tight text-foreground leading-none">
-                      asif
-                      <span className="text-blue-600 dark:text-blue-400">
-                        .to
-                      </span>
+                      {branding.title || "asif.to"}
                     </span>
                     <span className="text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
-                      Coding Tutorials & Cheatsheets
+                      {branding.tagline || "Coding Tutorials & Cheatsheets"}
                     </span>
                   </div>
                 </Link>
                 <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                  Modern step-by-step coding courses, instant syntax
-                  cheatsheets, interactive flashcards, and practice quizzes for
-                  React, Next.js, Express, Node & MongoDB.
+                  {branding.description || "Modern step-by-step coding courses, instant syntax cheatsheets, interactive flashcards, and practice quizzes for React, Next.js, Express, Node & MongoDB."}
                 </p>
 
                 {/* Bookmark & Share CTA Buttons */}
@@ -160,7 +156,7 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
                   </span>
                   <div className="flex items-center gap-2">
                     <a
-                      href="https://instagram.com/theasifto"
+                      href={branding.social?.instagram || "https://instagram.com/theasifto"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-linear-to-tr hover:from-amber-500 hover:via-rose-500 hover:to-purple-600 hover:text-white transition-all shadow-xs"
@@ -169,7 +165,7 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
                       <Instagram className="w-4 h-4" />
                     </a>
                     <a
-                      href="https://facebook.com/theasifto"
+                      href={branding.social?.facebook || "https://facebook.com/theasifto"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-[#1877F2] hover:text-white transition-all shadow-xs"
@@ -178,7 +174,7 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
                       <Facebook className="w-4 h-4" />
                     </a>
                     <a
-                      href="https://linkedin.com/company/asif.to"
+                      href={branding.social?.linkedin || "https://linkedin.com/company/asif.to"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-[#0A66C2] hover:text-white transition-all shadow-xs"
@@ -199,11 +195,11 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
                 </div>
 
                 <a
-                  href="mailto:support@asif.to"
+                  href={`mailto:${branding.supportEmail || "support@asif.to"}`}
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors w-fit pt-0.5"
                 >
                   <Mail className="w-3.5 h-3.5" />
-                  <span>support@asif.to</span>
+                  <span>{branding.supportEmail || "support@asif.to"}</span>
                 </a>
               </div>
 

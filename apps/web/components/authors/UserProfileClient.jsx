@@ -17,7 +17,10 @@ import {
   useUpdateAttemptVisibilityMutation,
 } from "@/lib/api/authApi";
 import { useGetArticlesQuery } from "@/lib/api/articlesApi";
-import { useGetMyLibraryQuery, useGetPublicLibraryQuery } from "@/lib/api/libraryApi";
+import {
+  useGetMyLibraryQuery,
+  useGetPublicLibraryQuery,
+} from "@/lib/api/libraryApi";
 import {
   BookMarked,
   Bookmark,
@@ -107,12 +110,12 @@ export default function UserProfileClient({ username }) {
   // Robust case-insensitive comparison across username, ID, and email
   const isOwnProfile = Boolean(
     (isAuthenticated || session?.user) &&
-      cleanParam &&
-      (activeUsername === cleanParam ||
-        activeUserId === cleanParam ||
-        activeEmail === cleanParam ||
-        (session?.user?.name &&
-          session.user.name.toLowerCase().replace(/\s+/g, "") === cleanParam)),
+    cleanParam &&
+    (activeUsername === cleanParam ||
+      activeUserId === cleanParam ||
+      activeEmail === cleanParam ||
+      (session?.user?.name &&
+        session.user.name.toLowerCase().replace(/\s+/g, "") === cleanParam)),
   );
 
   // If viewing someone else, attempt to fetch their public profile
@@ -158,17 +161,25 @@ export default function UserProfileClient({ username }) {
 
   // Queries
   const { data: savedItemsRes, isLoading: savedItemsLoading } =
-    useGetMySavedItemsQuery(undefined, { skip: !isAuthenticated || !isOwnProfile });
+    useGetMySavedItemsQuery(undefined, {
+      skip: !isAuthenticated || !isOwnProfile,
+    });
   const savedItems = savedItemsRes?.data?.savedItems || [];
 
   const { data: myLibraryRes, isLoading: myLibraryLoading } =
-    useGetMyLibraryQuery(undefined, { skip: !isOwnProfile || !isAuthenticated });
+    useGetMyLibraryQuery(undefined, {
+      skip: !isOwnProfile || !isAuthenticated,
+    });
   const { data: publicLibraryRes, isLoading: publicLibraryLoading } =
     useGetPublicLibraryQuery(cleanParam, { skip: isOwnProfile || !cleanParam });
 
   const libraryData = isOwnProfile
-    ? (myLibraryRes?.data || { entries: [], bookmarks: [], collections: [] })
-    : { entries: publicLibraryRes?.data?.entries || [], bookmarks: [], collections: [] };
+    ? myLibraryRes?.data || { entries: [], bookmarks: [], collections: [] }
+    : {
+        entries: publicLibraryRes?.data?.entries || [],
+        bookmarks: [],
+        collections: [],
+      };
   const libraryEntries = libraryData.entries || [];
   const libraryBookmarks = libraryData.bookmarks || [];
   const libraryCollections = libraryData.collections || [];
@@ -258,7 +269,7 @@ export default function UserProfileClient({ username }) {
   const tabs = isOwnProfile ? allTabs : allTabs.filter((t) => !t.ownOnly);
 
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground transition-colors duration-300 pb-24 sm:pb-12">
+    <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950 text-foreground transition-colors duration-300 pb-24 sm:pb-12 mb-4">
       <Header />
 
       <main className="flex-1 w-full max-w-5xl mx-auto px-1.5 sm:px-6 pt-20 sm:pt-24 flex flex-col gap-6">
@@ -278,7 +289,9 @@ export default function UserProfileClient({ username }) {
               isOwnProfile={isOwnProfile}
               onOpenLogout={() => setIsLogoutModalOpen(true)}
               streak={user?.streak || 0}
-              libraryCount={libraryEntries.length + libraryBookmarks.length || 0}
+              libraryCount={
+                libraryEntries.length + libraryBookmarks.length || 0
+              }
               completedCoursesCount={completedCourses.length || 0}
               certificatesCount={certificates.length || 0}
               onSelectTab={handleTabChange}
@@ -345,8 +358,8 @@ export default function UserProfileClient({ username }) {
 
       {/* Logout Modal Confirmation */}
       {isLogoutModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2.5rem] p-6 sm:p-7 shadow-2xl space-y-4 text-center border border-zinc-100 dark:border-zinc-800">
+        <div className="fixed inset-0 z-300 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-t-[2.25rem] sm:rounded-[2.5rem] p-6 sm:p-7 shadow-2xl space-y-4 text-center border-t sm:border border-zinc-100 dark:border-zinc-800 animate-in slide-in-from-bottom-6 sm:slide-in-from-bottom-0 duration-200">
             <div className="w-12 h-12 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center mx-auto">
               <LogOut className="w-6 h-6" />
             </div>
@@ -355,8 +368,8 @@ export default function UserProfileClient({ username }) {
               Sign Out of asif.to?
             </h3>
             <p className="text-xs text-zinc-500 leading-relaxed font-medium">
-              Are you sure you want to log out? Your saved bookmarks and learning
-              progress will remain safely synced.
+              Are you sure you want to log out? Your saved bookmarks and
+              learning progress will remain safely synced.
             </p>
 
             <div className="flex gap-3 pt-2">
@@ -366,7 +379,7 @@ export default function UserProfileClient({ username }) {
                 className="flex-1 py-3 rounded-full bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-500/25 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isSigningOut ? (
-                  <LogoLoader className="w-4 h-4 "  />
+                  <LogoLoader className="w-4 h-4 " />
                 ) : (
                   "Yes, Sign Out"
                 )}

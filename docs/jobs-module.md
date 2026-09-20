@@ -32,7 +32,20 @@ Those fictional records are clearly marked `isDemo`, use `example.com`, and are 
 Example source registry entry:
 
 ```json
-[{"name":"Example Company","type":"greenhouse","providerOrganizationId":"example-board-token","careersUrl":"https://example.com/careers","enabled":true,"trusted":false,"autoPublish":false,"syncFrequency":"daily","syncIntervalHours":12,"qualityThreshold":90}]
+[
+  {
+    "name": "Example Company",
+    "type": "greenhouse",
+    "providerOrganizationId": "example-board-token",
+    "careersUrl": "https://example.com/careers",
+    "enabled": true,
+    "trusted": false,
+    "autoPublish": false,
+    "syncFrequency": "daily",
+    "syncIntervalHours": 12,
+    "qualityThreshold": 90
+  }
+]
 ```
 
 Do not put credentials in that JSON. The three curated public sources above are registered automatically; no fake production jobs are seeded.

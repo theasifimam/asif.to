@@ -66,24 +66,24 @@ export default function CardFileItem({
           !accepted && "cursor-not-allowed opacity-40",
         )}
       >
-        <div className="aspect-4/3 overflow-hidden bg-zinc-100 dark:bg-zinc-900">
+        <div className="aspect-square sm:aspect-4/3 overflow-hidden bg-zinc-100 dark:bg-zinc-900">
           <AssetThumbnail
             asset={asset}
             className="transition-transform duration-300 group-hover:scale-[1.03]"
           />
         </div>
-        <div className="flex items-center gap-2 p-2.5 sm:p-3">
+        <div className="flex items-center gap-1.5 p-2">
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-xs font-black text-zinc-900 dark:text-white">
+            <h3 className="truncate text-[11px] sm:text-xs font-extrabold text-zinc-900 dark:text-white">
               {asset.name}
             </h3>
-            <p className="mt-0.5 truncate text-[10px] font-medium text-zinc-400">
+            <p className="mt-0.5 truncate text-[9px] sm:text-[10px] font-medium text-zinc-400">
               {ASSET_TYPE_LABELS[asset.category]} ·{" "}
               {formatAssetBytes(asset.size)}
             </p>
             <AssetUsageBadge
               usageCount={asset.usageCount}
-              className="mt-1"
+              className="mt-0.5"
             />
           </div>
           {!pickerMode && canManage && (

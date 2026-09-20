@@ -124,8 +124,8 @@ export default function AccountManagementSettings({ user }) {
     (!user?.hasPassword || password.trim().length > 0);
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-3xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
+    <div className="space-y-8 w-full">
+      <section className="w-full">
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
             <Shield size={18} />
@@ -137,7 +137,7 @@ export default function AccountManagementSettings({ user }) {
             </p>
           </div>
         </div>
-        <dl className="mt-6 divide-y divide-zinc-100 rounded-2xl border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+        <dl className="mt-6 divide-y divide-zinc-100 dark:divide-zinc-800/80 border-t border-b border-zinc-100 dark:border-zinc-800/80">
           <AccountRow label="Username" value={`@${user?.username || ""}`} />
           <AccountRow label="Email" value={user?.email || "—"} />
           <AccountRow
@@ -172,7 +172,7 @@ export default function AccountManagementSettings({ user }) {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-red-200 bg-white p-6 dark:border-red-950 dark:bg-zinc-900 sm:p-8">
+      <section className="w-full border-t border-red-100 dark:border-red-950/60 pt-6">
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400">
             <AlertTriangle size={18} />
@@ -209,11 +209,11 @@ export default function AccountManagementSettings({ user }) {
       {/* Security Confirmation Modal */}
       {action && (
         <div
-          className="fixed inset-0 z-120 grid place-items-center bg-black/70 p-4 backdrop-blur-sm overflow-y-auto"
+          className="fixed inset-0 z-300 flex items-end sm:items-center justify-center bg-black/70 p-0 sm:p-4 backdrop-blur-sm overflow-y-auto"
           role="dialog"
           aria-modal="true"
         >
-          <div className="w-full max-w-md rounded-3xl border border-zinc-200 bg-white p-6 sm:p-8 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950 animate-in fade-in zoom-in-95 duration-150 my-8">
+          <div className="w-full max-w-md rounded-t-[2.25rem] sm:rounded-3xl border-t sm:border border-zinc-200 bg-white p-6 sm:p-8 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950 animate-in slide-in-from-bottom-6 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200 my-0 sm:my-8">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-600 dark:bg-red-500/15 dark:text-red-400">
               <AlertTriangle size={24} />
             </div>
@@ -245,7 +245,7 @@ export default function AccountManagementSettings({ user }) {
                   value={confirmation}
                   onChange={(event) => setConfirmation(event.target.value)}
                   placeholder={expected}
-                  className="h-11 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 text-xs font-semibold outline-none focus:border-red-500 dark:border-zinc-700 dark:bg-zinc-900"
+                  className="w-full bg-transparent border-b border-zinc-200 dark:border-zinc-700 rounded-none px-0 py-2.5 text-xs font-semibold outline-none focus:border-red-500 dark:focus:border-red-400 transition-colors text-foreground placeholder:text-zinc-400"
                 />
               </div>
 
@@ -255,22 +255,22 @@ export default function AccountManagementSettings({ user }) {
                   <label className="block text-[11px] font-bold text-zinc-600 dark:text-zinc-300">
                     2. Current Account Password
                   </label>
-                  <div className="relative">
+                  <div className="relative w-full">
                     <input
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                       placeholder="Enter your current password"
-                      className="h-11 w-full rounded-xl border border-zinc-200 bg-zinc-50 pl-9 pr-10 text-xs font-semibold outline-none focus:border-red-500 dark:border-zinc-700 dark:bg-zinc-900"
+                      className="w-full bg-transparent border-b border-zinc-200 dark:border-zinc-700 rounded-none pl-7 pr-8 py-2.5 text-xs font-semibold outline-none focus:border-red-500 dark:focus:border-red-400 transition-colors text-foreground placeholder:text-zinc-400"
                     />
                     <Lock
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 text-zinc-400"
                       size={15}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 cursor-pointer"
+                      className="absolute right-0 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 cursor-pointer"
                     >
                       {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
@@ -282,8 +282,7 @@ export default function AccountManagementSettings({ user }) {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="block text-[11px] font-bold text-zinc-600 dark:text-zinc-300">
-                    {user?.hasPassword ? "3." : "2."} Email
-                    Verification OTP
+                    {user?.hasPassword ? "3." : "2."} Email Verification OTP
                   </label>
                   <button
                     type="button"
@@ -293,7 +292,7 @@ export default function AccountManagementSettings({ user }) {
                   >
                     {sendingOtp ? (
                       <>
-                        <LogoLoader className=" w-3 h-3"  />
+                        <LogoLoader className=" w-3 h-3" />
                         <span>Sending...</span>
                       </>
                     ) : otpCountdown > 0 ? (
@@ -306,7 +305,7 @@ export default function AccountManagementSettings({ user }) {
                     )}
                   </button>
                 </div>
-                <div className="relative">
+                <div className="relative w-full">
                   <input
                     type="text"
                     maxLength={6}
@@ -315,10 +314,10 @@ export default function AccountManagementSettings({ user }) {
                       setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))
                     }
                     placeholder="Enter 6-digit OTP"
-                    className="h-11 w-full rounded-xl border border-zinc-200 bg-zinc-50 pl-9 pr-3 text-xs font-mono font-bold tracking-widest outline-none focus:border-red-500 dark:border-zinc-700 dark:bg-zinc-900"
+                    className="w-full bg-transparent border-b border-zinc-200 dark:border-zinc-700 rounded-none pl-7 pr-3 py-2.5 text-xs font-mono font-bold tracking-widest outline-none focus:border-red-500 dark:focus:border-red-400 transition-colors text-foreground placeholder:text-zinc-400"
                   />
                   <Mail
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 text-zinc-400"
                     size={15}
                   />
                 </div>
@@ -346,7 +345,7 @@ export default function AccountManagementSettings({ user }) {
               >
                 {busy ? (
                   <>
-                    <LogoLoader className=" w-3.5 h-3.5"  />
+                    <LogoLoader className=" w-3.5 h-3.5" />
                     <span>Processing…</span>
                   </>
                 ) : action === "delete" ? (
@@ -365,10 +364,12 @@ export default function AccountManagementSettings({ user }) {
 
 function AccountRow({ label, value, capitalize }) {
   return (
-    <div className="grid gap-1 px-4 py-3 sm:grid-cols-[160px_1fr]">
-      <dt className="text-xs font-semibold text-zinc-400">{label}</dt>
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between py-3.5 px-0 gap-1">
+      <dt className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+        {label}
+      </dt>
       <dd
-        className={`text-xs font-bold text-zinc-700 dark:text-zinc-200 ${capitalize ? "capitalize" : ""}`}
+        className={`text-xs font-bold text-zinc-800 dark:text-zinc-200 ${capitalize ? "capitalize" : ""}`}
       >
         {value}
       </dd>

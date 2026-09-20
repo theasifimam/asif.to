@@ -1,22 +1,16 @@
 "use client";
 
 import React from "react";
-import { ChevronDown, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
 import SettingToggle from "./SettingToggle";
 
 export default function PrivacySection({
-  isOpen,
-  onToggle,
   formData,
   setFormData,
 }) {
   return (
     <div className="transition-colors">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="w-full flex items-center justify-between p-5 sm:p-7 text-left hover:bg-zinc-50/60 dark:hover:bg-zinc-800/30 transition-colors cursor-pointer"
-      >
+      <div className="w-full p-5 text-left sm:p-7">
         <div className="flex items-center gap-3.5">
           <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
             <Eye size={20} />
@@ -43,16 +37,9 @@ export default function PrivacySection({
             </p>
           </div>
         </div>
-        <ChevronDown
-          size={18}
-          className={`text-zinc-400 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        />
-      </button>
+      </div>
 
-      {isOpen && (
-        <div className="p-5 sm:p-7 pt-0 divide-y divide-zinc-100 dark:divide-zinc-800 animate-in fade-in duration-200">
+      <div className="divide-y divide-zinc-100 p-5 pt-0 dark:divide-zinc-800 sm:p-7 sm:pt-0">
           <SettingToggle
             label="Public Profile"
             description="Allow visitors to view your public profile at your @username URL."
@@ -99,7 +86,6 @@ export default function PrivacySection({
             }
           />
         </div>
-      )}
-    </div>
+      </div>
   );
 }

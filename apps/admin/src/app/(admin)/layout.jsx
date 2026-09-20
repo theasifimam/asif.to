@@ -292,24 +292,6 @@ const NAV_ITEMS = [
           { name: "Activity Logs", href: "/users/activity", permission: "users.edit" },
         ],
       },
-      {
-        name: "Communications Overview",
-        href: "/communications",
-        icon: MessageSquare,
-        description: "Customer inbox, email and team collaboration",
-        children: [
-          { name: "Inbox", href: "/communications/inbox", permission: "communications.inbox.read" },
-          { name: "Campaigns", href: "/communications/campaigns", permission: "communications.campaigns.read" },
-          { name: "Subscribers", href: "/communications/subscribers", permission: "communications.subscribers.read" },
-          { name: "Automations", href: "/communications/automations", permission: "communications.automations.manage" },
-          { name: "Transactional", href: "/communications/transactional", permission: "communications.transactional.read" },
-          { name: "Templates", href: "/communications/templates", permission: "communications.templates.manage" },
-          { name: "Team Chat", href: "/communications/team", permission: "messages.view" },
-          { name: "Discussions", href: "/communications/discussions", permission: "messages.view" },
-          { name: "Analytics", href: "/communications/analytics", permission: "communications.analytics.read" },
-          { name: "Settings", href: "/communications/settings", permission: "communications.settings.manage" },
-        ],
-      },
     ],
   },
   {
@@ -412,6 +394,13 @@ const NAV_ITEMS = [
         description: "Meta tags & indexing",
       },
       {
+        name: "Site & Brand",
+        href: "/site-settings",
+        icon: Sliders,
+        permission: "settings.manage",
+        description: "Titles, logos & social profiles",
+      },
+      {
         name: "Code Playground",
         href: "/playground-settings",
         icon: Code2,
@@ -435,8 +424,22 @@ export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isNavVisible, setIsNavVisible] = useState(true);
+  const [branding, setBranding] = useState(null);
   const lastScrollY = React.useRef(0);
   const mainRef = React.useRef(null);
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/site-settings/public?site=admin`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((body) => {
+        if (body?.data) {
+          setBranding(body.data);
+          document.title = body.data.title || document.title;
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -464,7 +467,6 @@ export default function AdminLayout({ children }) {
     const handleScroll = (event) => {
       const target = event?.target;
 
-      // Ignore scroll events originating from inside dialogs, modals, floating docks, or the menu island
       if (
         target &&
         target !== document &&
@@ -494,14 +496,11 @@ export default function AdminLayout({ children }) {
 
           const delta = currentScroll - lastScrollY.current;
 
-          // When at top of page, always show header & navbar
           if (currentScroll <= 20) {
             setIsNavVisible(true);
           } else if (delta > 8) {
-            // Scrolling down on page -> Hide both top header and bottom tab bar
             setIsNavVisible(false);
           } else if (delta < -8) {
-            // Scrolling up on page -> Reveal both top header and bottom tab bar
             setIsNavVisible(true);
           }
 
@@ -543,6 +542,7 @@ export default function AdminLayout({ children }) {
         ? user.avatar
         : `${STORAGE_URL}${user.avatar}`
       : null;
+
   const visibleNavItems = NAV_ITEMS.map((group) => ({
     ...group,
     items: group.items
@@ -562,22 +562,22 @@ export default function AdminLayout({ children }) {
           : undefined,
       })),
   })).filter((group) => group.items.length > 0);
+
   const requiredPermission = permissionForPath(pathname);
   const canViewPage = hasPermission(user, requiredPermission);
-  const isMessagesRoute = pathname?.startsWith("/messages") || pathname?.startsWith("/communications");
+  const isMessagesRoute =
+    pathname?.startsWith("/messages") ||
+    pathname?.startsWith("/communications/inbox") ||
+    pathname?.startsWith("/communications/team");
   const isFilesRoute = pathname?.startsWith("/files");
-  const isFullAppRoute = isMessagesRoute || isFilesRoute;
+  const isFullAppRoute = isMessagesRoute;
 
-  const headerDisplayClass = isMessagesRoute
-    ? "hidden"
-    : isFilesRoute
-    ? "hidden md:flex"
-    : "flex";
+  const headerDisplayClass = isMessagesRoute ? "hidden" : "flex";
 
   const mainPaddingClass = isMessagesRoute
     ? "pt-0 pb-0 flex flex-col h-full overflow-hidden"
     : isFilesRoute
-    ? "pt-0 md:pt-16 pb-0 flex flex-col h-full overflow-hidden"
+    ? "pt-16 pb-20 lg:pb-4 flex flex-col h-full overflow-hidden"
     : "pt-16 pb-24 lg:pb-8";
 
   return (
@@ -593,11 +593,12 @@ export default function AdminLayout({ children }) {
           avatarUrl={avatarUrl}
           navItems={visibleNavItems}
           setIsLogoutDialogOpen={setIsLogoutDialogOpen}
+          branding={branding}
         />
 
         {/* Main Panel */}
         <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
-          {/* Global Minimal Header - Absolute over content for zero layout shift during scroll */}
+          {/* Global Minimal Header */}
           <header
             data-admin-header
             className={`absolute top-0 left-0 right-0 z-40 h-16 shrink-0 items-center justify-between bg-zinc-100/95 backdrop-blur-xl dark:bg-[#09090b]/90 dark:backdrop-blur-xl px-3 transition-all duration-300 ease-out sm:px-6 md:px-8 lg:px-10 ${headerDisplayClass} ${
@@ -607,19 +608,17 @@ export default function AdminLayout({ children }) {
             }`}
           >
             <div className="flex items-center gap-2 md:gap-6">
-              {/* Logo in top header for mobile since sidebar is hidden */}
               <Link
                 href="/dashboard"
                 className="flex items-center gap-2 lg:hidden"
               >
                 <img
-                  src="/logo.png"
+                  src={branding?.logoUrl || "/logo.png"}
                   alt="asif.to logo"
                   className="w-7 h-7 rounded-xl object-contain shrink-0"
                 />
                 <span className="font-outfit font-black text-sm tracking-tight text-zinc-950 dark:text-white leading-none">
-                  asif
-                  <span className="text-blue-600 dark:text-blue-400">.to</span>
+                  asif<span className="text-blue-600 dark:text-blue-400">.to</span>
                 </span>
               </Link>
 
@@ -637,7 +636,6 @@ export default function AdminLayout({ children }) {
 
               <NotesQuickAccess />
 
-              {/* Utility Icon Actions - Hidden on smaller devices */}
               <div className="hidden sm:block">
                 <MessageHeaderButton />
               </div>
@@ -645,7 +643,6 @@ export default function AdminLayout({ children }) {
                 <NotificationCenter />
               </div>
 
-              {/* Subtle Divider */}
               {hasPermission(user, "articles.create") &&
                 pathname !== "/articles/new" &&
                 !pathname.startsWith("/articles/edit/") && (
@@ -660,7 +657,7 @@ export default function AdminLayout({ children }) {
             </div>
           </header>
 
-          {/* Content Viewport with constant top and bottom padding */}
+          {/* Content Viewport */}
           <main
             ref={mainRef}
             data-admin-main
@@ -674,7 +671,7 @@ export default function AdminLayout({ children }) {
             )}
           </main>
 
-          {/* Floating LinkedIn/Instagram-style Docked Messaging Drawer */}
+          {/* Floating Chat Dock */}
           <FloatingChatDock isNavVisible={isNavVisible} />
         </div>
 
@@ -682,7 +679,7 @@ export default function AdminLayout({ children }) {
         <MobileBottomNavbar
           navItems={visibleNavItems}
           user={user}
-          isVisible={!isFullAppRoute}
+          isVisible={!isFullAppRoute && isNavVisible}
         />
 
         {/* Logout Confirmation Dialog */}

@@ -18,7 +18,11 @@ export default function PinnedMessagesBar({
   selected,
   onOpenConversation,
 }) {
-  if (!pins.length) return null;
+  const activePins = pins.filter(
+    (pinItem) => pinItem.message && !pinItem.message.deletedAt,
+  );
+
+  if (!activePins.length) return null;
 
   return (
     <div className="flex shrink-0 items-center gap-2.5 overflow-x-auto border-b border-zinc-100 bg-amber-50/70 px-4 py-2.5 dark:border-zinc-800 dark:bg-amber-500/10">
@@ -26,7 +30,7 @@ export default function PinnedMessagesBar({
       <span className="shrink-0 text-xs font-black uppercase tracking-wider text-amber-700 dark:text-amber-300">
         Pinned
       </span>
-      {pins.map((pinItem) => (
+      {activePins.map((pinItem) => (
         <button
           key={pinItem._id}
           onClick={() =>

@@ -4,6 +4,16 @@ import { emailAddress } from "./communications/policy.js";
 let cachedTransporter = null;
 let cachedSupportTransporter = null;
 
+// SMTP providers such as Zoho only permit the authenticated mailbox (or an
+// explicitly verified alias) in the envelope sender. Keep transactional mail
+// aligned with the mailbox used to authenticate the transporter.
+export function getAuthenticatedSender(name = "asif.to") {
+  if (!process.env.EMAIL_USER) {
+    throw new Error("EMAIL_USER is required to determine the transactional sender.");
+  }
+  return { name, address: emailAddress(process.env.EMAIL_USER) };
+}
+
 export const getTransporter = () => {
   if (cachedTransporter) {
     return cachedTransporter;

@@ -40,6 +40,7 @@ import {
   AdminSearch,
 } from "@/components/admin";
 import { ViewToggle } from "@/components/ui/ViewToggle";
+import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 
 const metrics = [
   ["active", "Active jobs", BriefcaseBusiness, "text-emerald-600"],
@@ -103,6 +104,7 @@ export default function JobsAdminPage() {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("card");
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const load = async (page = pagination.page, overrideLimit = null) => {
     setLoading(true);
@@ -154,6 +156,17 @@ export default function JobsAdminPage() {
     load();
   };
 
+  const remove = (job) => setDeleteTarget(job);
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    const result = await jobsApi.delete(deleteTarget._id);
+    if (!result.success) return toast.error(result.error || "Delete failed");
+    toast.success("Job deleted");
+    setDeleteTarget(null);
+    load();
+  };
+  /* legacy confirmation removed; kept temporarily for diff context
   const remove = async (job) => {
     if (
       !window.confirm(
@@ -166,15 +179,16 @@ export default function JobsAdminPage() {
     toast.success("Job deleted");
     load();
   };
+*/
 
   return (
-    <AdminPage className="space-y-5 py-4 pb-28 sm:pb-8">
+    <AdminPage className="space-y-5 py-4 pb-36 sm:pb-8">
       <AdminPageHeader
         eyebrow="UAE jobs"
         title="Jobs"
         description="Moderate every manual and imported listing, review performance, and control publication individually."
         actions={
-          <div className="flex gap-2">
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto">
             <Link href="/jobs/companies">
               <Button variant="outline">Companies</Button>
             </Link>
@@ -192,7 +206,7 @@ export default function JobsAdminPage() {
         {metrics.map(([key, label, Icon, color]) => (
           <div
             key={key}
-            className="rounded-2xl sm:rounded-3xl border border-zinc-200/80 bg-white p-2.5 sm:p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-950 flex flex-col justify-between"
+            className="rounded-xl sm:rounded-3xl border border-zinc-200/80 bg-white p-3 px-4 sm:p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-950 flex flex-col justify-between"
           >
             <div className="flex items-center justify-between">
               <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${color}`} />
@@ -437,10 +451,10 @@ export default function JobsAdminPage() {
                   size="sm"
                   className="h-10 w-full rounded-full px-3 text-xs font-semibold"
                 >
-                  <SelectValue placeholder="All statuses" />
+                  <SelectValue placeholder="Status: All" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="all">Status: All</SelectItem>
                   {[
                     "draft",
                     "pending",
@@ -463,7 +477,7 @@ export default function JobsAdminPage() {
               onValueChange={(origin) =>
                 setFilters((current) => ({ ...current, origin }))
               }
-              placeholder="All origins"
+              placeholder="Origin: All"
               items={originLabels}
             />
             <AdminSelectFilter
@@ -471,7 +485,7 @@ export default function JobsAdminPage() {
               onValueChange={(importStatus) =>
                 setFilters((current) => ({ ...current, importStatus }))
               }
-              placeholder="All import states"
+              placeholder="Import: All"
               items={importLabels}
             />
             <AdminSelectFilter
@@ -479,7 +493,7 @@ export default function JobsAdminPage() {
               onValueChange={(source) =>
                 setFilters((current) => ({ ...current, source }))
               }
-              placeholder="All sources"
+              placeholder="Source: All"
               items={Object.fromEntries(
                 sources.map((source) => [source._id, source.name]),
               )}
@@ -510,7 +524,7 @@ export default function JobsAdminPage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between sm:justify-end shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-100 dark:border-zinc-800">
+        <div className="flex items-center justify-between sm:justify-end shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-zinc-100 dark:border-zinc-800">
           <span className="text-xs text-zinc-400 sm:hidden font-medium">
             {pagination.totalCount || jobs.length} listings
           </span>
@@ -736,20 +750,20 @@ export default function JobsAdminPage() {
           </div>
         ) : (
           /* Card Grid View */
-          <div className="grid gap-3 sm:gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid w-full min-w-0 max-w-full gap-1 sm:gap-1 lg:gap-1 sm:grid-cols-2 lg:grid-cols-3">
             {jobs.map((job) => (
               <article
                 key={job._id}
-                className={`relative flex flex-col justify-between rounded-2xl sm:rounded-3xl border bg-white p-4 sm:p-5 shadow-xs transition-all dark:bg-zinc-950 ${
+                className={`relative flex min-w-0 w-full max-w-full flex-col justify-between overflow-hidden rounded-2xl sm:rounded-3xl border bg-white p-3.5 sm:p-5 shadow-xs transition-all dark:bg-zinc-950 ${
                   selected.includes(job._id)
                     ? "border-blue-500 ring-2 ring-blue-500/20 dark:border-blue-500"
                     : "border-zinc-200/80 hover:border-zinc-300 dark:border-zinc-800 dark:hover:border-zinc-700"
                 }`}
               >
-                <div className="space-y-3.5">
+                <div className="min-w-0 max-w-full space-y-3.5">
                   {/* Header: Checkbox + Title + Badges */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-2.5 min-w-0">
+                  <div className="flex min-w-0 max-w-full items-start justify-between gap-2">
+                    <div className="flex min-w-0 flex-1 items-start gap-2 sm:gap-2.5">
                       <input
                         type="checkbox"
                         checked={selected.includes(job._id)}
@@ -762,31 +776,33 @@ export default function JobsAdminPage() {
                         }
                         className="mt-1 h-4 w-4 rounded-sm accent-blue-600 shrink-0"
                       />
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <Link
                           href={`/jobs/${job._id}/edit`}
-                          className="font-bold text-sm text-zinc-900 hover:text-blue-600 dark:text-zinc-100 dark:hover:text-blue-400 line-clamp-1 block"
+                          className="font-bold text-sm text-zinc-900 hover:text-blue-600 dark:text-zinc-100 dark:hover:text-blue-400 line-clamp-1 block truncate"
                         >
                           {job.title}
                         </Link>
-                        <div className="mt-0.5 flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-                          <span className="font-semibold text-zinc-800 dark:text-zinc-200 truncate">
+                        <div className="mt-0.5 flex min-w-0 items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
+                          <span className="font-semibold text-zinc-800 dark:text-zinc-200 truncate min-w-0 shrink">
                             {job.companyName}
                           </span>
-                          <span>•</span>
-                          <span className="truncate">{job.location}</span>
+                          <span className="shrink-0">•</span>
+                          <span className="truncate min-w-0 shrink">
+                            {job.location}
+                          </span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1 shrink-0">
+                    <div className="flex flex-col items-end gap-1 shrink-0 ml-1">
                       <span
-                        className={`rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase ${badge[job.status] || ""}`}
+                        className={`rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase whitespace-nowrap shrink-0 ${badge[job.status] || ""}`}
                       >
                         {job.status}
                       </span>
                       {job.featured && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-900/50">
-                          <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-bold text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-900/50 whitespace-nowrap shrink-0">
+                          <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400 shrink-0" />
                           Featured
                         </span>
                       )}
@@ -794,42 +810,42 @@ export default function JobsAdminPage() {
                   </div>
 
                   {/* Metadata Pills */}
-                  <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
-                    <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 font-bold text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300">
+                  <div className="flex flex-wrap items-center gap-1.5 text-[10px] min-w-0 max-w-full">
+                    <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 font-bold text-zinc-600 dark:bg-zinc-900 dark:text-zinc-300 truncate max-w-full">
                       {originLabels[job.creationOrigin] || "Admin Created"}
                     </span>
                     {job.sourceName && (
-                      <span className="rounded-full bg-blue-50 px-2.5 py-0.5 font-bold text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 truncate max-w-35">
+                      <span className="rounded-full bg-blue-50 px-2.5 py-0.5 font-bold text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 truncate max-w-32">
                         {job.sourceName}
                       </span>
                     )}
                     {job.importQualityScore != null && (
-                      <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 font-bold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                      <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 font-bold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 whitespace-nowrap">
                         Score: {job.importQualityScore}/100
                       </span>
                     )}
                     {job.isDemo && (
-                      <span className="rounded-full bg-amber-100 px-2 py-0.5 font-black text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 font-black text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 whitespace-nowrap">
                         DEMO
                       </span>
                     )}
                   </div>
 
                   {/* Metrics Box */}
-                  <div className="grid grid-cols-2 gap-2 rounded-2xl bg-zinc-50/80 p-2.5 dark:bg-zinc-900/60 text-xs">
-                    <div>
-                      <span className="text-[10px] text-zinc-400 uppercase font-bold">
+                  <div className="grid grid-cols-2 gap-2 rounded-2xl bg-zinc-50/80 p-2.5 dark:bg-zinc-900/60 text-xs min-w-0">
+                    <div className="min-w-0">
+                      <span className="text-[10px] text-zinc-400 uppercase font-bold truncate block">
                         Views
                       </span>
-                      <p className="font-bold text-zinc-800 dark:text-zinc-200">
+                      <p className="font-bold text-zinc-800 dark:text-zinc-200 truncate">
                         {job.views || 0}
                       </p>
                     </div>
-                    <div>
-                      <span className="text-[10px] text-zinc-400 uppercase font-bold">
+                    <div className="min-w-0">
+                      <span className="text-[10px] text-zinc-400 uppercase font-bold truncate block">
                         Applies / Clicks
                       </span>
-                      <p className="font-bold text-zinc-800 dark:text-zinc-200">
+                      <p className="font-bold text-zinc-800 dark:text-zinc-200 truncate">
                         {job.applicationCount || 0} / {job.applyClicks || 0}
                       </p>
                     </div>
@@ -837,11 +853,11 @@ export default function JobsAdminPage() {
                 </div>
 
                 {/* Footer: Date & Actions */}
-                <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between text-[11px] text-zinc-400">
-                  <span>
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-1.5 border-t border-zinc-100 pt-3 text-[11px] text-zinc-400 dark:border-zinc-800 min-w-0 max-w-full">
+                  <span className="shrink-0 text-[10px] sm:text-[11px]">
                     Posted {new Date(job.postedAt).toLocaleDateString()}
                   </span>
-                  <div className="flex items-center gap-1">
+                  <div className="ml-auto flex items-center justify-end gap-1 shrink-0 flex-wrap">
                     <a
                       href={`${process.env.NEXT_PUBLIC_WEB_URL || "https://asif.to"}/jobs/${job.slug}`}
                       target="_blank"
@@ -922,19 +938,33 @@ export default function JobsAdminPage() {
           }}
         />
       </AdminContent>
+      <ConfirmDialog
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="Delete job?"
+        description={
+          deleteTarget
+            ? `Delete “${deleteTarget.title}” and its applications/activity? This cannot be undone.`
+            : "This action cannot be undone."
+        }
+        confirmText="Delete job"
+        variant="destructive"
+      />
     </AdminPage>
   );
 }
 
 function AdminSelectFilter({ value, onValueChange, placeholder, items }) {
+  const displayLabel = value === "all" ? placeholder : items[value] || value;
   return (
-    <div className="w-full sm:w-38">
+    <div className="w-full sm:w-38 min-w-0">
       <Select value={value} onValueChange={onValueChange}>
         <SelectTrigger
           size="sm"
-          className="h-10 w-full rounded-full px-3 text-xs font-semibold"
+          className="h-10 w-full rounded-full px-3 text-xs font-semibold min-w-0"
         >
-          <SelectValue placeholder={placeholder} />
+          <span className="truncate">{displayLabel}</span>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">{placeholder}</SelectItem>

@@ -170,12 +170,12 @@ export default function SourceForm({ sourceId }) {
           <ArrowLeft className="h-4 w-4" /> Back to job sources
         </Link>
       }
-      actions={
-        <Button
+        actions={
+          <Button
           form="source-form"
           type="submit"
           disabled={saving}
-          className="rounded-full"
+            className="w-full rounded-full sm:w-auto"
         >
           {saving ? (
             <RefreshCw className="mr-2 h-4 w-4 animate-spin" />

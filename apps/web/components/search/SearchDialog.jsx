@@ -36,7 +36,12 @@ export default function SearchDialog({
   const [activeType, setActiveType] = useState("all");
   const [recent, setRecent] = useState([]);
   const inputRef = useRef(null);
-  const { results: allResults, searching, resultQuery, error: workerError } = useSearchWorker(items, query);
+  const {
+    results: allResults,
+    searching,
+    resultQuery,
+    error: workerError,
+  } = useSearchWorker(items, query);
   const counts = useMemo(
     () =>
       allResults.reduce(
@@ -59,7 +64,11 @@ export default function SearchDialog({
 
   useEffect(() => {
     if (!open) return;
-    Promise.resolve().then(() => { setRecent(getRecentSearches()); setLoading(true); setError(""); });
+    Promise.resolve().then(() => {
+      setRecent(getRecentSearches());
+      setLoading(true);
+      setError("");
+    });
     loadIndex()
       .then(setItems)
       .catch(() => setError("Search is temporarily unavailable."))
@@ -101,7 +110,7 @@ export default function SearchDialog({
   };
   return createPortal(
     <div
-      className="fixed inset-0 z-120 bg-black/40 backdrop-blur-md dark:bg-black/60 p-3 sm:p-6 flex flex-col items-center pt-[max(1rem,env(safe-area-inset-top))] sm:pt-[10vh] overflow-y-auto"
+      className="fixed inset-0 z-300 bg-black/40 backdrop-blur-md dark:bg-black/60 p-3 sm:p-6 flex flex-col items-center pt-[max(1rem,env(safe-area-inset-top))] sm:pt-[10vh] overflow-y-auto"
       onMouseDown={(event) => event.target === event.currentTarget && onClose()}
     >
       <div
@@ -218,7 +227,7 @@ export default function SearchDialog({
                 <LogoLoader className="h-5 w-5  text-blue-500" /> Loading search
                 index…
               </div>
-            ) : (error || workerError) ? (
+            ) : error || workerError ? (
               <div className="py-12 text-center rounded-3xl bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl shadow-lg border border-zinc-200/80 dark:border-zinc-800/80 text-sm text-red-600">
                 {error || workerError}
               </div>

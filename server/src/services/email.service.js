@@ -250,16 +250,16 @@ export const sendWelcomeEmail = async (to, fullName) => {
   const siteUrl = getSiteUrl();
   const safeName = escapeHtml(fullName || "there");
 
-  await sendLegacyEmail({
+  const delivery = await sendLegacyEmail({
     from,
     to,
-    subject: "Welcome to asif.to - Your account is ready",
-    text: `Welcome to asif.to, ${fullName || "there"}!\n\nYour account is verified and ready. Explore courses, cheatsheets, flashcards, and practice quizzes at ${siteUrl}.\n\nasif.to`,
+    subject: "Welcome to asif.to — start building your developer skills",
+    text: `Welcome to asif.to, ${fullName || "there"}!\n\nYour account is ready. Explore JavaScript, React.js, Next.js and Node.js courses; use the code playground; practise with questions, quizzes, flashcards and cheatsheets; browse UAE jobs across technology, engineering, business and other fields; and earn a certificate after completing a course exam.\n\nStart learning: ${siteUrl}\nCourses: ${siteUrl}/courses\nPractice: ${siteUrl}/practice\nUAE jobs: ${siteUrl}/jobs\nCode playground: ${siteUrl}/playground\n\nasif.to`,
     html: renderEmailLayout({
-      preheader: "Your asif.to account is verified and ready for learning.",
-      eyebrow: "Account ready",
-      title: `Welcome aboard, ${fullName || "there"}`,
-      intro: `Hi ${safeName}, your account has been verified. Your learning workspace is ready whenever you are.`,
+      preheader: "Your asif.to account is ready — learn, practise, build and grow.",
+      eyebrow: "Welcome to asif.to",
+      title: `Start building, ${fullName || "there"}`,
+      intro: `Hi ${safeName}, your account is ready. Learn practical development skills, practise what you know, and discover your next opportunity in the UAE.`,
       content: `
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px;">
           <tr>
@@ -267,8 +267,8 @@ export const sendWelcomeEmail = async (to, fullName) => {
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.surfaceLow};border:1px solid ${BRAND.border};border-radius:18px;">
                 <tr>
                   <td style="padding:18px;">
-                    <p style="margin:0 0 6px;font-family:'Outfit',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;font-weight:800;color:${BRAND.heading};">Learn step-by-step</p>
-                    <p style="margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;line-height:18px;color:${BRAND.muted};">Follow focused courses, interactive coding, and tutorials.</p>
+                    <p style="margin:0 0 6px;font-family:'Outfit',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;font-weight:800;color:${BRAND.heading};">Learn the stack</p>
+                    <p style="margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;line-height:18px;color:${BRAND.muted};">Build your foundation with JavaScript, then move into React.js, Next.js and Node.js courses.</p>
                   </td>
                 </tr>
               </table>
@@ -277,18 +277,22 @@ export const sendWelcomeEmail = async (to, fullName) => {
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.surfaceLow};border:1px solid ${BRAND.border};border-radius:18px;">
                 <tr>
                   <td style="padding:18px;">
-                    <p style="margin:0 0 6px;font-family:'Outfit',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;font-weight:800;color:${BRAND.heading};">Practice and revise</p>
-                    <p style="margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;line-height:18px;color:${BRAND.muted};">Test skills with quizzes, flashcards, and quick cheatsheets.</p>
+                    <p style="margin:0 0 6px;font-family:'Outfit',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;font-weight:800;color:${BRAND.heading};">Practice by doing</p>
+                    <p style="margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;line-height:18px;color:${BRAND.muted};">Use the code playground, practice questions, quizzes, flashcards and cheatsheets to reinforce every lesson.</p>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
         </table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;background:${BRAND.primaryContainer};border:1px solid ${BRAND.primaryContainerBorder};border-radius:18px;"><tr><td style="padding:18px;"><p style="margin:0 0 6px;font-family:'Outfit',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;font-weight:800;color:${BRAND.primaryContainerInk};">Learn, work and prove your progress</p><p style="margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;line-height:19px;color:${BRAND.primaryContainerInk};">Browse UAE jobs across technology, engineering, business and other fields. Complete a course exam to earn a certificate that marks your achievement.</p></td></tr></table>
         ${renderButton("Start learning now", siteUrl)}
-        <p style="margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;line-height:21px;color:${BRAND.muted};">Need help? Reply to us at <a href="mailto:support@asif.to" style="font-weight:700;color:${BRAND.primary};text-decoration:none;">support@asif.to</a>.</p>`,
+        <p style="margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;line-height:21px;color:${BRAND.muted};"><a href="${siteUrl}/courses" style="font-weight:700;color:${BRAND.primary};text-decoration:none;">Courses</a> &nbsp;·&nbsp; <a href="${siteUrl}/practice" style="font-weight:700;color:${BRAND.primary};text-decoration:none;">Practice</a> &nbsp;·&nbsp; <a href="${siteUrl}/jobs" style="font-weight:700;color:${BRAND.primary};text-decoration:none;">UAE Jobs</a> &nbsp;·&nbsp; <a href="${siteUrl}/playground" style="font-weight:700;color:${BRAND.primary};text-decoration:none;">Playground</a></p><p style="margin:14px 0 0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;line-height:21px;color:${BRAND.muted};">Need help? Reply to us at <a href="mailto:support@asif.to" style="font-weight:700;color:${BRAND.primary};text-decoration:none;">support@asif.to</a>.</p>`,
     }),
   });
+  if (!delivery?.accepted?.length) {
+    throw new Error("The email provider did not accept the welcome email recipient.");
+  }
 };
 
 /**

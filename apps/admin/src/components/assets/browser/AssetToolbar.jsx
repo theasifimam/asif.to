@@ -4,25 +4,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Folder,
-  FolderPlus,
-  Plus,
-  RefreshCw,
   Search,
-  Upload,
   X,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ViewToggle } from "@/components/ui/ViewToggle";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import AssetFilterMenu from "./AssetFilterMenu";
-import AssetSortMenu from "./AssetSortMenu";
+import AssetSettingsIsland from "./AssetSettingsIsland";
 import { SCOPE_LABELS } from "./constants";
 
 export default function AssetToolbar({
@@ -63,54 +50,64 @@ export default function AssetToolbar({
 }) {
   return (
     <>
-      <header className="flex shrink-0 items-center justify-between gap-2 border-b border-zinc-100 p-2 sm:p-3 sm:px-5 dark:border-zinc-800/80 overflow-x-auto scrollbar-none">
-        {/* Breadcrumbs & Navigation */}
-        <div className="flex items-center gap-1.5 min-w-0 flex-1">
-          <button
-            type="button"
-            onClick={() => openFolder(null)}
-            disabled={!currentFolderId && scope === "all"}
-            className="hidden sm:flex rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 disabled:opacity-30 dark:hover:bg-zinc-800"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <div className="flex items-center gap-1 overflow-x-auto text-xs font-semibold text-zinc-500 whitespace-nowrap scrollbar-none">
+      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-zinc-100 p-3 sm:px-6 dark:border-zinc-800/80">
+        {/* Left Side: Page Heading & Breadcrumbs */}
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          {currentFolderId && (
             <button
               type="button"
               onClick={() => openFolder(null)}
-              onDragOver={(event) => handleDragOver(event, "root")}
-              onDragLeave={clearDropTarget}
-              onDrop={(event) => handleDrop(event, null)}
-              className={cn(
-                "flex items-center gap-1.5 rounded-lg px-2 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800",
-                currentFolderId === null &&
-                  "font-bold text-zinc-900 dark:text-white",
-              )}
+              className="flex rounded-lg p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-white"
+              aria-label="Go back"
             >
-              <Folder className="h-3.5 w-3.5 text-blue-500" />
-              <span>{SCOPE_LABELS[scope] || "All Files"}</span>
+              <ChevronLeft className="h-5 w-5" />
             </button>
-            {breadcrumbs.map((folder) => (
-              <span key={folder._id} className="flex items-center gap-1">
-                <ChevronRight className="h-3.5 w-3.5 text-zinc-400" />
-                <button
-                  type="button"
-                  onClick={() => openFolder(folder)}
-                  onDragOver={(event) => handleDragOver(event, folder._id)}
-                  onDragLeave={clearDropTarget}
-                  onDrop={(event) => handleDrop(event, folder._id)}
-                  className="rounded-lg px-2 py-1 font-bold text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                >
-                  {folder.name}
-                </button>
-              </span>
-            ))}
+          )}
+
+          <div className="flex items-center gap-2 min-w-0">
+            <h1 className="text-xl sm:text-2xl font-black font-outfit text-zinc-950 dark:text-white tracking-tight shrink-0">
+              Files
+            </h1>
+
+            <div className="flex items-center gap-1 min-w-0 text-xs font-semibold text-zinc-500 whitespace-nowrap overflow-x-auto scrollbar-none">
+              <span className="text-zinc-300 dark:text-zinc-700">/</span>
+              <button
+                type="button"
+                onClick={() => openFolder(null)}
+                onDragOver={(event) => handleDragOver(event, "root")}
+                onDragLeave={clearDropTarget}
+                onDrop={(event) => handleDrop(event, null)}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-lg px-2 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors",
+                  currentFolderId === null &&
+                    "font-bold text-zinc-900 dark:text-white",
+                )}
+              >
+                <Folder className="h-3.5 w-3.5 text-blue-500 shrink-0" />
+                <span className="truncate">{SCOPE_LABELS[scope] || "All Files"}</span>
+              </button>
+              {breadcrumbs.map((folder) => (
+                <span key={folder._id} className="flex items-center gap-1">
+                  <ChevronRight className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
+                  <button
+                    type="button"
+                    onClick={() => openFolder(folder)}
+                    onDragOver={(event) => handleDragOver(event, folder._id)}
+                    onDragLeave={clearDropTarget}
+                    onDrop={(event) => handleDrop(event, folder._id)}
+                    className="rounded-lg px-2 py-1 font-bold text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 truncate"
+                  >
+                    {folder.name}
+                  </button>
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Action Toolbar */}
-        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-          {/* Mobile Search Button Toggle */}
+        {/* Right Side: Action Controls */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Mobile Search Toggle */}
           <button
             type="button"
             onClick={() => setMobileSearchOpen((prev) => !prev)}
@@ -120,8 +117,8 @@ export default function AssetToolbar({
             <Search className="h-4 w-4" />
           </button>
 
-          {/* Desktop Search Input */}
-          <div className="relative hidden sm:block sm:min-w-50">
+          {/* Search Input */}
+          <div className="relative hidden sm:block sm:w-48 lg:w-60">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
             <Input
               value={search}
@@ -130,8 +127,8 @@ export default function AssetToolbar({
                 setPage(1);
                 setSelectedIds([]);
               }}
-              placeholder="Search files…"
-              className="h-9 rounded-xl bg-zinc-50 pl-9 pr-8 text-xs dark:bg-zinc-900"
+              placeholder="Search files..."
+              className="h-9 rounded-xl bg-zinc-50 pl-9 pr-8 text-xs dark:bg-zinc-900 border-zinc-200/80 dark:border-zinc-800"
             />
             {search && (
               <button
@@ -144,23 +141,7 @@ export default function AssetToolbar({
             )}
           </div>
 
-          {/* View Switcher Toggle */}
-          <ViewToggle view={view} onViewChange={setView} />
-
-          {/* Refresh Button */}
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={refresh}
-            aria-label="Refresh"
-            className="h-9 w-9 rounded-xl"
-          >
-            <RefreshCw className="h-4 w-4" />
-          </Button>
-
-          {/* Filter Dropdown */}
-          <AssetFilterMenu
+          <AssetSettingsIsland
             scope={scope}
             setScope={setScope}
             usageFilter={usageFilter}
@@ -174,53 +155,21 @@ export default function AssetToolbar({
             resetFilters={resetFilters}
             pickerMode={pickerMode}
             onScopeChange={onScopeChange}
-          />
-
-          {/* Sort Dropdown */}
-          <AssetSortMenu
             sort={sort}
             setSort={setSort}
             setPage={setPage}
+            view={view}
+            setView={setView}
+            refresh={refresh}
+            canUpload={canUpload}
+            canManage={canManage}
+            setUploadOpen={setUploadOpen}
+            setDialog={setDialog}
           />
-
-          {/* Consolidated Action Dropdown (+ New) for Desktop */}
-          {scope !== "trash" && (canUpload || canManage) && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  type="button"
-                  className="hidden sm:flex h-9 gap-1 rounded-xl font-bold text-xs shadow-md shadow-blue-600/15 px-3"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>New</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 p-1.5">
-                {canUpload && (
-                  <DropdownMenuItem
-                    onSelect={() => setUploadOpen(true)}
-                    className="gap-2.5 py-2 font-semibold"
-                  >
-                    <Upload className="h-4 w-4 text-blue-600" />
-                    <span>Upload files</span>
-                  </DropdownMenuItem>
-                )}
-                {!pickerMode && canManage && (
-                  <DropdownMenuItem
-                    onSelect={() => setDialog({ type: "create-folder" })}
-                    className="gap-2.5 py-2 font-semibold"
-                  >
-                    <FolderPlus className="h-4 w-4 text-amber-500" />
-                    <span>New folder</span>
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
         </div>
       </header>
 
-      {/* Mobile Expandable Search Bar */}
+      {/* Mobile Search Input */}
       {mobileSearchOpen && (
         <div className="flex items-center gap-2 border-b border-zinc-100 bg-zinc-50 p-2 sm:hidden dark:border-zinc-800 dark:bg-zinc-900/60">
           <div className="relative flex-1">
@@ -232,7 +181,7 @@ export default function AssetToolbar({
                 setPage(1);
                 setSelectedIds([]);
               }}
-              placeholder="Search files by name..."
+              placeholder="Search files..."
               className="h-9 rounded-xl bg-white pl-9 pr-8 text-xs dark:bg-zinc-950"
               autoFocus
             />

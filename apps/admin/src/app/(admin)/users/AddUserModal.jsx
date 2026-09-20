@@ -51,8 +51,8 @@ export function AddUserModal({ isOpen, onClose, onAdd, submitting }) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
       <DialogContent className="overflow-hidden rounded-3xl border-zinc-200 bg-white p-0 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950 sm:max-w-lg">
-        <form onSubmit={submit}>
-          <div className="border-b border-zinc-100 px-6 py-6 dark:border-zinc-900 sm:px-8">
+        <form onSubmit={submit} className="flex h-full max-h-[calc(100dvh-2.5rem)] min-h-0 flex-col overflow-hidden">
+          <div className="shrink-0 border-b border-zinc-100 px-6 py-6 dark:border-zinc-900 sm:px-8">
             <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
               <UserPlus size={20} />
             </div>
@@ -67,7 +67,7 @@ export function AddUserModal({ isOpen, onClose, onAdd, submitting }) {
             </DialogHeader>
           </div>
 
-          <div className="space-y-5 px-6 py-6 sm:px-8">
+          <div className="min-h-0 flex-1 overflow-y-auto space-y-5 px-6 py-6 sm:px-8">
             <div className="space-y-2">
               <label
                 htmlFor="invite-email"
@@ -134,7 +134,7 @@ export function AddUserModal({ isOpen, onClose, onAdd, submitting }) {
             )}
           </div>
 
-          <DialogFooter className="flex-row border-t border-zinc-100 bg-zinc-50/70 px-6 py-4 dark:border-zinc-900 dark:bg-zinc-900/40 sm:px-8">
+          <DialogFooter className="shrink-0 flex-row border-t border-zinc-100 bg-zinc-50/70 px-6 py-4 dark:border-zinc-900 dark:bg-zinc-900/40 sm:px-8">
             <Button type="button" variant="ghost" onClick={close}>
               Cancel
             </Button>

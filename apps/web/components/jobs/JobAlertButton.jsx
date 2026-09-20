@@ -32,7 +32,9 @@ export default function JobAlertButton({ criteria = {}, taxonomy = {} }) {
   const [location, setLocation] = useState(criteria.location || "all");
   const [category, setCategory] = useState(criteria.category || "all");
   const [workMode, setWorkMode] = useState(criteria.workMode || "all");
-  const [employmentType, setEmploymentType] = useState(criteria.employmentType || "all");
+  const [employmentType, setEmploymentType] = useState(
+    criteria.employmentType || "all",
+  );
 
   // Sync state when dialog opens or incoming criteria changes
   useEffect(() => {
@@ -58,12 +60,17 @@ export default function JobAlertButton({ criteria = {}, taxonomy = {} }) {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    api.get("/jobs/me/alerts").then(({ data }) => {
-      const current = data?.data?.find((alert) =>
-        Object.entries(activeCriteria).every(([key, value]) => (alert[key] || "") === value),
-      );
-      setAlertId(current?._id || null);
-    }).catch(() => {});
+    api
+      .get("/jobs/me/alerts")
+      .then(({ data }) => {
+        const current = data?.data?.find((alert) =>
+          Object.entries(activeCriteria).every(
+            ([key, value]) => (alert[key] || "") === value,
+          ),
+        );
+        setAlertId(current?._id || null);
+      })
+      .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, activeCriteriaKey]);
 
@@ -95,7 +102,9 @@ export default function JobAlertButton({ criteria = {}, taxonomy = {} }) {
         toast.success("You’ll be notified when a matching job is posted");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Unable to update your job alert");
+      toast.error(
+        error.response?.data?.message || "Unable to update your job alert",
+      );
     } finally {
       setWorking(false);
     }
@@ -116,11 +125,17 @@ export default function JobAlertButton({ criteria = {}, taxonomy = {} }) {
       ];
 
   const categoryOptions = taxonomy?.categories?.length
-    ? taxonomy.categories.map((item) => ({ label: item.name, value: item.slug }))
+    ? taxonomy.categories.map((item) => ({
+        label: item.name,
+        value: item.slug,
+      }))
     : [
         { label: "Web & Software Development", value: "software-development" },
         { label: "Accounting & Finance", value: "accounting-finance" },
-        { label: "Sales & Business Development", value: "sales-business-development" },
+        {
+          label: "Sales & Business Development",
+          value: "sales-business-development",
+        },
         { label: "Marketing & Media", value: "marketing-media" },
         { label: "Human Resources", value: "human-resources" },
         { label: "Customer Support & Operations", value: "customer-support" },
@@ -132,7 +147,10 @@ export default function JobAlertButton({ criteria = {}, taxonomy = {} }) {
   const activeBadges = Object.entries(activeCriteria)
     .filter(([, value]) => Boolean(value))
     .map(([key, value]) => {
-      const formattedKey = key === "keyword" ? "Role" : key.replace(/[A-Z]/g, (l) => ` ${l.toLowerCase()}`);
+      const formattedKey =
+        key === "keyword"
+          ? "Role"
+          : key.replace(/[A-Z]/g, (l) => ` ${l.toLowerCase()}`);
       return `${formattedKey}: ${value.replaceAll("-", " ")}`;
     });
 
@@ -149,208 +167,234 @@ export default function JobAlertButton({ criteria = {}, taxonomy = {} }) {
             : "border-blue-300 bg-blue-600 text-white shadow-blue-600/25 hover:bg-blue-700"
         }`}
       >
-        {alertId ? <BellRing className="h-5 w-5" /> : <Bell className="h-5 w-5" />}
+        {alertId ? (
+          <BellRing className="h-5 w-5" />
+        ) : (
+          <Bell className="h-5 w-5" />
+        )}
       </button>
 
       <Dialog.Root open={open} onOpenChange={setOpen}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-200 bg-zinc-950/60 backdrop-blur-sm transition-opacity" />
-          <div className="fixed inset-0 z-201 flex items-end sm:items-center justify-center pointer-events-none p-0 sm:p-4">
+          <Dialog.Overlay className="fixed inset-0 z-300 bg-zinc-950/60 backdrop-blur-sm transition-opacity" />
+          <div className="fixed inset-0 z-301 flex items-end sm:items-center justify-center pointer-events-none p-0 sm:p-4">
             <Dialog.Content
               style={sheetStyle}
               className="pointer-events-auto flex max-h-[92dvh] sm:max-h-[85dvh] w-full sm:max-w-xl flex-col overflow-hidden rounded-t-4xl sm:rounded-4xl border border-zinc-200 bg-white text-zinc-950 shadow-2xl outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 motion-safe:animate-[job-sheet-in_420ms_cubic-bezier(0.16,1,0.3,1)]"
             >
-            <div
-              className="shrink-0 select-none touch-none cursor-grab active:cursor-grabbing border-b border-zinc-100 dark:border-zinc-800/80"
-              {...dragProps}
-            >
-              {/* Top Drag Handle for mobile */}
-              <div className="pt-3 pb-1 flex justify-center shrink-0 sm:hidden">
-                <div className="w-10 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+              <div
+                className="shrink-0 select-none touch-none cursor-grab active:cursor-grabbing border-b border-zinc-100 dark:border-zinc-800/80"
+                {...dragProps}
+              >
+                {/* Top Drag Handle for mobile */}
+                <div className="pt-3 pb-1 flex justify-center shrink-0 sm:hidden">
+                  <div className="w-10 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+                </div>
+
+                {/* Header */}
+                <div className="px-6 pt-2 sm:pt-4 pb-3 flex items-start justify-between">
+                  <div>
+                    <Dialog.Title className="font-outfit text-xl sm:text-2xl font-black tracking-tight">
+                      Get notified about matching jobs
+                    </Dialog.Title>
+                    <Dialog.Description className="mt-1 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
+                      We’ll email you automatically when a new published job
+                      matches these criteria.
+                    </Dialog.Description>
+                  </div>
+                  <Dialog.Close asChild>
+                    <button
+                      type="button"
+                      aria-label="Close"
+                      className="rounded-full p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-900 dark:hover:text-zinc-200 transition"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </Dialog.Close>
+                </div>
               </div>
 
-              {/* Header */}
-              <div className="px-6 pt-2 sm:pt-4 pb-3 flex items-start justify-between">
-                <div>
-                  <Dialog.Title className="font-outfit text-xl sm:text-2xl font-black tracking-tight">
-                    Get notified about matching jobs
-                  </Dialog.Title>
-                  <Dialog.Description className="mt-1 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
-                    We’ll email you automatically when a new published job matches these criteria.
-                  </Dialog.Description>
+              {/* Scrollable Body */}
+              <div className="p-6 overflow-y-auto space-y-4">
+                {/* Email box */}
+                <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-3.5 dark:border-blue-900/60 dark:bg-blue-950/30">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
+                    Notification email
+                  </p>
+                  <p className="mt-0.5 text-xs sm:text-sm font-bold">
+                    {user?.email || "Your account email"}
+                  </p>
                 </div>
+
+                {/* Interactive Filter Options */}
+                <div className="space-y-3.5 pt-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-black uppercase tracking-wider text-zinc-400">
+                      Filter Options
+                    </p>
+                    {(keyword ||
+                      location !== "all" ||
+                      category !== "all" ||
+                      workMode !== "all" ||
+                      employmentType !== "all") && (
+                      <button
+                        type="button"
+                        onClick={resetFilters}
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                        Clear options
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Keyword / Role search */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300">
+                      Keyword / Job Title
+                    </label>
+                    <div className="relative">
+                      <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
+                      <Input
+                        value={keyword}
+                        onChange={(e) => setKeyword(e.target.value)}
+                        placeholder="e.g. Software Engineer, Accountant, Sales..."
+                        className="h-10 rounded-xl bg-zinc-50 pl-9 pr-3 text-xs font-semibold dark:bg-zinc-900 dark:border-zinc-800"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Location & Category Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300">
+                        Location
+                      </label>
+                      <Select value={location} onValueChange={setLocation}>
+                        <SelectTrigger className="h-10 rounded-xl bg-zinc-50 text-xs font-semibold dark:bg-zinc-900 dark:border-zinc-800">
+                          <SelectValue placeholder="All UAE locations" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All UAE locations</SelectItem>
+                          {locationOptions.map((loc) => (
+                            <SelectItem key={loc.value} value={loc.value}>
+                              {loc.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300">
+                        Category
+                      </label>
+                      <Select value={category} onValueChange={setCategory}>
+                        <SelectTrigger className="h-10 rounded-xl bg-zinc-50 text-xs font-semibold dark:bg-zinc-900 dark:border-zinc-800">
+                          <SelectValue placeholder="All categories" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All categories</SelectItem>
+                          {categoryOptions.map((cat) => (
+                            <SelectItem key={cat.value} value={cat.value}>
+                              {cat.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Work Mode & Employment Type Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300">
+                        Work Mode
+                      </label>
+                      <Select value={workMode} onValueChange={setWorkMode}>
+                        <SelectTrigger className="h-10 rounded-xl bg-zinc-50 text-xs font-semibold dark:bg-zinc-900 dark:border-zinc-800">
+                          <SelectValue placeholder="All work modes" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All work modes</SelectItem>
+                          <SelectItem value="onsite">On-site</SelectItem>
+                          <SelectItem value="remote">Remote</SelectItem>
+                          <SelectItem value="hybrid">Hybrid</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300">
+                        Employment Type
+                      </label>
+                      <Select
+                        value={employmentType}
+                        onValueChange={setEmploymentType}
+                      >
+                        <SelectTrigger className="h-10 rounded-xl bg-zinc-50 text-xs font-semibold dark:bg-zinc-900 dark:border-zinc-800">
+                          <SelectValue placeholder="All types" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All types</SelectItem>
+                          <SelectItem value="full-time">Full-Time</SelectItem>
+                          <SelectItem value="part-time">Part-Time</SelectItem>
+                          <SelectItem value="contract">Contract</SelectItem>
+                          <SelectItem value="internship">Internship</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Selected Filters Badges */}
+                  <div className="pt-2">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-zinc-400 mb-1.5">
+                      Your Active Alert Filters
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {activeBadges.length ? (
+                        activeBadges.map((badge) => (
+                          <span
+                            key={badge}
+                            className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/60 capitalize"
+                          >
+                            {badge}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="rounded-full bg-zinc-100 dark:bg-zinc-900 px-2.5 py-1 text-xs font-medium text-zinc-500">
+                          All UAE Jobs (No specific filter selected)
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="p-6 pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex gap-3 shrink-0">
                 <Dialog.Close asChild>
                   <button
                     type="button"
-                    aria-label="Close"
-                    className="rounded-full p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-900 dark:hover:text-zinc-200 transition"
+                    className="h-11 flex-1 rounded-full border border-zinc-200 text-sm font-bold dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition cursor-pointer"
                   >
-                    <X className="h-5 w-5" />
+                    Cancel
                   </button>
                 </Dialog.Close>
-              </div>
-            </div>
-
-            {/* Scrollable Body */}
-            <div className="p-6 overflow-y-auto space-y-4">
-              {/* Email box */}
-              <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-3.5 dark:border-blue-900/60 dark:bg-blue-950/30">
-                <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
-                  Notification email
-                </p>
-                <p className="mt-0.5 text-xs sm:text-sm font-bold">{user?.email || "Your account email"}</p>
-              </div>
-
-              {/* Interactive Filter Options */}
-              <div className="space-y-3.5 pt-1">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-black uppercase tracking-wider text-zinc-400">
-                    Filter Options
-                  </p>
-                  {(keyword || location !== "all" || category !== "all" || workMode !== "all" || employmentType !== "all") && (
-                    <button
-                      type="button"
-                      onClick={resetFilters}
-                      className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
-                    >
-                      <RotateCcw className="h-3 w-3" />
-                      Clear options
-                    </button>
-                  )}
-                </div>
-
-                {/* Keyword / Role search */}
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300">
-                    Keyword / Job Title
-                  </label>
-                  <div className="relative">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
-                    <Input
-                      value={keyword}
-                      onChange={(e) => setKeyword(e.target.value)}
-                      placeholder="e.g. Software Engineer, Accountant, Sales..."
-                      className="h-10 rounded-xl bg-zinc-50 pl-9 pr-3 text-xs font-semibold dark:bg-zinc-900 dark:border-zinc-800"
-                    />
-                  </div>
-                </div>
-
-                {/* Location & Category Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300">Location</label>
-                    <Select value={location} onValueChange={setLocation}>
-                      <SelectTrigger className="h-10 rounded-xl bg-zinc-50 text-xs font-semibold dark:bg-zinc-900 dark:border-zinc-800">
-                        <SelectValue placeholder="All UAE locations" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All UAE locations</SelectItem>
-                        {locationOptions.map((loc) => (
-                          <SelectItem key={loc.value} value={loc.value}>
-                            {loc.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300">Category</label>
-                    <Select value={category} onValueChange={setCategory}>
-                      <SelectTrigger className="h-10 rounded-xl bg-zinc-50 text-xs font-semibold dark:bg-zinc-900 dark:border-zinc-800">
-                        <SelectValue placeholder="All categories" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All categories</SelectItem>
-                        {categoryOptions.map((cat) => (
-                          <SelectItem key={cat.value} value={cat.value}>
-                            {cat.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Work Mode & Employment Type Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300">Work Mode</label>
-                    <Select value={workMode} onValueChange={setWorkMode}>
-                      <SelectTrigger className="h-10 rounded-xl bg-zinc-50 text-xs font-semibold dark:bg-zinc-900 dark:border-zinc-800">
-                        <SelectValue placeholder="All work modes" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All work modes</SelectItem>
-                        <SelectItem value="onsite">On-site</SelectItem>
-                        <SelectItem value="remote">Remote</SelectItem>
-                        <SelectItem value="hybrid">Hybrid</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-zinc-600 dark:text-zinc-300">Employment Type</label>
-                    <Select value={employmentType} onValueChange={setEmploymentType}>
-                      <SelectTrigger className="h-10 rounded-xl bg-zinc-50 text-xs font-semibold dark:bg-zinc-900 dark:border-zinc-800">
-                        <SelectValue placeholder="All types" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All types</SelectItem>
-                        <SelectItem value="full-time">Full-Time</SelectItem>
-                        <SelectItem value="part-time">Part-Time</SelectItem>
-                        <SelectItem value="contract">Contract</SelectItem>
-                        <SelectItem value="internship">Internship</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Selected Filters Badges */}
-                <div className="pt-2">
-                  <p className="text-[10px] font-black uppercase tracking-wider text-zinc-400 mb-1.5">
-                    Your Active Alert Filters
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {activeBadges.length ? (
-                      activeBadges.map((badge) => (
-                        <span
-                          key={badge}
-                          className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/60 capitalize"
-                        >
-                          {badge}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="rounded-full bg-zinc-100 dark:bg-zinc-900 px-2.5 py-1 text-xs font-medium text-zinc-500">
-                        All UAE Jobs (No specific filter selected)
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Action buttons */}
-            <div className="p-6 pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex gap-3 shrink-0">
-              <Dialog.Close asChild>
                 <button
                   type="button"
-                  className="h-11 flex-1 rounded-full border border-zinc-200 text-sm font-bold dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition cursor-pointer"
+                  onClick={toggle}
+                  disabled={working}
+                  className="h-11 flex-1 rounded-full bg-blue-600 text-sm font-black text-white hover:bg-blue-700 transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Cancel
+                  {working
+                    ? "Saving…"
+                    : alertId
+                      ? "Turn off alert"
+                      : "Enable notifications"}
                 </button>
-              </Dialog.Close>
-              <button
-                type="button"
-                onClick={toggle}
-                disabled={working}
-                className="h-11 flex-1 rounded-full bg-blue-600 text-sm font-black text-white hover:bg-blue-700 transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {working ? "Saving…" : alertId ? "Turn off alert" : "Enable notifications"}
-              </button>
-            </div>
-          </Dialog.Content>
+              </div>
+            </Dialog.Content>
           </div>
         </Dialog.Portal>
       </Dialog.Root>

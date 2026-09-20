@@ -8,7 +8,11 @@ const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const matchesAlert = (alert, job) => {
   const text = `${job.title} ${job.companyName} ${job.category} ${job.description || ""}`.toLowerCase();
-  if (alert.keyword && !new RegExp(`\\b${escapeRegex(alert.keyword)}\\b`, "i").test(text)) return false;
+  const keywords = String(alert.keyword || "")
+    .split(",")
+    .map((keyword) => keyword.trim())
+    .filter(Boolean);
+  if (keywords.length && !keywords.some((keyword) => new RegExp(`\\b${escapeRegex(keyword)}\\b`, "i").test(text))) return false;
   return (!alert.category || alert.category === job.categorySlug) &&
     (!alert.location || alert.location === job.locationSlug) &&
     (!alert.employmentType || alert.employmentType === job.employmentType) &&
