@@ -1,5 +1,6 @@
 node_modules/
-.next/
+.next/dev
+.next/cache
 out/
 .vercel/
 .env.local

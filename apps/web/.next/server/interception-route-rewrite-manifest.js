@@ -1,0 +1,1 @@
+self.__INTERCEPTION_ROUTE_REWRITE_MANIFEST="[{\"source\":\"/login\",\"destination\":\"/(.)login\",\"has\":[{\"type\":\"header\",\"key\":\"next-url\",\"value\":\"/.*\"}],\"regex\":\"^/login(?:/)?$\"},{\"source\":\"/signup\",\"destination\":\"/(.)signup\",\"has\":[{\"type\":\"header\",\"key\":\"next-url\",\"value\":\"/.*\"}],\"regex\":\"^/signup(?:/)?$\"}]";

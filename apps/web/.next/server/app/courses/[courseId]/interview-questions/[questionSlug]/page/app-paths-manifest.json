@@ -1,0 +1,3 @@
+{
+  "/courses/[courseId]/interview-questions/[questionSlug]/page": "app/courses/[courseId]/interview-questions/[questionSlug]/page.js"
+}

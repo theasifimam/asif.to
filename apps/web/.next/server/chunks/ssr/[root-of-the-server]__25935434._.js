@@ -1,0 +1,3 @@
+module.exports=[254799,(a,b,c)=>{b.exports=a.x("crypto",()=>require("crypto"))},483317,a=>{"use strict";a.i(570396);var b=a.i(673727),c=a.i(388193);async function d(){let a=await (0,c.auth)();a?.user||(0,b.redirect)("/login?callbackUrl=/dashboard"),(0,b.redirect)(`/${a.user.username}`)}a.s(["default",()=>d,"metadata",0,{title:"Dashboard",robots:{index:!1,follow:!1}}])}];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__25935434._.js.map

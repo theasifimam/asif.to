@@ -1,0 +1,3 @@
+{
+  "/api/auth/backend-session/route": "app/api/auth/backend-session/route.js"
+}

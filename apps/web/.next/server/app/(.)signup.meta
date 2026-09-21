@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/@modal/layout,_N_T_/@modal/(.)signup/layout,_N_T_/@modal/(.)signup/page,_N_T_/(.)signup"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/__DEFAULT__",
+    "/@modal/!KHNsb3Qp/!KC4pc2lnbnVw/__PAGE__",
+    "/@modal/!KHNsb3Qp/!KC4pc2lnbnVw",
+    "/@modal/!KHNsb3Qp",
+    "/_index",
+    "/_head"
+  ]
+}

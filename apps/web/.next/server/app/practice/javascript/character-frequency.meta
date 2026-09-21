@@ -1,0 +1,18 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/practice/layout,_N_T_/practice/[technology]/layout,_N_T_/practice/[technology]/[slug]/layout,_N_T_/practice/[technology]/[slug]/page,_N_T_/practice/javascript/character-frequency"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/practice/$d$technology/$d$slug/__PAGE__",
+    "/practice/$d$technology/$d$slug",
+    "/practice/$d$technology",
+    "/practice",
+    "/@modal/__DEFAULT__",
+    "/_index",
+    "/_head"
+  ]
+}

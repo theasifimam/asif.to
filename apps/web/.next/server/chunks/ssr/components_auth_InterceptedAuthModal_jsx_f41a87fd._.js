@@ -1,0 +1,3 @@
+module.exports=[517174,a=>{"use strict";var b=a.i(187924),c=a.i(572131),d=a.i(50944),e=a.i(665437),f=a.i(682271);function g(){let a=(0,d.useRouter)(),g=(0,d.usePathname)(),h=(0,d.useSearchParams)(),i=(0,e.useAppSelector)(a=>a.auth.isAuthenticated),[j,k]=(0,c.useState)(!0),l=h?.get("callbackUrl")||"/",m="/login"===g||"/signup"===g||g?.startsWith("/login")||g?.startsWith("/signup"),n=g?.startsWith("/signup")?"signup":"signin";(0,c.useEffect)(()=>{m&&!i?k(!0):k(!1)},[g,m,i]);let[o]=(0,c.useState)(()=>"/");return i||!m?null:(0,b.jsx)(f.default,{isOpen:j,onClose:()=>{k(!1),i||setTimeout(()=>{a.push(o)},120)},defaultTab:n,callbackUrl:l,updateUrl:!1})}a.s(["default",()=>g])}];
+
+//# sourceMappingURL=components_auth_InterceptedAuthModal_jsx_f41a87fd._.js.map

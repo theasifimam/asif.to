@@ -1,0 +1,3 @@
+{
+  "/[username]/[topicSlug]/[...nestedSlug]/page": "app/[username]/[topicSlug]/[...nestedSlug]/page.js"
+}
