@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { PRACTICE_PROBLEMS } from "@/lib/playground/problems";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
   let remote = [];
   if (baseUrl) {
     try {
-      const response = await fetch(`${baseUrl}/search/index`, { next: { revalidate } });
+      const response = await fetch(`${baseUrl}/search/index`, { cache: "no-store" });
       if (response.ok) remote = (await response.json())?.data?.items || [];
     } catch (error) {
       console.error("Search index fetch failed:", error);
