@@ -10,7 +10,7 @@ export default function ProfileArticlesSection({ recentArticles }) {
   return (
     <section className="space-y-3">
       <SectionHeader title="Published Dispatches" />
-      <div className="grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 gap-1">
         {recentArticles && recentArticles.length > 0 ? (
           recentArticles.map((article, i) => (
             <motion.div

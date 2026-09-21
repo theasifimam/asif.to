@@ -11,10 +11,12 @@ export default function AssetPicker({
   value,
   onChange,
   accept = "*/*",
-  label = "Choose from Library",
+  label = "Select from the library",
   description = "Select a reusable file or upload a new one.",
   showPreview = false,
   onClear,
+  className = "",
+  buttonClassName = "",
 }) {
   const [open, setOpen] = useState(false);
   const preview = value && typeof value === "object" ? getAssetUrl(value, { preview: true }) : "";
@@ -24,10 +26,27 @@ export default function AssetPicker({
   };
   return (
     <>
-      <div className="space-y-2">
-        <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" onClick={() => setOpen(true)}><Files className="h-4 w-4" /> {label}</Button>
-          {(value || onClear) && onClear && <Button type="button" variant="ghost" size="icon" onClick={onClear} aria-label="Clear selected asset"><X className="h-4 w-4" /></Button>}
+      <div className={className || "space-y-2"}>
+        <div className="flex items-center gap-2 h-full">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(true)}
+            className={buttonClassName}
+          >
+            <Files className="h-4 w-4" /> {label}
+          </Button>
+          {(value || onClear) && onClear && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={onClear}
+              aria-label="Clear selected asset"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         {showPreview && preview && (
           <div className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800">

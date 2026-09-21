@@ -181,12 +181,14 @@ const renderEmailLayout = ({
 /**
  * Send an OTP verification email from noreply@asif.to.
  */
-export const sendOtpEmail = async (to, fullName, otp, purpose = "verification") => {
+export const sendOtpEmail = async (to, fullName, otp, purpose = "verification", action = "") => {
   const from = process.env.EMAIL_FROM || "asif.to <noreply@asif.to>";
   const safeName = escapeHtml(fullName || "there");
   const safeOtp = escapeHtml(otp);
   const isReset = purpose === "forgot-password" || purpose === "reset-password";
   const isSecurity = purpose === "account-security";
+  const isDeletion = isSecurity && action === "delete";
+  const securityAction = isDeletion ? "permanently delete" : "deactivate";
 
   const subject = isReset
     ? `${otp} - Your asif.to password reset code`
@@ -196,24 +198,31 @@ export const sendOtpEmail = async (to, fullName, otp, purpose = "verification") 
   const eyebrow = isReset
     ? "Password reset"
     : isSecurity
-      ? "Account security"
+      ? "Important security warning"
       : "Account verification";
   const title = isReset
     ? `Reset your password, ${fullName || "there"}`
     : isSecurity
-      ? `Confirm this account action, ${fullName || "there"}`
+      ? `Warning: confirm account ${isDeletion ? "deletion" : "deactivation"}`
       : `Confirm your email, ${fullName || "there"}`;
   const intro = isReset
     ? `Hi ${safeName}, use the secure code below to reset your asif.to account password. It is valid for the next 10 minutes.`
     : isSecurity
-      ? `Hi ${safeName}, use the secure code below to confirm the account security action you requested. It is valid for the next 10 minutes.`
+      ? `Hi ${safeName}, use the secure code below to confirm your request to ${securityAction} your asif.to account. It is valid for the next 10 minutes.`
       : `Hi ${safeName}, use the secure code below to finish setting up your account. It is valid for the next 10 minutes.`;
+  const securityNotice = isDeletion
+    ? `This code was requested to permanently delete your account. You will be signed out, your personal account data will be scheduled for permanent removal after the 30-day recovery period, and your published contributions will remain preserved.`
+    : `This code was requested to deactivate your account. You will be signed out and your account will be disabled until you sign in again to reactivate it. Your saved data and published contributions will remain preserved.`;
+  const securityWarning = `If you did not initiate this request, ignore this email and do not share the code. If this keeps happening, change your password and contact support.`;
+  const messageText = isSecurity
+    ? `\n\n${securityNotice}\n\n${securityWarning}`
+    : "";
 
   const delivery = await sendLegacyEmail({
     from,
     to,
     subject,
-    text: `Hi ${fullName || "there"},\n\nYour asif.to ${isReset ? "password reset" : isSecurity ? "account security" : "verification"} code is ${otp}. It expires in 10 minutes.\n\nIf you did not request this code, you can safely ignore this email.\n\nasif.to`,
+    text: `Hi ${fullName || "there"},\n\nYour asif.to ${isReset ? "password reset" : isSecurity ? "account security" : "verification"} code is ${otp}. It expires in 10 minutes.${messageText}\n\nIf you did not request this code, you can safely ignore this email.\n\nasif.to`,
     html: renderEmailLayout({
       preheader: `${otp} is your asif.to ${isReset ? "password reset" : isSecurity ? "account security" : "verification"} code. It expires in 10 minutes.`,
       eyebrow,
@@ -231,7 +240,9 @@ export const sendOtpEmail = async (to, fullName, otp, purpose = "verification") 
         ${renderNotice(
           isReset
             ? `If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.`
-            : `For your security, never share this code. asif.to will never ask you for it. If you did not create an account, you can safely ignore this email.`
+            : isSecurity
+              ? `${securityNotice}<br><br><strong style="color:${BRAND.dangerInk};">${securityWarning}</strong>`
+              : `For your security, never share this code. asif.to will never ask you for it. If you did not create an account, you can safely ignore this email.`
         )}
         <p style="margin:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:12px;line-height:19px;color:${BRAND.subtle};">Sent automatically by <strong style="color:${BRAND.muted};">noreply@asif.to</strong>. Please do not reply to this message.</p>`,
     }),

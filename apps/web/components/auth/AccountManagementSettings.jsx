@@ -23,7 +23,7 @@ import { clearCredentials } from "@/lib/store/authSlice";
 import {
   useDeactivateAccountMutation,
   useDeleteAccountMutation,
-  useSendOtpMutation,
+  useSendAccountSecurityOtpMutation,
 } from "@/lib/api/authApi";
 
 export default function AccountManagementSettings({ user }) {
@@ -35,7 +35,8 @@ export default function AccountManagementSettings({ user }) {
   const [otp, setOtp] = useState("");
   const [otpCountdown, setOtpCountdown] = useState(0);
 
-  const [sendOtp, { isLoading: sendingOtp }] = useSendOtpMutation();
+  const [sendAccountSecurityOtp, { isLoading: sendingOtp }] =
+    useSendAccountSecurityOtpMutation();
   const [deactivateAccount, { isLoading: deactivating }] =
     useDeactivateAccountMutation();
   const [deleteAccount, { isLoading: deleting }] = useDeleteAccountMutation();
@@ -54,11 +55,7 @@ export default function AccountManagementSettings({ user }) {
       return toast.error("No registered email found for this account.");
     }
     try {
-      const res = await sendOtp({
-        email: user.email,
-        fullName: user.fullName || user.username,
-        purpose: "account-security",
-      }).unwrap();
+      const res = await sendAccountSecurityOtp({ action }).unwrap();
       if (res.success) {
         toast.success(`Verification code sent to ${user.email}`);
         setOtpCountdown(60);
@@ -182,8 +179,8 @@ export default function AccountManagementSettings({ user }) {
               Danger Zone & Account Controls
             </h2>
             <p className="mt-1 text-xs leading-5 text-zinc-500">
-              High-security operations require OTP verification and your current
-              password.
+              High-security operations require OTP verification. Accounts with a
+              password also require that password.
             </p>
           </div>
         </div>
@@ -226,8 +223,12 @@ export default function AccountManagementSettings({ user }) {
 
             <p className="mt-2 text-xs leading-relaxed text-zinc-500">
               {action === "delete"
-                ? "This action is irreversible. For security, you must confirm your password and verify a one-time code sent to your email."
-                : "You will be signed out on all devices. For your protection, verify with password and OTP."}
+                ? user?.hasPassword
+                  ? "For security, confirm your password and verify a one-time code sent to your email."
+                  : "For security, confirm the phrase and verify a one-time code sent to your email."
+                : user?.hasPassword
+                  ? "You will be signed out on all devices. For your protection, verify with password and OTP."
+                  : "You will be signed out on all devices. For your protection, verify with an email OTP."}
             </p>
 
             <div className="mt-5 space-y-4">

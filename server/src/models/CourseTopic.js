@@ -105,6 +105,11 @@ const courseTopicSchema = new Schema(
       type: String,
       default: "",
     },
+    imageAsset: {
+      type: Schema.Types.ObjectId,
+      ref: "Asset",
+      default: null,
+    },
   },
   { timestamps: true },
 );

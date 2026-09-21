@@ -18,6 +18,7 @@ import {
   deleteMyAccount,
 } from "../controllers/user.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
+import { sendAccountSecurityOtp } from "../controllers/otp.controller.js";
 import { requirePermission } from "../utils/permissions.js";
 import {
   getPermissionMatrix,
@@ -54,6 +55,7 @@ router.patch(
   compressAvatar,
   updateMyProfile,
 );
+router.post("/me/account-security-otp", protect, sendAccountSecurityOtp);
 router.post("/me/deactivate", protect, deactivateMyAccount);
 router.delete("/me/account", protect, deleteMyAccount);
 router.get("/me/bookmarks", protect, getMyBookmarks);

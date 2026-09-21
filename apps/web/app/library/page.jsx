@@ -293,11 +293,15 @@ export default function LibraryPage() {
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl">
                     <SelectItem value="all">All types</SelectItem>
-                    {TYPES.map(([v, l]) => (
-                      <SelectItem key={v} value={v}>
-                        {l}
-                      </SelectItem>
-                    ))}
+                    {TYPES.map(([v, l]) => {
+                      const count = entries.filter((e) => e.type === v).length;
+                      if (count === 0 && v !== filter) return null;
+                      return (
+                        <SelectItem key={v} value={v}>
+                          {l} ({count})
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>

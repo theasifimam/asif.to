@@ -2,7 +2,15 @@ import LogoLoader from "@/components/ui/LogoLoader";
 import React from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, EyeOff, BarChart3, Edit3, Trash2, ArrowUpRight, FileText } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  BarChart3,
+  Edit3,
+  Trash2,
+  ArrowUpRight,
+  FileText,
+} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Button, Badge, Card } from "@/components/ui";
 
@@ -15,7 +23,7 @@ export default function ArticleCardView({
   setIsDeleteOpen,
 }) {
   return (
-    <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
       <AnimatePresence>
         {articles.map((item, i) => {
           const isVisibleOnWeb = item.status === "published";
@@ -62,7 +70,7 @@ export default function ArticleCardView({
                       }`}
                     >
                       {togglingId === item._id ? (
-                        <LogoLoader size={12} className=""  />
+                        <LogoLoader size={12} className="" />
                       ) : isVisibleOnWeb ? (
                         <Eye size={12} />
                       ) : (
@@ -128,7 +136,7 @@ export default function ArticleCardView({
                     }`}
                   >
                     {togglingId === item._id ? (
-                      <LogoLoader size={12} className=""  />
+                      <LogoLoader size={12} className="" />
                     ) : isVisibleOnWeb ? (
                       <Eye size={12} />
                     ) : (

@@ -18,7 +18,7 @@ const generateOtp = () => String(crypto.randomInt(100000, 999999));
 export const sendOtp = async (req, res) => {
   let normalizedEmail;
   try {
-    const { email, fullName, purpose = "verification" } = req.body;
+    const { email, fullName, purpose = "verification", action } = req.body;
 
     if (!email) {
       res.status(400).json({ success: false, message: "Email is required." });
@@ -129,7 +129,7 @@ export const sendOtp = async (req, res) => {
 
     // Do not tell the client that the code was sent until SMTP has accepted it.
     // This also lets the UI surface configuration and provider failures.
-    await sendOtpEmail(normalizedEmail, name, otp, purpose);
+    await sendOtpEmail(normalizedEmail, name, otp, purpose, action);
 
     res
       .status(200)
@@ -147,6 +147,27 @@ export const sendOtp = async (req, res) => {
         : "Verification email could not be delivered. Please try again shortly.",
     });
   }
+};
+
+// POST /api/v1/users/me/account-security-otp
+// Account lifecycle OTPs must use the authenticated user's verified account
+// email. Do not allow the client to choose an arbitrary recipient here.
+export const sendAccountSecurityOtp = async (req, res) => {
+  if (!req.user?.email) {
+    return res.status(401).json({
+      success: false,
+      message: "You must be signed in to request an account security code.",
+    });
+  }
+
+  req.body = {
+    ...(req.body || {}),
+    email: req.user.email,
+    fullName: req.user.fullName,
+    purpose: "account-security",
+    action: req.body?.action === "delete" ? "delete" : "deactivate",
+  };
+  return sendOtp(req, res);
 };
 
 // POST /api/v1/auth/otp/verify

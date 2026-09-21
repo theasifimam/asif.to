@@ -164,7 +164,7 @@ export default function ProfileLibraryTab({
                   </SelectItem>
                   {Object.entries(LIBRARY_TYPE_CONFIG).map(([tKey, cfg]) => {
                     const count = entries.filter((e) => e.type === tKey).length;
-                    if (count === 0 && !isOwnProfile) return null;
+                    if (count === 0 && tKey !== typeFilter) return null;
                     const Icon = cfg.icon;
                     return (
                       <SelectItem key={tKey} value={tKey}>

@@ -133,6 +133,13 @@ export const authApi = createApi({
         data: typeof data === "string" ? { confirmation: data } : data,
       }),
     }),
+    sendAccountSecurityOtp: builder.mutation({
+      query: (data = {}) => ({
+        url: "/users/me/account-security-otp",
+        method: "POST",
+        data,
+      }),
+    }),
     deleteAccount: builder.mutation({
       query: (data) => ({
         url: "/users/me/account",
@@ -196,6 +203,7 @@ export const {
   useGetPublicProfileQuery,
   useUpdateProfileMutation,
   useDeactivateAccountMutation,
+  useSendAccountSecurityOtpMutation,
   useDeleteAccountMutation,
   useToggleBookmarkMutation,
   useGetBookmarksQuery,

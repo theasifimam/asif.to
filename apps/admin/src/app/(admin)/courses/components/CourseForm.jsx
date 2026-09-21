@@ -115,7 +115,11 @@ export default function CourseForm({ courseId = null }) {
             res?.data?.users ||
             res?.data?.data ||
             (Array.isArray(res?.data) ? res.data : []);
-          setAdminUsers(Array.isArray(usersData) ? usersData : []);
+          const ALLOWED_ROLES = ["author", "admin", "super_admin", "superadmin"];
+          const staffUsers = (Array.isArray(usersData) ? usersData : []).filter(
+            (u) => ALLOWED_ROLES.includes((u.role || "").toLowerCase()),
+          );
+          setAdminUsers(staffUsers);
         }
       });
     }
@@ -446,19 +450,20 @@ export default function CourseForm({ courseId = null }) {
                 hidden
                 onChange={chooseImage}
               />
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch gap-2.5">
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-700 px-4 py-5 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900/50 px-4 py-3.5 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
                   <ImagePlus className="h-4 w-4" /> Choose course image
                 </button>
-                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-zinc-400"><span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />or reuse<span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" /></div>
                 <AssetPicker
                   value={selectedImageAsset}
                   accept="image/*"
-                  label="Choose from Library"
+                  label="Select from library"
+                  className="flex-1"
+                  buttonClassName="flex w-full h-full items-center justify-center gap-2 rounded-2xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900/50 px-4 py-3.5 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   onChange={(asset) => {
                     setSelectedImageAsset(asset);
                     setImageFile(null);
@@ -467,29 +472,30 @@ export default function CourseForm({ courseId = null }) {
                     setImagePreview(getAssetUrl(asset, { preview: true }));
                   }}
                 />
-                {imagePreview && (
-                  <div className="relative overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900">
-                    <img
-                      src={imagePreview}
-                      alt="Course preview"
-                      className="h-40 w-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImagePreview("");
-                        setImageFile(null);
-                        setSelectedImageAsset(null);
-                        update("thumbnailAsset", "");
-                        update("thumbnail", "");
-                      }}
-                      className="absolute right-2 top-2 rounded-full bg-black/60 p-1.5 text-white hover:bg-black/80 transition-colors"
-                      title="Remove image"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                )}
+              </div>
+              {imagePreview && (
+                <div className="relative overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900">
+                  <img
+                    src={imagePreview}
+                    alt="Course preview"
+                    className="h-40 w-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImagePreview("");
+                      setImageFile(null);
+                      setSelectedImageAsset(null);
+                      update("thumbnailAsset", "");
+                      update("thumbnail", "");
+                    }}
+                    className="absolute right-2 top-2 rounded-full bg-black/60 p-1.5 text-white hover:bg-black/80 transition-colors"
+                    title="Remove image"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
                 <div className="space-y-1">
                   <Label htmlFor="course-thumbnail" className="text-xs text-muted-foreground">Or direct image URL</Label>
                   <Input
@@ -507,7 +513,6 @@ export default function CourseForm({ courseId = null }) {
                   />
                 </div>
               </div>
-            </div>
             <div className="space-y-2">
               <Label htmlFor="course-outcomes">Learning outcomes</Label>
               <Textarea
@@ -857,8 +862,16 @@ export default function CourseForm({ courseId = null }) {
                   <SelectContent>
                     {adminUsers.map((u) => (
                       <SelectItem key={u._id} value={u._id}>
-                        <span className="font-medium">{u.fullName || u.name || u.username}</span>
-                        {u.email && <span className="ml-1 text-zinc-400 text-[10px]">({u.email})</span>}
+                        <div className="flex flex-col py-0.5 min-w-0">
+                          <span className="font-medium text-xs leading-tight truncate">
+                            {u.fullName || u.name || u.username}
+                          </span>
+                          {u.email && (
+                            <span className="text-[10px] text-zinc-400 font-normal leading-tight truncate">
+                              {u.email}
+                            </span>
+                          )}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>

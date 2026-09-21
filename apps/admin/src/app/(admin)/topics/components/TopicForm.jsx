@@ -112,7 +112,11 @@ export default function TopicForm({ topicId = null }) {
             usersResponse?.data?.users ||
             usersResponse?.data?.data ||
             (Array.isArray(usersResponse?.data) ? usersResponse.data : []);
-          setAdminUsers(Array.isArray(usersData) ? usersData : []);
+          const ALLOWED_ROLES = ["author", "admin", "super_admin", "superadmin"];
+          const staffUsers = (Array.isArray(usersData) ? usersData : []).filter(
+            (u) => ALLOWED_ROLES.includes((u.role || "").toLowerCase()),
+          );
+          setAdminUsers(staffUsers);
         }
         if (topicResponse?.success) {
           const topic = topicResponse.data?.data;
@@ -714,13 +718,28 @@ export default function TopicForm({ topicId = null }) {
                 hidden
                 onChange={chooseImage}
               />
-              <button
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-zinc-300 px-4 py-4 text-xs font-bold text-zinc-500 hover:border-blue-500 hover:text-blue-600 dark:border-zinc-700"
-              >
-                <ImagePlus className="h-4 w-4" /> Choose image
-              </button>
+              <div className="flex flex-col sm:flex-row items-stretch gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900/50 px-4 py-3.5 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  <ImagePlus className="h-4 w-4" /> Choose image
+                </button>
+                <AssetPicker
+                  value={selectedImageAsset}
+                  accept="image/*"
+                  label="Select from library"
+                  className="flex-1"
+                  buttonClassName="flex w-full h-full items-center justify-center gap-2 rounded-2xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900/50 px-4 py-3.5 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  onChange={(asset) => {
+                    setSelectedImageAsset(asset);
+                    setImageFile(null);
+                    update("imageAsset", asset._id);
+                    setImagePreview(getAssetUrl(asset, { preview: true }));
+                  }}
+                />
+              </div>
               {imagePreview && (
                 <div className="relative overflow-hidden rounded-2xl">
                   <img
@@ -803,14 +822,16 @@ export default function TopicForm({ topicId = null }) {
                     <SelectContent>
                       {adminUsers.map((u) => (
                         <SelectItem key={u._id} value={u._id}>
-                          <span className="font-medium">
-                            {u.fullName || u.name || u.username}
-                          </span>
-                          {u.email && (
-                            <span className="ml-1 text-zinc-400 text-[10px]">
-                              ({u.email})
+                          <div className="flex flex-col py-0.5 min-w-0">
+                            <span className="font-medium text-xs leading-tight truncate">
+                              {u.fullName || u.name || u.username}
                             </span>
-                          )}
+                            {u.email && (
+                              <span className="text-[10px] text-zinc-400 font-normal leading-tight truncate">
+                                {u.email}
+                              </span>
+                            )}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>

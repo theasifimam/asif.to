@@ -6,6 +6,8 @@ import InterviewQuestion from "../models/Question.js";
 import Chapter from "../models/Chapter.js";
 import { formatCanonicalUrl } from "../utils/canonical.js";
 import fs from "fs";
+import { resolvePublicAsset } from "../services/asset.service.js";
+import { removeEntityAssetUsages, syncEntityAssetUsages } from "../services/assetUsage.service.js";
 
 function slugify(value = "") {
   return value
@@ -275,7 +277,10 @@ export const createCourseTopic = async (req, res) => {
       targetSlug,
     );
 
-    let imageUrl = "";
+    const selectedAsset = req.body.imageAsset
+      ? await resolvePublicAsset(req.body.imageAsset, "image")
+      : null;
+    let imageUrl = selectedAsset?.url || "";
     if (req.file) {
       imageUrl = `/uploads/articles/${req.file.filename}`;
     }
@@ -291,9 +296,18 @@ export const createCourseTopic = async (req, res) => {
       relatedTopics,
       interviewQuestions,
       image: imageUrl,
+      imageAsset: selectedAsset?.asset._id || null,
       author: req.user._id,
       status: "draft",
       publishedAt: null,
+    });
+    await syncEntityAssetUsages({
+      entityType: "courseTopic",
+      entityId: topic._id,
+      entityTitle: topic.title,
+      entityStatus: topic.status,
+      route: `/topics/${topic._id}/edit`,
+      references: topic.imageAsset ? [{ asset: topic.imageAsset, field: "image" }] : [],
     });
     res.status(201).json({
       success: true,
@@ -415,6 +429,15 @@ export const updateCourseTopic = async (req, res) => {
         }
       }
       topic.image = `/uploads/articles/${req.file.filename}`;
+      topic.imageAsset = null;
+    } else if (req.body.imageAsset !== undefined) {
+      if (req.body.imageAsset) {
+        const selectedAsset = await resolvePublicAsset(req.body.imageAsset, "image");
+        topic.imageAsset = selectedAsset.asset._id;
+        topic.image = selectedAsset.url;
+      } else {
+        topic.imageAsset = null;
+      }
     } else if (req.body.image === "" || req.body.image === "null" || req.body.image === null) {
       if (topic.image && topic.image.startsWith("/")) {
         const oldImagePath = topic.image.slice(1);
@@ -423,9 +446,18 @@ export const updateCourseTopic = async (req, res) => {
         }
       }
       topic.image = "";
+      topic.imageAsset = null;
     }
 
     await topic.save();
+    await syncEntityAssetUsages({
+      entityType: "courseTopic",
+      entityId: topic._id,
+      entityTitle: topic.title,
+      entityStatus: topic.status,
+      route: `/topics/${topic._id}/edit`,
+      references: topic.imageAsset ? [{ asset: topic.imageAsset, field: "image" }] : [],
+    });
     res.json({
       success: true,
       data: await adminPopulate(CourseTopic.findById(topic._id)),
@@ -493,6 +525,8 @@ export const deleteCourseTopic = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, message: "Topic not found." });
+
+    await removeEntityAssetUsages("courseTopic", topic._id);
 
     if (topic.image && topic.image.startsWith("/")) {
       const oldImagePath = topic.image.slice(1);
