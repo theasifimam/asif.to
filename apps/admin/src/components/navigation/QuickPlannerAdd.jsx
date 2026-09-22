@@ -238,7 +238,11 @@ export default function QuickPlannerAdd() {
             >
               <SelectValue placeholder="Category" />
             </SelectTrigger>
-            <SelectContent align="start" className="z-10100">
+            <SelectContent
+              align="start"
+              portal={false}
+              className="z-10100"
+            >
               <SelectItem value="Development">Development</SelectItem>
               <SelectItem value="SEO">SEO</SelectItem>
               <SelectItem value="Content">Content</SelectItem>

@@ -595,7 +595,7 @@ export const deactivateMyAccount = async (req, res) => {
         message: "A 6-digit email verification code is required to deactivate your account.",
       });
     }
-    const otpResult = verifyAndConsumeOtp(
+    const otpResult = await verifyAndConsumeOtp(
       req.user.email,
       otp,
       "account-security",
@@ -690,7 +690,7 @@ export const deleteMyAccount = async (req, res) => {
         message: "A 6-digit email verification code is required to delete your account.",
       });
     }
-    const otpResult = verifyAndConsumeOtp(
+    const otpResult = await verifyAndConsumeOtp(
       req.user.email,
       otp,
       "account-security",

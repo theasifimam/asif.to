@@ -69,6 +69,7 @@ export const upsertOAuthUser = async (req, res) => {
       });
     }
     const normalizedEmail = String(email).trim().toLowerCase();
+    let createdOAuthUser = false;
     let user = await User.findOne({
       oauthAccounts: {
         $elemMatch: { provider, providerAccountId: String(providerAccountId) },
@@ -113,6 +114,7 @@ export const upsertOAuthUser = async (req, res) => {
           status: "active",
           role: "reader",
         });
+        createdOAuthUser = true;
       }
     }
     // Admin-imposed blocks are always hard-blocked
@@ -179,6 +181,15 @@ export const upsertOAuthUser = async (req, res) => {
     user.providerAccountId ||= String(providerAccountId);
     user.lastLogin = new Date();
     await user.save({ validateBeforeSave: false });
+
+    // OAuth callbacks do not pass through the regular signup controller.
+    // Send this only for a genuinely new account, not every Google login.
+    if (createdOAuthUser) {
+      sendWelcomeEmail(user.email, user.fullName).catch((error) =>
+        console.error("[AUTH] OAuth welcome email failed:", error?.message || error),
+      );
+    }
+
     return res.json({
       success: true,
       data: {
@@ -331,7 +342,7 @@ export const signup = async (req, res) => {
       });
     }
 
-    const otpResult = verifyAndConsumeOtp(normalizedEmail, otp, "signup");
+    const otpResult = await verifyAndConsumeOtp(normalizedEmail, otp, "signup");
     if (!otpResult.success) {
       res.status(400).json({ success: false, message: otpResult.message });
       return;
@@ -604,7 +615,7 @@ export const updatePassword = async (req, res) => {
         });
       }
     } else {
-      const otpResult = verifyAndConsumeOtp(
+      const otpResult = await verifyAndConsumeOtp(
         user.email,
         req.body.otp,
         "forgot-password",
@@ -701,7 +712,7 @@ export const resetPassword = async (req, res) => {
     }
 
     // Verify OTP using the helper function
-    const otpResult = verifyAndConsumeOtp(email, otp, "forgot-password");
+    const otpResult = await verifyAndConsumeOtp(email, otp, "forgot-password");
     if (!otpResult.success) {
       res.status(400).json({ success: false, message: otpResult.message });
       return;

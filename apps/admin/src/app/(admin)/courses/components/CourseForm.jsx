@@ -5,7 +5,16 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getModuleBackUrl } from "@/hooks/useModuleHistory";
-import { ArrowLeft, BookOpen, ExternalLink, ImagePlus, Save, Send, UserPen, X } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpen,
+  ExternalLink,
+  ImagePlus,
+  Save,
+  Send,
+  UserPen,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { Button } from "@/components/ui/button";
@@ -115,7 +124,12 @@ export default function CourseForm({ courseId = null }) {
             res?.data?.users ||
             res?.data?.data ||
             (Array.isArray(res?.data) ? res.data : []);
-          const ALLOWED_ROLES = ["author", "admin", "super_admin", "superadmin"];
+          const ALLOWED_ROLES = [
+            "author",
+            "admin",
+            "super_admin",
+            "superadmin",
+          ];
           const staffUsers = (Array.isArray(usersData) ? usersData : []).filter(
             (u) => ALLOWED_ROLES.includes((u.role || "").toLowerCase()),
           );
@@ -164,7 +178,9 @@ export default function CourseForm({ courseId = null }) {
         setImagePreview(getImageUrl(course.thumbnail));
       }
       if (course?.thumbnailAsset) {
-        setSelectedImageAsset({ _id: course.thumbnailAsset?._id || course.thumbnailAsset });
+        setSelectedImageAsset({
+          _id: course.thumbnailAsset?._id || course.thumbnailAsset,
+        });
       }
       setSlugEdited(true);
       setLoading(false);
@@ -211,7 +227,10 @@ export default function CourseForm({ courseId = null }) {
       data.append("seoDescription", form.seoDescription || "");
       data.append("canonicalUrl", form.canonicalUrl || "");
       data.append("interviewSeoTitle", form.interviewSeoTitle || "");
-      data.append("interviewSeoDescription", form.interviewSeoDescription || "");
+      data.append(
+        "interviewSeoDescription",
+        form.interviewSeoDescription || "",
+      );
       data.append("interviewCanonicalUrl", form.interviewCanonicalUrl || "");
       data.append("interviewOgImage", form.interviewOgImage || "");
 
@@ -234,10 +253,14 @@ export default function CourseForm({ courseId = null }) {
       data.append("learningOutcomes", JSON.stringify(outcomesArray));
 
       data.append("relatedCourses", JSON.stringify(form.relatedCourses || []));
-      data.append("popularChapterIds", JSON.stringify(form.popularChapterIds || []));
+      data.append(
+        "popularChapterIds",
+        JSON.stringify(form.popularChapterIds || []),
+      );
       data.append("examSettings", JSON.stringify(form.examSettings || {}));
       // Super-admin author override
-      if (isSuperAdmin && overrideAuthorId) data.append("authorId", overrideAuthorId);
+      if (isSuperAdmin && overrideAuthorId)
+        data.append("authorId", overrideAuthorId);
 
       if (imageFile) {
         data.append("thumbnail", imageFile);
@@ -246,7 +269,8 @@ export default function CourseForm({ courseId = null }) {
       } else {
         data.append("thumbnail", form.thumbnail);
       }
-      if (form.thumbnailAsset) data.append("thumbnailAsset", form.thumbnailAsset);
+      if (form.thumbnailAsset)
+        data.append("thumbnailAsset", form.thumbnailAsset);
 
       return data;
     }
@@ -309,7 +333,10 @@ export default function CourseForm({ courseId = null }) {
     toast.success(status === "published" ? "Course published" : "Course saved");
     setSaving(false);
 
-    const emailFollowUp = await subscriberNotification.notify(savedCourse?._id || courseId, status || form.status);
+    const emailFollowUp = await subscriberNotification.notify(
+      savedCourse?._id || courseId,
+      status || form.status,
+    );
     window.location.assign(emailFollowUp || returnTo);
     return savedCourse;
   };
@@ -372,8 +399,8 @@ export default function CourseForm({ courseId = null }) {
         </>
       }
     >
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] min-w-0 w-full">
-        <main className="space-y-6 min-w-0 w-full">
+      <div className="grid gap-1 lg:grid-cols-[minmax(0,1fr)_320px] min-w-0 w-full">
+        <main className="space-y-1 min-w-0 w-full">
           <section className={formSectionClass}>
             <div className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-primary" />
@@ -496,23 +523,28 @@ export default function CourseForm({ courseId = null }) {
                   </button>
                 </div>
               )}
-                <div className="space-y-1">
-                  <Label htmlFor="course-thumbnail" className="text-xs text-muted-foreground">Or direct image URL</Label>
-                  <Input
-                    id="course-thumbnail"
-                    type="text"
-                    value={form.thumbnail}
-                    onChange={(event) => {
-                      const val = event.target.value;
-                      update("thumbnail", val);
-                      update("thumbnailAsset", "");
-                      setSelectedImageAsset(null);
-                      if (!imageFile) setImagePreview(getImageUrl(val));
-                    }}
-                    placeholder="https://... or uploaded image filename"
-                  />
-                </div>
+              <div className="space-y-1">
+                <Label
+                  htmlFor="course-thumbnail"
+                  className="text-xs text-muted-foreground"
+                >
+                  Or direct image URL
+                </Label>
+                <Input
+                  id="course-thumbnail"
+                  type="text"
+                  value={form.thumbnail}
+                  onChange={(event) => {
+                    const val = event.target.value;
+                    update("thumbnail", val);
+                    update("thumbnailAsset", "");
+                    setSelectedImageAsset(null);
+                    if (!imageFile) setImagePreview(getImageUrl(val));
+                  }}
+                  placeholder="https://... or uploaded image filename"
+                />
               </div>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="course-outcomes">Learning outcomes</Label>
               <Textarea
@@ -742,7 +774,7 @@ export default function CourseForm({ courseId = null }) {
           </section>
         </main>
 
-        <aside className="space-y-6 min-w-0 w-full">
+        <aside className="space-y-1 min-w-0 w-full">
           {subscriberNotification.controls}
           <div className="space-y-4 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-4 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950 min-w-0 w-full">
             <h2 className="font-semibold text-zinc-900 dark:text-white text-sm">
@@ -877,7 +909,9 @@ export default function CourseForm({ courseId = null }) {
                   </SelectContent>
                 </Select>
                 {adminUsers.length === 0 && (
-                  <p className="text-[10px] text-zinc-400 italic">Loading users...</p>
+                  <p className="text-[10px] text-zinc-400 italic">
+                    Loading users...
+                  </p>
                 )}
               </div>
             </div>

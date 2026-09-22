@@ -138,7 +138,7 @@ export default function PlacementsPage() {
       </div>
 
       {settings?.previewMode && (
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-6 grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
           {placements.map((placement) => (
             <div
               key={placement.key}

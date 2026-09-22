@@ -3,7 +3,7 @@ import { Card } from "@/components/ui";
 
 export default function ArticleMetrics({ stats }) {
   return (
-    <div className="admin-surface mt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 p-6 sm:p-8 rounded-3xl">
+    <div className="admin-surface mt-1 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 p-6 sm:p-8 rounded-3xl">
       <div className="flex flex-col gap-1.5 max-w-md">
         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">
           Visibility Summary

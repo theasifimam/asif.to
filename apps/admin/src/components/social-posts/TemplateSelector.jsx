@@ -35,7 +35,7 @@ export default function TemplateSelector({ value, onChange }) {
       </div>
 
       {/* Templates */}
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
         {templates.map((template) => {
           const isSelected = value === template.id;
 

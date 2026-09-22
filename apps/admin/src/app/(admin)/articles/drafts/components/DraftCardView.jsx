@@ -16,7 +16,7 @@ export default function DraftCardView({
   setIsDeleteOpen,
 }) {
   return (
-    <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
       <AnimatePresence>
         {drafts.map((draft, i) => {
           const imgUrl = getImageUrl(draft.image);

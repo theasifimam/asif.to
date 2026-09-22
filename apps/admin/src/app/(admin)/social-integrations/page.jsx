@@ -222,7 +222,7 @@ export default function SocialIntegrationsPage() {
           <LogoLoader className="h-12 w-12 text-blue-600" />
         </div>
       ) : (
-        <div className="grid gap-4 xl:grid-cols-3">
+        <div className="grid gap-1 xl:grid-cols-3">
           {Object.entries(META).map(([platform, meta]) => {
             const item = byPlatform[platform] || {
               platform,

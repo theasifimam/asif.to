@@ -43,6 +43,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CanonicalUrlInput } from "@/components/admin";
+import AssetPicker from "@/components/assets/AssetPicker";
 
 const initialForm = {
   type: "article",
@@ -60,6 +61,7 @@ const initialForm = {
   relatedTopics: [],
   interviewQuestions: [],
   status: "draft",
+  imageAsset: "",
 };
 
 function slugify(value) {
@@ -90,6 +92,7 @@ export default function TopicForm({ topicId = null }) {
   const fileRef = useRef(null);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [selectedImageAsset, setSelectedImageAsset] = useState(null);
   const [adminUsers, setAdminUsers] = useState([]);
   const [overrideAuthorId, setOverrideAuthorId] = useState("");
   const { user: currentAdminUser } = useAuth();
@@ -112,7 +115,12 @@ export default function TopicForm({ topicId = null }) {
             usersResponse?.data?.users ||
             usersResponse?.data?.data ||
             (Array.isArray(usersResponse?.data) ? usersResponse.data : []);
-          const ALLOWED_ROLES = ["author", "admin", "super_admin", "superadmin"];
+          const ALLOWED_ROLES = [
+            "author",
+            "admin",
+            "super_admin",
+            "superadmin",
+          ];
           const staffUsers = (Array.isArray(usersData) ? usersData : []).filter(
             (u) => ALLOWED_ROLES.includes((u.role || "").toLowerCase()),
           );
@@ -125,6 +133,7 @@ export default function TopicForm({ topicId = null }) {
             ...topic,
             course: topic.course?._id || topic.course,
             category: topic.category?._id || topic.category,
+            imageAsset: topic.imageAsset?._id || topic.imageAsset || "",
             keywords: (topic.keywords || []).join(", "),
             relatedTopics: (topic.relatedTopics || []).map(
               (item) => item._id || item,
@@ -137,6 +146,11 @@ export default function TopicForm({ topicId = null }) {
           const currentAuthorId = topic?.author?._id || topic?.author || "";
           setOverrideAuthorId(String(currentAuthorId));
           setImagePreview(getImageUrl(topic.image));
+          if (topic.imageAsset) {
+            setSelectedImageAsset({
+              _id: topic.imageAsset?._id || topic.imageAsset,
+            });
+          }
           setSlugEdited(true);
         }
         setLoading(false);
@@ -214,6 +228,8 @@ export default function TopicForm({ topicId = null }) {
     const file = event.target.files?.[0];
     if (!file) return;
     setImageFile(file);
+    setSelectedImageAsset(null);
+    update("imageAsset", "");
     setImagePreview(URL.createObjectURL(file));
   };
 
@@ -250,6 +266,9 @@ export default function TopicForm({ topicId = null }) {
       data.append("image", imageFile);
     } else if (!imagePreview) {
       data.append("image", "");
+    }
+    if (form.imageAsset) {
+      data.append("imageAsset", form.imageAsset);
     }
 
     if (isSuperAdmin && overrideAuthorId) {
@@ -334,7 +353,7 @@ export default function TopicForm({ topicId = null }) {
     );
 
   return (
-    <main className="mx-auto max-w-6xl space-y-6 px-3 py-6 sm:px-6 lg:px-8 min-w-0 w-full overflow-x-hidden">
+    <main className="mx-auto max-w-6xl space-y-1 px-3 py-1 sm:px-1 lg:px-8 min-w-0 w-full overflow-x-hidden">
       <header className="flex flex-col justify-between gap-4 md:flex-row md:items-end min-w-0 w-full">
         <div className="min-w-0">
           <Link
@@ -387,8 +406,8 @@ export default function TopicForm({ topicId = null }) {
         </div>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] min-w-0 w-full">
-        <section className="space-y-6 min-w-0 w-full">
+      <div className="grid gap-1 lg:grid-cols-[minmax(0,1fr)_320px] min-w-0 w-full">
+        <section className="space-y-1 min-w-0 w-full">
           <div className="space-y-5 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-4 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950 min-w-0 w-full">
             <div className="space-y-2">
               <Label>Title</Label>
@@ -629,7 +648,7 @@ export default function TopicForm({ topicId = null }) {
           </div>
         </section>
 
-        <aside className="space-y-6 min-w-0 w-full">
+        <aside className="space-y-1 min-w-0 w-full">
           <div className="space-y-4 rounded-3xl sm:rounded-4xl border border-zinc-200/60 bg-white p-4 sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-950 min-w-0 w-full">
             <h2 className="font-semibold text-zinc-900 dark:text-white">
               Placement

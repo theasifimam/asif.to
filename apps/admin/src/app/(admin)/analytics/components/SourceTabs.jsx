@@ -25,7 +25,7 @@ export const SOURCES = [
 
 export function SourceTabs({ value, onChange }) {
   return (
-    <div className="inline-flex max-w-full items-center gap-1.5 p-1 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 overflow-x-auto custom-scrollbar">
+    <div className="inline-flex max-w-full items-center gap-1.5 p-1 overflow-x-auto custom-scrollbar">
       {SOURCES.map((item) => {
         const Icon = item.icon;
         const active = value === item.value;
@@ -35,7 +35,7 @@ export function SourceTabs({ value, onChange }) {
             key={item.value}
             type="button"
             onClick={() => onChange(item.value)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               active
                 ? "bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-xs"
                 : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"

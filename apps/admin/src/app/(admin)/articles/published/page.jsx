@@ -32,11 +32,10 @@ export default function PublishedPage() {
   const [togglingId, setTogglingId] = useState(null);
   const [urlFilters, setUrlFilters] = useUrlFilters({ view: "card" });
   const viewMode = urlFilters.view || "card";
-  const setViewMode = (v) => setUrlFilters((current) => ({ ...current, view: v }));
+  const setViewMode = (v) =>
+    setUrlFilters((current) => ({ ...current, view: v }));
   const [statusFilter, setStatusFilter] = useState("all"); // 'all' | 'published' | 'draft'
   const [searchQuery, setSearchQuery] = useState("");
-
-
 
   const fetchArticles = useCallback(async () => {
     setLoading(true);
@@ -170,7 +169,7 @@ export default function PublishedPage() {
       />
 
       {loading ? (
-        <div className="flex-1 space-y-8 py-20 px-4">
+        <div className="flex-1 space-y-1 py-1 px-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center justify-between">
               <div className="flex items-center gap-8">

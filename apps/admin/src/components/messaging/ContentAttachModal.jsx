@@ -101,15 +101,15 @@ export default function ContentAttachModal({ open, onClose, onSelect }) {
           </div>
 
           {/* Type Filter Pills */}
-          <div className="mt-2.5 flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
+          <div className="mt-2.5 inline-flex max-w-full items-center gap-1 p-1 overflow-x-auto scrollbar-none">
             {TABS.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveType(tab.key)}
-                className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-bold transition-all cursor-pointer ${
+                className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all cursor-pointer ${
                   activeType === tab.key
-                    ? "bg-blue-600 text-white shadow-xs"
-                    : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                    ? "bg-white text-blue-600 shadow-xs dark:bg-zinc-800 dark:text-blue-400"
+                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                 }`}
               >
                 {tab.label}

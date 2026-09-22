@@ -86,6 +86,7 @@ const routeRules = [
   [/^\/legal(?:\/|$)/, "settings.manage"],
   [/^\/media-audit(?:\/|$)/, "settings.manage"],
   [/^\/site-settings(?:\/|$)/, "settings.manage"],
+  [/^\/admin-guide(?:\/|$)/, "content.read"],
   [/^\/messages(?:\/|$)/, "users.edit"],
   [/^\/articles(?:\/|$)/, "articles.create"],
   [/^\/topics\/(?:new|[^/]+\/edit)(?:\/|$)/, "topics.manage"],

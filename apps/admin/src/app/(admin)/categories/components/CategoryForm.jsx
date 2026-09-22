@@ -4,7 +4,16 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getModuleBackUrl } from "@/hooks/useModuleHistory";
-import { ArrowLeft, ExternalLink, Globe, Save, Send, Trash2, FolderTree, Layers } from "lucide-react";
+import {
+  ArrowLeft,
+  ExternalLink,
+  Globe,
+  Save,
+  Send,
+  Trash2,
+  FolderTree,
+  Layers,
+} from "lucide-react";
 import { toast } from "sonner";
 import { CanonicalUrlInput } from "@/components/admin";
 import AdminFormShell, {
@@ -199,7 +208,11 @@ export default function CategoryForm({
 
   return (
     <AdminFormShell
-      eyebrow={selectedCourse ? `Taxonomy / ${selectedCourse.title}` : "Taxonomy Manager"}
+      eyebrow={
+        selectedCourse
+          ? `Taxonomy / ${selectedCourse.title}`
+          : "Taxonomy Manager"
+      }
       title={categoryId ? `Edit category` : "Create new category"}
       description="Configure category taxonomy, rich landing intro guides, and search engine metadata."
       back={
@@ -211,7 +224,7 @@ export default function CategoryForm({
         </Link>
       }
       actions={
-        <div className="grid grid-cols-2 sm:flex sm:w-auto items-center gap-2 w-full">
+        <div className="grid grid-cols-2 sm:flex sm:w-auto items-center gap-1 w-full">
           {liveUrl && (
             <Button
               variant="outline"
@@ -247,14 +260,16 @@ export default function CategoryForm({
         </div>
       }
     >
-      <div className="grid min-w-0 w-full gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid min-w-0 w-full gap-1 lg:grid-cols-[minmax(0,1fr)_320px]">
         {/* Main Left Content Column */}
-        <main className="min-w-0 w-full space-y-6">
+        <main className="min-w-0 w-full space-y-1">
           {/* General Details Section */}
           <section className={formSectionClass}>
             <div className="flex items-center gap-2">
               <FolderTree className="h-5 w-5 text-primary shrink-0" />
-              <h2 className="text-base font-semibold">Category Details &amp; Intro Guide</h2>
+              <h2 className="text-base font-semibold">
+                Category Details &amp; Intro Guide
+              </h2>
             </div>
 
             <div className="space-y-2 min-w-0">
@@ -292,7 +307,9 @@ export default function CategoryForm({
                 <div className="flex flex-wrap items-center gap-1.5 text-xs text-zinc-500 pt-1 min-w-0 overflow-hidden">
                   <div className="flex items-center gap-1.5 shrink-0">
                     <Globe className="h-3.5 w-3.5 text-blue-500 shrink-0" />
-                    <span className="font-semibold text-zinc-600 dark:text-zinc-400">Frontend URL:</span>
+                    <span className="font-semibold text-zinc-600 dark:text-zinc-400">
+                      Frontend URL:
+                    </span>
                   </div>
                   <code className="font-mono text-blue-600 dark:text-blue-400 break-all text-[11px] min-w-0 max-w-full">
                     {liveUrl}
@@ -302,11 +319,15 @@ export default function CategoryForm({
             </div>
 
             <div className="space-y-2 min-w-0">
-              <Label htmlFor="category-description">Short Description / Subtitle</Label>
+              <Label htmlFor="category-description">
+                Short Description / Subtitle
+              </Label>
               <Textarea
                 id="category-description"
                 value={form.description}
-                onChange={(e) => setForm((curr) => ({ ...curr, description: e.target.value }))}
+                onChange={(e) =>
+                  setForm((curr) => ({ ...curr, description: e.target.value }))
+                }
                 rows={3}
                 placeholder="Brief overview displayed on category cards and the landing page hero."
                 className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 shadow-none dark:bg-zinc-900 text-xs leading-relaxed"
@@ -316,11 +337,14 @@ export default function CategoryForm({
             <div className="space-y-2 pt-2 min-w-0">
               <Label>Landing Page Rich Guide</Label>
               <p className="text-xs text-muted-foreground">
-                Write comprehensive introduction notes, cheat-sheets, or study guide content displayed on this category landing page.
+                Write comprehensive introduction notes, cheat-sheets, or study
+                guide content displayed on this category landing page.
               </p>
               <Editor
                 value={form.content}
-                onChange={(content) => setForm((curr) => ({ ...curr, content }))}
+                onChange={(content) =>
+                  setForm((curr) => ({ ...curr, content }))
+                }
                 placeholder="Start writing the landing guide for this category..."
               />
             </div>
@@ -329,9 +353,12 @@ export default function CategoryForm({
           {/* Search Engine Optimization Section */}
           <section className={formSectionClass}>
             <div>
-              <h2 className="text-base font-semibold">Search Engine Optimization &amp; Social</h2>
+              <h2 className="text-base font-semibold">
+                Search Engine Optimization &amp; Social
+              </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Custom meta tags, OpenGraph previews, and search engine directives.
+                Custom meta tags, OpenGraph previews, and search engine
+                directives.
               </p>
             </div>
 
@@ -340,7 +367,9 @@ export default function CategoryForm({
               <Input
                 id="category-seo-title"
                 value={form.seoTitle}
-                onChange={(e) => setForm((curr) => ({ ...curr, seoTitle: e.target.value }))}
+                onChange={(e) =>
+                  setForm((curr) => ({ ...curr, seoTitle: e.target.value }))
+                }
                 placeholder="Defaults to category name if left blank"
                 className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60"
               />
@@ -351,7 +380,12 @@ export default function CategoryForm({
               <Textarea
                 id="category-seo-description"
                 value={form.seoDescription}
-                onChange={(e) => setForm((curr) => ({ ...curr, seoDescription: e.target.value }))}
+                onChange={(e) =>
+                  setForm((curr) => ({
+                    ...curr,
+                    seoDescription: e.target.value,
+                  }))
+                }
                 rows={3}
                 placeholder="Concise summary for search engine snippet (recommended 150-160 characters)"
                 className="rounded-2xl border-0 bg-zinc-100 px-4 py-3 shadow-none dark:bg-zinc-900 text-xs leading-relaxed"
@@ -359,11 +393,15 @@ export default function CategoryForm({
             </div>
 
             <div className="space-y-2 min-w-0">
-              <Label htmlFor="category-keywords">Keywords (comma separated)</Label>
+              <Label htmlFor="category-keywords">
+                Keywords (comma separated)
+              </Label>
               <Input
                 id="category-keywords"
                 value={form.keywords}
-                onChange={(e) => setForm((curr) => ({ ...curr, keywords: e.target.value }))}
+                onChange={(e) =>
+                  setForm((curr) => ({ ...curr, keywords: e.target.value }))
+                }
                 placeholder="e.g. react, nextjs, frontend, javascript"
                 className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60"
               />
@@ -371,9 +409,15 @@ export default function CategoryForm({
 
             <div className="min-w-0 w-full">
               <CanonicalUrlInput
-                basePrefix={selectedCourseSlug ? `https://asif.to/${selectedCourseSlug}/interview-questions` : "https://asif.to/interview-questions"}
+                basePrefix={
+                  selectedCourseSlug
+                    ? `https://asif.to/${selectedCourseSlug}/interview-questions`
+                    : "https://asif.to/interview-questions"
+                }
                 value={form.canonicalUrl}
-                onChange={(val) => setForm((curr) => ({ ...curr, canonicalUrl: val }))}
+                onChange={(val) =>
+                  setForm((curr) => ({ ...curr, canonicalUrl: val }))
+                }
                 placeholder={form.slug || slugify(form.name)}
               />
             </div>
@@ -383,7 +427,9 @@ export default function CategoryForm({
               <Input
                 id="category-og-image"
                 value={form.ogImage}
-                onChange={(e) => setForm((curr) => ({ ...curr, ogImage: e.target.value }))}
+                onChange={(e) =>
+                  setForm((curr) => ({ ...curr, ogImage: e.target.value }))
+                }
                 placeholder="https://asif.to/images/og/..."
                 className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60 font-mono text-xs"
               />
@@ -401,7 +447,9 @@ export default function CategoryForm({
                 </div>
                 <Switch
                   checked={form.noindex}
-                  onCheckedChange={(checked) => setForm((curr) => ({ ...curr, noindex: checked }))}
+                  onCheckedChange={(checked) =>
+                    setForm((curr) => ({ ...curr, noindex: checked }))
+                  }
                 />
               </div>
 
@@ -416,7 +464,9 @@ export default function CategoryForm({
                 </div>
                 <Switch
                   checked={form.nofollow}
-                  onCheckedChange={(checked) => setForm((curr) => ({ ...curr, nofollow: checked }))}
+                  onCheckedChange={(checked) =>
+                    setForm((curr) => ({ ...curr, nofollow: checked }))
+                  }
                 />
               </div>
             </div>
@@ -425,9 +475,12 @@ export default function CategoryForm({
           {/* Related Content & Cross-Promotion */}
           <section className={formSectionClass}>
             <div>
-              <h2 className="text-base font-semibold">Related Content &amp; Cross-Promotion</h2>
+              <h2 className="text-base font-semibold">
+                Related Content &amp; Cross-Promotion
+              </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Choose featured course lessons or related courses to display alongside this guide.
+                Choose featured course lessons or related courses to display
+                alongside this guide.
               </p>
             </div>
 
@@ -437,7 +490,9 @@ export default function CategoryForm({
               {courseChapters.length > 0 ? (
                 <div className="max-h-56 overflow-y-auto space-y-1 rounded-2xl border border-zinc-200/80 bg-zinc-50/60 p-3 dark:border-zinc-800/80 dark:bg-zinc-900/40">
                   {courseChapters.map((ch, idx) => {
-                    const isSelected = (form.featuredChapters || []).includes(ch._id);
+                    const isSelected = (form.featuredChapters || []).includes(
+                      ch._id,
+                    );
                     return (
                       <label
                         key={ch._id}
@@ -449,8 +504,13 @@ export default function CategoryForm({
                           onChange={(e) => {
                             const next = e.target.checked
                               ? [...(form.featuredChapters || []), ch._id]
-                              : (form.featuredChapters || []).filter((id) => id !== ch._id);
-                            setForm((curr) => ({ ...curr, featuredChapters: next }));
+                              : (form.featuredChapters || []).filter(
+                                  (id) => id !== ch._id,
+                                );
+                            setForm((curr) => ({
+                              ...curr,
+                              featuredChapters: next,
+                            }));
                           }}
                           className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
                         />
@@ -463,7 +523,8 @@ export default function CategoryForm({
                 </div>
               ) : (
                 <p className="rounded-2xl border border-dashed border-zinc-200 p-4 text-xs text-zinc-400 dark:border-zinc-800">
-                  Select an Associated Course in the right sidebar to attach specific lessons from that course.
+                  Select an Associated Course in the right sidebar to attach
+                  specific lessons from that course.
                 </p>
               )}
             </div>
@@ -475,7 +536,9 @@ export default function CategoryForm({
                 {courses
                   .filter((c) => c._id !== form.course)
                   .map((c) => {
-                    const isSelected = (form.relatedCourses || []).includes(c._id);
+                    const isSelected = (form.relatedCourses || []).includes(
+                      c._id,
+                    );
                     return (
                       <label
                         key={c._id}
@@ -487,8 +550,13 @@ export default function CategoryForm({
                           onChange={(e) => {
                             const next = e.target.checked
                               ? [...(form.relatedCourses || []), c._id]
-                              : (form.relatedCourses || []).filter((id) => id !== c._id);
-                            setForm((curr) => ({ ...curr, relatedCourses: next }));
+                              : (form.relatedCourses || []).filter(
+                                  (id) => id !== c._id,
+                                );
+                            setForm((curr) => ({
+                              ...curr,
+                              relatedCourses: next,
+                            }));
                           }}
                           className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
                         />
@@ -502,21 +570,28 @@ export default function CategoryForm({
         </main>
 
         {/* Right Sidebar */}
-        <aside className="min-w-0 w-full space-y-6">
+        <aside className="min-w-0 w-full space-y-1">
           {/* Status & Taxonomy Assignment */}
           <section className={formSectionClass}>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <Layers className="h-5 w-5 text-primary shrink-0" />
-              <h2 className="text-base font-semibold">Publishing &amp; Taxonomy</h2>
+              <h2 className="text-base font-semibold">
+                Publishing &amp; Taxonomy
+              </h2>
             </div>
 
             <div className="space-y-2 min-w-0">
               <Label htmlFor="category-status">Status</Label>
               <Select
                 value={form.status}
-                onValueChange={(status) => setForm((curr) => ({ ...curr, status }))}
+                onValueChange={(status) =>
+                  setForm((curr) => ({ ...curr, status }))
+                }
               >
-                <SelectTrigger id="category-status" className="h-11 rounded-2xl border-zinc-200/80 bg-zinc-50/60 dark:border-zinc-800/80 dark:bg-zinc-900/60">
+                <SelectTrigger
+                  id="category-status"
+                  className="h-11 rounded-2xl border-zinc-200/80 bg-zinc-50/60 dark:border-zinc-800/80 dark:bg-zinc-900/60"
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -534,14 +609,18 @@ export default function CategoryForm({
                   setForm((curr) => ({ ...curr, course: val }));
                   if (val && val !== "none") {
                     coursesApi.getById(val).then((cRes) => {
-                      if (cRes.success) setCourseChapters(cRes.data?.data?.chapters || []);
+                      if (cRes.success)
+                        setCourseChapters(cRes.data?.data?.chapters || []);
                     });
                   } else {
                     setCourseChapters([]);
                   }
                 }}
               >
-                <SelectTrigger id="category-course" className="h-11 w-full rounded-2xl border-zinc-200/80 bg-zinc-50/60 dark:border-zinc-800/80 dark:bg-zinc-900/60">
+                <SelectTrigger
+                  id="category-course"
+                  className="h-11 w-full rounded-2xl border-zinc-200/80 bg-zinc-50/60 dark:border-zinc-800/80 dark:bg-zinc-900/60"
+                >
                   <SelectValue placeholder="Standalone (Global Taxonomy)" />
                 </SelectTrigger>
                 <SelectContent>
@@ -563,7 +642,12 @@ export default function CategoryForm({
                 id="category-order"
                 type="number"
                 value={form.order}
-                onChange={(e) => setForm((curr) => ({ ...curr, order: Number(e.target.value) || 0 }))}
+                onChange={(e) =>
+                  setForm((curr) => ({
+                    ...curr,
+                    order: Number(e.target.value) || 0,
+                  }))
+                }
                 className="h-11 rounded-2xl bg-zinc-50/60 dark:bg-zinc-900/60 font-mono text-xs"
               />
             </div>

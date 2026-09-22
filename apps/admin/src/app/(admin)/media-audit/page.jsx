@@ -151,7 +151,7 @@ export default function MediaAuditPage() {
       </header>
 
       {/* Summary Cards (Interactive Filters) */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-1 sm:grid-cols-3">
         {[
           ["Total images", summary.total, Image, "all"],
           ["In use", summary.referenced, CheckCircle2, "in_use"],
@@ -213,7 +213,7 @@ export default function MediaAuditPage() {
         {/* Filters & View Toggle */}
         <div className="flex items-center gap-3 flex-wrap">
           {/* Status Filter Pills */}
-          <div className="inline-flex h-10 sm:h-11 items-center rounded-2xl border border-zinc-200/80 bg-zinc-100 p-1 dark:border-zinc-800/80 dark:bg-zinc-900">
+          <div className="inline-flex max-w-full items-center gap-1 p-1 overflow-x-auto">
             {[
               { id: "all", label: "All" },
               { id: "in_use", label: "In Use" },
@@ -223,10 +223,10 @@ export default function MediaAuditPage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setStatusFilter(tab.id)}
-                className={`flex h-full items-center justify-center rounded-xl px-3 text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center justify-center rounded-full px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
                   statusFilter === tab.id
-                    ? "bg-white text-zinc-900 shadow-xs dark:bg-zinc-800 dark:text-white"
-                    : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+                    ? "bg-white text-blue-600 shadow-xs dark:bg-zinc-800 dark:text-blue-400"
+                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                 }`}
               >
                 {tab.label}
@@ -267,7 +267,7 @@ export default function MediaAuditPage() {
           </div>
         ) : viewMode === "card" || viewMode === "grid" ? (
           /* CARD / GRID VIEW */
-          <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:p-6">
+          <div className="grid grid-cols-1 gap-1 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:p-6">
             {paginatedFiles.map((row) => (
               <div
                 key={row.path}

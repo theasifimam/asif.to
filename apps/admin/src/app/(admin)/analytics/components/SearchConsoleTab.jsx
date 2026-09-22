@@ -69,7 +69,7 @@ export default function SearchConsoleTab({ range }) {
     <div className="space-y-10">
       <ErrorBox>{error}</ErrorBox>
 
-      <section className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-1 lg:grid-cols-4">
         <MetricCard icon={MousePointerClick} label="Google clicks" value={n(metric("clicks").value)} delta={metric("clicks").change} source="GSC" />
         <MetricCard icon={Eye} label="Search impressions" value={n(metric("impressions").value)} delta={metric("impressions").change} source="GSC" />
         <MetricCard icon={BarChart3} label="CTR" value={pct(metric("ctr").value)} delta={metric("ctr").change} source="GSC" />
@@ -106,7 +106,7 @@ export default function SearchConsoleTab({ range }) {
       </div>
 
       {/* 2-column: Search Performance Trend (1/2 space) + Search Quality Trend (1/2 space) */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-1 lg:grid-cols-2">
         <Section eyebrow="Search trend" title="Clicks and impressions over time" description="Search Console volume metrics.">
           <TrendChart
             data={overview?.trend || []}

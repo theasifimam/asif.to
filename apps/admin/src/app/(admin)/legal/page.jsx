@@ -43,7 +43,7 @@ export default function LegalPagesPage() {
       title="Legal pages"
       description="Manage policy, company information, and support content from one place."
     >
-      <section className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
         {pages.map(({ slug, title, description, icon: Icon }) => (
           <Link
             key={slug}

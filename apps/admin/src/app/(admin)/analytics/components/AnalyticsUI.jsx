@@ -129,16 +129,16 @@ export function Section({
 
 export function Pills({ items, value, onChange }) {
   return (
-    <div className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-full bg-zinc-100 p-1 dark:bg-zinc-900">
+    <div className="inline-flex max-w-full items-center gap-1 p-1 overflow-x-auto custom-scrollbar">
       {items.map(([key, label]) => (
         <button
           key={key}
           type="button"
           onClick={() => onChange(key)}
-          className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[11px] font-black ${
+          className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
             value === key
-              ? "bg-white text-blue-600 shadow-xs dark:bg-zinc-800"
-              : "text-zinc-500"
+              ? "bg-white text-blue-600 shadow-xs dark:bg-zinc-800 dark:text-blue-400"
+              : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
           }`}
         >
           {label}

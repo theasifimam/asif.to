@@ -5,7 +5,11 @@ import { Clock3, Eye, Globe2, Monitor, Users, Waypoints } from "lucide-react";
 import { analyticsApi } from "@/lib/api";
 
 import AnalyticsDataTable from "../AnalyticsDataTable";
-import { DonutChart, HorizontalBarChart, TrendChart } from "../SimpleAnalyticsCharts";
+import {
+  DonutChart,
+  HorizontalBarChart,
+  TrendChart,
+} from "../SimpleAnalyticsCharts";
 import {
   MetricCard,
   Section,
@@ -48,7 +52,9 @@ export default function FirstPartyTab({ range }) {
         setOverview(unwrap(overviewResponse));
         setError("");
       } else {
-        setError(overviewResponse.error || "First-party analytics is unavailable.");
+        setError(
+          overviewResponse.error || "First-party analytics is unavailable.",
+        );
       }
       if (deviceResponse.success) {
         setDevices(unwrap(deviceResponse)?.rows || []);
@@ -64,7 +70,12 @@ export default function FirstPartyTab({ range }) {
   useEffect(() => {
     let active = true;
     analyticsApi
-      .acquisition({ ...range, dimension: acqDimension, page: acqPage, limit: 15 })
+      .acquisition({
+        ...range,
+        dimension: acqDimension,
+        page: acqPage,
+        limit: 15,
+      })
       .then((response) => {
         if (active && response.success) setAcquisition(unwrap(response));
       });
@@ -88,7 +99,12 @@ export default function FirstPartyTab({ range }) {
   useEffect(() => {
     let active = true;
     analyticsApi
-      .locations({ ...range, dimension: locationDimension, page: locationPage, limit: 15 })
+      .locations({
+        ...range,
+        dimension: locationDimension,
+        page: locationPage,
+        limit: 15,
+      })
       .then((response) => {
         if (active && response.success) setLocations(unwrap(response));
       });
@@ -102,13 +118,17 @@ export default function FirstPartyTab({ range }) {
   const metrics = overview?.metrics || {};
   const metric = (key) => metrics[key] || { value: 0, change: 0 };
   const acquisitionLabel =
-    acqDimension === "source" ? "Source" : acqDimension === "referrer" ? "Referrer" : "Campaign";
+    acqDimension === "source"
+      ? "Source"
+      : acqDimension === "referrer"
+        ? "Referrer"
+        : "Campaign";
 
   return (
     <div className="space-y-10">
       <ErrorBox>{error}</ErrorBox>
 
-      <section className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-1 lg:grid-cols-4">
         <MetricCard
           icon={Users}
           label="Unique browsers"
@@ -142,7 +162,7 @@ export default function FirstPartyTab({ range }) {
 
       <Quality data={overview?.quality} />
 
-      <div className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
+      <div className="grid gap-1 xl:grid-cols-[1.35fr_0.65fr]">
         <Section
           eyebrow="Captured trend"
           title="First-party traffic over time"
@@ -167,7 +187,9 @@ export default function FirstPartyTab({ range }) {
           <div className="flex h-[calc(100%-2.5rem)] flex-col justify-between gap-3 rounded-3xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800 dark:bg-[#121215]">
             <div className="space-y-4">
               <div className="flex items-center justify-between border-b border-zinc-100 pb-3 dark:border-zinc-800">
-                <span className="text-xs font-semibold text-zinc-500">Views per session</span>
+                <span className="text-xs font-semibold text-zinc-500">
+                  Views per session
+                </span>
                 <span className="text-sm font-black text-zinc-900 dark:text-white">
                   {metric("sessions").value
                     ? (
@@ -178,7 +200,9 @@ export default function FirstPartyTab({ range }) {
                 </span>
               </div>
               <div className="flex items-center justify-between border-b border-zinc-100 pb-3 dark:border-zinc-800">
-                <span className="text-xs font-semibold text-zinc-500">Sessions per browser</span>
+                <span className="text-xs font-semibold text-zinc-500">
+                  Sessions per browser
+                </span>
                 <span className="text-sm font-black text-zinc-900 dark:text-white">
                   {metric("visitors").value
                     ? (
@@ -189,13 +213,17 @@ export default function FirstPartyTab({ range }) {
                 </span>
               </div>
               <div className="flex items-center justify-between border-b border-zinc-100 pb-3 dark:border-zinc-800">
-                <span className="text-xs font-semibold text-zinc-500">Avg. time / view</span>
+                <span className="text-xs font-semibold text-zinc-500">
+                  Avg. time / view
+                </span>
                 <span className="text-sm font-black text-zinc-900 dark:text-white">
                   {seconds(metric("engagementTime").value)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-zinc-500">Tracker status</span>
+                <span className="text-xs font-semibold text-zinc-500">
+                  Tracker status
+                </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                   Active
@@ -228,30 +256,68 @@ export default function FirstPartyTab({ range }) {
           />
         }
       >
-        <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
+        <div className="grid gap-1 xl:grid-cols-[0.8fr_1.2fr]">
           <div className="rounded-3xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800 dark:bg-[#121215]">
-            <HorizontalBarChart rows={acquisition?.chart || []} labelKey="key" valueKey="pageViews" valueLabel="views" />
+            <HorizontalBarChart
+              rows={acquisition?.chart || []}
+              labelKey="key"
+              valueKey="pageViews"
+              valueLabel="views"
+            />
           </div>
           <AnalyticsDataTable
             rows={acquisition?.rows || []}
             pagination={acquisition?.pagination}
             onPage={setAcqPage}
             columns={[
-              { key: "key", label: acquisitionLabel, render: (row) => <strong>{row.key || "Unknown"}</strong> },
-              { key: "extra", label: "Medium", render: (row) => row.extra || "—" },
-              { key: "visitors", label: "Unique browsers", render: (row) => n(row.visitors) },
-              { key: "sessions", label: "Sessions", render: (row) => n(row.sessions) },
-              { key: "pageViews", label: "Page views", render: (row) => n(row.pageViews) },
-              { key: "avgEngagement", label: "Avg. time", render: (row) => seconds(row.avgEngagement) },
+              {
+                key: "key",
+                label: acquisitionLabel,
+                render: (row) => <strong>{row.key || "Unknown"}</strong>,
+              },
+              {
+                key: "extra",
+                label: "Medium",
+                render: (row) => row.extra || "—",
+              },
+              {
+                key: "visitors",
+                label: "Unique browsers",
+                render: (row) => n(row.visitors),
+              },
+              {
+                key: "sessions",
+                label: "Sessions",
+                render: (row) => n(row.sessions),
+              },
+              {
+                key: "pageViews",
+                label: "Page views",
+                render: (row) => n(row.pageViews),
+              },
+              {
+                key: "avgEngagement",
+                label: "Avg. time",
+                render: (row) => seconds(row.avgEngagement),
+              },
             ]}
           />
         </div>
       </Section>
 
-      <Section eyebrow="Content" title="Captured page data" description="Every normalized path currently provided by the first-party content endpoint.">
-        <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
+      <Section
+        eyebrow="Content"
+        title="Captured page data"
+        description="Every normalized path currently provided by the first-party content endpoint."
+      >
+        <div className="grid gap-1 xl:grid-cols-[0.8fr_1.2fr]">
           <div className="rounded-3xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800 dark:bg-[#121215]">
-            <HorizontalBarChart rows={content?.chart || []} labelKey="path" valueKey="pageViews" valueLabel="views" />
+            <HorizontalBarChart
+              rows={content?.chart || []}
+              labelKey="path"
+              valueKey="pageViews"
+              valueLabel="views"
+            />
           </div>
           <AnalyticsDataTable
             rows={content?.rows || []}
@@ -262,15 +328,36 @@ export default function FirstPartyTab({ range }) {
                 key: "path",
                 label: "Page",
                 render: (row) => (
-                  <a href={`https://asif.to${row.path}`} target="_blank" rel="noreferrer" className="block max-w-80 truncate font-black text-blue-600 hover:underline">
+                  <a
+                    href={`https://asif.to${row.path}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block max-w-80 truncate font-black text-blue-600 hover:underline"
+                  >
                     {row.path}
                   </a>
                 ),
               },
-              { key: "visitors", label: "Unique browsers", render: (row) => n(row.visitors) },
-              { key: "sessions", label: "Sessions", render: (row) => n(row.sessions) },
-              { key: "pageViews", label: "Page views", render: (row) => n(row.pageViews) },
-              { key: "avgEngagement", label: "Avg. time", render: (row) => seconds(row.avgEngagement) },
+              {
+                key: "visitors",
+                label: "Unique browsers",
+                render: (row) => n(row.visitors),
+              },
+              {
+                key: "sessions",
+                label: "Sessions",
+                render: (row) => n(row.sessions),
+              },
+              {
+                key: "pageViews",
+                label: "Page views",
+                render: (row) => n(row.pageViews),
+              },
+              {
+                key: "avgEngagement",
+                label: "Avg. time",
+                render: (row) => seconds(row.avgEngagement),
+              },
             ]}
           />
         </div>
@@ -294,15 +381,26 @@ export default function FirstPartyTab({ range }) {
           />
         }
       >
-        {locationDimension === "country" && <Quality data={locations?.quality} />}
+        {locationDimension === "country" && (
+          <Quality data={locations?.quality} />
+        )}
 
-        <div className="grid gap-4 xl:grid-cols-2">
+        <div className="grid gap-1 xl:grid-cols-2">
           <div className="rounded-3xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800 dark:bg-[#121215]">
             <div className="mb-4 flex items-center gap-2">
               <Globe2 className="h-4 w-4 text-blue-600" />
-              <h3 className="text-sm font-black">{locationDimension === "country" ? "Verified countries" : "Browser time zones"}</h3>
+              <h3 className="text-sm font-black">
+                {locationDimension === "country"
+                  ? "Verified countries"
+                  : "Browser time zones"}
+              </h3>
             </div>
-            <HorizontalBarChart rows={locations?.chart || []} labelKey="key" valueKey="visitors" valueLabel="browsers" />
+            <HorizontalBarChart
+              rows={locations?.chart || []}
+              labelKey="key"
+              valueKey="visitors"
+              valueLabel="browsers"
+            />
           </div>
           <div className="rounded-3xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800 dark:bg-[#121215]">
             <div className="mb-4 flex items-center gap-2">
@@ -318,11 +416,29 @@ export default function FirstPartyTab({ range }) {
           pagination={locations?.pagination}
           onPage={setLocationPage}
           columns={[
-            { key: "key", label: locationDimension === "country" ? "Country" : "Time zone", render: (row) => <strong>{row.key || "Unknown"}</strong> },
-            { key: "visitors", label: "Unique browsers", render: (row) => n(row.visitors) },
-            { key: "sessions", label: "Sessions", render: (row) => n(row.sessions) },
+            {
+              key: "key",
+              label: locationDimension === "country" ? "Country" : "Time zone",
+              render: (row) => <strong>{row.key || "Unknown"}</strong>,
+            },
+            {
+              key: "visitors",
+              label: "Unique browsers",
+              render: (row) => n(row.visitors),
+            },
+            {
+              key: "sessions",
+              label: "Sessions",
+              render: (row) => n(row.sessions),
+            },
             ...(locationDimension === "country"
-              ? [{ key: "pageViews", label: "Page views", render: (row) => n(row.pageViews) }]
+              ? [
+                  {
+                    key: "pageViews",
+                    label: "Page views",
+                    render: (row) => n(row.pageViews),
+                  },
+                ]
               : []),
           ]}
         />

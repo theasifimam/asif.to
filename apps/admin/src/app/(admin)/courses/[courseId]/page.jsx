@@ -347,7 +347,7 @@ export default function CourseChaptersPage() {
       </section>
       {viewMode === "card" ? (
         <div className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
             {loading ? (
               Array.from({ length: filters.limit || 20 }).map((_, i) => (
                 <ChapterCardSkeleton key={i} />

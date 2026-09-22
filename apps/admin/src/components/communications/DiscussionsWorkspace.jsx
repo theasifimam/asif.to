@@ -174,7 +174,7 @@ export default function DiscussionsWorkspace() {
 
       {/* Discussions Cards Grid */}
       {filtered && filtered.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
+        <div className="grid gap-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
           {filtered.map((item) => (
             <Link
               key={item._id}

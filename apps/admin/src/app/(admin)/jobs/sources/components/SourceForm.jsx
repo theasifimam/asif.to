@@ -170,12 +170,12 @@ export default function SourceForm({ sourceId }) {
           <ArrowLeft className="h-4 w-4" /> Back to job sources
         </Link>
       }
-        actions={
-          <Button
+      actions={
+        <Button
           form="source-form"
           type="submit"
           disabled={saving}
-            className="w-full rounded-full sm:w-auto"
+          className="w-full rounded-full sm:w-auto"
         >
           {saving ? (
             <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
@@ -189,10 +189,10 @@ export default function SourceForm({ sourceId }) {
       <form
         id="source-form"
         onSubmit={submit}
-        className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] min-w-0 w-full"
+        className="grid gap-1 lg:grid-cols-[minmax(0,1fr)_340px] min-w-0 w-full"
       >
         {/* Main Content Sections */}
-        <section className="space-y-6 min-w-0 w-full">
+        <section className="space-y-1 min-w-0 w-full">
           {/* General Information */}
           <div className={formSectionClass}>
             <div className="flex items-center gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800">
@@ -360,7 +360,7 @@ export default function SourceForm({ sourceId }) {
 
         {/* Sidebar Settings */}
         <aside
-          className={`${formAsideClass} min-w-0 w-full self-start lg:sticky lg:top-24 space-y-5`}
+          className={`${formAsideClass} min-w-0 w-full self-start lg:sticky lg:top-1 space-y-1`}
         >
           <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-4 text-xs leading-5 text-zinc-600 dark:text-zinc-300">
             <strong className="block text-blue-600 dark:text-blue-400 font-bold mb-1">

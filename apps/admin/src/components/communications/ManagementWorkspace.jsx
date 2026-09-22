@@ -119,7 +119,9 @@ export default function ManagementWorkspace({ section, record }) {
             : record === "notify"
               ? "Announce published content"
               : detail
-                ? initial?.name || initial?.email || (section === "subscribers" ? "Subscriber" : "Communications")
+                ? initial?.name ||
+                  initial?.email ||
+                  (section === "subscribers" ? "Subscriber" : "Communications")
                 : definition?.label || "Communications"
         }
         description={definition?.description}
@@ -281,67 +283,86 @@ export default function ManagementWorkspace({ section, record }) {
         </Link>
       )}
 
-      {section === "subscribers" && (
-        detail ? <SubscriberJobAlerts subscriber={initial} canManage={can("subscribers.manage")} /> : <div className="space-y-2">
-          {can("subscribers.manage") && data?.jobAlertDigest && <JobAlertDigestControls digest={data.jobAlertDigest} busy={busy} perform={perform} />}
-          {data?.items.map((item) => (
-            <article
-              key={item._id}
-              className={`${cardClass} flex flex-wrap items-center gap-4`}
-            >
-              <div className="min-w-0 flex-1">
-                <h3 className="truncate text-sm font-semibold"><Link href={`/communications/subscribers/${item._id}`} className="hover:text-blue-600">{item.email}</Link></h3>
-                <p className="mt-1 text-xs text-zinc-500">
-                  {readable(item.status)} ·{" "}
-                  {item.topics.join(", ") || "General updates"}
-                </p>
-                <details className="mt-2 text-xs text-zinc-400">
-                  <summary className="cursor-pointer">
-                    Subscription details
-                  </summary>
-                  <p className="mt-2">
-                    Source: {readable(item.source)} ·{" "}
-                    {item.verifiedAt
-                      ? "Email confirmed"
-                      : "Awaiting confirmation"}
-                  </p>
-                  {item.suppressionReason && (
-                    <p>{readable(item.suppressionReason)}</p>
-                  )}
-                  {item.user && (
+      {section === "subscribers" &&
+        (detail ? (
+          <SubscriberJobAlerts
+            subscriber={initial}
+            canManage={can("subscribers.manage")}
+          />
+        ) : (
+          <div className="space-y-2">
+            {can("subscribers.manage") && data?.jobAlertDigest && (
+              <JobAlertDigestControls
+                digest={data.jobAlertDigest}
+                busy={busy}
+                perform={perform}
+              />
+            )}
+            {data?.items.map((item) => (
+              <article
+                key={item._id}
+                className={`${cardClass} flex flex-wrap items-center gap-4`}
+              >
+                <div className="min-w-0 flex-1">
+                  <h3 className="truncate text-sm font-semibold">
                     <Link
-                      className="text-blue-600"
-                      href={`/users/${item.user}`}
+                      href={`/communications/subscribers/${item._id}`}
+                      className="hover:text-blue-600"
                     >
-                      Open user profile
+                      {item.email}
                     </Link>
-                  )}
-                </details>
-              </div>
-              {can("subscribers.manage") && (
-                <SelectField
-                  aria-label={`Manage ${item.email}`}
-                  className="h-9 w-40"
-                  disabled={busy}
-                  value=""
-                  onChange={(e) =>
-                    perform(() =>
-                      api(`/subscribers/${item._id}`, {
-                        method: "PATCH",
-                        body: { status: e.target.value },
-                      }),
-                    )
-                  }
-                >
-                  <option value="">Manage</option>
-                  <option value="UNSUBSCRIBED">Unsubscribe</option>
-                  <option value="SUPPRESSED">Suppress emails</option>
-                </SelectField>
-              )}
-            </article>
-          ))}
-        </div>
-      )}
+                  </h3>
+                  <p className="mt-1 text-xs text-zinc-500">
+                    {readable(item.status)} ·{" "}
+                    {item.topics.join(", ") || "General updates"}
+                  </p>
+                  <details className="mt-2 text-xs text-zinc-400">
+                    <summary className="cursor-pointer">
+                      Subscription details
+                    </summary>
+                    <p className="mt-2">
+                      Source: {readable(item.source)} ·{" "}
+                      {item.verifiedAt
+                        ? "Email confirmed"
+                        : "Awaiting confirmation"}
+                    </p>
+                    {item.suppressionReason && (
+                      <p>{readable(item.suppressionReason)}</p>
+                    )}
+                    {item.user && (
+                      <Link
+                        className="text-blue-600"
+                        href={`/users/${item.user}`}
+                      >
+                        Open user profile
+                      </Link>
+                    )}
+                  </details>
+                </div>
+                {can("subscribers.manage") && (
+                  <SelectField
+                    aria-label={`Manage ${item.email}`}
+                    className="h-9 w-40"
+                    disabled={busy}
+                    value=""
+                    onChange={(e) =>
+                      perform(() =>
+                        api(`/subscribers/${item._id}`, {
+                          method: "PATCH",
+                          body: { status: e.target.value },
+                        }),
+                      )
+                    }
+                  >
+                    <option value="">Manage</option>
+                    <option value="UNSUBSCRIBED">Unsubscribe</option>
+                    <option value="SUPPRESSED">Suppress emails</option>
+                  </SelectField>
+                )}
+              </article>
+            ))}
+          </div>
+        ))}
 
       {section === "transactional" && (
         <div className="space-y-2">
@@ -467,41 +488,206 @@ export default function ManagementWorkspace({ section, record }) {
 }
 
 function JobAlertDigestControls({ digest, busy, perform }) {
-  const [value, setValue] = useState({ enabled: true, hour: 18, minute: 0, ...(digest || {}) });
+  const [value, setValue] = useState({
+    enabled: true,
+    hour: 18,
+    minute: 0,
+    ...(digest || {}),
+  });
   const time = `${String(value.hour).padStart(2, "0")}:${String(value.minute).padStart(2, "0")}`;
-  return <form className={`${cardClass} flex flex-wrap items-end gap-4`} onSubmit={e => {
-    e.preventDefault();
-    perform(() => api("/subscribers/job-alert-digest", { method: "PATCH", body: value }), "Job alert digest settings saved.");
-  }}>
-    <div className="min-w-[220px] flex-1">
-      <h2 className="text-sm font-semibold">Daily job-alert digest</h2>
-      <p className="mt-1 text-xs text-zinc-500">Send each subscriber’s new matching jobs once a day.</p>
-    </div>
-    <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={value.enabled} onChange={e => setValue(v => ({ ...v, enabled: e.target.checked }))} />Enabled</label>
-    <label className="text-sm"><span className="mr-2">Send at</span><input type="time" value={time} onChange={e => { const [hour, minute] = e.target.value.split(":").map(Number); setValue(v => ({ ...v, hour, minute })); }} className="rounded-xl border border-zinc-200 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-950" /></label>
-    <span className="text-xs text-zinc-500">{value.timezone || "Asia/Dubai"}</span>
-    <Button disabled={busy}>Save</Button>
-  </form>;
+  return (
+    <form
+      className={`${cardClass} flex flex-wrap items-end gap-4`}
+      onSubmit={(e) => {
+        e.preventDefault();
+        perform(
+          () =>
+            api("/subscribers/job-alert-digest", {
+              method: "PATCH",
+              body: value,
+            }),
+          "Job alert digest settings saved.",
+        );
+      }}
+    >
+      <div className="min-w-55 flex-1">
+        <h2 className="text-sm font-semibold">Daily job-alert digest</h2>
+        <p className="mt-1 text-xs text-zinc-500">
+          Send each subscriber’s new matching jobs once a day.
+        </p>
+      </div>
+      <label className="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={value.enabled}
+          onChange={(e) =>
+            setValue((v) => ({ ...v, enabled: e.target.checked }))
+          }
+        />
+        Enabled
+      </label>
+      <label className="text-sm">
+        <span className="mr-2">Send at</span>
+        <input
+          type="time"
+          value={time}
+          onChange={(e) => {
+            const [hour, minute] = e.target.value.split(":").map(Number);
+            setValue((v) => ({ ...v, hour, minute }));
+          }}
+          className="rounded-xl border border-zinc-200 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-950"
+        />
+      </label>
+      <span className="text-xs text-zinc-500">
+        {value.timezone || "Asia/Dubai"}
+      </span>
+      <Button disabled={busy}>Save</Button>
+    </form>
+  );
 }
 
 function CommunicationsLoadingSkeleton() {
-  return <div role="status" aria-label="Loading communications" className="space-y-3 py-4">
-    {["w-full", "w-11/12", "w-10/12"].map((width, index) => <div key={index} className={`${cardClass} flex items-center gap-4`}><Skeleton className="h-10 w-10 rounded-full" /><div className="flex-1 space-y-2"><Skeleton className={`h-4 ${width}`} /><Skeleton className="h-3 w-2/5" /></div><Skeleton className="h-8 w-20 rounded-xl" /></div>)}
-  </div>;
+  return (
+    <div
+      role="status"
+      aria-label="Loading communications"
+      className="space-y-3 py-4"
+    >
+      {["w-full", "w-11/12", "w-10/12"].map((width, index) => (
+        <div key={index} className={`${cardClass} flex items-center gap-4`}>
+          <Skeleton className="h-10 w-10 rounded-full" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className={`h-4 ${width}`} />
+            <Skeleton className="h-3 w-2/5" />
+          </div>
+          <Skeleton className="h-8 w-20 rounded-xl" />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function SubscriberJobAlerts({ subscriber, canManage }) {
-  const [data, setData] = useState(null), [error, setError] = useState(""), [busy, setBusy] = useState(false), [notice, setNotice] = useState("");
-  const load = () => api(`/subscribers/${subscriber?._id}/job-alerts`).then(setData).catch(e => setError(errorMessage(e)));
-  useEffect(() => { if (subscriber?._id) load(); }, [subscriber?._id]);
-  const send = async () => { setBusy(true); setError(""); setNotice(""); try { const result = await api(`/subscribers/${subscriber._id}/job-alerts/send`, { method: "POST" }); setNotice(`${result.queued} job-alert digest${result.queued === 1 ? "" : "s"} queued.`); await load(); } catch (e) { setError(errorMessage(e)); } finally { setBusy(false); } };
-  return <div className="space-y-4">
-    <div className={`${cardClass} flex flex-wrap items-center justify-between gap-3`}><div><h2 className="font-semibold">Job alerts for {subscriber?.email}</h2><p className="mt-1 text-xs text-zinc-500">New matching jobs whose notifications have not been sent yet.</p></div>{canManage && <Button disabled={busy || !data?.alerts?.some(item => item.jobs.length)} onClick={send}>{busy ? "Sending..." : "Send now"}</Button>}</div>
-    {error && <p role="alert" className="text-sm text-red-600">{error}</p>}{notice && <p role="status" className="text-sm text-emerald-600">{notice}</p>}
-    {!data && !error && <div role="status" aria-label="Loading job alerts" className="space-y-4">{[1, 2].map(item => <div key={item} className={`${cardClass} space-y-3`}><Skeleton className="h-4 w-32" /><Skeleton className="h-3 w-3/4" /><Skeleton className="h-3 w-1/2" /></div>)}</div>}
-    {data?.alerts?.map(({ alert, jobs }) => <article key={alert._id} className={`${cardClass} space-y-3`}><div><h3 className="font-medium">Alert filters</h3><p className="mt-1 text-xs text-zinc-500">{[alert.keyword && `Position: ${alert.keyword}`, alert.category && `Category: ${readable(alert.category)}`, alert.location && `Location: ${readable(alert.location)}`, alert.employmentType && `Employment: ${readable(alert.employmentType)}`, alert.workMode && `Work mode: ${readable(alert.workMode)}`, alert.experienceLevel && `Experience: ${readable(alert.experienceLevel)}`].filter(Boolean).join(" · ")}</p></div>{jobs.length ? <ul className="space-y-2 text-sm">{jobs.map(job => <li key={job._id} className="border-t pt-2 dark:border-zinc-800"><span className="font-medium">{job.title}</span> <span className="text-zinc-500">at {job.companyName} · {job.location}</span></li>)}</ul> : <p className="text-sm text-zinc-500">No unsent matching jobs.</p>}</article>)}
-    {data?.alerts?.length === 0 && <p className="text-sm text-zinc-500">This subscriber has no active job alerts.</p>}
-  </div>;
+  const [data, setData] = useState(null),
+    [error, setError] = useState(""),
+    [busy, setBusy] = useState(false),
+    [notice, setNotice] = useState("");
+  const load = () =>
+    api(`/subscribers/${subscriber?._id}/job-alerts`)
+      .then(setData)
+      .catch((e) => setError(errorMessage(e)));
+  useEffect(() => {
+    if (subscriber?._id) load();
+  }, [subscriber?._id]);
+  const send = async () => {
+    setBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      const result = await api(
+        `/subscribers/${subscriber._id}/job-alerts/send`,
+        { method: "POST" },
+      );
+      setNotice(
+        `${result.queued} job-alert digest${result.queued === 1 ? "" : "s"} queued.`,
+      );
+      await load();
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="space-y-4">
+      <div
+        className={`${cardClass} flex flex-wrap items-center justify-between gap-3`}
+      >
+        <div>
+          <h2 className="font-semibold">Job alerts for {subscriber?.email}</h2>
+          <p className="mt-1 text-xs text-zinc-500">
+            New matching jobs whose notifications have not been sent yet.
+          </p>
+        </div>
+        {canManage && (
+          <Button
+            disabled={busy || !data?.alerts?.some((item) => item.jobs.length)}
+            onClick={send}
+          >
+            {busy ? "Sending..." : "Send now"}
+          </Button>
+        )}
+      </div>
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
+      {notice && (
+        <p role="status" className="text-sm text-emerald-600">
+          {notice}
+        </p>
+      )}
+      {!data && !error && (
+        <div
+          role="status"
+          aria-label="Loading job alerts"
+          className="space-y-4"
+        >
+          {[1, 2].map((item) => (
+            <div key={item} className={`${cardClass} space-y-3`}>
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
+          ))}
+        </div>
+      )}
+      {data?.alerts?.map(({ alert, jobs }) => (
+        <article key={alert._id} className={`${cardClass} space-y-3`}>
+          <div>
+            <h3 className="font-medium">Alert filters</h3>
+            <p className="mt-1 text-xs text-zinc-500">
+              {[
+                alert.keyword && `Position: ${alert.keyword}`,
+                alert.category && `Category: ${readable(alert.category)}`,
+                alert.location && `Location: ${readable(alert.location)}`,
+                alert.employmentType &&
+                  `Employment: ${readable(alert.employmentType)}`,
+                alert.workMode && `Work mode: ${readable(alert.workMode)}`,
+                alert.experienceLevel &&
+                  `Experience: ${readable(alert.experienceLevel)}`,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          </div>
+          {jobs.length ? (
+            <ul className="space-y-2 text-sm">
+              {jobs.map((job) => (
+                <li
+                  key={job._id}
+                  className="border-t pt-2 dark:border-zinc-800"
+                >
+                  <span className="font-medium">{job.title}</span>{" "}
+                  <span className="text-zinc-500">
+                    at {job.companyName} · {job.location}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-zinc-500">No unsent matching jobs.</p>
+          )}
+        </article>
+      ))}
+      {data?.alerts?.length === 0 && (
+        <p className="text-sm text-zinc-500">
+          This subscriber has no active job alerts.
+        </p>
+      )}
+    </div>
+  );
 }
 
 function EmailTemplateCard({ item, section }) {
@@ -566,7 +752,7 @@ function EmailTemplateCard({ item, section }) {
 function Analytics({ data }) {
   return (
     <div className="space-y-5">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
         {["support", "email", "subscribers"].map((group) => (
           <section key={group} className={cardClass}>
             <h3 className="mb-4 font-semibold">
@@ -589,7 +775,7 @@ function Analytics({ data }) {
           </section>
         ))}
       </div>
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-1 sm:grid-cols-3">
         {[
           [
             "Average first response",
@@ -615,7 +801,7 @@ function Analytics({ data }) {
         <summary className="cursor-pointer text-sm font-medium">
           Topics, categories and tracking
         </summary>
-        <div className="mt-5 grid gap-5 sm:grid-cols-2">
+        <div className="mt-5 grid gap-1 sm:grid-cols-2">
           {["categories", "topics"].map((group) => (
             <div key={group}>
               <h3 className="mb-2 text-sm font-semibold">{readable(group)}</h3>

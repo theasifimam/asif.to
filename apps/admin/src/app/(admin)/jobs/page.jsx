@@ -202,11 +202,11 @@ export default function JobsAdminPage() {
         }
       />
 
-      <section className="grid grid-cols-3 gap-2 sm:gap-3 xl:grid-cols-9">
+      <section className="grid grid-cols-3 gap-1 sm:gap-1 xl:grid-cols-9">
         {metrics.map(([key, label, Icon, color]) => (
           <div
             key={key}
-            className="rounded-xl sm:rounded-3xl border border-zinc-200/80 bg-white p-3 px-4 sm:p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-950 flex flex-col justify-between"
+            className="rounded-xl sm:rounded-2xl border border-zinc-200/80 bg-white p-3 px-4 sm:p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-950 flex flex-col justify-between"
           >
             <div className="flex items-center justify-between">
               <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${color}`} />
@@ -244,7 +244,7 @@ export default function JobsAdminPage() {
           </div>
 
           <section
-            className={`gap-4 sm:gap-6 lg:grid-cols-3 ${
+            className={`gap-1 sm:gap-1 lg:grid-cols-3 ${
               showAnalytics ? "grid grid-cols-1" : "hidden lg:grid"
             }`}
           >

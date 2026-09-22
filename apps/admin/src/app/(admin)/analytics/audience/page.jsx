@@ -54,13 +54,13 @@ export default function AudiencePage() {
         />
       }
     >
-      <div className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-2xl bg-zinc-100/80 p-1 dark:bg-zinc-900/80">
+      <div className="inline-flex max-w-full items-center gap-1 p-1 overflow-x-auto">
         {["Overview", "Acquisition", "Visitors", "Realtime", "Events"].map(
           (name) => (
             <button
               key={name}
               onClick={() => setTab(name)}
-              className={`rounded-xl px-4 py-2 text-xs font-bold transition-all ${tab === name ? "bg-white text-blue-600 shadow-md dark:bg-zinc-950" : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"}`}
+              className={`rounded-full px-4 py-2 text-xs font-bold transition-all cursor-pointer ${tab === name ? "bg-white text-blue-600 shadow-xs dark:bg-zinc-800 dark:text-blue-400" : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"}`}
             >
               {name}
             </button>

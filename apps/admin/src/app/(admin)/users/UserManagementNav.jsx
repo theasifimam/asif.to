@@ -17,17 +17,17 @@ export function UserManagementNav() {
   const { user } = useAuth();
   const visibleItems = items.filter((item) => hasPermission(user, item[2]));
   return (
-    <nav className="flex gap-1 overflow-x-auto shrink-0 rounded-2xl p-1">
+    <nav className="inline-flex max-w-full items-center gap-1 p-1 overflow-x-auto scrollbar-none">
       {visibleItems.map(([label, href]) => {
         const active = pathname === href;
         return (
           <Link
             key={href}
             href={href}
-            className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-xs font-bold transition-colors ${
+            className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition-all ${
               active
-                ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-950"
-                : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-white"
+                ? "bg-white text-blue-600 shadow-xs dark:bg-zinc-800 dark:text-blue-400"
+                : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
             }`}
           >
             {label}

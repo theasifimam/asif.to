@@ -15,7 +15,7 @@ export default function RecommendationsPage() {
       title="Actionable recommendations"
       description="Deterministic rules use current settings and available traffic. Suggestions never change configuration automatically."
     >
-      <div className="grid gap-3 lg:grid-cols-2">
+      <div className="grid gap-1 lg:grid-cols-2">
         {recommendations.map((item, index) => (
           <article
             key={`${item.title}-${index}`}

@@ -102,7 +102,7 @@ function SiteSettingsContent() {
       </header>
 
       {/* Top Horizontal Layout Tabs for Switch Navigation */}
-      <div className="flex flex-wrap items-center gap-2.5 rounded-3xl border border-zinc-200/80 bg-white p-2 sm:p-2.5 dark:border-zinc-800/80 dark:bg-[#121215] shadow-xs">
+      <div className="inline-flex max-w-full flex-wrap items-center gap-1 p-1 overflow-x-auto">
         {SITES.map(({ site, label, icon: Icon, detail }) => {
           const isActive = activeSite === site;
           return (
@@ -110,10 +110,10 @@ function SiteSettingsContent() {
               key={site}
               type="button"
               onClick={() => handleSelectTab(site)}
-              className={`flex items-center gap-2.5 rounded-2xl px-4 py-2.5 text-xs font-black transition-all cursor-pointer ${
+              className={`flex items-center gap-2.5 rounded-full px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
                 isActive
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-500/20"
-                  : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+                  ? "bg-white text-blue-600 shadow-xs dark:bg-zinc-800 dark:text-blue-400"
+                  : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
               }`}
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -121,7 +121,7 @@ function SiteSettingsContent() {
                 <span>{label}</span>
                 <span
                   className={`text-[10px] font-semibold ${
-                    isActive ? "text-blue-100" : "text-zinc-400 dark:text-zinc-500"
+                    isActive ? "text-blue-500 dark:text-blue-400" : "text-zinc-400 dark:text-zinc-500"
                   }`}
                 >
                   ({detail})

@@ -19,7 +19,7 @@ export default function TopicGrid({
   setIsDeleteOpen,
 }) {
   return (
-    <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1">
       {loading ? (
         <div className="col-span-full py-20 flex flex-col items-center justify-center gap-4">
           <LogoLoader className=" text-zinc-300" size={32}  />

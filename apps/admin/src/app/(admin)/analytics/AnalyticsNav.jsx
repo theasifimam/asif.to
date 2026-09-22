@@ -15,7 +15,7 @@ export default function AnalyticsNav() {
 
   return (
     <nav
-      className="flex gap-1 overflow-x-auto scrollbar-none"
+      className="inline-flex max-w-full items-center gap-1 p-1 overflow-x-auto scrollbar-none"
       aria-label="Analytics sections"
     >
       {links.map(([label, href]) => (
@@ -24,8 +24,8 @@ export default function AnalyticsNav() {
           href={href}
           className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition-all ${
             pathname === href
-              ? "bg-blue-600 text-white shadow-xs"
-              : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+              ? "bg-white text-blue-600 shadow-xs dark:bg-zinc-800 dark:text-blue-400"
+              : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
           }`}
         >
           {label}

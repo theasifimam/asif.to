@@ -98,7 +98,7 @@ export default function ActivityPage() {
         </p>
       </div>
 
-      <div className="mb-4 flex flex-col md:flex-row gap-3 rounded-2xl border border-zinc-200 bg-white p-3 shadow-xs dark:border-zinc-800 dark:bg-[#121215]">
+      <div className="flex flex-col md:flex-row gap-1 rounded-2xl border border-zinc-200 bg-white p-3 shadow-xs dark:border-zinc-800 dark:bg-[#121215]">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-zinc-400" />
           <input
@@ -108,7 +108,7 @@ export default function ActivityPage() {
             className="h-10 w-full rounded-xl border border-zinc-200 bg-zinc-50 pl-9 pr-3 text-xs outline-none focus:border-blue-500 dark:border-zinc-800 dark:bg-zinc-900"
           />
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none -mx-3 px-3 md:mx-0 md:px-0 md:overflow-visible">
+        <div className="flex gap-1 overflow-x-auto pb-1 md:pb-0 scrollbar-none -mx-3 px-3 md:mx-0 md:px-0 md:overflow-visible">
           <div className="shrink-0 w-32 md:w-36">
             <ActivityFilterSelect
               value={filters.actorRole}

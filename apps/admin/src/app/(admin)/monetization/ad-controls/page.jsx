@@ -19,7 +19,7 @@ export default function AdControlsPage() {
   } = useMonetization();
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid gap-1 lg:grid-cols-2">
       <Surface
         title="Emergency control"
         description="Global OFF always wins and invalidates the runtime config cache immediately."

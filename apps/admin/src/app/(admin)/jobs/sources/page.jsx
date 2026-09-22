@@ -259,7 +259,7 @@ export default function JobSourcesPage() {
 
       {!loading && (
         <>
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-1 lg:grid-cols-5">
             <Summary label="Total sources" value={counts.total} />
             <Summary label="Enabled" value={counts.enabled} tone="emerald" />
             <Summary label="Verified" value={counts.verified} tone="blue" />
@@ -314,11 +314,13 @@ export default function JobSourcesPage() {
                   }}
                 />
               </div>
-              <div className="justify-self-end sm:justify-self-auto"><ViewToggle view={viewMode} onViewChange={setViewMode} /></div>
+              <div className="justify-self-end sm:justify-self-auto">
+                <ViewToggle view={viewMode} onViewChange={setViewMode} />
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-zinc-500">
+          <div className="flex items-center justify-between text-xs text-zinc-500 mt-4">
             <span>
               Showing {visibleSources.length} of {sources.length} sources.
             </span>
@@ -373,7 +375,12 @@ export default function JobSourcesPage() {
                           >
                             {source.name}
                           </Link>
-                          {source.creationOrigin === "automated_source_discovery" && <p className="text-xs text-zinc-500">Automated Source Discovery</p>}
+                          {source.creationOrigin ===
+                            "automated_source_discovery" && (
+                            <p className="text-xs text-zinc-500">
+                              Automated Source Discovery
+                            </p>
+                          )}
                           <span className="text-[10px] text-zinc-400 uppercase font-mono">
                             {source.providerRegion || "global"}
                           </span>
@@ -407,7 +414,9 @@ export default function JobSourcesPage() {
                       <span className="font-black text-zinc-900 dark:text-zinc-100">
                         {source.verifiedUaeJobsFound || 0} UAE
                       </span>
-                      <p className="text-xs text-zinc-500">{source.verifiedJobsFound || 0} total returned</p>
+                      <p className="text-xs text-zinc-500">
+                        {source.verifiedJobsFound || 0} total returned
+                      </p>
                       <p className="mt-0.5 text-[10px] text-zinc-400">
                         {source.numberImported || 0} imported ·{" "}
                         {source.numberUpdated || 0} updated
@@ -491,11 +500,11 @@ export default function JobSourcesPage() {
         </div>
       ) : (
         /* Card Grid View */
-        <div className="grid min-w-0 gap-3 sm:gap-4 lg:grid-cols-2">
+        <div className="grid min-w-0 gap-1 sm:gap-1 lg:grid-cols-2">
           {visibleSources.map((source) => (
             <article
               key={source._id}
-              className="rounded-4xl border border-zinc-200 bg-white p-5 shadow-xs dark:border-zinc-800 dark:bg-zinc-950"
+              className="min-w-0 overflow-hidden rounded-4xl border border-zinc-200 bg-white p-5 shadow-xs dark:border-zinc-800 dark:bg-zinc-950"
             >
               <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
@@ -503,7 +512,7 @@ export default function JobSourcesPage() {
                     <DatabaseZap className="h-4 w-4 text-blue-600" />
                     <Link
                       href={`/jobs/sources/${source._id}/edit`}
-                      className="font-black text-zinc-900 hover:text-blue-600 dark:text-zinc-100 dark:hover:text-blue-400"
+                      className="min-w-0 wrap-break-word font-black text-zinc-900 hover:text-blue-600 dark:text-zinc-100 dark:hover:text-blue-400"
                     >
                       {source.name}
                     </Link>
@@ -522,13 +531,17 @@ export default function JobSourcesPage() {
                       good={source.autoPublish && source.trusted}
                     />
                   </div>
-                  {source.creationOrigin === "automated_source_discovery" && <p className="text-xs text-zinc-500">Automated Source Discovery</p>}
+                  {source.creationOrigin === "automated_source_discovery" && (
+                    <p className="text-xs text-zinc-500">
+                      Automated Source Discovery
+                    </p>
+                  )}
                   <p className="mt-1 text-[10px] font-bold uppercase tracking-wide text-zinc-400">
                     {source.type} · every {source.syncIntervalHours || 12} hours
                     · quality {source.qualityThreshold || 90}+
                   </p>
                 </div>
-                <div className="flex w-full flex-wrap items-center justify-end gap-1 sm:w-auto">
+                <div className="flex w-full shrink-0 flex-wrap items-center justify-end gap-1 sm:w-auto">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -575,7 +588,7 @@ export default function JobSourcesPage() {
                 </div>
               </div>
               <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-zinc-100 bg-zinc-50/70 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900/70">
-                <div className="min-w-0 text-[10px] text-zinc-500">
+                <div className="min-w-0 flex-1 text-[10px] text-zinc-500">
                   <span className="font-bold text-zinc-700 dark:text-zinc-200">
                     Board ID:
                   </span>{" "}
@@ -587,6 +600,7 @@ export default function JobSourcesPage() {
                   <Button
                     variant="outline"
                     size="sm"
+                    className="shrink-0"
                     onClick={() => toggleEnabled(source)}
                     disabled={Boolean(busy[source._id])}
                   >
@@ -638,7 +652,7 @@ export default function JobSourcesPage() {
                   value={source.lastError ? "Review" : "0"}
                 />
               </dl>
-              <div className="mt-4 flex items-center gap-2 text-xs font-bold">
+              <div className="mt-4 flex min-w-0 flex-wrap items-center gap-2 text-xs font-bold wrap-break-word">
                 {source.syncStatus === "failed" ? (
                   <AlertTriangle className="h-4 w-4 text-rose-600" />
                 ) : (
@@ -649,7 +663,7 @@ export default function JobSourcesPage() {
                   · {source.availabilityStatus || "available"}
                 </span>
                 {source.credentialEnvKey && (
-                  <span className="ml-auto text-[10px] text-zinc-400">
+                  <span className="ml-auto break-all text-[10px] text-zinc-400">
                     Credential:{" "}
                     {source.credentialConfigured ? "configured" : "missing"}
                   </span>

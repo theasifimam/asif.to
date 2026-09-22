@@ -3,7 +3,15 @@ import useSubscriberNotification from "@/components/communications/useSubscriber
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ImagePlus, RefreshCw, Save, Send, UserPen, X } from "lucide-react";
+import {
+  ArrowLeft,
+  ImagePlus,
+  RefreshCw,
+  Save,
+  Send,
+  UserPen,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
@@ -73,49 +81,60 @@ export default function ArticleForm({ articleId = null }) {
     if (isSuperAdmin) {
       queries.push(usersApi.list({ limit: 100 }));
     }
-    Promise.all(queries).then(([topicResponse, courseResponse, articleResponse, usersResponse]) => {
-      if (!active) return;
-      const topicData = topicResponse?.data?.data ?? topicResponse?.data ?? [];
-      setTopics(Array.isArray(topicData) ? topicData : []);
-      setCourses(courseResponse?.data?.data || []);
-      if (usersResponse?.success) {
-        const usersData =
-          usersResponse?.data?.data?.users ||
-          usersResponse?.data?.users ||
-          usersResponse?.data?.data ||
-          (Array.isArray(usersResponse?.data) ? usersResponse.data : []);
-        const ALLOWED_ROLES = ["author", "admin", "super_admin", "superadmin"];
-        const staffUsers = (Array.isArray(usersData) ? usersData : []).filter(
-          (u) => ALLOWED_ROLES.includes((u.role || "").toLowerCase()),
-        );
-        setAdminUsers(staffUsers);
-      }
-      if (articleResponse?.success) {
-        const article = articleResponse.data?.data || articleResponse.data;
-        setForm({
-          title: article.title || "",
-          content: article.content || "",
-          topics: (article.topic || []).map((item) => item._id || item),
-          image: article.image || "",
-          imageAsset: article.imageAsset?._id || article.imageAsset || "",
-          status: article.status || "draft",
-          seoTitle: article.seoTitle || "",
-          seoDescription: article.seoDescription || "",
-          keywords: (article.keywords || []).join(", "),
-          canonicalUrl: article.canonicalUrl || "",
-          relatedCourses: (article.relatedCourses || []).map((c) =>
-            typeof c === "object" ? c._id : c,
-          ),
-        });
-        // Pre-select the article's current author
-        const currentAuthorId = article.author?._id || article.author || "";
-        setOverrideAuthorId(String(currentAuthorId));
-        setImagePreview(getImageUrl(article.image));
-        if (article.imageAsset) setSelectedImageAsset({ _id: article.imageAsset?._id || article.imageAsset });
-      } else if (articleId)
-        toast.error(articleResponse?.error || "Unable to load article");
-      setLoading(false);
-    });
+    Promise.all(queries).then(
+      ([topicResponse, courseResponse, articleResponse, usersResponse]) => {
+        if (!active) return;
+        const topicData =
+          topicResponse?.data?.data ?? topicResponse?.data ?? [];
+        setTopics(Array.isArray(topicData) ? topicData : []);
+        setCourses(courseResponse?.data?.data || []);
+        if (usersResponse?.success) {
+          const usersData =
+            usersResponse?.data?.data?.users ||
+            usersResponse?.data?.users ||
+            usersResponse?.data?.data ||
+            (Array.isArray(usersResponse?.data) ? usersResponse.data : []);
+          const ALLOWED_ROLES = [
+            "author",
+            "admin",
+            "super_admin",
+            "superadmin",
+          ];
+          const staffUsers = (Array.isArray(usersData) ? usersData : []).filter(
+            (u) => ALLOWED_ROLES.includes((u.role || "").toLowerCase()),
+          );
+          setAdminUsers(staffUsers);
+        }
+        if (articleResponse?.success) {
+          const article = articleResponse.data?.data || articleResponse.data;
+          setForm({
+            title: article.title || "",
+            content: article.content || "",
+            topics: (article.topic || []).map((item) => item._id || item),
+            image: article.image || "",
+            imageAsset: article.imageAsset?._id || article.imageAsset || "",
+            status: article.status || "draft",
+            seoTitle: article.seoTitle || "",
+            seoDescription: article.seoDescription || "",
+            keywords: (article.keywords || []).join(", "),
+            canonicalUrl: article.canonicalUrl || "",
+            relatedCourses: (article.relatedCourses || []).map((c) =>
+              typeof c === "object" ? c._id : c,
+            ),
+          });
+          // Pre-select the article's current author
+          const currentAuthorId = article.author?._id || article.author || "";
+          setOverrideAuthorId(String(currentAuthorId));
+          setImagePreview(getImageUrl(article.image));
+          if (article.imageAsset)
+            setSelectedImageAsset({
+              _id: article.imageAsset?._id || article.imageAsset,
+            });
+        } else if (articleId)
+          toast.error(articleResponse?.error || "Unable to load article");
+        setLoading(false);
+      },
+    );
     return () => {
       active = false;
     };
@@ -156,17 +175,23 @@ export default function ArticleForm({ articleId = null }) {
     data.append("keywords", form.keywords);
     data.append("canonicalUrl", form.canonicalUrl);
     form.topics.forEach((topic) => data.append("topic", topic));
-    (form.relatedCourses || []).forEach((c) => data.append("relatedCourses", c));
+    (form.relatedCourses || []).forEach((c) =>
+      data.append("relatedCourses", c),
+    );
     if (imageFile) data.append("image", imageFile);
     if (form.imageAsset) data.append("imageAsset", form.imageAsset);
     // Super-admin author override
-    if (isSuperAdmin && overrideAuthorId) data.append("authorId", overrideAuthorId);
+    if (isSuperAdmin && overrideAuthorId)
+      data.append("authorId", overrideAuthorId);
     const response = articleId
       ? await articlesApi.update(articleId, data)
       : await articlesApi.create(data);
     if (response.success) {
       toast.success(articleId ? "Article updated" : "Article created");
-      const emailFollowUp = await subscriberNotification.notify(response.data?.data?._id || articleId, status || form.status);
+      const emailFollowUp = await subscriberNotification.notify(
+        response.data?.data?._id || articleId,
+        status || form.status,
+      );
       router.push(emailFollowUp || returnTo);
     } else toast.error(response.error || "Unable to save article");
     setSaving(false);
@@ -205,7 +230,12 @@ export default function ArticleForm({ articleId = null }) {
               onClick={() => persist(form.status)}
               className="shrink-0"
             >
-              {saving ? <LogoLoader className="mr-2 h-4 w-4" /> : <RefreshCw className="mr-2 h-4 w-4" />} Update
+              {saving ? (
+                <LogoLoader className="mr-2 h-4 w-4" />
+              ) : (
+                <RefreshCw className="mr-2 h-4 w-4" />
+              )}{" "}
+              Update
             </Button>
           )}
           <Button
@@ -219,8 +249,8 @@ export default function ArticleForm({ articleId = null }) {
         </>
       }
     >
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] min-w-0 w-full">
-        <section className="space-y-6 min-w-0 w-full">
+      <div className="grid gap-1 lg:grid-cols-[minmax(0,1fr)_320px] min-w-0 w-full">
+        <section className="space-y-1 min-w-0 w-full">
           <div className={formSectionClass}>
             <div className="space-y-2">
               <Label>Title</Label>
@@ -275,7 +305,8 @@ export default function ArticleForm({ articleId = null }) {
               Related Courses & Cross-Promotion
             </h2>
             <p className="text-xs text-muted-foreground">
-              Select courses related to this article to display recommendations on the public page.
+              Select courses related to this article to display recommendations
+              on the public page.
             </p>
             <div className="max-h-48 overflow-y-auto space-y-1 rounded-2xl border border-zinc-200/60 bg-zinc-50 p-3 dark:border-zinc-800/60 dark:bg-zinc-900/50">
               {courses.map((c) => {
@@ -291,7 +322,9 @@ export default function ArticleForm({ articleId = null }) {
                       onChange={(e) => {
                         const next = e.target.checked
                           ? [...(form.relatedCourses || []), c._id]
-                          : (form.relatedCourses || []).filter((id) => id !== c._id);
+                          : (form.relatedCourses || []).filter(
+                              (id) => id !== c._id,
+                            );
                         update("relatedCourses", next);
                       }}
                       className="h-4 w-4 rounded border-zinc-300 text-blue-500 focus:ring-blue-400"
@@ -303,7 +336,7 @@ export default function ArticleForm({ articleId = null }) {
             </div>
           </div>
         </section>
-        <aside className="space-y-6 min-w-0">
+        <aside className="space-y-1 min-w-0">
           {subscriberNotification.controls}
           <div className={formAsideClass}>
             <h2 className="font-semibold text-zinc-900 dark:text-white">
@@ -383,7 +416,9 @@ export default function ArticleForm({ articleId = null }) {
 
           {/* Super-admin author override */}
           {isSuperAdmin && (
-            <div className={`${formAsideClass} border-2 border-dashed border-amber-300 dark:border-amber-700/50 bg-amber-50/40 dark:bg-amber-900/10`}>
+            <div
+              className={`${formAsideClass} border-2 border-dashed border-amber-300 dark:border-amber-700/50 bg-amber-50/40 dark:bg-amber-900/10`}
+            >
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-7 h-7 rounded-xl bg-amber-100 dark:bg-amber-500/15 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
                   <UserPen className="w-3.5 h-3.5" />
@@ -424,7 +459,9 @@ export default function ArticleForm({ articleId = null }) {
                   </SelectContent>
                 </Select>
                 {adminUsers.length === 0 && (
-                  <p className="text-[10px] text-zinc-400 italic">Loading users...</p>
+                  <p className="text-[10px] text-zinc-400 italic">
+                    Loading users...
+                  </p>
                 )}
               </div>
             </div>
@@ -464,10 +501,22 @@ export default function ArticleForm({ articleId = null }) {
               />
             </div>
             <CanonicalUrlInput
-              basePrefix={form.type === "cheatsheet" ? "https://asif.to/cheatsheets" : "https://asif.to/articles"}
+              basePrefix={
+                form.type === "cheatsheet"
+                  ? "https://asif.to/cheatsheets"
+                  : "https://asif.to/articles"
+              }
               value={form.canonicalUrl}
               onChange={(value) => update("canonicalUrl", value)}
-              placeholder={form.slug || (form.title ? form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") : "")}
+              placeholder={
+                form.slug ||
+                (form.title
+                  ? form.title
+                      .toLowerCase()
+                      .replace(/[^a-z0-9]+/g, "-")
+                      .replace(/(^-|-$)/g, "")
+                  : "")
+              }
             />
           </div>
         </aside>

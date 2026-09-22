@@ -201,14 +201,14 @@ export default function SocialPostStudio({
         <div className="w-full xl:flex-1 min-w-0 space-y-4">
           <div className="admin-surface rounded-3xl border border-zinc-200/80 dark:border-zinc-800 p-5 sm:p-6 space-y-6">
             {/* Control Navigation Tabs */}
-            <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 overflow-x-auto">
+            <div className="inline-flex max-w-full items-center gap-1 p-1 overflow-x-auto">
               <button
                 type="button"
                 onClick={() => setActiveTab("content")}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 ${
                   activeTab === "content"
-                    ? "bg-white dark:bg-zinc-800 text-primary shadow-sm"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                    ? "bg-white text-blue-600 shadow-xs dark:bg-zinc-800 dark:text-blue-400"
+                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                 }`}
               >
                 <Type size={15} />
@@ -218,10 +218,10 @@ export default function SocialPostStudio({
               <button
                 type="button"
                 onClick={() => setActiveTab("templates")}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 ${
                   activeTab === "templates"
-                    ? "bg-white dark:bg-zinc-800 text-primary shadow-sm"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                    ? "bg-white text-blue-600 shadow-xs dark:bg-zinc-800 dark:text-blue-400"
+                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                 }`}
               >
                 <Layout size={15} />
@@ -231,10 +231,10 @@ export default function SocialPostStudio({
               <button
                 type="button"
                 onClick={() => setActiveTab("settings")}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 ${
                   activeTab === "settings"
-                    ? "bg-white dark:bg-zinc-800 text-primary shadow-sm"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                    ? "bg-white text-blue-600 shadow-xs dark:bg-zinc-800 dark:text-blue-400"
+                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                 }`}
               >
                 <Settings size={15} />
@@ -244,10 +244,10 @@ export default function SocialPostStudio({
               <button
                 type="button"
                 onClick={() => setActiveTab("caption")}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 ${
                   activeTab === "caption"
-                    ? "bg-white dark:bg-zinc-800 text-primary shadow-sm"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                    ? "bg-white text-blue-600 shadow-xs dark:bg-zinc-800 dark:text-blue-400"
+                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                 }`}
               >
                 <MessageSquareText size={15} />

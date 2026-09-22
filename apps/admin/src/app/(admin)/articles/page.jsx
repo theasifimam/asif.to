@@ -203,8 +203,8 @@ export default function ArticlesPage() {
 
       <AdminContent plain={viewMode === "card"}>
         {viewMode === "card" ? (
-          <div className="space-y-6">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-1">
+            <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
               {loading ? (
                 Array.from({ length: limit }).map((_, i) => (
                   <ArticleCardSkeleton key={i} />

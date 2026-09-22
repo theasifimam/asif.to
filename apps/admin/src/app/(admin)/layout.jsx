@@ -408,6 +408,13 @@ const NAV_ITEMS = [
         description: "Editor, languages & runtimes",
       },
       {
+        name: "Admin Guide",
+        href: "/admin-guide",
+        icon: BookOpen,
+        permission: "content.read",
+        description: "Step-by-step work instructions",
+      },
+      {
         name: "Legal & Help",
         href: "/legal",
         icon: Info,

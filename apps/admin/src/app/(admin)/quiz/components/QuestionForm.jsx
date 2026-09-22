@@ -6,7 +6,10 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Check, Save } from "lucide-react";
 import { toast } from "sonner";
-import AdminFormShell, { formAsideClass, formSectionClass } from "@/components/forms/AdminFormShell";
+import AdminFormShell, {
+  formAsideClass,
+  formSectionClass,
+} from "@/components/forms/AdminFormShell";
 import { Button, Input, Label, Textarea } from "@/components/ui";
 import {
   Select,
@@ -49,7 +52,9 @@ export default function QuestionForm({ questionId }) {
       coursesApi.listAll(),
       questionId ? quizApi.get(questionId) : null,
     ]).then(([courseResponse, questionResponse]) => {
-      setCourses(courseResponse.data?.data?.data || courseResponse.data?.data || []);
+      setCourses(
+        courseResponse.data?.data?.data || courseResponse.data?.data || [],
+      );
       if (questionResponse?.success) {
         const item = questionResponse.data?.data;
         setForm({
@@ -64,21 +69,26 @@ export default function QuestionForm({ questionId }) {
             source: m.source || "manual",
             confidence: m.confidence ?? 100,
           })),
-          options: item.options?.length === 4 ? item.options : initialForm.options,
+          options:
+            item.options?.length === 4 ? item.options : initialForm.options,
         });
       }
       setLoading(false);
     });
   }, [questionId]);
 
-  const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
-  const updateQuestion = (value) => setForm((current) => ({ ...current, question: value }));
+  const update = (key, value) =>
+    setForm((current) => ({ ...current, [key]: value }));
+  const updateQuestion = (value) =>
+    setForm((current) => ({ ...current, question: value }));
 
   const submit = async (event) => {
     event.preventDefault();
     setSaving(true);
     const payload = { ...form, type: "quiz" };
-    const response = questionId ? await quizApi.update(questionId, payload) : await quizApi.create(payload);
+    const response = questionId
+      ? await quizApi.update(questionId, payload)
+      : await quizApi.create(payload);
     if (response.success) {
       toast.success(questionId ? "Question saved" : "Question created");
       window.location.assign(returnTo);
@@ -102,7 +112,10 @@ export default function QuestionForm({ questionId }) {
       title={questionId ? "Edit question" : "Create question"}
       description="Create a concise quiz or practice question with one correct answer."
       back={
-        <Link href={returnTo} className="inline-flex items-center gap-2 text-sm text-zinc-500">
+        <Link
+          href={returnTo}
+          className="inline-flex items-center gap-2 text-sm text-zinc-500"
+        >
           <ArrowLeft className="h-4 w-4" /> Back to question bank
         </Link>
       }
@@ -112,7 +125,11 @@ export default function QuestionForm({ questionId }) {
         </Button>
       }
     >
-      <form id="question-form" onSubmit={submit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] min-w-0 w-full">
+      <form
+        id="question-form"
+        onSubmit={submit}
+        className="grid gap-1 lg:grid-cols-[minmax(0,1fr)_320px] min-w-0 w-full"
+      >
         <section className="space-y-6 min-w-0 w-full">
           <div className={formSectionClass}>
             <div className="space-y-2">
@@ -147,8 +164,8 @@ export default function QuestionForm({ questionId }) {
                       update(
                         "options",
                         form.options.map((item, itemIndex) =>
-                          itemIndex === index ? event.target.value : item
-                        )
+                          itemIndex === index ? event.target.value : item,
+                        ),
                       )
                     }
                     placeholder={`Option ${index + 1}`}
@@ -168,24 +185,34 @@ export default function QuestionForm({ questionId }) {
               <>
                 <div className="space-y-2">
                   <Label>
-                    Flashcard answer <span className="font-normal text-zinc-400">(optional override)</span>
+                    Flashcard answer{" "}
+                    <span className="font-normal text-zinc-400">
+                      (optional override)
+                    </span>
                   </Label>
                   <Textarea
                     rows={4}
                     value={form.flashcardAnswer}
-                    onChange={(event) => update("flashcardAnswer", event.target.value)}
+                    onChange={(event) =>
+                      update("flashcardAnswer", event.target.value)
+                    }
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Revision tag</Label>
-                  <Input value={form.tag} onChange={(event) => update("tag", event.target.value)} />
+                  <Input
+                    value={form.tag}
+                    onChange={(event) => update("tag", event.target.value)}
+                  />
                 </div>
               </>
             )}
           </div>
         </section>
 
-        <aside className={`${formAsideClass} min-w-0 w-full self-start lg:sticky lg:top-24`}>
+        <aside
+          className={`${formAsideClass} min-w-0 w-full self-start lg:sticky lg:top-1`}
+        >
           <div className="space-y-2">
             <Label>Courses</Label>
             <div className="max-h-48 overflow-y-auto space-y-1.5 rounded-2xl border border-zinc-200/80 bg-zinc-50/50 p-2.5 dark:border-zinc-800/80 dark:bg-zinc-900/50">
@@ -235,7 +262,9 @@ export default function QuestionForm({ questionId }) {
             <input
               type="checkbox"
               checked={form.flashcardEnabled}
-              onChange={(event) => update("flashcardEnabled", event.target.checked)}
+              onChange={(event) =>
+                update("flashcardEnabled", event.target.checked)
+              }
             />
             Use as flashcard
           </label>

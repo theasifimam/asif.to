@@ -3,11 +3,21 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Building2, Globe, Save, ShieldCheck, RefreshCw } from "lucide-react";
+import {
+  ArrowLeft,
+  Building2,
+  Globe,
+  Save,
+  ShieldCheck,
+  RefreshCw,
+} from "lucide-react";
 import { toast } from "sonner";
 import { jobsApi } from "@/lib/api";
 import { getModuleBackUrl } from "@/hooks/useModuleHistory";
-import AdminFormShell, { formAsideClass, formSectionClass } from "@/components/forms/AdminFormShell";
+import AdminFormShell, {
+  formAsideClass,
+  formSectionClass,
+} from "@/components/forms/AdminFormShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,7 +42,10 @@ const emptyCompany = {
 export default function CompanyForm({ companyId }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const returnTo = getModuleBackUrl("/jobs/companies", searchParams.get("returnTo"));
+  const returnTo = getModuleBackUrl(
+    "/jobs/companies",
+    searchParams.get("returnTo"),
+  );
 
   const [form, setForm] = useState(emptyCompany);
   const [loading, setLoading] = useState(Boolean(companyId));
@@ -75,7 +88,9 @@ export default function CompanyForm({ companyId }) {
     setSaving(false);
 
     if (res.success) {
-      toast.success(companyId ? "Company profile saved" : "Company profile created");
+      toast.success(
+        companyId ? "Company profile saved" : "Company profile created",
+      );
       router.push(returnTo);
     } else {
       toast.error(res.error || "Unable to save company");
@@ -93,28 +108,50 @@ export default function CompanyForm({ companyId }) {
   return (
     <AdminFormShell
       eyebrow="Jobs / Companies"
-      title={companyId ? `Edit Company: ${form.name || "Company"}` : "Create Company Profile"}
+      title={
+        companyId
+          ? `Edit Company: ${form.name || "Company"}`
+          : "Create Company Profile"
+      }
       description="Reusable employer profiles standardize company branding, metadata, and verified badges across job listings."
       back={
-        <Link href={returnTo} className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
+        <Link
+          href={returnTo}
+          className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
+        >
           <ArrowLeft className="h-4 w-4" /> Back to companies
         </Link>
       }
       actions={
-        <Button form="company-form" type="submit" disabled={saving} className="rounded-full">
-          {saving ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+        <Button
+          form="company-form"
+          type="submit"
+          disabled={saving}
+          className="rounded-full"
+        >
+          {saving ? (
+            <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="mr-2 h-4 w-4" />
+          )}
           {saving ? "Saving..." : companyId ? "Save Company" : "Create Company"}
         </Button>
       }
     >
-      <form id="company-form" onSubmit={submit} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] min-w-0 w-full">
+      <form
+        id="company-form"
+        onSubmit={submit}
+        className="grid gap-1 lg:grid-cols-[minmax(0,1fr)_340px] min-w-0 w-full"
+      >
         {/* Main Section */}
-        <section className="space-y-6 min-w-0 w-full">
+        <section className="space-y-1 min-w-0 w-full">
           {/* General Info */}
           <div className={formSectionClass}>
             <div className="flex items-center gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800">
               <Building2 className="h-4 w-4 text-blue-600" />
-              <h2 className="font-semibold text-zinc-900 dark:text-white">Basic Information</h2>
+              <h2 className="font-semibold text-zinc-900 dark:text-white">
+                Basic Information
+              </h2>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -170,7 +207,9 @@ export default function CompanyForm({ companyId }) {
           <div className={formSectionClass}>
             <div className="flex items-center gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800">
               <Globe className="h-4 w-4 text-emerald-600" />
-              <h2 className="font-semibold text-zinc-900 dark:text-white">Web Links & Branding</h2>
+              <h2 className="font-semibold text-zinc-900 dark:text-white">
+                Web Links & Branding
+              </h2>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -221,7 +260,9 @@ export default function CompanyForm({ companyId }) {
         </section>
 
         {/* Sidebar Settings & Preview */}
-        <aside className={`${formAsideClass} min-w-0 w-full self-start lg:sticky lg:top-24 space-y-5`}>
+        <aside
+          className={`${formAsideClass} min-w-0 w-full self-start lg:sticky lg:top-1 space-y-1`}
+        >
           {/* Logo preview */}
           <div className="rounded-3xl border border-zinc-200 bg-white p-5 text-center dark:border-zinc-800 dark:bg-zinc-950 shadow-xs">
             <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-3">
@@ -243,7 +284,9 @@ export default function CompanyForm({ companyId }) {
             </div>
             <h3 className="mt-3 font-bold text-sm text-zinc-900 dark:text-white truncate">
               {form.name || "Company Name"}
-              {form.verified && <ShieldCheck className="ml-1 inline h-4 w-4 text-blue-600" />}
+              {form.verified && (
+                <ShieldCheck className="ml-1 inline h-4 w-4 text-blue-600" />
+              )}
             </h3>
             <p className="text-[11px] text-zinc-500 truncate mt-0.5">
               {form.industry || "Industry not set"}
@@ -257,7 +300,9 @@ export default function CompanyForm({ companyId }) {
                 <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
                   Verified Company
                 </span>
-                <p className="text-[10px] text-zinc-500">Official verified badge</p>
+                <p className="text-[10px] text-zinc-500">
+                  Official verified badge
+                </p>
               </div>
               <Switch
                 checked={form.verified}
@@ -270,7 +315,9 @@ export default function CompanyForm({ companyId }) {
                 <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
                   Active Status
                 </span>
-                <p className="text-[10px] text-zinc-500">Visible across job listings</p>
+                <p className="text-[10px] text-zinc-500">
+                  Visible across job listings
+                </p>
               </div>
               <Switch
                 checked={form.active}

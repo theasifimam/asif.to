@@ -45,7 +45,7 @@ export default function SettingsPage() {
           </Button>
         }
       >
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-4">
           {(settings.contentRules?.thresholds || []).map(
             (threshold, index) => (
               <label
@@ -114,7 +114,7 @@ export default function SettingsPage() {
         title="Environment and deployment"
         description="Configuration supplied by build/deploy environment variables."
       >
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-1 sm:grid-cols-3">
           <div className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800">
             <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
               Environment Master

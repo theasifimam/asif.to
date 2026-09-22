@@ -250,10 +250,10 @@ export default function CompaniesPage() {
             {items.map((item) => (
               <article
                 key={item._id}
-                className="rounded-4xl border border-zinc-200 bg-white p-5 shadow-xs dark:border-zinc-800 dark:bg-zinc-950 flex flex-col justify-between"
+                className="min-w-0 overflow-hidden rounded-4xl border border-zinc-200 bg-white p-5 shadow-xs dark:border-zinc-800 dark:bg-zinc-950 flex flex-col justify-between"
               >
-                <div>
-                  <div className="flex items-start gap-3">
+                <div className="min-w-0">
+                  <div className="flex min-w-0 items-start gap-3">
                     <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-800 dark:bg-zinc-900 shrink-0">
                       {item.logo ? (
                         <img
@@ -280,18 +280,18 @@ export default function CompaniesPage() {
                       <p className="mt-1 text-[10px] font-bold uppercase text-zinc-400">
                         {item.industry || "Industry not set"}
                       </p>
-                      <p className="mt-1 text-[10px] font-bold text-blue-600">
+                      <p className="mt-1 truncate text-[10px] font-bold text-blue-600">
                         {ORIGIN_LABELS[item.creationOrigin] || "Admin Created"}
                         {item.sourceName ? ` · ${item.sourceName}` : ""}
                       </p>
                     </div>
-                    <Link href={`/jobs/companies/${item._id}/edit`}>
+                    <Link className="shrink-0" href={`/jobs/companies/${item._id}/edit`}>
                       <Button variant="ghost" size="icon" title="Edit company">
                         <Pencil className="h-4 w-4" />
                       </Button>
                     </Link>
                   </div>
-                  <p className="mt-4 line-clamp-3 text-xs leading-5 text-zinc-500">
+                  <p className="mt-4 break-words line-clamp-3 text-xs leading-5 text-zinc-500">
                     {item.description || "No company description yet."}
                   </p>
                 </div>

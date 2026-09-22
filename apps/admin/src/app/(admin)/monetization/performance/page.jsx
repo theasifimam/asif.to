@@ -18,7 +18,7 @@ export default function PerformancePage() {
 
   return (
     <>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-4">
         <Metric
           label="Revenue"
           value={
@@ -74,7 +74,7 @@ export default function PerformancePage() {
         />
       </Surface>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-1 lg:grid-cols-2">
         <Surface
           title="Top eligible pages"
           description="Estimated opportunities use active placement counts; they are not impressions."
@@ -107,7 +107,7 @@ export default function PerformancePage() {
         </Surface>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-1 lg:grid-cols-2">
         <Surface
           title="Traffic by device"
           description="Viewport classes from first-party analytics; not AdSense device revenue."
@@ -140,7 +140,7 @@ export default function PerformancePage() {
         title="UX + revenue health"
         description="Possible correlations will be shown only when matching time-series data exists. No causation is inferred."
       >
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-4">
           <Metric
             label="Engagement rate"
             value={

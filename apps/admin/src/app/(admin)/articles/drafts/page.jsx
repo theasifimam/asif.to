@@ -127,7 +127,7 @@ export default function DraftsPage() {
 
       {/* Main Drafts Section */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 min-h-75">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 min-h-75">
           {[1, 2, 3].map((i) => (
             <Card
               key={i}

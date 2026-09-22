@@ -35,7 +35,7 @@ export default function MonetizationOverviewPage() {
 
   return (
     <>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-4">
         <Metric
           label="Ads status"
           value={live ? "Live" : "Disabled"}
@@ -124,12 +124,12 @@ export default function MonetizationOverviewPage() {
         />
       </Surface>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-1 lg:grid-cols-2">
         <Surface
           title="Ad blocker impact"
           description="Estimated based on first-party ping events."
         >
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-1 sm:grid-cols-3">
             <Metric
               label="Block rate"
               value={percentage(traffic.estimatedAdBlockRatio)}

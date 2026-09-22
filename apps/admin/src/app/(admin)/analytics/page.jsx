@@ -30,7 +30,7 @@ export default function AnalyticsPage() {
   const searchParams = useSearchParams();
   const sourceParam = searchParams.get("source");
 
-  const [source, setSource] = useState(sourceParam || "first-party");
+  const [source, setSource] = useState(sourceParam || "ga4");
   const [days, setDays] = useState(28);
 
   useEffect(() => {
@@ -58,17 +58,26 @@ export default function AnalyticsPage() {
             Analytics by data source
           </h1>
           <p className="mt-1.5 max-w-3xl text-xs sm:text-sm font-medium text-zinc-500 dark:text-zinc-400">
-            First-party, Google Analytics 4 and Google Search Console are isolated so no metric can be mistaken for data from another provider.
+            First-party, Google Analytics 4 and Google Search Console are
+            isolated so no metric can be mistaken for data from another
+            provider.
           </p>
         </div>
 
-        <Select value={String(days)} onValueChange={(value) => setDays(Number(value))}>
+        <Select
+          value={String(days)}
+          onValueChange={(value) => setDays(Number(value))}
+        >
           <SelectTrigger className="h-10 w-40 rounded-full border-zinc-200/80 bg-white text-xs font-bold dark:border-zinc-800 dark:bg-[#121215]">
             <SelectValue placeholder="Select range" />
           </SelectTrigger>
           <SelectContent className="rounded-2xl border-zinc-200/80 dark:border-zinc-800">
             {PRESETS.map(([label, value]) => (
-              <SelectItem key={value} value={String(value)} className="cursor-pointer rounded-xl text-xs font-bold">
+              <SelectItem
+                key={value}
+                value={String(value)}
+                className="cursor-pointer rounded-xl text-xs font-bold"
+              >
                 {label}
               </SelectItem>
             ))}
@@ -80,7 +89,10 @@ export default function AnalyticsPage() {
 
       <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold text-zinc-400">
         <span>
-          Source: <strong className="text-zinc-600 dark:text-zinc-300">{active?.label}</strong>
+          Source:{" "}
+          <strong className="text-zinc-600 dark:text-zinc-300">
+            {active?.label}
+          </strong>
         </span>
         <span>·</span>
         <span>

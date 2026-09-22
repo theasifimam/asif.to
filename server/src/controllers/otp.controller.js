@@ -2,17 +2,17 @@ import crypto from "crypto";
 import { sendOtpEmail } from "../services/email.service.js";
 import User from "../models/User.js";
 import { canRecreateDeletedAccount } from "../utils/accountLifecycle.js";
+import OtpVerification from "../models/OtpVerification.js";
 
-// ─── Simple in-memory OTP store: { email → { otp, expiresAt, attempts } } ──
-// In production replace with Redis
-
-const otpStore = new Map();
+// OTP state is persisted so send and verify can be handled by different
+// production workers or instances.
 
 const EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
 const MAX_ATTEMPTS = 5;
 
 /** Generate a 6-digit OTP */
 const generateOtp = () => String(crypto.randomInt(100000, 999999));
+const hashOtp = (otp) => crypto.createHash("sha256").update(String(otp)).digest("hex");
 
 // POST /api/v1/auth/otp/send
 export const sendOtp = async (req, res) => {
@@ -103,8 +103,8 @@ export const sendOtp = async (req, res) => {
     }
 
     // Rate-limit: block if already pending and not expired yet (< 1 min since last send)
-    const existingOtp = otpStore.get(normalizedEmail);
-    if (existingOtp && existingOtp.expiresAt - Date.now() > EXPIRY_MS - 60_000) {
+    const existingOtp = await OtpVerification.findOne({ email: normalizedEmail });
+    if (existingOtp && existingOtp.sentAt.getTime() > Date.now() - 60_000 && existingOtp.expiresAt > new Date()) {
       res
         .status(429)
         .json({
@@ -115,12 +115,11 @@ export const sendOtp = async (req, res) => {
     }
 
     const otp = generateOtp();
-    otpStore.set(normalizedEmail, {
-      otp,
-      purpose,
-      expiresAt: Date.now() + EXPIRY_MS,
-      attempts: 0,
-    });
+    await OtpVerification.findOneAndUpdate(
+      { email: normalizedEmail },
+      { email: normalizedEmail, otpHash: hashOtp(otp), purpose, expiresAt: new Date(Date.now() + EXPIRY_MS), sentAt: new Date(), attempts: 0 },
+      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
+    );
 
     const name =
       fullName?.trim() ||
@@ -138,7 +137,7 @@ export const sendOtp = async (req, res) => {
         message: `Verification code sent to ${normalizedEmail}.`,
       });
   } catch (error) {
-    if (normalizedEmail) otpStore.delete(normalizedEmail);
+    if (normalizedEmail) await OtpVerification.deleteOne({ email: normalizedEmail }).catch(() => {});
     console.error("[OTP] sendOtp error:", error);
     res.status(500).json({
       success: false,
@@ -182,7 +181,8 @@ export const verifyOtp = async (req, res) => {
       return;
     }
 
-    const entry = otpStore.get(email.toLowerCase());
+    const normalizedEmail = email.toLowerCase().trim();
+    const entry = await OtpVerification.findOne({ email: normalizedEmail }).select("+otpHash");
 
     if (!entry) {
       res
@@ -195,7 +195,7 @@ export const verifyOtp = async (req, res) => {
     }
 
     if (Date.now() > entry.expiresAt) {
-      otpStore.delete(email.toLowerCase());
+      await OtpVerification.deleteOne({ email: normalizedEmail });
       res
         .status(400)
         .json({
@@ -206,8 +206,9 @@ export const verifyOtp = async (req, res) => {
     }
 
     entry.attempts++;
+    await entry.save();
     if (entry.attempts > MAX_ATTEMPTS) {
-      otpStore.delete(email.toLowerCase());
+      await OtpVerification.deleteOne({ email: normalizedEmail });
       res
         .status(400)
         .json({
@@ -217,7 +218,7 @@ export const verifyOtp = async (req, res) => {
       return;
     }
 
-    if (entry.otp !== otp.trim()) {
+    if (entry.otpHash !== hashOtp(otp.trim())) {
       res
         .status(400)
         .json({
@@ -228,7 +229,7 @@ export const verifyOtp = async (req, res) => {
     }
 
     // Valid — remove from store
-    otpStore.delete(email.toLowerCase());
+    await OtpVerification.deleteOne({ _id: entry._id });
     res
       .status(200)
       .json({ success: true, message: "Code verified successfully." });
@@ -238,19 +239,19 @@ export const verifyOtp = async (req, res) => {
   }
 };
 
-export const verifyAndConsumeOtp = (email, otp, expectedPurpose) => {
+export const verifyAndConsumeOtp = async (email, otp, expectedPurpose) => {
   if (!email || !otp)
     return { success: false, message: "Email and OTP are required." };
 
   const normalizedEmail = email.toLowerCase().trim();
-  const entry = otpStore.get(normalizedEmail);
+  const entry = await OtpVerification.findOne({ email: normalizedEmail }).select("+otpHash");
   if (!entry)
     return {
       success: false,
       message: "No verification code found. Please request a new one.",
     };
   if (Date.now() > entry.expiresAt) {
-    otpStore.delete(normalizedEmail);
+    await OtpVerification.deleteOne({ email: normalizedEmail });
     return {
       success: false,
       message: "Verification code has expired. Please request a new one.",
@@ -265,15 +266,16 @@ export const verifyAndConsumeOtp = (email, otp, expectedPurpose) => {
   }
 
   entry.attempts++;
+  await entry.save();
   if (entry.attempts > MAX_ATTEMPTS) {
-    otpStore.delete(normalizedEmail);
+    await OtpVerification.deleteOne({ email: normalizedEmail });
     return {
       success: false,
       message: "Too many failed attempts. Please request a new code.",
     };
   }
 
-  if (entry.otp !== otp.trim()) {
+  if (entry.otpHash !== hashOtp(otp.trim())) {
     return {
       success: false,
       message: `Invalid code. ${MAX_ATTEMPTS - entry.attempts} attempts remaining.`,
@@ -281,6 +283,6 @@ export const verifyAndConsumeOtp = (email, otp, expectedPurpose) => {
   }
 
   // Valid — remove from store
-  otpStore.delete(normalizedEmail);
+  await OtpVerification.deleteOne({ _id: entry._id });
   return { success: true };
 };

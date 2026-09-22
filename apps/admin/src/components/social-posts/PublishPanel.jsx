@@ -314,7 +314,7 @@ export default function PublishPanel({ postId, post, exportRefs }) {
 
       <div className="p-4 space-y-4">
         {/* Connected Platforms Grid */}
-        <div className="grid gap-3 lg:grid-cols-3">
+        <div className="grid gap-1 lg:grid-cols-3">
           {Object.entries(META).map(([platform, meta]) => {
             const item = byPlatform[platform];
             const connected = item?.status === "connected";
@@ -467,7 +467,7 @@ export default function PublishPanel({ postId, post, exportRefs }) {
         )}
 
         {/* Caption + Action Bar */}
-        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
+        <div className="grid gap-1 lg:grid-cols-[minmax(0,1fr)_220px]">
           <div>
             <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               Caption + hashtags

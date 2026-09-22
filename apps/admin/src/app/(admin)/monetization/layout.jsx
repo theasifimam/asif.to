@@ -74,7 +74,7 @@ function MonetizationLayoutInner({ children }) {
 
       {/* Navigation tabs */}
       <nav
-        className="flex max-w-full min-w-0 gap-1 overflow-x-auto rounded-2xl border border-zinc-200 bg-zinc-100/70 p-1 dark:border-zinc-800 dark:bg-zinc-900/70 custom-scrollbar"
+        className="inline-flex max-w-full w-fit items-center gap-1 overflow-x-auto p-1 custom-scrollbar"
         aria-label="Monetization sections"
       >
         {TABS.map((item) => {
@@ -83,10 +83,10 @@ function MonetizationLayoutInner({ children }) {
             <Link
               key={item.href}
               href={item.href}
-              className={`shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition ${
+              className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold transition-all ${
                 isActive
-                  ? "bg-white text-blue-600 shadow-sm dark:bg-zinc-950 dark:text-blue-400"
-                  : "text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+                  ? "bg-white text-blue-600 shadow-xs dark:bg-zinc-800 dark:text-blue-400"
+                  : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
               }`}
             >
               {item.name}

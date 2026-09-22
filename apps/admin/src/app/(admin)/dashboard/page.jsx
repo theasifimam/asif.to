@@ -213,7 +213,7 @@ export default function DashboardPage() {
     user?.fullName || user?.name || user?.username || "Asif Imam";
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-6 p-4 font-sans text-zinc-800 dark:text-zinc-300 sm:p-6 md:p-8 lg:p-10 min-w-0">
+    <div className="mx-auto flex max-w-7xl flex-col gap-1 p-4 font-sans text-zinc-800 dark:text-zinc-300 sm:p-6 md:p-8 lg:p-10 min-w-0">
       {/* 1. CREATOR HERO BENTO BANNER */}
       <section className="relative overflow-hidden rounded-4xl sm:rounded-[2.5rem] bg-zinc-950 text-white p-6 sm:p-9 shadow-xl border border-zinc-800 min-w-0">
         {/* Ambient Radial Mesh Glows */}
@@ -288,7 +288,7 @@ export default function DashboardPage() {
             : visibleStats.length === 4
               ? "sm:grid-cols-2 lg:grid-cols-4"
               : "sm:grid-cols-3"
-        } gap-3 sm:gap-4`}
+        } gap-1`}
       >
         {visibleStats.map((stat, i) => {
           const StatIcon = ICON_MAP[stat.icon] || BookOpen;
@@ -367,7 +367,7 @@ export default function DashboardPage() {
             Fetching planner tasks...
           </div>
         ) : plannerTasks.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1">
             {plannerTasks.slice(0, 3).map((task) => {
               let priorityColorClass =
                 "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
@@ -541,7 +541,7 @@ export default function DashboardPage() {
       </section>
 
       {/* 5. BENTO LOWER GRID: TOP COURSES & CURRICULUM FOCUS */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-1">
         {/* Top Performing Courses (Bento Container) */}
         <section className="lg:col-span-8 flex flex-col gap-3 min-w-0">
           <div className="rounded-4xl sm:rounded-[2.5rem] bg-white dark:bg-zinc-900/90 border border-zinc-200/80 dark:border-zinc-800 p-5 sm:p-7 shadow-xs flex flex-col gap-4">
@@ -668,7 +668,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Platform Ecosystem Counts */}
-            <div className="pt-4 border-t border-zinc-200/60 dark:border-zinc-800/80 grid grid-cols-3 gap-2 text-center">
+            <div className="pt-4 border-t border-zinc-200/60 dark:border-zinc-800/80 grid grid-cols-3 gap-1 text-center">
               <div className="flex flex-col p-3 bg-white/80 dark:bg-zinc-900/80 rounded-2xl border border-zinc-200/80 dark:border-zinc-800">
                 <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
                   Quizzes

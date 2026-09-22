@@ -14,7 +14,7 @@ export function BentoGrid({ children, className, columns = 3 }) {
   };
 
   return (
-    <div className={cn("grid gap-6", gridCols[columns], className)}>
+    <div className={cn("grid gap-1", gridCols[columns], className)}>
       {children}
     </div>
   );

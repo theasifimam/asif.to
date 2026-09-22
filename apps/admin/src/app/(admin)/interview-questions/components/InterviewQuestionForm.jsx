@@ -66,10 +66,7 @@ export default function InterviewQuestionForm({
 }) {
   const searchParams = useSearchParams();
   const requestedReturnTo = searchParams.get("returnTo");
-  const returnTo = getModuleBackUrl(
-    "/interview-questions",
-    requestedReturnTo,
-  );
+  const returnTo = getModuleBackUrl("/interview-questions", requestedReturnTo);
   const taxonomyLocked =
     lockTaxonomy ||
     /^\/courses\/[^/]+\/categories\/[^/]+\/interview-questions(?:\?|$)/.test(
@@ -220,7 +217,10 @@ export default function InterviewQuestionForm({
             {form.question || "Untitled question"}
           </h2>
           <div className="rounded-2xl bg-zinc-50 dark:bg-zinc-900 p-4 border border-zinc-200/60 dark:border-zinc-800/60">
-            <MarkdownPreview source={form.answer} placeholder="No answer content provided." />
+            <MarkdownPreview
+              source={form.answer}
+              placeholder="No answer content provided."
+            />
           </div>
           {form.codeExample && (
             <pre className="overflow-x-auto rounded-2xl bg-zinc-950 p-4 text-xs sm:text-sm text-zinc-100">
@@ -234,8 +234,8 @@ export default function InterviewQuestionForm({
           )}
         </article>
       ) : (
-        <div className="grid gap-6 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] min-w-0 w-full">
-          <section className="space-y-6 min-w-0 w-full">
+        <div className="grid gap-1 grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] min-w-0 w-full">
+          <section className="space-y-1 min-w-0 w-full">
             <div className={formSectionClass}>
               <div className="space-y-2">
                 <Label>Question</Label>
