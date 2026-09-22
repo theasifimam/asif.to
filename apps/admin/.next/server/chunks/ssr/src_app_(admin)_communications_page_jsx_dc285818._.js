@@ -1,0 +1,3 @@
+module.exports=[571253,a=>{"use strict";var b=a.i(187924),c=a.i(572131),d=a.i(50944),e=a.i(116100),f=a.i(170615),g=a.i(746723);function h(){let{user:a}=(0,e.useAuth)(),h=(0,d.useRouter)(),i=g.sections.find(b=>(0,f.hasPermission)(a,b.permission));return(0,c.useEffect)(()=>{i&&h.replace(`/communications/${i.key}`)},[i,h]),(0,b.jsx)("p",{className:"p-6 text-sm text-zinc-400",children:i?"Opening communications?":"You do not have access to communications."})}a.s(["default",()=>h])}];
+
+//# sourceMappingURL=src_app_%28admin%29_communications_page_jsx_dc285818._.js.map

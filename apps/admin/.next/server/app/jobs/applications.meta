@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(admin)/layout,_N_T_/(admin)/jobs/layout,_N_T_/(admin)/jobs/applications/layout,_N_T_/(admin)/jobs/applications/page,_N_T_/jobs/applications"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KGFkbWluKQ/jobs/applications/__PAGE__",
+    "/!KGFkbWluKQ/jobs/applications",
+    "/!KGFkbWluKQ/jobs",
+    "/!KGFkbWluKQ",
+    "/_index",
+    "/_head"
+  ]
+}

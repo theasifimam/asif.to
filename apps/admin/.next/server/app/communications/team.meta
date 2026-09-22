@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(admin)/layout,_N_T_/(admin)/communications/layout,_N_T_/(admin)/communications/team/layout,_N_T_/(admin)/communications/team/page,_N_T_/communications/team"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KGFkbWluKQ/communications/team/__PAGE__",
+    "/!KGFkbWluKQ/communications/team",
+    "/!KGFkbWluKQ/communications",
+    "/!KGFkbWluKQ",
+    "/_index",
+    "/_head"
+  ]
+}

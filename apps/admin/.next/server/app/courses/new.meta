@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(admin)/layout,_N_T_/(admin)/courses/layout,_N_T_/(admin)/courses/new/layout,_N_T_/(admin)/courses/new/page,_N_T_/courses/new"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KGFkbWluKQ/courses/new/__PAGE__",
+    "/!KGFkbWluKQ/courses/new",
+    "/!KGFkbWluKQ/courses",
+    "/!KGFkbWluKQ",
+    "/_index",
+    "/_head"
+  ]
+}

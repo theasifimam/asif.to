@@ -1,0 +1,3 @@
+{
+  "/(admin)/playground-settings/page": "app/(admin)/playground-settings/page.js"
+}

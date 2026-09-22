@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(admin)/layout,_N_T_/(admin)/monetization/layout,_N_T_/(admin)/monetization/performance/layout,_N_T_/(admin)/monetization/performance/page,_N_T_/monetization/performance"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KGFkbWluKQ/monetization/performance/__PAGE__",
+    "/!KGFkbWluKQ/monetization/performance",
+    "/!KGFkbWluKQ/monetization",
+    "/!KGFkbWluKQ",
+    "/_index",
+    "/_head"
+  ]
+}

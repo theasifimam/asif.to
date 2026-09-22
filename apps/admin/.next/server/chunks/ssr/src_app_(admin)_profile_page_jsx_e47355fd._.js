@@ -1,0 +1,3 @@
+module.exports=[845947,a=>{"use strict";var b=a.i(187924),c=a.i(233713),d=a.i(572131),e=a.i(50944),f=a.i(116100);function g(){let a=(0,e.useRouter)(),{user:g,loading:h}=(0,f.useAuth)();return(0,d.useEffect)(()=>{h||(g?._id?a.replace(`/users/${g._id}`):a.replace("/users"))},[g,h,a]),(0,b.jsx)("div",{className:"min-h-screen flex items-center justify-center bg-white dark:bg-black",children:(0,b.jsxs)("div",{className:"flex flex-col items-center gap-4",children:[(0,b.jsx)(c.default,{className:" text-zinc-500",size:32}),(0,b.jsx)("span",{className:"text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400",children:"Redirecting to profile..."})]})})}a.s(["default",()=>g])}];
+
+//# sourceMappingURL=src_app_%28admin%29_profile_page_jsx_e47355fd._.js.map

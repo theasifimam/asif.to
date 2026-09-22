@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(admin)/layout,_N_T_/(admin)/media-audit/layout,_N_T_/(admin)/media-audit/page,_N_T_/media-audit"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KGFkbWluKQ/media-audit/__PAGE__",
+    "/!KGFkbWluKQ/media-audit",
+    "/!KGFkbWluKQ",
+    "/_index",
+    "/_head"
+  ]
+}

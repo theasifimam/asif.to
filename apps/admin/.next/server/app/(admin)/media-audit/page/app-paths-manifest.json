@@ -1,0 +1,3 @@
+{
+  "/(admin)/media-audit/page": "app/(admin)/media-audit/page.js"
+}

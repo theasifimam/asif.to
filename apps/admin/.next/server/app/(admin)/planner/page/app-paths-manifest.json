@@ -1,0 +1,3 @@
+{
+  "/(admin)/planner/page": "app/(admin)/planner/page.js"
+}

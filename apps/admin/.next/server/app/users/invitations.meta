@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(admin)/layout,_N_T_/(admin)/users/layout,_N_T_/(admin)/users/invitations/layout,_N_T_/(admin)/users/invitations/page,_N_T_/users/invitations"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KGFkbWluKQ/users/invitations/__PAGE__",
+    "/!KGFkbWluKQ/users/invitations",
+    "/!KGFkbWluKQ/users",
+    "/!KGFkbWluKQ",
+    "/_index",
+    "/_head"
+  ]
+}
