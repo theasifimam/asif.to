@@ -4,6 +4,7 @@ import { AdminToaster } from "@/components/ui/toaster";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ReduxProvider } from "@/redux/provider";
+import NavigationProgressProvider from "@/components/providers/NavigationProgressProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -46,6 +47,7 @@ export default function RootLayout({ children }) {
               storageKey="asif-admin-theme"
               disableTransitionOnChange
             >
+              <NavigationProgressProvider />
               {children}
               <AdminToaster />
             </ThemeProvider>

@@ -104,7 +104,7 @@ export const sendOtp = async (req, res) => {
 
     // Rate-limit: block if already pending and not expired yet (< 1 min since last send)
     const existingOtp = await OtpVerification.findOne({ email: normalizedEmail });
-    if (existingOtp && existingOtp.sentAt.getTime() > Date.now() - 60_000 && existingOtp.expiresAt > new Date()) {
+    if (existingOtp && existingOtp.sentAt?.getTime() > Date.now() - 60_000 && existingOtp.expiresAt > new Date()) {
       res
         .status(429)
         .json({

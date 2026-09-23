@@ -17,6 +17,7 @@ import MonetizationProvider from "@/components/ads/MonetizationProvider";
 import { getRuntimeMonetizationConfig } from "@/lib/ads/runtimeConfig";
 import { getSiteSetting } from "@/lib/publicContent";
 import { SiteBrandingProvider } from "@/components/providers/SiteBrandingProvider";
+import NavigationProgressProvider from "@/components/providers/NavigationProgressProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -117,6 +118,7 @@ export default async function RootLayout({ children, modal }) {
                 <AuthBridge>
                   <AuthPromptProvider>
                     <ScrollNavProvider>
+                      <NavigationProgressProvider />
                       <Suspense fallback={null}>
                         <AnalyticsTracker />
                       </Suspense>
