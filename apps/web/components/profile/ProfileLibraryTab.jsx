@@ -142,7 +142,7 @@ export default function ProfileLibraryTab({
   return (
     <div className="space-y-4">
       {/* Main Knowledge Card Container */}
-      <div className="rounded-[2.5rem] bg-white dark:bg-zinc-900/90 shadow-xs border border-zinc-200/70 dark:border-zinc-800 p-5 sm:p-7 space-y-5">
+      <div className="space-y-5">
         {/* Top Controls: Type/Collection Selectors & Action Buttons */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 pb-4 border-b border-zinc-100 dark:border-zinc-800/80">
           {/* Left: Filters & Search */}
@@ -150,7 +150,7 @@ export default function ProfileLibraryTab({
             {/* Type Selector */}
             <div className="w-full sm:w-52 shrink-0">
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-full rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800 px-3.5 py-2.5 text-xs font-bold text-foreground">
+                <SelectTrigger className="w-full rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 px-3.5 py-2.5 text-xs font-bold text-foreground shadow-xs">
                   <SelectValue placeholder="Filter by type" />
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl max-h-80">
@@ -197,7 +197,7 @@ export default function ProfileLibraryTab({
             {collections.length > 0 && (
               <div className="w-full sm:w-44 shrink-0">
                 <Select value={collectionId} onValueChange={setCollectionId}>
-                  <SelectTrigger className="w-full rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800 px-3.5 py-2.5 text-xs font-bold text-foreground">
+                  <SelectTrigger className="w-full rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 px-3.5 py-2.5 text-xs font-bold text-foreground shadow-xs">
                     <SelectValue placeholder="All Collections" />
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl">
@@ -221,7 +221,7 @@ export default function ProfileLibraryTab({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search notes, code, fixes, tags..."
-                className="w-full rounded-2xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-800 pl-10 pr-4 py-2.5 text-xs text-foreground placeholder:text-zinc-400 outline-none focus:border-blue-500 dark:focus:border-blue-500 transition"
+                className="w-full rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 pl-10 pr-4 py-2.5 text-xs text-foreground placeholder:text-zinc-400 outline-none focus:border-blue-500 dark:focus:border-blue-500 transition shadow-xs"
               />
             </div>
           </div>

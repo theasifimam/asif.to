@@ -74,6 +74,12 @@ const nextConfig = {
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
+      // Production API — serves all uploaded images (avatars, articles, etc.)
+      {
+        protocol: "https",
+        hostname: "api.asif.to",
+        pathname: "/uploads/**",
+      },
       {
         protocol: "https",
         hostname: "images.unsplash.com",
@@ -82,6 +88,16 @@ const nextConfig = {
         protocol: "https",
         hostname: "ui-avatars.com",
       },
+      // OAuth avatars
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+      },
+      // Local development
       {
         protocol: "http",
         hostname: "localhost",
