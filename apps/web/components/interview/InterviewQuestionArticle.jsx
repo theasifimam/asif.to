@@ -18,6 +18,7 @@ import {
 import { absoluteUrl, getSiteUrl, jsonLd } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import { InterviewQuestionAd } from "@/components/ads/SemanticAds";
+import { processInternalLinks } from "@/lib/internalLinks";
 
 export async function buildInterviewQuestionMetadata(courseSlug, questionSlug) {
   const data = await getPublicInterviewQuestion(courseSlug, questionSlug);
@@ -71,6 +72,12 @@ export default async function InterviewQuestionArticle({
     question.canonicalUrl,
     `/${encodeURIComponent(course.slug)}/interview-questions/${encodeURIComponent(question.slug)}`,
   );
+  
+  const currentPath = `/${encodeURIComponent(course.slug)}/interview-questions/${encodeURIComponent(question.slug)}`;
+  if (question.answer) {
+    question.answer = await processInternalLinks(question.answer, currentPath);
+  }
+
   const href = (target) =>
     target
       ? `/${encodeURIComponent(course.slug)}/interview-questions/${encodeURIComponent(target.slug)}`

@@ -34,6 +34,7 @@ import ChapterBlocksRenderer from "@/components/chapter/ChapterBlocksRenderer";
 import { parseContentBlocks } from "@/components/chapter/chapterUtils";
 import { ArticleAd } from "@/components/ads/SemanticAds";
 import RelatedContentSidebar from "@/components/related/RelatedContentSidebar";
+import { getInternalLinkRules, processInternalLinksSync } from "@/lib/internalLinks";
 
 const WhatsAppIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -64,11 +65,33 @@ export default function ArticleClient({ slug, initialData }) {
     isLoading: cleanSlugLoading,
   } = useGetArticleBySlugQuery(cleanSlug, { skip: !looksLikeMongoId || cleanSlug === slug });
 
-  const article =
-    initialData ||
+  const [linkRules, setLinkRules] = useState([]);
+  useEffect(() => {
+    getInternalLinkRules().then((rules) =>
+      setLinkRules(rules.filter((r) => r.enabled !== false))
+    );
+  }, []);
+
+  const rawArticle =
     responseById?.data ||
     responseBySlug?.data ||
     responseByCleanSlug?.data;
+
+  const article = useMemo(() => {
+    if (!rawArticle) return initialData;
+    if (!linkRules.length) return rawArticle;
+
+    const processed = { ...rawArticle };
+    const currentPath = `/articles/${slug}`;
+    if (processed.content) {
+      if (Array.isArray(processed.content)) {
+        processed.content = processed.content.map(block => processInternalLinksSync(block, linkRules, currentPath));
+      } else {
+        processed.content = processInternalLinksSync(processed.content, linkRules, currentPath);
+      }
+    }
+    return processed;
+  }, [rawArticle, initialData, linkRules, slug]);
 
   const isLoading =
     !article && (idLoading || slugLoading || cleanSlugLoading);

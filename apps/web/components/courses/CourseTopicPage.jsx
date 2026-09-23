@@ -19,6 +19,7 @@ import SafeHeroImage from "@/components/ui/SafeHeroImage";
 import { getPublicTopic } from "@/lib/publicContent";
 import { absoluteUrl, getSiteUrl } from "@/lib/seo";
 import { getImageUrl } from "@/lib/config";
+import { processInternalLinks } from "@/lib/internalLinks";
 
 const siteUrl = getSiteUrl();
 
@@ -387,10 +388,20 @@ export default async function CourseTopicPage({ courseSlug, topicPath }) {
     .join("/")}`;
   if (currentPath !== canonicalPath) redirect(canonicalPath);
 
-  const questions = (topic.interviewQuestions || []).map((question, index) => ({
-    ...question,
-    anchorId: questionAnchor(question, index),
-  }));
+  if (topic.content) {
+    topic.content = await processInternalLinks(topic.content, currentPath);
+  }
+  if (topic.excerpt) {
+    topic.excerpt = await processInternalLinks(topic.excerpt, currentPath);
+  }
+
+  const questions = await Promise.all(
+    (topic.interviewQuestions || []).map(async (question, index) => ({
+      ...question,
+      anchorId: questionAnchor(question, index),
+      answer: question.answer ? await processInternalLinks(question.answer, currentPath) : question.answer,
+    }))
+  );
   const jsonLd = structuredData(courseSlug, topic, questions);
   const readingMinutes = estimateReadingTime(topic, questions);
 

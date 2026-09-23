@@ -10,7 +10,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-const SOCIALS = ["github", "linkedin", "instagram", "youtube", "twitter", "facebook"];
+const SOCIALS = [
+  "github",
+  "linkedin",
+  "instagram",
+  "youtube",
+  "twitter",
+  "facebook",
+];
 const empty = (site) => ({
   site,
   title: "",
@@ -25,7 +32,12 @@ const empty = (site) => ({
 
 const SITES = [
   { site: "public", label: "asif.to", icon: Globe2, detail: "Public website" },
-  { site: "admin", label: "admin.asif.to", icon: ShieldCheck, detail: "Control panel" },
+  {
+    site: "admin",
+    label: "admin.asif.to",
+    icon: ShieldCheck,
+    detail: "Control panel",
+  },
 ];
 
 function SiteSettingsContent() {
@@ -43,7 +55,9 @@ function SiteSettingsContent() {
       if (response.success) {
         const values = response.data?.data || [];
         setItems(values);
-        setForm(values.find((item) => item.site === activeSite) || empty(activeSite));
+        setForm(
+          values.find((item) => item.site === activeSite) || empty(activeSite),
+        );
       } else {
         toast.error(response.error || "Unable to load site settings");
       }
@@ -52,7 +66,9 @@ function SiteSettingsContent() {
 
   useEffect(() => {
     if (items.length > 0) {
-      setForm(items.find((item) => item.site === activeSite) || empty(activeSite));
+      setForm(
+        items.find((item) => item.site === activeSite) || empty(activeSite),
+      );
     } else {
       setForm(empty(activeSite));
     }
@@ -97,7 +113,8 @@ function SiteSettingsContent() {
           Site & brand control
         </h1>
         <p className="max-w-2xl text-sm font-medium text-zinc-500 dark:text-zinc-400">
-          Update the identity shown across asif.to and the admin control panel. Changes are used by public metadata and brand surfaces.
+          Update the identity shown across asif.to and the admin control panel.
+          Changes are used by public metadata and brand surfaces.
         </p>
       </header>
 
@@ -121,7 +138,9 @@ function SiteSettingsContent() {
                 <span>{label}</span>
                 <span
                   className={`text-[10px] font-semibold ${
-                    isActive ? "text-blue-500 dark:text-blue-400" : "text-zinc-400 dark:text-zinc-500"
+                    isActive
+                      ? "text-blue-500 dark:text-blue-400"
+                      : "text-zinc-400 dark:text-zinc-500"
                   }`}
                 >
                   ({detail})
@@ -182,7 +201,8 @@ function SiteSettingsContent() {
               Social profiles
             </h2>
             <p className="mt-1 text-xs text-zinc-500">
-              Use full profile URLs. Empty fields are hidden wherever social links are rendered.
+              Use full profile URLs. Empty fields are hidden wherever social
+              links are rendered.
             </p>
           </div>
 
@@ -221,7 +241,13 @@ function SiteSettingsContent() {
 
 export default function SiteSettingsPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-xs font-bold text-zinc-400">Loading settings...</div>}>
+    <Suspense
+      fallback={
+        <div className="p-8 text-xs font-bold text-zinc-400">
+          Loading settings...
+        </div>
+      }
+    >
       <SiteSettingsContent />
     </Suspense>
   );

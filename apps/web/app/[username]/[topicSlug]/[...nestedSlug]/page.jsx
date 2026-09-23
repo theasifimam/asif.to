@@ -10,6 +10,7 @@ import CategoryInterviewGuide, {
 } from "@/components/interview/InterviewQuestionsGuide";
 import { getChapterData, getPublicInterviewCategory } from "@/lib/publicContent";
 import { notFound } from "next/navigation";
+import { processInternalLinks } from "@/lib/internalLinks";
 
 export const dynamic = "force-dynamic";
 
@@ -81,6 +82,18 @@ export default async function NestedPublicTopicPage({ params, searchParams }) {
     const chapterData = await getChapterData(courseSlug, topicSlug);
     if (chapterData?.course && chapterData?.chapter) {
       if (!activityAvailable(chapterData, nestedSlug[0])) notFound();
+      
+      const currentPath = `/${encodeURIComponent(chapterData.course.slug || courseSlug)}/${encodeURIComponent(chapterData.chapter.slug || topicSlug)}`;
+      if (chapterData.chapter.content) {
+        if (Array.isArray(chapterData.chapter.content)) {
+          chapterData.chapter.content = await Promise.all(
+            chapterData.chapter.content.map(block => processInternalLinks(block, currentPath))
+          );
+        } else {
+          chapterData.chapter.content = await processInternalLinks(chapterData.chapter.content, currentPath);
+        }
+      }
+
       return (
         <ChapterActivityClient
           courseSlug={courseSlug}

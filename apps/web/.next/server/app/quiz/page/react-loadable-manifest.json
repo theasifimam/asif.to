@@ -10,5 +10,18 @@
     "files": [
       "static/chunks/002a086ef08efd5f.js"
     ]
+  },
+  "936582": {
+    "id": 936582,
+    "files": [
+      "static/chunks/26903398c4f7866a.js"
+    ]
+  },
+  "893960": {
+    "id": 893960,
+    "files": [
+      "static/chunks/ca649487c8cbf064.js",
+      "static/chunks/25730d011b16b7ad.css"
+    ]
   }
 }

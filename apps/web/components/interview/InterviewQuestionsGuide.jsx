@@ -15,6 +15,7 @@ import {
   getRelatedContent,
 } from "@/lib/publicContent";
 import { absoluteUrl, getSiteUrl, jsonLd } from "@/lib/seo";
+import { processInternalLinks } from "@/lib/internalLinks";
 import InterviewAnswer from "./InterviewAnswer";
 import InterviewQuestionList from "./InterviewQuestionList";
 import MobileQuestionIndex from "./MobileQuestionIndex";
@@ -136,6 +137,20 @@ export default async function CategoryInterviewGuide({
   const basePath = courseSlug
     ? `/${encodeURIComponent(courseSlug)}/interview-questions/${encodeURIComponent(canonicalSlug)}`
     : `/interview-questions/${encodeURIComponent(canonicalSlug)}`;
+
+  if (questions.length > 0) {
+    await Promise.all(
+      questions.map(async (q) => {
+        if (q.answer) {
+          const qPath = courseSlug
+            ? `/${encodeURIComponent(courseSlug)}/interview-questions/${encodeURIComponent(q.slug)}`
+            : `/interview-questions/${encodeURIComponent(q.slug)}`;
+          q.answer = await processInternalLinks(q.answer, qPath);
+        }
+      })
+    );
+  }
+
   const firstNumber = (pagination.page - 1) * pagination.limit + 1;
 
   const relatedData = await getRelatedContent({

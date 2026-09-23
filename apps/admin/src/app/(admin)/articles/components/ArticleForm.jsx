@@ -24,7 +24,7 @@ import AdminFormShell, {
 } from "@/components/forms/AdminFormShell";
 import DiscussButton from "@/components/messaging/DiscussButton";
 import { CanonicalUrlInput } from "@/components/admin";
-import { articlesApi, articleTopicsApi, coursesApi, usersApi } from "@/lib/api";
+import { articlesApi, articleTopicsApi, coursesApi, chaptersApi, usersApi } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { getImageUrl } from "@/lib/utils";
 import { getAssetUrl } from "@/lib/assets";
@@ -50,6 +50,7 @@ export default function ArticleForm({ articleId = null }) {
   const [saving, setSaving] = useState(false);
   const [topics, setTopics] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [chaptersByCourse, setChaptersByCourse] = useState({});
   const [adminUsers, setAdminUsers] = useState([]);
   const [overrideAuthorId, setOverrideAuthorId] = useState("");
   const { user: currentAdminUser } = useAuth();
@@ -66,6 +67,7 @@ export default function ArticleForm({ articleId = null }) {
     keywords: "",
     canonicalUrl: "",
     relatedCourses: [],
+    relatedChapters: [],
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
@@ -121,6 +123,9 @@ export default function ArticleForm({ articleId = null }) {
             relatedCourses: (article.relatedCourses || []).map((c) =>
               typeof c === "object" ? c._id : c,
             ),
+            relatedChapters: (article.relatedChapters || []).map((c) =>
+              typeof c === "object" ? c._id : c,
+            ),
           });
           // Pre-select the article's current author
           const currentAuthorId = article.author?._id || article.author || "";
@@ -139,6 +144,21 @@ export default function ArticleForm({ articleId = null }) {
       active = false;
     };
   }, [articleId, isSuperAdmin]);
+
+  useEffect(() => {
+    (form.relatedCourses || []).forEach((courseId) => {
+      if (!chaptersByCourse[courseId]) {
+        chaptersApi.list(courseId).then((res) => {
+          if (res.success) {
+            setChaptersByCourse((prev) => ({
+              ...prev,
+              [courseId]: res.data?.data || res.data || [],
+            }));
+          }
+        });
+      }
+    });
+  }, [form.relatedCourses]);
 
   const update = (key, value) =>
     setForm((current) => ({ ...current, [key]: value }));
@@ -177,6 +197,9 @@ export default function ArticleForm({ articleId = null }) {
     form.topics.forEach((topic) => data.append("topic", topic));
     (form.relatedCourses || []).forEach((c) =>
       data.append("relatedCourses", c),
+    );
+    (form.relatedChapters || []).forEach((c) =>
+      data.append("relatedChapters", c),
     );
     if (imageFile) data.append("image", imageFile);
     if (form.imageAsset) data.append("imageAsset", form.imageAsset);
@@ -311,26 +334,49 @@ export default function ArticleForm({ articleId = null }) {
             <div className="max-h-48 overflow-y-auto space-y-1 rounded-2xl border border-zinc-200/60 bg-zinc-50 p-3 dark:border-zinc-800/60 dark:bg-zinc-900/50">
               {courses.map((c) => {
                 const isSelected = (form.relatedCourses || []).includes(c._id);
+                const courseChapters = chaptersByCourse[c._id] || [];
                 return (
-                  <label
-                    key={c._id}
-                    className="flex items-center gap-2.5 rounded-xl px-2 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-200/60 dark:text-zinc-300 dark:hover:bg-zinc-800 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={(e) => {
-                        const next = e.target.checked
-                          ? [...(form.relatedCourses || []), c._id]
-                          : (form.relatedCourses || []).filter(
-                              (id) => id !== c._id,
-                            );
-                        update("relatedCourses", next);
-                      }}
-                      className="h-4 w-4 rounded border-zinc-300 text-blue-500 focus:ring-blue-400"
-                    />
-                    <span>{c.title}</span>
-                  </label>
+                  <div key={c._id}>
+                    <label className="flex items-center gap-2.5 rounded-xl px-2 py-1.5 text-xs font-bold text-zinc-800 hover:bg-zinc-200/60 dark:text-zinc-200 dark:hover:bg-zinc-800 cursor-pointer transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          const next = e.target.checked
+                            ? [...(form.relatedCourses || []), c._id]
+                            : (form.relatedCourses || []).filter(
+                                (id) => id !== c._id,
+                              );
+                          update("relatedCourses", next);
+                        }}
+                        className="h-4 w-4 rounded border-zinc-300 text-blue-500 focus:ring-blue-400"
+                      />
+                      <span>{c.title}</span>
+                    </label>
+                    {isSelected && courseChapters.length > 0 && (
+                      <div className="ml-6 mt-1 flex flex-col gap-1 border-l-2 border-zinc-200 dark:border-zinc-800 pl-2">
+                        {courseChapters.map((chapter) => {
+                          const isChapterSelected = (form.relatedChapters || []).includes(chapter._id);
+                          return (
+                            <label key={chapter._id} className="flex items-center gap-2 rounded-lg px-2 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/50 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={isChapterSelected}
+                                onChange={(e) => {
+                                  const next = e.target.checked
+                                    ? [...(form.relatedChapters || []), chapter._id]
+                                    : (form.relatedChapters || []).filter((id) => id !== chapter._id);
+                                  update("relatedChapters", next);
+                                }}
+                                className="h-3 w-3 rounded border-zinc-300 text-orange-500 focus:ring-orange-400"
+                              />
+                              <span className="truncate">{chapter.title}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>

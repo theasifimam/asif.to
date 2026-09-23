@@ -6,6 +6,7 @@ import { getChapterData, getPublicTopic, getPublicInterviewCategories } from "@/
 import { absoluteUrl, assetUrl, getSiteUrl, jsonLd } from "@/lib/seo";
 import { authorIdentity, buildPersonSchema } from "@/lib/authorIdentity";
 import { notFound, permanentRedirect, redirect } from "next/navigation";
+import { processInternalLinks } from "@/lib/internalLinks";
 
 export const revalidate = 60;
 
@@ -204,6 +205,17 @@ export default async function PublicTopicPage({ params, searchParams }) {
 
   const chapterData = await getChapterData(courseSlug, topicSlug);
   if (!chapterData?.course || !chapterData?.chapter) notFound();
+  
+  const currentPath = chapterPath(chapterData, courseSlug, topicSlug);
+  if (chapterData.chapter.content) {
+    if (Array.isArray(chapterData.chapter.content)) {
+      chapterData.chapter.content = await Promise.all(
+        chapterData.chapter.content.map(block => processInternalLinks(block, currentPath))
+      );
+    } else {
+      chapterData.chapter.content = await processInternalLinks(chapterData.chapter.content, currentPath);
+    }
+  }
 
   return (
     <>

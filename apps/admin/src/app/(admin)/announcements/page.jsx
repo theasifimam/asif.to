@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { AdminPage, AdminPageHeader } from "@/components/admin";
 
 const EMPTY = {
   enabled: false,
@@ -167,23 +168,22 @@ export default function AnnouncementsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6 md:p-8">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-violet-600 dark:text-violet-400">
-            Site communication
-          </p>
-          <h1 className="mt-1 font-outfit text-3xl font-black tracking-tight text-zinc-950 dark:text-white sm:text-4xl">
-            Header Announcement
-          </h1>
-          <p className="mt-1.5 max-w-2xl text-xs font-medium text-zinc-500 dark:text-zinc-400 sm:text-sm">
-            Publish maintenance windows and important notices directly below the asif.to header.
-          </p>
-        </div>
-        <Button onClick={save} disabled={loading || saving} className="h-10 rounded-full px-5 text-xs font-bold">
-          <Save className="h-4 w-4" /> {saving ? "Saving…" : form.enabled ? "Publish announcement" : "Save announcement"}
-        </Button>
-      </header>
+    <AdminPage size="lg">
+      <AdminPageHeader
+        eyebrow="Site communication"
+        title="Header Announcement"
+        description="Publish maintenance windows and important notices directly below the asif.to header."
+        actions={
+          <Button
+            onClick={save}
+            disabled={loading || saving}
+            className="h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-5 shadow-xs cursor-pointer"
+          >
+            <Save className="h-4 w-4 mr-1.5" />
+            {saving ? "Saving…" : form.enabled ? "Publish announcement" : "Save announcement"}
+          </Button>
+        }
+      />
 
       <section className="rounded-3xl border border-zinc-200/80 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -318,6 +318,6 @@ export default function AnnouncementsPage() {
           </section>
         </aside>
       </div>
-    </div>
+    </AdminPage>
   );
 }

@@ -591,6 +591,13 @@ export const seoSettingsApi = {
   save: (data) => apiPut("/seo-settings", data),
 };
 
+export const internalLinksApi = {
+  list: () => apiGet("/internal-links"),
+  create: (data) => apiPost("/internal-links", data),
+  update: (id, data) => apiPatch(`/internal-links/${id}`, data),
+  delete: (id) => apiDelete(`/internal-links/${id}`),
+};
+
 export const siteSettingsApi = {
   list: () => apiGet("/site-settings"),
   save: (data) => apiPut("/site-settings", data),

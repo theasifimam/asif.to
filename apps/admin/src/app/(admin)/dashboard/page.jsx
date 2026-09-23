@@ -215,7 +215,7 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-1 p-4 font-sans text-zinc-800 dark:text-zinc-300 sm:p-6 md:p-8 lg:p-10 min-w-0">
       {/* 1. CREATOR HERO BENTO BANNER */}
-      <section className="relative overflow-hidden rounded-4xl sm:rounded-[2.5rem] bg-zinc-950 text-white p-6 sm:p-9 shadow-xl border border-zinc-800 min-w-0">
+      <section className="relative overflow-hidden rounded-4xl sm:rounded-[2.5rem] bg-zinc-950 text-white p-6 sm:p-9 border border-zinc-800 min-w-0">
         {/* Ambient Radial Mesh Glows */}
         <div className="absolute -right-12 -top-12 w-80 h-80 rounded-full bg-blue-600/15 blur-3xl pointer-events-none" />
         <div className="absolute -left-12 -bottom-12 w-80 h-80 rounded-full bg-indigo-600/15 blur-3xl pointer-events-none" />

@@ -21,6 +21,7 @@ import { ChapterReaderSkeleton } from "@/components/courses/ReaderSkeletons";
 // ASIF_COURSE_LEARNING_FLOW_V1:chapter-progress-imports
 import ChapterLearningLoop from "@/components/courses/ChapterLearningLoop";
 import { useCourseProgress } from "@/lib/courseProgress";
+import { getInternalLinkRules, processInternalLinksSync } from "@/lib/internalLinks";
 
 export default function ChapterClient({
   courseSlug,
@@ -42,9 +43,32 @@ export default function ChapterClient({
     { skip: !courseId || !chapterId },
   );
 
+  const [linkRules, setLinkRules] = useState([]);
+  useEffect(() => {
+    getInternalLinkRules().then((rules) =>
+      setLinkRules(rules.filter((r) => r.enabled !== false))
+    );
+  }, []);
+
   const course = data?.data?.course || initialData?.course;
   const activeCourseSlug = course?.slug || courseId;
-  const chapter = data?.data?.chapter || initialData?.chapter;
+
+  const rawChapter = data?.data?.chapter;
+  const chapter = useMemo(() => {
+    if (!rawChapter) return initialData?.chapter;
+    if (!linkRules.length) return rawChapter; // wait for rules to process API data
+
+    const processed = { ...rawChapter };
+    const currentPath = `/${activeCourseSlug}/${rawChapter.slug}`;
+    if (processed.content) {
+      if (Array.isArray(processed.content)) {
+        processed.content = processed.content.map(block => processInternalLinksSync(block, linkRules, currentPath));
+      } else {
+        processed.content = processInternalLinksSync(processed.content, linkRules, currentPath);
+      }
+    }
+    return processed;
+  }, [rawChapter, initialData?.chapter, linkRules, activeCourseSlug]);
   const allChapters = useMemo(
     () => data?.data?.allChapters || initialData?.allChapters || [],
     [data?.data?.allChapters, initialData?.allChapters],

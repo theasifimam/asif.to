@@ -12,6 +12,8 @@ import Image from "next/image";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SaveButton from "@/components/articles/SaveButton";
+import TopicMarkdown from "@/components/articles/TopicMarkdown";
+import { getInternalLinkRules, processInternalLinksSync } from "@/lib/internalLinks";
 import {
   useGetCoursesQuery,
   useGetQuizQuestionsQuery,
@@ -52,6 +54,13 @@ export default function QuizPage() {
   const [isFinished, setIsFinished] = useState(false);
   const [answers, setAnswers] = useState([]);
   const [search, setSearch] = useState("");
+  const [linkRules, setLinkRules] = useState([]);
+
+  React.useEffect(() => {
+    getInternalLinkRules().then((rules) =>
+      setLinkRules(rules.filter((r) => r.enabled !== false))
+    );
+  }, []);
 
   const { isAuthenticated } = useSelector((state) => state.auth);
   const [submitPracticeQuiz] = useSubmitPracticeQuizMutation();
@@ -449,9 +458,19 @@ export default function QuizPage() {
                     <Sparkles className="w-4 h-4" />
                     <span>Explanation</span>
                   </div>
-                  <p className="text-zinc-300 leading-relaxed font-medium">
-                    {question.explanation}
-                  </p>
+                  <div className="text-zinc-300 leading-relaxed font-medium">
+                    <TopicMarkdown
+                      content={
+                        question.explanation
+                          ? processInternalLinksSync(
+                              question.explanation,
+                              linkRules,
+                              `/quiz`
+                            )
+                          : ""
+                      }
+                    />
+                  </div>
                 </div>
               )}
 

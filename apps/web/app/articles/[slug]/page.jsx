@@ -53,6 +53,7 @@ async function getArticle(slugWithId) {
 }
 
 import { getImageUrl } from "@/lib/config";
+import { processInternalLinks } from "@/lib/internalLinks";
 
 export async function generateMetadata({ params }) {
   const { slug: slugWithId } = await params;
@@ -114,6 +115,18 @@ export default async function ArticlePage({ params }) {
     article?.canonicalUrl,
     `/articles/${slugWithId}`,
   );
+  
+  if (article && article.content) {
+    const currentPath = `/articles/${slugWithId}`;
+    if (Array.isArray(article.content)) {
+      article.content = await Promise.all(
+        article.content.map(block => processInternalLinks(block, currentPath))
+      );
+    } else {
+      article.content = await processInternalLinks(article.content, currentPath);
+    }
+  }
+
   const schema = article
     ? {
         "@context": "https://schema.org",
