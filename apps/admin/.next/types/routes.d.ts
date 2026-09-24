@@ -3,7 +3,7 @@
 
 type AppRoutes = "/"
 type PageRoutes = never
-type LayoutRoutes = "/" | "/communications" | "/monetization"
+type LayoutRoutes = "/" | "/communications" | "/monetization" | "/site-settings"
 type RedirectRoutes = never
 type RewriteRoutes = never
 type Routes = AppRoutes | PageRoutes | LayoutRoutes | RedirectRoutes | RewriteRoutes
@@ -13,6 +13,7 @@ interface ParamMap {
   "/": {}
   "/communications": {}
   "/monetization": {}
+  "/site-settings": {}
 }
 
 
@@ -22,6 +23,7 @@ interface LayoutSlotMap {
   "/": never
   "/communications": never
   "/monetization": never
+  "/site-settings": never
 }
 
 

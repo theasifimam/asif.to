@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(admin)/layout,_N_T_/(admin)/site-settings/layout,_N_T_/(admin)/site-settings/admin-brand/layout,_N_T_/(admin)/site-settings/admin-brand/page,_N_T_/site-settings/admin-brand"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KGFkbWluKQ/site-settings/admin-brand/__PAGE__",
+    "/!KGFkbWluKQ/site-settings/admin-brand",
+    "/!KGFkbWluKQ/site-settings",
+    "/!KGFkbWluKQ",
+    "/_index",
+    "/_head"
+  ]
+}

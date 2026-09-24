@@ -248,10 +248,6 @@
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/1b99372b3eaef0c8-s.p.758e15a8.woff2"
     ],
-    "[project]/src/app/(admin)/playground-settings/page": [
-      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
-      "static/media/1b99372b3eaef0c8-s.p.758e15a8.woff2"
-    ],
     "[project]/src/app/(admin)/profile/page": [
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/1b99372b3eaef0c8-s.p.758e15a8.woff2"
@@ -268,11 +264,23 @@
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/1b99372b3eaef0c8-s.p.758e15a8.woff2"
     ],
-    "[project]/src/app/(admin)/seo-settings/page": [
+    "[project]/src/app/(admin)/site-settings/admin-brand/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.758e15a8.woff2"
+    ],
+    "[project]/src/app/(admin)/site-settings/interlinking/page": [
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/1b99372b3eaef0c8-s.p.758e15a8.woff2"
     ],
     "[project]/src/app/(admin)/site-settings/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.758e15a8.woff2"
+    ],
+    "[project]/src/app/(admin)/site-settings/playground/page": [
+      "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
+      "static/media/1b99372b3eaef0c8-s.p.758e15a8.woff2"
+    ],
+    "[project]/src/app/(admin)/site-settings/seo/page": [
       "static/media/83afe278b6a6bb3c-s.p.3a6ba036.woff2",
       "static/media/1b99372b3eaef0c8-s.p.758e15a8.woff2"
     ],

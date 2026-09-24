@@ -123,18 +123,7 @@ export default function AccountManagementSettings({ user }) {
   return (
     <div className="space-y-8 w-full">
       <section className="w-full">
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
-            <Shield size={18} />
-          </div>
-          <div>
-            <h2 className="text-sm font-extrabold">Account & security</h2>
-            <p className="mt-1 text-xs leading-5 text-zinc-500">
-              Review your account identity and manage active sessions.
-            </p>
-          </div>
-        </div>
-        <dl className="mt-6 divide-y divide-zinc-100 dark:divide-zinc-800/80 border-t border-b border-zinc-100 dark:border-zinc-800/80">
+        <dl className="mt-6 divide-y divide-zinc-100 dark:divide-zinc-800/80  border-b border-zinc-100 dark:border-zinc-800/80">
           <AccountRow label="Username" value={`@${user?.username || ""}`} />
           <AccountRow label="Email" value={user?.email || "—"} />
           <AccountRow

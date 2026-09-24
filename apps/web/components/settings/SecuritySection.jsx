@@ -4,9 +4,7 @@ import React from "react";
 import { Shield } from "lucide-react";
 import AccountManagementSettings from "@/components/auth/AccountManagementSettings";
 
-export default function SecuritySection({
-  user,
-}) {
+export default function SecuritySection({ user }) {
   return (
     <div className="transition-colors">
       <div className="w-full p-5 text-left sm:p-7">
@@ -24,14 +22,15 @@ export default function SecuritySection({
               </span>
             </div>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium mt-0.5">
-              Change password, active sessions, deactivation, and account deletion.
+              Change password, active sessions, deactivation, and account
+              deletion.
             </p>
           </div>
         </div>
       </div>
 
       <div className="p-5 pt-0 sm:p-7 sm:pt-0">
-          <AccountManagementSettings user={user} />
+        <AccountManagementSettings user={user} />
       </div>
     </div>
   );

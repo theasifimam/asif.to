@@ -1058,30 +1058,6 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/playground-settings": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "next-action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/playground-settings",
-      "dataRoute": "/playground-settings.rsc",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
     "/profile": {
       "experimentalBypassFor": [
         {
@@ -1154,7 +1130,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/seo-settings": {
+    "/site-settings/admin-brand": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -1167,8 +1143,32 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/seo-settings",
-      "dataRoute": "/seo-settings.rsc",
+      "srcRoute": "/site-settings/admin-brand",
+      "dataRoute": "/site-settings/admin-brand.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/site-settings/interlinking": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/site-settings/interlinking",
+      "dataRoute": "/site-settings/interlinking.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -1193,6 +1193,54 @@
       "initialRevalidateSeconds": false,
       "srcRoute": "/site-settings",
       "dataRoute": "/site-settings.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/site-settings/playground": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/site-settings/playground",
+      "dataRoute": "/site-settings/playground.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/site-settings/seo": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/site-settings/seo",
+      "dataRoute": "/site-settings/seo.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",

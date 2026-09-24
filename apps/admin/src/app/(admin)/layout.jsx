@@ -387,25 +387,11 @@ const NAV_ITEMS = [
         description: "Reusable files, usage & orphans",
       },
       {
-        name: "SEO Settings",
-        href: "/seo-settings",
-        icon: SearchCheck,
-        permission: "seo.view",
-        description: "Meta tags & indexing",
-      },
-      {
-        name: "Site & Brand",
+        name: "Site Settings",
         href: "/site-settings",
         icon: Sliders,
         permission: "settings.manage",
-        description: "Titles, logos & social profiles",
-      },
-      {
-        name: "Code Playground",
-        href: "/playground-settings",
-        icon: Code2,
-        permission: "playground.manage",
-        description: "Editor, languages & runtimes",
+        description: "Brand, SEO, Interlinking & Playground",
       },
       {
         name: "Admin Guide",

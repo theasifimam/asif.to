@@ -489,12 +489,6 @@
       "namedRegex": "^/planner(?:/)?$"
     },
     {
-      "page": "/playground-settings",
-      "regex": "^/playground\\-settings(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/playground\\-settings(?:/)?$"
-    },
-    {
       "page": "/profile",
       "regex": "^/profile(?:/)?$",
       "routeKeys": {},
@@ -513,12 +507,6 @@
       "namedRegex": "^/quiz/new(?:/)?$"
     },
     {
-      "page": "/seo-settings",
-      "regex": "^/seo\\-settings(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/seo\\-settings(?:/)?$"
-    },
-    {
       "page": "/signin",
       "regex": "^/signin(?:/)?$",
       "routeKeys": {},
@@ -529,6 +517,30 @@
       "regex": "^/site\\-settings(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/site\\-settings(?:/)?$"
+    },
+    {
+      "page": "/site-settings/admin-brand",
+      "regex": "^/site\\-settings/admin\\-brand(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/site\\-settings/admin\\-brand(?:/)?$"
+    },
+    {
+      "page": "/site-settings/interlinking",
+      "regex": "^/site\\-settings/interlinking(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/site\\-settings/interlinking(?:/)?$"
+    },
+    {
+      "page": "/site-settings/playground",
+      "regex": "^/site\\-settings/playground(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/site\\-settings/playground(?:/)?$"
+    },
+    {
+      "page": "/site-settings/seo",
+      "regex": "^/site\\-settings/seo(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/site\\-settings/seo(?:/)?$"
     },
     {
       "page": "/social-integrations",
