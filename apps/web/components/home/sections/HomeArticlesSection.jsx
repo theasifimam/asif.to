@@ -35,8 +35,10 @@ export default function HomeArticlesSection({ displayArticles = [] }) {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {displayArticles.map((article) => {
+      <div
+        className="mt-3 flex gap-3.5 sm:gap-4 overflow-x-auto scroll-smooth scrollbar-none snap-x snap-mandatory py-4 w-full"
+      >
+        {displayArticles.map((article, idx) => {
           const articleUrl = getArticleHref(article);
           const categoryName =
             article.topic?.[0]?.name || article.category || "Article";
@@ -47,7 +49,7 @@ export default function HomeArticlesSection({ displayArticles = [] }) {
             <Link
               key={article._id || article.id}
               href={articleUrl}
-              className="group flex flex-col justify-between overflow-hidden rounded-[1.75rem] border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 p-4 sm:p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-purple-500/40 hover:shadow-md"
+              className={`group flex flex-col justify-between overflow-hidden rounded-[1.75rem] border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 p-4 sm:p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-purple-500/40 hover:shadow-md w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start`}
             >
               <div>
                 <SafeArticleCover

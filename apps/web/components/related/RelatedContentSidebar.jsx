@@ -59,7 +59,7 @@ export default function RelatedContentSidebar({
 
   return (
     <aside
-      className={`hidden lg:block w-full max-w-77.5 xl:max-w-82.5 shrink-0 space-y-5 ${className}`}
+      className={`hidden lg:block w-full max-w-77.5 xl:max-w-82.5 shrink-0 space-y-5 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-2 lg:pb-8 scrollbar-none ${className}`}
       aria-label="Related course and study resources"
     >
       {/* Topics Set on Article */}

@@ -57,7 +57,7 @@ export default function ChapterBlocksRenderer({
 
   return (
     <div
-      className={`mobile-reading-copy space-y-5 sm:space-y-6 ${fontBodyClass} text-left sm:text-justify font-medium text-zinc-700 dark:text-zinc-300`}
+      className={`mobile-reading-copy space-y-6 sm:space-y-8 ${fontBodyClass} text-left sm:text-justify`}
     >
       {parsedBlocks.map((block, idx) => {
         const renderedBlock = (() => {
@@ -68,7 +68,7 @@ export default function ChapterBlocksRenderer({
               <h2
                 key={idx}
                 id={headingId}
-                className="text-xl sm:text-3xl font-black text-foreground tracking-tight mt-8 sm:mt-10 mb-4 border-b border-zinc-100 dark:border-zinc-800/80 pb-3 scroll-mt-20"
+                className="font-outfit text-2xl sm:text-3xl md:text-4xl font-black text-foreground tracking-tight mt-10 sm:mt-14 mb-5 border-b border-zinc-200/80 dark:border-zinc-800/80 pb-4 scroll-mt-24 leading-tight"
               >
                 {renderInlineFormatting(block.text)}
               </h2>
@@ -81,7 +81,7 @@ export default function ChapterBlocksRenderer({
               <h3
                 key={idx}
                 id={headingId}
-                className="text-lg sm:text-2xl font-extrabold text-foreground tracking-tight mt-8 mb-3 scroll-mt-20"
+                className="font-outfit text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight mt-8 sm:mt-12 mb-4 scroll-mt-24 leading-snug"
               >
                 {renderInlineFormatting(block.text)}
               </h3>
@@ -94,7 +94,7 @@ export default function ChapterBlocksRenderer({
               <h4
                 key={idx}
                 id={headingId}
-                className="text-base sm:text-xl font-bold text-foreground mt-6 mb-2 scroll-mt-20"
+                className="font-outfit text-lg sm:text-xl md:text-2xl font-bold text-foreground mt-6 sm:mt-8 mb-3 scroll-mt-24 leading-snug"
               >
                 {renderInlineFormatting(block.text)}
               </h4>
@@ -142,7 +142,7 @@ export default function ChapterBlocksRenderer({
             return (
               <p
                 key={idx}
-                className="mb-4 text-zinc-800 dark:text-zinc-200 leading-relaxed font-medium sm:font-semibold"
+                className="mb-5 leading-[1.8] text-zinc-800 dark:text-zinc-200"
               >
                 {renderInlineFormatting(block.text)}
               </p>
@@ -152,10 +152,10 @@ export default function ChapterBlocksRenderer({
             return (
               <blockquote
                 key={idx}
-                className="border-l-4 border-blue-500 pl-4 py-3 my-4 sm:my-6 bg-blue-500/5 dark:bg-blue-500/10 rounded-r-2xl text-zinc-800 dark:text-zinc-200 font-medium shadow-xs flex items-start gap-3"
+                className="border-l-4 border-blue-500 pl-5 py-4 my-6 sm:my-8 bg-blue-500/5 dark:bg-blue-500/10 rounded-r-3xl text-zinc-900 dark:text-zinc-100 font-medium flex items-start gap-3 text-lg italic shadow-sm"
               >
                 <Lightbulb className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-                <div className="flex-1 italic leading-relaxed">
+                <div className="flex-1 leading-relaxed">
                   {renderInlineFormatting(block.text)}
                 </div>
               </blockquote>
@@ -164,25 +164,25 @@ export default function ChapterBlocksRenderer({
           if (block.type === "list") {
             const listItems = block.text.split("\n").filter((l) => l.trim());
             return (
-              <ul key={idx} className="space-y-1.5 my-4 pl-1">
+              <ul key={idx} className="space-y-3 my-6 sm:my-8 pl-2">
                 {listItems.map((li, i) => {
                   const isOrdered = /^\d+\.\s/.test(li.trim());
                   const content = li.trim().replace(/^([-*]|\d+\.)\s+/, "");
                   return (
                     <li
                       key={i}
-                      className="flex gap-3 text-zinc-700 dark:text-zinc-300"
+                      className="flex gap-4 text-zinc-800 dark:text-zinc-200"
                     >
-                      <span className="text-blue-500 mt-1 shrink-0">
+                      <span className="text-blue-600 dark:text-blue-500 mt-1.5 shrink-0 flex items-center justify-center">
                         {isOrdered ? (
-                          <span className="font-bold text-[10px] bg-blue-500/10 px-1.5 py-0.5 rounded text-blue-600 dark:text-blue-400">
+                          <span className="font-bold text-xs bg-blue-500/10 border border-blue-500/20 w-6 h-6 flex items-center justify-center rounded-md">
                             {li.trim().match(/^\d+/)?.[0]}
                           </span>
                         ) : (
-                          <span className="w-2 h-2 rounded-full bg-blue-500 inline-block align-middle mb-0.5" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-500 inline-block" />
                         )}
                       </span>
-                      <span className="leading-relaxed">
+                      <span className="leading-[1.8] flex-1">
                         {renderInlineFormatting(content)}
                       </span>
                     </li>

@@ -62,19 +62,16 @@ export default function AssetUploadPanel({ folderId, onUploaded, compact = false
         onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setDragging(false); }}
         onDrop={(event) => { event.preventDefault(); setDragging(false); addFiles(event.dataTransfer.files); }}
         className={cn(
-          "flex w-full items-center justify-center gap-3 rounded-3xl border border-dashed px-5 text-center transition-colors",
-          compact ? "min-h-24 py-4" : "min-h-36 py-7",
+          "flex w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed px-5 text-center transition-all duration-200",
+          compact ? "min-h-24 py-4" : "min-h-32 py-8",
           dragging
-            ? "border-blue-500 bg-blue-500/10 text-blue-600"
-            : "border-zinc-300 bg-zinc-50/70 text-zinc-500 hover:border-blue-400 hover:text-blue-600 dark:border-zinc-700 dark:bg-zinc-900/50",
+            ? "border-blue-500 bg-blue-500/10 text-blue-600 scale-[0.99]"
+            : "border-zinc-300 bg-zinc-50/50 text-zinc-500 hover:border-blue-400 hover:bg-blue-50/50 dark:border-zinc-700 dark:bg-zinc-900/30 dark:hover:border-zinc-600 dark:hover:bg-zinc-900/50",
         )}
       >
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-600/20">
-          <UploadCloud className="h-5 w-5" />
-        </span>
-        <span className="text-left">
-          <span className="block text-sm font-bold text-zinc-900 dark:text-white">Drop files here or choose files</span>
-          <span className="mt-0.5 block text-[11px] font-medium">Multiple files supported · validated on the server</span>
+        <span className="text-center">
+          <span className="block text-sm font-bold text-zinc-900 dark:text-white">Drop files here or click to browse</span>
+          <span className="mt-1 block text-xs font-medium opacity-70">Multiple files supported · validated on the server</span>
         </span>
       </button>
 

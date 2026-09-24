@@ -323,7 +323,7 @@ export default function ArticleClient({ slug, initialData }) {
               <ChapterBlocksRenderer
                 chapter={article}
                 parsedBlocks={parsedBlocks}
-                fontBodyClass="text-base sm:text-lg md:text-xl font-medium sm:font-semibold text-zinc-800 dark:text-zinc-200"
+                fontBodyClass="text-lg sm:text-[19px] md:text-[21px] font-serif text-zinc-800 dark:text-zinc-300"
                 middleAd={
                   <ArticleAd position="middle" wordCount={articleWordCount} />
                 }

@@ -36,6 +36,10 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = true;
       state.isInitialized = true;
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("asif_token");
+        localStorage.setItem("asif_user", JSON.stringify(action.payload.user));
+      }
     },
     // Hydrate from localStorage on app load
     hydrateAuth(state) {

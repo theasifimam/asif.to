@@ -287,9 +287,21 @@ const NAV_ITEMS = [
         description: "Accounts, roles & invites",
         children: [
           { name: "All Users", href: "/users" },
-          { name: "Invitations", href: "/users/invitations", permission: "invitations.manage" },
-          { name: "Roles & Permissions", href: "/users/roles", permission: "roles.manage" },
-          { name: "Activity Logs", href: "/users/activity", permission: "users.edit" },
+          {
+            name: "Invitations",
+            href: "/users/invitations",
+            permission: "invitations.manage",
+          },
+          {
+            name: "Roles & Permissions",
+            href: "/users/roles",
+            permission: "roles.manage",
+          },
+          {
+            name: "Activity Logs",
+            href: "/users/activity",
+            permission: "users.edit",
+          },
         ],
       },
     ],
@@ -570,8 +582,8 @@ export default function AdminLayout({ children }) {
   const mainPaddingClass = isMessagesRoute
     ? "pt-0 pb-0 flex flex-col h-full overflow-hidden"
     : isFilesRoute
-    ? "pt-16 pb-20 lg:pb-4 flex flex-col h-full overflow-hidden"
-    : "pt-16 pb-24 lg:pb-8";
+      ? "pt-16 pb-20 lg:pb-4 flex flex-col h-full overflow-hidden"
+      : "pt-16 pb-24 lg:pb-8";
 
   return (
     <MessagingProvider>
@@ -611,7 +623,8 @@ export default function AdminLayout({ children }) {
                   className="w-7 h-7 rounded-xl object-contain shrink-0"
                 />
                 <span className="font-outfit font-black text-sm tracking-tight text-zinc-950 dark:text-white leading-none">
-                  asif<span className="text-blue-600 dark:text-blue-400">.to</span>
+                  asif
+                  <span className="text-blue-600 dark:text-blue-400">.to</span>
                 </span>
               </Link>
 

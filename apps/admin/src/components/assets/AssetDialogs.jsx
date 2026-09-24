@@ -128,17 +128,19 @@ export function AssetUploadDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
-        <DialogHeader>
-          <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white">
-            <UploadCloud className="h-5 w-5" />
+      <DialogContent className="sm:max-w-lg p-6 sm:p-8">
+        <DialogHeader className="text-center sm:text-center items-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600 mb-2">
+            <UploadCloud className="h-6 w-6" />
           </div>
-          <DialogTitle>Upload files</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="font-outfit text-xl sm:text-2xl font-black tracking-tight">Upload files</DialogTitle>
+          <DialogDescription className="text-sm">
             Upload once, then reuse these files across asif.to content.
           </DialogDescription>
         </DialogHeader>
-        <AssetUploadPanel folderId={folderId} onUploaded={onUploaded} />
+        <div className="mt-2">
+          <AssetUploadPanel folderId={folderId} onUploaded={onUploaded} />
+        </div>
       </DialogContent>
     </Dialog>
   );

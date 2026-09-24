@@ -28,9 +28,13 @@ export default function HomeInteractiveBento() {
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 min-w-0">
-        {/* Top Row: Playground Hero Bento Card (Spans 2 columns on desktop) */}
-        <div className="sm:col-span-2 lg:col-span-2 flex flex-col justify-between overflow-hidden rounded-4xl sm:rounded-[2.5rem] bg-zinc-950 text-white p-5 sm:p-6 border border-zinc-800 shadow-xl min-w-0">
+      <div
+        className="mt-3 flex gap-3.5 sm:gap-4 overflow-x-auto scroll-smooth scrollbar-none snap-x snap-mandatory py-4 w-full"
+      >
+        {/* Top Row: Playground Hero Bento Card */}
+        <div 
+          className="flex flex-col justify-between overflow-hidden rounded-4xl sm:rounded-[2.5rem] bg-zinc-950 text-white p-5 sm:p-6 border border-zinc-800 shadow-xl min-w-0 w-[85vw] sm:w-[38rem] shrink-0 snap-start"
+        >
           <div>
             <div className="flex items-center justify-between">
               <div className="inline-flex items-center gap-1.5 text-blue-400">
@@ -142,7 +146,7 @@ export default function HomeInteractiveBento() {
         {/* Feature 1: Revision Flashcards */}
         <Link
           href="/revision"
-          className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-indigo-500/20 bg-linear-to-br from-indigo-500/10 via-purple-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-indigo-500/40 transition-all min-w-0"
+          className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-indigo-500/20 bg-linear-to-br from-indigo-500/10 via-purple-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-indigo-500/40 transition-all min-w-0 w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start"
         >
           <div>
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 group-hover:scale-105 transition-transform">
@@ -165,7 +169,7 @@ export default function HomeInteractiveBento() {
         {/* Feature 2: Interview Preparation */}
         <Link
           href="#interview-prep"
-          className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-orange-500/20 bg-linear-to-br from-orange-500/10 via-amber-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-orange-500/40 transition-all min-w-0"
+          className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-orange-500/20 bg-linear-to-br from-orange-500/10 via-amber-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-orange-500/40 transition-all min-w-0 w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start"
         >
           <div>
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/20 group-hover:scale-105 transition-transform">
@@ -188,7 +192,7 @@ export default function HomeInteractiveBento() {
         {/* Feature 3: Practice Quizzes */}
         <Link
           href="/quiz"
-          className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-purple-500/20 bg-linear-to-br from-purple-500/10 via-fuchsia-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-purple-500/40 transition-all min-w-0"
+          className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-purple-500/20 bg-linear-to-br from-purple-500/10 via-fuchsia-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-purple-500/40 transition-all min-w-0 w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start"
         >
           <div>
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20 group-hover:scale-105 transition-transform">
@@ -211,7 +215,7 @@ export default function HomeInteractiveBento() {
         {/* Feature 4: Developer Cheatsheets */}
         <Link
           href="/cheatsheets"
-          className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-emerald-500/20 bg-linear-to-br from-emerald-500/10 via-teal-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-emerald-500/40 transition-all min-w-0"
+          className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-emerald-500/20 bg-linear-to-br from-emerald-500/10 via-teal-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-emerald-500/40 transition-all min-w-0 w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start"
         >
           <div>
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 group-hover:scale-105 transition-transform">

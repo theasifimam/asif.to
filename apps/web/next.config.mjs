@@ -1,4 +1,7 @@
 const nextConfig = {
+  experimental: {
+    optimizePackageImports: ["lucide-react", "date-fns"],
+  },
   // Allows CI/verification builds to avoid a .next directory held by a local dev server.
   distDir: process.env.NEXT_DIST_DIR || ".next",
   async redirects() {

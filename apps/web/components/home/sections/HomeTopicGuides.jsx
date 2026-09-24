@@ -29,14 +29,16 @@ export default function HomeTopicGuides({ displayTopics = [] }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3.5 sm:gap-4 sm:grid-cols-2 min-w-0">
-        {displayTopics.map((topic) => {
+      <div
+        className="mt-3 flex gap-3.5 sm:gap-4 overflow-x-auto scroll-smooth scrollbar-none snap-x snap-mandatory py-4 w-full"
+      >
+        {displayTopics.map((topic, idx) => {
           const topicUrl = getTopicHref(topic);
           return (
             <Link
               key={topic._id || topic.slug}
               href={topicUrl}
-              className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-emerald-500/20 bg-linear-to-br from-emerald-500/10 via-teal-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-emerald-500/40 transition-all min-w-0 overflow-hidden"
+              className={`group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-emerald-500/20 bg-linear-to-br from-emerald-500/10 via-teal-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-emerald-500/40 transition-all overflow-hidden w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start`}
             >
               <div>
                 {/* Top Row: Icon Glow Badge + Category/Course Badges */}

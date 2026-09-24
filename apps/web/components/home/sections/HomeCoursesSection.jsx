@@ -103,10 +103,9 @@ export default function HomeCoursesSection({
         ))}
       </div>
 
-      {/* Dribbble Horizontal Slidable Course Cards */}
       <div
         ref={coursesScrollRef}
-        className="mt-3 flex gap-3.5 sm:gap-4 overflow-x-auto scroll-smooth scrollbar-none snap-x snap-mandatory py-1.5 -mx-1 px-1 min-w-0"
+        className="mt-3 flex gap-3.5 sm:gap-4 overflow-x-auto scroll-smooth scrollbar-none snap-x snap-mandatory py-4 w-full"
       >
         {filteredCourses.map((course, idx) => {
           const tech = TECH_STACKS.find((item) => item.id === course.techId);
@@ -173,7 +172,9 @@ export default function HomeCoursesSection({
         })}
 
         {/* Catalog Bento Card */}
-        <article className="group relative flex w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start flex-col justify-between overflow-hidden rounded-4xl sm:rounded-[2.5rem] border border-blue-500/25 dark:border-blue-500/20 bg-linear-to-br from-blue-600/10 via-indigo-600/10 to-violet-600/10 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-blue-500/50 transition-all duration-300">
+        <article 
+          className="group relative flex w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start flex-col justify-between overflow-hidden rounded-4xl sm:rounded-[2.5rem] border border-blue-500/25 dark:border-blue-500/20 bg-linear-to-br from-blue-600/10 via-indigo-600/10 to-violet-600/10 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-blue-500/50 transition-all duration-300"
+        >
           <div className="flex flex-col">
             <div className="mb-3.5 flex items-center justify-between">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-md shadow-blue-500/20">
