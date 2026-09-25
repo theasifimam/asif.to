@@ -34,7 +34,7 @@ const discoveryCandidateSchema = new Schema(
   {
     // ── Company identity ───────────────────────────────────────────────────
     companyName: { type: String, required: true, trim: true, maxlength: 180 },
-    normalizedCompanyName: { type: String, default: "", trim: true, maxlength: 180, index: true },
+    normalizedCompanyName: { type: String, default: "", trim: true, maxlength: 180 },
 
     // ── Domain / URL signals ───────────────────────────────────────────────
     domain: { type: String, default: "", trim: true, lowercase: true, maxlength: 253, index: true },
