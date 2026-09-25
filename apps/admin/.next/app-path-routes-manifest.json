@@ -42,6 +42,7 @@
   "/(admin)/jobs/companies/[id]/page": "/jobs/companies/[id]",
   "/(admin)/jobs/companies/new/page": "/jobs/companies/new",
   "/(admin)/jobs/companies/page": "/jobs/companies",
+  "/(admin)/jobs/discovery/page": "/jobs/discovery",
   "/(admin)/jobs/new/page": "/jobs/new",
   "/(admin)/jobs/page": "/jobs",
   "/(admin)/jobs/sources/[id]/edit/page": "/jobs/sources/[id]/edit",

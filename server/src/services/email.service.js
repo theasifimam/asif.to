@@ -79,7 +79,7 @@ const renderButton = (label, href) => `
   </table>`;
 
 const renderNotice = (content) => `
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;background:${BRAND.surfaceLow};border:1px solid ${BRAND.border};border-radius:16px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;background:${BRAND.surfaceLow};border-radius:16px;">
     <tr>
       <td style="padding:16px 18px;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:13px;line-height:20px;color:${BRAND.muted};">${content}</td>
     </tr>
@@ -118,12 +118,12 @@ const renderEmailLayout = ({
     }
   </style>
 </head>
-<body style="margin:0;padding:0;background:${BRAND.background};font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;">
+<body style="margin:0;padding:0;background:${BRAND.surface};font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">${escapeHtml(preheader)}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background:${BRAND.background};">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background:${BRAND.surface};">
     <tr>
-      <td align="center" class="page-pad" style="padding:40px 16px;">
-        <table role="presentation" width="580" cellpadding="0" cellspacing="0" border="0" class="email-card" style="width:100%;max-width:580px;background:${BRAND.surface};border:1px solid ${BRAND.border};border-radius:28px;overflow:hidden;box-shadow:0 20px 45px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);">
+      <td align="center" class="page-pad" style="padding:0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="email-card" style="width:100%;background:${BRAND.surface};">
           <!-- Header -->
           <tr>
             <td class="header-cell" style="padding:24px 34px 20px;border-bottom:1px solid ${BRAND.borderLight};">
@@ -141,7 +141,7 @@ const renderEmailLayout = ({
                     </table>
                   </td>
                   <td align="right" valign="middle">
-                    <span style="display:inline-block;padding:5px 12px;background:${BRAND.surfaceLow};border:1px solid ${BRAND.border};border-radius:9999px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:11px;font-weight:800;color:${BRAND.muted};text-transform:uppercase;letter-spacing:0.8px;">Developer Learning</span>
+                    <span style="display:inline-block;padding:5px 12px;background:${BRAND.surfaceLow};border-radius:9999px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:11px;font-weight:800;color:${BRAND.muted};text-transform:uppercase;letter-spacing:0.8px;">Developer Learning</span>
                   </td>
                 </tr>
               </table>
@@ -275,7 +275,7 @@ export const sendWelcomeEmail = async (to, fullName) => {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px;">
           <tr>
             <td class="stack-cell" width="50%" valign="top" style="padding-right:6px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.surfaceLow};border:1px solid ${BRAND.border};border-radius:18px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.surfaceLow};border-radius:18px;">
                 <tr>
                   <td style="padding:18px;">
                     <p style="margin:0 0 6px;font-family:'Outfit',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;font-weight:800;color:${BRAND.heading};">Learn the stack</p>
@@ -285,7 +285,7 @@ export const sendWelcomeEmail = async (to, fullName) => {
               </table>
             </td>
             <td class="stack-cell stack-gap" width="50%" valign="top" style="padding-left:6px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.surfaceLow};border:1px solid ${BRAND.border};border-radius:18px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.surfaceLow};border-radius:18px;">
                 <tr>
                   <td style="padding:18px;">
                     <p style="margin:0 0 6px;font-family:'Outfit',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;font-weight:800;color:${BRAND.heading};">Practice by doing</p>
@@ -351,7 +351,7 @@ export const sendContactEmail = async (name, email, subject, message) => {
       badgeText: "Support Desk",
       intro: `A visitor submitted the contact form on asif.to. Replying to this email will respond directly to ${safeName}.`,
       content: `
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;background:${BRAND.surfaceLow};border:1px solid ${BRAND.border};border-radius:18px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;background:${BRAND.surfaceLow};border-radius:18px;">
           <tr>
             <td width="92" valign="top" style="padding:16px 8px 8px 18px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:11px;font-weight:800;color:${BRAND.subtle};text-transform:uppercase;letter-spacing:0.5px;">From</td>
             <td style="padding:16px 18px 8px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;font-weight:700;color:${BRAND.heading};">${safeName}</td>
@@ -540,7 +540,7 @@ export const sendAccountDeletedEmail = async (to, fullName) => {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
           <tr>
             <td class="stack-cell" width="50%" valign="top" style="padding-right:6px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.surfaceLow};border:1px solid ${BRAND.border};border-radius:18px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.surfaceLow};border-radius:18px;">
                 <tr>
                   <td style="padding:18px;">
                     <p style="margin:0 0 6px;font-family:'Outfit',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;font-weight:800;color:${BRAND.heading};">Your content stays</p>
@@ -550,7 +550,7 @@ export const sendAccountDeletedEmail = async (to, fullName) => {
               </table>
             </td>
             <td class="stack-cell stack-gap" width="50%" valign="top" style="padding-left:6px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.surfaceLow};border:1px solid ${BRAND.border};border-radius:18px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.surfaceLow};border-radius:18px;">
                 <tr>
                   <td style="padding:18px;">
                     <p style="margin:0 0 6px;font-family:'Outfit',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;font-weight:800;color:${BRAND.heading};">Data removed after 30 days</p>

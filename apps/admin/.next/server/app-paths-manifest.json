@@ -42,6 +42,7 @@
   "/(admin)/jobs/companies/[id]/page": "app/(admin)/jobs/companies/[id]/page.js",
   "/(admin)/jobs/companies/new/page": "app/(admin)/jobs/companies/new/page.js",
   "/(admin)/jobs/companies/page": "app/(admin)/jobs/companies/page.js",
+  "/(admin)/jobs/discovery/page": "app/(admin)/jobs/discovery/page.js",
   "/(admin)/jobs/new/page": "app/(admin)/jobs/new/page.js",
   "/(admin)/jobs/page": "app/(admin)/jobs/page.js",
   "/(admin)/jobs/sources/[id]/edit/page": "app/(admin)/jobs/sources/[id]/edit/page.js",

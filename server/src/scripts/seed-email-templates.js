@@ -7,7 +7,8 @@ const TEMPLATES = [
   {
     name: "General Support Reply",
     category: "Support",
-    subject: "Re: Inquiry #{{conversationNumber}} - Support Update from asif.to",
+    subject:
+      "Re: Inquiry #{{conversationNumber}} - Support Update from asif.to",
     text: `Hi {{firstName}},
 
 Thank you for reaching out to asif.to support regarding inquiry #{{conversationNumber}}.
@@ -21,7 +22,7 @@ If you have any further questions or details to add, simply reply directly to th
 
 Best regards,
 Asif Imam & the asif.to Support Team
-https://asif.to | support@asif.to`
+https://asif.to | support@asif.to`,
   },
   {
     name: "Support Request Resolved",
@@ -40,12 +41,13 @@ Thank you for being part of the asif.to community!
 
 Best regards,
 Asif Imam & the asif.to Support Team
-https://asif.to | support@asif.to`
+https://asif.to | support@asif.to`,
   },
   {
     name: "Contact Form Auto-Acknowledgment",
     category: "Support",
-    subject: "We received your message [Inquiry #{{conversationNumber}}] - asif.to",
+    subject:
+      "We received your message [Inquiry #{{conversationNumber}}] - asif.to",
     text: `Hi {{firstName}},
 
 Thank you for contacting asif.to. We have received your inquiry #{{conversationNumber}} and queued it for our team.
@@ -57,7 +59,20 @@ We typically respond within 24 hours. You can reply directly to this email to at
 
 Best regards,
 asif.to Support System
-https://asif.to`
+https://asif.to`,
+  },
+  {
+    name: "Contact Form Submission",
+    category: "Support",
+    subject: "[Contact Form] {{subject}}",
+    text: `New contact form submission
+
+Name: {{name}}
+Email: {{email}}
+Subject: {{subject}}
+
+Message:
+{{message}}`,
   },
 
   // --- MARKETING ---
@@ -82,7 +97,7 @@ https://asif.to
 
 Best regards,
 Asif Imam
-Founder & Engineer, asif.to`
+Founder & Engineer, asif.to`,
   },
   {
     name: "Subscription Welcome & Confirmation",
@@ -105,7 +120,7 @@ Thank you for joining our community!
 
 Best regards,
 Asif Imam
-Founder, asif.to`
+Founder, asif.to`,
   },
   {
     name: "New Platform Feature Announcement",
@@ -126,7 +141,7 @@ Try out the new features today and let us know what you think!
 👉 Explore now: https://asif.to
 
 Best regards,
-Asif Imam & the asif.to Team`
+Asif Imam & the asif.to Team`,
   },
   {
     name: "Exclusive Community Offer & Course Discount",
@@ -144,7 +159,7 @@ Get access to our full-stack engineering curriculum and interactive quizzes with
 
 Best regards,
 Asif Imam
-Founder, asif.to`
+Founder, asif.to`,
   },
   {
     name: "Re-engagement & Inactive User Outreach",
@@ -164,7 +179,7 @@ We noticed it's been a while since you visited asif.to. We've published several 
 
 Best regards,
 Asif Imam
-asif.to`
+asif.to`,
   },
 
   // --- ARTICLE ---
@@ -184,7 +199,7 @@ Read the full article online to discover practical code examples, architecture b
 
 Best regards,
 Asif Imam
-Founder & Engineer, asif.to`
+Founder & Engineer, asif.to`,
   },
 
   // --- COURSE ---
@@ -204,7 +219,7 @@ Master real-world concepts with step-by-step lessons, hands-on coding exercises,
 
 Best regards,
 Asif Imam
-asif.to Learning`
+asif.to Learning`,
   },
 
   // --- JOBS ---
@@ -224,7 +239,7 @@ Review the position requirements, salary details, and submit your application di
 
 Best regards,
 asif.to Job Board Team
-https://asif.to/jobs`
+https://asif.to/jobs`,
   },
 
   // --- AUTHENTICATION ---
@@ -247,7 +262,7 @@ Explore your dashboard and set up your preferences:
 👉 Open asif.to: https://asif.to
 
 Best regards,
-Asif Imam & the asif.to Team`
+Asif Imam & the asif.to Team`,
   },
   {
     name: "Email Verification Confirmation",
@@ -261,7 +276,60 @@ Your account is fully active and all features are unlocked.
 
 Best regards,
 asif.to Security Team
-https://asif.to`
+https://asif.to`,
+  },
+  {
+    name: "OTP Verification Email",
+    category: "Authentication",
+    subject: "{{otp}} - Your asif.to verification code",
+    text: `Hi {{fullName}},
+
+Your asif.to verification code is {{otp}}. It expires in 10 minutes.
+
+If you did not request this code, you can safely ignore this email.
+
+asif.to`,
+  },
+  {
+    name: "Team Invitation",
+    category: "Authentication",
+    subject: "You're invited to join asif.to as {{role}}",
+    text: `You have been invited to join asif.to as {{role}}. Accept your invitation within 7 days: {{inviteUrl}}`,
+  },
+  {
+    name: "Account Deactivated",
+    category: "Authentication",
+    subject: "Your asif.to account has been deactivated",
+    text: `Hi {{fullName}},
+
+Your asif.to account has been successfully deactivated.
+
+We'll miss you! Whenever you're ready to come back, simply sign in at {{siteUrl}}/login and your account will be instantly reactivated — no hoops, no waiting.
+
+Your learning progress, bookmarks, and certificates are all safely stored and will be right where you left them.
+
+We hope to see you again.
+
+asif.to`,
+  },
+  {
+    name: "Account Deletion Request",
+    category: "Authentication",
+    subject: "Your asif.to account deletion request",
+    text: `Hi {{fullName}},
+
+We've received your request to delete your asif.to account.
+
+We'll miss you more than you know. The dev community you've been part of here is a little smaller without you.
+
+You have until {{restoreDeadline}} to change your mind. Simply sign in at {{siteUrl}}/login within the next 30 days and your account will be fully restored.
+
+After {{restoreDeadline}}, your account will be permanently removed. Your published articles and course contributions will remain preserved so the community can still benefit from your work.
+
+If you'd like to discuss your account, contact us at support@asif.to.
+
+Take care,
+asif.to`,
   },
 
   // --- SYSTEM ---
@@ -282,7 +350,33 @@ No action is required on your part. If you experience any issues, please feel fr
 Best regards,
 Asif Imam
 Founder & Lead Engineer, asif.to
-https://asif.to`
+https://asif.to`,
+  },
+  {
+    name: "Course Deletion Security OTP",
+    category: "System",
+    subject: "{{otp}} - Confirm deletion of {{courseTitle}}",
+    text: `Hi {{fullName}},
+
+Your protected course deletion request code is {{otp}}.
+
+Course: {{courseTitle}}
+This code expires in 10 minutes.
+
+Do not forward or share this code. The requester and second approver must be different administrator accounts.
+
+asif.to`,
+  },
+  {
+    name: "Course Deletion Approval Request",
+    category: "System",
+    subject: "Approval required: delete {{courseTitle}}",
+    text: `{{requesterName}} requested permanent deletion of {{courseTitle}}.
+
+Review the exact cascade selections before approving:
+{{reviewUrl}}
+
+You must request and enter your own approval OTP. The requester cannot approve their own deletion.`,
   },
   {
     name: "Scheduled Maintenance Notice",
@@ -297,7 +391,7 @@ asif.to will undergo scheduled platform maintenance while our engineering team d
 We’ll work to keep the interruption as short as possible, and no action is required from you. Thank you for your patience while we make asif.to faster and more reliable.
 
 Warm regards,
-The asif.to Engineering Team`
+The asif.to Engineering Team`,
   },
   {
     name: "General Guidelines Warning",
@@ -316,7 +410,7 @@ Repeated violations may result in account restriction or suspension.
 If you believe this notice was issued in error, please reply to this email to reach our moderation team.
 
 Best regards,
-asif.to Moderation Team`
+asif.to Moderation Team`,
   },
   {
     name: "Harassment Warning",
@@ -333,7 +427,7 @@ Respectful and professional communication is strictly required on asif.to. Haras
 Further infractions will lead to immediate suspension of your account.
 
 Best regards,
-asif.to Safety & Moderation Team`
+asif.to Safety & Moderation Team`,
   },
   {
     name: "Spam & Solicitation Warning",
@@ -350,7 +444,7 @@ Please do not use asif.to discussions, comments, or messaging features for unsol
 Continued non-compliance will result in permanent account suppression.
 
 Best regards,
-asif.to Moderation Team`
+asif.to Moderation Team`,
   },
   {
     name: "Inappropriate Content Warning",
@@ -367,7 +461,7 @@ Please ensure all content shared on asif.to adheres to our platform safety and c
 If you have questions regarding this removal, you can reply directly to this email to contact our moderation team.
 
 Best regards,
-asif.to Content Operations`
+asif.to Content Operations`,
   },
   {
     name: "Admin Test Email Template",
@@ -386,8 +480,8 @@ Stream: TRANSACTIONAL / TEST
 If you are receiving this message, your SMTP transport and email delivery queue are functioning properly.
 
 Best regards,
-asif.to System Engineering`
-  }
+asif.to System Engineering`,
+  },
 ];
 
 async function seed() {
@@ -407,7 +501,7 @@ async function seed() {
       const res = await EmailTemplate.findOneAndUpdate(
         { name: item.name },
         { $set: item },
-        { upsert: true, returnDocument: "after" }
+        { upsert: true, returnDocument: "after" },
       );
       if (res.createdAt.getTime() === res.updatedAt.getTime()) {
         inserted++;
@@ -416,7 +510,9 @@ async function seed() {
       }
     }
 
-    console.log(`Seeding complete: ${inserted} inserted, ${updated} updated, ${TEMPLATES.length} total templates present.`);
+    console.log(
+      `Seeding complete: ${inserted} inserted, ${updated} updated, ${TEMPLATES.length} total templates present.`,
+    );
   } catch (error) {
     console.error("Failed to seed email templates:", error);
     process.exitCode = 1;

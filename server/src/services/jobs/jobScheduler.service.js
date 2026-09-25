@@ -3,6 +3,27 @@ import JobSource from "../../models/JobSource.js";
 import { syncJobSource } from "./jobImport.service.js";
 import { ensureDefaultPublicJobSources } from "./defaultSources.service.js";
 import { runDailyJobAlertDigests } from "./jobAlert.service.js";
+import { runDiscovery } from "./companyDiscovery.service.js";
+
+// ─── Discovery scheduler state ────────────────────────────────────────────────
+let lastDiscoveryRun = null;
+
+const discoveryIntervalMs = () => {
+  const hours = parseFloat(process.env.DISCOVERY_INTERVAL_HOURS || "24");
+  return Math.max(1, hours) * 3_600_000;
+};
+
+export async function runDiscoveryIfDue() {
+  if (process.env.DISCOVERY_ENABLED === "false") return;
+  const now = Date.now();
+  if (lastDiscoveryRun && now - lastDiscoveryRun < discoveryIntervalMs()) return;
+  lastDiscoveryRun = now;
+  try {
+    await runDiscovery({ trigger: "scheduled" });
+  } catch (error) {
+    console.error("[DISCOVERY] Scheduled run failed:", error.message);
+  }
+}
 
 export async function expireJobs() {
   return Job.updateMany(
@@ -42,9 +63,15 @@ export function startJobScheduler() {
   if (timer) return;
   runMaintenance().catch((error) => console.error("[JOBS] maintenance failed:", error.message));
   runDailyJobAlertDigests().catch((error) => console.error("[JOBS] daily alert digest failed:", error.message));
+  // Run discovery on first tick (after a short delay so the server is fully ready)
+  setTimeout(() => {
+    runDiscoveryIfDue().catch((error) => console.error("[DISCOVERY] initial run failed:", error.message));
+  }, 30_000);
   timer = setInterval(() => {
     runMaintenance().catch((error) => console.error("[JOBS] maintenance failed:", error.message));
     runDailyJobAlertDigests().catch((error) => console.error("[JOBS] daily alert digest failed:", error.message));
+    // Check every maintenance tick whether discovery is due
+    runDiscoveryIfDue().catch((error) => console.error("[DISCOVERY] scheduled run failed:", error.message));
   }, 15 * 60_000);
   timer.unref();
 }

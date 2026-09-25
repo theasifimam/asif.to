@@ -63,12 +63,13 @@ export function formatEmailHtml(text = "") {
 
 export function brandedEmail({
   text = "",
+  html = "",
   stream = "TRANSACTIONAL",
   unsubscribeUrl = "",
 }) {
   const siteUrl = (process.env.WEB_URL || "https://asif.to").replace(/\/$/, "");
   const logoUrl = process.env.EMAIL_LOGO_URL || `${siteUrl}/logo.png`;
-  const content = formatEmailHtml(text);
+  const content = html || formatEmailHtml(text);
   const unsubscribe =
     unsubscribeUrl && ["MARKETING", "JOBS"].includes(stream)
       ? `<p style="margin:24px 0 0;font-size:12px;line-height:1.6;color:#71717a">You are receiving this because you subscribed to asif.to updates. <a href="${escapeHtml(unsubscribeUrl)}" style="color:#2563eb;text-decoration:underline;">Unsubscribe or manage preferences</a>.</p>`
@@ -91,6 +92,7 @@ export async function queueEmail({
   stream,
   subject,
   text,
+  html,
   conversation,
   customerMessage,
   campaign,
@@ -121,6 +123,7 @@ export async function queueEmail({
               .replace(/[\r\n]/g, " ")
               .slice(0, 250),
             text: String(text).slice(0, 50000),
+            html: html ? String(html) : undefined,
             attachments,
           },
         },
@@ -278,6 +281,7 @@ export async function deliverJob(job, config, provider) {
     text,
     html: brandedEmail({
       text,
+      html: job.mail.html,
       stream: job.stream,
       unsubscribeUrl: marketing ? url : "",
     }),

@@ -639,6 +639,19 @@ export const jobsApi = {
   resumeUrl: (id) => buildUrl(`/jobs/admin/applications/${id}/resume`),
 };
 
+export const discoveryApi = {
+  dashboard: () => apiGet("/jobs/admin/discovery/dashboard"),
+  candidates: (params = {}) => apiGet(`/jobs/admin/discovery/candidates?${new URLSearchParams(params)}`),
+  getCandidate: (id) => apiGet(`/jobs/admin/discovery/candidates/${id}`),
+  verify: (id) => apiPost(`/jobs/admin/discovery/candidates/${id}/verify`),
+  approve: (id) => apiPost(`/jobs/admin/discovery/candidates/${id}/approve`),
+  reject: (id, reason = "") => apiPost(`/jobs/admin/discovery/candidates/${id}/reject`, { reason }),
+  retry: (id) => apiPost(`/jobs/admin/discovery/candidates/${id}/retry`),
+  run: () => apiPost("/jobs/admin/discovery/run"),
+  logs: (params = {}) => apiGet(`/jobs/admin/discovery/logs?${new URLSearchParams(params)}`),
+  getLog: (id) => apiGet(`/jobs/admin/discovery/logs/${id}`),
+};
+
 export const activityApi = {
   list: (params = {}) => apiGet(`/activity?${new URLSearchParams(params)}`),
   notifications: (params = {}) =>

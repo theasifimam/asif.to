@@ -66,6 +66,7 @@ const routeRules = [
   [/^\/communications\/settings(?:\/|$)/, "communications.settings.manage"],
 
   [/^\/jobs\/sources(?:\/|$)/, "job_sources.manage"],
+  [/^\/jobs\/discovery(?:\/|$)/, "job_sources.manage"],
   [/^\/jobs\/applications(?:\/|$)/, "job_applications.review"],
   [/^\/jobs\/(?:new|[^/]+\/edit)(?:\/|$)/, "jobs.manage"],
   [/^\/jobs(?:\/|$)/, "jobs.view"],

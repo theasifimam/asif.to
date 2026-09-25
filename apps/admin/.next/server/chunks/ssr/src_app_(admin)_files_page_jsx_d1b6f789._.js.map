@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../../src/app/%28admin%29/files/page.jsx"],"sourcesContent":["\"use client\";\n\nimport AssetBrowser from \"@/components/assets/AssetBrowser\";\n\nexport default function FilesPage() {\n  return <AssetBrowser />;\n}\n"],"names":[],"mappings":"0DAEA,EAAA,EAAA,CAAA,CAAA,QAEe,SAAS,IACtB,MAAO,CAAA,EAAA,EAAA,GAAA,EAAC,EAAA,OAAY,CAAA,CAAA,EACtB"}

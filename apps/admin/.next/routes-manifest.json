@@ -405,6 +405,12 @@
       "namedRegex": "^/jobs/companies/new(?:/)?$"
     },
     {
+      "page": "/jobs/discovery",
+      "regex": "^/jobs/discovery(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/jobs/discovery(?:/)?$"
+    },
+    {
       "page": "/jobs/new",
       "regex": "^/jobs/new(?:/)?$",
       "routeKeys": {},

@@ -38,6 +38,7 @@ import assetRoutes from "./routes/asset.routes.js";
 import personalNoteRoutes from "./routes/personalNote.routes.js";
 import monetizationRoutes from "./routes/monetization.routes.js";
 import jobRoutes from "./routes/job.routes.js";
+import discoveryRoutes from "./routes/discovery.routes.js";
 // ASIF_LEARNING_JOURNEY_V1:server-import
 
 import socialPostRoutes from "./routes/socialPost.routes.js";
@@ -146,6 +147,7 @@ app.use("/api/v1/assets", assetRoutes);
 app.use("/api/v1/notes", personalNoteRoutes);
 app.use("/api/v1/monetization", monetizationRoutes);
 app.use("/api/v1/jobs", jobRoutes);
+app.use("/api/v1/jobs/admin/discovery", discoveryRoutes);
 // ASIF_LEARNING_JOURNEY_V1:server-mount
 
 app.use("/api/v1/social-posts", socialPostRoutes);

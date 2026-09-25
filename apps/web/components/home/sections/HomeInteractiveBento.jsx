@@ -30,7 +30,7 @@ export default function HomeInteractiveBento() {
 
       <div className="mt-3 flex gap-3.5 sm:gap-4 overflow-x-auto scroll-smooth scrollbar-none snap-x snap-mandatory py-4 w-full">
         {/* Top Row: Playground Hero Bento Card */}
-        <div className="flex flex-col justify-between overflow-hidden rounded-4xl sm:rounded-[2.5rem] bg-zinc-950 text-white p-5 sm:p-6 border border-zinc-800 shadow-xl min-w-0 w-[85vw] sm:w-[38rem] shrink-0 snap-start">
+        <div className="flex flex-col justify-between overflow-hidden rounded-4xl sm:rounded-[2.5rem] bg-zinc-950 text-white p-5 sm:p-6 border border-zinc-800 shadow-xl min-w-0 w-[85vw] sm:w-152 shrink-0 snap-start">
           <div>
             <div className="flex items-center justify-between">
               <div className="inline-flex items-center gap-1.5 text-blue-400">
@@ -156,11 +156,11 @@ export default function HomeInteractiveBento() {
               decks.
             </p>
           </div>
-          <div className="flex-1 mt-8 mb-4 flex flex-col items-center justify-center relative w-full min-h-[120px]">
+          <div className="flex-1 mt-8 mb-4 flex flex-col items-center justify-center relative w-full min-h-30">
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="absolute w-[80%] h-[72px] bg-indigo-500/10 border border-indigo-500/20 rounded-xl transform -rotate-6 transition-transform group-hover:-rotate-12"></div>
-              <div className="absolute w-[85%] h-[80px] bg-indigo-500/15 border border-indigo-500/30 rounded-xl transform rotate-3 transition-transform group-hover:rotate-6"></div>
-              <div className="relative w-[90%] h-[88px] bg-zinc-900 border border-zinc-700/80 rounded-xl shadow-xl p-3 flex flex-col justify-between transition-transform group-hover:scale-105">
+              <div className="absolute w-[80%] h-18 bg-indigo-500/10 border border-indigo-500/20 rounded-xl transform -rotate-6 transition-transform group-hover:-rotate-12"></div>
+              <div className="absolute w-[85%] h-20 bg-indigo-500/15 border border-indigo-500/30 rounded-xl transform rotate-3 transition-transform group-hover:rotate-6"></div>
+              <div className="relative w-[90%] h-22 bg-zinc-900 border border-zinc-700/80 rounded-xl shadow-xl p-3 flex flex-col justify-between transition-transform group-hover:scale-105">
                 <div className="flex justify-between items-center text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
                   <span>JS Basics</span>
                   <span>4/20</span>
@@ -198,7 +198,7 @@ export default function HomeInteractiveBento() {
               answers.
             </p>
           </div>
-          <div className="flex-1 mt-8 mb-4 flex flex-col justify-center gap-2.5 w-full relative min-h-[120px]">
+          <div className="flex-1 mt-8 mb-4 flex flex-col justify-center gap-2.5 w-full relative min-h-30">
             <div className="w-[85%] self-end bg-orange-500/10 border border-orange-500/20 rounded-2xl rounded-tr-sm p-2.5 shadow-sm transform transition-transform group-hover:-translate-x-1">
               <div className="h-1.5 w-16 bg-orange-500/30 rounded-full mb-2" />
               <div className="h-1 w-full bg-orange-500/20 rounded-full mb-1.5" />
@@ -237,7 +237,7 @@ export default function HomeInteractiveBento() {
               revision.
             </p>
           </div>
-          <div className="flex-1 mt-8 mb-4 flex flex-col justify-center w-full relative min-h-[120px]">
+          <div className="flex-1 mt-8 mb-4 flex flex-col justify-center w-full relative min-h-30">
             <div className="text-[10px] font-bold text-zinc-400 mb-2.5 text-center">
               Which hook runs a side effect?
             </div>
@@ -281,8 +281,8 @@ export default function HomeInteractiveBento() {
               reach.
             </p>
           </div>
-          <div className="flex-1 mt-8 mb-4 flex flex-col items-center justify-center relative w-full min-h-[120px]">
-            <div className="w-full h-full max-h-[110px] bg-zinc-950 border border-zinc-800/80 rounded-xl overflow-hidden shadow-lg flex flex-col transform transition-transform group-hover:scale-105">
+          <div className="flex-1 mt-8 mb-4 flex flex-col items-center justify-center relative w-full min-h-30">
+            <div className="w-full h-full max-h-27.5 bg-zinc-950 border border-zinc-800/80 rounded-xl overflow-hidden shadow-lg flex flex-col transform transition-transform group-hover:scale-105">
               <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-900 border-b border-zinc-800/80">
                 <div className="flex gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
