@@ -26,7 +26,7 @@ export default function MobileNav() {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm bg-white/95 dark:bg-[#1a1c18]/95 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 px-6 py-2.5 z-100 rounded-full shadow-lg transition-all duration-300">
+    <div className="md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm bg-white/30 dark:bg-black/30 backdrop-blur-3xl border border-white/40 dark:border-white/10 px-6 py-2.5 z-100 rounded-full shadow-lg transition-all duration-300">
       <div className="flex items-center justify-between relative">
         {navItems.map((item) => {
           const isActive = pathname === item.href;

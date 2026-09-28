@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import JobSubscriptions from "./JobSubscriptions";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -387,16 +388,7 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
 
       {/* Action buttons */}
       <div className="pt-1 space-y-2">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={toggleAlert}
-          disabled={alertWorking}
-          className="h-11 w-full rounded-full border-blue-200 text-xs font-black text-blue-700 hover:bg-blue-50 dark:border-blue-900 dark:text-blue-300 dark:hover:bg-blue-950/40"
-        >
-          {alertId && alertCriteriaKey === alertKey ? <BellRing className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
-          {alertWorking ? "Saving alert…" : alertId && alertCriteriaKey === alertKey ? "Job alert active" : "Notify me about matching jobs"}
-        </Button>
+
 
         <Button
           type="button"
@@ -427,5 +419,9 @@ export default function JobsFilters(props) {
     values.salaryMax,
   ].join("|");
 
-  return <JobsFiltersForm key={formKey} {...props} />;
+  return (
+    <div className="space-y-4">
+      <JobsFiltersForm key={formKey} {...props} />
+    </div>
+  );
 }

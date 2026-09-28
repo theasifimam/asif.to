@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useBottomSheetDrag } from "@/lib/hooks/useBottomSheetDrag";
+import JobSubscriptions from "./JobSubscriptions";
 
 export default function JobAlertButton({ criteria = {}, taxonomy = {} }) {
   const { requireAuth, isAuthenticated } = useAuthPrompt();
@@ -161,17 +162,16 @@ export default function JobAlertButton({ criteria = {}, taxonomy = {} }) {
         onClick={openAlertSheet}
         title="Set up job notifications"
         aria-label="Set up job notifications"
-        className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border shadow-lg transition hover:-translate-y-0.5 cursor-pointer ${
-          alertId
-            ? "border-blue-300 bg-blue-600 text-white shadow-blue-600/30"
-            : "border-blue-300 bg-blue-600 text-white shadow-blue-600/25 hover:bg-blue-700"
-        }`}
+        className="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-blue-500/20 bg-white/95 px-3 py-2 text-xs font-bold text-blue-600 shadow-xs transition hover:border-blue-400 hover:bg-blue-50 dark:bg-zinc-900 dark:text-blue-400 dark:hover:bg-blue-950/40 sm:rounded-full sm:px-3.5 sm:py-2 sm:flex-initial cursor-pointer"
       >
         {alertId ? (
-          <BellRing className="h-5 w-5" />
+          <BellRing className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
         ) : (
-          <Bell className="h-5 w-5" />
+          <Bell className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
         )}
+        <span className="truncate">
+          {alertId ? "Alert Active" : "Job Alerts"}
+        </span>
       </button>
 
       <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -368,6 +368,10 @@ export default function JobAlertButton({ criteria = {}, taxonomy = {} }) {
                       )}
                     </div>
                   </div>
+                </div>
+
+                <div className="pt-2">
+                  <JobSubscriptions />
                 </div>
               </div>
 

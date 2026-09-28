@@ -229,7 +229,7 @@ export default function BottomNav() {
       {/* Floating Bottom Tab Bar for Mobile - Always visible & elevated above backdrop */}
       <nav
         aria-label="Primary navigation"
-        className={`fixed left-1/2 -translate-x-1/2 z-110 lg:hidden max-w-[calc(100vw-1rem)] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl p-1 rounded-full shadow-2xl border border-zinc-200/80 dark:border-zinc-800/80 flex items-center justify-center gap-0.5 bottom-[max(.5rem,env(safe-area-inset-bottom))] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
+        className={`fixed left-1/2 -translate-x-1/2 z-110 lg:hidden max-w-[calc(100vw-1rem)] bg-white/30 dark:bg-zinc-950/30 backdrop-blur-3xl p-1 rounded-full shadow-2xl border border-zinc-200/50 dark:border-zinc-800/50 flex items-center justify-center gap-0.5 bottom-[max(.5rem,env(safe-area-inset-bottom))] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
           isVisible
             ? "translate-y-0 opacity-100 scale-100 pointer-events-auto"
             : "translate-y-[calc(100%+2rem)] opacity-0 scale-95 pointer-events-none"

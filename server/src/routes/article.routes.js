@@ -7,6 +7,7 @@ import {
   deleteArticle,
   publishArticle,
   getArticleBySlug,
+  trackArticleView,
 } from "../controllers/article.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
 import { requireAnyPermission, requirePermission } from "../utils/permissions.js";
@@ -21,6 +22,7 @@ const router = Router();
 router.get("/", getArticles);
 router.get("/:id", getArticleById);
 router.get("/slug/:slug", getArticleBySlug);
+router.post("/:id/view", trackArticleView);
 
 // Protected editor/admin routes
 router.post(

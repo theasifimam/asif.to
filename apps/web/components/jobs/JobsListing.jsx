@@ -1,15 +1,10 @@
 import Link from "next/link";
 import MobileJobsFilters from "./MobileJobsFilters";
-import JobResults from "./JobResults";
 import JobAlertButton from "./JobAlertButton";
-import JobSubscriptions from "./JobSubscriptions";
+import JobsHeroSearch from "./JobsHeroSearch";
+import JobResults from "./JobResults";
 import { fetchJobs, fetchJobTaxonomy } from "@/lib/jobs";
-import {
-  Briefcase,
-  Building2,
-  MapPin,
-  BookmarkCheck,
-} from "lucide-react";
+import { Briefcase, Building2, MapPin, BookmarkCheck } from "lucide-react";
 
 /** Format exact count to rounded badge like 2,500+, 3,000+, 3,500+ */
 function formatRoundedCount(count = 0) {
@@ -118,20 +113,8 @@ export default async function JobsListing({
       <section className="px-4 pt-20 pb-2 sm:px-6 sm:pt-24 sm:pb-4">
         <div className="mx-auto max-w-7xl">
           <div className="relative rounded-4xl sm:rounded-[2.5rem] bg-linear-to-br from-blue-500/10 via-indigo-500/10 to-sky-500/10 p-5 xs:p-6 sm:p-8 border border-blue-500/15 dark:border-blue-500/20 dark:from-blue-950/40 dark:via-indigo-950/30 dark:to-zinc-900/90 shadow-sm min-w-0 overflow-hidden">
-            {/* Top Right Notification Bell */}
-            <div className="absolute right-4 top-4 z-20 sm:right-7 sm:top-7">
-              <JobAlertButton
-                taxonomy={taxonomy}
-                criteria={{
-                  keyword: searchParams.keyword || "",
-                  category: fixed.category || searchParams.category || "",
-                  location: fixed.location || searchParams.location || "",
-                  employmentType: searchParams.employmentType || "",
-                  workMode: searchParams.workMode || "",
-                  experienceLevel: searchParams.experienceLevel || "",
-                }}
-              />
-            </div>
+            {/* Top Right Expanding Search */}
+            <JobsHeroSearch fixed={fixed} />
 
             <div className="relative z-10">
               {/* Header Title Section with right padding to clear bell icon */}
@@ -168,6 +151,12 @@ export default async function JobsListing({
                   <span className="truncate">Saved Jobs</span>
                 </Link>
 
+                {/* Job Alerts Modal Button */}
+                <JobAlertButton
+                  criteria={{ ...searchParams, ...fixed }}
+                  taxonomy={taxonomy}
+                />
+
                 {/* Count Stat Chips */}
                 {stats.map(({ icon: Icon, label }) => (
                   <span
@@ -183,8 +172,6 @@ export default async function JobsListing({
           </div>
         </div>
       </section>
-
-      <JobSubscriptions />
 
       {/* Main Jobs Listing & Filters Grid */}
       <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-4 sm:px-6 sm:py-6 lg:grid-cols-[300px_1fr] lg:py-8 min-w-0 overflow-x-clip">

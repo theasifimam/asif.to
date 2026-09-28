@@ -89,11 +89,6 @@ export const getArticleById = async (req, res) => {
       return;
     }
 
-    if (article.status === "published") {
-      article.readCount = (article.readCount || 0) + 1;
-      await article.save({ validateBeforeSave: false });
-    }
-
     res.status(200).json({ success: true, data: article });
   } catch (error) {
     console.error("[ARTICLES] getArticleById error:", error);
@@ -123,15 +118,32 @@ export const getArticleBySlug = async (req, res) => {
       return;
     }
 
-    if (article.status === "published") {
-      article.readCount = (article.readCount || 0) + 1;
-      await article.save({ validateBeforeSave: false });
-    }
-
     res.status(200).json({ success: true, data: article });
   } catch (error) {
     console.error("[ARTICLES] getArticleBySlug error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+/**
+ * POST /api/v1/articles/:id/view
+ * Track a view or a genuine read for an article.
+ */
+export const trackArticleView = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { type } = req.body; // "view" or "read"
+    
+    if (type === "read") {
+      await Article.findByIdAndUpdate(id, { $inc: { readCount: 1 } });
+    } else {
+      await Article.findByIdAndUpdate(id, { $inc: { viewCount: 1 } });
+    }
+    
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("[ANALYTICS] trackArticleView error:", error);
+    res.status(200).json({ success: true }); // silently fail
   }
 };
 

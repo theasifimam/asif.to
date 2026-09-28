@@ -22,7 +22,7 @@ import { ChapterReaderSkeleton } from "@/components/courses/ReaderSkeletons";
 import ChapterLearningLoop from "@/components/courses/ChapterLearningLoop";
 import { useCourseProgress } from "@/lib/courseProgress";
 import { getInternalLinkRules, processInternalLinksSync } from "@/lib/internalLinks";
-
+import { useTrackChapterViewMutation } from "@/lib/api/courseApi";
 export default function ChapterClient({
   courseSlug,
   chapterSlug,
@@ -42,6 +42,21 @@ export default function ChapterClient({
     { courseSlug: courseId, chapterSlug: chapterId },
     { skip: !courseId || !chapterId },
   );
+
+  const [trackView] = useTrackChapterViewMutation();
+
+  // Track genuine chapter views (once per session per chapter)
+  useEffect(() => {
+    const chapterObjectId = data?.data?.chapter?._id || initialData?.chapter?._id;
+    if (chapterObjectId) {
+      const sessionKey = `viewed_chapter_${chapterObjectId}`;
+      if (!sessionStorage.getItem(sessionKey)) {
+        trackView(chapterObjectId);
+        sessionStorage.setItem(sessionKey, "true");
+      }
+    }
+  }, [data?.data?.chapter?._id, initialData?.chapter?._id, trackView]);
+
 
   const [linkRules, setLinkRules] = useState([]);
   useEffect(() => {
@@ -249,7 +264,7 @@ export default function ChapterClient({
         />
       )}
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 pt-16 sm:pt-20 lg:pt-24 flex flex-col gap-3 sm:gap-6 pb-32 sm:pb-16">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 pt-36 lg:pt-24 flex flex-col gap-3 sm:gap-6 pb-32 sm:pb-16">
         {/* Standard Mode Top Header Bar */}
         <ChapterHeader
           courseId={activeCourseSlug}

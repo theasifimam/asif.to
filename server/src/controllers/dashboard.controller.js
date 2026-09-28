@@ -239,14 +239,14 @@ export const getDashboardStats = async (req, res) => {
         value: totalSiteVisits.toLocaleString(),
         trend: siteVisitsTrend,
         icon: "TrendingUp",
-        description: "One count for every tracked page visit",
+        description: "One count for every tracked page visit (All-Time)",
       },
       {
         label: "Total Course Reads",
         value: formatCount(realTotalCourseReads),
-        trend: realTotalCourseReads > 0 ? "+34.2% MoM" : "Live Capture",
+        trend: "All-Time",
         icon: "BookOpen",
-        description: "Real recorded web chapter visits",
+        description: "Real recorded web chapter visits (All-Time)",
       },
       {
         label: "Active Courses",

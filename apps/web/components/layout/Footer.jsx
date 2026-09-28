@@ -371,7 +371,7 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
                       Terms & Conditions
                     </Link>
                     <Link
-                      href="/legal/cookie-usage"
+                      href="/legal/cookies"
                       className="hover:text-foreground transition-colors"
                     >
                       Cookie Policy
@@ -395,14 +395,14 @@ export default function Footer({ containerWidth = "max-w-7xl" }) {
                 </a>
                 <span>•</span>
                 <Link
-                  href="/legal/privacy-policy"
+                  href="/privacy"
                   className="hover:text-foreground transition-colors"
                 >
                   Privacy
                 </Link>
                 <span>•</span>
                 <Link
-                  href="/legal/terms-conditions"
+                  href="/terms"
                   className="hover:text-foreground transition-colors"
                 >
                   Terms

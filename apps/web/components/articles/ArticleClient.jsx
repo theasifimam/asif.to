@@ -20,6 +20,7 @@ import {
   useGetArticleByIdQuery,
   useGetArticlesQuery,
   useGetArticleBySlugQuery,
+  useTrackArticleViewMutation,
 } from "@/lib/api/articlesApi";
 import { format } from "date-fns";
 import { getImageUrl } from "@/lib/config";
@@ -97,6 +98,31 @@ export default function ArticleClient({ slug, initialData }) {
     !article && (idLoading || slugLoading || cleanSlugLoading);
 
   const error = !article && !isLoading;
+
+  const [trackView] = useTrackArticleViewMutation();
+
+  useEffect(() => {
+    if (!article?._id) return;
+
+    const sessionViewKey = `article_view_${article._id}`;
+    const sessionReadKey = `article_read_${article._id}`;
+
+    // Track "view" immediately if not already viewed in this session
+    if (!sessionStorage.getItem(sessionViewKey)) {
+      trackView({ id: article._id, type: "view" });
+      sessionStorage.setItem(sessionViewKey, "true");
+    }
+
+    // Track "read" after 20 seconds if not already read in this session
+    if (!sessionStorage.getItem(sessionReadKey)) {
+      const readTimer = setTimeout(() => {
+        trackView({ id: article._id, type: "read" });
+        sessionStorage.setItem(sessionReadKey, "true");
+      }, 20000);
+
+      return () => clearTimeout(readTimer);
+    }
+  }, [article?._id, trackView]);
 
   const { data: moreArticles } = useGetArticlesQuery({ limit: 4 });
   const [copied, setCopied] = useState(false);

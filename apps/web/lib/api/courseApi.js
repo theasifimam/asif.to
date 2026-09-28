@@ -28,6 +28,14 @@ export const courseApi = createApi({
       ],
     }),
 
+    trackChapterView: builder.mutation({
+      query: (chapterId) => ({
+        url: `/courses/chapters/${chapterId}/view`,
+        method: "POST",
+      }),
+    }),
+
+
     // ── Cheatsheets ──────────────────────────────────────────────────────────
     getCheatsheets: builder.query({
       query: (params) => ({ url: "/cheatsheets", method: "GET", params }),
@@ -88,4 +96,5 @@ export const {
   useSubmitCourseExamMutation,
   useSubmitPracticeQuizMutation,
   useGetFlashcardsQuery,
+  useTrackChapterViewMutation,
 } = courseApi;

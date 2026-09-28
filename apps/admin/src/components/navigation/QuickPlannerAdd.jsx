@@ -284,7 +284,7 @@ export default function QuickPlannerAdd() {
           {loadingTasks && <LogoLoader size={11} className="text-zinc-400" />}
         </div>
 
-        <div className="max-h-52 overflow-y-auto overflow-x-hidden space-y-1.5 pr-1 min-w-0">
+        <div className="max-h-[60vh] sm:max-h-[400px] overflow-y-auto overflow-x-hidden space-y-1.5 pr-1 min-w-0">
           {loadingTasks && tasks.length === 0 ? (
             <div className="flex h-20 items-center justify-center text-xs text-zinc-400">
               <LogoLoader size={16} className="mr-2" /> Loading tasks...
@@ -374,6 +374,11 @@ export default function QuickPlannerAdd() {
         <PopoverContent
           align="end"
           sideOffset={8}
+          onInteractOutside={(e) => {
+            if (window.innerWidth < 640) {
+              e.preventDefault();
+            }
+          }}
           className="hidden sm:block z-50 w-[min(23rem,calc(100vw-2rem))] overflow-hidden rounded-3xl border border-zinc-200/90 bg-white p-4 shadow-2xl dark:border-zinc-800 dark:bg-[#121215]"
         >
           {plannerContent}

@@ -47,8 +47,15 @@ export const articlesApi = createApi({
         method: "GET"
       }),
       providesTags: (result, error, slug) => [{ type: "Articles", id: slug }]
+    }),
+    trackArticleView: builder.mutation({
+      query: ({ id, type }) => ({
+        url: `/articles/${id}/view`,
+        method: "POST",
+        data: { type }
+      })
     })
   })
 });
 
-export const { useGetArticlesQuery, useGetArticleByIdQuery, useGetArticleBySlugQuery } = articlesApi;
+export const { useGetArticlesQuery, useGetArticleByIdQuery, useGetArticleBySlugQuery, useTrackArticleViewMutation } = articlesApi;

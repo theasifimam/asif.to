@@ -40,6 +40,7 @@ const articleSchema = new Schema({
     type: Number,
     default: 0,
   },
+  viewCount: { type: Number, default: 0 },
   views: [
     {
       type: Schema.Types.ObjectId,

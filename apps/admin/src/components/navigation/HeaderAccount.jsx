@@ -245,6 +245,11 @@ export default function HeaderAccount({
           align="end"
           side="bottom"
           sideOffset={10}
+          onInteractOutside={(e) => {
+            if (window.innerWidth < 640) {
+              e.preventDefault();
+            }
+          }}
           className="hidden sm:flex z-50 w-76 flex-col gap-3 rounded-3xl border border-zinc-200/80 bg-white p-4 shadow-[0_20px_55px_-24px_rgba(24,24,27,.32)] dark:border-zinc-800/80 dark:bg-[#121215]"
         >
           {menuContent}

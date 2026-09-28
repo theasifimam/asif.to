@@ -85,7 +85,7 @@ export default function ActivityPage() {
       page: key === "page" ? value : 1,
     }));
   return (
-    <div className="mx-auto w-full max-w-6xl p-3.5 sm:p-8">
+    <div className="mx-auto w-full max-w-6xl p-3.5 gap-1 sm:p-8">
       <div className="mb-6">
         <p className="text-[10px] font-black uppercase tracking-[.2em] text-blue-600 dark:text-blue-400">
           Operational awareness
@@ -136,7 +136,7 @@ export default function ActivityPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-xs dark:border-zinc-800 dark:bg-[#121215]">
+      <div className="overflow-hidden rounded-2xl mt-1 border border-zinc-200 bg-white shadow-xs dark:border-zinc-800 dark:bg-[#121215]">
         {loading ? (
           Array.from({ length: filters.limit }).map((_, i) => (
             <ActivityRowSkeleton key={i} />

@@ -264,7 +264,7 @@ export default function MobileBottomNavbar({
       <nav
         aria-label="Mobile navigation"
         data-mobile-nav
-        className={`fixed left-1/2 z-45 flex max-w-[calc(100vw-1rem)] -translate-x-1/2 items-center justify-center gap-0.5 rounded-full border border-zinc-200/80 bg-white/95 p-1 shadow-2xl backdrop-blur-2xl transition-[bottom,opacity] duration-300 ease-in-out dark:border-zinc-800/80 dark:bg-zinc-900/95 lg:hidden ${
+        className={`fixed left-1/2 z-45 flex max-w-[calc(100vw-1rem)] -translate-x-1/2 items-center justify-center gap-0.5 rounded-full border border-zinc-200/50 bg-white/30 p-1 shadow-2xl backdrop-blur-3xl transition-[bottom,opacity] duration-300 ease-in-out dark:border-zinc-800/50 dark:bg-zinc-950/30 lg:hidden ${
           isVisible
             ? "translate-y-0 opacity-100"
             : "translate-y-28 opacity-0 pointer-events-none"

@@ -215,28 +215,28 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-1 p-4 font-sans text-zinc-800 dark:text-zinc-300 sm:p-6 md:p-8 lg:p-10 min-w-0">
       {/* 1. CREATOR HERO BENTO BANNER */}
-      <section className="relative overflow-hidden rounded-4xl sm:rounded-[2.5rem] bg-zinc-950 text-white p-6 sm:p-9 border border-zinc-800 min-w-0">
+      <section className="relative overflow-hidden rounded-4xl sm:rounded-[2.5rem] bg-linear-to-br from-blue-500/10 via-indigo-500/10 to-sky-500/10 p-6 sm:p-9 border border-blue-500/15 dark:border-blue-500/20 dark:from-blue-950/40 dark:via-indigo-950/30 dark:to-zinc-900/90 shadow-sm min-w-0">
         {/* Ambient Radial Mesh Glows */}
         <div className="absolute -right-12 -top-12 w-80 h-80 rounded-full bg-blue-600/15 blur-3xl pointer-events-none" />
         <div className="absolute -left-12 -bottom-12 w-80 h-80 rounded-full bg-indigo-600/15 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-800 text-[10px] sm:text-[11px] font-black tracking-wider uppercase mb-3 text-zinc-300 shadow-xs">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/60 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 text-[10px] sm:text-[11px] font-black tracking-wider uppercase mb-3 text-zinc-700 dark:text-zinc-300 shadow-xs backdrop-blur-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Creator & Admin Studio
             </div>
 
             <div className="space-y-1">
-              <span className="block text-xs sm:text-sm font-bold uppercase tracking-widest text-zinc-400">
+              <span className="block text-xs sm:text-sm font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">
                 Welcome back
               </span>
-              <h1 className="font-outfit text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight text-blue-400">
+              <h1 className="font-outfit text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight text-blue-600 dark:text-blue-400">
                 {userName}! 👋
               </h1>
             </div>
 
-            <p className="mt-2 max-w-2xl text-xs sm:text-sm leading-relaxed font-medium text-zinc-400">
+            <p className="mt-2 max-w-2xl text-xs sm:text-sm leading-relaxed font-medium text-zinc-600 dark:text-zinc-400">
               Here is your platform roadmap, course analytics, and planner
               status for today.
             </p>
@@ -258,10 +258,10 @@ export default function DashboardPage() {
               asChild
               variant="outline"
               size="sm"
-              className="rounded-full shrink-0 h-10 px-4 text-xs font-bold gap-2 border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 active:scale-95 transition-all"
+              className="rounded-full shrink-0 h-10 px-4 text-xs font-bold gap-2 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-200 shadow-sm active:scale-95 transition-all"
             >
               <Link href="/articles">
-                <PenSquare className="w-4 h-4 text-blue-400" />
+                <PenSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 <span>Write Articles</span>
               </Link>
             </Button>
@@ -269,10 +269,10 @@ export default function DashboardPage() {
               asChild
               variant="outline"
               size="sm"
-              className="rounded-full shrink-0 h-10 px-4 text-xs font-bold gap-2 border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 active:scale-95 transition-all"
+              className="rounded-full shrink-0 h-10 px-4 text-xs font-bold gap-2 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-200 shadow-sm active:scale-95 transition-all"
             >
               <Link href="/quiz">
-                <BrainCircuit className="w-4 h-4 text-purple-400" />
+                <BrainCircuit className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                 <span>Quiz Builder</span>
               </Link>
             </Button>

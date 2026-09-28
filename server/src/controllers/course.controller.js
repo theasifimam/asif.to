@@ -271,10 +271,6 @@ export const getChapterBySlug = async (req, res) => {
         .json({ success: false, message: "Chapter not found." });
     }
 
-    // Capture real readership: increment viewCount on each read
-    Chapter.findByIdAndUpdate(chapter._id, { $inc: { viewCount: 1 } })
-      .exec()
-      .catch(() => {});
 
     // Get adjacent chapters for prev/next navigation
     const allChapters = await Chapter.find({
