@@ -16,6 +16,7 @@ export default function robots() {
           "/bookmarks",
           "/certificates",
           "/courses/*/final-exam",
+          "/*?callbackUrl=",
         ],
       },
       {
@@ -31,6 +32,7 @@ export default function robots() {
           "/bookmarks",
           "/certificates",
           "/courses/*/final-exam",
+          "/*?callbackUrl=",
         ],
       },
     ],

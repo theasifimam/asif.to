@@ -9,6 +9,7 @@ Disallow: /forgot-password
 Disallow: /bookmarks
 Disallow: /certificates
 Disallow: /courses/*/final-exam
+Disallow: /*?callbackUrl=
 
 User-Agent: Googlebot
 Allow: /
@@ -21,6 +22,7 @@ Disallow: /forgot-password
 Disallow: /bookmarks
 Disallow: /certificates
 Disallow: /courses/*/final-exam
+Disallow: /*?callbackUrl=
 
 Host: https://asif.to
 Sitemap: https://asif.to/sitemap.xml

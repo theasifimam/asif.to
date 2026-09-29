@@ -68,7 +68,12 @@ export default function MobileNav() {
                       unoptimized
                     />
                   ) : (
-                    user.fullName?.[0]?.toUpperCase() || "U"
+                    user.fullName
+                      ?.split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .slice(0, 2)
+                      .toUpperCase() || "U"
                   )}
                 </div>
               ) : (

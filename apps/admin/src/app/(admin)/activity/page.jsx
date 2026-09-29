@@ -159,8 +159,18 @@ export default function ActivityPage() {
                 key={item._id}
                 className="flex gap-3.5 sm:gap-4 border-b border-zinc-100 p-4 sm:p-5 last:border-0 dark:border-zinc-800"
               >
-                <div className="mt-1 h-9 w-9 shrink-0 rounded-full bg-blue-600/10 text-center text-sm font-black leading-9 text-blue-600">
-                  {item.actorId?.fullName?.[0] || "S"}
+                <div className="mt-1 h-9 w-9 shrink-0 rounded-full overflow-hidden bg-blue-600/10 flex items-center justify-center">
+                  {item.actorId?.avatar && !item.actorId.avatar.includes("ui-avatars.com") ? (
+                    <img
+                      src={item.actorId.avatar.startsWith("http") ? item.actorId.avatar : `${process.env.NEXT_PUBLIC_STORAGE_URL || ""}${item.actorId.avatar}`}
+                      alt={item.actorId.fullName || ""}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-sm font-black text-blue-600 leading-none">
+                      {item.actorId?.fullName?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "S"}
+                    </span>
+                  )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">

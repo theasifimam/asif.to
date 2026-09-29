@@ -43,7 +43,7 @@ function DockAvatar({
         <span
           className={`flex ${className} shrink-0 items-center justify-center bg-zinc-200 text-xs font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300`}
         >
-          {user?.fullName?.[0] || <UserRound size={14} />}
+          {user?.fullName?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || <UserRound size={14} />}
         </span>
       )}
       {online && (
@@ -421,7 +421,7 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                       />
                     ) : (
                       <span className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-200 text-[10px] font-black text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-                        {u.fullName?.[0] || <UserRound size={11} />}
+                        {u.fullName?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || <UserRound size={11} />}
                       </span>
                     )}
                     {idx === 0 && (
@@ -528,7 +528,7 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                               />
                             ) : (
                               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-200 text-[11px] font-black text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-                                {u.fullName?.[0] || <UserRound size={12} />}
+                                {u.fullName?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || <UserRound size={12} />}
                               </span>
                             )}
                             {idx === 0 && (
@@ -632,7 +632,7 @@ export default function FloatingChatDock({ isNavVisible = true }) {
                                 />
                               ) : (
                                 <span className="flex h-full w-full items-center justify-center rounded-full bg-zinc-200 text-xs font-black text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-                                  {onlineUser.fullName?.[0] || (
+                                  {onlineUser.fullName?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || (
                                     <UserRound size={14} />
                                   )}
                                 </span>

@@ -4,7 +4,20 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { ThemeToggle } from "../ui/ThemeToggle";
-import { ArrowLeft, BriefcaseBusiness, ChevronDown, ChevronRight, GraduationCap, FileCode2, BookOpen, Layers, HelpCircle, Code2, Sparkles, Bookmark } from "lucide-react";
+import {
+  ArrowLeft,
+  BriefcaseBusiness,
+  ChevronDown,
+  ChevronRight,
+  GraduationCap,
+  FileCode2,
+  BookOpen,
+  Layers,
+  HelpCircle,
+  Code2,
+  Sparkles,
+  Bookmark,
+} from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { clearCredentials } from "@/lib/store/authSlice";
 import { useSignoutMutation } from "@/lib/api/authApi";
@@ -12,7 +25,10 @@ import { toast } from "sonner";
 import { usePathname } from "next/navigation";
 import { useScrollNavVisible } from "@/components/layout/ScrollNavProvider";
 import GlobalSearch from "@/components/search/GlobalSearch";
-import { useGetCoursesQuery, useGetCheatsheetsQuery } from "@/lib/api/courseApi";
+import {
+  useGetCoursesQuery,
+  useGetCheatsheetsQuery,
+} from "@/lib/api/courseApi";
 import { signOut as oauthSignOut, useSession } from "next-auth/react";
 import AuthUserMenu from "@/components/auth/AuthUserMenu";
 import { Button } from "@/components/ui/button";
@@ -149,17 +165,20 @@ export default function Header() {
                   <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 px-3 py-1.5 mb-1 block">
                     Curriculum
                   </span>
-                  
+
                   {/* Nested Courses Item */}
                   <div className="relative group/course">
-                    <Link href="/courses" className="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors">
+                    <Link
+                      href="/courses"
+                      className="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors"
+                    >
                       <div className="flex items-center gap-2.5">
                         <GraduationCap className="w-4 h-4 text-blue-500" />
                         <span className="font-semibold text-sm">Courses</span>
                       </div>
                       <ChevronRight className="w-3.5 h-3.5 opacity-50" />
                     </Link>
-                    
+
                     {/* Courses Sub-Menu */}
                     <div className="absolute top-0 left-full pl-2 w-72 opacity-0 invisible -translate-x-2 group-hover/course:translate-x-0 group-hover/course:opacity-100 group-hover/course:visible transition-all duration-200 flex flex-col">
                       <div className="p-2.5 rounded-[1.5rem] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl shadow-2xl border border-zinc-200/80 dark:border-zinc-800/80 flex flex-col">
@@ -167,14 +186,24 @@ export default function Header() {
                           <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 px-3 py-1.5 mb-1 block shrink-0">
                             All Courses
                           </span>
-                          {courses.length > 0 ? courses.map(course => (
-                            <Link key={course._id} href={`/courses/${course.slug}`} className="px-3 py-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors flex items-center gap-3 shrink-0">
-                              <div className="flex flex-col min-w-0 py-0.5">
-                                <span className="text-[13px] font-bold truncate">{course.title}</span>
-                              </div>
-                            </Link>
-                          )) : (
-                            <span className="px-4 py-3 text-xs text-zinc-500 shrink-0">Loading courses...</span>
+                          {courses.length > 0 ? (
+                            courses.map((course) => (
+                              <Link
+                                key={course._id}
+                                href={`/courses/${course.slug}`}
+                                className="px-3 py-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors flex items-center gap-3 shrink-0"
+                              >
+                                <div className="flex flex-col min-w-0 py-0.5">
+                                  <span className="text-[13px] font-bold truncate">
+                                    {course.title}
+                                  </span>
+                                </div>
+                              </Link>
+                            ))
+                          ) : (
+                            <span className="px-4 py-3 text-xs text-zinc-500 shrink-0">
+                              Loading courses...
+                            </span>
                           )}
                         </div>
                       </div>
@@ -183,14 +212,19 @@ export default function Header() {
 
                   {/* Nested Cheatsheets Item */}
                   <div className="relative group/cheatsheet">
-                    <Link href="/cheatsheets" className="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors">
+                    <Link
+                      href="/cheatsheets"
+                      className="flex items-center justify-between px-3 py-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors"
+                    >
                       <div className="flex items-center gap-2.5">
                         <FileCode2 className="w-4 h-4 text-emerald-500" />
-                        <span className="font-semibold text-sm">Cheatsheets</span>
+                        <span className="font-semibold text-sm">
+                          Cheatsheets
+                        </span>
                       </div>
                       <ChevronRight className="w-3.5 h-3.5 opacity-50" />
                     </Link>
-                    
+
                     {/* Cheatsheets Sub-Menu */}
                     <div className="absolute top-0 left-full pl-2 w-72 opacity-0 invisible -translate-x-2 group-hover/cheatsheet:translate-x-0 group-hover/cheatsheet:opacity-100 group-hover/cheatsheet:visible transition-all duration-200 flex flex-col">
                       <div className="p-2.5 rounded-[1.5rem] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl shadow-2xl border border-zinc-200/80 dark:border-zinc-800/80 flex flex-col">
@@ -198,25 +232,37 @@ export default function Header() {
                           <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 px-3 py-1.5 mb-1 block shrink-0">
                             All Cheatsheets
                           </span>
-                          {cheatsheets.length > 0 ? cheatsheets.map(cs => (
-                            <Link key={cs._id} href={`/cheatsheets/${cs.slug}`} className="px-3 py-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors flex items-center gap-3 shrink-0">
-                              <div className="flex flex-col min-w-0 py-0.5">
-                                <span className="text-[13px] font-bold truncate">{cs.title}</span>
-                              </div>
-                            </Link>
-                          )) : (
-                            <span className="px-4 py-3 text-xs text-zinc-500 shrink-0">Loading cheatsheets...</span>
+                          {cheatsheets.length > 0 ? (
+                            cheatsheets.map((cs) => (
+                              <Link
+                                key={cs._id}
+                                href={`/cheatsheets/${cs.slug}`}
+                                className="px-3 py-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors flex items-center gap-3 shrink-0"
+                              >
+                                <div className="flex flex-col min-w-0 py-0.5">
+                                  <span className="text-[13px] font-bold truncate">
+                                    {cs.title}
+                                  </span>
+                                </div>
+                              </Link>
+                            ))
+                          ) : (
+                            <span className="px-4 py-3 text-xs text-zinc-500 shrink-0">
+                              Loading cheatsheets...
+                            </span>
                           )}
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <Link href="/articles" className="flex items-center gap-2.5 px-3 py-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors">
+                  <Link
+                    href="/articles"
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors"
+                  >
                     <BookOpen className="w-4 h-4 text-purple-500" />
                     <span className="font-semibold text-sm">Articles</span>
                   </Link>
-
                 </div>
               </div>
             </div>
@@ -240,33 +286,47 @@ export default function Header() {
                   <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 px-3 py-1.5 mb-1 block">
                     Interactive
                   </span>
-                  
-                  <Link href="/revision" className="flex items-center gap-3 px-3 py-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors">
+
+                  <Link
+                    href="/revision"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors"
+                  >
                     <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
                       <Layers className="w-3.5 h-3.5" />
                     </div>
                     <span className="font-semibold text-sm">Revision Deck</span>
                   </Link>
-                  
-                  <Link href="/quiz" className="flex items-center gap-3 px-3 py-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors">
+
+                  <Link
+                    href="/quiz"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors"
+                  >
                     <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
                       <HelpCircle className="w-3.5 h-3.5" />
                     </div>
                     <span className="font-semibold text-sm">Quizzes</span>
                   </Link>
-                  
-                  <Link href="/playground" className="flex items-center gap-3 px-3 py-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors">
+
+                  <Link
+                    href="/playground"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors"
+                  >
                     <div className="w-7 h-7 rounded-lg bg-sky-500/10 text-sky-500 flex items-center justify-center shrink-0">
                       <Code2 className="w-3.5 h-3.5" />
                     </div>
                     <span className="font-semibold text-sm">Playground</span>
                   </Link>
-                  
-                  <Link href="/interview-questions" className="flex items-center gap-3 px-3 py-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors">
+
+                  <Link
+                    href="/interview-questions"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-2xl hover:bg-zinc-100 dark:hover:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors"
+                  >
                     <div className="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
                       <Sparkles className="w-3.5 h-3.5" />
                     </div>
-                    <span className="font-semibold text-sm">Interview Prep</span>
+                    <span className="font-semibold text-sm">
+                      Interview Prep
+                    </span>
                   </Link>
                 </div>
               </div>
@@ -326,14 +386,19 @@ export default function Header() {
                   className="flex h-10 items-center gap-2.5 px-4 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-xs font-bold text-foreground transition-all active:scale-95 shadow-sm"
                 >
                   <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[11px] flex items-center justify-center font-black shadow-sm overflow-hidden shrink-0 relative">
-                    {user.avatar ? (
+                    {user.avatar && !user.avatar.includes("ui-avatars.com") ? (
                       <img
                         src={getImageUrl(user.avatar)}
                         alt={user.fullName || "User"}
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      user.fullName?.[0]?.toUpperCase() || "U"
+                      user.fullName
+                        ?.split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .slice(0, 2)
+                        .toUpperCase() || "U"
                     )}
                   </span>
                   <span>{user.fullName?.split(" ")[0] || "User"}</span>
@@ -343,6 +408,7 @@ export default function Header() {
                   <Button asChild variant="ghost" className="h-10 text-xs px-4">
                     <Link
                       href={`/login?callbackUrl=${encodeURIComponent(pathname || "/")}`}
+                      rel="nofollow"
                     >
                       Sign In
                     </Link>
@@ -350,6 +416,7 @@ export default function Header() {
                   <Button asChild className="h-10 text-xs px-4">
                     <Link
                       href={`/signup?callbackUrl=${encodeURIComponent(pathname || "/")}`}
+                      rel="nofollow"
                     >
                       Sign Up
                     </Link>

@@ -26,7 +26,7 @@ function MentionAvatar({ user }) {
     />
   ) : (
     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-200 text-xs font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
-      {user?.fullName?.[0] || <UserRound size={14} />}
+      {user?.fullName?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || <UserRound size={14} />}
     </span>
   );
 }

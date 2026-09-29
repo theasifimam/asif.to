@@ -30,7 +30,7 @@ function BubbleAvatar({
     <span
       className={`flex ${className} items-center justify-center bg-zinc-200 text-[10px] font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300`}
     >
-      {user?.fullName?.[0] || <UserRound size={14} />}
+      {user?.fullName?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || <UserRound size={14} />}
     </span>
   );
 }

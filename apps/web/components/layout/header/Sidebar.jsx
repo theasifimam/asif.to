@@ -219,7 +219,7 @@ export default function Sidebar({
                         />
                       ) : (
                         <span className="w-full h-full bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-black flex items-center justify-center text-xs uppercase">
-                          {user?.fullName?.[0]?.toUpperCase() || "U"}
+                          {user?.fullName?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "U"}
                         </span>
                       )}
                     </div>

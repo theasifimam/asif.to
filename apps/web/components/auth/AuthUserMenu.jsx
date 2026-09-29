@@ -16,6 +16,16 @@ import {
   BriefcaseBusiness,
 } from "lucide-react";
 
+const getInitials = (name) => {
+  if (!name) return "U";
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+};
+
 export default function AuthUserMenu({ user }) {
   const dispatch = useAppDispatch();
   const [open, setOpen] = useState(false);
@@ -27,6 +37,15 @@ export default function AuthUserMenu({ user }) {
     document.addEventListener("mousedown", close);
     return () => document.removeEventListener("mousedown", close);
   }, []);
+
+  // Prefer our own stored avatar (may be an uploaded file or an OAuth URL stored at account creation).
+  // Fall back to the NextAuth provider image only when the user has no avatar in our DB.
+  const avatarSrc =
+    (user.avatar && !user.avatar.includes("ui-avatars.com")
+      ? getImageUrl(user.avatar)
+      : null) ||
+    (user.image && !user.image.includes("ui-avatars.com") ? user.image : null);
+
   return (
     <div className="relative" ref={ref}>
       <button
@@ -36,11 +55,17 @@ export default function AuthUserMenu({ user }) {
         aria-haspopup="menu"
         className="flex items-center gap-1 rounded-full bg-zinc-100 p-1 pr-2 text-xs font-bold transition hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700"
       >
-        <img
-          src={getImageUrl(user.image || user.avatar || "/logo.png")}
-          alt={user.name || user.fullName || "User"}
-          className="h-8 w-8 rounded-full object-cover"
-        />
+        {avatarSrc ? (
+          <img
+            src={avatarSrc}
+            alt={user.name || user.fullName || "User"}
+            className="h-8 w-8 rounded-full object-cover"
+          />
+        ) : (
+          <span className="h-8 w-8 rounded-full bg-blue-600 text-white text-xs font-black flex items-center justify-center uppercase shrink-0">
+            {getInitials(user.name || user.fullName)}
+          </span>
+        )}
         <ChevronDown
           className={`h-3.5 w-3.5 transition ${open ? "rotate-180" : ""}`}
         />

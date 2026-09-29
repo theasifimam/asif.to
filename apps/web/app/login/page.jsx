@@ -6,6 +6,9 @@ import AuthLayout from "@/components/auth/AuthLayout";
 export const metadata = {
   title: "Sign In - asif.to",
   description: "Sign in to your asif.to learning account.",
+  alternates: {
+    canonical: "https://asif.to/login",
+  },
 };
 
 function safeCallback(value) {

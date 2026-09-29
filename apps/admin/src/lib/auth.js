@@ -93,11 +93,13 @@ export async function login(credentials) {
 
     // Store in localStorage
     const user = {
-      id: data.data.user.id,
+      id: data.data.user.id || data.data.user._id,
       email: data.data.user.email,
       name: data.data.user.fullName,
-      role: data.data.user.role, // Ensure backend returns role
-      avatar: data.data.user.profilePicture?.url,
+      fullName: data.data.user.fullName,
+      username: data.data.user.username,
+      role: data.data.user.role,
+      avatar: data.data.user.avatar || null,
       createdAt: data.data.user.createdAt,
     };
 

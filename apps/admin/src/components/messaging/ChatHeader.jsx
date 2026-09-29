@@ -17,7 +17,7 @@ function HeaderAvatar({ user, online = false }) {
         />
       ) : (
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-zinc-200 text-sm font-black text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
-          {user?.fullName?.[0] || <UserRound size={18} />}
+          {user?.fullName?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || <UserRound size={18} />}
         </span>
       )}
       {online && (
