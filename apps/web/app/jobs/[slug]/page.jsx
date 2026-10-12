@@ -1,3 +1,4 @@
+import { JOBS_INDEXABLE } from "@/lib/jobsIndexing";
 import Link from "next/link";
 import { cache } from "react";
 import { notFound } from "next/navigation";
@@ -12,6 +13,8 @@ import {
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import JobActions from "@/components/jobs/JobActions";
+import JobLearningPanel from "@/components/jobs/JobLearningPanel";
+import JobMatchCard from "@/components/jobs/JobMatchCard";
 import CompanyLogo from "@/components/jobs/CompanyLogo";
 import JobCard from "@/components/jobs/JobCard";
 import JobResults from "@/components/jobs/JobResults";
@@ -22,6 +25,9 @@ import {
   fetchJobTaxonomy,
   formatJobDate,
   formatSalary,
+  jobCountryByCode,
+  jobPlace,
+  salaryNote,
 } from "@/lib/jobs";
 import { absoluteUrl, assetUrl } from "@/lib/seo";
 
@@ -47,14 +53,14 @@ export async function generateMetadata({ params }) {
     `${job.title} Jobs in ${job.location} | ${job.companyName} | asif.to`;
   const description =
     job.seoDescription ||
-    `${job.title} opportunity at ${job.companyName} in ${job.location}, UAE. View requirements, salary details and how to apply.`;
+    `${job.title} opportunity at ${job.companyName} in ${jobPlace(job)}. View requirements, salary details and how to apply.`;
   const canonical = job.canonicalUrl || `/jobs/${job.slug}`;
   const image = job.company?.logo || job.companyLogo || "/logo.png";
   return {
     title,
     description,
     alternates: { canonical },
-    robots: { index: job.status === "published" && !job.isDemo, follow: true },
+    robots: { index: JOBS_INDEXABLE && job.status === "published" && !job.isDemo, follow: true },
     openGraph: {
       title,
       description,
@@ -217,12 +223,12 @@ export default async function JobPage({ params, searchParams }) {
         "@type": "PostalAddress",
         addressLocality: job.location,
         addressRegion: job.emirate,
-        addressCountry: "AE",
+        addressCountry: jobCountryByCode(job.country).code,
       },
     },
     applicantLocationRequirements: {
       "@type": "Country",
-      name: "United Arab Emirates",
+      name: jobCountryByCode(job.country).name,
     },
     directApply: job.applicationType === "internal",
     ...(job.salaryVisible &&
@@ -381,7 +387,7 @@ export default async function JobPage({ params, searchParams }) {
                 <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 border-t border-zinc-100 pt-5 text-xs font-semibold text-zinc-500 dark:border-zinc-800">
                   <span className="inline-flex items-center gap-1.5">
                     <MapPin className="h-4 w-4" />
-                    {job.location}, UAE
+                    {jobPlace(job)}
                   </span>
                   <span className="inline-flex items-center gap-1.5">
                     <BriefcaseBusiness className="h-4 w-4" />
@@ -389,7 +395,7 @@ export default async function JobPage({ params, searchParams }) {
                   </span>
                   <span className="inline-flex items-center gap-1.5">
                     <Clock3 className="h-4 w-4" />
-                    {formatJobDate(job.postedAt)}
+                    {formatJobDate(job.postedAt, job.postedAtSource)}
                   </span>
                 </div>
               </header>
@@ -418,20 +424,30 @@ export default async function JobPage({ params, searchParams }) {
                     </div>
                   </section>
                 )}
+                <JobMatchCard slug={job.slug} learning={result.data.learning} />
+                <JobLearningPanel learning={result.data.learning} />
               </div>
             </article>
             <section className="rounded-4xl border border-zinc-200/80 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/90 sm:p-6">
               <h2 className="font-outfit text-xl font-black">Job details</h2>
+              {result.data.salaryInsight && (
+                <Link
+                  href={`/jobs/salaries/${result.data.salaryInsight.categorySlug}`}
+                  className="mt-3 block rounded-2xl bg-emerald-50 px-3.5 py-2.5 text-xs font-semibold leading-5 text-emerald-900 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-200"
+                >
+                  Typical for {result.data.salaryInsight.categoryName}: <strong>AED {new Intl.NumberFormat("en-AE").format(result.data.salaryInsight.median)}</strong> a month (median of {result.data.salaryInsight.n} postings that state pay) →
+                </Link>
+              )}
               <dl className="mt-4 divide-y divide-zinc-100 text-xs dark:divide-zinc-800">
                 {[
-                  ["Salary", formatSalary(job)],
+                  ["Salary", `${formatSalary(job)}${salaryNote(job) ? " (from description)" : ""}`],
                   ["Category", job.category],
                   ["Experience", label(job.experienceLevel)],
                   ["Employment", label(job.employmentType)],
                   ["Work mode", label(job.workMode)],
-                  ["Location", `${job.location}, UAE`],
+                  ["Location", jobPlace(job)],
                   [
-                    "Posted",
+                    job.postedAtSource === "first_seen" ? "First listed" : "Posted",
                     new Intl.DateTimeFormat("en-AE", {
                       dateStyle: "medium",
                     }).format(new Date(job.postedAt)),
@@ -520,7 +536,7 @@ export default async function JobPage({ params, searchParams }) {
             {result.data.related?.length > 0 && (
               <section className="mt-12">
                 <h2 className="font-outfit text-2xl font-black">
-                  Related active jobs
+                  Similar jobs
                 </h2>
                 <div className="mt-5 grid gap-3 xl:grid-cols-2">
                   {result.data.related.map((item) => (

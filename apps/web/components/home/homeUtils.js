@@ -11,6 +11,22 @@ export function getTopicHref(topic) {
   return `/${encodeURIComponent(courseSlug)}/${encodeURIComponent(topic.slug)}`;
 }
 
+// Plain-text teaser from markdown/HTML article content (no raw #, *, --- or tags).
+export function getArticleExcerpt(article, max = 140) {
+  const raw = article?.subtitle || article?.description || article?.content || "";
+  const text = String(raw)
+    .replace(/<[^>]*>/g, " ")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/^\s*(#{1,6}|>|[-*+]|\d+\.)\s+/gm, "")
+    .replace(/^\s*([-*_]\s*){3,}$/gm, " ")
+    .replace(/[*_`~#>|]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!text) return `Practical guide: ${article?.title || "read more"} on asif.to.`;
+  return text.length > max ? `${text.slice(0, max).replace(/\s+\S*$/, "")}…` : text;
+}
+
 export function getArticleHref(article) {
   if (!article) return "/articles";
   const slug = article.slug || article._id;

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useJobSheet } from "./JobSheetProvider";
 import { BriefcaseBusiness, Clock3, MapPin, Star } from "lucide-react";
-import { formatJobDate, formatSalary } from "@/lib/jobs";
+import { JOB_TAG_LABELS, formatJobDate, formatSalary, isOlderListing, jobPlace, salaryNote } from "@/lib/jobs";
 import CompanyLogo from "./CompanyLogo";
 
 const label = (value = "") =>
@@ -80,7 +80,7 @@ export default function JobCard({
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 min-w-0 max-w-full">
             <span className="inline-flex items-center gap-1.5 min-w-0 max-w-full">
               <MapPin className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">{job.location}, UAE</span>
+              <span className="truncate">{jobPlace(job)}</span>
             </span>
             <span className="inline-flex items-center gap-1.5 min-w-0 max-w-full">
               <BriefcaseBusiness className="h-3.5 w-3.5 shrink-0" />
@@ -90,18 +90,28 @@ export default function JobCard({
             </span>
             <span className="inline-flex items-center gap-1.5 min-w-0 max-w-full">
               <Clock3 className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">{formatJobDate(job.postedAt)}</span>
+              <span className="truncate">{formatJobDate(job.postedAt, job.postedAtSource)}</span>
+              {isOlderListing(job) && (
+                <span className="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-950/50 dark:text-amber-300" title="This job has been listed for over 45 days and may already be filled.">
+                  Older listing
+                </span>
+              )}
             </span>
           </div>
           <div
             className={`mt-4 flex flex-wrap items-center gap-2 min-w-0 max-w-full ${compact ? "[&>span:nth-child(n+3)]:hidden" : ""}`}
           >
-            <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 shrink-0">
+            <span title={salaryNote(job) || undefined} className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 shrink-0">
               {formatSalary(job)}
             </span>
             <span className="rounded-full bg-zinc-100 px-3 py-1 text-[11px] font-bold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 shrink-0">
               {label(job.experienceLevel)}
             </span>
+            {(job.tags || []).slice(0, 2).map((tag) => (
+              <span key={tag} className="rounded-full bg-sky-50 px-2.5 py-1 text-[10px] font-bold text-sky-700 dark:bg-sky-950/50 dark:text-sky-300 shrink-0">
+                {JOB_TAG_LABELS[tag] || tag}
+              </span>
+            ))}
             {(job.skills || []).slice(0, 3).map((skill) => (
               <span
                 key={skill}

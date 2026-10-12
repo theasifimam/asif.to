@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronRight, FileText } from "lucide-react";
 import { SafeArticleCover } from "../SafeCovers";
-import { getArticleHref } from "../homeUtils";
+import { getArticleExcerpt, getArticleHref } from "../homeUtils";
 
 export default function HomeArticlesSection({ displayArticles = [] }) {
   if (displayArticles.length === 0) return null;
@@ -64,11 +64,7 @@ export default function HomeArticlesSection({ displayArticles = [] }) {
                 </h3>
 
                 <p className="line-clamp-2 text-[11px] leading-relaxed font-medium text-zinc-500 dark:text-zinc-400 mt-1.5">
-                  {article.subtitle ||
-                    article.description ||
-                    (article.content
-                      ? article.content.replace(/<[^>]*>?/gm, "").slice(0, 110)
-                      : `Deep dive technical analysis into ${article.title} on asif.to.`)}
+                  {getArticleExcerpt(article)}
                 </p>
               </div>
 

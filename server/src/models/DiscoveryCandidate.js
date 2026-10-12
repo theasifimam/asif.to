@@ -19,6 +19,7 @@ export const DISCOVERY_METHODS = [
   "ats_discovery",       // Discovered via a known ATS provider's public list
   "career_page",         // Company career page inspection
   "existing_source",     // Derived from signal on an existing JobSource
+  "ats_slug_probe",      // Known employer name matched to a live public ATS board
   "other",               // Fallback
 ];
 
@@ -43,7 +44,7 @@ const discoveryCandidateSchema = new Schema(
     // ── ATS detection ─────────────────────────────────────────────────────
     detectedProvider: {
       type: String,
-      enum: ["greenhouse", "lever", "smartrecruiters", "workable", "ashby", "recruitee", "pinpoint", "teamtailor", "employer-career-page", "api", "other", "unknown"],
+      enum: ["greenhouse", "lever", "smartrecruiters", "workable", "ashby", "recruitee", "pinpoint", "teamtailor", "workday", "employer-career-page", "api", "other", "unknown"],
       default: "unknown",
       index: true,
     },

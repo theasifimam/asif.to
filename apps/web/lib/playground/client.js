@@ -21,7 +21,7 @@ export function explainError(message = "") {
 
 export function unsupportedFeedback(files) {
   const code = Object.values(files || {}).map((file) => file.code || "").join("\n");
-  if (/\b(?:fs|node:fs|child_process|node:child_process)\b/.test(code)) return "Node.js filesystem and process APIs are not available in this browser sandbox.";
+  if (/(?:from\s+|require\(\s*|import\s*\(\s*)["'](?:node:)?(?:fs|fs\/promises|child_process)["']/.test(code)) return "Node.js filesystem and process APIs are not available in this browser sandbox.";
   if (/\b(?:getServerSideProps|getStaticProps|use server)\b|next\/headers|next\/server/.test(code)) return "This Next.js server feature requires a server runtime and cannot run inside this browser sandbox.";
   if (/process\.env\.[A-Z_]+/.test(code)) return "Private server environment variables are not available to browser playground code.";
   return "";

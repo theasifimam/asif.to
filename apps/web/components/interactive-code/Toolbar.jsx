@@ -102,6 +102,7 @@ function Toolbar({
   formatting,
   runtimeAdapter,
   executionEnabled = true,
+  features = {},
 }) {
   const { requireAuth } = useAuthPrompt();
   const { sandpack, listen } = useSandpack();
@@ -525,6 +526,7 @@ function Toolbar({
                     Ctrl+Shift+F
                   </span>
                 </DropdownMenuItem>
+                {features.sharing !== false && (
                 <DropdownMenuItem
                   onSelect={onShare}
                   className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
@@ -538,6 +540,7 @@ function Toolbar({
                   />
                   <span>{shareStatus || "Share playground"}</span>
                 </DropdownMenuItem>
+                )}
                 <DropdownMenuItem
                   onSelect={copy}
                   className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
@@ -559,6 +562,7 @@ function Toolbar({
                     {copied ? "Copied to clipboard" : "Copy all files"}
                   </span>
                 </DropdownMenuItem>
+                {features.download !== false && (
                 <DropdownMenuItem
                   onSelect={download}
                   className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold transition ${
@@ -578,6 +582,7 @@ function Toolbar({
                       : "Download active file"}
                   </span>
                 </DropdownMenuItem>
+                )}
               </DropdownMenuGroup>
               <DropdownMenuSeparator
                 className={isDark ? "!bg-zinc-800!" : "bg-zinc-200!"}

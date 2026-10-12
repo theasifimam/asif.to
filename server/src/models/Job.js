@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 import {
-  APPLICATION_TYPES, CREATION_ORIGINS, EMPLOYMENT_TYPES, EXPERIENCE_LEVELS, IMPORT_STATUSES, JOB_STATUSES, SALARY_PERIODS, SOURCE_TYPES, WORK_MODES,
+  APPLICATION_TYPES, CREATION_ORIGINS, EMPLOYMENT_TYPES, EXPERIENCE_LEVELS, IMPORT_STATUSES, JOB_COUNTRY_CODES, JOB_STATUSES, SALARY_PERIODS, SOURCE_TYPES, WORK_MODES,
 } from "../constants/jobs.js";
 
 const jobSchema = new Schema(
@@ -16,12 +16,14 @@ const jobSchema = new Schema(
     requirements: { type: [String], default: [] },
     benefits: { type: [String], default: [] },
     skills: { type: [String], default: [] },
+    // Quick-filter tags read from the posting text (visa, walk-in, ...); see constants/jobTags.js.
+    tags: { type: [String], default: [], index: true },
     category: { type: String, required: true, trim: true, maxlength: 120, index: true },
     categorySlug: { type: String, required: true, trim: true, lowercase: true, index: true },
     location: { type: String, required: true, trim: true, maxlength: 160, index: true },
     locationSlug: { type: String, required: true, trim: true, lowercase: true, index: true },
     emirate: { type: String, required: true, trim: true, maxlength: 80 },
-    country: { type: String, enum: ["AE"], default: "AE", index: true },
+    country: { type: String, enum: JOB_COUNTRY_CODES, default: "AE", index: true },
     employmentType: { type: String, enum: EMPLOYMENT_TYPES, required: true, index: true },
     workMode: { type: String, enum: WORK_MODES, required: true, index: true },
     experienceLevel: { type: String, enum: EXPERIENCE_LEVELS, required: true, index: true },
@@ -33,6 +35,8 @@ const jobSchema = new Schema(
     salaryCurrency: { type: String, default: "AED", enum: ["AED"], uppercase: true },
     salaryPeriod: { type: String, enum: SALARY_PERIODS, default: "month" },
     salaryVisible: { type: Boolean, default: false, index: true },
+    // "description" = the figure was read from the posting text rather than a structured field.
+    salarySource: { type: String, enum: ["provider", "description"], default: "provider" },
     applicationType: { type: String, enum: APPLICATION_TYPES, required: true, default: "external", index: true },
     applicationUrl: { type: String, default: "", trim: true },
     source: { type: Schema.Types.ObjectId, ref: "JobSource", required: true, index: true },
@@ -50,6 +54,9 @@ const jobSchema = new Schema(
     normalizedApplicationUrl: { type: String, default: "", trim: true },
     fingerprint: { type: String, required: true, index: true },
     postedAt: { type: Date, required: true, default: Date.now, index: true },
+    // "provider" = the source published this date; "first_seen" = the source gave none, so
+    // postedAt is when asif.to first imported the job (shown as "First seen", never "Posted").
+    postedAtSource: { type: String, enum: ["provider", "first_seen"], default: "provider" },
     expiresAt: { type: Date, default: null, index: true },
     importedAt: { type: Date, default: null },
     lastSyncedAt: { type: Date, default: null },

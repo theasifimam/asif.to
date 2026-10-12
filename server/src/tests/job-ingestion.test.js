@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  classifyCategory, normalizeEmploymentType, normalizeExperience, normalizeSalary, normalizeUaeLocation,
+  activeJobCountries, classifyCategory, normalizeEmploymentType, normalizeExperience, normalizeRegionLocation, normalizeSalary, normalizeUaeLocation,
   normalizeWorkMode, prepareDescription, scoreImport, validateNormalizedJob,
 } from "../services/jobs/jobNormalization.service.js";
+import { decideImportStatus } from "../services/jobs/jobPublishPolicy.js";
 import { buildDedupeCriteria, buildImportedUpdate, normalizeCompanyName, normalizeImportedJob, resolveCompany, upsertJob } from "../services/jobs/jobImport.service.js";
 import { GreenhouseJobProvider } from "../services/jobs/providers/greenhouse.provider.js";
 import { LeverJobProvider } from "../services/jobs/providers/lever.provider.js";
@@ -16,6 +17,54 @@ test("UAE locations normalize to the existing filter taxonomy and foreign jobs a
   assert.equal(normalizeUaeLocation("RAK, UAE"), "Ras Al Khaimah");
   assert.equal(normalizeUaeLocation("Remote", "AE"), "United Arab Emirates");
   assert.equal(normalizeUaeLocation("Riyadh, Saudi Arabia"), null);
+});
+
+test("GCC locations resolve to a city, a country and a region; the rest of the world is rejected", () => {
+  assert.deepEqual(normalizeRegionLocation("Riyadh, Saudi Arabia"), { location: "Riyadh", country: "SA", region: "Riyadh" });
+  assert.deepEqual(normalizeRegionLocation("Al Khobar"), { location: "Al Khobar", country: "SA", region: "Al Khobar" });
+  assert.deepEqual(normalizeRegionLocation("Doha, Qatar"), { location: "Doha", country: "QA", region: "Doha" });
+  assert.deepEqual(normalizeRegionLocation("Kuwait"), { location: "Kuwait", country: "KW", region: "Kuwait" });
+  assert.deepEqual(normalizeRegionLocation("Muscat, Sultanate of Oman"), { location: "Muscat", country: "OM", region: "Muscat" });
+  assert.deepEqual(normalizeRegionLocation("Manama"), { location: "Manama", country: "BH", region: "Manama" });
+  assert.deepEqual(normalizeRegionLocation("Remote", "SA"), { location: "Saudi Arabia", country: "SA", region: "Saudi Arabia" });
+  assert.deepEqual(normalizeRegionLocation("Remote", "KWT"), { location: "Kuwait", country: "KW", region: "Kuwait" });
+  assert.deepEqual(normalizeRegionLocation("Al Ain, UAE"), { location: "Al Ain", country: "AE", region: "Abu Dhabi" });
+  assert.equal(normalizeRegionLocation("Dubai / Riyadh").country, "AE");
+  for (const outside of ["London, United Kingdom", "Amman, Jordan", "Romania", "Lahore, Pakistan", "Remote USA"]) assert.equal(normalizeRegionLocation(outside), null, outside);
+  assert.equal(normalizeRegionLocation("Remote", "GB"), null);
+});
+
+test("JOB_COUNTRIES narrows the accepted countries and ignores unknown codes", () => {
+  assert.deepEqual(activeJobCountries(""), ["AE", "SA", "QA", "KW", "BH", "OM"]);
+  assert.deepEqual(activeJobCountries("ae, sa"), ["AE", "SA"]);
+  assert.deepEqual(activeJobCountries("ZZ"), ["AE", "SA", "QA", "KW", "BH", "OM"]);
+  assert.equal(normalizeRegionLocation("Riyadh", "", { countries: ["AE"] }), null);
+  assert.equal(normalizeRegionLocation("Dubai", "", { countries: ["SA"] }), null);
+});
+
+test("a Saudi import keeps its country and never shows a salary in dirhams", async () => {
+  const source = { _id: "source-id", name: "Example Co", type: "greenhouse", providerOrganizationId: "example", autoPublish: true, trusted: true, qualityThreshold: 70 };
+  const provider = new GreenhouseJobProvider(source, { validateRemoteHost: false });
+  const normalized = await normalizeImportedJob({
+    id: 9, title: "Project Engineer", content: `<p>${"Deliver giga-projects safely. Salary: AED 20,000 per month. ".repeat(4)}</p>`,
+    location: { name: "Riyadh, Saudi Arabia" }, absolute_url: "https://example.com/jobs/9",
+  }, source, provider, new Date("2026-01-01"));
+  assert.equal(normalized.data.country, "SA");
+  assert.equal(normalized.data.location, "Riyadh");
+  assert.equal(normalized.data.emirate, "Riyadh");
+  assert.equal(normalized.data.salaryVisible, false);
+  assert.equal(normalized.data.status, "published");
+});
+
+test("publish policy: valid trusted imports publish at the threshold, the rest wait, bad ones are rejected", () => {
+  const trusted = { autoPublish: true, trusted: true, qualityThreshold: 90 };
+  assert.equal(decideImportStatus({ valid: true, score: 90, source: trusted }), "published");
+  assert.equal(decideImportStatus({ valid: true, score: 85, source: trusted }), "pending");
+  assert.equal(decideImportStatus({ valid: true, score: 60, source: trusted }), "rejected");
+  assert.equal(decideImportStatus({ valid: false, score: 100, source: trusted }), "rejected");
+  assert.equal(decideImportStatus({ valid: true, score: 100, source: { ...trusted, trusted: false } }), "pending");
+  assert.equal(decideImportStatus({ valid: true, score: 100, source: { ...trusted, autoPublish: false } }), "pending");
+  assert.equal(decideImportStatus({ valid: true, score: 100, source: trusted }, "false"), "pending");
 });
 
 test("classification rules normalize filters deterministically", () => {
@@ -61,7 +110,7 @@ test("validation and transparent quality scoring cover malformed and expired job
   const valid = { title: "Engineer", companyName: "Acme", location: "Dubai", description: "A".repeat(120), applicationUrl: "https://example.com/apply", sourceUrl: "https://example.com/job", postedAt: new Date(), expiresAt: new Date(Date.now() + 86_400_000), category: "Engineering", employmentType: "full-time", workMode: "on-site" };
   assert.equal(validateNormalizedJob(valid).valid, true);
   assert.equal(scoreImport(valid).score, 100);
-  assert.deepEqual(validateNormalizedJob({ ...valid, title: "", companyName: "", location: null, description: "x", applicationUrl: "", expiresAt: new Date(0) }).errors, ["missing_title", "missing_company", "non_uae_location", "malformed_description", "invalid_application_url", "expired_job"]);
+  assert.deepEqual(validateNormalizedJob({ ...valid, title: "", companyName: "", location: null, description: "x", applicationUrl: "", expiresAt: new Date(0) }).errors, ["missing_title", "missing_company", "unsupported_location", "malformed_description", "invalid_application_url", "expired_job"]);
 });
 
 test("company normalization prevents trivial UAE legal suffix duplicates", () => {
@@ -125,7 +174,7 @@ test("foreign imported jobs reach validation instead of failing during slug gene
   assert.equal(normalized.data.location, null);
   assert.equal(normalized.data.locationSlug, "");
   assert.equal(normalized.data.status, "rejected");
-  assert.deepEqual(normalized.validation.errors, ["non_uae_location"]);
+  assert.deepEqual(normalized.validation.errors, ["unsupported_location"]);
 });
 
 test("SmartRecruiters fetch requests public postings and only expands UAE summaries", async () => {
@@ -133,7 +182,7 @@ test("SmartRecruiters fetch requests public postings and only expands UAE summar
   const responses = [
     { content: [
       { id: "uae-1", location: { city: "Dubai", country: "ae" } },
-      { id: "foreign-1", location: { city: "Riyadh", country: "sa" } },
+      { id: "foreign-1", location: { city: "London", country: "gb" } },
     ] },
     {
       id: "uae-1", name: "Project Manager", company: { identifier: "example", name: "Example Co" },
@@ -173,4 +222,16 @@ test("Lever adapter preserves apply destination and filter fields", () => {
   const provider = new LeverJobProvider({ name: "Example", type: "lever", providerOrganizationId: "example" }, { validateRemoteHost: false });
   const job = provider.normalizeJob({ id: "l1", text: "Sales Manager", description: "Lead our UAE sales team.", hostedUrl: "https://jobs.lever.co/example/l1", applyUrl: "https://jobs.lever.co/example/l1/apply", categories: { location: "Abu Dhabi, UAE", commitment: "Full-time", team: "Sales" }, workplaceType: "hybrid" });
   assert.equal(job.applicationUrl, "https://jobs.lever.co/example/l1/apply"); assert.equal(job.location, "Abu Dhabi, UAE"); assert.equal(job.workMode, "hybrid");
+});
+
+test("unchanged imports are not reported as updated because of company-level fields the Job schema does not store", async () => {
+  const { default: Job } = await import("../models/Job.js");
+  const existing = new Job({ title: "Engineer", companyName: "Acme", slug: "engineer-acme", description: "Same" });
+  const { update, changed } = buildImportedUpdate(existing, {
+    title: "Engineer", description: "Same", companyWebsite: "https://acme.test", companyCareersUrl: "https://acme.test/careers",
+    companyDescription: "About Acme", companyHeadquarters: "Dubai", lastSeenAt: new Date(),
+  });
+  assert.equal(changed, false);
+  assert.equal(update.importStatus, "unchanged");
+  for (const key of ["companyWebsite", "companyCareersUrl", "companyDescription", "companyHeadquarters"]) assert.equal(key in update, false, key);
 });

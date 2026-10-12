@@ -26,7 +26,9 @@ export default function JobSort({
         query.set(key, value);
       }
     }
-    if (newSort && newSort !== "newest") {
+    // "newest" is the default only when browsing; with a keyword the default is best match,
+    // so choosing Newest there must be explicit.
+    if (newSort && (newSort !== "newest" || searchParams.keyword)) {
       query.set("sort", newSort);
     }
     const url = `${path}${query.size ? `?${query.toString()}` : ""}`;

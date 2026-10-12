@@ -26,6 +26,7 @@ export function WorkspacePanels({ workspace }) {
       customInput,
       customOutput,
       previewBusy,
+      testsRunning,
       shareStatus,
       formatting,
     },
@@ -152,6 +153,7 @@ export function WorkspacePanels({ workspace }) {
         setCustomInput={setCustomInput}
         handleRunCustom={handleRunCustom}
         customOutput={customOutput}
+        testsRunning={testsRunning}
       />
 
       {/* Mobile Floating Island Control Dock */}

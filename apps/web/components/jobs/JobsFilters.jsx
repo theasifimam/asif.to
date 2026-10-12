@@ -157,12 +157,17 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
     if (next.salaryMin) query.set("salaryMin", next.salaryMin);
     if (next.salaryMax) query.set("salaryMax", next.salaryMax);
     if (values.sort && values.sort !== "newest") query.set("sort", values.sort);
+    if (values.tag) query.set("tag", values.tag);
 
     const basePath = fixed.location
       ? `/jobs/location/${fixed.location}`
       : fixed.category
         ? `/jobs/category/${fixed.category}`
-        : "/jobs";
+        : fixed.track === "tech"
+          ? "/jobs/tech"
+          : fixed.country
+            ? `/jobs/country/${fixed.country}`
+            : "/jobs";
 
     const targetUrl = query.toString()
       ? `${basePath}?${query.toString()}`
@@ -191,7 +196,11 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
     ? `/jobs/location/${fixed.location}`
     : fixed.category
       ? `/jobs/category/${fixed.category}`
-      : "/jobs";
+      : fixed.track === "tech"
+        ? "/jobs/tech"
+        : fixed.country
+          ? `/jobs/country/${fixed.country}`
+          : "/jobs";
 
   return (
     <form
@@ -224,13 +233,13 @@ function JobsFiltersForm({ values = {}, taxonomy = {}, fixed = {} }) {
             <label className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Location</label>
             <Select value={location} onValueChange={(value) => { setLocation(value); applyFilters({ location: value }); }}>
               <SelectTrigger
-                aria-label="UAE location"
+                aria-label="Location"
                 className="h-11 rounded-2xl bg-zinc-50/80 text-xs font-semibold dark:bg-zinc-950"
               >
-                <SelectValue placeholder="All UAE locations" />
+                <SelectValue placeholder="All locations" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All UAE locations</SelectItem>
+                <SelectItem value="all">All locations</SelectItem>
                 {locationOptions.map((item) => (
                   <SelectItem key={item.value} value={item.value}>
                     {item.label}

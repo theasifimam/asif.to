@@ -10,10 +10,26 @@ const urlKey = (value) => {
   } catch { return ""; }
 };
 
+// https://{tenant}.{wdN}.myworkdayjobs.com/[en-US/]{site}[/job/...] -> tenant/wdN/site
+function detectWorkday(url, parts) {
+  const host = url.hostname.match(/^([a-z0-9][a-z0-9-]*)\.(wd\d{1,4})\.myworkdayjobs\.com$/i);
+  if (!host) return null;
+  const rest = /^[a-z]{2}([-_][A-Za-z]{2})?$/.test(parts[0] || "") ? parts.slice(1) : parts;
+  const site = rest[0];
+  if (!site || site === "job" || site === "wday" || !/^[A-Za-z0-9_-]+$/.test(site)) return null;
+  const tenant = host[1].toLowerCase(); const pod = host[2].toLowerCase();
+  return {
+    type: "workday", providerOrganizationId: `${tenant}/${pod}/${site}`, providerRegion: "global",
+    careersUrl: `https://${tenant}.${pod}.myworkdayjobs.com/${site}`, endpointUrl: `https://${tenant}.${pod}.myworkdayjobs.com/wday/cxs/${tenant}/${site}/jobs`,
+  };
+}
+
 export function detectJobBoard(value) {
   const url = new URL(value);
   if (url.protocol !== "https:") throw new Error("An HTTPS public career URL is required.");
   const parts = url.pathname.split("/").filter(Boolean);
+  const workday = detectWorkday(url, parts);
+  if (workday) return workday;
   const subdomain = url.hostname.match(/^([a-z0-9-]+)\.(recruitee\.com|pinpointhq\.com|teamtailor\.com)$/);
   if (subdomain) {
     const type = { "recruitee.com": "recruitee", "pinpointhq.com": "pinpoint", "teamtailor.com": "teamtailor" }[subdomain[2]];

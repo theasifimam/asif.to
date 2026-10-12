@@ -18,11 +18,12 @@
  *
  * Safety limits (all configurable via env):
  *   DISCOVERY_MAX_CANDIDATES_PER_RUN     default 200
- *   DISCOVERY_MAX_VERIFICATIONS_PER_RUN  default 40
- *   DISCOVERY_MAX_COMPANIES_PER_RUN      default 20
- *   DISCOVERY_MAX_CONCURRENT_VERIFICATIONS default 4
+ *   DISCOVERY_MAX_VERIFICATIONS_PER_RUN  default 200
+ *   DISCOVERY_MAX_COMPANIES_PER_RUN      default 60
+ *   DISCOVERY_MAX_CONCURRENT_VERIFICATIONS default 6
  *   DISCOVERY_ENABLED                    default true
- *   DISCOVERY_INTERVAL_HOURS             default 24
+ *   DISCOVERY_INTERVAL_HOURS             default 6
+ *   DISCOVERY_PROBE_BATCH                default 800 (ATS board probes per run)
  */
 
 import crypto from "crypto";
@@ -39,16 +40,17 @@ import { normalizeCompanyName, resolveCompany } from "./jobImport.service.js";
 import { syncJobSource } from "./jobImport.service.js";
 import { createExclusionSet, detectJobBoard, duplicateSource, sourceIdentityKeys } from "./jobSourceDiscovery.service.js";
 import { verifyJobSource } from "./jobSourceVerification.service.js";
+import { probeAtsBoards } from "./atsBoardProbe.service.js";
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 
 const cfg = () => ({
   enabled: process.env.DISCOVERY_ENABLED !== "false",
   maxCandidatesPerRun: parseInt(process.env.DISCOVERY_MAX_CANDIDATES_PER_RUN || "200", 10),
-  maxVerificationsPerRun: parseInt(process.env.DISCOVERY_MAX_VERIFICATIONS_PER_RUN || "40", 10),
-  maxCompaniesPerRun: parseInt(process.env.DISCOVERY_MAX_COMPANIES_PER_RUN || "20", 10),
-  maxConcurrent: parseInt(process.env.DISCOVERY_MAX_CONCURRENT_VERIFICATIONS || "4", 10),
-  intervalHours: parseFloat(process.env.DISCOVERY_INTERVAL_HOURS || "24"),
+  maxVerificationsPerRun: parseInt(process.env.DISCOVERY_MAX_VERIFICATIONS_PER_RUN || "200", 10),
+  maxCompaniesPerRun: parseInt(process.env.DISCOVERY_MAX_COMPANIES_PER_RUN || "60", 10),
+  maxConcurrent: parseInt(process.env.DISCOVERY_MAX_CONCURRENT_VERIFICATIONS || "6", 10),
+  intervalHours: parseFloat(process.env.DISCOVERY_INTERVAL_HOURS || "6"),
   // After this many consecutive failures, move to requires_review instead of retrying
   maxRetries: parseInt(process.env.DISCOVERY_MAX_RETRIES || "5", 10),
 });
@@ -513,12 +515,22 @@ export async function runDiscovery({ trigger = "scheduled" } = {}) {
       extractCandidatesFromSources({ limit: Math.ceil(config.maxCandidatesPerRun * 0.3) }),
     ]);
     const rawSignals = [...jobSignals, ...sourceSignals];
+    // The signals above only recycle what the platform already holds, so on their own they can
+    // never surface a new company. The probe looks outward for public boards we do not have yet.
+    let probeSignals = [];
+    try {
+      const probe = await probeAtsBoards();
+      probeSignals = probe.signals;
+      console.log(`[DISCOVERY] ATS probe: ${probe.probed}/${probe.total} checked, ${probeSignals.length} live boards found`);
+    } catch (err) {
+      logError("ats_probe", "PROBE_ERROR", err.message);
+    }
 
     // ── 2. Build exclusion set from existing sources + companies ───────────
     const exclusions = await buildSystemExclusions();
 
     // ── 3. Filter and upsert candidates ───────────────────────────────────
-    for (const signal of rawSignals.slice(0, config.maxCandidatesPerRun)) {
+    for (const signal of [...rawSignals.slice(0, config.maxCandidatesPerRun), ...probeSignals]) {
       try {
         const board = detectProviderFromUrl(signal.careersUrl);
         if (!board) continue; // Only auto-create for known ATS providers

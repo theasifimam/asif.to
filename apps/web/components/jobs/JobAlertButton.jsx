@@ -162,16 +162,14 @@ export default function JobAlertButton({ criteria = {}, taxonomy = {} }) {
         onClick={openAlertSheet}
         title="Set up job notifications"
         aria-label="Set up job notifications"
-        className="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-blue-500/20 bg-white/95 px-3 py-2 text-xs font-bold text-blue-600 shadow-xs transition hover:border-blue-400 hover:bg-blue-50 dark:bg-zinc-900 dark:text-blue-400 dark:hover:bg-blue-950/40 sm:rounded-full sm:px-3.5 sm:py-2 sm:flex-initial cursor-pointer"
+        className="inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-full border border-blue-500/20 bg-white/95 px-3.5 text-xs font-bold text-blue-600 shadow-xs transition hover:border-blue-400 hover:bg-blue-50 dark:bg-zinc-900 dark:text-blue-400 dark:hover:bg-blue-950/40"
       >
         {alertId ? (
-          <BellRing className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
+          <BellRing className="h-3.5 w-3.5 shrink-0" />
         ) : (
-          <Bell className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
+          <Bell className="h-3.5 w-3.5 shrink-0" />
         )}
-        <span className="truncate">
-          {alertId ? "Alert Active" : "Job Alerts"}
-        </span>
+        {alertId ? "Alert active" : "Job alerts"}
       </button>
 
       <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -272,10 +270,10 @@ export default function JobAlertButton({ criteria = {}, taxonomy = {} }) {
                       </label>
                       <Select value={location} onValueChange={setLocation}>
                         <SelectTrigger className="h-10 rounded-xl bg-zinc-50 text-xs font-semibold dark:bg-zinc-900 dark:border-zinc-800">
-                          <SelectValue placeholder="All UAE locations" />
+                          <SelectValue placeholder="All locations" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">All UAE locations</SelectItem>
+                          <SelectItem value="all">All locations</SelectItem>
                           {locationOptions.map((loc) => (
                             <SelectItem key={loc.value} value={loc.value}>
                               {loc.label}
@@ -363,7 +361,7 @@ export default function JobAlertButton({ criteria = {}, taxonomy = {} }) {
                         ))
                       ) : (
                         <span className="rounded-full bg-zinc-100 dark:bg-zinc-900 px-2.5 py-1 text-xs font-medium text-zinc-500">
-                          All UAE Jobs (No specific filter selected)
+                          All jobs (No specific filter selected)
                         </span>
                       )}
                     </div>

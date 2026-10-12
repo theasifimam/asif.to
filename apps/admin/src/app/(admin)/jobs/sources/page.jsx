@@ -32,6 +32,8 @@ const types = [
   "recruitee",
   "pinpoint",
   "teamtailor",
+  "workday",
+  "jsonld",
   "api",
   "other",
 ];

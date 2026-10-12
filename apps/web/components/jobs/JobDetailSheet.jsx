@@ -12,7 +12,9 @@ import {
   X,
 } from "lucide-react";
 import api from "@/lib/axios";
-import { formatJobDate, formatSalary } from "@/lib/jobs";
+import { formatJobDate, formatSalary, salaryNote } from "@/lib/jobs";
+import JobLearningPanel from "./JobLearningPanel";
+import JobMatchCard from "./JobMatchCard";
 import { safeJobDescription } from "@/lib/jobDescription.mjs";
 import CompanyLogo from "./CompanyLogo";
 import JobActions from "./JobActions";
@@ -23,6 +25,7 @@ const label = (value) => (value || "Not specified").replaceAll("-", " ");
 
 export default function JobDetailSheet({ selection, onClose, onRestoreFocus }) {
   const [job, setJob] = useState(null);
+  const [learning, setLearning] = useState(null);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
   const { dragProps, sheetStyle } = useBottomSheetDrag({ onClose });
@@ -37,6 +40,7 @@ export default function JobDetailSheet({ selection, onClose, onRestoreFocus }) {
           throw new Error("This job is no longer available.");
         if (!controller.signal.aborted) {
           setJob(data.data.job);
+          setLearning(data.data.learning || null);
           setError("");
         }
       })
@@ -126,7 +130,7 @@ export default function JobDetailSheet({ selection, onClose, onRestoreFocus }) {
                   </span>
                   <span className="inline-flex items-center gap-1">
                     <Clock3 className="h-3.5 w-3.5" />
-                    {formatJobDate(preview.postedAt)}
+                    {formatJobDate(preview.postedAt, preview.postedAtSource)}
                   </span>
                 </div>
               </header>
@@ -193,6 +197,9 @@ export default function JobDetailSheet({ selection, onClose, onRestoreFocus }) {
                     </div>
                   ))}
                 </dl>
+                {salaryNote(job) && (
+                  <p className="-mt-3 mb-5 text-xs text-zinc-500">{salaryNote(job)}.</p>
+                )}
                 <section>
                   <h3 className="text-base font-bold">About the role</h3>
                   <div
@@ -244,6 +251,8 @@ export default function JobDetailSheet({ selection, onClose, onRestoreFocus }) {
                     </div>
                   </section>
                 )}
+                <JobMatchCard slug={job.slug} learning={learning} />
+                <JobLearningPanel learning={learning} compact />
                 {company.description && (
                   <section className="mt-7">
                     <h3 className="font-bold">About {job.companyName}</h3>

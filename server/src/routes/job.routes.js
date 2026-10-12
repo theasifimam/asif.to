@@ -4,9 +4,10 @@ import {
   adminDownloadResume, adminGetCompany, adminGetJob, adminGetSource, adminListApplications, adminListCompanies, adminListJobs, adminListSourceLogs, adminListSources,
   adminSyncSource, adminTestSource, adminUpdateApplication, adminUpdateCompany, adminUpdateJob, adminUpdateSource, externalApply,
   getJobsSitemap, getMyJobApplications, getMySavedJobs, getPublicCompany, getPublicJob, getPublicTaxonomy,
-  internalApply, listPublicJobs, recordJobEvent, toggleSavedJob,
+  internalApply, listPublicJobs, recordJobEvent, suggestPublicJobs, toggleSavedJob, updateMyJobApplication,
 } from "../controllers/job.controller.js";
 import { createJobAlert, deleteJobAlert, listMyJobAlerts } from "../controllers/jobAlert.controller.js";
+import { getJobMatch, getMySkills, getSalaryCategory, getSalaryOverview, updateMySkills } from "../controllers/jobInsights.controller.js";
 import { optionalProtect, protect } from "../middlewares/auth.middleware.js";
 import { jobRateLimit } from "../middlewares/jobRateLimit.middleware.js";
 import { uploadJobResume } from "../middlewares/upload.middleware.js";
@@ -16,15 +17,22 @@ const router = Router();
 
 router.get("/", jobRateLimit({ max: 120 }), listPublicJobs);
 router.get("/taxonomy", getPublicTaxonomy);
+router.get("/suggest", jobRateLimit({ max: 120 }), suggestPublicJobs);
+router.get("/salaries", jobRateLimit({ max: 60 }), getSalaryOverview);
+router.get("/salaries/:category", jobRateLimit({ max: 60 }), getSalaryCategory);
 router.get("/sitemap", getJobsSitemap);
 router.get("/slug/:slug", jobRateLimit({ max: 120 }), getPublicJob);
+router.get("/slug/:slug/match", protect, jobRateLimit({ max: 60 }), getJobMatch);
 router.get("/company/:slug", jobRateLimit({ max: 120 }), getPublicCompany);
 router.post("/events", optionalProtect, jobRateLimit({ max: 40 }), recordJobEvent);
 router.post("/:id/events", optionalProtect, jobRateLimit({ max: 40 }), recordJobEvent);
 
 router.get("/me/saved", protect, getMySavedJobs);
 router.get("/me/applications", protect, getMyJobApplications);
+router.patch("/me/applications/:id", protect, jobRateLimit({ max: 60 }), updateMyJobApplication);
 router.get("/me/alerts", protect, listMyJobAlerts);
+router.get("/me/skills", protect, getMySkills);
+router.put("/me/skills", protect, jobRateLimit({ max: 30 }), updateMySkills);
 router.post("/me/alerts", protect, jobRateLimit({ max: 20 }), createJobAlert);
 router.delete("/me/alerts/:id", protect, deleteJobAlert);
 router.post("/:id/save", protect, jobRateLimit({ max: 30 }), toggleSavedJob);

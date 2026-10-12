@@ -5,11 +5,13 @@ import JobSyncLog from "../../models/JobSyncLog.js";
 import { cleanStringArray, cleanText, escapeRegex, normalizeUrl, normalizedJobFingerprint } from "../../utils/jobValidation.js";
 import { slugify } from "../../utils/slugify.js";
 import {
-  classifyCategory, normalizeEmploymentType, normalizeExperience, normalizeSalary, normalizeUaeLocation,
+  classifyCategory, normalizeEmploymentType, normalizeExperience, normalizeRegionLocation, normalizeSalary,
   normalizeWorkMode, prepareDescription, scoreImport, validateNormalizedJob,
 } from "./jobNormalization.service.js";
+import { decideImportStatus } from "./jobPublishPolicy.js";
 import { providerForSource } from "./providers/index.js";
 import { isJobSuppressed } from "./jobSuppression.service.js";
+import { extractExperienceHint, extractSalary, extractSkills, extractTags } from "./jobExtraction.service.js";
 
 const asDate = (value, fallback = null) => {
   if (!value) return fallback;
@@ -31,7 +33,7 @@ async function uniqueSlug(model, value, excludeId = null) {
   return slug;
 }
 
-const creationOriginFor = (source) => ["greenhouse", "lever", "smartrecruiters", "workable", "ashby", "recruitee", "pinpoint", "teamtailor"].includes(source.type)
+const creationOriginFor = (source) => ["greenhouse", "lever", "smartrecruiters", "workable", "ashby", "recruitee", "pinpoint", "teamtailor", "workday"].includes(source.type)
   ? "ats_import" : source.type === "api" ? "api_import" : "automated_import";
 
 export async function resolveCompany(data, source, { CompanyModel = Company } = {}) {
@@ -68,32 +70,53 @@ const compactSnapshot = (raw) => {
 
 export async function normalizeImportedJob(raw, source, provider, now = new Date()) {
   const data = await provider.normalizeJob(raw); const title = cleanText(data.title, 220);
-  const companyName = cleanText(data.companyName || source.name, 180); const location = normalizeUaeLocation(data.location, data.country);
+  const companyName = cleanText(data.companyName || source.name, 180);
+  const place = normalizeRegionLocation(data.location, data.country); const location = place?.location ?? null;
   const description = prepareDescription(data.description); const applicationUrl = normalizeUrl(data.applicationUrl, { required: true });
   const sourceUrl = normalizeUrl(data.sourceUrl || applicationUrl, { required: true });
   const category = classifyCategory({ title, description: description.description, category: data.category });
   const employmentType = normalizeEmploymentType(`${data.employmentType || ""} ${title} ${description.description}`);
   const workMode = normalizeWorkMode(`${data.workMode || ""} ${title} ${description.description}`, data.location);
-  const experience = normalizeExperience(data.experienceText || data.experienceLevel, title); const salary = normalizeSalary(data);
-  const postedAt = asDate(data.postedAt, now); const expiresAt = asDate(data.expiresAt);
+  let experience = normalizeExperience(data.experienceText || data.experienceLevel, title); let salary = normalizeSalary(data);
+  // Providers rarely send structured salary or experience; read what the posting text states.
+  let salarySource = "provider";
+  // Salary figures, filters and insights are AED-only. A provider amount outside the UAE carries no
+  // trustworthy currency, so it is dropped rather than shown as dirhams.
+  if (place && place.country !== "AE") salary = { minimumSalary: null, maximumSalary: null, salaryCurrency: "AED", salaryPeriod: "month", salaryVisible: false };
+  else if (!salary.salaryVisible) {
+    const stated = extractSalary(description.description);
+    if (stated) { salary = { ...stated, salaryCurrency: "AED", salaryVisible: true }; salarySource = "description"; }
+  }
+  if (experience.experienceLevel === "not-specified" && experience.minimumExperience === null) {
+    const hint = extractExperienceHint(description.description);
+    if (hint) experience = normalizeExperience(hint, title);
+  }
+  const roleText = `${title}
+${cleanStringArray(data.skills).join(" ")}
+${description.description}`;
+  const skills = [...new Set([...cleanStringArray(data.skills), ...extractSkills(roleText).map((skill) => skill.label)])].slice(0, 30);
+  const tags = extractTags(`${title}
+${description.description}`);
+  // A future or missing provider date must never make a job look newer than it is.
+  const providerPostedAt = asDate(data.postedAt);
+  const hasProviderDate = Boolean(providerPostedAt) && providerPostedAt.getTime() <= now.getTime() + 86_400_000;
+  const postedAt = hasProviderDate ? providerPostedAt : now; const postedAtSource = hasProviderDate ? "provider" : "first_seen";
+  const expiresAt = asDate(data.expiresAt);
   const result = {
     title, companyName, companyLogo: data.companyLogo ? normalizeUrl(data.companyLogo) : "",
     companyWebsite: data.companyWebsite ? normalizeUrl(data.companyWebsite) : "", companyCareersUrl: data.companyCareersUrl ? normalizeUrl(data.companyCareersUrl) : "",
     companyDescription: cleanText(data.companyDescription, 5000), companyHeadquarters: cleanText(data.companyHeadquarters, 180),
-    ...description, responsibilities: cleanStringArray(data.responsibilities), requirements: cleanStringArray(data.requirements), benefits: cleanStringArray(data.benefits), skills: cleanStringArray(data.skills),
-    category, categorySlug: slugify(category), location, locationSlug: slugify(location), emirate: location === "Al Ain" ? "Abu Dhabi" : location || "", country: "AE",
-    employmentType, workMode, ...experience, ...salary, applicationType: "external", applicationUrl,
+    ...description, responsibilities: cleanStringArray(data.responsibilities), requirements: cleanStringArray(data.requirements), benefits: cleanStringArray(data.benefits), skills, tags,
+    category, categorySlug: slugify(category), location, locationSlug: slugify(location), emirate: place?.region || "", country: place?.country || "AE",
+    employmentType, workMode, ...experience, ...salary, salarySource, applicationType: "external", applicationUrl,
     normalizedApplicationUrl: applicationUrl.toLowerCase().replace(/\/$/, ""), source: source._id, sourceName: source.name, sourceUrl,
     sourceJobId: cleanText(data.sourceJobId, 300), sourceProvider: source.type, sourceCompanyId: cleanText(data.sourceCompanyId || source.providerOrganizationId, 300),
-    creationOrigin: creationOriginFor(source), importedAt: now, lastSyncedAt: now, lastSeenAt: now, missingSyncCount: 0, postedAt, expiresAt,
+    creationOrigin: creationOriginFor(source), importedAt: now, lastSyncedAt: now, lastSeenAt: now, missingSyncCount: 0, postedAt, postedAtSource, expiresAt,
     fingerprint: normalizedJobFingerprint({ title, companyName, location, employmentType }), importedData: compactSnapshot(data.raw || raw),
   };
   const quality = scoreImport(result); const validation = validateNormalizedJob(result, now);
   result.importQualityScore = quality.score; result.importQualityBreakdown = quality.checks;
-  result.status = !validation.valid
-    ? "rejected"
-    : source.autoPublish && source.trusted && quality.score >= source.qualityThreshold ? "published"
-      : quality.score < 70 ? "rejected" : "pending";
+  result.status = decideImportStatus({ valid: validation.valid, score: quality.score, source });
   result.importStatus = validation.valid ? "imported" : "validation_failed";
   return { data: result, validation, quality };
 }
@@ -125,8 +148,19 @@ const comparable = (value) => JSON.stringify(value instanceof Date ? value.toISO
 
 export function buildImportedUpdate(existing, data) {
   const protectedFields = new Set(existing.overrideFields || []); const update = {}; let changed = false;
+  const persisted = (key) => !existing.schema?.path || Boolean(existing.schema.path(key));
   for (const [key, value] of Object.entries(data)) {
     if (protectedFields.has(key) || ["slug", "featured", "verified", "createdBy", "updatedBy"].includes(key)) continue;
+    // Company-level fields (website, description...) live on Company, not Job. Comparing them
+    // against a field the schema drops made every job look changed on every sync.
+    if (!persisted(key)) continue;
+    // Without a provider date postedAt is "first seen", which must stay fixed across syncs
+    // (legacy rows get it repaired from createdAt instead of drifting to each sync time).
+    if (key === "postedAt" && data.postedAtSource === "first_seen") {
+      const firstSeen = existing.postedAtSource === "first_seen" ? existing.postedAt : (existing.createdAt || existing.importedAt || existing.postedAt);
+      if (firstSeen && comparable(existing.postedAt) !== comparable(firstSeen)) update.postedAt = firstSeen;
+      continue;
+    }
     if (comparable(existing[key]) !== comparable(value)) {
       update[key] = value;
       if (!["lastSeenAt", "lastSyncedAt", "importedAt", "importStatus", "importedData"].includes(key)) changed = true;
@@ -181,7 +215,7 @@ export async function syncJobSource(sourceId, { trigger = "scheduled", providerO
     for (const raw of rawJobs) {
       try {
         const normalized = await normalizeImportedJob(raw, source, provider);
-        if (!normalized.validation.valid && ["missing_title", "missing_company", "non_uae_location", "invalid_application_url", "invalid_source_url", "malformed_description"].some((code) => normalized.validation.errors.includes(code))) {
+        if (!normalized.validation.valid && ["missing_title", "missing_company", "unsupported_location", "invalid_application_url", "invalid_source_url", "malformed_description"].some((code) => normalized.validation.errors.includes(code))) {
           counts.validationFailed += 1; counts.rejected += 1;
           logError(errors, raw, Object.assign(new Error(normalized.validation.errors.join(", ")), { code: "VALIDATION_FAILED" })); continue;
         }

@@ -1,5 +1,5 @@
 import { JobProvider } from "./base.provider.js";
-import { normalizeUaeLocation } from "../jobNormalization.service.js";
+import { activeJobCountries, normalizeRegionLocation } from "../jobNormalization.service.js";
 
 export class SmartRecruitersJobProvider extends JobProvider {
   async fetchJobs() {
@@ -8,23 +8,26 @@ export class SmartRecruitersJobProvider extends JobProvider {
     const base = this.source.endpointUrl || `https://api.smartrecruiters.com/v1/companies/${encodeURIComponent(id)}/postings`;
     const summaries = [];
     let jobsFound = 0;
-    let countryOnly = false;
-    for (let offset = 0; ; offset += 100) {
-      if (offset >= 10000) throw new Error("SmartRecruiters pagination exceeded its safety limit; refusing a partial sync.");
-      const separator = base.includes("?") ? "&" : "?";
-      const body = await this.requestJson(`${base}${separator}limit=100&offset=${offset}&destination=PUBLIC${countryOnly ? "&country=ae" : ""}`);
-      const page = body?.content;
-      if (!Array.isArray(page)) throw new Error("SmartRecruiters response did not contain content.");
-      jobsFound = Math.max(jobsFound, Number(body.totalFound) || offset + page.length);
-      summaries.push(...page.filter((item) => {
-        const location = [item.location?.city, item.location?.region, item.location?.country].filter(Boolean).join(", ");
-        return Boolean(normalizeUaeLocation(location, item.location?.country));
-      }));
-      if (page.length < 100) break;
-      // The public Posting API documents a country filter. Fetch the global
-      // count once, then paginate UAE results without truncating large boards.
-      if (!countryOnly) { countryOnly = true; offset = -100; }
-    }
+    const separator = base.includes("?") ? "&" : "?";
+    // Returns true when the whole result set fit in the pages read, false when it is larger than a page.
+    const collect = async (country) => {
+      for (let offset = 0; ; offset += 100) {
+        if (offset >= 10000) throw new Error("SmartRecruiters pagination exceeded its safety limit; refusing a partial sync.");
+        const body = await this.requestJson(`${base}${separator}limit=100&offset=${offset}&destination=PUBLIC${country ? `&country=${country}` : ""}`);
+        const page = body?.content;
+        if (!Array.isArray(page)) throw new Error("SmartRecruiters response did not contain content.");
+        if (!country) jobsFound = Math.max(jobsFound, Number(body.totalFound) || offset + page.length);
+        summaries.push(...page.filter((item) => {
+          const location = [item.location?.city, item.location?.region, item.location?.country].filter(Boolean).join(", ");
+          return Boolean(normalizeRegionLocation(location, item.location?.country));
+        }));
+        if (page.length < 100) return true;
+        // The public Posting API documents a country filter. After the global count is known, a board
+        // larger than one page is read per accepted country so it is never truncated.
+        if (!country) return false;
+      }
+    };
+    if (!await collect(null)) for (const code of activeJobCountries()) await collect(code.toLowerCase());
     const uniqueSummaries = [...new Map(summaries.map((job) => [job.id, job])).values()];
     const jobs = [];
     for (let start = 0; start < uniqueSummaries.length; start += 5) {

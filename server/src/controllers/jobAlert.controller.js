@@ -3,7 +3,10 @@ import User from "../models/User.js";
 import { EmailSubscriber } from "../models/Communication.js";
 import { queueEmail } from "../services/communications/email.service.js";
 
-const fields = ["keyword", "category", "location", "employmentType", "workMode", "experienceLevel"];
+import mongoose from "mongoose";
+import Company from "../models/Company.js";
+
+const fields = ["keyword", "category", "location", "employmentType", "workMode", "experienceLevel", "company"];
 const clean = (value, max = 160) => String(value || "").trim().toLowerCase().slice(0, max);
 
 const criteriaFrom = (body = {}) => Object.fromEntries(fields.map((field) => [field, clean(body[field])]));
@@ -15,6 +18,7 @@ const filterLabels = {
   employmentType: "Employment type",
   workMode: "Work mode",
   experienceLevel: "Experience level",
+  company: "Company",
 };
 
 const displayValue = (value) => String(value)
@@ -25,7 +29,7 @@ const displayValue = (value) => String(value)
 const confirmationText = (user, criteria) => {
   const filters = fields
     .filter((field) => criteria[field])
-    .map((field) => `${filterLabels[field]}: ${displayValue(criteria[field])}`)
+    .map((field) => `${filterLabels[field]}: ${field === "company" ? (criteria.companyLabel || "this company") : displayValue(criteria[field])}`)
     .join("\n");
 
   return `Hi ${user.fullName || "there"},
@@ -41,12 +45,25 @@ You can turn off this job alert at any time from your job alerts on asif.to.`;
 export const createJobAlert = async (req, res) => {
   const criteria = criteriaFrom(req.body);
   if (!Object.values(criteria).some(Boolean)) return res.status(400).json({ success: false, message: "Choose a role or job filter first." });
-  const existing = await JobAlert.findOne({ user: req.user._id, ...criteria }).lean();
-  const alert = await JobAlert.findOneAndUpdate(
-    { user: req.user._id, ...criteria },
-    { $set: { active: true } },
-    { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
-  );
+  if (criteria.company) {
+    const company = mongoose.Types.ObjectId.isValid(criteria.company) ? await Company.findOne({ _id: criteria.company, active: true }).select("name").lean() : null;
+    if (!company) return res.status(404).json({ success: false, message: "Company not found." });
+    criteria.companyLabel = company.name;
+  }
+  // Alerts saved before company-following existed have no `company` field, so "no company" must match them too.
+  const identity = { user: req.user._id, ...Object.fromEntries(fields.map((field) => [field, criteria[field]])) };
+  if (!criteria.company) identity.company = { $in: ["", null] };
+  const existing = await JobAlert.findOne(identity).lean();
+  let alert;
+  if (existing) {
+    alert = await JobAlert.findByIdAndUpdate(existing._id, { $set: { active: true } }, { returnDocument: "after" });
+  } else {
+    try { alert = await JobAlert.create({ user: req.user._id, ...criteria }); }
+    catch (error) {
+      if (error.code !== 11000) throw error; // created by a parallel request
+      alert = await JobAlert.findOneAndUpdate(identity, { $set: { active: true } }, { returnDocument: "after" });
+    }
+  }
   const user = await User.findById(req.user._id).select("email fullName").lean();
   if (user?.email) {
     await EmailSubscriber.findOneAndUpdate(

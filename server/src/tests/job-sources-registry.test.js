@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { normalizeCompanyName, normalizeImportedJob } from "../services/jobs/jobImport.service.js";
-import { runMaintenance } from "../services/jobs/jobScheduler.service.js";
+import { runMaintenance, syncSourcesWithLimits } from "../services/jobs/jobScheduler.service.js";
 import { seedJobSourceDefinitions } from "../services/jobs/jobSourceSeed.service.js";
 import { verifyAndPersistJobSource, verifyJobSource } from "../services/jobs/jobSourceVerification.service.js";
 import { AshbyJobProvider } from "../services/jobs/providers/ashby.provider.js";
@@ -136,4 +136,38 @@ test("scheduler queries enabled due sources and isolates one source failure", as
   });
   assert.equal(sourceFilter.enabled, true);
   assert.deepEqual(calls, ["bad", "good"]);
+});
+
+test("source syncs run in parallel but respect the global and per-provider caps", async () => {
+  const sources = [
+    ...Array.from({ length: 6 }, (_, i) => ({ _id: `lever-${i}`, name: `L${i}`, type: "lever" })),
+    ...Array.from({ length: 4 }, (_, i) => ({ _id: `gh-${i}`, name: `G${i}`, type: "greenhouse" })),
+  ];
+  let active = 0; let peak = 0; const perProviderPeak = {}; const activeBy = {};
+  const syncSource = async (id) => {
+    const type = id.split("-")[0];
+    active += 1; activeBy[type] = (activeBy[type] || 0) + 1;
+    peak = Math.max(peak, active); perProviderPeak[type] = Math.max(perProviderPeak[type] || 0, activeBy[type]);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    active -= 1; activeBy[type] -= 1;
+    if (id === "gh-1") throw new Error("boom");
+  };
+  const originalError = console.error; console.error = () => {};
+  let result;
+  try { result = await syncSourcesWithLimits(sources, syncSource, { concurrency: 3, perProvider: 2 }); } finally { console.error = originalError; }
+  assert.deepEqual(result, { synced: 9, failed: 1, deferred: 0 });
+  assert.ok(peak > 1 && peak <= 3, `peak concurrency ${peak}`);
+  assert.ok(perProviderPeak.lever <= 2 && perProviderPeak.gh <= 2);
+});
+
+test("a tick past its deadline defers the remaining sources instead of starting them", async () => {
+  const started = [];
+  const result = await syncSourcesWithLimits(
+    [{ _id: "a", type: "x" }, { _id: "b", type: "x" }, { _id: "c", type: "x" }],
+    async (id) => { started.push(id); },
+    { concurrency: 1, perProvider: 1, deadline: Date.now() - 1 },
+  );
+  assert.deepEqual(started, []);
+  assert.deepEqual(result, { synced: 0, failed: 0, deferred: 3 });
+  assert.deepEqual(await syncSourcesWithLimits([], async () => {}), { synced: 0, failed: 0, deferred: 0 });
 });

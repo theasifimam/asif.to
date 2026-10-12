@@ -12,6 +12,7 @@ export default function WorkspaceTestsPanel({
   setCustomInput,
   handleRunCustom,
   customOutput,
+  testsRunning = false,
 }) {
   return (
     <div
@@ -23,16 +24,16 @@ export default function WorkspaceTestsPanel({
         <button
           type="button"
           onClick={handleRunTests}
-          disabled={executionEnabled === false}
+          disabled={executionEnabled === false || testsRunning}
           title={executionEnabled === false ? "Test execution is temporarily disabled" : "Run tests"}
           className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Run tests
+          {testsRunning ? "Running..." : "Run tests"}
         </button>
       </div>
       {!tests.length ? (
         <p className="mt-6 text-sm text-zinc-500">
-          Run your solution to check the test cases.
+          {testsRunning ? "Running tests..." : "Run your solution to check the test cases."}
         </p>
       ) : (
         <div className="mt-4 space-y-3">
@@ -50,9 +51,9 @@ export default function WorkspaceTestsPanel({
                   <dt>Input:</dt>
                   <dd>{JSON.stringify(test.args)}</dd>
                   <dt>Expected:</dt>
-                  <dd>{JSON.stringify(test.expected)}</dd>
+                  <dd>{test.expected}</dd>
                   <dt>Received:</dt>
-                  <dd>{JSON.stringify(test.received)}</dd>
+                  <dd className="break-all">{test.received}</dd>
                 </dl>
               )}
             </div>
@@ -77,7 +78,7 @@ export default function WorkspaceTestsPanel({
           <button
             type="button"
             onClick={handleRunCustom}
-            disabled={executionEnabled === false}
+            disabled={executionEnabled === false || testsRunning}
             title={executionEnabled === false ? "Test execution is temporarily disabled" : "Run custom test"}
             className="mt-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
           >

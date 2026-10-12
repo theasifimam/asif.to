@@ -3,8 +3,13 @@ import MobileJobsFilters from "./MobileJobsFilters";
 import JobAlertButton from "./JobAlertButton";
 import JobsHeroSearch from "./JobsHeroSearch";
 import JobResults from "./JobResults";
-import { fetchJobs, fetchJobTaxonomy } from "@/lib/jobs";
-import { Briefcase, Building2, MapPin, BookmarkCheck } from "lucide-react";
+import JobCountryTabs from "./JobCountryTabs";
+import { GULF_HUB, fetchJobs, fetchJobTaxonomy, jobCountryBySlug } from "@/lib/jobs";
+import { BarChart3, Briefcase, Code2, BookmarkCheck } from "lucide-react";
+
+/** Shared look for the hero shortcut pills (JobAlertButton mirrors it); never truncates its label. */
+const SHORTCUT_PILL =
+  "inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-full border border-blue-500/20 bg-white/95 px-3.5 text-xs font-bold text-blue-600 shadow-xs transition hover:border-blue-400 hover:bg-blue-50 dark:bg-zinc-900 dark:text-blue-400 dark:hover:bg-blue-950/40";
 
 /** Format exact count to rounded badge like 2,500+, 3,000+, 3,500+ */
 function formatRoundedCount(count = 0) {
@@ -15,8 +20,22 @@ function formatRoundedCount(count = 0) {
   return `${rounded.toLocaleString("en-AE")}+`;
 }
 
+/**
+ * Which part of the Gulf a listing covers. The main /jobs, category and tech pages stay UAE-only so their
+ * wording and rankings are unchanged; /jobs/country/<slug> pages cover one country or "gulf" (all).
+ * Location pages span whichever country the city is in, so they have no country scope.
+ */
+function resolveScope(fixed = {}) {
+  if (fixed.country === GULF_HUB.slug) return { slug: GULF_HUB.slug, name: GULF_HUB.name, label: "Gulf", code: null, api: GULF_HUB.slug };
+  const country = jobCountryBySlug(fixed.country) || (fixed.location ? null : jobCountryBySlug("uae"));
+  if (!country) return { slug: null, name: "the Gulf", label: "Gulf", code: null, api: undefined };
+  return { slug: country.slug, name: country.slug === "uae" ? "the UAE" : country.name, label: country.label, code: country.code, api: country.slug };
+}
+
+const withoutCountry = (params = {}) => Object.fromEntries(Object.entries(params).filter(([key]) => key !== "country"));
+
 /** Build a contextual heading from active search params */
-function buildHeading({ searchParams = {}, totalCount = 0 }) {
+function buildHeading({ searchParams = {}, totalCount = 0, placeName = "the UAE" }) {
   const parts = [];
   if (searchParams.category)
     parts.push(searchParams.category.replace(/-/g, " "));
@@ -28,15 +47,15 @@ function buildHeading({ searchParams = {}, totalCount = 0 }) {
 
   if (parts.length === 0) {
     return countStr
-      ? `${countStr} verified jobs in the UAE.`
-      : "UAE Jobs, Curated Daily.";
+      ? `${countStr} verified jobs in ${placeName}.`
+      : `${placeName === "the UAE" ? "UAE" : placeName} Jobs, Curated Daily.`;
   }
   return countStr
     ? `${countStr} ${parts.join(" ")} jobs.`
-    : `${parts.join(" ")} jobs in the UAE.`;
+    : `${parts.join(" ")} jobs in ${placeName}.`;
 }
 
-function buildSubtitle({ searchParams = {}, taxonomy = {} }) {
+function buildSubtitle({ searchParams = {}, taxonomy = {}, scope = {} }) {
   const hasFilter = Object.values(searchParams).some(Boolean);
   if (hasFilter) {
     const active = [];
@@ -51,7 +70,9 @@ function buildSubtitle({ searchParams = {}, taxonomy = {} }) {
   }
   const categoryCount = taxonomy.categories?.length ?? 0;
   const locationCount = taxonomy.locations?.length ?? 0;
-  return `${categoryCount > 0 ? `${categoryCount} categories` : "Roles"} across ${locationCount > 0 ? `${locationCount} emirates & locations` : "all seven emirates"} — reviewed, verified, and updated daily by asif.to.`;
+  const places = scope.code === "AE" ? "emirates & locations" : "cities & locations";
+  const fallbackPlaces = scope.code === "AE" ? "all seven emirates" : scope.name || "the Gulf";
+  return `${categoryCount > 0 ? `${categoryCount} categories` : "Roles"} across ${locationCount > 0 ? `${locationCount} ${places}` : fallbackPlaces} — reviewed, verified, and updated daily by asif.to.`;
 }
 
 export default async function JobsListing({
@@ -61,9 +82,13 @@ export default async function JobsListing({
   intro,
   path = "/jobs",
 }) {
+  const scope = resolveScope(fixed);
+  // `country` reaches the API only through the scope, never from a stray ?country= in the address bar.
+  const visitorParams = withoutCountry(searchParams);
   const params = {
-    ...searchParams,
+    ...visitorParams,
     ...fixed,
+    country: scope.api,
     page: searchParams.page || 1,
     limit: 15,
   };
@@ -77,35 +102,23 @@ export default async function JobsListing({
     totalPages: 1,
     totalCount: 0,
   };
-  const taxonomy = taxonomyResult?.data || {};
+  const fullTaxonomy = taxonomyResult?.data || {};
+  // Location choices and counts follow the scope, so the UAE page does not offer Riyadh and vice versa.
+  const taxonomy = scope.code
+    ? { ...fullTaxonomy, locations: (fullTaxonomy.locations || []).filter((location) => !location.country || location.country === scope.code) }
+    : fullTaxonomy;
+  const fixedFilters = withoutCountry(fixed);
 
   const dynamicHeading =
     heading ||
     buildHeading({
-      searchParams: { ...searchParams, ...fixed },
+      searchParams: { ...visitorParams, ...fixedFilters },
       totalCount: pagination.totalCount,
+      placeName: scope.name,
     });
   const dynamicSubtitle =
     intro ||
-    buildSubtitle({ searchParams: { ...searchParams, ...fixed }, taxonomy });
-
-  const roundedCountLabel = formatRoundedCount(pagination.totalCount);
-
-  // Quick-stat chips
-  const stats = [
-    {
-      icon: Briefcase,
-      label: `${roundedCountLabel} Jobs`,
-    },
-    taxonomy.locations?.length && {
-      icon: MapPin,
-      label: `${taxonomy.locations.length} Locations`,
-    },
-    taxonomy.categories?.length && {
-      icon: Building2,
-      label: `${taxonomy.categories.length} Categories`,
-    },
-  ].filter(Boolean);
+    buildSubtitle({ searchParams: { ...visitorParams, ...fixedFilters }, taxonomy, scope });
 
   return (
     <>
@@ -123,7 +136,7 @@ export default async function JobsListing({
                 <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
                   <Briefcase className="h-4 w-4" />
                   <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.18em]">
-                    UAE Jobs Directory
+                    {scope.label} Jobs Directory
                   </span>
                 </div>
 
@@ -133,48 +146,39 @@ export default async function JobsListing({
                 </h1>
 
                 {/* Subtitle */}
-                <p className="mt-1.5 max-w-2xl text-xs sm:text-sm font-medium text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                <p className="mt-1.5 max-w-2xl line-clamp-2 text-xs sm:line-clamp-none sm:text-sm font-medium text-zinc-600 dark:text-zinc-400 leading-relaxed">
                   {dynamicSubtitle}
                 </p>
               </div>
 
-              {/* Hero Count & Saved Buttons Row */}
-              <div className="mt-4 grid grid-cols-2 gap-1.5 xs:grid-cols-4 xs:gap-2 w-full sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-2">
-                {/* 1st Button: Saved Jobs */}
-                <Link
-                  href="/jobs/my"
-                  title="Saved jobs and applications"
-                  aria-label="Saved jobs and applications"
-                  className="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-blue-500/20 bg-white/95 px-3 py-2 text-xs font-bold text-blue-600 shadow-xs transition hover:border-blue-400 hover:bg-blue-50 dark:bg-zinc-900 dark:text-blue-400 dark:hover:bg-blue-950/40 sm:rounded-full sm:px-3.5 sm:py-2 sm:flex-initial cursor-pointer"
-                >
-                  <BookmarkCheck className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
-                  <span className="truncate">Saved Jobs</span>
-                </Link>
-
-                {/* Job Alerts Modal Button */}
+              {/* Shortcuts: one scrolling row on phones so every label stays fully readable; wraps from sm up. */}
+              <div className="mt-4 -mx-5 flex gap-2 overflow-x-auto px-5 pb-1 scrollbar-none xs:-mx-6 xs:px-6 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
                 <JobAlertButton
-                  criteria={{ ...searchParams, ...fixed }}
+                  criteria={{ ...visitorParams, ...fixedFilters }}
                   taxonomy={taxonomy}
                 />
-
-                {/* Count Stat Chips */}
-                {stats.map(({ icon: Icon, label }) => (
-                  <span
-                    key={label}
-                    className="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-blue-500/20 bg-white/95 px-3 py-2 text-xs font-bold text-zinc-800 shadow-xs dark:bg-zinc-900 dark:text-zinc-100 sm:rounded-full sm:px-3.5 sm:py-2 sm:flex-initial"
-                  >
-                    <Icon className="h-3.5 w-3.5 shrink-0 text-blue-600 dark:text-blue-400" />
-                    <span className="truncate">{label}</span>
-                  </span>
-                ))}
+                <Link href="/jobs/my" className={SHORTCUT_PILL}>
+                  <BookmarkCheck className="h-3.5 w-3.5 shrink-0" />
+                  Saved jobs
+                </Link>
+                <Link href="/jobs/tech" className={SHORTCUT_PILL}>
+                  <Code2 className="h-3.5 w-3.5 shrink-0" />
+                  Tech jobs
+                </Link>
+                <Link href="/jobs/salaries" className={SHORTCUT_PILL}>
+                  <BarChart3 className="h-3.5 w-3.5 shrink-0" />
+                  Salaries
+                </Link>
               </div>
+
+              <JobCountryTabs countries={fullTaxonomy.countries} activeSlug={scope.slug} />
             </div>
           </div>
         </div>
       </section>
 
       {/* Main Jobs Listing & Filters Grid */}
-      <main className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-4 sm:px-6 sm:py-6 lg:grid-cols-[300px_1fr] lg:py-8 min-w-0 overflow-x-clip">
+      <main className="mx-auto grid w-full max-w-7xl gap-1 px-4 py-4 lg:gap-6 sm:px-6 sm:py-6 lg:grid-cols-[300px_1fr] lg:py-8 min-w-0 overflow-x-clip">
         <aside className="min-w-0 max-w-full lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100dvh-6.5rem)] lg:overflow-y-auto scrollbar-none pr-0.5">
           <MobileJobsFilters
             values={searchParams}
@@ -186,8 +190,11 @@ export default async function JobsListing({
           key={JSON.stringify({ searchParams, fixed })}
           jobs={jobs}
           pagination={pagination}
+          meta={result?.meta}
+          tags={taxonomy.tags}
+          skills={fixed.track === "tech" ? taxonomy.techSkills : []}
           searchParams={searchParams}
-          queryParams={{ ...searchParams, ...fixed }}
+          queryParams={{ ...visitorParams, ...fixedFilters, ...(scope.api ? { country: scope.api } : {}) }}
           path={path}
         />
       </main>

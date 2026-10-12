@@ -1,11 +1,7 @@
+import { JOBS_INDEXABLE } from "@/lib/jobsIndexing";
 export const revalidate = 3600; // revalidate every hour
 
 const STATIC_ROUTES = [
-  {
-    path: "/jobs",
-    priority: 0.9,
-    changeFrequency: "daily",
-  },
   {
     path: "/courses",
     priority: 0.9,
@@ -125,6 +121,9 @@ export default async function sitemap() {
 
   for (const item of searchableItems) {
     if (!item.url) continue;
+    // User profiles are noindex, and jobs/companies are gated by JOBS_INDEXABLE below.
+    if (item.type === "user") continue;
+    if (!JOBS_INDEXABLE && (item.type === "job" || item.type === "company")) continue;
 
     let urlPath = item.url;
     let changeFrequency = "weekly";
@@ -213,7 +212,7 @@ export default async function sitemap() {
 
   // Jobs only exposes inventory-backed location/category pages, preventing thin sitemap URLs.
   const jobsIndex = await fetchApi("/jobs/sitemap");
-  if (jobsIndex) {
+  if (JOBS_INDEXABLE && jobsIndex) {
     for (const job of jobsIndex.jobs || []) {
       const url = `${siteUrl}/jobs/${job.slug}`;
       if (!existingUrls.has(url)) {
@@ -228,6 +227,10 @@ export default async function sitemap() {
         dynamicEntries.push({ url, lastModified: company.updatedAt ? new Date(company.updatedAt) : undefined, changeFrequency: "weekly", priority: 0.7 });
       }
     }
+    // /jobs is the UAE page; the other countries, and the all-Gulf view, have their own hubs.
+    const hubs = (jobsIndex.countries || []).filter((country) => country !== "uae");
+    if (hubs.length) hubs.push("gulf");
+    for (const country of hubs) dynamicEntries.push({ url: `${siteUrl}/jobs/country/${country}`, changeFrequency: "daily", priority: 0.8 });
     for (const location of jobsIndex.locations || []) dynamicEntries.push({ url: `${siteUrl}/jobs/location/${location}`, changeFrequency: "daily", priority: 0.7 });
     for (const category of jobsIndex.categories || []) dynamicEntries.push({ url: `${siteUrl}/jobs/category/${category}`, changeFrequency: "daily", priority: 0.7 });
   }

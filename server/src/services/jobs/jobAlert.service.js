@@ -7,7 +7,7 @@ import { escapeHtml } from "../communications/policy.js";
 
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const matchesAlert = (alert, job) => {
+export const matchesAlert = (alert, job) => {
   const text = `${job.title} ${job.companyName} ${job.category} ${job.description || ""}`.toLowerCase();
   const keywords = String(alert.keyword || "")
     .split(",")
@@ -18,7 +18,8 @@ const matchesAlert = (alert, job) => {
     (!alert.location || alert.location === job.locationSlug) &&
     (!alert.employmentType || alert.employmentType === job.employmentType) &&
     (!alert.workMode || alert.workMode === job.workMode) &&
-    (!alert.experienceLevel || alert.experienceLevel === job.experienceLevel);
+    (!alert.experienceLevel || alert.experienceLevel === job.experienceLevel) &&
+    (!alert.company || alert.company === String(job.company));
 };
 
 const formatJob = (job, siteUrl) => `- ${job.title} at ${job.companyName}\n  ${job.location} · ${job.category}\n  View the role: ${siteUrl}/jobs/${job.slug}`;
@@ -45,7 +46,7 @@ const formatJobHtml = (job, siteUrl) => `
 export async function unsentJobsForAlert(alert, now = new Date()) {
   const subscribedAt = alert.createdAt ? new Date(alert.createdAt) : new Date(0);
   const jobs = await Job.find({ status: "published", createdAt: { $gte: subscribedAt, $lte: now } })
-    .select("title slug companyName location category categorySlug locationSlug employmentType workMode experienceLevel description createdAt")
+    .select("title slug company companyName location category categorySlug locationSlug employmentType workMode experienceLevel description createdAt")
     .sort({ createdAt: -1 })
     .lean();
   const matchingJobs = jobs.filter((job) => matchesAlert(alert, job));
@@ -97,7 +98,7 @@ export async function runDailyJobAlertDigests(now = new Date()) {
     return createdAt < earliest ? createdAt : earliest;
   }, now);
   const jobs = await Job.find({ status: "published", createdAt: { $gte: earliestAlert, $lte: now } })
-      .select("title slug companyName location category categorySlug locationSlug employmentType workMode experienceLevel description createdAt")
+      .select("title slug company companyName location category categorySlug locationSlug employmentType workMode experienceLevel description createdAt")
       .sort({ createdAt: -1 })
       .lean();
   if (!jobs.length) return { sent: 0 };

@@ -28,6 +28,7 @@ import {
 import { VSCODE_DARK_THEME } from "../sandpackConfig";
 import Workspace from "../Workspace";
 import { useAuthPrompt } from "@/components/auth/AuthPromptProvider";
+import { PLAYGROUND_DEFAULT_CONTROL } from "@/lib/playground/control";
 
 function formatBytes(value) {
   if (!Number.isFinite(value) || value <= 0) return "size unavailable";
@@ -37,6 +38,15 @@ function formatBytes(value) {
     units.length - 1,
   );
   return `${(value / 1024 ** index).toFixed(index ? 1 : 0)} ${units[index]}`;
+}
+
+function capOutput(text, max) {
+  const value = String(text || "");
+  return value.length > max
+    ? `${value.slice(0, max)}
+
+[Output truncated at ${max.toLocaleString()} characters]`
+    : value;
 }
 
 function sourceFromProps(language, code, files) {
@@ -55,8 +65,13 @@ function BrowserRuntimeWorkspace({
   starter,
   executionEnabled = true,
   compact = false,
+  playgroundControl = PLAYGROUND_DEFAULT_CONTROL,
 }) {
   const { requireAuth } = useAuthPrompt();
+  const limitsRef = useRef(playgroundControl.limits);
+  useEffect(() => {
+    limitsRef.current = playgroundControl.limits;
+  }, [playgroundControl.limits]);
   const config = BROWSER_RUNTIME_CONFIG[language];
   const { sandpack } = useSandpack();
   const activeFile = sandpack.activeFile || config.file;
@@ -77,6 +92,8 @@ function BrowserRuntimeWorkspace({
   const pendingJavaRef = useRef(null);
   const javaReadyRef = useRef(false);
   const watchdogRef = useRef(null);
+  const execTimerRef = useRef(null);
+  const lastRunRef = useRef(0);
   const saveRef = useRef(null);
   const key = storageKey(
     playgroundId || title || "runtime",
@@ -88,13 +105,36 @@ function BrowserRuntimeWorkspace({
     if (message.type === "ready") {
       javaReadyRef.current = true;
       if (pendingJavaRef.current && javaRef.current?.contentWindow)
-        javaRef.current.contentWindow.postMessage(pendingJavaRef.current, "*");
+        javaRef.current.contentWindow.postMessage(
+          pendingJavaRef.current,
+          window.location.origin,
+        );
       return;
     }
     if (message.type === "status") {
       setStatus("loading");
       setStatusText(message.message);
       if (message.progress) setProgress(message.progress);
+      // Downloads can legitimately take minutes, but once user code starts
+      // running it is held to the admin-configured execution limit.
+      if (/^Running/i.test(message.message || "")) {
+        clearTimeout(watchdogRef.current);
+        clearTimeout(execTimerRef.current);
+        execTimerRef.current = setTimeout(() => {
+          workerRef.current?.terminate();
+          workerRef.current = null;
+          setJavaMounted(false);
+          javaReadyRef.current = false;
+          pendingJavaRef.current = null;
+          setProgress(null);
+          setOutput("");
+          setError(
+            `Execution stopped after ${limitsRef.current.executionTimeoutMs / 1000}s (possible infinite loop or very slow program).`,
+          );
+          setStatus("error");
+          setStatusText("");
+        }, limitsRef.current.executionTimeoutMs);
+      }
       return;
     }
     if (message.type === "progress") {
@@ -104,10 +144,12 @@ function BrowserRuntimeWorkspace({
       return;
     }
     clearTimeout(watchdogRef.current);
+    clearTimeout(execTimerRef.current);
     setProgress(null);
     if (message.type === "result") {
-      setOutput(message.stdout || "");
-      setError(message.stderr || "");
+      const max = limitsRef.current.maxOutputChars;
+      setOutput(capOutput(message.stdout, max));
+      setError(capOutput(message.stderr, max));
       setStatus(message.stderr ? "error" : "done");
       setStatusText("");
       pendingJavaRef.current = null;
@@ -140,7 +182,21 @@ function BrowserRuntimeWorkspace({
     if (!executionEnabled) return;
     if (!requireAuth()) return;
     setConsoleOpen(true);
+    const limits = limitsRef.current;
+    const now = Date.now();
+    if (now - lastRunRef.current < limits.runCooldownMs) return;
+    lastRunRef.current = now;
+    if (source.length > limits.maxSourceChars) {
+      setOutput("");
+      setProgress(null);
+      setStatus("error");
+      setError(
+        `Source is ${source.length.toLocaleString()} characters; the limit is ${limits.maxSourceChars.toLocaleString()}.`,
+      );
+      return;
+    }
     clearTimeout(watchdogRef.current);
+    clearTimeout(execTimerRef.current);
     setOutput("");
     setError("");
     setProgress(null);
@@ -176,7 +232,10 @@ function BrowserRuntimeWorkspace({
       if (!javaMounted) {
         setJavaMounted(true);
       } else if (javaReadyRef.current && javaRef.current?.contentWindow) {
-        javaRef.current.contentWindow.postMessage(request, "*");
+        javaRef.current.contentWindow.postMessage(
+          request,
+          window.location.origin,
+        );
       }
       return;
     }
@@ -219,6 +278,7 @@ function BrowserRuntimeWorkspace({
   useEffect(
     () => () => {
       clearTimeout(watchdogRef.current);
+      clearTimeout(execTimerRef.current);
       workerRef.current?.terminate();
     },
     [],
@@ -391,6 +451,7 @@ function BrowserRuntimeWorkspace({
         starterFiles={{ [config.file]: starter }}
         runtimeAdapter={{ run, status, output: runtimeOutput }}
         executionEnabled={executionEnabled !== false}
+        playgroundControl={playgroundControl}
       />
       {javaMounted && (
         <iframe

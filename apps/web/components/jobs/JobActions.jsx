@@ -97,7 +97,7 @@ export default function JobActions({ job, layout = "stacked" }) {
   const share = async () => {
     const payload = {
       title: `${job.title} at ${job.companyName}`,
-      text: `View this UAE job on asif.to`,
+      text: `View this job on asif.to`,
       url: `${window.location.origin}/jobs/${encodeURIComponent(job.slug)}`,
     };
     try {

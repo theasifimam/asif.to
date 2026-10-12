@@ -20,6 +20,10 @@ const jobApplicationSchema = new Schema(
     sourceName: { type: String, default: "", maxlength: 160 },
     redirectUrl: { type: String, default: "" },
     appliedAt: { type: Date, default: Date.now, index: true },
+    // The applicant's own progress tracker. Separate from `status`, which is the employer-side review state.
+    stage: { type: String, enum: ["applied", "interviewing", "offer", "accepted", "rejected", "withdrawn"], default: "applied", index: true },
+    stageUpdatedAt: { type: Date, default: null },
+    note: { type: String, default: "", maxlength: 2000 },
     reviewedAt: Date,
     reviewedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
   },

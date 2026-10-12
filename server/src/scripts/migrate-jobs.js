@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import connectDB from "../configs/db.js";
 import Company from "../models/Company.js";
 import Job from "../models/Job.js";
+import JobAlert from "../models/JobAlert.js";
 import JobApplication from "../models/JobApplication.js";
 import JobEvent from "../models/JobEvent.js";
 import JobSource from "../models/JobSource.js";
@@ -17,7 +18,7 @@ dotenv.config();
 
 async function run() {
   await connectDB();
-  await Promise.all([Company.syncIndexes(), Job.syncIndexes(), JobSource.syncIndexes(), JobSyncLog.syncIndexes(), JobApplication.syncIndexes(), SavedJob.syncIndexes(), JobEvent.syncIndexes()]);
+  await Promise.all([Company.syncIndexes(), Job.syncIndexes(), JobAlert.syncIndexes(), JobSource.syncIndexes(), JobSyncLog.syncIndexes(), JobApplication.syncIndexes(), SavedJob.syncIndexes(), JobEvent.syncIndexes()]);
   const companies = await Company.find({ $or: [{ normalizedName: "" }, { normalizedName: { $exists: false } }] }).select("name website");
   for (const company of companies) {
     company.normalizedName = normalizeCompanyName(company.name);

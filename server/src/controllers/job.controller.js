@@ -9,9 +9,11 @@ import JobSyncLog from "../models/JobSyncLog.js";
 import SavedJob from "../models/SavedJob.js";
 import { suppressDeletedJob } from "../services/jobs/jobSuppression.service.js";
 import {
-  APPLICATION_TYPES, CREATION_ORIGINS, EMPLOYMENT_TYPES, EXPERIENCE_LEVELS, IMPORT_STATUSES, JOB_STATUSES, SOURCE_TYPES, UAE_JOB_CATEGORIES,
-  UAE_LOCATIONS, WORK_MODES,
+  APPLICATION_TYPES, CREATION_ORIGINS, EMPLOYMENT_TYPES, EXPERIENCE_LEVELS, GCC_COUNTRIES, GCC_LOCATIONS, IMPORT_STATUSES,
+  JOB_STATUSES, SOURCE_TYPES, UAE_JOB_CATEGORIES, WORK_MODES,
 } from "../constants/jobs.js";
+import { activeJobCountries } from "../services/jobs/jobNormalization.service.js";
+import { parseWorkdayId } from "../services/jobs/providers/workday.provider.js";
 import { buildPublicCategoryFilter } from "../services/jobs/jobFilter.service.js";
 import { getPrivateJobResumePath, validateJobResume } from "../middlewares/upload.middleware.js";
 import { logActivity } from "../services/activity.service.js";
@@ -23,6 +25,22 @@ import {
   parseNullableNumber, publicJobFilter, sanitizeJobHtml,
 } from "../utils/jobValidation.js";
 import { slugify } from "../utils/slugify.js";
+import { diversifyByCompany } from "../utils/jobFeedOrder.js";
+import { buildJobLearning } from "../services/jobs/jobLearning.service.js";
+import { correctKeyword, suggestJobs } from "../services/jobs/jobSearch.service.js";
+import { rankSimilarJobs } from "../services/jobs/jobSimilarity.service.js";
+import { JOB_TAGS, JOB_TAG_IDS } from "../constants/jobTags.js";
+import { buildCompanyInsights, salaryInsightFor } from "./jobInsights.controller.js";
+import { SKILL_CATALOG } from "../services/jobs/skillCatalog.js";
+
+// "Tech" roles for the tech-first landing page: stored categories, not a guess from titles.
+const TECH_CATEGORY_SLUGS = ["software-development", "web-development", "it"];
+
+// `?country=` accepts an ISO code or the country slug ("sa", "saudi-arabia", "uae"); anything else is ignored.
+export const countryFromParam = (value) => {
+  const key = String(value ?? "").trim().toLowerCase();
+  return key ? GCC_COUNTRIES.find((country) => country.code.toLowerCase() === key || country.slug === key) || null : null;
+};
 
 const isId = (value) => mongoose.Types.ObjectId.isValid(value);
 const asBoolean = (value) => value === true || value === "true" || value === "1";
@@ -36,6 +54,8 @@ const pageValues = (query, defaultLimit = 20) => {
   const limit = Math.min(Math.max(Number.parseInt(query.limit || String(defaultLimit), 10), 1), 100);
   return { page, limit, skip: (page - 1) * limit };
 };
+
+const PUBLIC_LIST_SELECT = "-applicationUrl -normalizedApplicationUrl -sourceUrl -importedData -overrideFields -missingSyncCount -createdBy -updatedBy -creationOrigin -importStatus -importQualityScore -importQualityBreakdown -duplicateCandidate -duplicateConfidence -sourceCompanyId -sourceProvider -sourceRemovedAt -lastImportChangedAt";
 
 const publicFields = (job) => {
   if (!job) return null;
@@ -171,7 +191,7 @@ async function buildJobPayload(body, { existing = null, userId = null } = {}) {
     location,
     locationSlug: slugify(location),
     emirate,
-    country: "AE",
+    country: countryFromParam(body.country)?.code || existing?.country || "AE",
     employmentType,
     workMode,
     experienceLevel,
@@ -207,7 +227,11 @@ async function buildJobPayload(body, { existing = null, userId = null } = {}) {
 function applyPublicFilters(query) {
   const now = new Date();
   const active = publicJobFilter(now);
-  const filter = { status: active.status, postedAt: active.postedAt, country: "AE", $and: [{ $or: active.$or }] };
+  const country = countryFromParam(query.country);
+  const filter = {
+    status: active.status, postedAt: active.postedAt, $and: [{ $or: active.$or }],
+    country: country ? country.code : { $in: activeJobCountries() },
+  };
   if (query.keyword?.trim()) filter.$text = { $search: cleanText(query.keyword, 200) };
   if (query.location) filter.locationSlug = slugify(query.location);
   if (query.category) {
@@ -217,6 +241,11 @@ function applyPublicFilters(query) {
       if (categoryFilter.semanticMatch) filter.$and.push(categoryFilter.semanticMatch);
     }
   }
+  if (query.track === "tech") filter.categorySlug = filter.categorySlug || { $in: TECH_CATEGORY_SLUGS };
+  const skillLabel = SKILL_CATALOG.find((skill) => skill.id === query.skill || skill.label.toLowerCase() === String(query.skill || "").toLowerCase());
+  if (skillLabel) filter.skills = skillLabel.label;
+  const tags = String(query.tag || "").split(",").map((tag) => tag.trim()).filter((tag) => JOB_TAG_IDS.includes(tag));
+  if (tags.length) filter.tags = { $all: tags };
   if (EMPLOYMENT_TYPES.includes(query.employmentType)) filter.employmentType = query.employmentType;
   if (WORK_MODES.includes(query.workMode)) filter.workMode = query.workMode;
   if (EXPERIENCE_LEVELS.includes(query.experienceLevel)) filter.experienceLevel = query.experienceLevel;
@@ -236,36 +265,98 @@ function applyPublicFilters(query) {
   return filter;
 }
 
+// Interleaved id order per filter, cached briefly: it needs every matching job's id, company and date.
+const FEED_TTL_MS = 60_000;
+const feedCache = new Map();
+async function diversifiedFeed(query, filter) {
+  const { page: _page, limit: _limit, skip: _skip, sort: _sort, groupByCompany: _group, ...rest } = query;
+  const key = JSON.stringify(Object.keys(rest).sort().map((name) => [name, rest[name]]));
+  const cached = feedCache.get(key);
+  if (cached && Date.now() - cached.at < FEED_TTL_MS) return cached.ids;
+  // Sorted here, not by MongoDB: a server-side sort over the full documents exceeds its memory limit.
+  const rows = (await Job.find(filter).select("company postedAt featured").lean())
+    .sort((a, b) => new Date(b.postedAt) - new Date(a.postedAt) || Number(Boolean(b.featured)) - Number(Boolean(a.featured)));
+  const ids = diversifyByCompany(rows).map((row) => row._id);
+  if (feedCache.size > 200) feedCache.clear();
+  feedCache.set(key, { at: Date.now(), ids });
+  return ids;
+}
+
 export async function listPublicJobs(req, res) {
   try {
     await expireJobs();
     const { page, limit, skip } = pageValues(req.query);
     const filter = applyPublicFilters(req.query);
-    const sortName = ["newest", "relevant", "featured"].includes(req.query.sort) ? req.query.sort : "newest";
-    let query = Job.find(filter).populate("company", "name slug logo verified industry").select("-applicationUrl -normalizedApplicationUrl -sourceUrl -importedData -overrideFields -missingSyncCount -createdBy -updatedBy -creationOrigin -importStatus -importQualityScore -importQualityBreakdown -duplicateCandidate -duplicateConfidence -sourceCompanyId -sourceProvider -sourceRemovedAt -lastImportChangedAt");
+    // Mongo text search matches ANY word, so a typo still returns loose results. Correct unknown
+    // words up front ("sofware" -> "software"); ?exact=true searches the typed words as they are.
+    const originalText = filter.$text;
+    let correctedKeyword = null;
+    if (filter.$text && !asBoolean(req.query.exact)) {
+      correctedKeyword = await correctKeyword(req.query.keyword).catch(() => null);
+      if (correctedKeyword) filter.$text = { $search: correctedKeyword };
+    }
+    // A keyword search defaults to best match; browsing defaults to newest. An explicit ?sort= always wins.
+    const sortName = ["newest", "relevant", "featured"].includes(req.query.sort) ? req.query.sort : filter.$text ? "relevant" : "newest";
+    const listQuery = (where) => Job.find(where).populate("company", "name slug logo verified industry").select("-applicationUrl -normalizedApplicationUrl -sourceUrl -importedData -overrideFields -missingSyncCount -createdBy -updatedBy -creationOrigin -importStatus -importQualityScore -importQualityBreakdown -duplicateCandidate -duplicateConfidence -sourceCompanyId -sourceProvider -sourceRemovedAt -lastImportChangedAt");
+    const buildQuery = () => {
+    let query = listQuery(filter);
     if (sortName === "relevant" && filter.$text) query = query.select({ score: { $meta: "textScore" } }).sort({ score: { $meta: "textScore" }, featured: -1, postedAt: -1 });
     else if (sortName === "featured") query = query.sort({ featured: -1, postedAt: -1 });
     else query = query.sort({ postedAt: -1, featured: -1 });
-    const [jobs, total, indexableCount] = await Promise.all([
-      query.skip(skip).limit(limit).lean(),
-      Job.countDocuments(filter),
-      Job.countDocuments({ ...filter, isDemo: { $ne: true } }),
-    ]);
-    return res.json({ success: true, data: jobs, pagination: { page, limit, totalCount: total, totalPages: Math.ceil(total / limit) }, meta: { indexableCount } });
+    return query;
+    };
+    // "Newest" is interleaved by company so one employer's bulk upload cannot fill a page.
+    // groupByCompany=true keeps the plain chronological order.
+    const diversify = sortName === "newest" && !filter.$text && !asBoolean(req.query.groupByCompany);
+    let jobs; let total;
+    if (diversify) {
+      const order = await diversifiedFeed(req.query, filter);
+      const pageIds = order.slice(skip, skip + limit);
+      const byId = new Map((await listQuery({ _id: { $in: pageIds } }).lean()).map((job) => [String(job._id), job]));
+      jobs = pageIds.map((id) => byId.get(String(id))).filter(Boolean);
+      total = order.length;
+    } else {
+      [jobs, total] = await Promise.all([buildQuery().skip(skip).limit(limit).lean(), Job.countDocuments(filter)]);
+    }
+    if (correctedKeyword && total === 0) {
+      // The corrected wording found nothing; search what the person actually typed.
+      filter.$text = originalText; correctedKeyword = null;
+      [jobs, total] = await Promise.all([buildQuery().skip(skip).limit(limit).lean(), Job.countDocuments(filter)]);
+    }
+    const indexableCount = await Job.countDocuments({ ...filter, isDemo: { $ne: true } });
+    return res.json({ success: true, data: jobs, pagination: { page, limit, totalCount: total, totalPages: Math.ceil(total / limit) }, meta: { indexableCount, correctedKeyword, searchedKeyword: correctedKeyword ? cleanText(req.query.keyword, 200) : null } });
   } catch (error) { return errorResponse(res, error, "listPublicJobs"); }
+}
+
+export async function suggestPublicJobs(req, res) {
+  try {
+    const q = cleanText(req.query.q, 60);
+    const suggestions = q.length >= 2 ? await suggestJobs(q, { limit: 8 }) : [];
+    res.set("Cache-Control", "public, max-age=60");
+    return res.json({ success: true, data: suggestions });
+  } catch (error) { return errorResponse(res, error, "suggestPublicJobs"); }
 }
 
 export async function getPublicTaxonomy(_req, res) {
   try {
-    const filter = publicJobFilter();
-    const [locations, categories] = await Promise.all([
-      Job.aggregate([{ $match: { ...filter, country: "AE" } }, { $group: { _id: { slug: "$locationSlug", name: "$location" }, count: { $sum: 1 } } }, { $sort: { count: -1 } }]),
-      Job.aggregate([{ $match: { ...filter, country: "AE" } }, { $group: { _id: { slug: "$categorySlug", name: "$category" }, count: { $sum: 1 } } }, { $sort: { count: -1 } }]),
+    const countries = activeJobCountries();
+    const filter = { ...publicJobFilter(), country: { $in: countries } };
+    const [locations, categories, tagCounts, skillCounts, countryCounts] = await Promise.all([
+      Job.aggregate([{ $match: filter }, { $group: { _id: { slug: "$locationSlug", name: "$location", country: "$country" }, count: { $sum: 1 } } }, { $sort: { count: -1 } }]),
+      Job.aggregate([{ $match: filter }, { $group: { _id: { slug: "$categorySlug", name: "$category" }, count: { $sum: 1 } } }, { $sort: { count: -1 } }]),
+      Job.aggregate([{ $match: { ...filter, "tags.0": { $exists: true } } }, { $unwind: "$tags" }, { $group: { _id: "$tags", count: { $sum: 1 } } }]),
+      Job.aggregate([{ $match: { ...filter, categorySlug: { $in: TECH_CATEGORY_SLUGS }, "skills.0": { $exists: true } } }, { $unwind: "$skills" }, { $group: { _id: "$skills", count: { $sum: 1 } } }, { $sort: { count: -1 } }]),
+      Job.aggregate([{ $match: filter }, { $group: { _id: "$country", count: { $sum: 1 } } }]),
     ]);
+    const tagTotals = new Map(tagCounts.map((item) => [item._id, item.count]));
+    const perCountry = new Map(countryCounts.map((item) => [item._id, item.count]));
     return res.json({ success: true, data: {
+      countries: GCC_COUNTRIES.filter((country) => countries.includes(country.code)).map((country) => ({ ...country, count: perCountry.get(country.code) || 0 })),
       locations: locations.map((item) => ({ ...item._id, count: item.count })),
       categories: categories.map((item) => ({ ...item._id, count: item.count })),
-      availableLocations: UAE_LOCATIONS,
+      techSkills: skillCounts.filter((item) => SKILL_CATALOG.some((skill) => skill.label === item._id)).slice(0, 14).map((item) => ({ id: SKILL_CATALOG.find((skill) => skill.label === item._id).id, label: item._id, count: item.count })),
+      tags: JOB_TAGS.map((tag) => ({ id: tag.id, label: tag.label, count: tagTotals.get(tag.id) || 0 })),
+      availableLocations: countries.flatMap((code) => GCC_LOCATIONS[code] || []),
       availableCategories: UAE_JOB_CATEGORIES,
       employmentTypes: EMPLOYMENT_TYPES,
       workModes: WORK_MODES,
@@ -285,20 +376,25 @@ export async function getPublicJob(req, res) {
     await Job.updateOne({ _id: job._id }, { $inc: { views: 1 } });
     JobEvent.create({ event: "view", job: job._id, company: job.company?._id, category: job.category, location: job.location }).catch(() => {});
     const relatedActive = publicJobFilter();
-    const relatedFilter = {
-      status: relatedActive.status,
-      postedAt: relatedActive.postedAt,
-      _id: { $ne: job._id },
-      $and: [
-        { $or: relatedActive.$or },
-        { $or: [{ categorySlug: job.categorySlug }, { company: job.company?._id }, { locationSlug: job.locationSlug }] },
-      ],
-    };
-    const related = await Job.find(relatedFilter).populate("company", "name slug logo verified").select("-applicationUrl -normalizedApplicationUrl -sourceUrl -importedData -overrideFields -creationOrigin -importStatus -importQualityScore -importQualityBreakdown -duplicateCandidate -duplicateConfidence -sourceCompanyId -sourceProvider -sourceRemovedAt -lastImportChangedAt").sort({ featured: -1, postedAt: -1 }).limit(4).lean();
+    const activeWhere = { status: relatedActive.status, postedAt: relatedActive.postedAt, _id: { $ne: job._id } };
+    // Similar jobs: score a pool of same-category or shared-skill jobs, then fall back to
+    // plain category/company/location matches so the section is rarely empty.
+    const skills = job.skills || [];
+    const pool = await Job.find({ ...activeWhere, $and: [{ $or: relatedActive.$or }, { $or: [{ categorySlug: job.categorySlug }, ...(skills.length ? [{ skills: { $in: skills } }] : [])] }] })
+      .select("title skills categorySlug experienceLevel locationSlug company postedAt").sort({ postedAt: -1 }).limit(300).lean();
+    const rankedIds = rankSimilarJobs(job.toObject(), pool).map((item) => item._id);
+    const loadRelated = (where, limit = 6) => Job.find(where).populate("company", "name slug logo verified").select(PUBLIC_LIST_SELECT).sort({ featured: -1, postedAt: -1 }).limit(limit);
+    let related = rankedIds.length ? await loadRelated({ _id: { $in: rankedIds } }).then((rows) => rows.map((row) => row.toObject()).sort((x, y) => rankedIds.findIndex((id) => String(id) === String(x._id)) - rankedIds.findIndex((id) => String(id) === String(y._id)))) : [];
+    if (related.length < 4) {
+      const fallback = await loadRelated({ ...activeWhere, _id: { $nin: [job._id, ...related.map((item) => item._id)] }, $and: [{ $or: relatedActive.$or }, { $or: [{ categorySlug: job.categorySlug }, { company: job.company?._id }, { locationSlug: job.locationSlug }] }] }, 6);
+      related = [...related, ...fallback.map((row) => row.toObject())].slice(0, 6);
+    }
     const data = publicFields(job);
     data.status = isExpired ? "expired" : data.status;
     data.views = (data.views || 0) + 1;
-    return res.json({ success: true, data: { job: data, related } });
+    const learning = await buildJobLearning(data).catch(() => null);
+    const salaryInsight = await salaryInsightFor(data).catch(() => null);
+    return res.json({ success: true, data: { job: data, related, learning, salaryInsight } });
   } catch (error) { return errorResponse(res, error, "getPublicJob"); }
 }
 
@@ -314,7 +410,8 @@ export async function getPublicCompany(req, res) {
     ]);
     const indexableOpenJobs = await Job.countDocuments({ ...filter, isDemo: { $ne: true } });
     for (const key of ["normalizedName", "websiteDomain", "creationOrigin", "source", "sourceName", "sourceProvider", "providerIdentities", "overrideFields"]) delete company[key];
-    return res.json({ success: true, data: { company, jobs, openJobs: total, indexableOpenJobs }, pagination: { page, limit, totalCount: total, totalPages: Math.ceil(total / limit) } });
+    const insights = await buildCompanyInsights(company._id).catch(() => null);
+    return res.json({ success: true, data: { company, jobs, openJobs: total, indexableOpenJobs, insights }, pagination: { page, limit, totalCount: total, totalPages: Math.ceil(total / limit) } });
   } catch (error) { return errorResponse(res, error, "getPublicCompany"); }
 }
 
@@ -322,13 +419,17 @@ export async function getJobsSitemap(_req, res) {
   try {
     const indexableFilter = { ...publicJobFilter(), isDemo: { $ne: true } };
     const companyIds = await Job.distinct("company", indexableFilter);
-    const [jobs, companies, locations, categories] = await Promise.all([
+    const [jobs, companies, locations, categories, countryCounts] = await Promise.all([
       Job.find(indexableFilter).select("slug updatedAt").lean(),
       Company.find({ active: true, _id: { $in: companyIds } }).select("slug updatedAt").lean(),
       Job.distinct("locationSlug", indexableFilter),
       Job.distinct("categorySlug", indexableFilter),
+      Job.aggregate([{ $match: indexableFilter }, { $group: { _id: "$country", count: { $sum: 1 } } }]),
     ]);
-    return res.json({ success: true, data: { jobs, companies, locations, categories } });
+    // A country hub is only listed once it has enough jobs to be a useful page rather than a thin one.
+    const MIN_COUNTRY_HUB_JOBS = 20;
+    const countries = GCC_COUNTRIES.filter((country) => (countryCounts.find((row) => row._id === country.code)?.count || 0) >= MIN_COUNTRY_HUB_JOBS).map((country) => country.slug);
+    return res.json({ success: true, data: { jobs, companies, locations, categories, countries } });
   } catch (error) { return errorResponse(res, error, "getJobsSitemap"); }
 }
 
@@ -367,6 +468,26 @@ export async function getMyJobApplications(req, res) {
   } catch (error) { return errorResponse(res, error, "getMyJobApplications"); }
 }
 
+export const APPLICATION_STAGES = ["applied", "interviewing", "offer", "accepted", "rejected", "withdrawn"];
+
+/** The applicant's own tracker: stage and a private note. Employer-side review status is untouched. */
+export async function updateMyJobApplication(req, res) {
+  try {
+    if (!isId(req.params.id)) return res.status(404).json({ success: false, message: "Application not found." });
+    const set = {};
+    if (req.body.stage !== undefined) {
+      if (!APPLICATION_STAGES.includes(req.body.stage)) return res.status(400).json({ success: false, message: "Choose a valid stage." });
+      set.stage = req.body.stage;
+      set.stageUpdatedAt = new Date();
+    }
+    if (req.body.note !== undefined) set.note = cleanText(req.body.note, 2000);
+    if (!Object.keys(set).length) return res.status(400).json({ success: false, message: "Nothing to update." });
+    const updated = await JobApplication.findOneAndUpdate({ _id: req.params.id, user: req.user._id }, { $set: set }, { returnDocument: "after" }).select("stage stageUpdatedAt note");
+    if (!updated) return res.status(404).json({ success: false, message: "Application not found." });
+    return res.json({ success: true, data: updated });
+  } catch (error) { return errorResponse(res, error, "updateMyJobApplication"); }
+}
+
 async function activeJobForApply(id) {
   if (!isId(id)) return null;
   return Job.findOne({ _id: id, ...publicJobFilter() });
@@ -379,8 +500,13 @@ export async function externalApply(req, res) {
     if (job.applicationType !== "external" || !job.applicationUrl) return res.status(400).json({ success: false, message: "This job uses an internal application." });
     const redirectUrl = normalizeUrl(job.applicationUrl, { required: true });
     await Promise.all([
+      // One tracker row per user and job, however many times the apply button is pressed.
       req.user?._id
-        ? JobApplication.create({ kind: "external_click", user: req.user._id, job: job._id, sourceName: job.sourceName, redirectUrl, appliedAt: new Date() })
+        ? JobApplication.updateOne(
+          { kind: "external_click", user: req.user._id, job: job._id },
+          { $set: { sourceName: job.sourceName, redirectUrl, appliedAt: new Date() }, $setOnInsert: { stage: "applied" } },
+          { upsert: true },
+        )
         : Promise.resolve(),
       Job.updateOne({ _id: job._id }, { $inc: { applyClicks: 1 } }),
       JobEvent.create({ event: "external_redirect", user: req.user?._id, job: job._id, company: job.company, category: job.category, location: job.location }),
@@ -631,12 +757,17 @@ function sourcePayload(body, existing = {}) {
   const type = SOURCE_TYPES.includes(body.type) ? body.type : existing.type || "manual";
   const rawEndpoint = body.endpointUrl === undefined ? existing.endpointUrl : body.endpointUrl;
   const endpointUrl = rawEndpoint ? assertSafeRemoteUrl(rawEndpoint) : "";
-  if (type !== "manual" && !endpointUrl && !["greenhouse", "lever", "smartrecruiters", "workable", "ashby"].includes(type)) {
-    throw Object.assign(new Error("An endpoint URL is required for this source type."), { statusCode: 400 });
-  }
+  // ATS types are addressed by an organization id; the id-only ones build their own endpoint.
+  const idBased = ["greenhouse", "lever", "smartrecruiters", "workable", "ashby", "recruitee", "pinpoint", "teamtailor", "workday"].includes(type);
   const providerOrganizationId = cleanText(body.providerOrganizationId ?? existing.providerOrganizationId, 300);
-  if (["greenhouse", "lever", "smartrecruiters", "workable", "ashby"].includes(type) && !providerOrganizationId && !endpointUrl) {
+  if (type !== "manual" && !endpointUrl && !idBased) {
+    throw Object.assign(new Error(type === "jsonld" ? "A sitemap or careers page URL is required for a career site crawler." : "An endpoint URL is required for this source type."), { statusCode: 400 });
+  }
+  if (idBased && !providerOrganizationId && !(endpointUrl && type !== "workday")) {
     throw Object.assign(new Error("A provider organization ID or custom endpoint is required for this ATS source."), { statusCode: 400 });
+  }
+  if (type === "workday") {
+    try { parseWorkdayId(providerOrganizationId); } catch (error) { throw Object.assign(error, { statusCode: 400 }); }
   }
   return {
     name: cleanText(body.name ?? existing.name, 160), type,

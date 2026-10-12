@@ -18,7 +18,7 @@ export default function HomeHeroBanner() {
 
       <div className="relative z-10 grid gap-6 lg:grid-cols-[1.25fr_.75fr] lg:items-center">
         <div>
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/60 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 text-[10px] sm:text-[11px] font-black tracking-wider uppercase mb-3.5 text-zinc-700 dark:text-zinc-300 shadow-xs backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full bg-white/60 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 max-w-full whitespace-nowrap text-[9px] min-[360px]:text-[10px] sm:text-[11px] font-black tracking-wide sm:tracking-wider uppercase mb-3.5 text-zinc-700 dark:text-zinc-300 shadow-xs backdrop-blur-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             Live Developer Learning Platform
           </div>
@@ -36,17 +36,17 @@ export default function HomeHeroBanner() {
             in one focused developer platform.
           </p>
 
-          <div className="mt-5 flex flex-col min-[360px]:flex-row items-stretch min-[360px]:items-center gap-2.5 *:flex-1">
+          <div className="mt-5 flex flex-col min-[360px]:flex-row items-stretch min-[360px]:items-center gap-2.5">
             <a
               href="#courses"
-              className="h-12 min-[360px]:h-11 inline-flex flex-1 items-center justify-center gap-2 px-4 sm:px-6 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-md active:scale-95 transition-all"
+              className="h-12 min-[360px]:h-11 inline-flex shrink-0 min-[360px]:flex-1 items-center justify-center gap-2 px-4 sm:px-6 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-md active:scale-95 transition-all"
             >
               <BookOpen className="w-4 h-4" />
               Start Learning
             </a>
             <Link
               href="/run"
-              className="h-12 min-[360px]:h-11 inline-flex flex-1 items-center justify-center gap-2 px-4 sm:px-6 rounded-full bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-200 text-xs font-black active:scale-95 transition-all shadow-sm"
+              className="h-12 min-[360px]:h-11 inline-flex shrink-0 min-[360px]:flex-1 items-center justify-center gap-2 px-4 sm:px-6 rounded-full bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-200 text-xs font-black active:scale-95 transition-all shadow-sm"
             >
               <Code2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               Playground
@@ -93,7 +93,7 @@ export default function HomeHeroBanner() {
           type="text"
           readOnly
           aria-label="Open global search"
-          placeholder="Search courses, concepts, interview questions, cheatsheets..."
+          placeholder="Search courses, concepts, interviews..."
           onFocus={openSearch}
           onClick={openSearch}
           className="w-full h-12 pl-11 pr-14 rounded-full bg-white/90 dark:bg-zinc-900/90 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 text-xs sm:text-sm border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-500/30 font-semibold cursor-pointer transition-colors"

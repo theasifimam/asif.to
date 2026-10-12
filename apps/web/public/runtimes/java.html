@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><script src="https://cjrtnc.leaningtech.com/4.3/loader.js" crossorigin="anonymous"></script></head><body><pre id="console"></pre><div id="output"></div><script>
-const send = (payload) => parent.postMessage({ source: "asif-java-runtime", ...payload }, "*");
+const send = (payload) => parent.postMessage({ source: "asif-java-runtime", ...payload }, location.origin);
 let ready;
 let running = false;
 async function initialize() {
@@ -12,6 +12,7 @@ async function initialize() {
   return ready;
 }
 window.addEventListener("message", async (event) => {
+  if (event.source !== parent || event.origin !== location.origin) return;
   if (event.data?.type !== "run" || running) return;
   running = true;
   const consoleNode = document.getElementById("console"); consoleNode.textContent = "";

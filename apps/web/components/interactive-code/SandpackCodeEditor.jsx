@@ -25,6 +25,7 @@ export default function InteractiveCodeSandbox({
   testCases = [],
   executionEnabled = true,
   compact = false,
+  playgroundControl,
 }) {
   const [editorTheme, setEditorTheme] = useState("dark");
   const initialFiles = useMemo(
@@ -81,6 +82,7 @@ export default function InteractiveCodeSandbox({
         starterFiles={initialFiles}
         testCases={testCases}
         executionEnabled={executionEnabled}
+        playgroundControl={playgroundControl}
       />
       )}
     </SandpackProvider>

@@ -26,7 +26,11 @@ export default function MobileJobsFilters(props) {
     ? `/jobs/location/${props.fixed.location}`
     : props.fixed?.category
       ? `/jobs/category/${props.fixed.category}`
-      : "/jobs";
+      : props.fixed?.track === "tech"
+        ? "/jobs/tech"
+        : props.fixed?.country
+          ? `/jobs/country/${props.fixed.country}`
+          : "/jobs";
 
   const activeCount = Object.entries(values).filter(
     ([key, value]) =>

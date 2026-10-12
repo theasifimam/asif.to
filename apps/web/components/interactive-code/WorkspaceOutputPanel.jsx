@@ -35,6 +35,7 @@ export default function WorkspaceOutputPanel({
   setCustomInput,
   handleRunCustom,
   customOutput,
+  testsRunning,
 }) {
   return (
     <div
@@ -246,6 +247,7 @@ export default function WorkspaceOutputPanel({
         setCustomInput={setCustomInput}
         handleRunCustom={handleRunCustom}
         customOutput={customOutput}
+        testsRunning={testsRunning}
       />
     </div>
   );

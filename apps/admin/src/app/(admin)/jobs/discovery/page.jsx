@@ -58,6 +58,7 @@ const PROVIDERS = [
   "recruitee",
   "pinpoint",
   "teamtailor",
+  "workday",
   "unknown",
 ];
 

@@ -8,11 +8,15 @@ import { AshbyJobProvider } from "./ashby.provider.js";
 import { RecruiteeJobProvider } from "./recruitee.provider.js";
 import { PinpointJobProvider } from "./pinpoint.provider.js";
 import { TeamtailorJobProvider } from "./teamtailor.provider.js";
+import { WorkdayJobProvider } from "./workday.provider.js";
+import { JsonLdJobProvider } from "./jsonld.provider.js";
 
 export function providerForSource(source, options) {
   if (source.type === "recruitee") return new RecruiteeJobProvider(source, options);
   if (source.type === "pinpoint") return new PinpointJobProvider(source, options);
   if (source.type === "teamtailor") return new TeamtailorJobProvider(source, options);
+  if (source.type === "workday") return new WorkdayJobProvider(source, options);
+  if (source.type === "jsonld") return new JsonLdJobProvider(source, options);
   if (source.type === "manual") return new ManualJobProvider(source, options);
   if (source.type === "greenhouse") return new GreenhouseJobProvider(source, options);
   if (source.type === "lever") return new LeverJobProvider(source, options);

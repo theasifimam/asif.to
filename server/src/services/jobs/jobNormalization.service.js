@@ -1,22 +1,58 @@
-import { UAE_JOB_CATEGORIES } from "../../constants/jobs.js";
+import { GCC_COUNTRIES, JOB_COUNTRY_CODES, UAE_JOB_CATEGORIES } from "../../constants/jobs.js";
 import { cleanText, decodeHtmlEntities, parseNullableNumber, sanitizeJobHtml } from "../../utils/jobValidation.js";
 import { slugify } from "../../utils/slugify.js";
 
+// [canonical location, pattern, ISO country]. City rules come before the country-wide fallbacks, and
+// UAE rules come first so a mixed "Dubai / Riyadh" posting keeps resolving to Dubai as it always did.
 const locationRules = [
-  ["Dubai", /\b(dubai|jebel[ -]?ali)\b/i], ["Abu Dhabi", /\babu[ -]?dhabi\b/i], ["Sharjah", /\bsharjah\b/i],
-  ["Ajman", /\bajman\b/i], ["Ras Al Khaimah", /\b(ras al khaimah|ras al-khaimah|rak)\b/i],
-  ["Fujairah", /\bfujairah\b/i], ["Umm Al Quwain", /\b(umm al quwain|umm al-quwain|uaq)\b/i],
-  ["Al Ain", /\bal[ -]?ain\b/i],
+  ["Dubai", /\b(dubai|jebel[ -]?ali)\b/i, "AE"], ["Abu Dhabi", /\babu[ -]?dhabi\b/i, "AE"], ["Sharjah", /\bsharjah\b/i, "AE"],
+  ["Ajman", /\bajman\b/i, "AE"], ["Ras Al Khaimah", /\b(ras al khaimah|ras al-khaimah|rak)\b/i, "AE"],
+  ["Fujairah", /\bfujairah\b/i, "AE"], ["Umm Al Quwain", /\b(umm al quwain|umm al-quwain|uaq)\b/i, "AE"],
+  ["Al Ain", /\bal[ -]?ain\b/i, "AE"],
+  ["Riyadh", /\b(riyadh|ar[ -]?riyadh)\b/i, "SA"], ["Jeddah", /\b(jeddah|jiddah|jidda)\b/i, "SA"], ["Dammam", /\bdammam\b/i, "SA"],
+  ["Al Khobar", /\b(al[ -]?khobar|khobar)\b/i, "SA"], ["Dhahran", /\bdhahran\b/i, "SA"], ["Jubail", /\bjubail\b/i, "SA"],
+  ["Makkah", /\b(makkah|mecca)\b/i, "SA"], ["Madinah", /\b(madinah|medina)\b/i, "SA"], ["Yanbu", /\byanbu\b/i, "SA"],
+  ["Tabuk", /\btabuk\b/i, "SA"], ["Abha", /\babha\b/i, "SA"], ["NEOM", /\bneom\b/i, "SA"],
+  ["Doha", /\bdoha\b/i, "QA"], ["Lusail", /\blusail\b/i, "QA"], ["Al Wakrah", /\bal[ -]?wakrah\b/i, "QA"],
+  ["Kuwait City", /\bkuwait city\b/i, "KW"], ["Manama", /\bmanama\b/i, "BH"],
+  ["Muscat", /\bmuscat\b/i, "OM"], ["Salalah", /\bsalalah\b/i, "OM"], ["Sohar", /\bsohar\b/i, "OM"],
 ];
-const uaePattern = /\b(uae|u\.a\.e\.?|united arab emirates|ae)\b/i;
-const foreignPattern = /\b(saudi arabia|ksa|qatar|bahrain|kuwait|oman|egypt|india|pakistan|united kingdom|uk|united states|usa|canada|australia|singapore)\b/i;
+// Country-wide fallbacks: the posting names a country but no city we recognise.
+const countryRules = [
+  ["United Arab Emirates", /\b(uae|u\.a\.e\.?|united arab emirates|ae)\b/i, "AE"],
+  ["Saudi Arabia", /\b(saudi arabia|saudi|ksa)\b/i, "SA"], ["Qatar", /\bqatar\b/i, "QA"], ["Kuwait", /\bkuwait\b/i, "KW"],
+  ["Bahrain", /\bbahrain\b/i, "BH"], ["Oman", /\boman\b/i, "OM"],
+];
+const countryCodeAliases = { ARE: "AE", SAU: "SA", QAT: "QA", KWT: "KW", BHR: "BH", OMN: "OM" };
+const countryName = (code) => GCC_COUNTRIES.find((country) => country.code === code)?.name || "";
 
-export function normalizeUaeLocation(value, country = "") {
+/** Countries jobs are accepted for. `JOB_COUNTRIES=AE,SA` narrows the default of every GCC country. */
+export function activeJobCountries(env = process.env.JOB_COUNTRIES) {
+  const requested = String(env || "").split(",").map((code) => code.trim().toUpperCase()).filter((code) => JOB_COUNTRY_CODES.includes(code));
+  return requested.length ? requested : JOB_COUNTRY_CODES;
+}
+
+/**
+ * Resolves a provider location to `{ location, country, region }`, or null when it is outside the
+ * accepted countries. `region` is the emirate/governorate-level label stored in `Job.emirate`.
+ */
+export function normalizeRegionLocation(value, country = "", { countries = activeJobCountries() } = {}) {
   const raw = cleanText([value, country].filter(Boolean).join(", "), 300);
-  for (const [canonical, pattern] of locationRules) if (pattern.test(raw)) return canonical;
-  if (uaePattern.test(raw) || /^(AE|ARE)$/i.test(cleanText(country, 10))) return "United Arab Emirates";
-  if (foreignPattern.test(raw)) return null;
+  const supplied = cleanText(country, 10).toUpperCase();
+  const suppliedCode = countryCodeAliases[supplied] || supplied;
+  const accept = (location, code) => countries.includes(code)
+    ? { location, country: code, region: location === "Al Ain" ? "Abu Dhabi" : location }
+    : null;
+  for (const [canonical, pattern, code] of locationRules) if (pattern.test(raw)) return accept(canonical, code);
+  for (const [canonical, pattern, code] of countryRules) if (pattern.test(raw)) return accept(canonical, code);
+  // A bare ISO code ("Remote", "SA") is only trusted when the provider supplied it as the country.
+  if (JOB_COUNTRY_CODES.includes(suppliedCode)) return accept(countryName(suppliedCode), suppliedCode);
   return null;
+}
+
+/** UAE-only view of normalizeRegionLocation, kept for callers that care about the UAE alone. */
+export function normalizeUaeLocation(value, country = "") {
+  return normalizeRegionLocation(value, country, { countries: ["AE"] })?.location ?? null;
 }
 
 const categoryRules = [
@@ -132,7 +168,7 @@ export function validateNormalizedJob(data, now = new Date()) {
   const errors = [];
   if (!data.title || data.title.length < 3) errors.push("missing_title");
   if (!data.companyName || data.companyName.length < 2) errors.push("missing_company");
-  if (!data.location) errors.push("non_uae_location");
+  if (!data.location) errors.push("unsupported_location");
   if (!data.description || data.description.length < 50) errors.push("malformed_description");
   if (!data.applicationUrl) errors.push("invalid_application_url");
   if (!data.sourceUrl) errors.push("invalid_source_url");

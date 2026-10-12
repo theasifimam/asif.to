@@ -28,9 +28,9 @@ export default function HomeInteractiveBento() {
         </h2>
       </div>
 
-      <div className="mt-3 flex gap-3.5 sm:gap-4 overflow-x-auto scroll-smooth scrollbar-none snap-x snap-mandatory py-4 w-full">
+      <div className="mt-3 flex gap-3.5 sm:gap-4 overflow-x-auto scroll-smooth scrollbar-none snap-x snap-mandatory py-4 w-full lg:grid lg:grid-cols-4 lg:overflow-visible lg:py-0 lg:gap-4">
         {/* Top Row: Playground Hero Bento Card */}
-        <div className="flex flex-col justify-between overflow-hidden rounded-4xl sm:rounded-[2.5rem] bg-zinc-950 text-white p-5 sm:p-6 border border-zinc-800 shadow-xl min-w-0 w-[85vw] sm:w-152 shrink-0 snap-start">
+        <div className="flex flex-col justify-between overflow-hidden rounded-4xl sm:rounded-[2.5rem] bg-zinc-950 text-white p-4 sm:p-6 border border-zinc-800 shadow-xl min-w-0 w-[85vw] sm:w-152 shrink-0 snap-start lg:w-auto lg:col-span-2 lg:row-span-2 lg:p-7">
           <div>
             <div className="flex items-center justify-between">
               <div className="inline-flex items-center gap-1.5 text-blue-400">
@@ -39,23 +39,23 @@ export default function HomeInteractiveBento() {
                   Browser Code Playground
                 </span>
               </div>
-              <span className="flex items-center gap-1 text-[9px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+              <span className="hidden sm:flex items-center gap-1 text-[9px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Live IDE Sandbox
               </span>
             </div>
 
-            <h3 className="font-outfit mt-2 text-xl sm:text-2xl font-black tracking-tight">
+            <h3 className="font-outfit mt-2 text-xl sm:text-2xl lg:text-3xl font-black tracking-tight">
               Don&apos;t just read code.{" "}
               <span className="text-blue-400">Run it live.</span>
             </h3>
-            <p className="mt-1 text-xs leading-relaxed font-medium text-zinc-400">
+            <p className="mt-1.5 text-xs lg:text-sm leading-relaxed font-medium text-zinc-400">
               Experiment instantly with HTML, CSS, JS, React and Next.js right
               inside your browser with zero configuration.
             </p>
 
             {/* Code Editor Preview Window */}
-            <div className="mt-3.5 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/90 font-mono text-[11px] shadow-inner">
+            <div className="mt-3 sm:mt-3.5 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/90 font-mono text-[11px] shadow-inner lg:mt-5 lg:text-xs">
               <div className="flex items-center justify-between bg-zinc-900 border-b border-zinc-800 px-3 py-2 text-[10px] text-zinc-400 font-sans">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block" />
@@ -70,7 +70,7 @@ export default function HomeInteractiveBento() {
                 </span>
               </div>
 
-              <div className="p-3 text-zinc-300 space-y-1 text-[10.5px] leading-relaxed">
+              <div className="p-3 text-zinc-300 space-y-0.5 sm:space-y-1 text-[10.5px] leading-relaxed lg:p-4 lg:text-xs lg:space-y-1.5">
                 <div>
                   <span className="text-purple-400 font-bold">import</span>{" "}
                   <span className="text-blue-300">React</span>, {"{"}{" "}
@@ -91,23 +91,23 @@ export default function HomeInteractiveBento() {
                   <span className="text-amber-300">useState</span>(
                   <span className="text-orange-300">0</span>);
                 </div>
-                <div className="pl-3">
+                <div className="pl-3 hidden sm:block">
                   <span className="text-purple-400 font-bold">return</span> (
                 </div>
-                <div className="pl-6 text-zinc-400">
+                <div className="pl-6 text-zinc-400 hidden sm:block">
                   &lt;<span className="text-blue-400">button</span>{" "}
                   <span className="text-teal-300">onClick</span>={"{"}() =&gt;{" "}
                   <span className="text-blue-300">setCount</span>(c =&gt; c + 1)
                   {"}"}&gt;
                 </div>
-                <div className="pl-9 text-emerald-300">
+                <div className="pl-6 sm:pl-9 text-emerald-300">
                   Clicked {"{"}count{"}"} times ✨
                 </div>
                 <div className="pl-6 text-zinc-400">
                   &lt;/<span className="text-blue-400">button</span>&gt;
                 </div>
-                <div className="pl-3">);</div>
-                <div>{"}"}</div>
+                <div className="pl-3 hidden sm:block">);</div>
+                <div className="hidden sm:block">{"}"}</div>
               </div>
 
               <div className="border-t border-zinc-800/80 bg-zinc-950/80 px-3 py-1.5 flex items-center justify-between text-[10px] font-sans text-emerald-400">
@@ -118,7 +118,7 @@ export default function HomeInteractiveBento() {
               </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap gap-1.5">
+            <div className="mt-3 hidden sm:flex flex-wrap gap-1.5">
               <span className="rounded-full bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 text-[9.5px] font-bold text-blue-300">
                 ⚡ Instant React & JS
               </span>
@@ -133,7 +133,7 @@ export default function HomeInteractiveBento() {
 
           <Link
             href="/run"
-            className="mt-4 h-10 sm:h-11 w-full inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 text-white hover:bg-blue-500 text-xs font-black shadow-md transition-all active:scale-95"
+            className="mt-3 sm:mt-4 h-10 sm:h-11 w-full inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 text-white hover:bg-blue-500 text-xs font-black shadow-md transition-all active:scale-95"
           >
             <Play className="w-3.5 h-3.5 fill-current" /> Open Code Playground
           </Link>
@@ -142,21 +142,21 @@ export default function HomeInteractiveBento() {
         {/* Feature 1: Revision Flashcards */}
         <Link
           href="/revision"
-          className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-indigo-500/20 bg-linear-to-br from-indigo-500/10 via-purple-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-indigo-500/40 transition-all min-w-0 w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start"
+          className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-indigo-500/20 bg-linear-to-br from-indigo-500/10 via-purple-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-indigo-500/40 transition-all min-w-0 w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start lg:w-auto lg:p-4"
         >
           <div>
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 group-hover:scale-105 transition-transform">
+            <div className="flex h-10 w-10 sm:h-11 sm:w-11 lg:h-10 lg:w-10 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 group-hover:scale-105 transition-transform">
               <Layers className="h-5.5 w-5.5" />
             </div>
             <h3 className="font-outfit mt-4 text-base sm:text-lg font-black text-zinc-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
               Revision Flashcards
             </h3>
-            <p className="mt-1.5 text-xs leading-relaxed font-medium text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1.5 text-xs leading-relaxed font-medium text-zinc-500 dark:text-zinc-400 lg:line-clamp-3">
               Review important concepts quickly with focused, swipeable revision
               decks.
             </p>
           </div>
-          <div className="flex-1 mt-8 mb-4 flex flex-col items-center justify-center relative w-full min-h-30">
+          <div className="flex-1 mt-4 mb-1 lg:mt-4 lg:mb-2 flex flex-col items-center justify-center relative w-full min-h-24 sm:min-h-30">
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="absolute w-[80%] h-18 bg-indigo-500/10 border border-indigo-500/20 rounded-xl transform -rotate-6 transition-transform group-hover:-rotate-12"></div>
               <div className="absolute w-[85%] h-20 bg-indigo-500/15 border border-indigo-500/30 rounded-xl transform rotate-3 transition-transform group-hover:rotate-6"></div>
@@ -175,7 +175,7 @@ export default function HomeInteractiveBento() {
               </div>
             </div>
           </div>
-          <div className="mt-5 pt-3 border-t border-indigo-500/15 flex items-center justify-between text-xs font-black text-indigo-600 dark:text-indigo-400">
+          <div className="mt-3 sm:mt-5 pt-3 border-t border-indigo-500/15 flex items-center justify-between text-xs font-black text-indigo-600 dark:text-indigo-400">
             <span>Swipeable Decks</span>
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </div>
@@ -184,21 +184,21 @@ export default function HomeInteractiveBento() {
         {/* Feature 2: Interview Preparation */}
         <Link
           href="#interview-prep"
-          className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-orange-500/20 bg-linear-to-br from-orange-500/10 via-amber-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-orange-500/40 transition-all min-w-0 w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start"
+          className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-orange-500/20 bg-linear-to-br from-orange-500/10 via-amber-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-orange-500/40 transition-all min-w-0 w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start lg:w-auto lg:p-4"
         >
           <div>
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/20 group-hover:scale-105 transition-transform">
+            <div className="flex h-10 w-10 sm:h-11 sm:w-11 lg:h-10 lg:w-10 items-center justify-center rounded-2xl bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-500/20 group-hover:scale-105 transition-transform">
               <MessageSquareText className="h-5.5 w-5.5" />
             </div>
             <h3 className="font-outfit mt-4 text-base sm:text-lg font-black text-zinc-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
               Interview Preparation
             </h3>
-            <p className="mt-1.5 text-xs leading-relaxed font-medium text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1.5 text-xs leading-relaxed font-medium text-zinc-500 dark:text-zinc-400 lg:line-clamp-3">
               Practice categorized questions with detailed, interview-ready
               answers.
             </p>
           </div>
-          <div className="flex-1 mt-8 mb-4 flex flex-col justify-center gap-2.5 w-full relative min-h-30">
+          <div className="flex-1 mt-4 mb-1 lg:mt-4 lg:mb-2 flex flex-col justify-center gap-2.5 w-full relative min-h-24 sm:min-h-30">
             <div className="w-[85%] self-end bg-orange-500/10 border border-orange-500/20 rounded-2xl rounded-tr-sm p-2.5 shadow-sm transform transition-transform group-hover:-translate-x-1">
               <div className="h-1.5 w-16 bg-orange-500/30 rounded-full mb-2" />
               <div className="h-1 w-full bg-orange-500/20 rounded-full mb-1.5" />
@@ -214,7 +214,7 @@ export default function HomeInteractiveBento() {
               <div className="h-1 w-[95%] bg-zinc-700 rounded-full" />
             </div>
           </div>
-          <div className="mt-5 pt-3 border-t border-orange-500/15 flex items-center justify-between text-xs font-black text-orange-600 dark:text-orange-400">
+          <div className="mt-3 sm:mt-5 pt-3 border-t border-orange-500/15 flex items-center justify-between text-xs font-black text-orange-600 dark:text-orange-400">
             <span>Q&A Answer Keys</span>
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </div>
@@ -223,21 +223,21 @@ export default function HomeInteractiveBento() {
         {/* Feature 3: Practice Quizzes */}
         <Link
           href="/quiz"
-          className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-purple-500/20 bg-linear-to-br from-purple-500/10 via-fuchsia-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-purple-500/40 transition-all min-w-0 w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start"
+          className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-purple-500/20 bg-linear-to-br from-purple-500/10 via-fuchsia-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-purple-500/40 transition-all min-w-0 w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start lg:w-auto lg:p-4"
         >
           <div>
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20 group-hover:scale-105 transition-transform">
+            <div className="flex h-10 w-10 sm:h-11 sm:w-11 lg:h-10 lg:w-10 items-center justify-center rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20 group-hover:scale-105 transition-transform">
               <HelpCircle className="h-5.5 w-5.5" />
             </div>
             <h3 className="font-outfit mt-4 text-base sm:text-lg font-black text-zinc-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
               Practice Quizzes
             </h3>
-            <p className="mt-1.5 text-xs leading-relaxed font-medium text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1.5 text-xs leading-relaxed font-medium text-zinc-500 dark:text-zinc-400 lg:line-clamp-3">
               Check your understanding and find concepts that need another
               revision.
             </p>
           </div>
-          <div className="flex-1 mt-8 mb-4 flex flex-col justify-center w-full relative min-h-30">
+          <div className="flex-1 mt-4 mb-1 lg:mt-4 lg:mb-2 flex flex-col justify-center w-full relative min-h-24 sm:min-h-30">
             <div className="text-[10px] font-bold text-zinc-400 mb-2.5 text-center">
               Which hook runs a side effect?
             </div>
@@ -258,7 +258,7 @@ export default function HomeInteractiveBento() {
               </div>
             </div>
           </div>
-          <div className="mt-5 pt-3 border-t border-purple-500/15 flex items-center justify-between text-xs font-black text-purple-600 dark:text-purple-400">
+          <div className="mt-3 sm:mt-5 pt-3 border-t border-purple-500/15 flex items-center justify-between text-xs font-black text-purple-600 dark:text-purple-400">
             <span>Test Recall</span>
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </div>
@@ -267,21 +267,21 @@ export default function HomeInteractiveBento() {
         {/* Feature 4: Developer Cheatsheets */}
         <Link
           href="/cheatsheets"
-          className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-emerald-500/20 bg-linear-to-br from-emerald-500/10 via-teal-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-emerald-500/40 transition-all min-w-0 w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start"
+          className="group flex flex-col justify-between rounded-4xl sm:rounded-[2.5rem] border border-emerald-500/20 bg-linear-to-br from-emerald-500/10 via-teal-500/5 to-white dark:to-zinc-900/90 p-5 sm:p-6 shadow-xs hover:shadow-md hover:border-emerald-500/40 transition-all min-w-0 w-67.5 xs:w-75 sm:w-82.5 md:w-87.5 shrink-0 snap-start lg:w-auto lg:p-4"
         >
           <div>
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 group-hover:scale-105 transition-transform">
+            <div className="flex h-10 w-10 sm:h-11 sm:w-11 lg:h-10 lg:w-10 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 group-hover:scale-105 transition-transform">
               <FileCode className="h-5.5 w-5.5" />
             </div>
             <h3 className="font-outfit mt-4 text-base sm:text-lg font-black text-zinc-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
               Developer Cheatsheets
             </h3>
-            <p className="mt-1.5 text-xs leading-relaxed font-medium text-zinc-500 dark:text-zinc-400">
+            <p className="mt-1.5 text-xs leading-relaxed font-medium text-zinc-500 dark:text-zinc-400 lg:line-clamp-3">
               Keep syntax, commands and commonly used patterns within quick
               reach.
             </p>
           </div>
-          <div className="flex-1 mt-8 mb-4 flex flex-col items-center justify-center relative w-full min-h-30">
+          <div className="flex-1 mt-4 mb-1 lg:mt-4 lg:mb-2 flex flex-col items-center justify-center relative w-full min-h-24 sm:min-h-30">
             <div className="w-full h-full max-h-27.5 bg-zinc-950 border border-zinc-800/80 rounded-xl overflow-hidden shadow-lg flex flex-col transform transition-transform group-hover:scale-105">
               <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-zinc-900 border-b border-zinc-800/80">
                 <div className="flex gap-1">
@@ -313,7 +313,7 @@ export default function HomeInteractiveBento() {
               </div>
             </div>
           </div>
-          <div className="mt-5 pt-3 border-t border-emerald-500/15 flex items-center justify-between text-xs font-black text-emerald-600 dark:text-emerald-400">
+          <div className="mt-3 sm:mt-5 pt-3 border-t border-emerald-500/15 flex items-center justify-between text-xs font-black text-emerald-600 dark:text-emerald-400">
             <span>Quick Syntax</span>
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </div>

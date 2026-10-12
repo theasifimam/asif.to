@@ -11,6 +11,8 @@ import {
   storageKey,
   unsupportedFeedback,
 } from "@/lib/playground/client";
+import { runCustomCase, runTestCases } from "@/lib/playground/testRunner";
+import { PLAYGROUND_DEFAULT_CONTROL } from "@/lib/playground/control";
 
 export function useWorkspace({
   language,
@@ -21,7 +23,9 @@ export function useWorkspace({
   testCases = [],
   runtimeAdapter = null,
   executionEnabled = true,
+  playgroundControl = PLAYGROUND_DEFAULT_CONTROL,
 }) {
+  const { limits, features } = playgroundControl;
   const { requireAuth } = useAuthPrompt();
   const [panel, setPanel] = useState("code");
   const [split, setSplit] = useState(50);
@@ -45,6 +49,7 @@ export function useWorkspace({
   const [formatting, setFormatting] = useState(false);
   const [restoring, setRestoring] = useState(true);
   const [previewBusy, setPreviewBusy] = useState(false);
+  const [testsRunning, setTestsRunning] = useState(false);
 
   const restoredRef = useRef(false);
   const restoreStartedRef = useRef(false);
@@ -97,9 +102,10 @@ export function useWorkspace({
         );
         const sharedFiles = shared?.language === language ? shared.files : null;
         Object.keys(sandpack.files).forEach((path) => {
-          const saved = localStorage.getItem(
-            storageKey(playgroundId, language, path),
-          );
+          const saved =
+            features.persistence === false
+              ? null
+              : localStorage.getItem(storageKey(playgroundId, language, path));
           const value = sharedFiles?.[path] ?? saved;
           if (value != null) sandpack.updateFile(path, value);
         });
@@ -110,10 +116,12 @@ export function useWorkspace({
       }
     }
     restore();
+    // Runs once per mount; later control changes must not re-restore files.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language, playgroundId, sandpack]);
 
   useEffect(() => {
-    if (!restoredRef.current) return;
+    if (!restoredRef.current || features.persistence === false) return;
     setSaveStatus("Saving...");
     if (!["javascript", "typescript", "nextjs"].includes(language)) {
       clearTimeout(previewTimerRef.current);
@@ -157,7 +165,7 @@ export function useWorkspace({
         else clearTimeout(saveIdleRef.current);
       }
     };
-  }, [sandpack.files, language, playgroundId, title]);
+  }, [sandpack.files, language, playgroundId, title, features.persistence]);
 
   const formatActive = useCallback(async () => {
     if (formatting) return;
@@ -181,6 +189,7 @@ export function useWorkspace({
   }, [formatting, sandpack]);
 
   const share = async () => {
+    if (features.sharing === false) return;
     try {
       const files = Object.fromEntries(
         Object.entries(sandpack.files).map(([path, file]) => [path, file.code]),
@@ -201,7 +210,7 @@ export function useWorkspace({
       const original = starterFiles[path]?.code ?? starterFiles[path] ?? "";
       return (
         Math.abs(file.code.length - String(original).length) > 20 ||
-        (file.code !== original && file.code.split("\\n").length > 3)
+        (file.code !== original && file.code.split("\n").length > 3)
       );
     });
 
@@ -218,42 +227,67 @@ export function useWorkspace({
     setResetOpen(false);
   };
 
-  const runTests = () => {
-    if (!executionEnabled) return;
-    const source = sandpack.files["/index.js"]?.code || "";
-    const results = testCases.map((test) => {
-      try {
-        const fn = new Function(
-          `${source}\n;return typeof ${test.functionName} === "function" ? ${test.functionName} : null;`,
-        )();
-        const received = fn ? fn(...test.args) : undefined;
-        return {
-          ...test,
-          received,
-          passed: JSON.stringify(received) === JSON.stringify(test.expected),
-        };
-      } catch (error) {
-        return { ...test, received: error.message, passed: false };
-      }
-    });
-    setTests(results);
-    setPanel("tests");
+  const sourceTooLong = () => {
+    const total = Object.values(sandpack.files).reduce(
+      (sum, file) => sum + (file.code?.length || 0),
+      0,
+    );
+    return total > limits.maxSourceChars;
   };
 
-  const runCustom = () => {
-    if (!executionEnabled) return;
+  const runTests = async () => {
+    if (!executionEnabled || features.testCases === false || testsRunning) return;
+    if (sourceTooLong()) {
+      setSmartError(
+        explainError(
+          `Source is larger than the ${limits.maxSourceChars.toLocaleString()} character limit.`,
+        ),
+      );
+      return;
+    }
+    const source = sandpack.files["/index.js"]?.code || "";
+    setTests([]);
+    setTestsRunning(true);
+    setPanel("tests");
     try {
-      const source = sandpack.files["/index.js"]?.code || "";
-      const first = testCases[0];
-      const fn = new Function(`${source}\n;return ${first.functionName};`)();
+      setTests(
+        await runTestCases(source, testCases, {
+          timeoutMs: limits.executionTimeoutMs,
+          onResult: setTests,
+        }),
+      );
+    } catch (error) {
+      setCustomOutput(error.message);
+    } finally {
+      setTestsRunning(false);
+    }
+  };
+
+  const runCustom = async () => {
+    if (!executionEnabled || features.testCases === false || testsRunning) return;
+    let args;
+    try {
       const input = JSON.parse(customInput);
+      const first = testCases[0];
+      args = Array.isArray(input) && first.spreadInput ? input : [input];
+    } catch (error) {
+      setCustomOutput(`Input must be valid JSON. ${error.message}`);
+      return;
+    }
+    setTestsRunning(true);
+    try {
       setCustomOutput(
-        JSON.stringify(
-          fn(...(Array.isArray(input) && first.spreadInput ? input : [input])),
+        await runCustomCase(
+          sandpack.files["/index.js"]?.code || "",
+          testCases[0],
+          args,
+          { timeoutMs: limits.executionTimeoutMs },
         ),
       );
     } catch (error) {
       setCustomOutput(error.message);
+    } finally {
+      setTestsRunning(false);
     }
   };
 
@@ -427,6 +461,7 @@ export function useWorkspace({
       formatting,
       restoring,
       previewBusy,
+      testsRunning,
     },
     setters: {
       setPanel,
@@ -472,5 +507,6 @@ export function useWorkspace({
     testCases,
     runtimeAdapter,
     executionEnabled,
+    playgroundControl,
   };
 }

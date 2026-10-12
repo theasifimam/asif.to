@@ -42,6 +42,8 @@ const types = [
   { value: "recruitee", label: "Recruitee" },
   { value: "pinpoint", label: "Pinpoint" },
   { value: "teamtailor", label: "Teamtailor" },
+  { value: "workday", label: "Workday (id: tenant/wdN/site)" },
+  { value: "jsonld", label: "Career site crawler (sitemap URL + JSON-LD)" },
   { value: "api", label: "Custom JSON API" },
   { value: "other", label: "Other" },
 ];

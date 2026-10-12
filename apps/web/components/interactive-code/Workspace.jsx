@@ -89,6 +89,7 @@ function Workspace(props) {
         formatting={formatting}
         runtimeAdapter={workspace.runtimeAdapter}
         executionEnabled={props.executionEnabled !== false}
+        features={workspace.playgroundControl?.features}
       />
 
       {props.executionEnabled === false && (

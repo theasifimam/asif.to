@@ -1,3 +1,4 @@
+import { JOBS_INDEXABLE } from "@/lib/jobsIndexing";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import JobsListing from "@/components/jobs/JobsListing";
@@ -10,7 +11,7 @@ export async function generateMetadata({ params }) {
   const name = titleCase(category);
   const result = await fetchJobs({ category, limit: 1 });
   const useful = (result?.meta?.indexableCount || 0) > 0;
-  return { title: `${name} Jobs in the UAE | asif.to`, description: `Browse active ${name.toLowerCase()} jobs across the UAE.`, alternates: { canonical: `/jobs/category/${category}` }, robots: { index: useful, follow: true } };
+  return { title: `${name} Jobs in the UAE | asif.to`, description: `Browse active ${name.toLowerCase()} jobs across the UAE.`, alternates: { canonical: `/jobs/category/${category}` }, robots: { index: JOBS_INDEXABLE && useful, follow: true } };
 }
 
 export default async function CategoryJobsPage({ params, searchParams }) {

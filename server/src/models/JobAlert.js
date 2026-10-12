@@ -9,13 +9,16 @@ const jobAlertSchema = new Schema(
     employmentType: { type: String, default: "", trim: true, lowercase: true, maxlength: 40 },
     workMode: { type: String, default: "", trim: true, lowercase: true, maxlength: 40 },
     experienceLevel: { type: String, default: "", trim: true, lowercase: true, maxlength: 40 },
+    // Follow a company: the Company _id (hex) a job must belong to. companyLabel is only for display.
+    company: { type: String, default: "", trim: true, lowercase: true, maxlength: 40 },
+    companyLabel: { type: String, default: "", trim: true, maxlength: 180 },
     active: { type: Boolean, default: true, index: true },
   },
   { timestamps: true },
 );
 
 jobAlertSchema.index(
-  { user: 1, keyword: 1, category: 1, location: 1, employmentType: 1, workMode: 1, experienceLevel: 1 },
+  { user: 1, keyword: 1, category: 1, location: 1, employmentType: 1, workMode: 1, experienceLevel: 1, company: 1 },
   { unique: true },
 );
 

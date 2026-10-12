@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import jobRoutes from "../routes/job.routes.js";
-import { externalApply } from "../controllers/job.controller.js";
+import { countryFromParam, externalApply } from "../controllers/job.controller.js";
 import Job from "../models/Job.js";
 import JobApplication from "../models/JobApplication.js";
 import JobEvent from "../models/JobEvent.js";
@@ -46,7 +46,7 @@ for (const authenticated of [false, true]) {
   test(`external redirect works for ${authenticated ? "members" : "guests"}`, async (t) => {
     const job = { _id: "507f1f77bcf86cd799439011", applicationType: "external", applicationUrl: "https://careers.example.com/jobs/1" };
     t.mock.method(Job, "findOne", async () => job);
-    const applications = t.mock.method(JobApplication, "create", async () => ({}));
+    const applications = t.mock.method(JobApplication, "updateOne", async () => ({}));
     const clicks = t.mock.method(Job, "updateOne", async () => ({}));
     const events = t.mock.method(JobEvent, "create", async () => ({}));
     const req = { params: { id: job._id }, ...(authenticated ? { user: { _id: "507f1f77bcf86cd799439012" } } : {}) };
@@ -55,6 +55,13 @@ for (const authenticated of [false, true]) {
     assert.equal(res.body.success, true);
     assert.equal(res.body.data.redirectUrl, job.applicationUrl);
     assert.equal(applications.mock.callCount(), authenticated ? 1 : 0);
+    if (authenticated) {
+      // One tracker row per user and job, however often Apply is pressed.
+      const [filter, update, options] = applications.mock.calls[0].arguments;
+      assert.deepEqual(filter, { kind: "external_click", user: req.user._id, job: job._id });
+      assert.equal(options.upsert, true);
+      assert.deepEqual(update.$setOnInsert, { stage: "applied" });
+    }
     assert.deepEqual(clicks.mock.calls[0].arguments[1], { $inc: { applyClicks: 1 } });
     assert.equal(events.mock.calls[0].arguments[0].user, req.user?._id);
   });
@@ -80,4 +87,18 @@ test("default job permissions separate ordinary management from source and delet
   assert.ok(!DEFAULT_ROLE_PERMISSIONS.editor.includes("job_sources.manage"));
   assert.ok(DEFAULT_ROLE_PERMISSIONS.admin.includes("job_sources.manage"));
   assert.ok(DEFAULT_ROLE_PERMISSIONS.admin.includes("jobs.delete"));
+});
+
+test("?country= accepts ISO codes and country slugs, and anything else means every Gulf country", () => {
+  assert.equal(countryFromParam("sa")?.code, "SA");
+  assert.equal(countryFromParam("SA")?.code, "SA");
+  assert.equal(countryFromParam("saudi-arabia")?.code, "SA");
+  assert.equal(countryFromParam("uae")?.code, "AE");
+  assert.equal(countryFromParam("ae")?.code, "AE");
+  for (const all of ["gulf", "all", "", undefined, null, "gb", "../etc"]) assert.equal(countryFromParam(all), null, String(all));
+});
+
+test("Job accepts every Gulf country and rejects others", () => {
+  for (const country of ["AE", "SA", "QA", "KW", "BH", "OM"]) assert.equal(new Job({ country }).validateSync(["country"]), undefined, country);
+  assert.ok(new Job({ country: "GB" }).validateSync(["country"])?.errors?.country);
 });

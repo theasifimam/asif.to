@@ -1,12 +1,14 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import JobsListing from "@/components/jobs/JobsListing";
+import { JOBS_INDEXABLE } from "@/lib/jobsIndexing";
 
 export const metadata = {
   title: "UAE Jobs in Dubai, Abu Dhabi & More | asif.to",
   description:
     "Find reviewed UAE jobs across Dubai, Abu Dhabi, Sharjah and the other emirates. Search by role, company, work mode, salary and experience.",
   alternates: { canonical: "/jobs" },
+  robots: { index: JOBS_INDEXABLE, follow: true },
   openGraph: {
     title: "UAE Jobs | asif.to",
     description: "Search focused, traceable job opportunities across the UAE.",

@@ -5,6 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { BriefcaseBusiness, LoaderCircle, MapPin } from "lucide-react";
 import JobCard from "./JobCard";
 import JobSort from "./JobSort";
+import JobQuickFilters from "./JobQuickFilters";
+import JobSkillFilters from "./JobSkillFilters";
 
 function queryString(params = {}, excluded = []) {
   const query = new URLSearchParams();
@@ -27,6 +29,9 @@ export default function JobResults({
   selectedSlug = "",
   compact = false,
   queryParams = searchParams,
+  meta = null,
+  tags = [],
+  skills = [],
 }) {
   const [items, setItems] = useState(() => jobs);
   const [currentPage, setCurrentPage] = useState(() => pagination.page || 1);
@@ -94,6 +99,19 @@ export default function JobResults({
 
   return (
     <section className="min-w-0 max-w-full overflow-x-clip">
+      <JobSkillFilters skills={skills} searchParams={searchParams} path={path} />
+      <JobQuickFilters tags={tags} searchParams={searchParams} path={path} />
+      {meta?.correctedKeyword && (
+        <p className="mb-4 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-xs font-semibold text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200" role="status">
+          Showing results for <strong>{meta.correctedKeyword}</strong>.{" "}
+          <Link
+            href={`${path}?${queryString({ ...searchParams, keyword: meta.searchedKeyword, exact: "true", page: "" })}`}
+            className="font-black underline underline-offset-2"
+          >
+            Search instead for &ldquo;{meta.searchedKeyword}&rdquo;
+          </Link>
+        </p>
+      )}
       {jobs.length > 0 && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <p className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500">
@@ -102,7 +120,7 @@ export default function JobResults({
             {pagination.totalCount === 1 ? "job" : "jobs"}
           </p>
           <JobSort
-            currentSort={searchParams.sort}
+            currentSort={searchParams.sort || (searchParams.keyword ? "relevant" : undefined)}
             searchParams={searchParams}
             path={path}
           />
@@ -134,7 +152,7 @@ export default function JobResults({
             href="/jobs"
             className="mt-5 inline-block text-xs font-black text-blue-600"
           >
-            View all UAE jobs
+            View all jobs
           </Link>
         </div>
       )}
