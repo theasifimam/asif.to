@@ -380,6 +380,31 @@
         "x-next-revalidate-tag-token"
       ]
     },
+    "/jobs/salaries": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": 5,
+      "initialExpireSeconds": 31536000,
+      "srcRoute": "/jobs/salaries",
+      "dataRoute": "/jobs/salaries.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
     "/library": {
       "experimentalBypassFor": [
         {
@@ -1350,8 +1375,8 @@
   },
   "notFoundRoutes": [],
   "preview": {
-    "previewModeId": "891f844608269c04314dddcd65c1332c",
-    "previewModeSigningKey": "988c58e31f7af77fceed18ec2474d43aa52ff90653cfaa435d7e9219ccbbcbb4",
-    "previewModeEncryptionKey": "e126f67021d0fcada0240036ded5d9e29a2c415be052086c877a6560d848461e"
+    "previewModeId": "d90bb5de1895c96180536eeff177ae59",
+    "previewModeSigningKey": "3a282a859777238631bf2b79131cd7b46250084d649f5ce6b3bf6e9de4d8f46b",
+    "previewModeEncryptionKey": "c5744c742ee3b165c768888a2761c4ae0540573c3b912023d4d27f7fb0e0c346"
   }
 }

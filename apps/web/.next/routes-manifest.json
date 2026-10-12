@@ -224,12 +224,28 @@
       "namedRegex": "^/jobs/company/(?<nxtPcompanySlug>[^/]+?)(?:/)?$"
     },
     {
+      "page": "/jobs/country/[country]",
+      "regex": "^/jobs/country/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPcountry": "nxtPcountry"
+      },
+      "namedRegex": "^/jobs/country/(?<nxtPcountry>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/jobs/location/[location]",
       "regex": "^/jobs/location/([^/]+?)(?:/)?$",
       "routeKeys": {
         "nxtPlocation": "nxtPlocation"
       },
       "namedRegex": "^/jobs/location/(?<nxtPlocation>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/jobs/salaries/[category]",
+      "regex": "^/jobs/salaries/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPcategory": "nxtPcategory"
+      },
+      "namedRegex": "^/jobs/salaries/(?<nxtPcategory>[^/]+?)(?:/)?$"
     },
     {
       "page": "/jobs/[slug]",
@@ -526,6 +542,18 @@
       "regex": "^/jobs/my(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/jobs/my(?:/)?$"
+    },
+    {
+      "page": "/jobs/salaries",
+      "regex": "^/jobs/salaries(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/jobs/salaries(?:/)?$"
+    },
+    {
+      "page": "/jobs/tech",
+      "regex": "^/jobs/tech(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/jobs/tech(?:/)?$"
     },
     {
       "page": "/library",
