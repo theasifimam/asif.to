@@ -8,16 +8,18 @@ import { absoluteUrl } from "@/lib/seo";
 export const revalidate = 60;
 
 export async function generateMetadata() {
-  const title = "Interview Questions & Answers Hub | asif.to";
+  const title = "Interview Questions & Answers by Role and Technology | asif.to";
   const description =
-    "Explore curated technical interview questions and answers organized by category. Practice Next.js, React, JavaScript, and more with code examples and follow-up prompts.";
+    "Practical interview preparation: role guides for careers in the UAE and Gulf, plus technical questions on React, JavaScript, Next.js and more, with worked answers and follow-up prompts.";
   const canonical = absoluteUrl("", "/interview-questions");
 
   return {
     title,
     description,
     keywords: [
-      "interview questions",
+      "interview questions and answers",
+      "interview preparation",
+      "uae interview questions",
       "coding interview preparation",
       "next.js interview questions",
       "react interview questions",
@@ -51,8 +53,76 @@ export async function generateMetadata() {
   };
 }
 
+const categoryHref = (category) =>
+  category.course?.slug
+    ? `/${category.course.slug}/interview-questions/${category.slug}`
+    : `/interview-questions/${category.slug}`;
+
+function CategoryCard({ category }) {
+  const isCareer = category.track === "career";
+  return (
+    <Link
+      href={categoryHref(category)}
+      className="group flex flex-col justify-between rounded-3xl border border-zinc-200 bg-white p-5 shadow-xs transition-all hover:border-orange-500/50 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 sm:p-6"
+    >
+      <div>
+        <div className="flex items-center justify-between gap-2">
+          <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700 dark:bg-orange-500/10 dark:text-orange-300">
+            {category.questionCount} Questions
+          </span>
+          {category.course && (
+            <span className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+              <BookOpen className="h-3 w-3" /> Course Linked
+            </span>
+          )}
+        </div>
+        <h3 className="mt-4 text-xl font-bold tracking-tight text-zinc-900 group-hover:text-orange-600 dark:text-white dark:group-hover:text-orange-400">
+          {category.name} Interview Questions
+        </h3>
+        <p className="mt-2 line-clamp-3 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+          {category.description ||
+            (isCareer
+              ? `Common questions, practical scenarios and sample answers for ${category.name} interviews.`
+              : `Interview questions and answers for ${category.name}, with code examples and follow-ups.`)}
+        </p>
+      </div>
+      <div className="mt-6 flex items-center justify-between border-t border-zinc-100 pt-4 dark:border-zinc-800">
+        <span className="text-xs font-bold text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-200">
+          Explore guide
+        </span>
+        <ArrowRight className="h-4 w-4 text-orange-500 transition-transform group-hover:translate-x-1" />
+      </div>
+    </Link>
+  );
+}
+
+function CategorySection({ id, title, intro, categories }) {
+  if (!categories.length) return null;
+  return (
+    <section aria-labelledby={id} className="mt-8 sm:mt-10">
+      <h2
+        id={id}
+        className="text-xl font-black tracking-tight sm:text-2xl"
+      >
+        {title}
+      </h2>
+      <p className="mt-1 max-w-3xl text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+        {intro}
+      </p>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+        {categories.map((category) => (
+          <CategoryCard key={category._id} category={category} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default async function InterviewQuestionsIndexPage() {
   const categories = (await getPublicInterviewCategories()) || [];
+  // Categories saved before the "track" field existed have no value; they are technical.
+  const careerCategories = categories.filter((c) => c.track === "career");
+  const technologyCategories = categories.filter((c) => c.track !== "career");
 
   return (
     <div className="min-h-screen w-full bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
@@ -72,12 +142,19 @@ export default async function InterviewQuestionsIndexPage() {
             Interview Preparation Directory
           </p>
           <h1 className="mt-3 text-2xl font-black tracking-tight xs:text-3xl sm:text-5xl">
-            Interview Questions by Technology
+            Interview Questions &amp; Answers
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-zinc-600 dark:text-zinc-300">
-            Select a category to view full answers, code examples, expected
-            outputs, and likely follow-up questions.
+            Prepare for your next interview with worked answers, realistic
+            scenarios and likely follow-up questions. Pick a role guide or a
+            technology below.
           </p>
+          <Link
+            href="/jobs"
+            className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400"
+          >
+            Browse current jobs in the UAE <ArrowRight className="h-4 w-4" />
+          </Link>
         </header>
 
         {categories.length === 0 ? (
@@ -86,45 +163,20 @@ export default async function InterviewQuestionsIndexPage() {
             No interview categories published yet.
           </div>
         ) : (
-          <div className="mt-6 grid gap-4 sm:mt-8 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-            {categories.map((category) => (
-              <Link
-                key={category._id}
-                href={
-                  category.course?.slug
-                    ? `/${category.course.slug}/interview-questions/${category.slug}`
-                    : `/interview-questions/${category.slug}`
-                }
-                className="group flex flex-col justify-between rounded-3xl border border-zinc-200 bg-white p-5 shadow-xs transition-all hover:border-orange-500/50 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 sm:p-6"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-700 dark:bg-orange-500/10 dark:text-orange-300">
-                      {category.questionCount} Questions
-                    </span>
-                    {category.course && (
-                      <span className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400">
-                        <BookOpen className="h-3 w-3" /> Course Linked
-                      </span>
-                    )}
-                  </div>
-                  <h2 className="mt-4 text-xl font-bold tracking-tight text-zinc-900 group-hover:text-orange-600 dark:text-white dark:group-hover:text-orange-400">
-                    {category.name} Interview Questions
-                  </h2>
-                  <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400 line-clamp-3">
-                    {category.description ||
-                      `Comprehensive interview questions and answers for ${category.name}.`}
-                  </p>
-                </div>
-                <div className="mt-6 flex items-center justify-between border-t border-zinc-100 pt-4 dark:border-zinc-800">
-                  <span className="text-xs font-bold text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-200">
-                    Explore guide
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-orange-500 transition-transform group-hover:translate-x-1" />
-                </div>
-              </Link>
-            ))}
-          </div>
+          <>
+            <CategorySection
+              id="career-guides"
+              title="Career & role guides"
+              intro="Questions, scenarios and sample answers for specific roles, written for candidates applying in the UAE and the wider Gulf."
+              categories={careerCategories}
+            />
+            <CategorySection
+              id="technology-interviews"
+              title="Technology interviews"
+              intro="Technical questions with detailed answers, code examples, expected output and follow-up prompts."
+              categories={technologyCategories}
+            />
+          </>
         )}
       </main>
       <Footer />

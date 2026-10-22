@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 const links = [
   ["Overview", "/analytics"],
   ["Search Console", "/analytics/search"],
+  ["Insights", "/analytics/insights"],
   ["Platform", "/analytics/platform"],
 ];
 

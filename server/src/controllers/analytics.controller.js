@@ -3,14 +3,27 @@ import AnalyticsDaily from "../models/AnalyticsDaily.js";
 import AnalyticsIdentity from "../models/AnalyticsIdentity.js";
 import AnalyticsSync from "../models/AnalyticsSync.js";
 import SearchMetric from "../models/SearchMetric.js";
+import SeoChange from "../models/SeoChange.js";
 import Article from "../models/Article.js";
 import Chapter from "../models/Chapter.js";
 import Course from "../models/Course.js";
 import User from "../models/User.js";
 import {
+  fetchPageSearchDetails,
   isSearchConsoleConfigured,
   syncSearchConsole,
 } from "../services/searchConsole.service.js";
+import {
+  afterWindow,
+  baselineWindow,
+  compareWindows,
+  normalizePath,
+} from "../services/seoChange.service.js";
+import {
+  classifySection,
+  computeChanges,
+  summarizeSections,
+} from "../services/searchChanges.service.js";
 import { ga4Error, getGa4Realtime, getGa4Workspace, isGa4Configured } from "../services/googleAnalytics.service.js";
 
 const utcDay = (date) =>
@@ -277,6 +290,98 @@ export const getSearchReport = async (req, res) => {
   }
 };
 
+async function queryPerformance(start, end) {
+  return SearchMetric.aggregate([
+    { $match: { dimension: "query", date: { $gte: start, $lt: end } } },
+    {
+      $group: {
+        _id: "$query",
+        clicks: { $sum: "$clicks" },
+        impressions: { $sum: "$impressions" },
+        weightedPosition: { $sum: { $multiply: ["$position", "$impressions"] } },
+      },
+    },
+    {
+      $set: {
+        ctr: {
+          $cond: [
+            { $gt: ["$impressions", 0] },
+            { $multiply: [{ $divide: ["$clicks", "$impressions"] }, 100] },
+            0,
+          ],
+        },
+        position: {
+          $cond: [
+            { $gt: ["$impressions", 0] },
+            { $divide: ["$weightedPosition", "$impressions"] },
+            0,
+          ],
+        },
+      },
+    },
+  ]);
+}
+
+const CHANGE_SORTS = {
+  impressionsLoss: (a, b) => a.impressionsChange - b.impressionsChange,
+  impressionsGain: (a, b) => b.impressionsChange - a.impressionsChange,
+  clicksLoss: (a, b) => a.clicksChange - b.clicksChange,
+  positionWorse: (a, b) => b.positionChange - a.positionChange,
+  impressions: (a, b) => b.impressions - a.impressions,
+};
+
+/**
+ * Period-over-period comparison of pages or queries, including rows that
+ * vanished (zero current impressions). `section` filters pages by site area.
+ */
+export const getSearchChanges = async (req, res) => {
+  try {
+    const dates = range(req);
+    const type = req.query.type === "queries" ? "queries" : "pages";
+    const section = req.query.section;
+    const minImpressions = Math.max(0, Number(req.query.minImpressions ?? 10));
+    const limit = Math.min(5000, Math.max(1, Number(req.query.limit) || 100));
+    const sort = CHANGE_SORTS[req.query.sort] ? req.query.sort : "impressionsLoss";
+    const load = type === "pages" ? pagePerformance : queryPerformance;
+    const [current, previous] = await Promise.all([
+      load(dates.start, dates.end),
+      load(dates.previousStart, dates.previousEnd),
+    ]);
+    const all = computeChanges(current, previous);
+    const sections = type === "pages" ? summarizeSections(all) : undefined;
+    let rows = all.filter((row) => Math.max(row.impressions, row.previous.impressions) >= minImpressions);
+    if (type === "pages" && section) rows = rows.filter((row) => classifySection(row.key) === section);
+    if (req.query.search) {
+      const needle = String(req.query.search).toLowerCase();
+      rows = rows.filter((row) => String(row.key).toLowerCase().includes(needle));
+    }
+    // Position changes only mean something when the row existed in both periods.
+    if (sort === "positionWorse") rows = rows.filter((row) => row.positionChange !== 0);
+    rows.sort(CHANGE_SORTS[sort]);
+    res.json({
+      success: true,
+      data: {
+        type,
+        sort,
+        total: rows.length,
+        rows: rows.slice(0, limit),
+        sections,
+        period: {
+          start: dates.start,
+          end: dates.end,
+          previousStart: dates.previousStart,
+          previousEnd: dates.previousEnd,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("[ANALYTICS] changes", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Unable to load search changes" });
+  }
+};
+
 async function pagePerformance(start, end) {
   const dimension = await SearchMetric.exists({ dimension: "page", date: { $gte: start, $lt: end } }) ? "page" : "queryPage";
   return SearchMetric.aggregate([
@@ -336,8 +441,26 @@ export const getContentInsights = async (req, res) => {
       ctr: row.ctr,
       position: row.position,
       previousClicks: previousMap.get(row._id)?.clicks || 0,
+      previousImpressions: previousMap.get(row._id)?.impressions || 0,
       growth: pct(row.clicks, previousMap.get(row._id)?.clicks || 0),
+      impressionsGrowth: pct(
+        row.impressions,
+        previousMap.get(row._id)?.impressions || 0,
+      ),
     }));
+    // Pages that had impressions before but none now never appear in `enriched`.
+    const currentPages = new Set(current.map((row) => row._id));
+    const lostImpressions = previous
+      .filter((row) => !currentPages.has(row._id) && row.impressions >= 20)
+      .map((row) => ({
+        page: row._id,
+        previousClicks: row.clicks,
+        previousImpressions: row.impressions,
+        previousPosition: row.position,
+        section: classifySection(row._id),
+      }))
+      .sort((a, b) => b.previousImpressions - a.previousImpressions)
+      .slice(0, 100);
     const normalizePath = (value) => {
       try { return new URL(value, "https://asif.to").pathname.replace(/\/$/, "") || "/"; }
       catch { return String(value || "").replace(/\/$/, "") || "/"; }
@@ -386,11 +509,11 @@ export const getContentInsights = async (req, res) => {
             impact: "high",
             reason: `Average position ${row.position.toFixed(1)}`,
           });
-        if (row.position > 15 && row.position <= 30 && row.growth > 10)
+        if (row.position > 15 && row.position <= 30 && row.impressionsGrowth > 10)
           cases.push({
             type: "Growing impressions",
             impact: "medium",
-            reason: `Position ${row.position.toFixed(1)} with positive traffic trend`,
+            reason: `Position ${row.position.toFixed(1)} with impressions up ${row.impressionsGrowth.toFixed(0)}%`,
           });
         if (row.clicks < row.previousClicks * 0.8)
           cases.push({
@@ -427,6 +550,7 @@ export const getContentInsights = async (req, res) => {
           .sort((a, b) => b.impressions - a.impressions)
           .slice(0, 10),
         opportunities: opportunities.slice(0, 100),
+        lostImpressions,
       },
     });
   } catch (error) {
@@ -481,42 +605,35 @@ export const getPageDetails = async (req, res) => {
         .status(400)
         .json({ success: false, message: "path is required" });
     const escaped = escapeRegex(path);
-    const pageMatch = { $regex: `${escaped}$`, $options: "i" };
-    const [search, queries, traffic, countries, devices, trend] =
+    const pageMatch = { $regex: `${escaped}/?$`, $options: "i" };
+    const pageFilter = {
+      dimension: "page",
+      page: pageMatch,
+      date: { $gte: dates.start, $lt: dates.end },
+    };
+    // Query-by-page rows are not stored (see searchConsole.service.js), so the
+    // per-query breakdown comes from a live, cached Search Console request.
+    const lastDay = (date) => new Date(date.getTime() - 86400000).toISOString().slice(0, 10);
+    const liveQueries = isSearchConsoleConfigured()
+      ? fetchPageSearchDetails({
+          path,
+          startDate: dates.start.toISOString().slice(0, 10),
+          endDate: lastDay(dates.end),
+        }).catch((error) => {
+          console.error("[ANALYTICS] page queries", error?.message || error);
+          return null;
+        })
+      : Promise.resolve(null);
+    const [search, live, traffic, countries, devices, trend] =
       await Promise.all([
-        SearchMetric.aggregate([
-          {
-            $match: {
-              dimension: "queryPage",
-              page: pageMatch,
-              date: { $gte: dates.start, $lt: dates.end },
-            },
-          },
-          { $group: metricsGroup },
-        ]),
-        SearchMetric.aggregate([
-          {
-            $match: {
-              dimension: "queryPage",
-              page: pageMatch,
-              date: { $gte: dates.start, $lt: dates.end },
-            },
-          },
-          {
-            $group: {
-              _id: "$query",
-              clicks: { $sum: "$clicks" },
-              impressions: { $sum: "$impressions" },
-            },
-          },
-          { $sort: { clicks: -1 } },
-          { $limit: 25 },
-        ]),
+        SearchMetric.aggregate([{ $match: pageFilter }, { $group: metricsGroup }]),
+        liveQueries,
         AnalyticsDaily.aggregate([
           { $match: { path, date: { $gte: dates.start, $lt: dates.end } } },
           { $group: { _id: "$source", views: { $sum: "$pageViews" } } },
           { $sort: { views: -1 } },
         ]),
+        // Site-wide: country/device are synced independently of page.
         SearchMetric.aggregate([
           {
             $match: {
@@ -539,13 +656,7 @@ export const getPageDetails = async (req, res) => {
           { $sort: { clicks: -1 } },
         ]),
         SearchMetric.aggregate([
-          {
-            $match: {
-              dimension: "queryPage",
-              page: pageMatch,
-              date: { $gte: dates.start, $lt: dates.end },
-            },
-          },
+          { $match: pageFilter },
           {
             $group: {
               _id: "$date",
@@ -556,6 +667,7 @@ export const getPageDetails = async (req, res) => {
           { $sort: { _id: 1 } },
         ]),
       ]);
+    const queries = live?.queries || [];
     const row = search[0] || {};
     res.json({
       success: true,
@@ -569,6 +681,7 @@ export const getPageDetails = async (req, res) => {
             : 0,
         },
         queries,
+        queriesAvailable: Boolean(live),
         traffic,
         countries,
         devices,
@@ -579,6 +692,84 @@ export const getPageDetails = async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Unable to load page analytics" });
+  }
+};
+
+async function pageWindowMetrics(path, from, to) {
+  const [row] = await SearchMetric.aggregate([
+    {
+      $match: {
+        dimension: "page",
+        page: { $regex: `${escapeRegex(path)}/?$`, $options: "i" },
+        date: { $gte: from, $lt: to },
+      },
+    },
+    { $group: metricsGroup },
+  ]);
+  const impressions = row?.impressions || 0;
+  return {
+    clicks: row?.clicks || 0,
+    impressions,
+    ctr: impressions ? (row.clicks / impressions) * 100 : 0,
+    position: impressions ? row.weightedPosition / impressions : 0,
+  };
+}
+
+export const createSeoChange = async (req, res) => {
+  try {
+    const path = normalizePath(req.body?.url || req.body?.path);
+    if (!path)
+      return res.status(400).json({ success: false, message: "A valid page URL or path is required" });
+    const changedAt = req.body?.changedAt ? new Date(req.body.changedAt) : new Date();
+    if (Number.isNaN(changedAt.getTime()))
+      return res.status(400).json({ success: false, message: "changedAt is not a valid date" });
+    const window = baselineWindow(changedAt);
+    const baseline = await pageWindowMetrics(path, window.from, window.to);
+    const change = await SeoChange.create({
+      path,
+      changedAt,
+      changeType: req.body?.changeType,
+      note: req.body?.note,
+      baseline: { ...baseline, from: window.from, to: window.to },
+      createdBy: req.user?._id,
+    });
+    res.status(201).json({ success: true, data: change });
+  } catch (error) {
+    console.error("[ANALYTICS] create seo change", error);
+    res.status(500).json({ success: false, message: "Unable to save SEO change" });
+  }
+};
+
+/** Change log with before/after performance (after is null until 7+ days of final data exist). */
+export const listSeoChanges = async (req, res) => {
+  try {
+    const changes = await SeoChange.find().sort({ changedAt: -1 }).limit(200).lean();
+    const data = await Promise.all(
+      changes.map(async (change) => {
+        const window = afterWindow(change.changedAt);
+        if (!window) return { ...change, after: null, comparison: null };
+        const after = await pageWindowMetrics(change.path, window.from, window.to);
+        const beforeDays = Math.round((change.baseline.to - change.baseline.from) / 86400000);
+        return {
+          ...change,
+          after: { ...after, from: window.from, to: window.to, days: window.days },
+          comparison: compareWindows(change.baseline, after, beforeDays, window.days),
+        };
+      }),
+    );
+    res.json({ success: true, data });
+  } catch (error) {
+    console.error("[ANALYTICS] list seo changes", error);
+    res.status(500).json({ success: false, message: "Unable to load SEO changes" });
+  }
+};
+
+export const deleteSeoChange = async (req, res) => {
+  try {
+    await SeoChange.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch {
+    res.status(400).json({ success: false, message: "Unable to delete SEO change" });
   }
 };
 

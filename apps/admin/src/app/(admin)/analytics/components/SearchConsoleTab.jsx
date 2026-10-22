@@ -8,6 +8,7 @@ import LogoLoader from "@/components/ui/LogoLoader";
 
 import { TrendChart } from "../SimpleAnalyticsCharts";
 import GscReport from "./GscReport";
+import SearchChanges from "./SearchChanges";
 import {
   MetricCard,
   Section,
@@ -129,6 +130,10 @@ export default function SearchConsoleTab({ range }) {
           />
         </Section>
       </div>
+
+      <Section eyebrow="Period comparison" title="What changed since the previous period" description="Pages and queries that lost or gained impressions, clicks and rank, including those that disappeared entirely.">
+        <SearchChanges range={range} refreshToken={refreshToken} />
+      </Section>
 
       <Section eyebrow="Search dimensions" title="Every Search Console dimension currently synced" description="Queries, pages, countries, devices and search appearance.">
         <GscReport range={range} refreshToken={refreshToken} />

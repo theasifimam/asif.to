@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   ArrowLeft,
   BookOpen,
+  Briefcase,
   ChevronLeft,
   ChevronRight,
   HelpCircle,
@@ -16,6 +17,7 @@ import {
 } from "@/lib/publicContent";
 import { absoluteUrl, getSiteUrl, jsonLd } from "@/lib/seo";
 import { processInternalLinks } from "@/lib/internalLinks";
+import { toPlainText } from "@/lib/plainText.mjs";
 import InterviewAnswer from "./InterviewAnswer";
 import InterviewQuestionList from "./InterviewQuestionList";
 import MobileQuestionIndex from "./MobileQuestionIndex";
@@ -61,7 +63,9 @@ export async function buildCategoryInterviewGuideMetadata(
   const description =
     category.seoDescription ||
     category.description ||
-    `Prepare for ${categoryName} interviews with ${pagination?.total || "detailed"} questions, clear answers, code examples, and follow-up prompts.`;
+    (category.track === "career"
+      ? `Prepare for ${categoryName} interviews with ${pagination?.total || "detailed"} questions, practical scenarios, sample answers, and follow-up prompts.`
+      : `Prepare for ${categoryName} interviews with ${pagination?.total || "detailed"} questions, clear answers, code examples, and follow-up prompts.`);
   const path = targetCourseSlug
     ? `/${encodeURIComponent(targetCourseSlug)}/interview-questions/${encodeURIComponent(category.slug || categorySlug)}${pageNum > 1 ? `?page=${pageNum}` : ""}`
     : `/interview-questions/${encodeURIComponent(category.slug || categorySlug)}${pageNum > 1 ? `?page=${pageNum}` : ""}`;
@@ -153,6 +157,13 @@ export default async function CategoryInterviewGuide({
 
   const firstNumber = (pagination.page - 1) * pagination.limit + 1;
 
+  // Career guides link to the jobs they prepare for (first mapped job category).
+  const jobCategorySlug =
+    category?.track === "career" ? category.jobCategorySlugs?.[0] : "";
+  const jobsHref = jobCategorySlug
+    ? `/jobs/category/${encodeURIComponent(jobCategorySlug)}`
+    : "";
+
   const relatedData = await getRelatedContent({
     type: "category",
     categorySlug: canonicalSlug,
@@ -194,9 +205,9 @@ export default async function CategoryInterviewGuide({
               name: item.question,
               acceptedAnswer: {
                 "@type": "Answer",
-                text: [item.answer, item.codeExample]
-                  .filter(Boolean)
-                  .join("\n\n"),
+                text:
+                  toPlainText(item.answer) ||
+                  String(item.codeExample || "").trim(),
               },
             })),
           },
@@ -300,7 +311,9 @@ export default async function CategoryInterviewGuide({
           </h1>
           <p className="mt-4 max-w-3xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-300 sm:text-base sm:leading-7">
             {category?.description ||
-              `Master ${category?.name || "technical"} interviews with comprehensive questions, clear explanations, code examples, and follow-up discussion points.`}
+              (category?.track === "career"
+                ? `Prepare for ${category?.name || "your"} interviews with common questions, practical scenarios, sample answers, and follow-up discussion points.`
+                : `Master ${category?.name || "technical"} interviews with comprehensive questions, clear explanations, code examples, and follow-up discussion points.`)}
           </p>
           <div className="mt-6 flex flex-wrap gap-2.5 text-xs sm:text-sm">
             <span className="rounded-full bg-zinc-100 px-3.5 py-1.5 font-semibold dark:bg-zinc-800">
@@ -310,8 +323,19 @@ export default async function CategoryInterviewGuide({
               Easy to advanced
             </span>
             <span className="rounded-full bg-blue-50 px-3.5 py-1.5 font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
-              Collapsible answers & code
+              {category?.track === "career"
+                ? "Collapsible answers"
+                : "Collapsible answers & code"}
             </span>
+            {jobsHref && (
+              <Link
+                href={jobsHref}
+                className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3.5 py-1.5 font-semibold text-emerald-700 transition hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
+              >
+                <Briefcase className="h-3.5 w-3.5" aria-hidden="true" />
+                Browse open {category.name} jobs
+              </Link>
+            )}
           </div>
         </header>
 

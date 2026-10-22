@@ -43,6 +43,8 @@ const initialForm = {
   content: "",
   course: "none",
   status: "published",
+  track: "technology",
+  jobCategorySlugs: "",
   order: 0,
   seoTitle: "",
   seoDescription: "",
@@ -100,6 +102,9 @@ export default function CategoryForm({
           keywords: Array.isArray(cat.keywords)
             ? cat.keywords.join(", ")
             : cat.keywords || "",
+          jobCategorySlugs: Array.isArray(cat.jobCategorySlugs)
+            ? cat.jobCategorySlugs.join(", ")
+            : cat.jobCategorySlugs || "",
           noindex: Boolean(cat.noindex),
           nofollow: Boolean(cat.nofollow),
           featuredChapters: (cat.featuredChapters || []).map((ch) =>
@@ -158,6 +163,13 @@ export default function CategoryForm({
               .map((item) => item.trim())
               .filter(Boolean)
           : form.keywords,
+      jobCategorySlugs:
+        typeof form.jobCategorySlugs === "string"
+          ? form.jobCategorySlugs
+              .split(",")
+              .map((item) => item.trim())
+              .filter(Boolean)
+          : form.jobCategorySlugs,
     };
 
     const response = categoryId
@@ -600,6 +612,49 @@ export default function CategoryForm({
                 </SelectContent>
               </Select>
             </div>
+
+            <div className="space-y-2 min-w-0">
+              <Label htmlFor="category-track">Interview hub section</Label>
+              <Select
+                value={form.track || "technology"}
+                onValueChange={(track) =>
+                  setForm((curr) => ({ ...curr, track }))
+                }
+              >
+                <SelectTrigger
+                  id="category-track"
+                  className="h-11 rounded-2xl border-zinc-200/80 bg-zinc-50/60 dark:border-zinc-800/80 dark:bg-zinc-900/60"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="technology">Technology</SelectItem>
+                  <SelectItem value="career">Career &amp; role guides</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {form.track === "career" && (
+              <div className="space-y-2 min-w-0">
+                <Label htmlFor="category-job-categories">Job categories</Label>
+                <Input
+                  id="category-job-categories"
+                  value={form.jobCategorySlugs}
+                  onChange={(e) =>
+                    setForm((curr) => ({
+                      ...curr,
+                      jobCategorySlugs: e.target.value,
+                    }))
+                  }
+                  placeholder="hospitality, operations"
+                  className="h-11 rounded-2xl border-zinc-200/80 bg-zinc-50/60 dark:border-zinc-800/80 dark:bg-zinc-900/60"
+                />
+                <p className="text-xs text-zinc-500">
+                  Comma-separated job category slugs (e.g. hospitality). Job pages
+                  in these categories link here, and this guide links back to them.
+                </p>
+              </div>
+            )}
 
             <div className="space-y-2 min-w-0">
               <Label htmlFor="category-course">Associated Course</Label>

@@ -5,6 +5,7 @@ import TopicCategory from "../models/TopicCategory.js";
 import InterviewQuestion from "../models/Question.js";
 import Chapter from "../models/Chapter.js";
 import { formatCanonicalUrl } from "../utils/canonical.js";
+import { withIndexability } from "../utils/interviewCategoryQuality.js";
 import fs from "fs";
 import { resolvePublicAsset } from "../services/asset.service.js";
 import { removeEntityAssetUsages, syncEntityAssetUsages } from "../services/assetUsage.service.js";
@@ -842,6 +843,8 @@ export const updateTopicCategory = async (req, res) => {
       "content",
       "status",
       "order",
+      "track",
+      "jobCategorySlugs",
       "thumbnail",
       "seoTitle",
       "seoDescription",
@@ -990,7 +993,8 @@ export const listPublicInterviewCategories = async (req, res) => {
         status: { $ne: "draft" },
       });
       if (questionCount > 0) {
-        result.push({ ...cat, questionCount });
+        // Thin career guides stay listed for users but are noindex (and so skipped by the sitemap).
+        result.push({ ...withIndexability(cat, questionCount), questionCount });
       }
     }
     res.json({ success: true, data: result });
@@ -1080,7 +1084,7 @@ export const getPublicInterviewCategory = async (req, res) => {
     res.json({
       success: true,
       data: {
-        category,
+        category: withIndexability(category, total),
         questions,
         questionIndex,
         pagination: {

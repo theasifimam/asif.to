@@ -3,6 +3,7 @@ import Chapter from "../models/Chapter.js";
 import TopicCategory from "../models/TopicCategory.js";
 import Article from "../models/Article.js";
 import Question from "../models/Question.js";
+import { pickSiblingCareerCategories } from "../utils/interviewCategoryQuality.js";
 
 export async function getUnifiedRelatedContent(req, res) {
   try {
@@ -83,6 +84,9 @@ export async function getUnifiedRelatedContent(req, res) {
       if (targetCourse) effectiveCourseId = targetCourse._id;
     }
 
+    // Career/role guides have no course: never pad them with unrelated tech courses or cheatsheets.
+    const isCareerCategory = targetCategory?.track === "career";
+
     // 2. Fetch or assemble Related Courses
     let relatedCourses = [];
     if (targetCourse?.relatedCourses?.length) {
@@ -91,7 +95,7 @@ export async function getUnifiedRelatedContent(req, res) {
       relatedCourses = targetCategory.relatedCourses;
     } else if (targetArticle?.relatedCourses?.length) {
       relatedCourses = targetArticle.relatedCourses;
-    } else {
+    } else if (!isCareerCategory) {
       // Fallback: fetch other published courses
       const query = { status: "published" };
       if (targetCourse?._id) query._id = { $ne: targetCourse._id };
@@ -123,7 +127,27 @@ export async function getUnifiedRelatedContent(req, res) {
 
     // 4. Fetch Other Interview Categories for the same course
     let siblingCategories = [];
-    if (effectiveCourseId) {
+    if (isCareerCategory) {
+      const careerCategories = await TopicCategory.find({ track: "career", status: "published", noindex: { $ne: true }, _id: { $ne: targetCategory._id } })
+        .select("name slug description icon order track")
+        .sort({ order: 1, name: 1 })
+        .lean();
+      const counts = await Question.aggregate([
+        {
+          $match: {
+            category: { $in: careerCategories.map((c) => c._id) },
+            type: "interview",
+            status: { $ne: "draft" },
+          },
+        },
+        { $group: { _id: "$category", count: { $sum: 1 } } },
+      ]);
+      siblingCategories = pickSiblingCareerCategories(
+        careerCategories,
+        new Map(counts.map((c) => [String(c._id), c.count])),
+        targetCategory._id,
+      );
+    } else if (effectiveCourseId) {
       const categoryQuery = {
         course: effectiveCourseId,
         status: "published",
@@ -160,7 +184,7 @@ export async function getUnifiedRelatedContent(req, res) {
     let cheatsheets = [];
     if (targetCategory?.relatedCheatsheets?.length) {
       cheatsheets = targetCategory.relatedCheatsheets;
-    } else {
+    } else if (!isCareerCategory) {
       const cheatsheetQuery = {
         type: "cheatsheet",
         status: "published",
@@ -185,7 +209,7 @@ export async function getUnifiedRelatedContent(req, res) {
       articles = targetCourse.relatedArticles;
     } else if (targetChapter?.relatedArticles?.length) {
       articles = targetChapter.relatedArticles;
-    } else {
+    } else if (!isCareerCategory) {
       const articleQuery = {
         type: "article",
         status: "published",

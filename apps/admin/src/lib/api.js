@@ -561,6 +561,11 @@ export const analyticsApi = {
     apiGet(`/analytics/overview?${new URLSearchParams(params)}`),
   search: (type, params) =>
     apiGet(`/analytics/search/${type}?${new URLSearchParams(params)}`),
+  seoChanges: () => apiGet("/analytics/seo-changes"),
+  createSeoChange: (data) => apiPost("/analytics/seo-changes", data),
+  deleteSeoChange: (id) => apiDelete(`/analytics/seo-changes/${id}`),
+  searchChanges: (params) =>
+    apiGet(`/analytics/search-changes?${new URLSearchParams(params)}`),
   content: (params) =>
     apiGet(`/analytics/content?${new URLSearchParams(params)}`),
   sources: (params) =>

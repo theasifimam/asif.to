@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { analyticsApi } from "@/lib/api";
+import { downloadCsv } from "@/lib/csv";
 import AnalyticsShell from "../AnalyticsShell";
+import SeoChangeLog from "../components/SeoChangeLog";
 import { RangeControls, useAnalyticsRange } from "../useAnalyticsRange";
 
 function pathOf(value) { try { const url = new URL(value,"https://asif.to"); return decodeURIComponent(url.pathname).replace(/\/$/,"")||"/"; } catch { return null; } }
@@ -12,6 +14,37 @@ export default function InsightsPage() {
   const insights=useMemo(()=>joined.flatMap(r=>{const items=[]; if(r.impressions>=100&&r.ctr<2)items.push(["SEO opportunity",r,"High impressions with low CTR. Improve the title and meta description."]); if(r.ga.screenPageViews>=20&&r.ga.averageEngagementTime<30)items.push(["Engagement opportunity",r,"Traffic is meaningful but engagement is low. Review the introduction, examples and internal links."]); if(r.ga.averageEngagementTime>=180&&r.impressions<100)items.push(["Visibility opportunity",r,"Visitors engage strongly, but Google visibility is limited. Improve internal linking and on-page SEO."]); if(r.growth>=25&&r.clicks>=10)items.push(["Growing content",r,"Search clicks are growing meaningfully. Consider related supporting content."]); if(r.growth<=-25&&r.previousClicks>=10)items.push(["Declining content",r,"Search clicks declined against the previous equivalent period. Check rankings, freshness and competing results."]); return items;}),[joined]);
   return <AnalyticsShell eyebrow="Unified · Recommended actions" title="Insights" description="Actionable findings from Platform, Search Console and GA4. Minimum thresholds suppress conclusions from tiny samples." actions={<RangeControls {...controls} onSelect={controls.select} onRange={controls.setRange}/>}>
     {error&&<p className="rounded-2xl bg-amber-50 p-4 text-amber-800">{error}</p>}<section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{insights.length?insights.map(([type,r,text],i)=><article key={`${type}-${r.path}-${i}`} className="rounded-3xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950"><span className="rounded-full bg-blue-50 px-2 py-1 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-950">{type}</span><h2 className="mt-3 truncate font-black">{r.title}</h2><p className="mt-1 text-xs text-zinc-500">{r.clicks} clicks · {r.impressions} impressions · {r.ga.screenPageViews} views · {Math.round(r.ga.averageEngagementTime)}s engagement</p><p className="mt-3 text-sm">{text}</p></article>):<p className="col-span-full rounded-3xl border border-dashed p-10 text-center text-zinc-400">No reliable opportunities meet the minimum thresholds for this period.</p>}</section>
+    <section className="admin-surface overflow-x-auto rounded-[28px] sm:rounded-[32px]">
+      <div className="flex items-center justify-between gap-3 border-b border-zinc-100 p-6 dark:border-zinc-800/80">
+        <div>
+          <h2 className="text-lg font-black font-outfit text-zinc-950 dark:text-white">Search opportunities</h2>
+          <p className="mt-1 text-xs text-zinc-500">Low CTR, striking distance (position 5-15), growing and declining pages from Search Console.</p>
+        </div>
+        <button type="button" disabled={!(search?.opportunities||[]).length} onClick={()=>downloadCsv(`search-opportunities-${controls.range.start}_${controls.range.end}.csv`,[{label:"Type",value:r=>r.type},{label:"Impact",value:r=>r.impact},{label:"Page",value:r=>r.page},{label:"Clicks",value:r=>r.clicks},{label:"Impressions",value:r=>r.impressions},{label:"CTR %",value:r=>r.ctr.toFixed(2)},{label:"Position",value:r=>r.position.toFixed(1)},{label:"Reason",value:r=>r.reason}],search.opportunities)} className="h-9 shrink-0 rounded-full border border-zinc-200 px-4 text-xs font-black disabled:opacity-40 dark:border-zinc-800">Export CSV</button>
+      </div>
+      <table className="min-w-full text-left text-xs">
+        <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
+          {(search?.opportunities||[]).map((r,i)=><tr key={`${r.type}-${r.page}-${i}`}><td className="px-6 py-3 font-black">{r.type}</td><td className="max-w-md truncate px-6 py-3" title={r.page}>{r.page}</td><td className="px-6 py-3 tabular-nums">{Math.round(r.impressions)} impr · {r.clicks} clicks</td><td className="px-6 py-3 text-zinc-500">{r.reason}</td></tr>)}
+          {!(search?.opportunities||[]).length&&<tr><td className="px-6 py-8 text-center text-zinc-400">No opportunities for this period.</td></tr>}
+        </tbody>
+      </table>
+    </section>
+    <section className="admin-surface overflow-x-auto rounded-[28px] sm:rounded-[32px]">
+      <div className="flex items-center justify-between gap-3 border-b border-zinc-100 p-6 dark:border-zinc-800/80">
+        <div>
+          <h2 className="text-lg font-black font-outfit text-zinc-950 dark:text-white">Pages that lost all impressions</h2>
+          <p className="mt-1 text-xs text-zinc-500">Had 20+ impressions in the previous period and none in this one. Check indexing, noindex, redirects and canonicals first.</p>
+        </div>
+        <button type="button" disabled={!(search?.lostImpressions||[]).length} onClick={()=>downloadCsv(`lost-impressions-${controls.range.start}_${controls.range.end}.csv`,[{label:"Page",value:r=>r.page},{label:"Section",value:r=>r.section},{label:"Previous impressions",value:r=>r.previousImpressions},{label:"Previous clicks",value:r=>r.previousClicks},{label:"Previous position",value:r=>r.previousPosition.toFixed(1)}],search.lostImpressions)} className="h-9 shrink-0 rounded-full border border-zinc-200 px-4 text-xs font-black disabled:opacity-40 dark:border-zinc-800">Export CSV</button>
+      </div>
+      <table className="min-w-full text-left text-xs">
+        <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/70">
+          {(search?.lostImpressions||[]).map((r)=><tr key={r.page}><td className="max-w-md truncate px-6 py-3" title={r.page}>{r.page}</td><td className="px-6 py-3">{r.section}</td><td className="px-6 py-3 tabular-nums">{Math.round(r.previousImpressions)} impr · {r.previousClicks} clicks</td><td className="px-6 py-3 tabular-nums text-zinc-500">pos {r.previousPosition.toFixed(1)}</td></tr>)}
+          {!(search?.lostImpressions||[]).length&&<tr><td className="px-6 py-8 text-center text-zinc-400">No pages dropped to zero impressions.</td></tr>}
+        </tbody>
+      </table>
+    </section>
+    <SeoChangeLog />
     <section className="admin-surface overflow-x-auto rounded-[28px] sm:rounded-[32px]">
       <h2 className="p-6 text-lg font-black font-outfit text-zinc-950 dark:text-white border-b border-zinc-100 dark:border-zinc-800/80">Unified content performance</h2>
       <table className="admin-table min-w-full text-left text-sm">

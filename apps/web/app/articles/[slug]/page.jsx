@@ -66,16 +66,19 @@ export async function generateMetadata({ params }) {
     };
   }
 
-  const description = article.content
-    ? article.content.replace(/<[^>]*>/g, "").substring(0, 160) + "..."
-    : "Read the latest investigations on asif.to.";
+  // Honour the SEO fields set in the admin editor; fall back to generated text.
+  const description =
+    article.seoDescription?.trim() ||
+    (article.content
+      ? article.content.replace(/<[^>]*>/g, "").substring(0, 160) + "..."
+      : "Read the latest investigations on asif.to.");
   const canonical = absoluteUrl(
     article.canonicalUrl,
     `/articles/${slugWithId}`,
   );
 
   return {
-    title: `${article.title} | asif.to`,
+    title: article.seoTitle?.trim() || `${article.title} | asif.to`,
     description: description,
     alternates: { canonical },
     robots: {

@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import { slugify } from "../utils/slugify.js";
 
 const topicCategorySchema = new Schema(
   {
@@ -38,6 +39,21 @@ const topicCategorySchema = new Schema(
       type: Number,
       default: 0,
       min: 0,
+    },
+    // Which side of the interview hub a category belongs to. Existing documents
+    // have no value and are treated as "technology" by readers.
+    track: {
+      type: String,
+      enum: ["technology", "career"],
+      default: "technology",
+    },
+    // Job category slugs (Job.categorySlug) this career guide prepares for. Drives
+    // the job page -> role guide link and the guide -> jobs link.
+    jobCategorySlugs: {
+      type: [String],
+      default: [],
+      set: (values) =>
+        [...new Set((Array.isArray(values) ? values : []).map((v) => slugify(String(v || ""))).filter(Boolean))],
     },
     status: {
       type: String,

@@ -9,6 +9,7 @@ import Job from "../models/Job.js";
 import Company from "../models/Company.js";
 import { hasPermission } from "../utils/permissions.js";
 import { publicJobFilter } from "../utils/jobValidation.js";
+import { countQuestionsByCategory, isThinInterviewCategory } from "../utils/interviewCategoryQuality.js";
 
 const CACHE_MS = 60_000;
 let cachedIndex = null;
@@ -45,7 +46,7 @@ async function buildSearchIndex(req, res, admin) {
         ...(allowed("cheatsheets.view") ? [{ ...published, type: "cheatsheet" }] : []),
         { _id: null },
       ] }).select("title slug content seoDescription keywords type techId order topic updatedAt").populate("topic", "name").lean(),
-      allowed("topics.view") ? TopicCategory.find(admin ? {} : { status: { $ne: "draft" }, noindex: { $ne: true } }).select("name slug description seoTitle seoDescription keywords updatedAt course").populate("course", "title slug status").lean() : [],
+      allowed("topics.view") ? TopicCategory.find(admin ? {} : { status: { $ne: "draft" }, noindex: { $ne: true } }).select("name slug description seoTitle seoDescription keywords updatedAt course track").populate("course", "title slug status").lean() : [],
       allowed("interview_questions.view") ? Question.find({ type: "interview", ...(!admin ? { status: { $ne: "draft" } } : {}) }).select("question slug answer tags difficulty category course updatedAt").populate("category", "name slug").populate("course", "title slug techId status").lean() : [],
       allowed("users.view") ? User.find(admin ? { deletedAt: null } : {
         deletedAt: null, status: "active", "settings.profileVisibility": { $ne: "private" },
@@ -88,7 +89,12 @@ async function buildSearchIndex(req, res, admin) {
       category: (item.topic || []).map((topic) => topic.name).filter(Boolean).join(" · "), technology: item.techId, priority: item.type === "cheatsheet" ? 8 : 6,
       updatedAt: item.updatedAt,
     }));
-    categories.filter((item) => admin || !item.course || item.course.status === "published").forEach((item) => {
+    // Public index only lists categories that pass the quality gate (not empty, enough career questions).
+    const questionsPerCategory = countQuestionsByCategory(questions);
+    categories.filter((item) => admin || (
+      (!item.course || item.course.status === "published")
+      && !isThinInterviewCategory(item, questionsPerCategory.get(String(item._id)))
+    )).forEach((item) => {
       const courseSlug = item.course?.slug;
       const url = courseSlug ? `/${courseSlug}/interview-questions/${item.slug}` : `/interview-questions/${item.slug}`;
       items.push({
@@ -97,6 +103,9 @@ async function buildSearchIndex(req, res, admin) {
         adminUrl: `/categories`, keywords: item.keywords, priority: 9, updatedAt: item.updatedAt,
       });
     });
+    const indexedCategoryIds = new Set(categories
+      .filter((cat) => !isThinInterviewCategory(cat, questionsPerCategory.get(String(cat._id))))
+      .map((cat) => String(cat._id)));
     questions.filter((item) => admin || !item.course || item.course.status === "published").forEach((item) => {
       const courseSlug = item.course?.slug;
       const catSlug = item.category?.slug || "fundamentals";
@@ -104,6 +113,9 @@ async function buildSearchIndex(req, res, admin) {
         courseSlug && item.slug
           ? `/${courseSlug}/interview-questions/${item.slug}`
           : `/interview-questions/${catSlug}`;
+      // Without a course the entry points at its category page, so it must not
+      // re-introduce a category that was held back above (thin, noindex or draft).
+      if (!admin && !(courseSlug && item.slug) && item.category && !indexedCategoryIds.has(String(item.category._id))) return;
       items.push({
         id: `question:${item._id}`, type: "question", title: item.question,
         url, description: plainText(item.answer).slice(0, 180),

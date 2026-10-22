@@ -106,4 +106,45 @@ export async function syncSearchConsole() {
   }
 }
 
+const escapeRe2 = (value = "") => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const liveCache = new Map();
+const LIVE_CACHE_MS = 15 * 60 * 1000;
+
+/**
+ * Live (not stored) Search Console query for a single page. Used by the admin
+ * page-details view because query×page rows are deliberately not synced.
+ * Returns per-query and per-day rows for the page; cached for 15 minutes.
+ */
+export async function fetchPageSearchDetails({ path, startDate, endDate }) {
+  const cacheKey = `${path}|${startDate}|${endDate}`;
+  const hit = liveCache.get(cacheKey);
+  if (hit && hit.expiresAt > Date.now()) return hit.value;
+  const token = await accessToken();
+  const site = process.env.GSC_SITE_URL || "https://asif.to/";
+  const request = async (dimensions, rowLimit) => {
+    const response = await fetch(`https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(site)}/searchAnalytics/query`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        startDate,
+        endDate,
+        dimensions,
+        rowLimit,
+        dataState: "final",
+        dimensionFilterGroups: [{ filters: [{ dimension: "page", operator: "includingRegex", expression: `${escapeRe2(path)}/?$` }] }],
+      }),
+    });
+    const body = await response.json();
+    if (!response.ok) throw new Error(body.error?.message || "Search Console request failed");
+    return body.rows || [];
+  };
+  const [queryRows, dateRows] = await Promise.all([request(["query"], 100), request(["date"], 500)]);
+  const value = {
+    queries: queryRows.map((row) => ({ _id: row.keys[0], clicks: row.clicks || 0, impressions: row.impressions || 0, ctr: (row.ctr || 0) * 100, position: row.position || 0 })),
+    trend: dateRows.map((row) => ({ _id: new Date(`${row.keys[0]}T00:00:00.000Z`), clicks: row.clicks || 0, impressions: row.impressions || 0 })).sort((a, b) => a._id - b._id),
+  };
+  liveCache.set(cacheKey, { value, expiresAt: Date.now() + LIVE_CACHE_MS });
+  return value;
+}
+
 export function isSearchConsoleConfigured() { return Boolean((process.env.GSC_SERVICE_ACCOUNT_BASE64 || process.env.GSC_SERVICE_ACCOUNT_JSON) && process.env.GSC_SITE_URL); }

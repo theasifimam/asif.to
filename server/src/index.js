@@ -47,6 +47,7 @@ import { initializeMessagingSocket } from "./realtime/messaging.socket.js";
 import { ensureMessagingBootstrap } from "./services/messagingBootstrap.service.js";
 import { startSocialPublishingScheduler } from "./services/socialPublishingScheduler.service.js";
 import { startJobScheduler } from "./services/jobs/jobScheduler.service.js";
+import { startSearchConsoleScheduler } from "./services/searchConsoleScheduler.service.js";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -204,6 +205,7 @@ const startServer = async () => {
     await ensureMessagingBootstrap();
     startSocialPublishingScheduler();
     startJobScheduler();
+    startSearchConsoleScheduler();
     // Start background email queue worker
     startCommunicationsWorker();
     const PORT = parseInt(process.env.PORT || "5000", 10);
