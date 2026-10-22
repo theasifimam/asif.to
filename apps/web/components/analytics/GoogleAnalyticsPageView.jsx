@@ -35,11 +35,18 @@ export default function GoogleAnalyticsPageView() {
     const query = searchParams.toString();
     const pagePath = query ? `${pathname}?${query}` : pathname;
 
-    window.gtag("event", "page_view", {
-      page_title: document.title,
-      page_location: window.location.href,
-      page_path: pagePath,
-    });
+    // Next updates document.title after this effect runs, so reading it
+    // immediately reports the previous page's title. Wait for it to settle.
+    const timer = setTimeout(() => {
+      if (typeof window.gtag !== "function") return;
+      window.gtag("event", "page_view", {
+        page_title: document.title,
+        page_location: window.location.href,
+        page_path: pagePath,
+      });
+    }, 150);
+
+    return () => clearTimeout(timer);
   }, [pathname, searchParams]);
 
   return null;
