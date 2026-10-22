@@ -187,6 +187,7 @@ export default function Sidebar({
                 <div className="flex items-center gap-2">
                   <Link
                     href="/login"
+                    rel="nofollow"
                     onClick={onClose}
                     className="flex-1 py-3 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-center text-xs font-bold uppercase tracking-wider hover:bg-zinc-200 transition-all"
                   >
@@ -194,6 +195,7 @@ export default function Sidebar({
                   </Link>
                   <Link
                     href="/signup"
+                    rel="nofollow"
                     onClick={onClose}
                     className="flex-1 py-3 rounded-full bg-blue-600 text-white text-center text-xs font-bold uppercase tracking-wider hover:bg-blue-700 active:scale-95 transition-all"
                   >

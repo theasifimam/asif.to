@@ -9,6 +9,7 @@ export const metadata = {
   alternates: {
     canonical: "https://asif.to/login",
   },
+  robots: { index: false, follow: false },
 };
 
 function safeCallback(value) {
