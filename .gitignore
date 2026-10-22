@@ -6,7 +6,6 @@ out/
 .env.local
 .env
 .env.*.local
-.github
 
 .tmp-chrome-cpp
 

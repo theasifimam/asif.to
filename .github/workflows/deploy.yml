@@ -1,0 +1,74 @@
+name: Build and deploy
+
+# Builds the Next.js web app on a GitHub runner (the server is too small to build it),
+# uploads the finished .next folder over SSH, then pulls the code on the server,
+# installs dependencies for the web app and the API, and restarts pm2.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install web dependencies
+        working-directory: apps/web
+        run: npm ci
+
+      # NEXT_PUBLIC_* values are baked in at build time.
+      - name: Write production env for the build
+        run: printf '%s\n' "$WEB_ENV_FILE" > apps/web/.env.production
+        env:
+          WEB_ENV_FILE: ${{ secrets.WEB_ENV_FILE }}
+
+      - name: Build web
+        working-directory: apps/web
+        run: npm run build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+
+      - name: Set up SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+
+      - name: Upload .next to the server
+        run: |
+          rsync -az --delete -e "ssh -i ~/.ssh/id_deploy" \
+            apps/web/.next/ \
+            "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/apps/web/.next/"
+        env:
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+
+      - name: Pull code, install and restart on the server
+        run: |
+          ssh -i ~/.ssh/id_deploy "$DEPLOY_USER@$DEPLOY_HOST" \
+            "cd '$DEPLOY_PATH' && git pull --ff-only \
+              && (cd apps/web && npm ci --omit=dev) \
+              && (cd server && npm ci --omit=dev) \
+              && pm2 restart all --update-env"
+        env:
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
