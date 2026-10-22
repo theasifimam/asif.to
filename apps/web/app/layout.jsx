@@ -136,6 +136,19 @@ export default async function RootLayout({ children, modal }) {
                       if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.endsWith('.local')) {
                         window['ga-disable-${gaMeasurementId}'] = true;
                       }
+                      // Keep automated traffic out of GA4: headless/webdriver browsers,
+                      // bot user agents, and direct hits on auth pages with no on-site referrer.
+                      (function () {
+                        var ua = navigator.userAgent || '';
+                        var isBot = navigator.webdriver === true ||
+                          /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|phantom|puppeteer|playwright|selenium|python|curl|wget|axios|node-fetch|go-http|java\\//i.test(ua);
+                        var isAuthPath = /^\\/(login|signup)(\\/|$)/.test(window.location.pathname);
+                        var sameOriginRef = false;
+                        try { sameOriginRef = !!document.referrer && new URL(document.referrer).origin === window.location.origin; } catch (e) {}
+                        if (isBot || (isAuthPath && !sameOriginRef)) {
+                          window['ga-disable-${gaMeasurementId}'] = true;
+                        }
+                      })();
                       window.dataLayer = window.dataLayer || [];
                       function gtag(){dataLayer.push(arguments);}
                       window.gtag = gtag;
